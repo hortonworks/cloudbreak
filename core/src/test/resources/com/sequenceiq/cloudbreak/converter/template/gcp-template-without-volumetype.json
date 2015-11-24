@@ -3,7 +3,7 @@
   "volumeSize":100,
   "parameters":
   {
-    "gcpInstanceType":"N1_STANDARD_2"
+    "gcpInstanceType":"n1-standard-2"
   },
   "name":"gcp-template",
   "description":"gcp description",

@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 
 public enum AzureTemplateParam implements TemplateParam {
 
-    VMTYPE("vmType", true, AzureVmType.class, Optional.<String>absent());
+    VMTYPE("vmType", true, String.class,
+            Optional.of("^(?:Standard_(?:A[56789]|A10|A11|G[12345]|D[1234]|D11|D12|D13|D14|D1_v2|D2_v2|D3_v2|D4_v2|D5_v2|D11_v2|D12_v2|D13_v2|D14_v2))$"));
 
     private final String paramName;
     private final Class clazz;

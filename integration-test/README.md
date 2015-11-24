@@ -119,8 +119,8 @@ tests:
     parameters:
       gcpName: it-gcp-template-restest
       templateName: it-gcp-template-restest
-      gcpInstanceType: N1_STANDARD_4
-      volumeType: HDD
+      gcpInstanceType: n1-standard-4
+      volumeType: pd-standard
       volumeCount: 1
       volumeSize: 30
       templateAdditions: "gcp,1"
@@ -165,8 +165,8 @@ tests:
   - name: create gateway template
     parameters: {
       gcpName: it-gcp-smoke-gateway-ssud,
-      gcpInstanceType: N1_STANDARD_4,
-      volumeType: HDD,
+      gcpInstanceType: n1-standard-4,
+      volumeType: pd-standard,
       volumeCount: 1,
       volumeSize: 30,
       templateAdditions: "cbgateway,1,GATEWAY"
@@ -177,8 +177,8 @@ tests:
   - name: create master template
     parameters: {
       gcpName: it-gcp-smoke-master-ssud,
-      gcpInstanceType: N1_HIGHMEM_8,
-      volumeType: HDD,
+      gcpInstanceType: n1-highmem-8,
+      volumeType: pd-standard,
       volumeCount: 2,
       volumeSize: 100,
       templateAdditions: "master,1"
@@ -189,8 +189,8 @@ tests:
   - name: create slave template
     parameters: {
       gcpName: it-gcp-smoke-slave-ssud,
-      gcpInstanceType: N1_HIGHCPU_4,
-      volumeType: SSD,
+      gcpInstanceType: n1-highcpu-4,
+      volumeType: pd-ssd,
       volumeCount: 3,
       volumeSize: 500,
       templateAdditions: "slave_1,3"
@@ -325,8 +325,8 @@ You can define parameters for the tests as well, for example GcpTempateCreationT
   - name: create master template
     parameters: {
       gcpName: it-gcp-smoke-master-ssud,
-      gcpInstanceType: N1_HIGHMEM_8,
-      volumeType: HDD,
+      gcpInstanceType: n1-highmem-8,
+      volumeType: pd-standard,
       volumeCount: 2,
       volumeSize: 100,
       templateAdditions: "master,1"

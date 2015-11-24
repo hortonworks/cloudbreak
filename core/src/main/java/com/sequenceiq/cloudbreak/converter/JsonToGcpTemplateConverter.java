@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.controller.validation.GcpTemplateParam;
@@ -19,7 +18,7 @@ public class JsonToGcpTemplateConverter extends AbstractConversionServiceAwareCo
         gcpTemplate.setStatus(ResourceStatus.USER_MANAGED);
         gcpTemplate.setVolumeCount((source.getVolumeCount() == null) ? 0 : source.getVolumeCount());
         gcpTemplate.setVolumeSize((source.getVolumeSize() == null) ? 0 : source.getVolumeSize());
-        gcpTemplate.setGcpInstanceType(GcpInstanceType.valueOf(source.getParameters().get(GcpTemplateParam.INSTANCETYPE.getName()).toString()));
+        gcpTemplate.setInstanceType(source.getParameters().get(GcpTemplateParam.INSTANCETYPE.getName()).toString());
         Object type = source.getParameters().get(GcpTemplateParam.TYPE.getName());
         if (type != null) {
             gcpTemplate.setGcpRawDiskType(type.toString());

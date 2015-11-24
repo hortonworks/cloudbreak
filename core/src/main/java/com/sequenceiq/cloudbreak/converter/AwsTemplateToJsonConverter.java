@@ -3,12 +3,12 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @Component
 public class AwsTemplateToJsonConverter extends AbstractConversionServiceAwareConverter<AwsTemplate, TemplateResponse> {
@@ -20,7 +20,7 @@ public class AwsTemplateToJsonConverter extends AbstractConversionServiceAwareCo
         templateJson.setVolumeSize(source.getVolumeSize());
         templateJson.setPublicInAccount(source.isPublicInAccount());
         Map<String, Object> props = new HashMap<>();
-        props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), source.getInstanceType().name());
+        props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), source.getInstanceType());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), source.getSshLocation());
         props.put(AwsTemplateParam.VOLUME_TYPE.getName(), source.getVolumeType());
         props.put(AwsTemplateParam.ENCRYPTED.getName(), source.isEncrypted());

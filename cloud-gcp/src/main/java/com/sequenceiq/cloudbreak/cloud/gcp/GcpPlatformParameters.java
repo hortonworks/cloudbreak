@@ -130,9 +130,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         N1_HIGHCPU_2("n1-highcpu-2"),
         N1_HIGHCPU_4("n1-highcpu-4"),
         N1_HIGHCPU_8("n1-highcpu-8"),
-        N1_HIGHCPU_16("n1-highcpu-16"),
-        F1_MICRO("f1-micro"),
-        G1_SMALL("g1-small");
+        N1_HIGHCPU_16("n1-highcpu-16");
 
         private final String value;
 

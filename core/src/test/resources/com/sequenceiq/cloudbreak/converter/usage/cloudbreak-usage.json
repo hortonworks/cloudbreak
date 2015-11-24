@@ -7,6 +7,6 @@
   "instanceHours": 4,
   "stackId": 50,
   "stackName": "mystack",
-  "instanceType": "M3Large",
+  "instanceType": "m3.large",
   "instanceGroup": "slave_1"
 }

@@ -10,6 +10,14 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -18,13 +26,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountPreferencesValidatorTest {
@@ -147,15 +148,15 @@ public class AccountPreferencesValidatorTest {
 
     @Test(expected = AccountPreferencesValidationFailed.class)
     public void testValidateShouldThrowExceptionWhenTheStackContainsNotAllowedInstanceTypes() throws Exception {
-        String n1St4Type = "N1_STANDARD_4";
-        List<String> allowedInstanceTypes = Arrays.asList(n1St4Type, "N1_STANDARD_8", "N1_STANDARD_16");
+        String n1St4Type = "n1-standard-4";
+        List<String> allowedInstanceTypes = Arrays.asList(n1St4Type, "n1-standard-8", "n1-standard-16");
         when(preferences.getAllowedInstanceTypes()).thenReturn(allowedInstanceTypes);
         InstanceGroup cbgateway = Mockito.mock(InstanceGroup.class, Mockito.RETURNS_DEEP_STUBS);
         InstanceGroup master = Mockito.mock(InstanceGroup.class, Mockito.RETURNS_DEEP_STUBS);
         InstanceGroup slave = Mockito.mock(InstanceGroup.class, Mockito.RETURNS_DEEP_STUBS);
-        when(cbgateway.getTemplate().getInstanceTypeName()).thenReturn(n1St4Type);
-        when(master.getTemplate().getInstanceTypeName()).thenReturn(n1St4Type);
-        when(slave.getTemplate().getInstanceTypeName()).thenReturn("N1_STANDARD_32");
+        when(cbgateway.getTemplate().getInstanceType()).thenReturn(n1St4Type);
+        when(master.getTemplate().getInstanceType()).thenReturn(n1St4Type);
+        when(slave.getTemplate().getInstanceType()).thenReturn("n1-standard-32");
         when(stack.getInstanceGroups()).thenReturn(Sets.newHashSet(cbgateway, master, slave));
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
@@ -163,16 +164,16 @@ public class AccountPreferencesValidatorTest {
 
     @Test
     public void testValidateShouldNotThrowExceptionWhenTheStackContainsOnlyAllowedInstanceTypes() throws Exception {
-        String n1St4Type = "N1_STANDARD_4";
-        String n1St6Type = "N1_STANDARD_8";
-        List<String> allowedInstanceTypes = Arrays.asList(n1St4Type, n1St6Type, "N1_STANDARD_16");
+        String n1St4Type = "n1-standard-4";
+        String n1St6Type = "n1-standard-8";
+        List<String> allowedInstanceTypes = Arrays.asList(n1St4Type, n1St6Type, "n1-standard-16");
         when(preferences.getAllowedInstanceTypes()).thenReturn(allowedInstanceTypes);
         InstanceGroup cbgateway = Mockito.mock(InstanceGroup.class, Mockito.RETURNS_DEEP_STUBS);
         InstanceGroup master = Mockito.mock(InstanceGroup.class, Mockito.RETURNS_DEEP_STUBS);
         InstanceGroup slave = Mockito.mock(InstanceGroup.class, Mockito.RETURNS_DEEP_STUBS);
-        when(cbgateway.getTemplate().getInstanceTypeName()).thenReturn(n1St4Type);
-        when(master.getTemplate().getInstanceTypeName()).thenReturn(n1St4Type);
-        when(slave.getTemplate().getInstanceTypeName()).thenReturn(n1St6Type);
+        when(cbgateway.getTemplate().getInstanceType()).thenReturn(n1St4Type);
+        when(master.getTemplate().getInstanceType()).thenReturn(n1St4Type);
+        when(slave.getTemplate().getInstanceType()).thenReturn(n1St6Type);
         when(stack.getInstanceGroups()).thenReturn(Sets.newHashSet(cbgateway, master, slave));
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);

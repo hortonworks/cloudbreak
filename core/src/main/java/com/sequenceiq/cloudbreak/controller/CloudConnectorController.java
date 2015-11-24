@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.controller.json.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.controller.json.PlatformRegionsJson;
 import com.sequenceiq.cloudbreak.controller.json.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.controller.json.PlatformVirtualMachinesJson;
+import com.sequenceiq.cloudbreak.controller.json.VmTypeJson;
 import com.sequenceiq.cloudbreak.service.stack.CloudConnectorParameterService;
 
 @Controller
@@ -96,11 +97,11 @@ public class CloudConnectorController {
 
     @RequestMapping(value = "/connectors/vmtypes/{type}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Collection<String>> getVmTypeByType(@PathVariable String type) {
+    public ResponseEntity<Collection<VmTypeJson>> getVmTypeByType(@PathVariable String type) {
         PlatformVirtualMachines vmtypes = cloudConnectorParameterService.getVmtypes();
-        Collection<String> vmTypes = conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class)
+        Collection<VmTypeJson> vmTypes = conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class)
                 .getVirtualMachines().get(type.toUpperCase());
-        return new ResponseEntity<>(vmTypes == null ? new ArrayList<String>() : vmTypes, HttpStatus.OK);
+        return new ResponseEntity<>(vmTypes == null ? new ArrayList<VmTypeJson>() : vmTypes, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/connectors/regions", method = RequestMethod.GET)

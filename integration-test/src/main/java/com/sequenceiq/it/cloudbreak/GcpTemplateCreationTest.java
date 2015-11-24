@@ -24,7 +24,7 @@ public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({ "gcpName", "gcpInstanceType", "volumeType", "volumeCount", "volumeSize" })
-    public void testGcpTemplateCreation(@Optional("it-gcp-template") String gcpName, @Optional("N1_STANDARD_2") String gcpInstanceType,
+    public void testGcpTemplateCreation(@Optional("it-gcp-template") String gcpName, @Optional("n1-standard-2") String gcpInstanceType,
             @Optional("pd-standard") String volumeType, @Optional("1") String volumeCount, @Optional("30") String volumeSize) throws Exception {
         // GIVEN
         // WHEN

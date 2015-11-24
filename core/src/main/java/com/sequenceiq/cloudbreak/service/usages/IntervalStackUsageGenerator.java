@@ -72,13 +72,13 @@ public class IntervalStackUsageGenerator {
 
         if (CloudPlatform.AWS.equals(cloudPlatform)) {
             AwsTemplate awsTemp = (AwsTemplate) template;
-            instanceType = awsTemp.getInstanceType().name();
+            instanceType = awsTemp.getInstanceType();
         } else if (CloudPlatform.GCP.equals(cloudPlatform)) {
             GcpTemplate gceTemp = (GcpTemplate) template;
-            instanceType = gceTemp.getGcpInstanceType().name();
+            instanceType = gceTemp.getInstanceType();
         } else if (CloudPlatform.AZURE.equals(cloudPlatform)) {
             AzureTemplate azureTemp = (AzureTemplate) template;
-            instanceType = azureTemp.getVmType().toString();
+            instanceType = azureTemp.getInstanceType();
         } else if (CloudPlatform.OPENSTACK.equals(cloudPlatform)) {
             OpenStackTemplate openTemp = (OpenStackTemplate) template;
             instanceType = openTemp.getInstanceType().toString();

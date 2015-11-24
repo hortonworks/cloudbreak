@@ -9,10 +9,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformVirtualMachinesJson implements JsonEntity {
 
-    private Map<String, Collection<String>> virtualMachines;
+    private Map<String, Collection<VmTypeJson>> virtualMachines;
     private Map<String, String> defaultVirtualMachines;
 
-    public PlatformVirtualMachinesJson(Map<String, Collection<String>> virtualMachines, Map<String, String> defaultVirtualMachines) {
+    public PlatformVirtualMachinesJson(Map<String, Collection<VmTypeJson>> virtualMachines, Map<String, String> defaultVirtualMachines) {
         this.virtualMachines = virtualMachines;
         this.defaultVirtualMachines = defaultVirtualMachines;
     }
@@ -22,11 +22,11 @@ public class PlatformVirtualMachinesJson implements JsonEntity {
         this.defaultVirtualMachines = new HashMap<>();
     }
 
-    public Map<String, Collection<String>> getVirtualMachines() {
+    public Map<String, Collection<VmTypeJson>> getVirtualMachines() {
         return virtualMachines;
     }
 
-    public void setVirtualMachines(Map<String, Collection<String>> virtualMachines) {
+    public void setVirtualMachines(Map<String, Collection<VmTypeJson>> virtualMachines) {
         this.virtualMachines = virtualMachines;
     }
 
@@ -37,4 +37,6 @@ public class PlatformVirtualMachinesJson implements JsonEntity {
     public void setDefaultVirtualMachines(Map<String, String> defaultVirtualMachines) {
         this.defaultVirtualMachines = defaultVirtualMachines;
     }
+
+
 }

@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.service.account;
 
-import javax.inject.Inject;
-
 import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -13,7 +15,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
-import org.springframework.stereotype.Component;
 
 @Component
 public class AccountPreferencesValidator {
@@ -70,7 +71,7 @@ public class AccountPreferencesValidator {
         List<String> allowedInstanceTypes = preferences.getAllowedInstanceTypes();
         if (needToValidateField(allowedInstanceTypes)) {
             for (InstanceGroup ig : instanceGroups) {
-                String instanceTypeName = ig.getTemplate().getInstanceTypeName();
+                String instanceTypeName = ig.getTemplate().getInstanceType();
                 if (!allowedInstanceTypes.contains(instanceTypeName)) {
                     throw new AccountPreferencesValidationFailed(
                             String.format("The '%s' instance type isn't allowed within the account!", instanceTypeName));

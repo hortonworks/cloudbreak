@@ -3,12 +3,12 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
 @Component
 public class AzureTemplateToJsonConverter extends AbstractConversionServiceAwareConverter<AzureTemplate, TemplateResponse> {
@@ -21,7 +21,7 @@ public class AzureTemplateToJsonConverter extends AbstractConversionServiceAware
         azureTemplateJson.setDescription(source.getDescription());
         azureTemplateJson.setPublicInAccount(source.isPublicInAccount());
         Map<String, Object> props = new HashMap<>();
-        putProperty(props, AzureTemplateParam.VMTYPE.getName(), source.getVmType().name());
+        putProperty(props, AzureTemplateParam.VMTYPE.getName(), source.getInstanceType());
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setParameters(props);
         azureTemplateJson.setDescription(source.getDescription() == null ? "" : source.getDescription());

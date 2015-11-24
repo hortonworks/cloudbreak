@@ -22,7 +22,7 @@ tests:
   - name: create gateway template
     parameters: {
       gcpName: it-gcp-recipe-gateway,
-      gcpInstanceType: N1_STANDARD_4,
+      gcpInstanceType: n1-standard-4,
       volumeType: pd-standard,
       volumeCount: 1,
       volumeSize: 30,
@@ -34,7 +34,7 @@ tests:
   - name: create master template
     parameters: {
       gcpName: it-gcp-recipe-master,
-      gcpInstanceType: N1_HIGHMEM_8,
+      gcpInstanceType: n1-highmem-8,
       volumeType: pd-standard,
       volumeCount: 2,
       volumeSize: 100,
@@ -46,7 +46,7 @@ tests:
   - name: create slave template
     parameters: {
       gcpName: it-gcp-recipe-slave,
-      gcpInstanceType: N1_HIGHCPU_4,
+      gcpInstanceType: n1-highcpu-4,
       volumeType: pd-ssd,
       volumeCount: 3,
       volumeSize: 500,

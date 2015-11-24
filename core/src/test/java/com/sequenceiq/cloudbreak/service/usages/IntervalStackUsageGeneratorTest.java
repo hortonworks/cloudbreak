@@ -20,7 +20,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
@@ -35,6 +34,7 @@ public class IntervalStackUsageGeneratorTest {
 
     private static final Date DUMMY_START_DATE = new Date();
     private static final Date DUMMY_END_DATE = new Date();
+    private static final String C3XLARGE_INSTANCE = "c3.xlarge";
 
     @InjectMocks
     private IntervalStackUsageGenerator underTest;
@@ -96,7 +96,7 @@ public class IntervalStackUsageGeneratorTest {
         // GIVEN
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             AwsTemplate template = new AwsTemplate();
-            template.setInstanceType(AwsInstanceType.C3Xlarge);
+            template.setInstanceType(C3XLARGE_INSTANCE);
             instanceGroup.setTemplate(template);
         }
         given(stackRepository.findById(anyLong())).willReturn(stack);
@@ -115,7 +115,7 @@ public class IntervalStackUsageGeneratorTest {
         // GIVEN
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             AwsTemplate template = new AwsTemplate();
-            template.setInstanceType(AwsInstanceType.C3Xlarge);
+            template.setInstanceType(C3XLARGE_INSTANCE);
             instanceGroup.setTemplate(template);
         }
         given(stackRepository.findById(anyLong())).willReturn(stack);
@@ -134,7 +134,7 @@ public class IntervalStackUsageGeneratorTest {
         // GIVEN
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             AwsTemplate template = new AwsTemplate();
-            template.setInstanceType(AwsInstanceType.C3Xlarge);
+            template.setInstanceType(C3XLARGE_INSTANCE);
             instanceGroup.setTemplate(template);
         }
         given(stackRepository.findById(anyLong())).willReturn(stack);

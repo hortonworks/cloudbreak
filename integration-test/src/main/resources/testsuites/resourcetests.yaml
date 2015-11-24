@@ -12,7 +12,7 @@ tests:
     parameters:
       gcpName: it-gcp-template-restest
       templateName: it-gcp-template-restest
-      gcpInstanceType: N1_STANDARD_4
+      gcpInstanceType: n1-standard-4
       volumeType: pd-standard
       volumeCount: 1
       volumeSize: 30
@@ -25,7 +25,7 @@ tests:
     parameters:
       azureTemplateName: it-azure-template-restest
       templateName: it-azure-template-restest
-      azureVmType: A5
+      azureVmType: Standard_A5
       azureVolumeCount: 1
       azureVolumeSize: 50
       templateAdditions: "azure,1"
@@ -37,7 +37,7 @@ tests:
     parameters:
       awsTemplateName: it-aws-template-restest
       templateName: it-aws-template-restest
-      awsInstanceType: M3Medium
+      awsInstanceType: m3.medium
       awsVolumeType: standard
       awsVolumeCount: 1
       awsVolumeSize: 30

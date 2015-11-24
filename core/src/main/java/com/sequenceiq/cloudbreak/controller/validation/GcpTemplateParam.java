@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
 
 public enum GcpTemplateParam implements TemplateParam {
 
-    INSTANCETYPE("gcpInstanceType", true, GcpInstanceType.class, Optional.<String>absent()),
+    INSTANCETYPE("gcpInstanceType", true, String.class,
+            Optional.of("^(?:n1-standard-(?:[1248]|16)|n1-highmem-(?:[248]|16)|n1-highcpu-(?:[248]|16))$")),
     CONTAINERCOUNT("containerCount", false, Integer.class, Optional.<String>absent()),
     TYPE("volumeType", false, String.class, Optional.of("^pd-(?:ssd|standard)"));
 

@@ -18,11 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
-import com.sequenceiq.cloudbreak.common.type.AwsInstanceType;
-import com.sequenceiq.cloudbreak.common.type.AzureVmType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.GcpInstanceType;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
@@ -66,6 +63,7 @@ public class TestUtil {
     public static final String DUMMY_ADDRESS_PREFIX_CIDR = "dummyAddressPrefixCIDR";
     public static final String DUMMY_DESCRIPTION = "dummyDescription";
     public static final String DUMMY_VPC_ID = "dummyVpcId";
+    public static final String N1_HIGHCPU_16_INSTANCE = "n1-highcpu-16";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
 
@@ -107,6 +105,7 @@ public class TestUtil {
     private static final String DUMMY_NAME = "dummyName";
     private static final String DUMMY_INTERNET_GATEWAT_ID = "dummyInternetGatewatId";
     private static final String DUMMY_SSH_LOCATION = "dummySshLocation";
+    private static final String STANDARD_A5 = "Standard_A5";
 
     private TestUtil() {
     }
@@ -361,7 +360,7 @@ public class TestUtil {
 
     public static Template azureTemplate(Long id) {
         AzureTemplate azureTemplate = new AzureTemplate();
-        azureTemplate.setVmType(AzureVmType.A5);
+        azureTemplate.setInstanceType(STANDARD_A5);
         azureTemplate.setId(id);
         azureTemplate.setVolumeCount(1);
         azureTemplate.setVolumeSize(100);
@@ -371,7 +370,7 @@ public class TestUtil {
 
     public static Template awsTemplate(Long id) {
         AwsTemplate awsTemplate = new AwsTemplate();
-        awsTemplate.setInstanceType(AwsInstanceType.C32xlarge);
+        awsTemplate.setInstanceType("c3.2xlarge");
         awsTemplate.setId(id);
         awsTemplate.setVolumeCount(1);
         awsTemplate.setVolumeSize(100);
@@ -401,7 +400,7 @@ public class TestUtil {
 
     public static Template gcpTemplate(Long id) {
         GcpTemplate gcpTemplate = new GcpTemplate();
-        gcpTemplate.setGcpInstanceType(GcpInstanceType.N1_HIGHCPU_16);
+        gcpTemplate.setInstanceType(N1_HIGHCPU_16_INSTANCE);
         gcpTemplate.setId(id);
         gcpTemplate.setVolumeCount(1);
         gcpTemplate.setVolumeSize(100);
