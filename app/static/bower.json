@@ -44,7 +44,7 @@
   "resolutions": {
     "jquery": "~1.11.1",
     "font-awesome": "~4.4.0",
-    "angular": "v1.3.12",
+    "angular": "~v1.3.12",
     "moment": "2.5.1"
   }
 }
