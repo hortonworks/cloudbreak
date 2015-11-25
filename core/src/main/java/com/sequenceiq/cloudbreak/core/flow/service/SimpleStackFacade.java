@@ -282,7 +282,11 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             if (!stack.isDeleteInProgress()) {
+                stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS, "Removing instance");
+                fireEventAndLog(stack.getId(), actualContext, Msg.STACK_REMOVING_INSTANCE, UPDATE_IN_PROGRESS.name());
                 stackScalingService.removeInstance(actualContext.getStackId(), actualContext.getInstanceId());
+                stackUpdater.updateStackStatus(actualContext.getStackId(), AVAILABLE, "Instance removed");
+                fireEventAndLog(stack.getId(), actualContext, Msg.STACK_REMOVING_INSTANCE_FINISHED, AVAILABLE.name());
             }
         } catch (Exception e) {
             LOGGER.error("Exception during the removing instance from the stack: {}", e.getMessage());
@@ -643,6 +647,8 @@ public class SimpleStackFacade implements StackFacade {
         STACK_DELETE_COMPLETED("stack.delete.completed"),
         STACK_FORCED_DELETE_COMPLETED("stack.forced.delete.completed"),
         STACK_ADDING_INSTANCES("stack.adding.instances"),
+        STACK_REMOVING_INSTANCE("stack.removing.instance"),
+        STACK_REMOVING_INSTANCE_FINISHED("stack.removing.instance.finished"),
         STACK_METADATA_EXTEND("stack.metadata.extend"),
         STACK_BOOTSTRAP_NEW_NODES("stack.bootstrap.new.nodes"),
         STACK_UPSCALE_FINISHED("stack.upscale.finished"),

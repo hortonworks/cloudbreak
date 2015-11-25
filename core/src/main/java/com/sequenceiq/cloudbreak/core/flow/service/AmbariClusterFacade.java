@@ -133,7 +133,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         AMBARI_CLUSTER_STARTED("ambari.cluster.started"),
         AMBARI_CLUSTER_STOPPING("ambari.cluster.stopping"),
         AMBARI_CLUSTER_STOPPED("ambari.cluster.stopped"),
-        AMBARI_CLUSTER_ADD_CONTAINERS("ambari.cluster.add.containers"),
         AMBARI_CLUSTER_SCALING_UP("ambari.cluster.scaling.up"),
         AMBARI_CLUSTER_SCALED_UP("ambari.cluster.scaled.up"),
         AMBARI_CLUSTER_SCALING_DOWN("ambari.cluster.scaling.down"),
@@ -272,9 +271,9 @@ public class AmbariClusterFacade implements ClusterFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_ADD_CONTAINERS, UPDATE_IN_PROGRESS.name());
         containerRunner.addClusterContainers(actualContext);
         instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, actualContext.getUpscaleCandidateAddresses());
+        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "New containers added to the cluster.");
         return context;
     }
 
@@ -284,7 +283,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
         MDCBuilder.buildMdcContext(cluster);
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Scaling up ambari cluster.");
+        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
         fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
         Set<HostMetadata> hostMetaData = ambariClusterConnector.installAmbariNode(stack.getId(), actualContext.getHostGroupAdjustment());
         int failedHosts = 0;
@@ -295,7 +294,6 @@ public class AmbariClusterFacade implements ClusterFacade {
             }
         }
         boolean success = failedHosts == 0;
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, success ? "Ambari cluster successfully upscaled." : "Ambari cluster upscale failed.");
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         if (success) {
             fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
@@ -344,17 +342,14 @@ public class AmbariClusterFacade implements ClusterFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         MDCBuilder.buildMdcContext(cluster);
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Scaling down the Ambari cluster.");
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALING_DOWN, UPDATE_IN_PROGRESS.name());
-
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
+        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALING_DOWN, UPDATE_IN_PROGRESS.name());
         Set<String> hostNames = ambariClusterConnector
                 .decommissionAmbariNodes(stack.getId(), actualContext.getHostGroupAdjustment(), actualContext.getCandidates());
         updateInstanceMetadataAfterScaling(true, hostNames, stack);
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), actualContext.getHostGroupAdjustment().getHostGroup());
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Downscale of cluster finished successfully.");
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
+        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
         context = new StackScalingContext(stack.getId(),
                 actualContext.getCloudPlatform(), actualContext.getCandidates().size() * (-1), hostGroup.getInstanceGroup().getGroupName(),
                 null, actualContext.getScalingType(), null);
