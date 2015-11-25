@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
+
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Objects;
@@ -22,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -41,6 +45,9 @@ public class MetadataSetupService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    ClusterService clusterService;
 
     @Inject
     private CloudbreakEventService eventService;
@@ -78,6 +85,7 @@ public class MetadataSetupService {
 
     public Set<String> setupNewMetadata(Long stackId, Set<Resource> resources, String instanceGroupName, Integer scalingAdjustment) {
         Stack stack = stackService.getById(stackId);
+        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
         Set<CoreInstanceMetaData> coreInstanceMetaData = collectNewMetadata(stack, resources, instanceGroupName, scalingAdjustment);
         saveInstanceMetaData(stack, coreInstanceMetaData, InstanceStatus.CREATED);
         Set<String> upscaleCandidateAddresses = new HashSet<>();
@@ -88,6 +96,7 @@ public class MetadataSetupService {
         int nodeCount = instanceGroup.getNodeCount() + coreInstanceMetaData.size();
         instanceGroup.setNodeCount(nodeCount);
         instanceGroupRepository.save(instanceGroup);
+        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_METADATA_SETUP_UPSCALING_BILLING_CHANGED.code));
         return upscaleCandidateAddresses;

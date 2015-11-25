@@ -344,17 +344,14 @@ public class AmbariClusterFacade implements ClusterFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         MDCBuilder.buildMdcContext(cluster);
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Scaling down the Ambari cluster.");
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALING_DOWN, UPDATE_IN_PROGRESS.name());
-
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
+        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALING_DOWN, UPDATE_IN_PROGRESS.name());
         Set<String> hostNames = ambariClusterConnector
                 .decommissionAmbariNodes(stack.getId(), actualContext.getHostGroupAdjustment(), actualContext.getCandidates());
         updateInstanceMetadataAfterScaling(true, hostNames, stack);
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), actualContext.getHostGroupAdjustment().getHostGroup());
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Downscale of cluster finished successfully.");
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
+        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
         context = new StackScalingContext(stack.getId(),
                 actualContext.getCloudPlatform(), actualContext.getCandidates().size() * (-1), hostGroup.getInstanceGroup().getGroupName(),
                 null, actualContext.getScalingType(), null);
