@@ -16,7 +16,8 @@
     "socket.io": "~1.2.0",
     "uid2": "~0.0.3",
     "underscore": "~1.7.0",
-    "js-beautify": "~1.5.10"
+    "js-beautify": "~1.5.10",
+    "bower": "1.4.2"
   },
   "repository": {
     "type": "git",
