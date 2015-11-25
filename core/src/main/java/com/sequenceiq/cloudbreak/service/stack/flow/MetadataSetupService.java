@@ -47,7 +47,7 @@ public class MetadataSetupService {
     private StackService stackService;
 
     @Inject
-    ClusterService clusterService;
+    private ClusterService clusterService;
 
     @Inject
     private CloudbreakEventService eventService;
