@@ -12,10 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.HostConfig;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 
 public class MunchausenBootstrap implements ContainerBootstrap {
 
@@ -37,11 +35,11 @@ public class MunchausenBootstrap implements ContainerBootstrap {
         Bind[] binds = new BindsBuilder()
                 .addDockerSocket().build();
 
-        HostConfig hostConfig = new HostConfigBuilder().privileged().binds(binds).build();
         String name = MUNCHAUSEN.getName() + new Date().getTime();
         createContainer(docker, docker.createContainerCmd(containerName)
                 .withName(name)
-                .withHostConfig(hostConfig)
+                .withPrivileged(true)
+                .withBinds(binds)
                 .withCmd(cmd), name);
 
         startContainer(docker, name);

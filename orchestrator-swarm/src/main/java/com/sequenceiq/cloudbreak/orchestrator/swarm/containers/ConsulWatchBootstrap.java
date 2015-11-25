@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
+import static com.github.dockerjava.api.model.RestartPolicy.alwaysRestart;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.CONSUL_WATCH;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.createContainer;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.startContainer;
@@ -10,12 +11,10 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.HostConfig;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 
 public class ConsulWatchBootstrap implements ContainerBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulWatchBootstrap.class);
@@ -44,14 +43,16 @@ public class ConsulWatchBootstrap implements ContainerBootstrap {
                 .add(logVolumePath.getHostPath() + "/consul-watch",
                         logVolumePath.getContainerPath() + "/consul-watch").build();
 
-        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
         String name = format("%s-%s", CONSUL_WATCH.getName(), id);
         String ip = node.getPrivateIp();
 
         long createStartTime = System.currentTimeMillis();
 
         createContainer(docker, docker.createContainerCmd(imageName)
-                .withHostConfig(hostConfig)
+                .withNetworkMode("host")
+                .withRestartPolicy(alwaysRestart())
+                .withPrivileged(true)
+                .withBinds(binds)
                 .withName(name)
                 .withEnv(format("constraint:node==%s", node.getHostname()), format("CONSUL_HOST=%s", ip))
                 .withCmd(format("consul://%s:8500", ip)), node.getHostname());

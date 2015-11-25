@@ -1,21 +1,20 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
+import static com.github.dockerjava.api.model.RestartPolicy.alwaysRestart;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.createContainer;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.startContainer;
-
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.Ports;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 
 public class AmbariServerBootstrap implements ContainerBootstrap {
 
@@ -26,16 +25,13 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
     private final String imageName;
     private final String cloudPlatform;
     private final String nodeName;
-    private final Set<String> dataVolumes;
     private final LogVolumePath logVolumePath;
 
-    public AmbariServerBootstrap(DockerClient docker, String imageName, String nodeName, Set<String> dataVolumes,
-            String cloudPlatform, LogVolumePath logVolumePath) {
+    public AmbariServerBootstrap(DockerClient docker, String imageName, String nodeName, String cloudPlatform, LogVolumePath logVolumePath) {
         this.docker = docker;
         this.imageName = imageName;
         this.cloudPlatform = cloudPlatform;
         this.nodeName = nodeName;
-        this.dataVolumes = dataVolumes;
         this.logVolumePath = logVolumePath;
     }
 
@@ -44,11 +40,14 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
         LOGGER.info("Creating Ambari server container on: {}", nodeName);
 
         Bind[] binds = new BindsBuilder().addLog(logVolumePath).add("/etc/krb5.conf").build();
-        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().expose(PORT).binds(binds).build();
 
         String name = AMBARI_SERVER.getName();
         createContainer(docker, docker.createContainerCmd(imageName)
-                .withHostConfig(hostConfig)
+                .withNetworkMode("host")
+                .withRestartPolicy(alwaysRestart())
+                .withPrivileged(true)
+                .withBinds(binds)
+                .withPortBindings(new Ports(ExposedPort.tcp(PORT), new Ports.Binding("0.0.0.0", PORT)))
                 .withName(name)
                 .withEnv(String.format("constraint:node==%s", nodeName),
                         "POSTGRES_DB=localhost",

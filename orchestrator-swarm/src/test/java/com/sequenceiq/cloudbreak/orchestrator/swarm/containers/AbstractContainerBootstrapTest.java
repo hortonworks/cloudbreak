@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -23,8 +24,10 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerCmd;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.command.StartContainerCmd;
+import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.api.model.RestartPolicy;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 
@@ -35,12 +38,9 @@ public abstract class AbstractContainerBootstrapTest {
     protected static final String DUMMY_GENERATED_ID = "dummyGeneratedId";
     protected static final String DUMMY_IMAGE = "sequenceiq/dummy:0.0.1";
     protected static final String DUMMY_NODE = "dummyNode";
-    protected static final String DUMMY_GETAWAY_ADDRESS = "25.26.27.1";
     protected static final Set<String> DUMMY_VOLUMES = Sets.newHashSet("/var/path1", "/var/path2");
     protected static final String[] CMD = new String[]{"cmd1", "cmd2"};
     protected static final LogVolumePath DUMMY_LOG_VOLUME = new LogVolumePath("/var/path1", "/var/path2");
-    private static final String DUMMY_CONTAINER_ID = "dummyContainerId";
-
 
     private ContainerBootstrap underTest;
 
@@ -61,7 +61,6 @@ public abstract class AbstractContainerBootstrapTest {
 
     @Mock
     private CreateContainerResponse createContainerResponse;
-
 
     @Mock
     private InspectContainerResponse.ContainerState containerState;
@@ -112,12 +111,15 @@ public abstract class AbstractContainerBootstrapTest {
 
     }
 
-
     private void mockCreateContainerCommand() {
         given(mockedCreateContainerCmd.withCmd(anyString())).willReturn(mockedCreateContainerCmd);
         given(mockedCreateContainerCmd.withCmd(Matchers.<String>anyVararg())).willReturn(mockedCreateContainerCmd);
         given(mockedCreateContainerCmd.withName(anyString())).willReturn(mockedCreateContainerCmd);
-        given(mockedCreateContainerCmd.withHostConfig(any(HostConfig.class))).willReturn(mockedCreateContainerCmd);
+        given(mockedCreateContainerCmd.withNetworkMode(anyString())).willReturn(mockedCreateContainerCmd);
+        given(mockedCreateContainerCmd.withRestartPolicy(any(RestartPolicy.class))).willReturn(mockedCreateContainerCmd);
+        given(mockedCreateContainerCmd.withPrivileged(anyBoolean())).willReturn(mockedCreateContainerCmd);
+        given(mockedCreateContainerCmd.withBinds(Matchers.<Bind>anyVararg())).willReturn(mockedCreateContainerCmd);
+        given(mockedCreateContainerCmd.withPortBindings(any(Ports.class))).willReturn(mockedCreateContainerCmd);
         given(mockedCreateContainerCmd.withEnv(Matchers.<String>anyVararg())).willReturn(mockedCreateContainerCmd);
         given(mockedCreateContainerCmd.withExposedPorts(Matchers.<ExposedPort>anyVararg())).willReturn(mockedCreateContainerCmd);
         given(mockedCreateContainerCmd.exec()).willReturn(createContainerResponse);
@@ -128,8 +130,6 @@ public abstract class AbstractContainerBootstrapTest {
         given(inspectContainerResponse.getState()).willReturn(containerState);
         given(containerState.isRunning()).willReturn(true);
     }
-
-
 
     public DockerClient getMockedDockerClient() {
         return mockedDockerClient;

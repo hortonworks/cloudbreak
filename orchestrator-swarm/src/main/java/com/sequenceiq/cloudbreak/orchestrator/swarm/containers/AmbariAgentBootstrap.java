@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
+import static com.github.dockerjava.api.model.RestartPolicy.alwaysRestart;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.createContainer;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.startContainer;
@@ -11,11 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.HostConfig;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 
 public class AmbariAgentBootstrap implements ContainerBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariAgentBootstrap.class);
@@ -50,11 +49,12 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
                 .addLog(logVolumePath)
                 .add(dataVolumes).build();
 
-        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
-
         String name = String.format("%s-%s", AMBARI_AGENT.getName(), id);
         createContainer(docker, docker.createContainerCmd(imageName)
-                .withHostConfig(hostConfig)
+                .withNetworkMode("host")
+                .withRestartPolicy(alwaysRestart())
+                .withPrivileged(true)
+                .withBinds(binds)
                 .withName(name)
                 .withEnv(String.format("constraint:node==%s", nodeName),
                         String.format("CLOUD_PLATFORM=%s", cloudPlatform),

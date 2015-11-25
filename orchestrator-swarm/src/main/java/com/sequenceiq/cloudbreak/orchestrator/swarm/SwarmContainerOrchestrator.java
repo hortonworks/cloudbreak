@@ -354,7 +354,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     private DockerClientConfig getSwarmClientConfig(GatewayConfig gatewayConfig) {
         return DockerClientConfig.createDefaultConfigBuilder()
-                .withReadTimeout(READ_TIMEOUT)
                 .withDockerCertPath(gatewayConfig.getCertificateDir())
                 .withVersion("1.18")
                 .withUri("https://" + gatewayConfig.getPublicAddress() + "/swarm")
@@ -363,7 +362,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     private DockerClientConfig getDockerClientConfig(GatewayConfig gatewayConfig) {
         return DockerClientConfig.createDefaultConfigBuilder()
-                .withReadTimeout(READ_TIMEOUT)
                 .withDockerCertPath(gatewayConfig.getCertificateDir())
                 .withVersion("1.18")
                 .withUri("https://" + gatewayConfig.getPublicAddress() + "/docker")
@@ -373,13 +371,13 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @VisibleForTesting
     DockerClient dockerClient(GatewayConfig gatewayConfig) {
         return DockerClientBuilder.getInstance(getDockerClientConfig(gatewayConfig))
-                .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl()).build();
+                .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl().withReadTimeout(READ_TIMEOUT)).build();
     }
 
     @VisibleForTesting
     DockerClient swarmClient(GatewayConfig gatewayConfig) {
         return DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayConfig))
-                .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl()).build();
+                .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl().withReadTimeout(READ_TIMEOUT)).build();
     }
 
     @VisibleForTesting
@@ -430,8 +428,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @VisibleForTesting
     AmbariServerBootstrap ambariServerBootstrap(GatewayConfig gatewayConfig, String serverImageName, Node node, String platform, LogVolumePath logVolumePath) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new AmbariServerBootstrap(dockerApiClient, serverImageName, node.getHostname(), node.getDataVolumes(), platform,
-                logVolumePath);
+        return new AmbariServerBootstrap(dockerApiClient, serverImageName, node.getHostname(), platform, logVolumePath);
     }
 
     @VisibleForTesting

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
+import static com.github.dockerjava.api.model.RestartPolicy.alwaysRestart;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.KERBEROS;
 import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.DOMAIN_REALM;
 import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.REALM;
@@ -11,12 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.HostConfig;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 
 public class KerberosServerBootstrap implements ContainerBootstrap {
 
@@ -41,22 +40,24 @@ public class KerberosServerBootstrap implements ContainerBootstrap {
         LOGGER.info("Creating Kerberos server container on: {}", nodeName);
 
         Bind[] binds = new BindsBuilder().addLog(logVolumePath).add("/etc/krb5.conf").build();
-        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
 
         String name = KERBEROS.getName();
         createContainer(docker, docker.createContainerCmd(imageName)
-                        .withHostConfig(hostConfig)
-                        .withName(name)
-                        .withEnv(
-                                String.format("constraint:node==%s", nodeName),
-                                String.format("SERVICE_NAME=%s", name),
-                                "NAMESERVER_IP=127.0.0.1",
-                                String.format("REALM=%s", REALM),
-                                String.format("DOMAIN_REALM=%s", DOMAIN_REALM),
-                                String.format("KERB_MASTER_KEY=%s", config.getMasterKey()),
-                                String.format("KERB_ADMIN_USER=%s", config.getUser()),
-                                String.format("KERB_ADMIN_PASS=%s", config.getPassword())
-                        ), nodeName
+                .withNetworkMode("host")
+                .withRestartPolicy(alwaysRestart())
+                .withPrivileged(true)
+                .withBinds(binds)
+                .withName(name)
+                .withEnv(
+                        String.format("constraint:node==%s", nodeName),
+                        String.format("SERVICE_NAME=%s", name),
+                        "NAMESERVER_IP=127.0.0.1",
+                        String.format("REALM=%s", REALM),
+                        String.format("DOMAIN_REALM=%s", DOMAIN_REALM),
+                        String.format("KERB_MASTER_KEY=%s", config.getMasterKey()),
+                        String.format("KERB_ADMIN_USER=%s", config.getUser()),
+                        String.format("KERB_ADMIN_PASS=%s", config.getPassword())
+                ), nodeName
         );
 
         startContainer(docker, name);
