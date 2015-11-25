@@ -4,6 +4,27 @@
 
 var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'blockUI', 'ui.bootstrap', 'uluwatuControllers', 'uluwatuServices']);
 
+(function() {
+    fetchConfigData().then(bootstrapApplication);
+
+    function fetchConfigData() {
+        var initInjector = angular.injector(["ng"]);
+        var $http = initInjector.get("$http");
+
+        return $http.get("/connectors").then(function(response) {
+            cloudbreakApp.constant("initconf", response.data);
+        }, function(errorResponse) {
+            cloudbreakApp.constant("initconf", null);
+            console.log(errorResponse);
+        });
+    }
+
+    function bootstrapApplication() {
+        angular.element(document).ready(function() {
+            angular.bootstrap(document, ['cloudbreakApp', 'ngRoute', 'base64', 'blockUI', 'ui.bootstrap', 'uluwatuControllers', 'uluwatuServices']);
+        });
+    }
+}());
 
 cloudbreakApp.directive('match', function($parse) {
     return {
@@ -101,7 +122,30 @@ cloudbreakApp.run(function($rootScope, $http) {
             "DELETE_COMPLETED": $rootScope.msg.title_delete_completed
         }
     });
-});
+})
+.run(['$rootScope', 'initconf',
+    function($rootScope, initconf) {
+        if(initconf !== null) {
+            $rootScope.params = {};
+            $rootScope.params.regions = initconf.regions.regions;
+            $rootScope.params.defaultRegions = initconf.regions.defaultRegions;
+            $rootScope.params.zones = initconf.regions.availabilityZones;
+            $rootScope.params.diskTypes = initconf.disks.diskTypes;
+            $rootScope.params.defaultDisks = initconf.disks.defaultDisks;
+            $rootScope.params.vmTypes = initconf.virtualMachines.virtualMachines;
+            $rootScope.params.defaultVmTypes = initconf.virtualMachines.defaultVirtualMachines;
+        } else {
+            $rootScope.params = {};
+            $rootScope.params.regions = {};
+            $rootScope.params.defaultRegions = {};
+            $rootScope.params.zones = {};
+            $rootScope.params.diskTypes = {};
+            $rootScope.params.defaultDisks = {};
+            $rootScope.params.vmTypes = {};
+            $rootScope.params.defaultVmTypes = {};
+        }
+    }
+]);
 
 cloudbreakApp.directive('startdatevalidation', function($parse) {
     return {
