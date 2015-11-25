@@ -123,8 +123,7 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
             if (nodeCount != null && nodeCount != undefined && nodeCount != 0) {
                 actCluster.nodeCount = nodeCount;
             }
-            refreshMetadata(notification)
-            actCluster.status = notification.eventType;
+            updateStatus(actCluster, notification, true);
             $scope.showSuccess(msg, actCluster.name);
             addNotificationToGlobalEvents(notification);
             $rootScope.$broadcast('START_PERISCOPE_CLUSTER', actCluster, msg);
