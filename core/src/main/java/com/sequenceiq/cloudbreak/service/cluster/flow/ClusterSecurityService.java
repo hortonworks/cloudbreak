@@ -3,6 +3,10 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.DOMAIN_REALM;
 import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.REALM;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.ENABLE_SERVICES_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.INSTALL_SERVICES_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.START_SERVICES_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.STOP_SERVICES_AMBARI_PROGRESS_STATE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 
@@ -65,14 +69,18 @@ public class ClusterSecurityService {
             ambariClient.createKerberosConfig(kdcHost, REALM, DOMAIN_REALM + ",." + DOMAIN_REALM);
             ambariClientProvider.setKerberosSession(ambariClient, cluster);
             int installReqId = ambariClient.setServiceState(KERBEROS_SERVICE, "INSTALLED");
-            PollingResult pollingResult = waitForOperation(stack, ambariClient, singletonMap("INSTALL_KERBEROS", installReqId));
+            PollingResult pollingResult = waitForOperation(stack, ambariClient, singletonMap("INSTALL_KERBEROS", installReqId),
+                    INSTALL_SERVICES_AMBARI_PROGRESS_STATE);
             if (isContinue(pollingResult)) {
                 ambariClient.createKerberosDescriptor(REALM);
-                pollingResult = waitForOperation(stack, ambariClient, singletonMap("STOP_SERVICES", ambariClient.stopAllServices()));
+                pollingResult = waitForOperation(stack, ambariClient, singletonMap("STOP_SERVICES", ambariClient.stopAllServices()),
+                        STOP_SERVICES_AMBARI_PROGRESS_STATE);
                 if (isContinue(pollingResult)) {
-                    pollingResult = waitForOperation(stack, ambariClient, singletonMap("ENABLE_KERBEROS", ambariClient.enableKerberos()));
+                    pollingResult = waitForOperation(stack, ambariClient, singletonMap("ENABLE_KERBEROS", ambariClient.enableKerberos()),
+                            ENABLE_SERVICES_AMBARI_PROGRESS_STATE);
                     if (isContinue(pollingResult)) {
-                        waitForOperation(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
+                        waitForOperation(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()),
+                                START_SERVICES_AMBARI_PROGRESS_STATE);
                     }
                 }
             }
@@ -95,8 +103,8 @@ public class ClusterSecurityService {
         return true;
     }
 
-    private PollingResult waitForOperation(Stack stack, AmbariClient ambariClient, Map<String, Integer> requests) {
-        return ambariOperationService.waitForAmbariOperations(stack, ambariClient, requests);
+    private PollingResult waitForOperation(Stack stack, AmbariClient ambariClient, Map<String, Integer> requests, AmbariOperationType ambariOperationType) {
+        return ambariOperationService.waitForAmbariOperations(stack, ambariClient, requests, ambariOperationType);
     }
 
 }

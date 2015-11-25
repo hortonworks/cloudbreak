@@ -40,7 +40,7 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
             AmbariClient ambariClient = t.getAmbariClient();
             BigDecimal installProgress = Optional.fromNullable(ambariClient.getRequestProgress(request.getValue())).or(PENDING);
             LOGGER.info("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
-            notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack()));
+            notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack(), t.getAmbariOperationType()));
             allFinished = allFinished && COMPLETED.compareTo(installProgress) == 0;
             if (FAILED.compareTo(installProgress) == 0) {
                 boolean failed = true;
@@ -51,7 +51,7 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
                     }
                 }
                 if (failed) {
-                    notificationSender.send(getAmbariProgressNotification(Long.parseLong("100"), t.getStack()));
+                    notificationSender.send(getAmbariProgressNotification(Long.parseLong("100"), t.getStack(), t.getAmbariOperationType()));
                     throw new AmbariOperationFailedException(String.format("Ambari operation failed: [component: '%s', requestID: '%s']", request.getKey(),
                             request.getValue()));
                 }
@@ -60,9 +60,9 @@ public class AmbariOperationsStatusCheckerTask extends StackBasedStatusCheckerTa
         return allFinished;
     }
 
-    private Notification getAmbariProgressNotification(Long progressValue, Stack stack) {
+    private Notification getAmbariProgressNotification(Long progressValue, Stack stack, AmbariOperationType ambariOperationType) {
         Notification notification = new Notification();
-        notification.setEventType("AMBARI_PROGRESS_STATE");
+        notification.setEventType(ambariOperationType.name());
         notification.setEventTimestamp(new Date());
         notification.setEventMessage(String.valueOf(progressValue));
         notification.setOwner(stack.getOwner());

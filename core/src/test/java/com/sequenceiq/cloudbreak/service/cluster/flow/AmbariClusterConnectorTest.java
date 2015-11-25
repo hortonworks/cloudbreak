@@ -139,9 +139,10 @@ public class AmbariClusterConnectorTest {
         when(hostsPollingService.pollWithTimeoutSingleFailure(any(AmbariHostsStatusCheckerTask.class), any(AmbariHostsCheckerContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(hostGroupRepository.findHostGroupsInCluster(anyLong())).thenReturn(cluster.getHostGroups());
-        when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), anyMap())).thenReturn(PollingResult.SUCCESS);
-        when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), any(StatusCheckerTask.class), anyMap()))
+        when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), anyMap(), any(AmbariOperationType.class)))
                 .thenReturn(PollingResult.SUCCESS);
+        when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), any(StatusCheckerTask.class), anyMap(),
+                any(AmbariOperationType.class))).thenReturn(PollingResult.SUCCESS);
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
         when(instanceMetadataRepository.save(anyCollection())).thenReturn(stack.getRunningInstanceMetaData());
         when(ambariClient.recommendAssignments(anyString())).thenReturn(createStringListMap());
@@ -167,7 +168,8 @@ public class AmbariClusterConnectorTest {
 
     @Test(expected = AmbariOperationFailedException.class)
     public void testInstallAmbariWhenReachedMaxPollingEventsShouldInstallationFailed() throws Exception {
-        when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), anyMap())).thenReturn(PollingResult.TIMEOUT);
+        when(ambariOperationService.waitForAmbariOperations(any(Stack.class), any(AmbariClient.class), anyMap(), any(AmbariOperationType.class)))
+                .thenReturn(PollingResult.TIMEOUT);
         underTest.buildAmbariCluster(stack);
     }
 
