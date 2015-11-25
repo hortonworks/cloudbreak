@@ -6,7 +6,6 @@ public class AmbariServerBootstrapTest extends AbstractContainerBootstrapTest {
 
     @Override
     public ContainerBootstrap getTestInstance() {
-        return new AmbariServerBootstrap(getMockedDockerClient(), DUMMY_IMAGE, DUMMY_NODE, DUMMY_VOLUMES,
-                DUMMY_CLOUD_PLATFORM, DUMMY_LOG_VOLUME);
+        return new AmbariServerBootstrap(getMockedDockerClient(), DUMMY_IMAGE, DUMMY_NODE, DUMMY_CLOUD_PLATFORM, DUMMY_LOG_VOLUME);
     }
 }

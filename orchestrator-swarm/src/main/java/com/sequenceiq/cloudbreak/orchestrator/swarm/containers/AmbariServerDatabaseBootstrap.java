@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
+import static com.github.dockerjava.api.model.RestartPolicy.alwaysRestart;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.createContainer;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.startContainer;
@@ -11,11 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.HostConfig;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.HostConfigBuilder;
 
 public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
 
@@ -45,14 +44,15 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
                 .add(logVolumePath.getHostPath() + "/consul-watch",
                         logVolumePath.getHostPath() + "/consul-watch").build();
 
-        HostConfig hostConfig = new HostConfigBuilder().defaultConfig().binds(binds).build();
-
         String name = AMBARI_DB.getName();
         createContainer(docker, docker.createContainerCmd(imageName)
                 .withEnv(String.format("POSTGRES_PASSWORD=%s", "bigdata"),
                         String.format("POSTGRES_USER=%s", "ambari"),
                         String.format("constraint:node==%s", nodeName))
-                .withHostConfig(hostConfig)
+                .withNetworkMode("host")
+                .withRestartPolicy(alwaysRestart())
+                .withPrivileged(true)
+                .withBinds(binds)
                 .withName(name), nodeName);
 
         startContainer(docker, name);
