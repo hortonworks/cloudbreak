@@ -4,28 +4,6 @@ var log = log4javascript.getLogger("mainController-logger");
 var $jq = jQuery.noConflict();
 
 angular.module('uluwatuControllers')
-    .run(['$rootScope', 'PlatformParameters',
-        function($rootScope, PlatformParameters) {
-            PlatformParameters.get().$promise.then(function(success) {
-                $rootScope.params = {};
-                $rootScope.params.regions = success.regions.regions;
-                $rootScope.params.defaultRegions = success.regions.defaultRegions;
-                $rootScope.params.zones = success.regions.availabilityZones;
-                $rootScope.params.diskTypes = success.disks.diskTypes;
-                $rootScope.params.defaultDisks = success.disks.defaultDisks;
-                $rootScope.params.vmTypes = success.virtualMachines.virtualMachines;
-                $rootScope.params.defaultVmTypes = success.virtualMachines.defaultVirtualMachines;
-            }, function(error) {
-                $rootScope.params.regions = {};
-                $rootScope.params.defaultRegions = {};
-                $rootScope.params.zones = {};
-                $rootScope.params.diskTypes = {};
-                $rootScope.params.defaultDisks = {};
-                $rootScope.params.vmTypes = {};
-                $rootScope.params.defaultVmTypes = {};
-            });
-        }
-    ])
     .controller('mainController', ['$scope', '$rootScope', '$filter', '$interval', 'PlatformParameters',
         function($scope, $rootScope, $filter, $interval, PlatformParameters) {
 
