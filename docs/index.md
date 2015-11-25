@@ -58,7 +58,7 @@ Uluwatu is a small [node.js](http://nodejs.org/) webapp with an [Angular.js](htt
 
 ###Running Uluwatu locally for development
 
-If you'd like to run Uluwatu on your local machine, you should have npm and node.js installed. After checking out the git repository, run `npm install` in Uluwatu's directory.
+If you'd like to run Uluwatu on your local machine, you should have npm and node.js installed. After checking out the git repository, run `npm install && cd app/static && bower install` in Uluwatu's directory.
 
 The easiest way to run development environment of Uluwatu is to use [cloudbreak-deployer](https://github.com/sequenceiq/cloudbreak-deployer).
 To configure local Uluwatu source location use ULUWATU_VOLUME_HOST variable in your Profile file.

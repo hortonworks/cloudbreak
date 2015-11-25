@@ -9,5 +9,6 @@ RUN cd /uluwatu && VERSION=$(git name-rev --tags --name-only $(git rev-parse HEA
 RUN rm -rf /uluwatu/.git
 
 RUN cd /uluwatu && npm install
+RUN cd /uluwatu/app/static && bower install
 
 CMD ["/uluwatu/start-docker.sh"]
