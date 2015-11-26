@@ -58,6 +58,9 @@ export CLOUDBREAK_SMTP_TYPE=smtp
 
 Cloudbreak deployer uses UAA as an identity provider and supports multi tenancy. In UAA terminology this is referred as identity zones. An identity zone is accessed through a unique subdomain. If the standard UAA responds to [https://uaa.10.244.0.34.xip.io](https://uaa.10.244.0.34.xip.io) a zone on this UAA would be accessed through [https://testzone1.uaa.10.244.0.34.xip.io](https://testzone1.uaa.10.244.0.34.xip.io).
 
+As an example in our hosted deployment the `identity.sequenceiq.com` domain refers to our identity server and the `UAA_ZONE_DOMAIN` variable has to be set to that domain. This variable is necessary for UAA to identify which zone provider should handle the requests that arrives to the given domain.
+
+
 If you want to use a custom domain for your identity or deployment, put the `UAA_ZONE_DOMAIN` line into your
 `Profile`. You can see an example in the following box:
 ```

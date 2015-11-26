@@ -23,7 +23,7 @@ This release introduces the following changes in behavior as compared to previou
 
 | Title | Description |
 |----|----|
-|UI changes|Cluster creation is based on a step-by-step wizard. Steps can be |
+|UI changes|Cluster creation is based on a step-by-step wizard. |
 | Custom Security Groups | Ability to define and create custom security groups and rules.|
 | Azure ARM support | With this release we have switched to the new [Azure ARM API](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/) aka **Azure API v2**. Using the old API is not supported anymore - users have the option to **terminate only** clusters lunched with the old API. All new clusters are lunched with the new API.|
 |WASB support|For clusters launched on Microsoft Azure the default file system in use will be [WASB](http://blogs.msdn.com/b/cindygross/archive/2015/02/04/understanding-wasb-and-hadoop-storage-in-azure.aspx). Users will still have to option to use local HDFS with attached disk but the recommended file system will be WASB. See [Filesystem configuration](azure_pre_prov.md) for more information.|
