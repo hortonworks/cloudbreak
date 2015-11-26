@@ -67,7 +67,7 @@
                                 </div>
                             </div>
                             <div class="form-group" ng-show="activeCluster.ambariProgressState && activeCluster.ambariProgressState!=100 && (activeCluster.status != 'AVAILABLE' || activeCluster.status != 'DELETE_IN_PROGRESS' || activeCluster.status != 'CREATE_FAILED')">
-                                <label class="col-sm-3 control-label" for="sl_imagecopy">{{msg.active_cluster_ambari_progress_label}}</label>
+                                <label class="col-sm-3 control-label" for="sl_imagecopy">{{activeCluster.progressMessage}}</label>
                                 <div class="col-sm-6" style="padding-left: 10px;">
                                     <div class="progress" style="height: 25px;margin-bottom: 0px;">
                                         <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{activeCluster.ambariProgressState}}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em;width: {{activeCluster.ambariProgressState}}%;;padding-top: 4px;">
@@ -83,8 +83,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_username">
-                                    </i>{{msg.active_cluster_username_label}}</label>
+                                <label class="col-sm-3 control-label" for="sl_username">{{msg.active_cluster_username_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_username" class="form-control-static">{{activeCluster.cluster.userName}}
                                         <a ng-if="activeCluster.cluster.ambariServerIp != null" class="btn-sm btn-info" role="button" data-toggle="modal" data-target="#modal-credential-cluster" style="text-decoration: none;">
@@ -136,7 +135,7 @@
                             <div class="row" style="margin-top: 20px;    margin-bottom: 30px;">
                                 <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs">
                                     <ul id="myTabs" class="nav nav-tabs" role="tablist">
-                                        <li role="presentation" ng-class="{true:'active', false:''}[group.group == $root.activeCluster.activeGroup]" ng-repeat="group in $root.activeCluster.instanceGroups| orderBy: 'group'"><a  ng-click="changeActiveClusterGroup(group.group)" href="" id="{{group.group}}-tab" role="tab" data-toggle="tab" aria-controls="{{group.group}}" aria-expanded="true">{{group.group}}</a></li>
+                                        <li role="presentation" ng-class="{true:'active', false:''}[group.group == $root.activeCluster.activeGroup]" ng-repeat="group in $root.activeCluster.instanceGroups| orderBy: 'group'"><a ng-click="changeActiveClusterGroup(group.group)" href="" id="{{group.group}}-tab" role="tab" data-toggle="tab" aria-controls="{{group.group}}" aria-expanded="true">{{group.group}}</a></li>
                                     </ul>
                                     <div id="myTabContent" class="tab-content">
                                         <div role="tabpanel" class="tab-pane fade active review-tab" ng-class="{true:'in', false:''}[group.group == $root.activeCluster.activeGroup]" ng-hide="group.group != $root.activeCluster.activeGroup" ng-show="group.group == $root.activeCluster.activeGroup" ng-repeat="group in $root.activeCluster.instanceGroups" id="{{group.group}}" aria-labelledby="{{group.group}}-tab">
@@ -289,36 +288,29 @@
                         </div>
                         <div class="panel panel-default panel-cluster-history">
                             <div class="panel-heading">
-                                <h5><a data-toggle="collapse" data-target="#cluster-history-collapse01"><i class="fa fa-clock-o fa-fw"></i>{{msg.active_cluster_event_history_label}}</a></h5>
+                                <h5>
+                                    <a data-toggle="collapse" data-target="#cluster-history-collapse01"><i class="fa fa-clock-o fa-fw"></i>{{msg.active_cluster_event_history_label}}</a>
+                                </h5>
                             </div>
-
                             <div id="cluster-history-collapse01" class="panel-collapse collapse" style="height: auto;">
-
                                 <div class="panel-body">
-
                                     <form class="form-horizontal" role="document">
-
                                         <div class="form-group">
                                             <div class="col-sm-12">
                                                 <pre class="form-control-static event-history" style="overflow: auto; word-wrap: normal; height:300px; white-space: pre;">
 <span ng-repeat="actual in $root.events |filter:logFilterFunction|orderBy:eventTimestampAsFloat"><span class="{{$root.config.EVENT_CLASS[actual .eventType]}}" style="word-wrap: break-word">{{actual.customTimeStamp}} {{actual.stackName}} - {{$root.config.EVENT_TYPE[actual .eventType]}}: {{actual.eventMessage}}</span><br/></span>
                                                 </pre>
                                             </div>
-                                            <!-- .col-sm-12  -->
                                         </div>
-                                        <!-- .form-group -->
-
                                     </form>
                                 </div>
                             </div>
                         </div>
-
-
                     </section>
                     <section id="periscope-pane" ng-class="{ 'active': periscopeShow }" ng-show="periscopeShow" class="tab-pane fade in">
                         <div ng-include="'tags/periscope/periscope.tag'"></div>
                     </section>
-                    <section id="metrics-pane" ng-class="{ 'active': metricsShow }" ng-show="metricsShow" targe class="tab-pane fade in">
+                    <section id="metrics-pane" ng-class="{ 'active': metricsShow }" ng-show="metricsShow" class="tab-pane fade in">
                     </section>
                 </div>
             </div>
@@ -331,7 +323,7 @@
                 <!-- .modal-header -->
                 <div class="modal-body">
                     <p>{{msg.cluster_list_terminate_dialog_prefix}} <strong>{{activeCluster.name}}</strong> {{msg.cluster_list_dialog_suffix}}</p>
-                    <input id='modal-terminate-forced' type='checkbox' ng-model="inherited.forcedTermination" />
+                    <input id='modal-terminate-forced' type='checkbox' ng-model="inherited.forcedTermination">
                     <label for='modal-terminate-forced'>{{msg.cluster_list_terminate_dialog_forced}}</label>
                 </div>
                 <div class="modal-footer">
@@ -368,8 +360,9 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="modal-stop-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
-        <div class="modal-dialog modal-sm">
+
+    <div class="modal fade" id="modal-stop-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title">
+        <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <!-- .modal-header -->
                 <div class="modal-body">
@@ -409,6 +402,7 @@
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="modal-upscale-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
@@ -447,6 +441,7 @@
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="modal-downscale-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
@@ -608,7 +603,7 @@
                                                 <div ng-show="recipes && recipes.length">
                                                     <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">{{msg.active_cluster_details_show_recipes}}</label>
                                                     <div class="col-sm-9">
-                                                        <input type="checkbox" ng-click="toggleRecipes($index)" />
+                                                        <input type="checkbox" ng-click="toggleRecipes($index)">
                                                     </div>
                                                     <div ng-show="recipesToShow[$index]">
                                                         <div class="col-sm-9">

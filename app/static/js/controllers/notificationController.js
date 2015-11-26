@@ -45,8 +45,38 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                     case "IMAGE_COPY_STATE":
                         handleCopyStatus(notification);
                         break;
-                    case "AMBARI_PROGRESS_STATE":
-                        handleAmbariProgressState(notification);
+                    case "SMOKE_TEST_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.smoke_test_ambari_progress_state_label);
+                        break;
+                    case "INSTALL_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.install_ambari_progress_state_label);
+                        break;
+                    case "START_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.start_ambari_progress_state_label);
+                        break;
+                    case "STOP_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.stop_ambari_progress_state_label);
+                        break;
+                    case "RESTART_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.restart_ambari_progress_state_label);
+                        break;
+                    case "DECOMMISSION_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.decommission_ambari_progress_state_label);
+                        break;
+                    case "INSTALL_SERVICES_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.install_services_ambari_progress_state_label);
+                        break;
+                    case "START_SERVICES_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.start_services_ambari_progress_state_label);
+                        break;
+                    case "STOP_SERVICES_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.stop_services_ambari_progress_state_label);
+                        break;
+                    case "DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.decommission_services_ambari_progress_state_label);
+                        break;
+                    case "ENABLE_SERVICES_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.enable_services_ambari_progress_state_label);
                         break;
                     case "AVAILABLE":
                         handleAvailableNotification(notification);
@@ -105,12 +135,13 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
             }
         }
 
-        function handleAmbariProgressState(notification) {
+        function handleAmbariProgressState(notification, message) {
             var actCluster = $filter('filter')($rootScope.clusters, {
                 id: notification.stackId
             })[0];
             if (actCluster != undefined) {
                 actCluster.ambariProgressState = notification.eventMessage;
+                actCluster.progressMessage = message;
             }
         }
 

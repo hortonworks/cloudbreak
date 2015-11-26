@@ -110,42 +110,42 @@ cloudbreakApp.config(['$routeProvider', '$locationProvider', function($routeProv
 });
 
 cloudbreakApp.run(function($rootScope, $http) {
-    $http.get('messages.properties').then(function(messages) {
-        $rootScope.msg = messages.data
-        $rootScope.titleStatus = {
-            "REQUESTED": $rootScope.msg.title_requested,
-            "CREATE_IN_PROGRESS": $rootScope.msg.title_create_in_progress,
-            "UPDATE_IN_PROGRESS": $rootScope.msg.title_update_in_progress,
-            "AVAILABLE": $rootScope.msg.title_create_completed,
-            "CREATE_FAILED": $rootScope.msg.title_create_failed,
-            "DELETE_IN_PROGRESS": $rootScope.msg.title_delete_in_progress,
-            "DELETE_COMPLETED": $rootScope.msg.title_delete_completed
+        $http.get('messages.properties').then(function(messages) {
+            $rootScope.msg = messages.data
+            $rootScope.titleStatus = {
+                "REQUESTED": $rootScope.msg.title_requested,
+                "CREATE_IN_PROGRESS": $rootScope.msg.title_create_in_progress,
+                "UPDATE_IN_PROGRESS": $rootScope.msg.title_update_in_progress,
+                "AVAILABLE": $rootScope.msg.title_create_completed,
+                "CREATE_FAILED": $rootScope.msg.title_create_failed,
+                "DELETE_IN_PROGRESS": $rootScope.msg.title_delete_in_progress,
+                "DELETE_COMPLETED": $rootScope.msg.title_delete_completed
+            }
+        });
+    })
+    .run(['$rootScope', 'initconf',
+        function($rootScope, initconf) {
+            if (initconf !== null) {
+                $rootScope.params = {};
+                $rootScope.params.regions = initconf.regions.regions;
+                $rootScope.params.defaultRegions = initconf.regions.defaultRegions;
+                $rootScope.params.zones = initconf.regions.availabilityZones;
+                $rootScope.params.diskTypes = initconf.disks.diskTypes;
+                $rootScope.params.defaultDisks = initconf.disks.defaultDisks;
+                $rootScope.params.vmTypes = initconf.virtualMachines.virtualMachines;
+                $rootScope.params.defaultVmTypes = initconf.virtualMachines.defaultVirtualMachines;
+            } else {
+                $rootScope.params = {};
+                $rootScope.params.regions = {};
+                $rootScope.params.defaultRegions = {};
+                $rootScope.params.zones = {};
+                $rootScope.params.diskTypes = {};
+                $rootScope.params.defaultDisks = {};
+                $rootScope.params.vmTypes = {};
+                $rootScope.params.defaultVmTypes = {};
+            }
         }
-    });
-})
-.run(['$rootScope', 'initconf',
-    function($rootScope, initconf) {
-        if(initconf !== null) {
-            $rootScope.params = {};
-            $rootScope.params.regions = initconf.regions.regions;
-            $rootScope.params.defaultRegions = initconf.regions.defaultRegions;
-            $rootScope.params.zones = initconf.regions.availabilityZones;
-            $rootScope.params.diskTypes = initconf.disks.diskTypes;
-            $rootScope.params.defaultDisks = initconf.disks.defaultDisks;
-            $rootScope.params.vmTypes = initconf.virtualMachines.virtualMachines;
-            $rootScope.params.defaultVmTypes = initconf.virtualMachines.defaultVirtualMachines;
-        } else {
-            $rootScope.params = {};
-            $rootScope.params.regions = {};
-            $rootScope.params.defaultRegions = {};
-            $rootScope.params.zones = {};
-            $rootScope.params.diskTypes = {};
-            $rootScope.params.defaultDisks = {};
-            $rootScope.params.vmTypes = {};
-            $rootScope.params.defaultVmTypes = {};
-        }
-    }
-]);
+    ]);
 
 cloudbreakApp.directive('startdatevalidation', function($parse) {
     return {

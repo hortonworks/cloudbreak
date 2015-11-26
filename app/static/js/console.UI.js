@@ -82,12 +82,14 @@ function addClusterListPanelJQEventListeners() {
                 $jq('#' + type + '-btn').click();
             }
             if ($jq('' + segment).hasClass('in') == false) {
-              $jq('a[data-target=\'' + segment + '\']').click();
+                $jq('a[data-target=\'' + segment + '\']').click();
             }
             var panel = $jq('a[data-target=\'' + segment + '\']').parent();
             var offset = panel.offset().top;
             if (offset) {
-                $jq('html,body').animate({scrollTop: offset - 64}, 500);
+                $jq('html,body').animate({
+                    scrollTop: offset - 64
+                }, 500);
             }
         }
     }
@@ -121,20 +123,22 @@ function addClusterFormJQEventListeners() {
     });
 
     function goToPanel(pane, type) {
-      var segment = $jq(pane).attr('segment');
-      if (segment !== undefined) {
-          if ($jq('#panel-' + type + '-collapse').hasClass('in') == false) {
-              $jq('#' + type + '-btn').click();
-          }
-          if ($jq('' + segment).hasClass('in') == false) {
-            $jq('a[data-target=\'' + segment + '\']').click();
-          }
-          var panel = $jq('a[data-target=\'' + segment + '\']').parent();
-          var offset = panel.offset().top;
-          if (offset) {
-              $jq('html,body').animate({scrollTop: offset - 64}, 500);
-          }
-      }
+        var segment = $jq(pane).attr('segment');
+        if (segment !== undefined) {
+            if ($jq('#panel-' + type + '-collapse').hasClass('in') == false) {
+                $jq('#' + type + '-btn').click();
+            }
+            if ($jq('' + segment).hasClass('in') == false) {
+                $jq('a[data-target=\'' + segment + '\']').click();
+            }
+            var panel = $jq('a[data-target=\'' + segment + '\']').parent();
+            var offset = panel.offset().top;
+            if (offset) {
+                $jq('html,body').animate({
+                    scrollTop: offset - 64
+                }, 500);
+            }
+        }
     }
 
     $jq('#cluster-form-panel .panel-heading > h5 > a').click(function(e) {
