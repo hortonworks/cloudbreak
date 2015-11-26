@@ -5,7 +5,7 @@
 var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'blockUI', 'ui.bootstrap', 'uluwatuControllers', 'uluwatuServices']);
 
 (function() {
-    fetchConfigData().then(bootstrapApplication);
+    fetchConfigData().then(fetchLocalConfigData).then(bootstrapApplication);
 
     function fetchConfigData() {
         var initInjector = angular.injector(["ng"]);
@@ -15,6 +15,44 @@ var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'block
             cloudbreakApp.constant("initconf", response.data);
         }, function(errorResponse) {
             cloudbreakApp.constant("initconf", null);
+            console.log(errorResponse);
+        });
+    }
+
+    function fetchLocalConfigData() {
+        var initInjector = angular.injector(["ng"]);
+        var $http = initInjector.get("$http");
+
+        return $http.get("config/displaynames.json").then(function(response) {
+            function Config(data) {
+                angular.extend(this, data);
+            }
+            Config.prototype.getValue = function(names, provider, nameId) {
+                if (provider !== undefined && nameId !== undefined && names[provider] !== undefined && names[provider][nameId] !== undefined) {
+                    return names[provider][nameId];
+                }
+                return nameId;
+            };
+
+            Config.prototype.getRegion = function(provider, nameId) {
+                return this.getValue(this.region, provider, nameId);
+            };
+            Config.prototype.getRegionById = function(nameId) {
+                var self = this,
+                    result = nameId;
+                angular.forEach(this.region, function(val, key) {
+                    if (typeof val !== "function" && self.getRegion(key, nameId) !== nameId) {
+                        result = self.getRegion(key, nameId);
+                    }
+                });
+                return result;
+            };
+            Config.prototype.getDisk = function(provider, nameId) {
+                return this.getValue(this.disk, provider, nameId);
+            };
+            cloudbreakApp.constant("displayNames", new Config(response.data));
+        }, function(errorResponse) {
+            cloudbreakApp.constant("displayNames", null);
             console.log(errorResponse);
         });
     }
@@ -143,6 +181,15 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.params.defaultDisks = {};
                 $rootScope.params.vmTypes = {};
                 $rootScope.params.defaultVmTypes = {};
+            }
+        }
+    ])
+    .run(['$rootScope', 'displayNames',
+        function($rootScope, displayNames) {
+            if (displayNames !== null) {
+                $rootScope.displayNames = displayNames;
+            } else {
+                $rootScope.displayNames = {};
             }
         }
     ]);

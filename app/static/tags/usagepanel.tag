@@ -77,7 +77,7 @@
                         <div>
                             <select class="form-control input-sm" id="region" ng-model="usageFilter.region" ng-change="selectProviderByRegion()">
                                 <option value="all">{{msg.usage_events_form_all_label}}</option>
-                                <option ng-repeat="region in regions" value="{{region}}">{{$root.config.regionDisplayNames.getById(region)}}</option>
+                                <option ng-repeat="region in regions" value="{{region}}">{{$root.displayNames.getRegionById(region)}}</option>
                             </select>
                         </div>
                     </div>
@@ -118,7 +118,7 @@
                                 <td>{{usage.stackName}}</td>
                                 <td>{{usage.username}}</td>
                                 <td>
-                                    <p>{{$root.config.regionDisplayNames.get('GCP', usage.region)}}</p>
+                                    <p>{{$root.displayNames.getRegion('GCP', usage.region)}}</p>
                                 </td>
                                 <td>
                                     <table class="table usage-inline-table" style="background-color: #FFFFFF; margin-bottom: 0px;">
@@ -156,7 +156,7 @@
                                 <td>{{usage.stackName}}</td>
                                 <td>{{usage.username}}</td>
                                 <td>
-                                    <p>{{$root.config.regionDisplayNames.get('AWS', usage.region)}}</p>
+                                    <p>{{$root.displayNames.getRegion('AWS', usage.region)}}</p>
                                 </td>
                                 <td>
                                     <table class="table usage-inline-table" style="background-color: #FFFFFF; margin-bottom: 0px;">
