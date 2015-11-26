@@ -101,7 +101,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="sl_region">{{msg.active_cluster_region_label}}</label>
                                 <div class="col-sm-9">
-                                    <p id="sl_region" class="form-control-static">{{$root.config.regionDisplayNames.get(activeCluster.cloudPlatform, activeCluster.region)}}</p>
+                                    <p id="sl_region" class="form-control-static">{{$root.displayNames.getRegion(activeCluster.cloudPlatform, activeCluster.region)}}</p>
                                 </div>
                             </div>
 

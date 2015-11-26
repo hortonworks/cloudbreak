@@ -28,7 +28,7 @@
         <label class="col-sm-3 control-label" for="awsvolumetype">{{msg.template_form_volume_type_label}}</label>
 
         <div class="col-sm-9">
-            <p id="awsvolumetype" class="form-control-static">{{$root.config.diskDisplayNames.get('AWS', template.parameters.volumeType)}}</p>
+            <p id="awsvolumetype" class="form-control-static">{{$root.displayNames.getDisk('AWS', template.parameters.volumeType)}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>

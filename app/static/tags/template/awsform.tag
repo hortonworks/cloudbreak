@@ -37,7 +37,7 @@
     <label class="col-sm-3 control-label" for="aws_tvolumetype">{{msg.template_form_volume_type_label}}</label>
 
     <div class="col-sm-9">
-        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType as $root.config.diskDisplayNames.get('AWS', volumeType) for volumeType in $root.params.diskTypes.AWS | filter:filterByVolumetype" ng-model="awsTemp.parameters.volumeType" ng-change="changeAwsInstanceType()" required>
+        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AWS', volumeType) for volumeType in $root.params.diskTypes.AWS | filter:filterByVolumetype" ng-model="awsTemp.parameters.volumeType" ng-change="changeAwsInstanceType()" required>
         </select>
     </div>
     <!-- .col-sm-9 -->
