@@ -30,7 +30,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_PCDB 1.0.0-rc.3
     env-import DOCKER_TAG_UAA 2.7.1
     env-import DOCKER_TAG_UAADB v2.7.1
-    env-import DOCKER_TAG_ULUWATU 1.1.0-rc.17
+    env-import DOCKER_TAG_ULUWATU 1.1.0-rc.18
     env-import DOCKER_TAG_SULTANS 1.1.0-rc.5
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
