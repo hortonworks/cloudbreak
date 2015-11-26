@@ -12,6 +12,15 @@ import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.DECOMMISSION_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.INSTALL_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.RESTART_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.SMOKE_TEST_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.START_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.START_SERVICES_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.STOP_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.STOP_SERVICES_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
@@ -279,9 +288,11 @@ public class AmbariClusterConnector {
         if (isSuccess(pollingResult)) {
             final boolean recipesFound = recipesFound(hostGroupAsSet);
             if (!recipesFound || prepareAndExecuteRecipes(true, stack, hostGroup, hostMetadata)) {
-                pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
+                pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment),
+                        INSTALL_AMBARI_PROGRESS_STATE);
                 if (isSuccess(pollingResult)) {
-                    pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
+                    pollingResult = waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()),
+                            START_AMBARI_PROGRESS_STATE);
                     if (isSuccess(pollingResult)) {
                         pollingResult = restartHadoopServices(stack, ambariClient, false);
                         if (isSuccess(pollingResult)) {
@@ -388,7 +399,8 @@ public class AmbariClusterConnector {
             Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupName, blueprintName);
             Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(decommissionCandidates, stack, adjustment);
             List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
-            pollingResult = waitForAmbariOperations(stack, ambariClient, decommissionComponents(ambariClient, hostList, components));
+            pollingResult = waitForAmbariOperations(stack, ambariClient, decommissionComponents(ambariClient, hostList, components),
+                    DECOMMISSION_AMBARI_PROGRESS_STATE);
             if (isSuccess(pollingResult)) {
                 pollingResult = waitForDataNodeDecommission(stack, ambariClient);
                 if (isSuccess(pollingResult)) {
@@ -589,7 +601,8 @@ public class AmbariClusterConnector {
         int requestId = ambariClient.stopAllServices();
         if (requestId != -1) {
             LOGGER.info("Waiting for Hadoop services to stop on stack");
-            PollingResult servicesStopResult = ambariOperationService.waitForAmbariOperations(stack, ambariClient, singletonMap("stop services", requestId));
+            PollingResult servicesStopResult = ambariOperationService.waitForAmbariOperations(stack, ambariClient, singletonMap("stop services", requestId),
+                    STOP_AMBARI_PROGRESS_STATE);
             if (isExited(servicesStopResult)) {
                 throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
             } else if (isTimeout(servicesStopResult)) {
@@ -604,7 +617,8 @@ public class AmbariClusterConnector {
         int requestId = ambariClient.startAllServices();
         if (requestId != -1) {
             LOGGER.info("Waiting for Hadoop services to start on stack");
-            PollingResult servicesStartResult = ambariOperationService.waitForAmbariOperations(stack, ambariClient, singletonMap("start services", requestId));
+            PollingResult servicesStartResult = ambariOperationService.waitForAmbariOperations(stack, ambariClient, singletonMap("start services", requestId),
+                    START_AMBARI_PROGRESS_STATE);
             if (isExited(servicesStartResult)) {
                 throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
             } else if (isTimeout(servicesStartResult)) {
@@ -700,13 +714,14 @@ public class AmbariClusterConnector {
 
     private PollingResult runSmokeTest(Stack stack, AmbariClient ambariClient) {
         int id = ambariClient.runMRServiceCheck();
-        return waitForAmbariOperations(stack, ambariClient, singletonMap("MR_SMOKE_TEST", id));
+        return waitForAmbariOperations(stack, ambariClient, singletonMap("MR_SMOKE_TEST", id), SMOKE_TEST_AMBARI_PROGRESS_STATE);
     }
 
     private PollingResult stopHadoopComponents(Stack stack, AmbariClient ambariClient, List<String> hosts) {
         try {
             int requestId = ambariClient.stopAllComponentsOnHosts(hosts);
-            return waitForAmbariOperations(stack, ambariClient, singletonMap("Stopping components on the decommissioned hosts", requestId));
+            return waitForAmbariOperations(stack, ambariClient, singletonMap("Stopping components on the decommissioned hosts", requestId),
+                    STOP_SERVICES_AMBARI_PROGRESS_STATE);
         } catch (HttpResponseException e) {
             String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
             throw new AmbariOperationFailedException("Ambari could not stop components. " + errorMessage, e);
@@ -725,7 +740,7 @@ public class AmbariClusterConnector {
         if (serviceComponents.containsKey("GANGLIA")) {
             restartRequests.put("GANGLIA", restartComponentWithClient(ambariClient, "GANGLIA", "GANGLIA_SERVER"));
         }
-        return waitForAmbariOperations(stack, ambariClient, restartRequests);
+        return waitForAmbariOperations(stack, ambariClient, restartRequests, RESTART_AMBARI_PROGRESS_STATE);
     }
 
     private int restartComponentWithClient(AmbariClient ambariClient, String service, String... compontents) {
@@ -750,7 +765,7 @@ public class AmbariClusterConnector {
         }
 
         if (!stringIntegerMap.isEmpty()) {
-            return waitForAmbariOperations(stack, ambariClient, stringIntegerMap);
+            return waitForAmbariOperations(stack, ambariClient, stringIntegerMap, START_SERVICES_AMBARI_PROGRESS_STATE);
         } else {
             return SUCCESS;
         }
@@ -949,7 +964,7 @@ public class AmbariClusterConnector {
     private PollingResult waitForClusterInstall(Stack stack, AmbariClient ambariClient) {
         Map<String, Integer> clusterInstallRequest = new HashMap<>();
         clusterInstallRequest.put("CLUSTER_INSTALL", 1);
-        return waitForAmbariOperations(stack, ambariClient, clusterInstallRequest);
+        return waitForAmbariOperations(stack, ambariClient, clusterInstallRequest, INSTALL_AMBARI_PROGRESS_STATE);
     }
 
     private List<String> findFreeHosts(Long stackId, HostGroup hostGroup, int scalingAdjustment) {
@@ -993,14 +1008,15 @@ public class AmbariClusterConnector {
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS, AmbariOperationService.MAX_FAILURE_COUNT);
     }
 
-    private PollingResult waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests) {
+    private PollingResult waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests, AmbariOperationType type) {
         LOGGER.info("Waiting for Ambari operations to finish. [Operation requests: {}]", operationRequests);
-        return ambariOperationService.waitForAmbariOperations(stack, ambariClient, operationRequests);
+        return ambariOperationService.waitForAmbariOperations(stack, ambariClient, operationRequests, type);
     }
 
     private PollingResult waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient) {
         LOGGER.info("Waiting for DataNodes to move the blocks to other nodes. stack id: {}", stack.getId());
-        return ambariOperationService.waitForAmbariOperations(stack, ambariClient, dnDecommissionStatusCheckerTask, Collections.<String, Integer>emptyMap());
+        return ambariOperationService.waitForAmbariOperations(stack, ambariClient, dnDecommissionStatusCheckerTask, Collections.<String, Integer>emptyMap(),
+                DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE);
     }
 
     private PollingResult waitForRegionServerDecommission(Stack stack, AmbariClient ambariClient, List<String> hosts, Set<String> components) {
