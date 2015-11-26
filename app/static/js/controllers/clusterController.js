@@ -55,11 +55,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             forcedTermination: false
         };
         $scope.updateStatuses = [
-            "REQUESTED", "CREATE_IN_PROGRESS", "UPDATE_IN_PROGRESS", "DELETE_IN_PROGRESS", "START_REQUESTED", "START_IN_PROGRESS"
-        ],
-        $scope.terminatableStatuses = [
-            'CREATED', 'FAILED', 'UNREGISTERED', 'DECOMMISSIONED'
-        ];
+                "REQUESTED", "CREATE_IN_PROGRESS", "UPDATE_IN_PROGRESS", "DELETE_IN_PROGRESS", "START_REQUESTED", "START_IN_PROGRESS"
+            ],
+            $scope.terminatableStatuses = [
+                'CREATED', 'FAILED', 'UNREGISTERED', 'DECOMMISSIONED'
+            ];
         getUluwatuClusters();
         initCluster();
         initPlatformVariants();
