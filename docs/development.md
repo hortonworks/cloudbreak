@@ -2,7 +2,7 @@
 
 ##Cloudbreak application
 
-### Local Development Setup
+#### Local Development Setup
 To use this development environment on OSX, you need to have Docker and Boot2docker installed.
 
 Simplest way to prepare the working environment is to start the Cloudbreak on your local machine is to use the [Cloudbreak Deployer](https://github.com/sequenceiq/cloudbreak-deployer).
@@ -121,7 +121,7 @@ Gradle is used for build and dependency management. Gradle wrapper is added to C
 
 ##Cloudbreak deployer
 
-### Contribution
+####Contribution
 
 Development process should happen on separate branches. Then a pull-request should be opened as usual.
 
