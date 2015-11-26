@@ -23,7 +23,15 @@ This release introduces the following changes in behavior as compared to previou
 
 | Title | Description |
 |----|----|
-| X | X |
+|UI changes|Cluster creation is based on a step-by-step wizard. Steps can be |
+| Custom Security Groups | Ability to define and create custom security groups and rules.|
+| Azure ARM support | With this release we have switched to the new [Azure ARM API](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/) aka **Azure API v2**. Using the old API is not supported anymore - users have the option to **terminate only** clusters lunched with the old API. All new clusters are lunched with the new API.|
+|WASB support|For clusters launched on Microsoft Azure the default file system in use will be [WASB](http://blogs.msdn.com/b/cindygross/archive/2015/02/04/understanding-wasb-and-hadoop-storage-in-azure.aspx). Users will still have to option to use local HDFS with attached disk but the recommended file system will be WASB. See [Filesystem configuration](azure_pre_prov.md) for more information.|
+|DASH support for WASB|When WASB is used as a Hadoop filesystem the files are full-value blobs in a storage account. It means better performance compared to the data disks and the WASB filesystem can be configured very easily but Azure storage accounts have their own [limitations](https://azure.microsoft.com/en-us/documentation/articles/azure-subscription-service-limits/#storage-limits) as well. There is a space limitation for TB per storage account (500 TB) as well but the real bottleneck is the total request rate that is only 20000 IOPS where Azure will start to throw errors when trying to do an I/O operation. To bypass those limits Microsoft created a small service called [DASH](https://github.com/MicrosoftDX/Dash). See [Filesystem configuration](azure_pre_prov.md) for more information.|
+|Support for new regions|On AWS we added support for **Frankfurt**. On GCP we added support for **us-east-1**.|
+|UAA zones| Updated to UAA 2.7.1 version, which introduced the concept of **zones**. See [Access from custom domains](configuration.md) for more information.|
+
+
 
 ## Patch Information
 
