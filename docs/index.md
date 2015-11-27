@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 **This page has been moved. Please follow up with this link:** [http://sequenceiq.com/cloudbreak-docs/](http://sequenceiq.com/cloudbreak-docs/)
 =======
 Periscope
@@ -420,3 +421,6 @@ Cloudbreak is licensed under the Apache License, Version 2.0. See [LICENSE](http
 =======
 Periscope is licensed under the Apache License, Version 2.0. See [LICENSE](http://www.apache.org/licenses/LICENSE-2.0.html) for full license text.
 >>>>>>> f73b8db... docs updated
+=======
+**This page has been moved. Please follow up with this link:** http://sequenceiq.com/cloudbreak-docs/
+>>>>>>> 8543700... Documentation page has been moved.
