@@ -72,14 +72,10 @@
         "gatewaystaticipname": {
             "type": "string",
             "defaultValue": "${stackname}${instance.instanceId}"
-        },
+        }
         </#if>
         </#list>
         </#list>
-        "addressPrefix": {
-          "type": "string",
-          "defaultValue": "${addressPrefix}"
-        }
     },
   	"variables" : {
       "userImageName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userImageStorageContainerName'),'/',parameters('userImageVhdName'))]",
@@ -107,7 +103,7 @@
               "properties": {
                   "addressSpace": {
                       "addressPrefixes": [
-                          "[parameters('addressPrefix')]"
+                          "[parameters('subnet1Prefix')]"
                       ]
                   },
                   "subnets": [

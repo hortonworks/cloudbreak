@@ -62,9 +62,9 @@ public class ArmResourceConnector implements ResourceConnector {
         try {
             access.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
         } catch (HttpResponseException e) {
-            throw new CloudConnectorException(String.format("Error occured when creating stack: %s", e.getResponse().getData().toString()));
+            throw new CloudConnectorException(String.format("Error occurred when creating stack: %s", e.getResponse().getData().toString()));
         } catch (Exception e) {
-            throw new CloudConnectorException(String.format("Invalid provisiong type: %s", stackName));
+            throw new CloudConnectorException(String.format("Invalid provisioning type: %s", stackName));
         }
 
         CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(stackName).build();
