@@ -31,17 +31,6 @@
     </div>
     <!-- .col-sm-9 -->
 </div>
-<div class="form-group" ng-class="{ 'has-error': azureNetworkForm.azure_networkAddressPrefix.$dirty && azureNetworkForm.azure_networkAddressPrefix.$invalid }">
-    <label class="col-sm-3 control-label" for="azure_networkAddressPrefix">{{msg.network_azure_form_address_prefix_label}}</label>
-
-    <div class="col-sm-9">
-        <input type="text" class="form-control" name="azure_networkAddressPrefix" ng-model="network.parameters.addressPrefixCIDR" ng-maxlength="30" id="azure_networkAddressPrefix" placeholder="{{msg.network_azure_form_address_prefix_placeholder}}" ng-pattern="/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/" required>
-        <div class="help-block" ng-show="azureNetworkForm.azure_networkAddressPrefix.$dirty && azureNetworkForm.azure_networkAddressPrefix.$invalid">
-            <i class="fa fa-warning"></i> {{msg.network_subnet_invalid}}
-        </div>
-    </div>
-    <!-- .col-sm-9 -->
-</div>
 <div class="form-group">
     <label class="col-sm-3 control-label" for="azure_network_public">{{msg.public_in_account_label}}</label>
     <div class="col-sm-9">
