@@ -27,10 +27,10 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
-import com.sequenceiq.cloudbreak.service.stack.flow.ReflectionUtils;
 
 @Component
 public class StackToCloudStackConverter {
@@ -106,7 +106,9 @@ public class StackToCloudStackConverter {
     private Network buildNetwork(Stack stack) {
         com.sequenceiq.cloudbreak.domain.Network stackNetwork = stack.getNetwork();
         Subnet subnet = new Subnet(stackNetwork.getSubnetCIDR());
-        return new Network(subnet, ReflectionUtils.getDeclaredFields(stackNetwork));
+        Json attributes = stackNetwork.getAttributes();
+        Map<String, Object> params = attributes == null ? Collections.<String, Object>emptyMap() : attributes.getMap();
+        return new Network(subnet, params);
     }
 
     private Security buildSecurity(Stack stack) {

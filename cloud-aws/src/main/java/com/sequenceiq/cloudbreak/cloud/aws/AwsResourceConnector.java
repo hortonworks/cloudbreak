@@ -300,9 +300,7 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     public boolean isExistingVPC(Network network) {
-        return network.getStringParameter("subnetCIDR") != null
-                && network.getStringParameter("vpcId") != null
-                && network.getStringParameter("internetGatewayId") != null;
+        return network.getStringParameter("vpcId") != null && network.getStringParameter("internetGatewayId") != null;
     }
 
     @Override

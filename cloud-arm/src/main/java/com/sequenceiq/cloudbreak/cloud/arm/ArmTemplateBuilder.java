@@ -74,7 +74,6 @@ public class ArmTemplateBuilder {
             model.put("ssh_key", armCredentialView.getPublicKey());
             model.put("region", cloudContext.getLocation().getRegion().value());
             model.put("subnet1Prefix", cloudStack.getNetwork().getSubnet().getCidr());
-            model.put("addressPrefix", cloudStack.getNetwork().getParameter("subnetCIDR", String.class));
             model.put("groups", new ArmGroupView(cloudStack.getGroups()).getGroups());
             model.put("securities", new ArmSecurityView(cloudStack.getSecurity()));
             model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.CORE)));
