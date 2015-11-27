@@ -46,9 +46,6 @@ public class StackDecorator implements Decorator<Stack> {
         int consulServers = getConsulServerCount((Integer) data[DecorationData.USR_CONSUL_SERVER_COUNT.ordinal()], subject.getFullNodeCount());
         subject.setConsulServers(consulServers);
         Network network = networkService.getById((Long) data[DecorationData.NETWORK_ID.ordinal()]);
-        if (!network.cloudPlatform().contains(subject.cloudPlatform())) {
-            throw new BadRequestException("The selected credential and network must relate to the same cloud platform!");
-        }
         subject.setNetwork(network);
 
         if (subject.getFailurePolicy() != null) {

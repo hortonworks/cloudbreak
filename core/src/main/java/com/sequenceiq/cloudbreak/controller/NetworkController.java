@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UnknownFormatConversionException;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -25,12 +24,8 @@ import com.sequenceiq.cloudbreak.controller.doc.Notes;
 import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
-import com.sequenceiq.cloudbreak.domain.AwsNetwork;
-import com.sequenceiq.cloudbreak.domain.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.GcpNetwork;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
 import com.sequenceiq.cloudbreak.service.network.DefaultNetworkCreator;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.wordnik.swagger.annotations.Api;
@@ -46,7 +41,6 @@ public class NetworkController {
 
     @Inject
     private NetworkService networkService;
-
 
     @Inject
     private DefaultNetworkCreator networkCreator;
@@ -138,25 +132,9 @@ public class NetworkController {
     }
 
     private Network convert(NetworkJson networkRequest, boolean publicInAccount) {
-        Network converted = null;
-        switch (networkRequest.getCloudPlatform()) {
-            case AWS:
-                converted = conversionService.convert(networkRequest, AwsNetwork.class);
-                break;
-            case AZURE:
-                converted = conversionService.convert(networkRequest, AzureNetwork.class);
-                break;
-            case GCP:
-                converted = conversionService.convert(networkRequest, GcpNetwork.class);
-                break;
-            case OPENSTACK:
-                converted = conversionService.convert(networkRequest, OpenStackNetwork.class);
-                break;
-            default:
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", networkRequest.getCloudPlatform()));
-        }
-        converted.setPublicInAccount(publicInAccount);
-        return converted;
+        Network network = conversionService.convert(networkRequest, Network.class);
+        network.setPublicInAccount(publicInAccount);
+        return network;
     }
 
     private NetworkJson convert(Network network) {

@@ -28,10 +28,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -41,7 +39,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
-import com.sequenceiq.cloudbreak.domain.GcpNetwork;
 import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -49,7 +46,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
-import com.sequenceiq.cloudbreak.domain.OpenStackNetwork;
 import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -292,44 +288,11 @@ public class TestUtil {
     }
 
     public static Network network(String subnet) {
-        AzureNetwork network = new AzureNetwork();
+        Network network = new Network();
         network.setSubnetCIDR(subnet);
-        network.setAddressPrefixCIDR(DUMMY_ADDRESS_PREFIX_CIDR);
+//        network.setAddressPrefixCIDR(DUMMY_ADDRESS_PREFIX_CIDR);
         network.setId(1L);
         network.setName(DUMMY_NAME);
-        return network;
-    }
-
-    public static AwsNetwork awsNetwork(String subnet) {
-        AwsNetwork awsNetwork = new AwsNetwork();
-        awsNetwork.setInternetGatewayId(DUMMY_INTERNET_GATEWAT_ID);
-        awsNetwork.setVpcId(DUMMY_VPC_ID);
-        awsNetwork.setId(1L);
-        awsNetwork.setDescription(DUMMY_DESCRIPTION);
-        awsNetwork.setName(DUMMY_NAME);
-        awsNetwork.setPublicInAccount(true);
-        awsNetwork.setSubnetCIDR(subnet);
-        return awsNetwork;
-    }
-
-    public static GcpNetwork gcpNetwork(String subnet) {
-        GcpNetwork network = new GcpNetwork();
-        network.setId(1L);
-        network.setName(DUMMY_NAME);
-        network.setStatus(ResourceStatus.DEFAULT);
-        network.setSubnetCIDR(subnet);
-        network.setPublicInAccount(true);
-        network.setDescription(DUMMY_DESCRIPTION);
-        return network;
-    }
-
-    public static OpenStackNetwork openStackNetwork(String subnet) {
-        OpenStackNetwork network = new OpenStackNetwork();
-        network.setId(1L);
-        network.setName(DUMMY_NAME);
-        network.setStatus(ResourceStatus.DEFAULT);
-        network.setSubnetCIDR(subnet);
-        network.setPublicInAccount(true);
         return network;
     }
 

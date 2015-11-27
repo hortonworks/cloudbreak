@@ -25,13 +25,12 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Service
-public class DefaultCloudConnectorParameterService implements CloudConnectorParameterService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudConnectorParameterService.class);
+public class CloudParameterService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudParameterService.class);
 
     @Inject
     private EventBus eventBus;
 
-    @Override
     public PlatformVariants getPlatformVariants() {
         LOGGER.debug("Get platform variants");
         GetPlatformVariantsRequest getPlatformVariantsRequest = new GetPlatformVariantsRequest();
@@ -50,7 +49,6 @@ public class DefaultCloudConnectorParameterService implements CloudConnectorPara
         }
     }
 
-    @Override
     public PlatformDisks getDiskTypes() {
         LOGGER.debug("Get platform disktypes");
         GetDiskTypesRequest getDiskTypesRequest = new GetDiskTypesRequest();
@@ -69,7 +67,6 @@ public class DefaultCloudConnectorParameterService implements CloudConnectorPara
         }
     }
 
-    @Override
     public PlatformVirtualMachines getVmtypes() {
         LOGGER.debug("Get platform vm types");
         GetVirtualMachineTypesRequest getVirtualMachineTypesRequest = new GetVirtualMachineTypesRequest();
@@ -88,7 +85,6 @@ public class DefaultCloudConnectorParameterService implements CloudConnectorPara
         }
     }
 
-    @Override
     public PlatformRegions getRegions() {
         LOGGER.debug("Get platform regions");
         GetPlatformRegionsRequest getPlatformRegionsRequest = new GetPlatformRegionsRequest();

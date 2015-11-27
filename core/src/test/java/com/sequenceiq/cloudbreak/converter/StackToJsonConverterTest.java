@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.controller.json.StackResponse;
-import com.sequenceiq.cloudbreak.domain.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -118,7 +117,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
         stack.setAvailabilityZone("avZone");
-        Network network = new AwsNetwork();
+        Network network = new Network();
         network.setId(1L);
         stack.setNetwork(network);
         stack.setFailurePolicy(new FailurePolicy());

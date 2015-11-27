@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
-import com.sequenceiq.cloudbreak.service.stack.CloudConnectorParameterService;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -68,7 +68,7 @@ public class StackController {
     private AccountPreferencesValidator accountPreferencesValidator;
 
     @Inject
-    private CloudConnectorParameterService cloudConnectorParameterService;
+    private CloudParameterService parameterService;
 
     @ApiOperation(value = StackOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
     @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
@@ -248,7 +248,7 @@ public class StackController {
     @RequestMapping(value = "stacks/platformVariants", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<PlatformVariantsJson> getPlatformVariants(@ModelAttribute("user") CbUser user) {
-        PlatformVariants pv = cloudConnectorParameterService.getPlatformVariants();
+        PlatformVariants pv = parameterService.getPlatformVariants();
         return new ResponseEntity<>(conversionService.convert(pv, PlatformVariantsJson.class), HttpStatus.OK);
     }
 
