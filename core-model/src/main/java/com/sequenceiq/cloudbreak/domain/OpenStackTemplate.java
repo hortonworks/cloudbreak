@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import javax.persistence.Entity;
-
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
-@Entity
+//@Entity
 public class OpenStackTemplate extends Template implements ProvisionEntity {
 
     public OpenStackTemplate() {
@@ -15,7 +13,6 @@ public class OpenStackTemplate extends Template implements ProvisionEntity {
         return CloudPlatform.OPENSTACK;
     }
 
-    @Override
     public String getVolumeTypeName() {
         return "HDD";
     }

@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import javax.persistence.Entity;
-
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
-@Entity
+//@Entity
 public class GcpTemplate extends Template implements ProvisionEntity {
 
     private String gcpRawDiskType = "pd-standard";
@@ -26,7 +24,6 @@ public class GcpTemplate extends Template implements ProvisionEntity {
         return CloudPlatform.GCP;
     }
 
-    @Override
     public String getVolumeTypeName() {
         return getGcpRawDiskType();
     }

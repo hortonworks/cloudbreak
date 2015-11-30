@@ -4,7 +4,7 @@ import javax.persistence.Entity;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
-@Entity
+//@Entity
 public class AzureTemplate extends Template implements ProvisionEntity {
 
     public AzureTemplate() {
@@ -15,7 +15,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
         return CloudPlatform.AZURE;
     }
 
-    @Override
     public String getVolumeTypeName() {
         return "HDD";
     }

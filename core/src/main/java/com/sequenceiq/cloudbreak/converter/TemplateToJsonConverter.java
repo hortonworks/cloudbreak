@@ -9,26 +9,28 @@ import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
-public class AwsTemplateToJsonConverter extends AbstractConversionServiceAwareConverter<AwsTemplate, TemplateResponse> {
-    @Override public TemplateResponse convert(AwsTemplate source) {
+public class TemplateToJsonConverter extends AbstractConversionServiceAwareConverter<Template, TemplateResponse> {
+    @Override
+    public TemplateResponse convert(Template source) {
         TemplateResponse templateJson = new TemplateResponse();
         templateJson.setId(source.getId());
         templateJson.setName(source.getName());
         templateJson.setVolumeCount(source.getVolumeCount());
         templateJson.setVolumeSize(source.getVolumeSize());
         templateJson.setPublicInAccount(source.isPublicInAccount());
-        Map<String, Object> props = new HashMap<>();
-        props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), source.getInstanceType());
-        props.put(AwsTemplateParam.SSH_LOCATION.getName(), source.getSshLocation());
-        props.put(AwsTemplateParam.VOLUME_TYPE.getName(), source.getVolumeType());
-        props.put(AwsTemplateParam.ENCRYPTED.getName(), source.isEncrypted());
-        if (source.getSpotPrice() != null) {
-            props.put(AwsTemplateParam.SPOT_PRICE.getName(), source.getSpotPrice());
+        Json attributes = source.getAttributes();
+        Map<String, Object> parameters = new HashMap<>();
+        if (attributes != null) {
+            parameters = attributes.getMap();
         }
-        templateJson.setParameters(props);
-        templateJson.setCloudPlatform(CloudPlatform.AWS);
+        parameters.put("instanceType", source.getInstanceType());
+        parameters.put("volumeType", source.getVolumeType());
+        templateJson.setParameters(parameters);
+        templateJson.setCloudPlatform(source.cloudPlatform());
         templateJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         return templateJson;
     }

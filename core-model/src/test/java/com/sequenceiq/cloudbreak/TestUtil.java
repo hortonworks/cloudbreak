@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
-import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
@@ -342,7 +341,6 @@ public class TestUtil {
         awsTemplate.setName(DUMMY_NAME);
         awsTemplate.setDescription(DUMMY_DESCRIPTION);
         awsTemplate.setPublicInAccount(true);
-        awsTemplate.setEncrypted(AwsEncryption.FALSE);
         awsTemplate.setSshLocation(DUMMY_SSH_LOCATION);
         awsTemplate.setSpotPrice(1.0);
         return awsTemplate;

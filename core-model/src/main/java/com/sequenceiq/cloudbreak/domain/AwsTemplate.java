@@ -1,20 +1,13 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-
-import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
-@Entity
+//@Entity
 public class AwsTemplate extends Template implements ProvisionEntity {
 
     private String sshLocation;
     private String volumeType;
     private Double spotPrice;
-    @Enumerated(EnumType.STRING)
-    private AwsEncryption encrypted;
 
     public AwsTemplate() {
     }
@@ -32,7 +25,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
         return CloudPlatform.AWS;
     }
 
-    @Override
     public String getVolumeTypeName() {
         return getVolumeType();
     }
@@ -51,18 +43,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
 
     public void setSpotPrice(Double spotPrice) {
         this.spotPrice = spotPrice;
-    }
-
-    public AwsEncryption getEncrypted() {
-        return encrypted;
-    }
-
-    public boolean isEncrypted() {
-        return AwsEncryption.TRUE.equals(encrypted) ? true : false;
-    }
-
-    public void setEncrypted(AwsEncryption encrypted) {
-        this.encrypted = encrypted;
     }
 
     public boolean isEphemeral() {

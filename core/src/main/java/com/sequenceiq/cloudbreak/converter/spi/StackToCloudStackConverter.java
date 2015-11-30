@@ -94,10 +94,11 @@ public class StackToCloudStackConverter {
     }
 
     public InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status) {
-        Map<String, Object> fields = getDeclaredFields(template);
+        Json attributes = template.getAttributes();
+        Map<String, Object> fields = attributes == null ? Collections.<String, Object>emptyMap() : attributes.getMap();
         List<Volume> volumes = new ArrayList<>();
         for (int i = 0; i < template.getVolumeCount(); i++) {
-            Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeTypeName(), template.getVolumeSize());
+            Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeType(), template.getVolumeSize());
             volumes.add(volume);
         }
         return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields);

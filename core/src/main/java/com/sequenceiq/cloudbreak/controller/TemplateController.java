@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UnknownFormatConversionException;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -26,11 +25,7 @@ import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.TemplateOp
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
 import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.GcpTemplate;
-import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
@@ -154,23 +149,7 @@ public class TemplateController {
     }
 
     private Template convert(TemplateRequest templateRequest, boolean publicInAccount) {
-        Template converted = null;
-        switch (templateRequest.getCloudPlatform()) {
-        case AWS:
-            converted = conversionService.convert(templateRequest, AwsTemplate.class);
-            break;
-        case AZURE:
-            converted = conversionService.convert(templateRequest, AzureTemplate.class);
-            break;
-        case GCP:
-            converted = conversionService.convert(templateRequest, GcpTemplate.class);
-            break;
-        case OPENSTACK:
-            converted = conversionService.convert(templateRequest, OpenStackTemplate.class);
-            break;
-        default:
-            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));
-        }
+        Template converted = conversionService.convert(templateRequest, Template.class);
         converted.setPublicInAccount(publicInAccount);
         return converted;
     }
