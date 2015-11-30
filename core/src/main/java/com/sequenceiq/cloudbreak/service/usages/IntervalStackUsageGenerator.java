@@ -14,15 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -67,23 +63,7 @@ public class IntervalStackUsageGenerator {
     }
 
     private String getInstanceType(Template template) {
-        CloudPlatform cloudPlatform = template.cloudPlatform();
-        String instanceType = "";
-
-        if (CloudPlatform.AWS.equals(cloudPlatform)) {
-            AwsTemplate awsTemp = (AwsTemplate) template;
-            instanceType = awsTemp.getInstanceType();
-        } else if (CloudPlatform.GCP.equals(cloudPlatform)) {
-            GcpTemplate gceTemp = (GcpTemplate) template;
-            instanceType = gceTemp.getInstanceType();
-        } else if (CloudPlatform.AZURE.equals(cloudPlatform)) {
-            AzureTemplate azureTemp = (AzureTemplate) template;
-            instanceType = azureTemp.getInstanceType();
-        } else if (CloudPlatform.OPENSTACK.equals(cloudPlatform)) {
-            OpenStackTemplate openTemp = (OpenStackTemplate) template;
-            instanceType = openTemp.getInstanceType().toString();
-        }
-        return instanceType;
+        return template.getInstanceType();
     }
 
     private PriceGenerator selectPriceGeneratorByPlatform(CloudPlatform cloudPlatform) {

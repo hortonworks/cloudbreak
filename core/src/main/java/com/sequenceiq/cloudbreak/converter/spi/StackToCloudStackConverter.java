@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import static com.sequenceiq.cloudbreak.service.stack.flow.ReflectionUtils.getDeclaredFields;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

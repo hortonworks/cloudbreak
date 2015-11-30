@@ -599,7 +599,7 @@ public class Stack implements ProvisionEntity {
         boolean ephemeral = false;
         if (CloudPlatform.AWS.equals(cloudPlatform())) {
             for (InstanceGroup instanceGroup : instanceGroups) {
-                if (((AwsTemplate) instanceGroup.getTemplate()).isEphemeral()) {
+                if ("ephemeral".equals(instanceGroup.getTemplate().getVolumeType())) {
                     ephemeral = true;
                     break;
                 }
