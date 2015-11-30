@@ -30,14 +30,14 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
         CloudbreakClient client = getClient();
         if (scalingAdjustment < 0) {
             client.putCluster(stackIntId, instanceGroup, scalingAdjustment, false);
-            CloudbreakUtil.waitForStackStatus(itContext, stackId, "AVAILABLE");
+            CloudbreakUtil.waitAndCheckClusterStatus(itContext, stackId, "AVAILABLE");
             client.putStack(stackIntId, instanceGroup, scalingAdjustment);
-            CloudbreakUtil.waitForStackStatus(itContext, stackId, "AVAILABLE");
+            CloudbreakUtil.waitAndCheckStackStatus(itContext, stackId, "AVAILABLE");
         } else {
             client.putStack(stackIntId, instanceGroup, scalingAdjustment);
-            CloudbreakUtil.waitForStackStatus(itContext, stackId, "AVAILABLE");
+            CloudbreakUtil.waitAndCheckStackStatus(itContext, stackId, "AVAILABLE");
             client.putCluster(stackIntId, instanceGroup, scalingAdjustment, false);
-            CloudbreakUtil.waitForStackStatus(itContext, stackId, "AVAILABLE");
+            CloudbreakUtil.waitAndCheckClusterStatus(itContext, stackId, "AVAILABLE");
         }
         // THEN
         CloudbreakUtil.checkClusterAvailability(client, stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),

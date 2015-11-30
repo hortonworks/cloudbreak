@@ -270,10 +270,10 @@ public class AmbariClusterFacade implements ClusterFacade {
         ClusterScalingContext actualContext = (ClusterScalingContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
+        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
         containerRunner.addClusterContainers(actualContext);
         instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, actualContext.getUpscaleCandidateAddresses());
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "New containers added to the cluster.");
+        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE, "New containers added to the cluster.");
         return context;
     }
 

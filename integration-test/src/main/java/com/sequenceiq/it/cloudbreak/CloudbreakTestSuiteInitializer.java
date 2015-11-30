@@ -187,7 +187,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             String stackId = itContext.getCleanUpParameter(CloudbreakITContextConstants.STACK_ID);
             for (int i = 0; i < cleanUpRetryCount; i++) {
                 if (deleteStack(client, stackId)) {
-                    WaitResult waitResult = CloudbreakUtil.waitForStatus(itContext, stackId, "DELETE_COMPLETED");
+                    WaitResult waitResult = CloudbreakUtil.waitForStackStatus(itContext, stackId, "DELETE_COMPLETED");
                     if (waitResult == WaitResult.SUCCESSFUL) {
                         break;
                     }
