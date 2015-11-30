@@ -23,53 +23,20 @@ public class CloudbreakUtil {
     private CloudbreakUtil() {
     }
 
-    public static void waitForStackStatus(IntegrationTestContext itContext, String stackId, String desiredStatus) {
-        waitForStackStatus(itContext, stackId, desiredStatus, "status");
+    public static void waitAndCheckStackStatus(IntegrationTestContext itContext, String stackId, String desiredStatus) {
+        waitAndCheckStatus(itContext, stackId, desiredStatus, "status");
     }
 
-    public static void waitForStackStatus(IntegrationTestContext itContext, String stackId, String desiredStatus, String statusPath) {
-        WaitResult waitResult = waitForStatus(itContext, stackId, desiredStatus, statusPath);
-        if (waitResult == WaitResult.FAILED) {
-            Assert.fail("The stack has failed");
-        }
-        if (waitResult == WaitResult.TIMEOUT) {
-            Assert.fail("Timeout happened");
-        }
+    public static void waitAndCheckClusterStatus(IntegrationTestContext itContext, String stackId, String desiredStatus) {
+        waitAndCheckStatus(itContext, stackId, desiredStatus, "clusterStatus");
     }
 
-    public static WaitResult waitForStatus(IntegrationTestContext itContext, String stackId, String desiredStatus) {
+    public static WaitResult waitForStackStatus(IntegrationTestContext itContext, String stackId, String desiredStatus) {
         return waitForStatus(itContext, stackId, desiredStatus, "status");
     }
 
-    public static WaitResult  waitForStatus(IntegrationTestContext itContext, String stackId, String desiredStatus, String statusPath) {
-        WaitResult waitResult = WaitResult.SUCCESSFUL;
-        String stackStatus = null;
-        int retryCount = 0;
-        do {
-            LOGGER.info("Waiting for stack status {}, stack id: {}, current status {} ...", desiredStatus, stackId, stackStatus);
-            sleep();
-            CloudbreakClient client = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-
-            try {
-                Map<String, Object> statusResult = (Map<String, Object>) client.getFullStackStatus(Integer.valueOf(stackId));
-                stackStatus = (String) statusResult.get(statusPath);
-            } catch (Exception exception) {
-                if (exception instanceof HttpResponseException && ((HttpResponseException) exception).getStatusCode() == HttpStatus.NOT_FOUND.value()) {
-                    stackStatus = "DELETE_COMPLETED";
-                } else {
-                    continue;
-                }
-            }
-            retryCount++;
-        } while (!desiredStatus.equals(stackStatus) && !stackStatus.contains("FAILED") && !"DELETE_COMPLETED".equals(stackStatus) && retryCount < MAX_RETRY);
-        LOGGER.info("Status {} for {} is in desired status {}", statusPath, stackId, stackStatus);
-        if (stackStatus.contains("FAILED") || (!"DELETE_COMPLETED".equals(desiredStatus) && "DELETE_COMPLETED".equals(stackStatus))) {
-            waitResult = WaitResult.FAILED;
-        }
-        if (retryCount == MAX_RETRY) {
-            waitResult = WaitResult.TIMEOUT;
-        }
-        return waitResult;
+    public static WaitResult waitForClusterStatus(IntegrationTestContext itContext, String stackId, String desiredStatus) {
+        return waitForStatus(itContext, stackId, desiredStatus, "clusterStatus");
     }
 
     public static void checkClusterAvailability(CloudbreakClient client, String stackId, String ambariUser, String ambariPassowrd) throws Exception {
@@ -108,6 +75,49 @@ public class CloudbreakUtil {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private static void waitAndCheckStatus(IntegrationTestContext itContext, String stackId, String desiredStatus, String statusPath) {
+        for (int i = 0; i < 3; i++) {
+            WaitResult waitResult = waitForStatus(itContext, stackId, desiredStatus, statusPath);
+            if (waitResult == WaitResult.FAILED) {
+                Assert.fail("The stack has failed");
+            }
+            if (waitResult == WaitResult.TIMEOUT) {
+                Assert.fail("Timeout happened");
+            }
+        }
+    }
+
+    private static WaitResult  waitForStatus(IntegrationTestContext itContext, String stackId, String desiredStatus, String statusPath) {
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        String stackStatus = null;
+        int retryCount = 0;
+        do {
+            LOGGER.info("Waiting for stack status {}, stack id: {}, current status {} ...", desiredStatus, stackId, stackStatus);
+            sleep();
+            CloudbreakClient client = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
+
+            try {
+                Map<String, Object> statusResult = (Map<String, Object>) client.getFullStackStatus(Integer.valueOf(stackId));
+                stackStatus = (String) statusResult.get(statusPath);
+            } catch (Exception exception) {
+                if (exception instanceof HttpResponseException && ((HttpResponseException) exception).getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                    stackStatus = "DELETE_COMPLETED";
+                } else {
+                    continue;
+                }
+            }
+            retryCount++;
+        } while (!desiredStatus.equals(stackStatus) && !stackStatus.contains("FAILED") && !"DELETE_COMPLETED".equals(stackStatus) && retryCount < MAX_RETRY);
+        LOGGER.info("Status {} for {} is in desired status {}", statusPath, stackId, stackStatus);
+        if (stackStatus.contains("FAILED") || (!"DELETE_COMPLETED".equals(desiredStatus) && "DELETE_COMPLETED".equals(stackStatus))) {
+            waitResult = WaitResult.FAILED;
+        }
+        if (retryCount == MAX_RETRY) {
+            waitResult = WaitResult.TIMEOUT;
+        }
+        return waitResult;
     }
 
     private static void sleep() {

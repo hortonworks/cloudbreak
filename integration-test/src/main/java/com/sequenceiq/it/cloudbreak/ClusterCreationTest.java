@@ -49,7 +49,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         client.postCluster(clusterName, ambariUser, ambariPassword, blueprintId, "Cluster for integration test", Integer.valueOf(stackId), map,
                 enableSecurity, kerberosMasterKey, kerberosAdmin, kerberosPassword);
         // THEN
-        CloudbreakUtil.waitForStackStatus(itContext, stackIdStr, "AVAILABLE");
+        CloudbreakUtil.waitAndCheckStackStatus(itContext, stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(client, stackIdStr, ambariUser, ambariPassword);
     }
 

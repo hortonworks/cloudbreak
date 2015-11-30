@@ -30,14 +30,14 @@ public class StatusUpdateTest extends AbstractCloudbreakIntegrationTest {
         // WHEN
         if (newStatus.equals(STOPPED)) {
             client.putClusterStatus(stackIntId, newStatus);
-            CloudbreakUtil.waitForStackStatus(getItContext(), stackId, STOPPED, "clusterStatus");
+            CloudbreakUtil.waitAndCheckClusterStatus(getItContext(), stackId, STOPPED);
             client.putStackStatus(stackIntId, newStatus);
-            CloudbreakUtil.waitForStackStatus(getItContext(), stackId, STOPPED, "status");
+            CloudbreakUtil.waitAndCheckStackStatus(getItContext(), stackId, STOPPED);
         } else {
             client.putStackStatus(stackIntId, newStatus);
-            CloudbreakUtil.waitForStackStatus(getItContext(), stackId, "AVAILABLE", "status");
+            CloudbreakUtil.waitAndCheckStackStatus(getItContext(), stackId, "AVAILABLE");
             client.putClusterStatus(stackIntId, newStatus);
-            CloudbreakUtil.waitForStackStatus(getItContext(), stackId, "AVAILABLE", "clusterStatus");
+            CloudbreakUtil.waitAndCheckClusterStatus(getItContext(), stackId, "AVAILABLE");
         }
         // THEN
         if (newStatus.equals(STARTED)) {
