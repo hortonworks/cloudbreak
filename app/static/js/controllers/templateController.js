@@ -211,10 +211,10 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.awsTemp = {
                 volumeCount: 1,
                 volumeSize: 100,
+                volumeType: $rootScope.params.defaultDisks.AWS,
+                instanceType: $rootScope.params.defaultVmTypes.AWS,
                 parameters: {
-                    sshLocation: "0.0.0.0/0",
-                    instanceType: $rootScope.params.defaultVmTypes.AWS,
-                    volumeType: $rootScope.params.defaultDisks.AWS,
+                    sshLocation: "0.0.0.0/0",                  
                     encrypted: false
                 }
             }
@@ -224,10 +224,9 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.azureTemp = {
                 volumeCount: 1,
                 volumeSize: 100,
-                parameters: {
-                    vmType: $rootScope.params.defaultVmTypes.AZURE_RM,
-                    volumeSize: 100
-                }
+                volumeType: "HDD",
+                instanceType: $rootScope.params.defaultVmTypes.AZURE_RM,
+                parameters: {}
             }
         }
 
@@ -235,6 +234,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.openstackTemp = {
                 volumeCount: 1,
                 volumeSize: 100,
+                volumeType: "HDD",
                 parameters: {}
             }
         }
@@ -243,10 +243,9 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.gcpTemp = {
                 volumeCount: 1,
                 volumeSize: 100,
-                parameters: {
-                    gcpInstanceType: $rootScope.params.defaultVmTypes.GCP,
-                    volumeType: $rootScope.params.defaultDisks.GCP
-                }
+                instanceType: $rootScope.params.defaultVmTypes.GCP,
+                volumeType: $rootScope.params.defaultDisks.GCP,
+                parameters: {}
             }
         }
 

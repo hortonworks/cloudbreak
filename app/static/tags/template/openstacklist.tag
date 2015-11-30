@@ -20,7 +20,7 @@
         <label class="col-sm-3 control-label" for="openstackinstanceType">{{msg.template_form_instance_type_label}}</label>
 
         <div class="col-sm-9">
-            <p id="openstackinstanceType" class="form-control-static">{{template.parameters.instanceType}}</p>
+            <p id="openstackinstanceType" class="form-control-static">{{template.instanceType}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>

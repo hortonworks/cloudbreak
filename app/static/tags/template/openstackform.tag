@@ -27,7 +27,7 @@
     <label class="col-sm-3 control-label" for="openstack_tinstanceType">{{msg.template_form_instance_type_label}}</label>
 
     <div class="col-sm-9">
-        <input type="text" name="openstack_tinstancetype" class="form-control" ng-model="openstackTemp.parameters.instanceType" id="openstack_tinstancetype" placeholder="custom instance type name" required>
+        <input type="text" name="openstack_tinstancetype" class="form-control" ng-model="openstackTemp.instanceType" id="openstack_tinstancetype" placeholder="custom instance type name" required>
 
         <div class="help-block" ng-show="openstackTemplateForm.openstack_tinstancetype.$dirty && openstackTemplateForm.openstack_tinstancetype.$invalid"><i class="fa fa-warning"></i> {{msg.openstack_template_instancetype_invalid}}
         </div>
