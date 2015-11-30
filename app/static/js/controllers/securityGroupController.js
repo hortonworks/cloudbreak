@@ -74,13 +74,13 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
                 AccountSecurityGroup.save($scope.securitygroup, function(result) {
                     handleSecurityGroupCreationSuccess(result)
                 }, function(error) {
-                    $scope.showErrorMessageAlert(error, "failed");
+                    $scope.showError(error, "failed");
                 });
             } else {
                 UserSecurityGroup.save($scope.securitygroup, function(result) {
                     handleSecurityGroupCreationSuccess(result)
                 }, function(error) {
-                    $scope.showErrorMessageAlert(error, "failed");
+                    $scope.showError(error, "failed");
                 });
             }
         }
