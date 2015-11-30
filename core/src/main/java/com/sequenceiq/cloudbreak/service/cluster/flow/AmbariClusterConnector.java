@@ -139,8 +139,6 @@ public class AmbariClusterConnector {
     @Inject
     private ClusterSecurityService securityService;
     @Inject
-    private InstanceTerminationHandler instanceTerminationHandler;
-    @Inject
     private AmbariHostsRemover ambariHostsRemover;
     @Inject
     private PollingService<AmbariHostsCheckerContext> ambariHostJoin;
@@ -171,6 +169,8 @@ public class AmbariClusterConnector {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
         AMBARI_CLUSTER_AMBARI_DATABASE_RESET("ambari.cluster.ambari.database.reset"),
         AMBARI_CLUSTER_RESTARTING_AMBARI_SERVER("ambari.cluster.restarting.ambari.server"),
+        AMBARI_CLUSTER_RESTARTING_AMBARI_AGENT("ambari.cluster.restarting.ambari.agent"),
+        AMBARI_CLUSTER_AMBARI_AGENT_RESTARTED("ambari.cluster.ambari.agent.restarted"),
         AMBARI_CLUSTER_AMBARI_SERVER_RESTARTED("ambari.cluster.ambari.server.restarted"),
         AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup"),
         AMBARI_CLUSTER_ADDING_NODE_TO_HOSTGROUP("ambari.cluster.adding.node.to.hostgroup"),
@@ -340,7 +340,7 @@ public class AmbariClusterConnector {
                 cluster.getPassword());
     }
 
-    public Cluster resetAmbariCluster(Long stackId) throws CloudbreakSecuritySetupException {
+    public Cluster resetAmbariCluster(Long stackId) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
@@ -357,6 +357,11 @@ public class AmbariClusterConnector {
                 Collections.<String>emptyList(), new HashSet<>(hostNames));
         eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AMBARI_SERVER_RESTARTED.code()));
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_RESTARTING_AMBARI_AGENT.code()));
+        restartAmbariAgents(stack);
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AMBARI_AGENT_RESTARTED.code()));
         return cluster;
     }
 
