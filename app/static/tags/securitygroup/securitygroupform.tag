@@ -3,7 +3,7 @@
         <label class="col-sm-3 control-label" for="name">{{msg.name_label}}</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="sgname" ng-model="securitygroup.name" ng-minlength="5" ng-maxlength="100" required id="sgname" placeholder="{{msg.name_placeholder}}">
+            <input type="text" class="form-control" ng-pattern="/^[a-z][-a-z0-9]*[a-z]$/" name="sgname" ng-model="securitygroup.name" ng-minlength="5" ng-maxlength="100" required id="sgname" placeholder="{{msg.name_placeholder}}">
             <div class="help-block" ng-show="securitygroupForm.sgname.$dirty && securitygroupForm.sgname.$invalid">
                 <i class="fa fa-warning"></i> {{msg.template_name_invalid}}
             </div>
