@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -61,7 +62,8 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         InstanceTemplate template = instance.getTemplate();
         Volume volume = template.getVolumes().get(0);
 
-        final List<CloudResource> resources = new ArrayList<>();
+        List<CloudResource> resources = new ArrayList<>();
+        final List<CloudResource> syncedResources = Collections.synchronizedList(resources);
         final String projectId = context.getProjectId();
         final Location location = context.getLocation();
         final Compute compute = context.getCompute();
@@ -74,7 +76,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                     Compute.Disks.Insert insDisk = compute.disks().insert(projectId, location.getAvailabilityZone().value(), disk);
                     try {
                         Operation operation = insDisk.execute();
-                        resources.add(createOperationAwareCloudResource(cloudResource, operation));
+                        syncedResources.add(createOperationAwareCloudResource(cloudResource, operation));
                         if (operation.getHttpErrorStatusCode() != null) {
                             throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), cloudResource.getName());
                         }
