@@ -1,7 +1,7 @@
 <div class="form-group" ng-class="{ 'has-error': blueprintForm.name.$dirty && blueprintForm.name.$invalid }">
     <label class="col-sm-3 control-label" for="name">{{msg.name_label}}</label>
     <div class="col-sm-9">
-        <input type="text" class="form-control" id="name" ng-model="blueprint.name" name="name" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" ng-minlength="5" ng-maxlength="100" placeholder="{{msg.name_placeholder}}" required>
+        <input type="text" class="form-control" id="name" ng-model="blueprint.name" name="name" ng-pattern="/^[a-z][-a-z0-9]*$/" ng-minlength="5" ng-maxlength="100" placeholder="{{msg.name_placeholder}}" required>
         <div class="help-block" ng-show="blueprintForm.name.$dirty && blueprintForm.name.$invalid"><i class="fa fa-warning"></i> {{msg.blueprint_name_invalid}}
         </div>
     </div>
