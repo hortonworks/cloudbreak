@@ -5,7 +5,7 @@
         <div class="col-sm-9">
             <input type="text" class="form-control" ng-pattern="/^[a-z][-a-z0-9]*[a-z]$/" name="sgname" ng-model="securitygroup.name" ng-minlength="5" ng-maxlength="100" required id="sgname" placeholder="{{msg.name_placeholder}}">
             <div class="help-block" ng-show="securitygroupForm.sgname.$dirty && securitygroupForm.sgname.$invalid">
-                <i class="fa fa-warning"></i> {{msg.template_name_invalid}}
+                <i class="fa fa-warning"></i> {{msg.securitygroup_name_invalid}}
             </div>
         </div>
         <!-- .col-sm-9 -->
