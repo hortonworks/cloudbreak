@@ -5,13 +5,11 @@ public class StackServiceComponentDescriptor {
 
     private String name;
     private String category;
-    private int minCardinality;
     private int maxCardinality;
 
-    public StackServiceComponentDescriptor(String name, String category, int minCardinality, int maxCardinality) {
+    public StackServiceComponentDescriptor(String name, String category, int maxCardinality) {
         this.name = name;
         this.category = category;
-        this.minCardinality = minCardinality;
         this.maxCardinality = maxCardinality;
     }
 
@@ -21,10 +19,6 @@ public class StackServiceComponentDescriptor {
 
     public String getCategory() {
         return category;
-    }
-
-    public int getMinCardinality() {
-        return minCardinality;
     }
 
     public int getMaxCardinality() {
