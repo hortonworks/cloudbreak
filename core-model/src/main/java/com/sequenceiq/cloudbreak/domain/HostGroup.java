@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 @Entity
@@ -54,7 +55,7 @@ public class HostGroup {
     @ManyToOne
     private Cluster cluster;
 
-    @ManyToOne
+    @OneToOne
     private InstanceGroup instanceGroup;
 
     @OneToMany(mappedBy = "hostGroup", cascade = CascadeType.ALL, orphanRemoval = true)
