@@ -30,10 +30,11 @@ public class BlueprintValidatorTest {
     private static final String GROUP2 = "group2";
     private static final String GROUP3 = "group3";
     private static final String GROUP4 = "group4";
-    private static final String COMPONENT1 = "comp1";
-    private static final String COMPONENT2 = "comp2";
-    private static final String COMPONENT3 = "comp3";
-    private static final String SLAVE_COMPONENT = "slavecomp";
+    private static final String MA_MIN1_MAX5 = "comp1";
+    private static final String MA_MIN1_MAX1 = "comp2";
+    private static final String MA_MIN1_MAX3 = "comp3";
+    private static final String SL_MIN0_MAX3 = "slavecomp1";
+    private static final String SL_MIN5_MAX6 = "slavecomp2";
     private static final String UNKNOWN = "unknown";
 
     @Mock
@@ -66,7 +67,7 @@ public class BlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
-        JsonNode blueprintJsonTree = createJsonTreeWithUnknownHostGroup();
+        JsonNode blueprintJsonTree = createJsonTree();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
@@ -79,6 +80,7 @@ public class BlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+        instanceGroups.add(createInstanceGroup("gateway", 1));
         JsonNode blueprintJsonTree = createJsonTreeWithIllegalGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
@@ -92,6 +94,7 @@ public class BlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+        instanceGroups.add(createInstanceGroup("gateway", 1));
         JsonNode blueprintJsonTree = createJsonTreeWithTooMuchGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
@@ -118,7 +121,22 @@ public class BlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+        instanceGroups.add(createInstanceGroup("gateway", 1));
         JsonNode blueprintJsonTree = createJsonTreeWithComponentInMoreGroups();
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        // WHEN
+        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        // THEN throw exception
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testValidateBlueprintForStackShouldThrowBadRequestExceptionWhenComponentIsLessThanMin() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        Set<InstanceGroup> instanceGroups = createInstanceGroups();
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+        instanceGroups.add(createInstanceGroup("gateway", 1));
+        JsonNode blueprintJsonTree = createJsonTreeWithComponentIsLess();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
@@ -153,11 +171,51 @@ public class BlueprintValidatorTest {
         // THEN doesn't throw exception
     }
 
+    @Test(expected = BadRequestException.class)
+    public void testHostGroupScalingThrowsBadRequestExceptionWhenNodeCountIsMoreThanMax() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        JsonNode blueprintJsonTree = createJsonTree();
+        InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 3);
+        HostGroup hostGroup = createHostGroup(instanceGroup.getGroupName(), instanceGroup);
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        // WHEN
+        underTest.validateHostGroupScalingRequest(blueprint, hostGroup, 1);
+        // THEN throw exception
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testHostGroupScalingThrowsBadRequestExceptionWhenNodeCountIsLessThanMin() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        JsonNode blueprintJsonTree = createJsonTree();
+        InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 1);
+        HostGroup hostGroup = createHostGroup(instanceGroup.getGroupName(), instanceGroup);
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        // WHEN
+        underTest.validateHostGroupScalingRequest(blueprint, hostGroup, -1);
+        // THEN throw exception
+    }
+
+    @Test
+    public void testHostGroupScalingNoThrowsAnyExceptionWhenNumbersAreOk() throws IOException {
+        // GIVEN
+        Blueprint blueprint = createBlueprint();
+        JsonNode blueprintJsonTree = createJsonTree();
+        InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 2);
+        HostGroup hostGroup = createHostGroup(instanceGroup.getGroupName(), instanceGroup);
+        BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        // WHEN
+        underTest.validateHostGroupScalingRequest(blueprint, hostGroup, 1);
+        // THEN throw exception
+    }
+
     private void setupStackServiceComponentDescriptors() {
-        BDDMockito.given(stackServiceComponentDescriptors.get(COMPONENT1)).willReturn(new StackServiceComponentDescriptor(COMPONENT1, "MASTER", 5));
-        BDDMockito.given(stackServiceComponentDescriptors.get(COMPONENT2)).willReturn(new StackServiceComponentDescriptor(COMPONENT2, "MASTER", 1));
-        BDDMockito.given(stackServiceComponentDescriptors.get(COMPONENT3)).willReturn(new StackServiceComponentDescriptor(COMPONENT3, "MASTER", 3));
-        BDDMockito.given(stackServiceComponentDescriptors.get(SLAVE_COMPONENT)).willReturn(new StackServiceComponentDescriptor(SLAVE_COMPONENT, "SLAVE", 3));
+        BDDMockito.given(stackServiceComponentDescriptors.get(MA_MIN1_MAX5)).willReturn(new StackServiceComponentDescriptor(MA_MIN1_MAX5, "MASTER", 1, 5));
+        BDDMockito.given(stackServiceComponentDescriptors.get(MA_MIN1_MAX1)).willReturn(new StackServiceComponentDescriptor(MA_MIN1_MAX1, "MASTER", 1, 1));
+        BDDMockito.given(stackServiceComponentDescriptors.get(MA_MIN1_MAX3)).willReturn(new StackServiceComponentDescriptor(MA_MIN1_MAX3, "MASTER", 1, 3));
+        BDDMockito.given(stackServiceComponentDescriptors.get(SL_MIN0_MAX3)).willReturn(new StackServiceComponentDescriptor(SL_MIN0_MAX3, "SLAVE", 0, 3));
+        BDDMockito.given(stackServiceComponentDescriptors.get(SL_MIN5_MAX6)).willReturn(new StackServiceComponentDescriptor(SL_MIN5_MAX6, "SLAVE", 5, 6));
     }
 
     private Blueprint createBlueprint() {
@@ -183,7 +241,7 @@ public class BlueprintValidatorTest {
 
     private Set<HostGroup> createHostGroups(Set<InstanceGroup> instanceGroups) {
         Set<HostGroup> groups = Sets.newHashSet();
-        for (InstanceGroup instanceGroup : new ArrayList<InstanceGroup>(instanceGroups)) {
+        for (InstanceGroup instanceGroup : new ArrayList<>(instanceGroups)) {
             groups.add(createHostGroup(instanceGroup.getGroupName(), instanceGroup));
         }
         return groups;
@@ -196,22 +254,13 @@ public class BlueprintValidatorTest {
         return group;
     }
 
-    private JsonNode createJsonTreeWithUnknownHostGroup() {
-        JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
-        ObjectNode rootNode = jsonNodeFactory.objectNode();
-        ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
-        addHostGroup(hostGroupsNode, GROUP1, SLAVE_COMPONENT);
-        addHostGroup(hostGroupsNode, UNKNOWN);
-        return rootNode;
-    }
-
     private JsonNode createJsonTreeWithIllegalGroup() {
         JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
         ObjectNode rootNode = jsonNodeFactory.objectNode();
         ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
-        addHostGroup(hostGroupsNode, GROUP1, SLAVE_COMPONENT);
-        addHostGroup(hostGroupsNode, GROUP2, COMPONENT1, COMPONENT2);
-        addHostGroup(hostGroupsNode, GROUP3, COMPONENT3);
+        addHostGroup(hostGroupsNode, GROUP1, SL_MIN0_MAX3);
+        addHostGroup(hostGroupsNode, GROUP2, MA_MIN1_MAX5, MA_MIN1_MAX1);
+        addHostGroup(hostGroupsNode, GROUP3, MA_MIN1_MAX3);
         return rootNode;
     }
 
@@ -219,10 +268,10 @@ public class BlueprintValidatorTest {
         JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
         ObjectNode rootNode = jsonNodeFactory.objectNode();
         ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
-        addHostGroup(hostGroupsNode, GROUP1, COMPONENT2);
-        addHostGroup(hostGroupsNode, GROUP2, COMPONENT1);
-        addHostGroup(hostGroupsNode, GROUP3, COMPONENT3);
-        addHostGroup(hostGroupsNode, GROUP4, SLAVE_COMPONENT);
+        addHostGroup(hostGroupsNode, GROUP1, MA_MIN1_MAX1);
+        addHostGroup(hostGroupsNode, GROUP2, MA_MIN1_MAX5);
+        addHostGroup(hostGroupsNode, GROUP3, MA_MIN1_MAX3);
+        addHostGroup(hostGroupsNode, GROUP4, SL_MIN0_MAX3);
         return rootNode;
     }
 
@@ -230,8 +279,8 @@ public class BlueprintValidatorTest {
         JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
         ObjectNode rootNode = jsonNodeFactory.objectNode();
         ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
-        addHostGroup(hostGroupsNode, GROUP1, COMPONENT2);
-        addHostGroup(hostGroupsNode, GROUP2, COMPONENT1);
+        addHostGroup(hostGroupsNode, GROUP1, MA_MIN1_MAX1);
+        addHostGroup(hostGroupsNode, GROUP2, MA_MIN1_MAX5);
         return rootNode;
     }
 
@@ -239,8 +288,8 @@ public class BlueprintValidatorTest {
         JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
         ObjectNode rootNode = jsonNodeFactory.objectNode();
         ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
-        addHostGroup(hostGroupsNode, GROUP1, COMPONENT2);
-        addHostGroup(hostGroupsNode, GROUP2, COMPONENT1);
+        addHostGroup(hostGroupsNode, GROUP1, MA_MIN1_MAX1);
+        addHostGroup(hostGroupsNode, GROUP2, MA_MIN1_MAX5);
         addHostGroup(hostGroupsNode, GROUP3, UNKNOWN);
         return rootNode;
     }
@@ -249,9 +298,19 @@ public class BlueprintValidatorTest {
         JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
         ObjectNode rootNode = jsonNodeFactory.objectNode();
         ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
-        addHostGroup(hostGroupsNode, GROUP1, COMPONENT2, COMPONENT3);
-        addHostGroup(hostGroupsNode, GROUP2, COMPONENT1);
-        addHostGroup(hostGroupsNode, GROUP3, COMPONENT3);
+        addHostGroup(hostGroupsNode, GROUP1, MA_MIN1_MAX1, MA_MIN1_MAX3);
+        addHostGroup(hostGroupsNode, GROUP2, MA_MIN1_MAX5);
+        addHostGroup(hostGroupsNode, GROUP3, MA_MIN1_MAX3);
+        return rootNode;
+    }
+
+    private JsonNode createJsonTreeWithComponentIsLess() {
+        JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
+        ObjectNode rootNode = jsonNodeFactory.objectNode();
+        ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
+        addHostGroup(hostGroupsNode, GROUP1, MA_MIN1_MAX1);
+        addHostGroup(hostGroupsNode, GROUP2, MA_MIN1_MAX3);
+        addHostGroup(hostGroupsNode, GROUP3, SL_MIN5_MAX6);
         return rootNode;
     }
 
@@ -259,9 +318,9 @@ public class BlueprintValidatorTest {
         JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
         ObjectNode rootNode = jsonNodeFactory.objectNode();
         ArrayNode hostGroupsNode = rootNode.putArray("host_groups");
-        addHostGroup(hostGroupsNode, GROUP1, SLAVE_COMPONENT, COMPONENT2);
-        addHostGroup(hostGroupsNode, GROUP2, COMPONENT1);
-        addHostGroup(hostGroupsNode, GROUP3, COMPONENT3);
+        addHostGroup(hostGroupsNode, GROUP1, SL_MIN0_MAX3, MA_MIN1_MAX1);
+        addHostGroup(hostGroupsNode, GROUP2, MA_MIN1_MAX5);
+        addHostGroup(hostGroupsNode, GROUP3, MA_MIN1_MAX3);
         return rootNode;
     }
 

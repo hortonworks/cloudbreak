@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_REQUESTED;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -18,6 +19,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
@@ -32,8 +35,10 @@ import com.sequenceiq.cloudbreak.controller.validation.NetworkConfigurationValid
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -310,6 +315,9 @@ public class StackService {
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
+        if (instanceGroupAdjustmentJson.getWithClusterEvent()) {
+            validateHostGroupAdjustment(instanceGroupAdjustmentJson, stack, instanceGroupAdjustmentJson.getScalingAdjustment());
+        }
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
             UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
                     instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(),
@@ -318,8 +326,7 @@ public class StackService {
             flowManager.triggerStackUpscale(updateInstancesRequest);
         } else {
             UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
-                    instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(),
-                    ScalingType.DOWNSCALE_ONLY_STACK);
+                    instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(), ScalingType.DOWNSCALE_ONLY_STACK);
             flowManager.triggerStackDownscale(updateInstancesRequest);
         }
     }
@@ -364,6 +371,21 @@ public class StackService {
                                 removableHosts, instanceGroup.getGroupName(), instanceGroupAdjustmentJson.getScalingAdjustment() * -1));
             }
         }
+    }
+
+    private void validateHostGroupAdjustment(final InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
+        Blueprint blueprint = stack.getCluster().getBlueprint();
+        HostGroup hostGroup = Iterables.find(stack.getCluster().getHostGroups(), new Predicate<HostGroup>() {
+            @Override
+            public boolean apply(@Nullable HostGroup input) {
+            return input.getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup());
+            }
+        });
+        if (hostGroup == null) {
+            throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
+                    instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
+        }
+        blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup, adjustment);
     }
 
     private void validateStackStatus(Stack stack) {
