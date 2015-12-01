@@ -52,7 +52,7 @@ tests:
   - name: create cluster
     parameters: {
       stackName: it-azurerm-stack-ssud,
-      region: West Europe,
+      region: North Europe,
       clusterName: it-azurerm-cluster-ssud,
       sleepTime: 60000
     }
