@@ -14,9 +14,6 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 @Component
 public class JsonToTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, Template> {
 
-    private static final String INSTANCE_TYPE = "instanceType";
-    private static final String VOLUME_TYPE = "volumeType";
-
     @Override
     public Template convert(TemplateRequest source) {
         Template template = new Template();
@@ -25,12 +22,11 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
         template.setStatus(ResourceStatus.USER_MANAGED);
         template.setVolumeCount(source.getVolumeCount() == null ? 0 : source.getVolumeCount());
         template.setVolumeSize(source.getVolumeSize() == null ? 0 : source.getVolumeSize());
-        Map<String, Object> parameters = source.getParameters();
-        template.setInstanceType(String.valueOf(parameters.get(INSTANCE_TYPE)));
-        template.setVolumeType(String.valueOf(parameters.get(VOLUME_TYPE)));
-        parameters.remove(INSTANCE_TYPE);
-        parameters.remove(VOLUME_TYPE);
         template.setCloudPlatform(source.getCloudPlatform());
+        template.setInstanceType(source.getInstanceType());
+        String volumeType = source.getVolumeType();
+        template.setVolumeType(volumeType == null ? "HDD" : volumeType);
+        Map<String, Object> parameters = source.getParameters();
         if (parameters != null && !parameters.isEmpty()) {
             try {
                 template.setAttributes(new Json(parameters));

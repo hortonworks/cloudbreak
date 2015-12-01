@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
@@ -19,14 +16,12 @@ public class TemplateToJsonConverter extends AbstractConversionServiceAwareConve
         templateJson.setVolumeCount(source.getVolumeCount());
         templateJson.setVolumeSize(source.getVolumeSize());
         templateJson.setPublicInAccount(source.isPublicInAccount());
+        templateJson.setInstanceType(source.getInstanceType());
+        templateJson.setVolumeType(source.getVolumeType());
         Json attributes = source.getAttributes();
-        Map<String, Object> parameters = new HashMap<>();
         if (attributes != null) {
-            parameters = attributes.getMap();
+            templateJson.setParameters(attributes.getMap());
         }
-        parameters.put("instanceType", source.getInstanceType());
-        parameters.put("volumeType", source.getVolumeType());
-        templateJson.setParameters(parameters);
         templateJson.setCloudPlatform(source.cloudPlatform());
         templateJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         return templateJson;

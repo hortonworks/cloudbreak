@@ -32,6 +32,10 @@ public abstract class TemplateBase implements JsonEntity {
     private Integer volumeCount;
     @ApiModelProperty(ModelDescriptions.TemplateModelDescription.VOLUME_SIZE)
     private Integer volumeSize;
+    @ApiModelProperty(ModelDescriptions.TemplateModelDescription.VOLUME_TYPE)
+    private String volumeType;
+    @ApiModelProperty(ModelDescriptions.TemplateModelDescription.INSTANCE_TYPE)
+    private String instanceType;
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, readOnly = true)
     private boolean publicInAccount;
 
@@ -90,5 +94,21 @@ public abstract class TemplateBase implements JsonEntity {
 
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
+    }
+
+    public String getVolumeType() {
+        return volumeType;
+    }
+
+    public void setVolumeType(String volumeType) {
+        this.volumeType = volumeType;
+    }
+
+    public String getInstanceType() {
+        return instanceType;
+    }
+
+    public void setInstanceType(String instanceType) {
+        this.instanceType = instanceType;
     }
 }
