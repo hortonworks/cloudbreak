@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.wordnik.swagger.annotations.ApiModelProperty;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class TemplateBase implements JsonEntity {
@@ -34,7 +35,7 @@ public abstract class TemplateBase implements JsonEntity {
     private Integer volumeSize;
     @ApiModelProperty(ModelDescriptions.TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
-    @ApiModelProperty(ModelDescriptions.TemplateModelDescription.INSTANCE_TYPE)
+    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.INSTANCE_TYPE, required = true)
     private String instanceType;
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, readOnly = true)
     private boolean publicInAccount;

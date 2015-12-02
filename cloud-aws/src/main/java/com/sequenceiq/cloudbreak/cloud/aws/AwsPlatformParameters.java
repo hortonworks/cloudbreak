@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 
 @Service
 public class AwsPlatformParameters implements PlatformParameters {
+    public static final String AWS_EPHEMERAL_DISK_TYPE = "ephemeral";
 
     private static final Integer START_LABEL = Integer.valueOf(97);
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
@@ -98,7 +99,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private enum AwsDiskType {
         Standard("standard"),
-        Ephemeral("ephemeral"),
+        Ephemeral(AWS_EPHEMERAL_DISK_TYPE),
         Gp2("gp2");
 
         private final String value;
