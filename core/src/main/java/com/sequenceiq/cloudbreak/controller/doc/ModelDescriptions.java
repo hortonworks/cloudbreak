@@ -29,6 +29,8 @@ public class ModelDescriptions {
     public static class TemplateModelDescription {
         public static final String VOLUME_COUNT = "number of volumes";
         public static final String VOLUME_SIZE = "size of volumes";
+        public static final String VOLUME_TYPE = "type of the volumes";
+        public static final String INSTANCE_TYPE = "type of the instance";
         public static final String PARAMETERS = "cloud specific parameters for template";
     }
 

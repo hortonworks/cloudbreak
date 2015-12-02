@@ -20,12 +20,13 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.price.AwsPriceGenerator;
 import com.sequenceiq.cloudbreak.service.price.PriceGenerator;
@@ -95,7 +96,8 @@ public class IntervalStackUsageGeneratorTest {
     public void testGenerateUsagesWithAwsInstanceType() throws ParseException {
         // GIVEN
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            AwsTemplate template = new AwsTemplate();
+            Template template = new Template();
+            template.setCloudPlatform(CloudPlatform.AWS);
             template.setInstanceType(C3XLARGE_INSTANCE);
             instanceGroup.setTemplate(template);
         }
@@ -114,7 +116,8 @@ public class IntervalStackUsageGeneratorTest {
     public void testGenerateUsagesWithGcpInstanceType() throws ParseException {
         // GIVEN
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            AwsTemplate template = new AwsTemplate();
+            Template template = new Template();
+            template.setCloudPlatform(CloudPlatform.AWS);
             template.setInstanceType(C3XLARGE_INSTANCE);
             instanceGroup.setTemplate(template);
         }
@@ -133,7 +136,8 @@ public class IntervalStackUsageGeneratorTest {
     public void testGenerateUsagesWithOpenstackInstanceType() throws ParseException {
         // GIVEN
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            AwsTemplate template = new AwsTemplate();
+            Template template = new Template();
+            template.setCloudPlatform(CloudPlatform.AWS);
             template.setInstanceType(C3XLARGE_INSTANCE);
             instanceGroup.setTemplate(template);
         }

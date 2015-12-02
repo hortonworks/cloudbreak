@@ -79,7 +79,6 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
-import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -291,7 +290,7 @@ public class AwsResourceConnector implements ResourceConnector {
         for (Group group : stack.getGroups()) {
             for (CloudInstance cloudInstance : group.getInstances()) {
                 InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
-                if (instanceTemplate.getParameter("encrypted", AwsEncryption.class).equals(AwsEncryption.TRUE)) {
+                if (instanceTemplate.getParameter("encrypted", Boolean.class).equals(Boolean.TRUE)) {
                     return true;
                 }
             }

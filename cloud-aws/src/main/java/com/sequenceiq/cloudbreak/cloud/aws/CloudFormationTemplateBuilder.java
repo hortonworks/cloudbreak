@@ -15,11 +15,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -41,7 +39,7 @@ public class CloudFormationTemplateBuilder {
                             instanceTemplate.getFlavor(),
                             group.getName(),
                             instanceTemplate.getVolumes().size(),
-                            instanceTemplate.getParameter("encrypted", AwsEncryption.class).equals(AwsEncryption.TRUE) ? true : false,
+                            instanceTemplate.getParameter("encrypted", Boolean.class).equals(Boolean.TRUE),
                             instanceTemplate.getVolumes().get(0).getSize(),
                             instanceTemplate.getVolumes().get(0).getType(),
                             instanceTemplate.getParameter("spotPrice", Double.class)
@@ -82,19 +80,6 @@ public class CloudFormationTemplateBuilder {
     @VisibleForTesting
     void setFreemarkerConfiguration(Configuration freemarkerConfiguration) {
         this.freemarkerConfiguration = freemarkerConfiguration;
-    }
-
-
-    private List<String> getGroups(CloudStack cloudStack) {
-        List<String> groups = new ArrayList<>();
-        for (Group group : cloudStack.getGroups()) {
-            for (CloudInstance vm : group.getInstances()) {
-                if (!groups.contains(vm.getTemplate().getGroupName())) {
-                    groups.add(vm.getTemplate().getGroupName());
-                }
-            }
-        }
-        return groups;
     }
 
 }

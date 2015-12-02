@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -15,6 +16,8 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -64,7 +67,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
                         + "WHERE t.account= :account "
                         + "AND (t.status = 'DEFAULT_DELETED' OR t.status = 'DEFAULT') ")
 })
-public abstract class Template {
+public class Template {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "template_generator")
@@ -85,19 +88,24 @@ public abstract class Template {
 
     private Integer volumeCount;
     private Integer volumeSize;
+    private String volumeType;
 
     private boolean deleted;
 
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CloudPlatform cloudPlatform;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json attributes;
+
     public Template() {
         deleted = false;
     }
-
-    public abstract CloudPlatform cloudPlatform();
-
-    public abstract String getVolumeTypeName();
 
     public Long getId() {
         return id;
@@ -105,6 +113,14 @@ public abstract class Template {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getVolumeType() {
+        return volumeType;
+    }
+
+    public void setVolumeType(String volumeType) {
+        this.volumeType = volumeType;
     }
 
     public String getName() {
@@ -185,5 +201,21 @@ public abstract class Template {
 
     public void setInstanceType(String instanceType) {
         this.instanceType = instanceType;
+    }
+
+    public CloudPlatform cloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
+    public Json getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Json attributes) {
+        this.attributes = attributes;
     }
 }

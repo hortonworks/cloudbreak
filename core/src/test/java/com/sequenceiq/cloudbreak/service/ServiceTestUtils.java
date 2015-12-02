@@ -8,15 +8,12 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
-import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -63,30 +60,9 @@ public final class ServiceTestUtils {
                 createCluster(owner, account, createBlueprint(owner, account)));
     }
 
-    public static Stack createStack(CloudPlatform cloudPlatform) {
-        return createStack(DUMMY_OWNER, DUMMY_ACCOUNT,
-                createTemplate(DUMMY_OWNER, DUMMY_ACCOUNT, cloudPlatform),
-                createCredential(DUMMY_OWNER, DUMMY_ACCOUNT, cloudPlatform),
-                createCluster(DUMMY_OWNER, DUMMY_ACCOUNT, createBlueprint(DUMMY_OWNER, DUMMY_ACCOUNT)));
-    }
-
     public static Stack createStack(String owner, String account, Template template, Cluster cluster) {
         return createStack(owner, account, template,
                 createCredential(owner, account, template.cloudPlatform()),
-                cluster);
-    }
-
-    public static Stack createStack(String owner, String account, Credential credential, Cluster cluster) {
-        return createStack(owner, account,
-                createTemplate(owner, account, credential.cloudPlatform()),
-                credential,
-                cluster);
-    }
-
-    public static Stack createStack(String owner, String account, Cluster cluster) {
-        return createStack(owner, account,
-                createTemplate(owner, account, CloudPlatform.AWS),
-                createCredential(owner, account, CloudPlatform.AWS),
                 cluster);
     }
 
@@ -100,10 +76,6 @@ public final class ServiceTestUtils {
 
     public static Stack createStack(Template template, Credential credential, Set<Resource> resources) {
         return createStack(DUMMY_OWNER, DUMMY_ACCOUNT, template, credential, createCluster(), resources);
-    }
-
-    public static Stack createStack(String owner, String account, Template template, Credential credential, Set<Resource> resources) {
-        return createStack(owner, account, template, credential, createCluster(owner, account), resources);
     }
 
     public static Stack createStack(String owner, String account, Template template, Credential credential, Cluster cluster, Set<Resource> resources) {
@@ -149,16 +121,8 @@ public final class ServiceTestUtils {
         return cluster;
     }
 
-    public static Cluster createCluster(String owner, String account) {
-        return createCluster(owner, account, createBlueprint(owner, account));
-    }
-
     public static Cluster createCluster() {
         return createCluster(DUMMY_OWNER, DUMMY_ACCOUNT, createBlueprint(DUMMY_OWNER, DUMMY_ACCOUNT));
-    }
-
-    public static Credential createCredential(CloudPlatform platform) {
-        return createCredential(DUMMY_OWNER, DUMMY_ACCOUNT, platform);
     }
 
     public static Credential createCredential(String owner, String account, CloudPlatform platform) {
@@ -200,7 +164,7 @@ public final class ServiceTestUtils {
     public static Template createTemplate(String owner, String account, CloudPlatform platform) {
         switch (platform) {
             case AZURE:
-                AzureTemplate azureTemplate = new AzureTemplate();
+                Template azureTemplate = new Template();
                 azureTemplate.setId(1L);
                 azureTemplate.setOwner(owner);
                 azureTemplate.setAccount(account);
@@ -209,31 +173,33 @@ public final class ServiceTestUtils {
                 azureTemplate.setVolumeSize(100);
                 azureTemplate.setDescription("azure test template");
                 azureTemplate.setPublicInAccount(true);
+                azureTemplate.setCloudPlatform(CloudPlatform.AZURE);
                 return azureTemplate;
             case AWS:
-                AwsTemplate awsTemplate = new AwsTemplate();
+                Template awsTemplate = new Template();
                 awsTemplate.setId(1L);
                 awsTemplate.setOwner(owner);
                 awsTemplate.setAccount(account);
                 awsTemplate.setInstanceType(C3LARGE_INSTANCE);
                 awsTemplate.setVolumeType("gp2");
-                awsTemplate.setSshLocation("0.0.0.0/0");
                 awsTemplate.setVolumeCount(1);
                 awsTemplate.setVolumeSize(100);
                 awsTemplate.setDescription("aws test template");
                 awsTemplate.setPublicInAccount(true);
+                awsTemplate.setCloudPlatform(CloudPlatform.AWS);
                 return awsTemplate;
             case GCP:
-                GcpTemplate gcpTemplate = new GcpTemplate();
+                Template gcpTemplate = new Template();
                 gcpTemplate.setId(1L);
                 gcpTemplate.setInstanceType(N1_STANDARD_1);
-                gcpTemplate.setGcpRawDiskType("pd-standard");
+                gcpTemplate.setVolumeType("pd-standard");
                 gcpTemplate.setDescription("gcp test template");
                 gcpTemplate.setOwner(owner);
                 gcpTemplate.setAccount(account);
                 gcpTemplate.setVolumeCount(1);
                 gcpTemplate.setVolumeSize(100);
                 gcpTemplate.setPublicInAccount(true);
+                gcpTemplate.setCloudPlatform(CloudPlatform.GCP);
                 return gcpTemplate;
             default:
                 return null;

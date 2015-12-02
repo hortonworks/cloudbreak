@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
-import com.sequenceiq.cloudbreak.common.type.AwsEncryption;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
@@ -28,9 +27,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
@@ -39,14 +36,12 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.GcpCredential;
-import com.sequenceiq.cloudbreak.domain.GcpTemplate;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
-import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -175,7 +170,7 @@ public class TestUtil {
     public static Stack setEphemeral(Stack stack) {
         if (stack.cloudPlatform().equals(CloudPlatform.AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                ((AwsTemplate) instanceGroup.getTemplate()).setVolumeType("ephemeral");
+                (instanceGroup.getTemplate()).setVolumeType("ephemeral");
             }
         }
         return stack;
@@ -322,19 +317,21 @@ public class TestUtil {
     }
 
     public static Template azureTemplate(Long id) {
-        AzureTemplate azureTemplate = new AzureTemplate();
+        Template azureTemplate = new Template();
         azureTemplate.setInstanceType(STANDARD_A5);
         azureTemplate.setId(id);
         azureTemplate.setVolumeCount(1);
         azureTemplate.setVolumeSize(100);
         azureTemplate.setName("templateName");
+        azureTemplate.setCloudPlatform(CloudPlatform.AZURE);
         return azureTemplate;
     }
 
     public static Template awsTemplate(Long id) {
-        AwsTemplate awsTemplate = new AwsTemplate();
+        Template awsTemplate = new Template();
         awsTemplate.setInstanceType("c3.2xlarge");
         awsTemplate.setId(id);
+        awsTemplate.setCloudPlatform(CloudPlatform.AWS);
         awsTemplate.setVolumeCount(1);
         awsTemplate.setVolumeSize(100);
         awsTemplate.setVolumeType("standard");
@@ -342,15 +339,13 @@ public class TestUtil {
         awsTemplate.setName(DUMMY_NAME);
         awsTemplate.setDescription(DUMMY_DESCRIPTION);
         awsTemplate.setPublicInAccount(true);
-        awsTemplate.setEncrypted(AwsEncryption.FALSE);
-        awsTemplate.setSshLocation(DUMMY_SSH_LOCATION);
-        awsTemplate.setSpotPrice(1.0);
         return awsTemplate;
     }
 
     public static Template openstackTemplate(Long id) {
-        OpenStackTemplate openStackTemplate = new OpenStackTemplate();
+        Template openStackTemplate = new Template();
         openStackTemplate.setInstanceType("Big");
+        openStackTemplate.setCloudPlatform(CloudPlatform.OPENSTACK);
         openStackTemplate.setId(id);
         openStackTemplate.setVolumeCount(1);
         openStackTemplate.setVolumeSize(100);
@@ -362,12 +357,12 @@ public class TestUtil {
     }
 
     public static Template gcpTemplate(Long id) {
-        GcpTemplate gcpTemplate = new GcpTemplate();
+        Template gcpTemplate = new Template();
         gcpTemplate.setInstanceType(N1_HIGHCPU_16_INSTANCE);
         gcpTemplate.setId(id);
+        gcpTemplate.setCloudPlatform(CloudPlatform.GCP);
         gcpTemplate.setVolumeCount(1);
         gcpTemplate.setVolumeSize(100);
-        gcpTemplate.setGcpRawDiskType("pd-ssd");
         gcpTemplate.setDescription(DUMMY_DESCRIPTION);
         gcpTemplate.setPublicInAccount(true);
         gcpTemplate.setStatus(ResourceStatus.DEFAULT);
