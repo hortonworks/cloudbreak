@@ -1,7 +1,7 @@
 <div class="form-group" ng-class="{ 'has-error': gcpCredentialForm.gcpcname.$dirty && gcpCredentialForm.gcpcname.$invalid }">
     <label class="col-sm-3 control-label" for="gcpcname">{{msg.name_label}}</label>
     <div class="col-sm-9">
-        <input type="text" ng-pattern="/^[a-z][-a-z0-9]*$/" class="form-control" ng-model="credentialGcp.name" id="gcpcname" name="gcpcname" ng-minlength="5" ng-model="credentialGcp.name" ng-maxlength="100" required placeholder="{{msg.name_placeholder}}">
+        <input type="text" ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" class="form-control" ng-model="credentialGcp.name" id="gcpcname" name="gcpcname" ng-minlength="5" ng-model="credentialGcp.name" ng-maxlength="100" required placeholder="{{msg.name_placeholder}}">
 
         <div class="help-block" ng-show="gcpCredentialForm.gcpcname.$dirty && gcpCredentialForm.gcpcname.$invalid">
             <i class="fa fa-warning"></i> {{msg.credential_name_invalid}}
