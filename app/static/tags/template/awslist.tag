@@ -20,7 +20,7 @@
         <label class="col-sm-3 control-label" for="awsinstanceType">{{msg.template_form_instance_type_label}}</label>
 
         <div class="col-sm-9">
-            <p id="awsinstanceType" class="form-control-static">{{template.parameters.instanceType}}</p>
+            <p id="awsinstanceType" class="form-control-static">{{template.instanceType}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -28,7 +28,7 @@
         <label class="col-sm-3 control-label" for="awsvolumetype">{{msg.template_form_volume_type_label}}</label>
 
         <div class="col-sm-9">
-            <p id="awsvolumetype" class="form-control-static">{{$root.displayNames.getDisk('AWS', template.parameters.volumeType)}}</p>
+            <p id="awsvolumetype" class="form-control-static">{{$root.displayNames.getDisk('AWS', template.volumeType)}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>

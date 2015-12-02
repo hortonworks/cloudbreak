@@ -19,14 +19,14 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcp_tinstanceType">{{msg.template_form_instance_type_label}}</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcp_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.GCP" ng-model="gcpTemp.parameters.gcpInstanceType">
+        <select class="form-control" id="gcp_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.GCP" ng-model="gcpTemp.instanceType">
         </select>
     </div>
 </div>
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcp_tvolumetype">{{msg.template_form_volume_type_label}}</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcp_tvolumetype" ng-options="diskType as $root.displayNames.getDisk('GCP', diskType) for diskType in $root.params.diskTypes.GCP" ng-model="gcpTemp.parameters.volumeType">
+        <select class="form-control" id="gcp_tvolumetype" ng-options="diskType as $root.displayNames.getDisk('GCP', diskType) for diskType in $root.params.diskTypes.GCP" ng-model="gcpTemp.volumeType">
         </select>
     </div>
 </div>

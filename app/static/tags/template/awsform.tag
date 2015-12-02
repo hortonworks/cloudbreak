@@ -27,7 +27,7 @@
     <label class="col-sm-3 control-label" for="aws_tinstanceType">{{msg.template_form_instance_type_label}}</label>
 
     <div class="col-sm-9">
-        <select class="form-control" id="aws_tinstanceType" name="aws_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.AWS" ng-model="awsTemp.parameters.instanceType" ng-change="changeAwsInstanceType()" required>
+        <select class="form-control" id="aws_tinstanceType" name="aws_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.AWS" ng-model="awsTemp.instanceType" ng-change="changeAwsInstanceType()" required>
         </select>
     </div>
     <!-- .col-sm-9 -->
@@ -37,7 +37,7 @@
     <label class="col-sm-3 control-label" for="aws_tvolumetype">{{msg.template_form_volume_type_label}}</label>
 
     <div class="col-sm-9">
-        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AWS', volumeType) for volumeType in $root.params.diskTypes.AWS | filter:filterByVolumetype" ng-model="awsTemp.parameters.volumeType" ng-change="changeAwsInstanceType()" required>
+        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AWS', volumeType) for volumeType in $root.params.diskTypes.AWS | filter:filterByVolumetype" ng-model="awsTemp.volumeType" ng-change="changeAwsInstanceType()" required>
         </select>
     </div>
     <!-- .col-sm-9 -->

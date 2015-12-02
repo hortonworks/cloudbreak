@@ -26,7 +26,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="azure_tvmType">{{msg.template_form_instance_type_label}}</label>
     <div class="col-sm-9">
-        <select class="form-control" id="azure_tvmType" ng-options="vmType.value as vmType.value for vmType in $root.params.vmTypes.AZURE_RM" ng-model="azureTemp.parameters.vmType" required>
+        <select class="form-control" id="azure_tvmType" ng-options="vmType.value as vmType.value for vmType in $root.params.vmTypes.AZURE_RM" ng-model="azureTemp.instanceType" required>
         </select>
     </div>
     <!-- .col-sm-9 -->
