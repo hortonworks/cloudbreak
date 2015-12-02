@@ -118,7 +118,7 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
 
         function initializeFormsAndScopeSecurityGroup() {
             $scope.securitygroup = {
-                name: "customsecuritygroup" + ($rootScope.securitygroups.length == 0 ? Math.floor((Math.random() * 100) + 1) : $rootScope.securitygroups.length + 1),
+                name: "",
                 description: "",
                 tmpsecurityRules: []
             };

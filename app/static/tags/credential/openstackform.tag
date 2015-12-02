@@ -35,7 +35,7 @@
     <label class="col-sm-3 control-label" for="openstackcname">{{msg.name_label}}</label>
 
     <div class="col-sm-9">
-        <input type="text" ng-pattern="/^[a-z][-a-z0-9]*$/" class="form-control" ng-model="credentialOpenstack.name" id="openstackcname" name="openstackcname" ng-minlength="5" ng-maxlength="100" required placeholder="{{msg.name_placeholder}}">
+        <input type="text" ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" class="form-control" ng-model="credentialOpenstack.name" id="openstackcname" name="openstackcname" ng-minlength="5" ng-maxlength="100" required placeholder="{{msg.name_placeholder}}">
         <div class="help-block" ng-show="openstackCredentialForm.openstackcname.$dirty && openstackCredentialForm.openstackcname.$invalid">
             <i class="fa fa-warning"></i> {{msg.credential_name_invalid}}
         </div>
