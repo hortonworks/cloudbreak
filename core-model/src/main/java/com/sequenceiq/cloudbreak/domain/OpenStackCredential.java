@@ -4,7 +4,7 @@ import javax.persistence.Entity;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
-@Entity
+//@Entity
 public class OpenStackCredential extends Credential implements ProvisionEntity {
 
     @Encrypted

@@ -75,6 +75,11 @@ public class UserDataBuilderTest {
             }
 
             @Override
+            public String resourceDefinition(String resource) {
+                return "";
+            }
+
+            @Override
             public VmTypes vmTypes() {
                 return new VmTypes(new ArrayList<VmType>(), VmType.vmType(""));
             }

@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 
 public enum OpenStackCredentialParam implements TemplateParam {
 
-    USER("user", true, String.class, Optional.<String>absent()),
+    USER("userName", true, String.class, Optional.<String>absent()),
     PASSWORD("password", true, String.class, Optional.<String>absent()),
     TENANT_NAME("tenantName", false, String.class, Optional.<String>absent()),
     USER_DOMAIN("userDomain", false, String.class, Optional.<String>absent()),

@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
 public class AwsPlatformParameters implements PlatformParameters {
@@ -76,6 +77,11 @@ public class AwsPlatformParameters implements PlatformParameters {
             regions.put(region(region.value), region.availabilityZones());
         }
         return new AvailabilityZones(regions);
+    }
+
+    @Override
+    public String resourceDefinition(String resource) {
+        return FileReaderUtils.readFileFromClasspathQuietly("definitions/aws-" + resource + ".json");
     }
 
     @Override

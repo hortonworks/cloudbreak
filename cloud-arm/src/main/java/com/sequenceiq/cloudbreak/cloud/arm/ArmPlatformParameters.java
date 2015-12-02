@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
 public class ArmPlatformParameters implements PlatformParameters {
@@ -76,6 +77,11 @@ public class ArmPlatformParameters implements PlatformParameters {
             regions.put(region(region.value()), new ArrayList<AvailabilityZone>());
         }
         return new AvailabilityZones(regions);
+    }
+
+    @Override
+    public String resourceDefinition(String resource) {
+        return FileReaderUtils.readFileFromClasspathQuietly("definitions/arm-" + resource + ".json");
     }
 
     @Override

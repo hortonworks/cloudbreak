@@ -22,8 +22,8 @@ public class ArmCredentialView {
         return cloudCredential.getParameter("subscriptionId", String.class);
     }
 
-    public String getAccesKey() {
-        return cloudCredential.getParameter("accesKey", String.class);
+    public String getAccessKey() {
+        return cloudCredential.getParameter("accessKey", String.class);
     }
 
     public String getSecretKey() {

@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
-@Entity
+//@Entity
 public class GcpCredential extends Credential implements ProvisionEntity {
     private String serviceAccountId;
     @Column(columnDefinition = "TEXT")

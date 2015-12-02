@@ -7,7 +7,7 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 
-@Entity
+//@Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" })
 })

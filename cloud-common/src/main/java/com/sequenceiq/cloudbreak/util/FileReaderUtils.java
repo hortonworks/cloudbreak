@@ -9,14 +9,26 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.io.BaseEncoding;
 
+public final class FileReaderUtils {
 
-public class FileReaderUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileReaderUtils.class);
 
     private FileReaderUtils() {
+    }
+
+    public static final String readFileFromClasspathQuietly(String fileName) {
+        try {
+            return readFileFromClasspath(fileName);
+        } catch (IOException e) {
+            LOGGER.warn("Failed to load file from classpath", e);
+            return null;
+        }
     }
 
     public static final String readFileFromClasspath(String fileName) throws IOException {
