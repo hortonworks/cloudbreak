@@ -5,8 +5,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 
 public interface StackFacade {
 
-    FlowContext provision(FlowContext context) throws CloudbreakException;
-
     FlowContext setupTls(FlowContext context) throws CloudbreakException;
 
     FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException;
@@ -17,15 +15,9 @@ public interface StackFacade {
 
     FlowContext stop(FlowContext context) throws CloudbreakException;
 
-    FlowContext terminateStack(FlowContext flowContext) throws CloudbreakException;
-
     FlowContext handleCreationFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext handleStatusUpdateFailure(FlowContext context) throws CloudbreakException;
-
-    FlowContext handleTerminationFailure(FlowContext context) throws CloudbreakException;
-
-    FlowContext forceTerminateStack(FlowContext context) throws CloudbreakException;
 
     FlowContext addInstances(FlowContext context) throws CloudbreakException;
 

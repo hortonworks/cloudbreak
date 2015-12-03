@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
-public class DownscaleStackResult extends CloudPlatformResult {
+public class DownscaleStackResult extends CloudPlatformResult<CloudPlatformRequest> {
 
     private List<CloudResource> downscaledResources;
 

@@ -2,35 +2,20 @@ package com.sequenceiq.cloudbreak.cloud.event.resource;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 
-public class LaunchStackResult {
-
-    private CloudContext cloudContext;
-    private Exception exception;
+public class LaunchStackResult extends CloudPlatformResult<CloudPlatformRequest> {
     private List<CloudResourceStatus> results;
 
-    public LaunchStackResult(CloudContext cloudContext, List<CloudResourceStatus> results) {
-        this.cloudContext = cloudContext;
+    public LaunchStackResult(CloudPlatformRequest<?> request, List<CloudResourceStatus> results) {
+        super(request);
         this.results = results;
     }
 
-    public LaunchStackResult(CloudContext cloudContext, Exception exception) {
-        this.cloudContext = cloudContext;
-        this.exception = exception;
-    }
-
-    public Exception getException() {
-        return exception;
-    }
-
-    public CloudContext getCloudContext() {
-        return cloudContext;
-    }
-
-    public boolean isFailed() {
-        return exception != null;
+    public LaunchStackResult(Exception errorDetails, CloudPlatformRequest<?> request) {
+        super("", errorDetails, request);
     }
 
     public List<CloudResourceStatus> getResults() {
@@ -39,11 +24,12 @@ public class LaunchStackResult {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("LaunchStackResult{");
-        sb.append("cloudContext=").append(cloudContext);
-        sb.append(", exception=").append(exception);
-        sb.append(", results=").append(results);
-        sb.append('}');
-        return sb.toString();
+        return "LaunchStackResult{"
+                + "status=" + getStatus()
+                + ", statusReason='" + getStatusReason() + '\''
+                + ", errorDetails=" + getErrorDetails()
+                + ", request=" + getRequest()
+                + ", results=" + results
+                + '}';
     }
 }

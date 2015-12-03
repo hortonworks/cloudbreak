@@ -44,6 +44,7 @@ dependencies {
     compile group: 'org.springframework.security',  name: 'spring-security-web',            version: '3.2.3.RELEASE'
     compile group: 'org.springframework',           name: 'spring-messaging',               version: '4.0.3.RELEASE'
     compile group: 'org.springframework',           name: 'spring-context-support',         version: '4.0.3.RELEASE'
+    compile (group: 'org.springframework.statemachine', name: 'spring-statemachine-core', version: '1.0.1.RELEASE') { exclude group: 'org.springframework' }
     compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
     compile group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
     compile group: 'org.postgresql',                name: 'postgresql',                     version: '9.3-1101-jdbc41'

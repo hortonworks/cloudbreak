@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStackRequest> {
@@ -42,6 +43,8 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
     private PollTaskFactory statusCheckFactory;
     @Inject
     private PersistenceNotifier persistenceNotifier;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public Class<LaunchStackRequest> type() {
@@ -71,11 +74,14 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task);
             }
-            request.getResult().onNext(ResourcesStatePollerResults.transformToLaunchStackResult(statePollerResult));
+            LaunchStackResult result = ResourcesStatePollerResults.transformToLaunchStackResult(request, statePollerResult);
+            request.getResult().onNext(result);
+            eventBus.notify(result.selector(), new Event(launchStackRequestEvent.getHeaders(), result));
             LOGGER.info("Launching the stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            request.getResult().onNext(new LaunchStackResult(cloudContext, e));
+            LaunchStackResult failure = new LaunchStackResult(e, request);
+            request.getResult().onNext(failure);
+            eventBus.notify(failure.selector(), new Event(launchStackRequestEvent.getHeaders(), failure));
         }
     }
-
 }

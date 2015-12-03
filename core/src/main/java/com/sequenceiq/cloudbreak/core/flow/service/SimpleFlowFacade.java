@@ -1,21 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.concurrent.GuardedMethod;
 import com.sequenceiq.cloudbreak.concurrent.LockedMethod;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
@@ -25,9 +20,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.event.CheckImageComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.PrepareImageComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 
 @Service
@@ -39,9 +31,6 @@ public class SimpleFlowFacade implements FlowFacade {
 
     @Inject
     private StackFacade stackFacade;
-
-    @Inject
-    private ProvisioningSetupService provisioningSetupService;
 
     @Inject
     private MetadataSetupService metadataSetupService;
@@ -70,84 +59,6 @@ public class SimpleFlowFacade implements FlowFacade {
 
         public String code() {
             return code;
-        }
-    }
-
-    @Override
-    public FlowContext setup(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Provisioning setup. Context: {}", context);
-        try {
-            ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            Stack stack = stackService.getById(provisioningContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            ProvisionSetupComplete setupComplete = provisioningSetupService.setup(stack);
-            LOGGER.debug("Provisioning setup DONE.");
-            return new ProvisioningContext.Builder()
-                    .setDefaultParams(setupComplete.getStackId(), setupComplete.getCloudPlatform())
-                    .setProvisionSetupProperties(new HashMap<String, Object>())
-                    .build();
-        } catch (Exception e) {
-            LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext prepareImage(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Prepare Image. Context: {}", context);
-        try {
-            ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            Stack stack = stackService.getById(provisioningContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            PrepareImageComplete setupComplete = provisioningSetupService.prepareImage(stack);
-            fireEventAndLog(stack.getId(), context, Msg.FLOW_STACK_SETUP_START, UPDATE_IN_PROGRESS.name(), Arrays.asList());
-            LOGGER.debug("Prepare Image DONE.");
-            return new ProvisioningContext.Builder()
-                    .setDefaultParams(setupComplete.getStackId(), setupComplete.getCloudPlatform())
-                    .setProvisionSetupProperties(new HashMap<String, Object>())
-                    .build();
-        } catch (Exception e) {
-            LOGGER.error("Exception during prepare Image: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext checkImage(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Check Image. Context: {}", context);
-        try {
-
-            ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            Date startDate = new Date();
-            Stack stack = stackService.getById(provisioningContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            CheckImageComplete setupComplete = provisioningSetupService.checkImage(stack);
-            LOGGER.debug("Check Image DONE.");
-            Date endDate = new Date();
-            long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
-            fireEventAndLog(stack.getId(), context, Msg.FLOW_STACK_SETUP, UPDATE_IN_PROGRESS.name(), seconds);
-            return new ProvisioningContext.Builder()
-                    .setDefaultParams(setupComplete.getStackId(), setupComplete.getCloudPlatform())
-                    .setProvisionSetupProperties(new HashMap<String, Object>())
-                    .build();
-        } catch (Exception e) {
-            LOGGER.error("Exception during check Image: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext provision(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Provisioning. Context: {}", context);
-        try {
-            Stack stack = stackService.getById(((ProvisioningContext) context).getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            ProvisioningContext provisioningContext = (ProvisioningContext) stackFacade.provision(context);
-            LOGGER.debug("Provisioning DONE.");
-            return provisioningContext;
-        } catch (Exception e) {
-            LOGGER.error("Exception during provisioning setup: {}", e.getMessage());
-            throw new CloudbreakException(e);
         }
     }
 
@@ -542,52 +453,6 @@ public class SimpleFlowFacade implements FlowFacade {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Exception during the downscaling of cluster: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    @GuardedMethod(lockPrefix = "terminate")
-    public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Termination of stack. Context: {}", context);
-        try {
-            context = stackFacade.terminateStack(context);
-            LOGGER.debug("Termination of stack is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the termination of stack: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext forceTerminateStack(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Forced termination of stack. Context: {}", context);
-        try {
-            context = stackFacade.forceTerminateStack(context);
-            LOGGER.debug("Forced termination of stack is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the forced termination of stack: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleStackTerminationFailure(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Handling stack termination failure. Context: {}", context);
-        try {
-            context = stackFacade.handleTerminationFailure(context);
-            LOGGER.debug("Handling of stack termination failure is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the handling of stack termination failure: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

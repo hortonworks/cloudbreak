@@ -5,10 +5,6 @@ import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STARTE
 import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
 import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.type.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.common.type.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.type.Status.STOPPED;
@@ -19,7 +15,6 @@ import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,7 +24,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -64,13 +58,11 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
-import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 
 @Service
@@ -83,8 +75,6 @@ public class SimpleStackFacade implements StackFacade {
     private StackService stackService;
     @Inject
     private CloudbreakEventService cloudbreakEventService;
-    @Inject
-    private TerminationService terminationService;
     @Inject
     private StackStartService stackStartService;
     @Inject
@@ -196,60 +186,6 @@ public class SimpleStackFacade implements StackFacade {
         } catch (Exception e) {
             LOGGER.error("Exception during the stack stop process: {}", e.getMessage());
             throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext terminateStack(FlowContext context) throws CloudbreakException {
-        DefaultFlowContext actualContext = (DefaultFlowContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            stackUpdater.updateStackStatus(actualContext.getStackId(), DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS.name());
-
-            if (stack != null && stack.getCredential() != null) {
-                terminationService.terminateStack(stack.getId(), actualContext.getCloudPlatform());
-            }
-
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_BILLING_STOPPED, BILLING_STOPPED.name());
-
-            stackUpdater.updateStackStatus(stack.getId(), DELETE_COMPLETED,
-                    "The cluster and its infrastructure have successfully been terminated.");
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
-
-            if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-                emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
-                fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
-            }
-            terminationService.finalizeTermination(stack.getId());
-            clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
-        } catch (Exception e) {
-            LOGGER.error("Exception during the stack termination process: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext forceTerminateStack(FlowContext context) throws CloudbreakException {
-        try {
-            return terminateStack(context);
-        } catch (CloudbreakException e) {
-            DefaultFlowContext actualContext = (DefaultFlowContext) context;
-            Stack stack = stackService.getById(actualContext.getStackId());
-
-            stackUpdater.updateStackStatus(stack.getId(), DELETE_COMPLETED,
-                    "The cluster and its infrastructure have been force terminated.");
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_FORCED_DELETE_COMPLETED, DELETE_COMPLETED.name());
-
-            if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-                emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
-                fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
-            }
-            terminationService.finalizeTermination(stack.getId());
-            clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         }
         return context;
     }
@@ -397,28 +333,6 @@ public class SimpleStackFacade implements StackFacade {
     }
 
     @Override
-    public FlowContext provision(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        Date startDate = new Date();
-        Stack stack = stackService.getById(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
-        stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS, "Creating infrastructure");
-        fireEventAndLog(stack.getId(), actualContext, Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name());
-
-        ProvisionComplete provisionResult = provisioningService.buildStack(actualContext.getCloudPlatform(), stack, actualContext.getSetupProperties());
-        Date endDate = new Date();
-        long seconds = (endDate.getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
-
-        fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), seconds);
-        context = new ProvisioningContext.Builder()
-                .setDefaultParams(provisionResult.getStackId(), provisionResult.getCloudPlatform())
-                .setProvisionSetupProperties(actualContext.getSetupProperties())
-                .setProvisionedResources(provisionResult.getResources())
-                .build();
-        return context;
-    }
-
-    @Override
     public FlowContext setupTls(FlowContext context) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
@@ -543,20 +457,6 @@ public class SimpleStackFacade implements StackFacade {
             stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, String.format("Rollback failed: %s", ex.getMessage()));
             fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_ROLLBACK_FAILED, CREATE_FAILED.name(), ex.getMessage());
             throw new CloudbreakException(String.format("Stack rollback failed on {} stack: ", stack.getId(), ex));
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext handleTerminationFailure(FlowContext context) throws CloudbreakException {
-        DefaultFlowContext actualContext = (DefaultFlowContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
-        stackUpdater.updateStackStatus(stack.getId(), DELETE_FAILED, "Termination failed: " + actualContext.getErrorReason());
-        fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_DELETE_FAILED, DELETE_FAILED.name(), actualContext.getErrorReason());
-        if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-            emailSenderService.sendTerminationFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
-            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, DELETE_FAILED.name());
         }
         return context;
     }

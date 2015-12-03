@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRequest> {
@@ -32,6 +33,9 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
     private PollTaskFactory statusCheckFactory;
     @Inject
     private SyncPollingScheduler<ResourceStatus> syncPollingScheduler;
+    @Inject
+    private EventBus eventBus;
+
     @Override
     public Class<CheckImageRequest> type() {
         return CheckImageRequest.class;
@@ -51,7 +55,8 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
             request.getResult().onNext(imageResult);
             LOGGER.info("Provision setup finished for {}", cloudContext);
         } catch (Exception e) {
-            request.getResult().onNext(new CheckImageResult(e, request, ImageStatus.CREATE_FAILED));
+            CheckImageResult failure = new CheckImageResult(e, request, ImageStatus.CREATE_FAILED);
+            request.getResult().onNext(failure);
         }
     }
 }

@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupRequest> {
@@ -27,6 +28,9 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
 
     @Inject
     private ResourceNotifier resourceNotifier;
+
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public Class<SetupRequest> type() {
@@ -44,10 +48,14 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
             CloudStack cloudStack = request.getCloudStack();
             connector.setup().prerequisites(auth, cloudStack, resourceNotifier);
 
-            request.getResult().onNext(new SetupResult(request));
+            SetupResult result = new SetupResult(request);
+            request.getResult().onNext(result);
+            eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
             LOGGER.info("Provision setup finished for {}", cloudContext);
         } catch (Exception e) {
-            request.getResult().onNext(new SetupResult(e, request));
+            SetupResult failure = new SetupResult(e, request);
+            request.getResult().onNext(failure);
+            eventBus.notify(failure.selector(), new Event(event.getHeaders(), failure));
         }
     }
 }

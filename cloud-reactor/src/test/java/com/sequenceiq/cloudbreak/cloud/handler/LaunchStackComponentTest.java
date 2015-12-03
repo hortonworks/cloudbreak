@@ -22,7 +22,7 @@ public class LaunchStackComponentTest extends AbstractComponentTest<LaunchStackR
         List<CloudResourceStatus> r = lsr.getResults();
 
         assertEquals(ResourceStatus.CREATED, r.get(0).getStatus());
-        assertNull(lsr.getException());
+        assertNull(lsr.getErrorDetails());
     }
 
     @Override

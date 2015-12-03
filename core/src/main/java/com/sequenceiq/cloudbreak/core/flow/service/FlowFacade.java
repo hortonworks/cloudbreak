@@ -8,10 +8,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
  */
 public interface FlowFacade {
 
-    FlowContext setup(FlowContext flowContext) throws CloudbreakException;
-
-    FlowContext provision(FlowContext flowContext) throws CloudbreakException;
-
     FlowContext setupMetadata(FlowContext flowContext) throws CloudbreakException;
 
     FlowContext collectMetadata(FlowContext flowContext) throws CloudbreakException;
@@ -72,12 +68,6 @@ public interface FlowFacade {
 
     FlowContext downscaleCluster(FlowContext context) throws CloudbreakException;
 
-    FlowContext terminateStack(FlowContext flowContext) throws CloudbreakException;
-
-    FlowContext forceTerminateStack(FlowContext context) throws CloudbreakException;
-
-    FlowContext handleStackTerminationFailure(FlowContext context) throws CloudbreakException;
-
     FlowContext handleClusterScalingFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException;
@@ -93,9 +83,4 @@ public interface FlowFacade {
     FlowContext handleStackSync(FlowContext context) throws CloudbreakException;
 
     FlowContext credentialChange(FlowContext context) throws CloudbreakException;
-
-    FlowContext checkImage(FlowContext context) throws CloudbreakException;
-
-    FlowContext prepareImage(FlowContext context) throws CloudbreakException;
-
 }
