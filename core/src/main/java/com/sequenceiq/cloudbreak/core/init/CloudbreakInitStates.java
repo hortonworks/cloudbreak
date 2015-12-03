@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.init;
 import static com.sequenceiq.cloudbreak.common.type.Status.WAIT_FOR_SYNC;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -13,15 +14,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 
 @Component
 public class CloudbreakInitStates {
@@ -39,10 +42,14 @@ public class CloudbreakInitStates {
     @Inject
     private CloudbreakEventService eventService;
 
+    @Inject
+    private FlowManager flowManager;
+
     @PostConstruct
     public void resetInProgressStates() {
         resetStackStatus();
         resetCloudStatus();
+        restartStackDelete();
     }
 
     private void resetCloudStatus() {
@@ -72,6 +79,13 @@ public class CloudbreakInitStates {
                 LOGGER.info("InstanceMetaData [privateId: '{}'] is deleted at CB start.", metadata.getPrivateId());
                 instanceMetaDataRepository.delete(metadata);
             }
+        }
+    }
+
+    private void restartStackDelete() {
+        List<Stack> stacksDeleteInProgress = stackRepository.findByStatuses(Collections.singletonList(Status.DELETE_IN_PROGRESS));
+        for (Stack stack : stacksDeleteInProgress) {
+            flowManager.triggerTermination(new StackDeleteRequest(stack.cloudPlatform(), stack.getId()));
         }
     }
 
