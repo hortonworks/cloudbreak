@@ -120,7 +120,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     public void testConvertWithoutMasterComponent() throws IOException {
         // GIVEN
         mockAll();
-        given(stackServiceComponentDescs.get(anyString())).willReturn(new StackServiceComponentDescriptor("dummy", "dummy", 1));
+        given(stackServiceComponentDescs.get(anyString())).willReturn(new StackServiceComponentDescriptor("dummy", "dummy", 1, 1));
         // WHEN
         ClusterResponse result = underTest.convert(getSource());
         // THEN
@@ -133,7 +133,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         // GIVEN
         mockAll();
         given(instanceMetaData.getPublicIp()).willReturn("dummyPublicIp");
-        given(stackServiceComponentDescs.get(anyString())).willReturn(new StackServiceComponentDescriptor("GANGLIA_SERVER", "MASTER", 1));
+        given(stackServiceComponentDescs.get(anyString())).willReturn(new StackServiceComponentDescriptor("GANGLIA_SERVER", "MASTER", 1, 1));
         // WHEN
         ClusterResponse result = underTest.convert(getSource());
         // THEN
@@ -178,6 +178,6 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     }
 
     private StackServiceComponentDescriptor createStackServiceComponentDescriptor() {
-        return new StackServiceComponentDescriptor("ELASTIC_SEARCH", "MASTER", 1);
+        return new StackServiceComponentDescriptor("ELASTIC_SEARCH", "MASTER", 1, 1);
     }
 }

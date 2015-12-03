@@ -244,6 +244,13 @@ public class AppConfig {
 
     @Bean
     public StackServiceComponentDescriptorMapFactory stackServiceComponentDescriptorMapFactory() throws IOException {
+        Map<String, Integer> minCardinalityReps = Maps.newHashMap();
+        minCardinalityReps.put("1", 1);
+        minCardinalityReps.put("0-1", 0);
+        minCardinalityReps.put("1-2", 1);
+        minCardinalityReps.put("0+", 0);
+        minCardinalityReps.put("1+", 1);
+        minCardinalityReps.put("ALL", 0);
         Map<String, Integer> maxCardinalityReps = Maps.newHashMap();
         maxCardinalityReps.put("1", 1);
         maxCardinalityReps.put("0-1", 1);
@@ -252,6 +259,6 @@ public class AppConfig {
         maxCardinalityReps.put("1+", Integer.MAX_VALUE);
         maxCardinalityReps.put("ALL", Integer.MAX_VALUE);
         String stackServiceComponentsJson = FileReaderUtils.readFileFromClasspath("hdp/hdp-services.json");
-        return new StackServiceComponentDescriptorMapFactory(stackServiceComponentsJson, maxCardinalityReps);
+        return new StackServiceComponentDescriptorMapFactory(stackServiceComponentsJson, minCardinalityReps, maxCardinalityReps);
     }
 }

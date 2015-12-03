@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.controller.validation.blueprint;
 import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.GATEWAY;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -80,6 +82,29 @@ public class BlueprintValidator {
         }
     }
 
+    public void validateHostGroupScalingRequest(Blueprint blueprint, HostGroup hostGroup, Integer adjustment) {
+        try {
+            JsonNode hostGroupsNode = getHostGroupNode(blueprint);
+            Map<String, HostGroup> hostGroupMap = createHostGroupMap(Collections.singleton(hostGroup));
+            for (JsonNode hostGroupNode : hostGroupsNode) {
+                if (hostGroup.getName().equals(hostGroupNode.get("name").asText())) {
+                    InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
+                    instanceGroup.setNodeCount(instanceGroup.getNodeCount() + adjustment);
+                    try {
+                        validateHostGroup(hostGroupNode, hostGroupMap, new HashMap<String, BlueprintServiceComponent>());
+                    } catch (BadRequestException be) {
+                        throw be;
+                    } finally {
+                        instanceGroup.setNodeCount(instanceGroup.getNodeCount() - adjustment);
+                    }
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new BadRequestException(String.format("Blueprint [%s] can not be parsed from JSON.", blueprint.getId()));
+        }
+    }
+
     private Set<String> getHostGroupsFromRequest(Set<HostGroup> hostGroup) {
         return FluentIterable.from(hostGroup).transform(new Function<HostGroup, String>() {
             @Nullable
@@ -140,10 +165,12 @@ public class BlueprintValidator {
 
     private void validateComponentCardinality(StackServiceComponentDescriptor componentDescriptor, HostGroup hostGroup) {
         int nodeCount = hostGroup.getInstanceGroup().getNodeCount();
+        int minCardinality = componentDescriptor.getMinCardinality();
         int maxCardinality = componentDescriptor.getMaxCardinality();
-        if (componentDescriptor.isMaster() && nodeCount > maxCardinality) {
-            throw new BadRequestException(String.format("The nodecount '%d' for hostgroup '%s' cannot be more than '%d' because of '%s' component",
-                    nodeCount, hostGroup.getName(), maxCardinality, componentDescriptor.getName()));
+        if (componentDescriptor.isMaster() && !isNodeCountCorrect(nodeCount, minCardinality, maxCardinality)) {
+            throw new BadRequestException(String.format(
+                    "The nodecount '%d' for hostgroup '%s' cannot be less than '%d' or more than '%d' because of '%s' component", nodeCount,
+                    hostGroup.getName(), minCardinality, maxCardinality, componentDescriptor.getName()));
         }
     }
 
@@ -152,12 +179,19 @@ public class BlueprintValidator {
             String componentName = blueprintServiceComponent.getName();
             int nodeCount = blueprintServiceComponent.getNodeCount();
             StackServiceComponentDescriptor stackServiceComponentDescriptor = stackServiceComponentDescs.get(componentName);
-            int maxCardinality = stackServiceComponentDescriptor.getMaxCardinality();
-            if (stackServiceComponentDescriptor != null && nodeCount > maxCardinality) {
-                throw new BadRequestException(String.format("Too much '%s' components are in '%s' hostgroups: count: %d, max: %d",
-                        componentName, blueprintServiceComponent.getHostgroups().toString(), nodeCount, maxCardinality));
+            if (stackServiceComponentDescriptor != null) {
+                int minCardinality = stackServiceComponentDescriptor.getMinCardinality();
+                int maxCardinality = stackServiceComponentDescriptor.getMaxCardinality();
+                if (!isNodeCountCorrect(nodeCount, minCardinality, maxCardinality)) {
+                    throw new BadRequestException(String.format("Incorrect number of '%s' components are in '%s' hostgroups: count: %d, min: %d max: %d",
+                        componentName, blueprintServiceComponent.getHostgroups().toString(), nodeCount, minCardinality, maxCardinality));
+                }
             }
         }
+    }
+
+    private boolean isNodeCountCorrect(int nodeCount, int minCardinality, int maxCardinality) {
+        return minCardinality <= nodeCount && nodeCount <= maxCardinality;
     }
 
     private void updateBlueprintServiceComponentMap(StackServiceComponentDescriptor componentDescriptor, HostGroup hostGroup,

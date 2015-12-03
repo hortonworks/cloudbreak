@@ -38,8 +38,10 @@ import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.json.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.controller.json.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -73,6 +75,9 @@ public class ClusterController {
 
     @Inject
     private HostGroupService hostGroupService;
+
+    @Inject
+    private BlueprintValidator blueprintValidator;
 
     @Inject
     private StackService stackService;
@@ -192,6 +197,13 @@ public class ClusterController {
                     stack.getStatus()));
         }
         LOGGER.info("Cluster host adjustment request received. Stack id: {} ", stackId);
+        Blueprint blueprint = stack.getCluster().getBlueprint();
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), updateJson.getHostGroupAdjustment().getHostGroup());
+        if (hostGroup == null) {
+            throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
+                    updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
+        }
+        blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup, updateJson.getHostGroupAdjustment().getScalingAdjustment());
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 
