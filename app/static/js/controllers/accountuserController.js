@@ -11,6 +11,7 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
         getUsersForAccount();
 
         $scope.inviteUser = function() {
+            correctPermissions();
             UserInvite.save({
                 invite_email: $scope.invite.mail,
                 groups: $scope.invite.scopes
@@ -34,6 +35,17 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
             }, function(error) {
                 $scope.showError(error);
             });
+        }
+
+        function correctPermissions() {
+            if ($scope.invite.scopes.templates.write) {
+                $scope.invite.scopes.networks.write = true;
+                $scope.invite.scopes.securitygroups.write = true;
+            } else {
+                $scope.invite.scopes.networks.write = false;
+                $scope.invite.scopes.securitygroups.write = false;
+            }
+
         }
 
         $scope.contains = function(str, suffix) {
