@@ -10,11 +10,14 @@ import com.google.api.client.util.Maps;
 
 public class StackServiceComponentDescriptorMapFactory implements FactoryBean<StackServiceComponentDescriptors> {
     private String stackServiceComponentsJson;
+    private Map<String, Integer> minCardinalityReps;
     private Map<String, Integer> maxCardinalityReps;
     private ObjectMapper objectMapper;
 
-    public StackServiceComponentDescriptorMapFactory(String stackServiceComponentsJson, Map<String, Integer> maxCardinalityReps, ObjectMapper objectMapper) {
+    public StackServiceComponentDescriptorMapFactory(String stackServiceComponentsJson, Map<String, Integer> minCardinalityReps,
+            Map<String, Integer> maxCardinalityReps, ObjectMapper objectMapper) {
         this.stackServiceComponentsJson = stackServiceComponentsJson;
+        this.minCardinalityReps = minCardinalityReps;
         this.maxCardinalityReps = maxCardinalityReps;
         this.objectMapper = objectMapper;
     }
@@ -49,8 +52,14 @@ public class StackServiceComponentDescriptorMapFactory implements FactoryBean<St
     private StackServiceComponentDescriptor createComponentDesc(JsonNode stackServiceComponentNode) {
         String componentName = stackServiceComponentNode.get("component_name").asText();
         String componentCategory = stackServiceComponentNode.get("component_category").asText();
+        int minCardinality = parseMinCardinality(stackServiceComponentNode.get("cardinality").asText());
         int maxCardinality = parseMaxCardinality(stackServiceComponentNode.get("cardinality").asText());
-        return new StackServiceComponentDescriptor(componentName, componentCategory, maxCardinality);
+        return new StackServiceComponentDescriptor(componentName, componentCategory, minCardinality, maxCardinality);
+    }
+
+    private int parseMinCardinality(String cardinalityString) {
+        Integer minCardinality = minCardinalityReps.get(cardinalityString);
+        return minCardinality == null ? 0 : minCardinality;
     }
 
     private int parseMaxCardinality(String cardinalityString) {
