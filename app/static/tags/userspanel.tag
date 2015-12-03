@@ -73,13 +73,13 @@
                                                 <tr>
                                                     <th scope="row">Networks</th>
                                                     <td class="is-visible">
-                                                        <input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.networks.write">
+                                                        <input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.templates.write">
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Security Groups</th>
                                                     <td class="is-visible">
-                                                        <input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.securitygroups.write">
+                                                        <input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.templates.write">
                                                     </td>
                                                 </tr>
                                             </tbody>
