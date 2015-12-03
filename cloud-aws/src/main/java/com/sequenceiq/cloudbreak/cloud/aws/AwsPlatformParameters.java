@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 
 @Service
 public class AwsPlatformParameters implements PlatformParameters {
-
     private static final Integer START_LABEL = Integer.valueOf(97);
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
 
