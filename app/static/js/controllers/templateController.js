@@ -135,7 +135,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         }
 
         $scope.createAzureTemplate = function() {
-            $scope.azureTemp.cloudPlatform = "AZURE";
+            $scope.azureTemp.cloudPlatform = "AZURE_RM";
             if ($scope.azureTemp.public) {
                 AccountTemplate.save($scope.azureTemp, function(result) {
                     handleAzureTemplateSuccess(result)
