@@ -46,13 +46,11 @@ public class UserDataBuilder {
         model.put("cloudPlatform", cloudPlatform);
         model.put("platformDiskPrefix", params.diskPrefix());
         model.put("platformDiskStartLabel", params.startLabel());
-        if (type == InstanceGroupType.GATEWAY) {
-            model.put("gateway", true);
-            model.put("tmpSshKey", tmpSshKey);
-            model.put("sshUser", sshUser);
-        } else {
-            model.put("gateway", false);
-        }
+        model.put("gateway", type == InstanceGroupType.GATEWAY);
+        model.put("tmpSshKey", tmpSshKey);
+        model.put("sshUser", sshUser);
+        model.put("publicSshKey", publicSssKey);
+
         model.put("relocateDocker", relocateDocker);
         return build(model);
     }
