@@ -60,13 +60,11 @@ integrationtest:
     credentialNames:
         GCP: it-gcp-credential
         AWS: it-aws-credential
-        AZURE: itazurecredential
         AZURE_RM: itazurermcredential
         OPENSTACK: it-openstack-credential
     defaultNetworks:
        GCP: default-gcp-network
        AWS: default-aws-network
-       AZURE: default-azure-network
        AZURE_RM: default-azure-network
     defaultSecurityGroup: all-services-port
     testSuites:

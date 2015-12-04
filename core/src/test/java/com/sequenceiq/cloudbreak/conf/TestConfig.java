@@ -10,14 +10,13 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import com.sequenceiq.cloudbreak.core.flow.FlowConfig;
 import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
-import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 
 import reactor.Environment;
 import reactor.bus.EventBus;
 
 
 @Configuration
-@ComponentScan(basePackageClasses = {FlowManager.class, FlowHandler.class, ProvisionSetup.class })
+@ComponentScan(basePackageClasses = {FlowManager.class, FlowHandler.class  })
 @Import(FlowConfig.class)
 public class TestConfig {
 

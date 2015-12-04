@@ -32,12 +32,12 @@ public class NetworkConfigurationValidatorTest {
 
     @Test
     public void validNetworkRequestReturnTrue() {
-        assertTrue(underTest.validateNetworkForStack(TestUtil.network(), TestUtil.generateAzureInstanceGroupsByNodeCount(1, 2, 3)));
+        assertTrue(underTest.validateNetworkForStack(TestUtil.network(), TestUtil.generateGcpInstanceGroupsByNodeCount(1, 2, 3)));
     }
 
     @Test(expected = BadRequestException.class)
     public void inValidNetworkRequestReturnFalse() {
-        underTest.validateNetworkForStack(TestUtil.network("10.0.0.1/32"), TestUtil.generateAzureInstanceGroupsByNodeCount(10000, 10000, 10000));
+        underTest.validateNetworkForStack(TestUtil.network("10.0.0.1/32"), TestUtil.generateGcpInstanceGroupsByNodeCount(10000, 10000, 10000));
     }
 
     private class DummyAnnotation implements Annotation {

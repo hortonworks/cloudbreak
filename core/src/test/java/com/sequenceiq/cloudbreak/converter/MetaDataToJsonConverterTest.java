@@ -35,6 +35,6 @@ public class MetaDataToJsonConverterTest extends AbstractEntityConverterTest<Ins
     @Override
     public InstanceMetaData createSource() {
         return TestUtil.instanceMetaData(1L, InstanceStatus.REGISTERED, true,
-                TestUtil.instanceGroup(1L, InstanceGroupType.GATEWAY, TestUtil.azureTemplate(1L)));
+                TestUtil.instanceGroup(1L, InstanceGroupType.GATEWAY, TestUtil.gcpTemplate(1L)));
     }
 }

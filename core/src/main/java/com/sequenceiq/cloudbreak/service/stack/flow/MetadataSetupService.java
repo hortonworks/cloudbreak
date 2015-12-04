@@ -24,18 +24,18 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 
 @Service
 public class MetadataSetupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupService.class);
 
     @Inject
-    private CloudPlatformResolver cloudPlatformResolver;
+    private ServiceProviderMetadataAdapter metadata;
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
@@ -103,7 +103,7 @@ public class MetadataSetupService {
     }
 
     private Set<CoreInstanceMetaData> collectCoreMetadata(CloudPlatform cloudPlatform, Stack stack) {
-        Set<CoreInstanceMetaData> coreInstanceMetaData = cloudPlatformResolver.metadata(cloudPlatform).collectMetadata(stack);
+        Set<CoreInstanceMetaData> coreInstanceMetaData = metadata.collectMetadata(stack);
         if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
             throw new WrongMetadataException(String.format(
                     "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
@@ -166,7 +166,7 @@ public class MetadataSetupService {
 
     private Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resources, String instanceGroup, Integer scalingAdjustment) {
         try {
-            return cloudPlatformResolver.metadata(stack.cloudPlatform()).collectNewMetadata(stack, resources, instanceGroup, scalingAdjustment);
+            return metadata.collectNewMetadata(stack, resources, instanceGroup, scalingAdjustment);
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occurred while updating stack metadata.", e);
             throw e;

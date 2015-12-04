@@ -12,8 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
@@ -25,7 +23,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -39,13 +36,10 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterBootstrapperErrorHandlerTest {
@@ -62,32 +56,26 @@ public class ClusterBootstrapperErrorHandlerTest {
     @Mock
     private HostMetadataRepository hostMetadataRepository;
 
-    @Mock
-    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
-
-    @Mock
-    private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
-
-    @Mock
-    private CloudPlatformResolver platformResolver;
+    //private CloudPlatformResolver platformResolver;
 
     @Mock
     private CloudbreakEventService eventService;
 
     @Mock
-    private Map<CloudPlatform, MetadataSetup> metadataSetups;
-
-    @Mock
     private ContainerOrchestrator orchestrator;
 
-    @Mock
-    private CloudPlatformConnector cloudPlatformConnector;
-
-    @Mock
-    private MetadataSetup metadataSetup;
+    //@Mock
+    //private ServiceProviderMetadataAdapter metadataSetup;
 
     @Mock
     private CloudbreakMessagesService cloudbreakMessagesService;
+
+    @Mock
+    private ServiceProviderConnectorAdapter connector;
+
+    @Mock
+    private ServiceProviderMetadataAdapter metadata;
+
 
     @InjectMocks
     private ClusterBootstrapperErrorHandler underTest;
@@ -139,12 +127,10 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<String>());
         when(instanceGroupRepository.save(any(InstanceGroup.class))).then(returnsFirstArg());
         when(instanceMetaDataRepository.save(any(InstanceMetaData.class))).then(returnsFirstArg());
-        when(platformResolver.connector(any(CloudPlatform.class))).thenReturn(cloudPlatformConnector);
-        when(platformResolver.metadata(any(CloudPlatform.class))).thenReturn(metadataSetup);
-        when(metadataSetup.getInstanceResourceType()).thenReturn(ResourceType.AZURE_VIRTUAL_MACHINE);
+        when(metadata.getInstanceResourceType()).thenReturn(ResourceType.GCP_INSTANCE);
         doNothing().when(resourceRepository).delete(anyLong());
         when(resourceRepository.findByStackIdAndNameAndType(anyLong(), anyString(), any(ResourceType.class))).thenReturn(new Resource());
-        when(cloudPlatformConnector.removeInstances(any(Stack.class), anySet(), anyString())).thenReturn(new HashSet<String>());
+        when(connector.removeInstances(any(Stack.class), anySet(), anyString())).thenReturn(new HashSet<String>());
         when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer(new Answer<InstanceMetaData>() {
             @Override
             public InstanceMetaData answer(InvocationOnMock invocation) {
@@ -178,11 +164,9 @@ public class ClusterBootstrapperErrorHandlerTest {
         verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         verify(instanceGroupRepository, times(3)).save(any(InstanceGroup.class));
         verify(instanceMetaDataRepository, times(3)).save(any(InstanceMetaData.class));
-        verify(platformResolver, times(3)).connector(any(CloudPlatform.class));
-        verify(cloudPlatformConnector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());
-        verify(metadataSetup, times(3)).getInstanceResourceType();
+        verify(connector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());
+        verify(metadata, times(3)).getInstanceResourceType();
         verify(resourceRepository, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), any(ResourceType.class));
-        verify(platformResolver, times(3)).metadata(any(CloudPlatform.class));
         verify(resourceRepository, times(3)).delete(anyLong());
         verify(instanceGroupRepository, times(3)).findOneByGroupNameInStack(anyLong(), anyString());
 

@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @Service
 public class StackStartService {
@@ -22,12 +22,12 @@ public class StackStartService {
     private StackRepository stackRepository;
 
     @Inject
-    private CloudPlatformResolver platformResolver;
+    private ServiceProviderConnectorAdapter connector;
 
     public FlowContext start(FlowContext context) throws CloudbreakException {
         StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
         Stack stack = stackRepository.findOneWithLists(stackStatusUpdateContext.getStackId());
-        platformResolver.connector(stack.cloudPlatform()).startAll(stack);
+        connector.startAll(stack);
         return stackStatusUpdateContext;
     }
 }

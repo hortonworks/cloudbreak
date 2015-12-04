@@ -1,14 +1,11 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UnknownFormatConversionException;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,14 +13,12 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.sequenceiq.cloudbreak.controller.doc.ContentType;
 import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
@@ -33,7 +28,6 @@ import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureRmCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -42,7 +36,6 @@ import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -56,9 +49,6 @@ public class CredentialController {
 
     @Inject
     private CredentialService credentialService;
-
-    @Inject
-    private AzureStackUtil azureStackUtil;
 
     @Inject
     private Decorator<Credential> credentialDecorator;
@@ -151,49 +141,6 @@ public class CredentialController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @ApiOperation(value = CredentialOpDescription.GET_JKS_FILE, produces = ContentType.FILE_STREAM, notes = Notes.CREDENTIAL_NOTES)
-    @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.GET)
-    @ResponseBody
-    public ModelAndView getJksFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
-        MDCBuilder.buildUserMdcContext(user);
-        AzureCredential credential = (AzureCredential) credentialService.get(credentialId);
-        File cerFile = azureStackUtil.buildAzureCerFile(credential);
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment;filename=" + user.getUsername() + ".cer");
-        FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
-        return null;
-    }
-
-    @ApiOperation(value = CredentialOpDescription.PUT_CERTIFICATE_BY_ID, produces = ContentType.FILE_STREAM, notes = Notes.CREDENTIAL_NOTES)
-    @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.PUT)
-    @ResponseBody
-    // TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
-    public ModelAndView refreshCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
-        MDCBuilder.buildUserMdcContext(user);
-        Credential credential = credentialService.update(credentialId);
-        if (credential instanceof AzureCredential) {
-            File cerFile = azureStackUtil.buildAzureCerFile((AzureCredential) credential);
-            response.setContentType("application/octet-stream");
-            response.setHeader("Content-Disposition", "attachment;filename=" + user.getUsername() + ".cer");
-            FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
-        }
-        return null;
-    }
-
-    @ApiOperation(value = CredentialOpDescription.GET_SSH_FILE, produces = ContentType.FILE_STREAM, notes = Notes.CREDENTIAL_NOTES)
-    @RequestMapping(value = "credentials/{credentialId}/sshkey", method = RequestMethod.GET)
-    @ResponseBody
-    // TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
-    public ModelAndView getSshFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
-        MDCBuilder.buildUserMdcContext(user);
-        AzureCredential credential = (AzureCredential) credentialService.get(credentialId);
-        File cerFile = azureStackUtil.buildAzureSshCerFile(credential);
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment;filename=public_key.pem");
-        FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
-        return null;
-    }
-
     private ResponseEntity<IdJson> createCredential(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
         Credential credential = convert(credentialRequest, publicInAccount);
         credential = credentialDecorator.decorate(credential);
@@ -228,8 +175,6 @@ public class CredentialController {
         switch (credential.cloudPlatform()) {
         case AWS:
             return conversionService.convert((AwsCredential) credential, CredentialResponse.class);
-        case AZURE:
-            return conversionService.convert((AzureCredential) credential, CredentialResponse.class);
         case GCP:
             return conversionService.convert((GcpCredential) credential, CredentialResponse.class);
         case OPENSTACK:

@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
-import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.PrepareImageComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
@@ -37,7 +36,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ServiceProviderSetupAdapter implements ProvisionSetup {
+public class ServiceProviderSetupAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderSetupAdapter.class);
 
@@ -50,12 +49,10 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
     @Inject
     private ImageService imageService;
 
-    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.ADAPTER;
     }
 
-    @Override
     public ProvisionEvent prepareImage(Stack stack) throws Exception {
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -80,7 +77,6 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
         }
     }
 
-    @Override
     public ImageStatusResult checkImage(Stack stack) throws Exception {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
@@ -104,7 +100,6 @@ public class ServiceProviderSetupAdapter implements ProvisionSetup {
         }
     }
 
-    @Override
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
         CloudPlatform cloudPlatform = stack.cloudPlatform();
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));

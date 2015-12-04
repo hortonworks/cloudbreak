@@ -92,7 +92,7 @@ public class ClusterContainerRunnerTest {
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         Cluster cluster = new Cluster();
         cluster.setSecure(true);
-        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
+        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.GCP).build();
 
         when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -116,7 +116,7 @@ public class ClusterContainerRunnerTest {
         Cluster cluster = new Cluster();
         cluster.setSecure(false);
 
-        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
+        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.GCP).build();
 
         when(containerOrchestratorResolver.get()).thenReturn(new FailedMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -132,7 +132,7 @@ public class ClusterContainerRunnerTest {
             throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
-        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
+        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.GCP).build();
         Cluster cluster = new Cluster();
         cluster.setSecure(false);
 
@@ -150,7 +150,7 @@ public class ClusterContainerRunnerTest {
             CloudbreakOrchestratorCancelledException {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
-        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.AZURE).build();
+        ProvisioningContext provisioningContext = new ProvisioningContext.Builder().setDefaultParams(1L, CloudPlatform.GCP).build();
 
         when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -178,7 +178,7 @@ public class ClusterContainerRunnerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        ClusterScalingContext context = new ClusterScalingContext(1L, CloudPlatform.AZURE, hostGroupAdjustmentJson, getPrivateIps(stack),
+        ClusterScalingContext context = new ClusterScalingContext(1L, CloudPlatform.GCP, hostGroupAdjustmentJson, getPrivateIps(stack),
                 new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get()).thenReturn(new FailedMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -194,7 +194,7 @@ public class ClusterContainerRunnerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        ClusterScalingContext context = new ClusterScalingContext(1L, CloudPlatform.AZURE, hostGroupAdjustmentJson, getPrivateIps(stack),
+        ClusterScalingContext context = new ClusterScalingContext(1L, CloudPlatform.GCP, hostGroupAdjustmentJson, getPrivateIps(stack),
                 new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get()).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -210,7 +210,7 @@ public class ClusterContainerRunnerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        ClusterScalingContext context = new ClusterScalingContext(1L, CloudPlatform.AZURE, hostGroupAdjustmentJson, getPrivateIps(stack),
+        ClusterScalingContext context = new ClusterScalingContext(1L, CloudPlatform.GCP, hostGroupAdjustmentJson, getPrivateIps(stack),
                 new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
 
         when(containerOrchestratorResolver.get()).thenReturn(mockContainerOrchestrator);

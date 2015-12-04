@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -64,7 +63,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
@@ -119,7 +118,7 @@ public class SimpleStackFacade implements StackFacade {
     @Inject
     private CloudbreakMessagesService messagesService;
     @Inject
-    private CloudPlatformResolver platformResolver;
+    private ServiceProviderConnectorAdapter connector;
 
     @Override
     public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
@@ -454,7 +453,6 @@ public class SimpleStackFacade implements StackFacade {
             fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_SUBNETS_UPDATING, UPDATE_IN_PROGRESS.name());
 
             CloudPlatform cloudPlatform = stack.cloudPlatform();
-            CloudPlatformConnector connector = platformResolver.connector(cloudPlatform);
             Map<String, Set<SecurityRule>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSecurityRules());
             Set<SecurityRule> newSecurityRules = modifiedSubnets.get(UPDATED_SUBNETS);
             stack.getSecurityGroup().setSecurityRules(newSecurityRules);
@@ -534,7 +532,7 @@ public class SimpleStackFacade implements StackFacade {
                     LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
                 } else {
                     stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
-                    platformResolver.connector(cloudPlatform).rollback(stack, stack.getResources());
+                    connector.rollback(stack, stack.getResources());
                     fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name(), errorReason);
                 }
                 stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, errorReason);

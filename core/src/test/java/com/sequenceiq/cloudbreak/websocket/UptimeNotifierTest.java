@@ -56,7 +56,7 @@ public class UptimeNotifierTest {
 
         ArgumentCaptor<Notification> argument1 = ArgumentCaptor.forClass(Notification.class);
         verify(notificationSender).send(argument1.capture());
-        assertEquals(CloudPlatform.AZURE.name(), argument1.getValue().getCloud());
+        assertEquals(CloudPlatform.GCP.name(), argument1.getValue().getCloud());
         assertEquals("null", argument1.getValue().getBlueprintName());
         assertEquals(null, argument1.getValue().getBlueprintId());
 
@@ -78,7 +78,7 @@ public class UptimeNotifierTest {
 
         ArgumentCaptor<Notification> argument2 = ArgumentCaptor.forClass(Notification.class);
         verify(notificationSender).send(argument2.capture());
-        assertEquals(CloudPlatform.AZURE.name(), argument2.getValue().getCloud());
+        assertEquals(CloudPlatform.GCP.name(), argument2.getValue().getCloud());
         assertEquals("multi-node-yarn", argument2.getValue().getBlueprintName());
         assertEquals(Long.valueOf(1), argument2.getValue().getBlueprintId());
 

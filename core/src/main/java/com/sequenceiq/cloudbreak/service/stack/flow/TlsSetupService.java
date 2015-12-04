@@ -30,10 +30,9 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -53,7 +52,7 @@ public class TlsSetupService {
     private static final int SSH_MAX_ATTEMPTS_FOR_HOSTS = 100;
 
     @Inject
-    private CloudPlatformResolver platformResolver;
+    private ServiceProviderConnectorAdapter connector;
 
     @Inject
     private SecurityConfigRepository securityConfigRepository;
@@ -78,7 +77,6 @@ public class TlsSetupService {
 
     public void setupTls(CloudPlatform cloudPlatform, Stack stack) throws CloudbreakException {
         InstanceMetaData gateway = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        CloudPlatformConnector connector = platformResolver.connector(cloudPlatform);
         LOGGER.info("SSH into gateway node to setup certificates on gateway.");
         Set<String> sshFingerprints = connector.getSSHFingerprints(stack, gateway.getInstanceId());
         LOGGER.info("Fingerprint has been determined: {}", sshFingerprints);

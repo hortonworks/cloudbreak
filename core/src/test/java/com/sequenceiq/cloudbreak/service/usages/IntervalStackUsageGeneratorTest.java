@@ -61,7 +61,7 @@ public class IntervalStackUsageGeneratorTest {
         priceGenerators.add(new AwsPriceGenerator());
         ReflectionTestUtils.setField(underTest, "priceGenerators", priceGenerators);
         stack = TestUtil.stack();
-        cloudbreakEvent = TestUtil.azureCloudbreakEvent(stack.getId());
+        cloudbreakEvent = TestUtil.gcpCloudbreakEvent(stack.getId());
         instanceHours = new HashMap<>();
         instanceHours.put("2012-12-12", 1L);
         MockitoAnnotations.initMocks(this);
