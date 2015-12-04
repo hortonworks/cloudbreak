@@ -39,9 +39,7 @@ public class OpenStackParameters implements PlatformParameters {
     }
 
     private Collection<DiskType> getDiskTypes() {
-        Collection<DiskType> disk = new ArrayList<>();
-        disk.add(diskType("HDD"));
-        return disk;
+        return new ArrayList<>();
     }
 
     private DiskType defaultDiskType() {
