@@ -33,31 +33,31 @@ public class TemplateValidator implements ConstraintValidator<ValidTemplate, Tem
 
     @Override
     public boolean isValid(TemplateRequest value, ConstraintValidatorContext context) {
-        boolean valid = false;
+        boolean valid = true;
+        VmType vmType = null;
         Platform platform = Platform.platform(value.getCloudPlatform().name());
-        VmType vmType = getAndValidateVmType(value, context, platform);
-        if (vmType != null) {
+        Map<Platform, Collection<VmType>> virtualMachines = cloudParameterService.getVmtypes().getVirtualMachines();
+        VmType tempVmType = VmType.vmType(value.getInstanceType());
+
+        if (virtualMachines.containsKey(platform) && !virtualMachines.get(platform).isEmpty()) {
+            if (virtualMachines.get(platform).contains(tempVmType)) {
+                //get VmType with metadata
+                for (VmType type : virtualMachines.get(platform)) {
+                    if (type.equals(tempVmType)) {
+                        vmType = type;
+                    }
+                }
+            } else {
+                valid = false;
+                String message = String.format("The '%s' instance type isn't supported by '%s' platform", tempVmType.value(), platform.value());
+                addParameterConstraintViolation(context, "instanceType", message);
+            }
+        }
+
+        if (valid) {
             valid = validateVolume(value, context, vmType, platform);
         }
         return valid;
-    }
-
-    private VmType getAndValidateVmType(TemplateRequest value, ConstraintValidatorContext context, Platform platform) {
-        VmType result = null;
-        Map<Platform, Collection<VmType>> virtualMachines = cloudParameterService.getVmtypes().getVirtualMachines();
-        VmType tempVmType = VmType.vmType(value.getInstanceType());
-        if (virtualMachines.containsKey(platform) && virtualMachines.get(platform).contains(tempVmType)) {
-            //get VmType with metadata
-            for (VmType vmType : virtualMachines.get(platform)) {
-                if (vmType.equals(tempVmType)) {
-                    result = vmType;
-                }
-            }
-        } else {
-            String message = String.format("The '%s' instance type isn't supported by '%s' platform", tempVmType.value(), platform.value());
-            addParameterConstraintViolation(context, "instanceType", message);
-        }
-        return result;
     }
 
     private boolean validateVolume(TemplateRequest value, ConstraintValidatorContext context, VmType vmType, Platform platform) {
@@ -73,9 +73,12 @@ public class TemplateValidator implements ConstraintValidator<ValidTemplate, Tem
     }
 
     private boolean validateVolumeType(ConstraintValidatorContext context, TemplateRequest value, Platform platform) {
+        boolean valid = true;
         DiskType diskType = DiskType.diskType(value.getVolumeType());
         Map<Platform, Collection<DiskType>> diskTypes = cloudParameterService.getDiskTypes().getDiskTypes();
-        boolean valid = diskTypes.containsKey(platform) && diskTypes.get(platform).contains(diskType);
+        if (diskTypes.containsKey(platform) && !diskTypes.get(platform).isEmpty()) {
+            valid = diskTypes.get(platform).contains(diskType);
+        }
         if (!valid) {
             String message = String.format("The '%s' platform does not support '%s' volume type", platform.value(), diskType.value());
             addParameterConstraintViolation(context, "volumeType", message);
@@ -89,20 +92,22 @@ public class TemplateValidator implements ConstraintValidator<ValidTemplate, Tem
 
     private boolean validateEphemeralVolumeParams(ConstraintValidatorContext context, TemplateRequest value, VmType vmType) {
         boolean valid = true;
-        int maxVolume = vmType.getMetaData().maxEphemeralVolumeCount();
-        int desiredVolumeCount = value.getVolumeCount() == null ? 0 : value.getVolumeCount();
-        if (maxVolume == 0) {
-            valid = false;
-            String message = String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value());
-            addParameterConstraintViolation(context, "volumeCount", message);
-        }
-        if (valid && desiredVolumeCount > maxVolume) {
-            valid = false;
-            addParameterConstraintViolation(context, "volumeCount", String.format("Max allowed ephemeral volume for '%s': %s", vmType.value(), maxVolume));
-        }
-        if (valid && desiredVolumeCount < minCount) {
-            valid = false;
-            addParameterConstraintViolation(context, "volumeCount", "Min volume count: " + minCount);
+        if (vmType != null) {
+            int maxVolume = vmType.getMetaData().maxEphemeralVolumeCount();
+            int desiredVolumeCount = value.getVolumeCount() == null ? 0 : value.getVolumeCount();
+            if (maxVolume == 0) {
+                valid = false;
+                String message = String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value());
+                addParameterConstraintViolation(context, "volumeCount", message);
+            }
+            if (valid && desiredVolumeCount > maxVolume) {
+                valid = false;
+                addParameterConstraintViolation(context, "volumeCount", String.format("Max allowed ephemeral volume for '%s': %s", vmType.value(), maxVolume));
+            }
+            if (valid && desiredVolumeCount < minCount) {
+                valid = false;
+                addParameterConstraintViolation(context, "volumeCount", "Min volume count: " + minCount);
+            }
         }
         return valid;
     }

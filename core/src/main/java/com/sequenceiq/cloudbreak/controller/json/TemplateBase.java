@@ -15,6 +15,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class TemplateBase implements JsonEntity {
+    @NotNull
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private CloudPlatform cloudPlatform;
     @Size(max = 100, min = 5, message = "The length of the template's name has to be in range of 5 to 100")
@@ -23,6 +24,7 @@ public abstract class TemplateBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
+    @NotNull
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.PARAMETERS, required = true)
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 1000)
@@ -35,8 +37,10 @@ public abstract class TemplateBase implements JsonEntity {
     private Integer volumeSize;
     @ApiModelProperty(ModelDescriptions.TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
+    @NotNull
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.INSTANCE_TYPE, required = true)
     private String instanceType;
+    @NotNull
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, readOnly = true)
     private boolean publicInAccount;
 

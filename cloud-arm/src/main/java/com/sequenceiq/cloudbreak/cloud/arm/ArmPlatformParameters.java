@@ -45,9 +45,7 @@ public class ArmPlatformParameters implements PlatformParameters {
     }
 
     private Collection<DiskType> getDiskTypes() {
-        Collection<DiskType> disks = Lists.newArrayList();
-        disks.add(diskType("HDD"));
-        return disks;
+        return Lists.newArrayList();
     }
 
     private DiskType defaultDiskType() {
