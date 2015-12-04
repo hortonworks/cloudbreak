@@ -79,7 +79,7 @@
                                 </a>
                             </p>
 
-                            <div class="panel-body" ng-if="template.cloudPlatform == 'AZURE' ">
+                            <div class="panel-body" ng-if="template.cloudPlatform == 'AZURE_RM' ">
                                 <div ng-include src="'tags/template/azurelist.tag'"></div>
                             </div>
 
