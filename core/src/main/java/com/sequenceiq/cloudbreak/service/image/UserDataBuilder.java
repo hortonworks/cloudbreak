@@ -34,14 +34,14 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters parameters) {
+    Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform, String pubKey, String tmpSshKey, String sshUser, PlatformParameters parameters) {
         Map<InstanceGroupType, String> result = new HashMap<>();
-        result.put(InstanceGroupType.GATEWAY, build(InstanceGroupType.GATEWAY, cloudPlatform, tmpSshKey, sshUser, parameters));
-        result.put(InstanceGroupType.CORE, build(InstanceGroupType.CORE, cloudPlatform, null, null, parameters));
+        result.put(InstanceGroupType.GATEWAY, build(InstanceGroupType.GATEWAY, cloudPlatform, pubKey, tmpSshKey, sshUser, parameters));
+        result.put(InstanceGroupType.CORE, build(InstanceGroupType.CORE, cloudPlatform, pubKey, tmpSshKey, sshUser, parameters));
         return result;
     }
 
-    private String build(InstanceGroupType type, CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters params) {
+    private String build(InstanceGroupType type, CloudPlatform cloudPlatform, String publicSssKey, String tmpSshKey, String sshUser, PlatformParameters params) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform);
         model.put("platformDiskPrefix", params.diskPrefix());
