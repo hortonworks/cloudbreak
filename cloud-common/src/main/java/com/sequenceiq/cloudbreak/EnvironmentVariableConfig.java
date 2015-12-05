@@ -57,7 +57,7 @@ public class EnvironmentVariableConfig {
     public static final String CB_BAYWATCH_ENABLED = "true";
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
-    public static final String CB_AZURE_IMAGE_NAME = "cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd";
+    public static final String CB_AZURE_IMAGE_NAME = "cb-centos71-amb212-2015-12-05_2015-12-05_21-41-os-2015-12-05.vhd";
     public static final String CB_AZURE_IMAGE_URI = "https://02589fae040d8westeurope2.blob.core.windows.net/images/" + CB_AZURE_IMAGE_NAME;
     public static final String CB_AZURE_RM_IMAGE = new StringBuilder()
             .append(String.format("EAST_ASIA:https://sequenceiqeastasia2.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
@@ -75,18 +75,18 @@ public class EnvironmentVariableConfig {
             .append(String.format("BRAZIL_SOUTH:https://sequenceiqbrazilsouth2.blob.core.windows.net/images/%s", CB_AZURE_IMAGE_NAME))
             .toString();
     public static final String CB_AWS_AMI_MAP = new StringBuilder()
-            .append("ap-northeast-1:ami-4ea78120,")
-            .append("ap-southeast-1:ami-babd7bd9,")
-            .append("ap-southeast-2:ami-9188d6f2,")
-            .append("eu-central-1:ami-1cedfe70,")
-            .append("eu-west-1:ami-24a47c57,")
-            .append("sa-east-1:ami-6408b308,")
-            .append("us-east-1:ami-2393ed49,")
-            .append("us-west-1:ami-4af49b2a,")
-            .append("us-west-2:ami-203c2a41")
+            .append("ap-northeast-1:ami-9297b9fc,")
+            .append("ap-southeast-1:ami-11111111,")
+            .append("ap-southeast-2:ami-11111111,")
+            .append("eu-central-1:ami-41bca12d,")
+            .append("eu-west-1:ami-80ca6bf3,")
+            .append("sa-east-1:ami-11111111,")
+            .append("us-east-1:ami-dd2966b7,")
+            .append("us-west-1:ami-ae4129ce,")
+            .append("us-west-2:ami-a93d20c8")
             .toString();
-    public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb212-2015-10-27";
-    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb212-2015-10-279.tar.gz";
+    public static final String CB_OPENSTACK_IMAGE = "cb-centos71-amb212-2015-12-05";
+    public static final String CB_GCP_SOURCE_IMAGE_PATH = "sequenceiqimage/cb-centos71-amb212-2015-12-05.tar.gz";
 
     public static final String CB_ARM_CENTRAL_STORAGE = "cbstore";
     public static final String CB_ARM_TEMPLATE_PATH = "templates/arm-v2.ftl";
