@@ -93,15 +93,17 @@ cloudbreak-conf-smtp() {
     env-import CLOUDBREAK_SMTP_TYPE "smtp"
 }
 
+is_linux() {
+    [[ "$(uname)" == Linux ]]
+}
+
 cloudbreak-conf-db() {
     declare desc="Declares cloudbreak DB config"
 
-    if boot2docker version &> /dev/null; then
-        # this is for OSX
-        env-import CB_DB_ROOT_PATH "/var/lib/boot2docker/cloudbreak"
-    else
-        # this is for linux
+    if is_linux; then
         env-import CB_DB_ROOT_PATH "/var/lib/cloudbreak"
+    else
+        env-import CB_DB_ROOT_PATH "/var/lib/boot2docker/cloudbreak"
     fi
 
     env-import CB_DB_ENV_USER "postgres"
@@ -119,12 +121,10 @@ cloudbreak-conf-cert() {
 cloudbreak-delete-dbs() {
     declare desc="deletes all cloudbreak related dbs: cbdb,pcdb,uaadb"
 
-    if boot2docker version &> /dev/null; then
-        # this is for OSX
-        boot2docker ssh 'sudo rm -rf /var/lib/boot2docker/cloudbreak/*'
-    else
-        # this is for linux
+    if is_linux; then
         rm -rf /var/lib/cloudbreak/*
+    else
+        boot2docker ssh 'sudo rm -rf /var/lib/boot2docker/cloudbreak/*'
     fi
 }
 
