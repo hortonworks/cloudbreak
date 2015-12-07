@@ -62,7 +62,7 @@
     <label class="col-sm-3 control-label" for="ouser">{{msg.credential_openstack_form_user_label}}</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" name="ouser" ng-model="credentialOpenstack.parameters.user" required id="ouser" placeholder="{{msg.credential_openstack_user_placeholder}}">
+        <input type="text" class="form-control" name="ouser" ng-model="credentialOpenstack.parameters.userName" required id="ouser" placeholder="{{msg.credential_openstack_user_placeholder}}">
         <div class="help-block" ng-show="openstackCredentialForm.ouser.$dirty && openstackCredentialForm.ouser.$invalid">
             <i class="fa fa-warning"></i> {{msg.openstack_credential_ouser_invalid}}
         </div>

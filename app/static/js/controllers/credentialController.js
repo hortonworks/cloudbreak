@@ -131,7 +131,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         $scope.createAzureRmCredential = function() {
             $scope.credentialAzureRm.cloudPlatform = "AZURE_RM";
-            $scope.credentialAzureRm.publicKey = $base64.encode($scope.credentialAzureRm.publicKey)
+            $scope.credentialInCreation = true;
 
             if ($scope.credentialAzureRm.public) {
                 AccountCredential.save($scope.credentialAzureRm, function(result) {
@@ -139,7 +139,6 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 }, function(error) {
                     $scope.showError(error, $rootScope.msg.azure_rm_credential_failed);
                     $scope.credentialInCreation = false;
-                    $scope.credentialAzureRm.publicKey = $base64.decode($scope.credentialAzureRm.publicKey);
                     $scope.showErrorMessageAlert();
                 });
             } else {
@@ -148,7 +147,6 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 }, function(error) {
                     $scope.showError(error, $rootScope.msg.azure_rm_credential_failed);
                     $scope.credentialInCreation = false;
-                    $scope.credentialAzureRm.publicKey = $base64.decode($scope.credentialAzureRm.publicKey);
                     $scope.showErrorMessageAlert();
                 });
             }

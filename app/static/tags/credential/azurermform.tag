@@ -43,7 +43,7 @@
     <label class="col-sm-3 control-label" for="caccesKey">{{msg.credential_azure_rm_form_access_key_id_label}}</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" id="credentialAzureRm.parameters.accesKey" name="caccesKey" ng-model="credentialAzureRm.parameters.accesKey" required placeholder="{{msg.credential_azure_rm_form_access_key_id_placeholder}}">
+        <input type="text" class="form-control" id="credentialAzureRm.parameters.accesKey" name="caccesKey" ng-model="credentialAzureRm.parameters.accessKey" required placeholder="{{msg.credential_azure_rm_form_access_key_id_placeholder}}">
         <div class="help-block" ng-show="azureRmCredentialForm.caccesKey.$dirty && azureRmCredentialForm.caccesKey.$invalid">
             <i class="fa fa-warning"></i> {{msg.credential_accesskey_invalid}}
         </div>
