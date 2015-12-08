@@ -52,14 +52,14 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 AccountTemplate.save($scope.awsTemp, function(result) {
                     handleAwsTemplateSuccess(result)
                 }, function(error) {
-                    $scope.showErrorMessageAlert(error, $rootScope.msg.aws_template_failed);
+                    $scope.showError(error, $rootScope.msg.aws_template_failed);
                     $scope.showErrorMessageAlert();
                 });
             } else {
                 UserTemplate.save($scope.awsTemp, function(result) {
                     handleAwsTemplateSuccess(result)
                 }, function(error) {
-                    $scope.showErrorMessageAlert(error, $rootScope.msg.aws_template_failed);
+                    $scope.showError(error, $rootScope.msg.aws_template_failed);
                     $scope.showErrorMessageAlert();
                 });
             }
