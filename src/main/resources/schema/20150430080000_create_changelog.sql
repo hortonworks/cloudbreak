@@ -1,4 +1,4 @@
--- // Create Changelog
+-- // Create changelog
 
 -- Default DDL for changelog table that will keep
 -- a record of the migrations that have been run.
@@ -9,16 +9,16 @@
 -- Be sure that ID and DESCRIPTION fields exist in
 -- BigInteger and String compatible fields respectively.
 
-CREATE TABLE ${changelog} (
+CREATE TABLE changelog (
 ID NUMERIC(20,0) NOT NULL,
 APPLIED_AT VARCHAR(25) NOT NULL,
 DESCRIPTION VARCHAR(255) NOT NULL
 );
 
-ALTER TABLE ${changelog}
-ADD CONSTRAINT PK_${changelog}
+ALTER TABLE changelog
+ADD CONSTRAINT PK_changelog
 PRIMARY KEY (id);
 
 -- //@UNDO
 
-DROP TABLE ${changelog};
+DROP TABLE changelog;
