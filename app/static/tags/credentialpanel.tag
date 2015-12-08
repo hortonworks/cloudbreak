@@ -84,10 +84,6 @@
                                 </a>
                             </p>
 
-
-                            <div class="panel-body" ng-if="credential.cloudPlatform == 'AZURE' ">
-                                <div ng-include src="'tags/credential/azurelist.tag'"></div>
-                            </div>
                             <div class="panel-body" ng-if="credential.cloudPlatform == 'AZURE_RM' ">
                                 <div ng-include src="'tags/credential/azurermlist.tag'"></div>
                             </div>

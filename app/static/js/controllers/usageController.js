@@ -96,7 +96,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
                 if ($scope.elementProviderEquals(item, 'GCP')) {
                     usageByProvider = $scope.gcpSum;
                     chartsDataByProvider = chartsData.gcp;
-                } else if ($scope.elementProviderEquals(item, 'AZURE')) {
+                } else if ($scope.elementProviderEquals(item, 'AZURE_RM')) {
                     usageByProvider = $scope.azureSum;
                     chartsDataByProvider = chartsData.azure;
                 } else if ($scope.elementProviderEquals(item, 'AWS')) {

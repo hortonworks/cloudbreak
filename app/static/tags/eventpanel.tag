@@ -20,7 +20,7 @@
                             <select class="form-control input-sm" id="cloudProvider" ng-model="localFilter.cloud">
                                 <option>{{msg.usage_events_form_all_label}}</option>
                                 <option value="AWS">{{msg.usage_events_form_provider_amazon_label}}</option>
-                                <option value="AZURE">{{msg.usage_events_form_provider_microsoft_label}}</option>
+                                <option value="AZURE_RM">{{msg.usage_events_form_provider_microsoft_label}}</option>
                                 <option value="GCP">{{msg.usage_events_form_provider_google_label}}</option>
                             </select>
                         </div>

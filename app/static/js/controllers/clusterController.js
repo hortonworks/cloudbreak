@@ -62,7 +62,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             ];
         getUluwatuClusters();
         initCluster();
-        initPlatformVariants();
         initWizard();
 
         function initWizard() {
@@ -569,7 +568,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         function setFileSystem() {
             if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform != undefined) {
-                if ($rootScope.activeCredential.cloudPlatform == 'AZURE' || $rootScope.activeCredential.cloudPlatform == 'AZURE_RM') {
+                if ($rootScope.activeCredential.cloudPlatform == 'AZURE_RM') {
                     $scope.cluster.fileSystem = {};
                     $scope.cluster.fileSystem.type = "WASB";
                     $scope.cluster.fileSystem.defaultFs = true;
@@ -833,23 +832,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             setRegion();
         }
 
-        function initPlatformVariants() {
-            PlatformVariant.get().$promise.then(function(success) {
-                $scope.platformVariants = success.platformToVariants;
-                $scope.platformVariants.AZURE = ["AZURE"];
-                $scope.defaultVariants = success.defaultVariants;
-                $scope.defaultVariants.AZURE = ["AZURE"];
-            }, function(error) {
-                $scope.platformVariants = {};
-                $scope.defaultVariants = {};
-            });
-        }
-
         $scope.getPlatformVariants = function() {
             var variants = [];
             if ($rootScope.activeCredential !== undefined) {
-                variants = $scope.platformVariants[$rootScope.activeCredential.cloudPlatform];
-                var defaultVariant = $scope.defaultVariants[$rootScope.activeCredential.cloudPlatform];
+                variants = $rootScope.params.platformVariants[$rootScope.activeCredential.cloudPlatform];
+                var defaultVariant = $rootScope.params.defaultVariants[$rootScope.activeCredential.cloudPlatform];
                 if (defaultVariant) {
                     $scope.cluster.platformVariant = defaultVariant;
                 }

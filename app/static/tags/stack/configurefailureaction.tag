@@ -1,9 +1,3 @@
-<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'">
-    <label class="col-sm-3 control-label" for="diskPerStorageAccount">{{msg.cluster_form_disk_per_storage_label}}</label>
-    <div class="col-sm-3">
-        <input class="form-control" type="number" id="diskPerStorageAccount" name="diskPerStorageAccount" ng-model="cluster.parameters.diskPerStorage" min="1" max="10000">
-    </div>
-</div>
 <div class="form-group" ng-show="showAdvancedOptionForm">
     <label class="col-sm-3 control-label" for="onFailureConfig">{{msg.cluster_form_onfailure_label}}</label>
     <div class="col-sm-3">
@@ -43,10 +37,10 @@
     <div class="col-sm-11">
 
         <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
-            <div class="btn-group" role="group" ng-show="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP'">
+            <div class="btn-group" role="group" ng-show="activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP'">
                 <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureFileSystem')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_filesystem_tag}}</button>
             </div>
-            <div class="btn-group" role="group" ng-show="activeCredential.cloudPlatform != 'AZURE' && activeCredential.cloudPlatform != 'AZURE_RM' && activeCredential.cloudPlatform != 'GCP'">
+            <div class="btn-group" role="group" ng-show="activeCredential.cloudPlatform != 'AZURE_RM' && activeCredential.cloudPlatform != 'GCP'">
                 <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId || !cluster.blueprintId" ng-click="showWizardActualElement('configureHostGroups')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_blueprint_tag}}</button>
             </div>
             <div class="btn-group" role="group" style="opacity: 0;">
