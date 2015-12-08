@@ -68,7 +68,11 @@ public class KeystoneCredentialView {
         return cloudCredential.getParameter("domainName", String.class);
     }
 
-    public String getSelector() {
-        return cloudCredential.getParameter("selector", String.class);
+    public String getScope() {
+        return cloudCredential.getParameter("keystoneAuthScope", String.class);
+    }
+
+    public String getVersion() {
+        return cloudCredential.getParameter("keystoneVersion", String.class);
     }
 }

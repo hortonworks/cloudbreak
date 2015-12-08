@@ -46,31 +46,30 @@ public class OpenStackClient {
 
     public Access createAccess(AuthenticatedContext authenticatedContext) {
         KeystoneCredentialView osCredential = createKeystoneCredential(authenticatedContext);
-        switch (osCredential.getSelector()) {
-            case KeystoneCredentialView.CB_KEYSTONE_V2:
-                return OSFactory.builder().endpoint(osCredential.getEndpoint())
-                        .credentials(osCredential.getUserName(), osCredential.getPassword())
-                        .tenantName(osCredential.getTenantName())
-                        .authenticate().getAccess();
-            case KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE:
-                return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
-                        .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
-                        .authenticate()
-                        .getAccess();
-            case KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE:
-                return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
-                        .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
-                        .scopeToDomain(Identifier.byName(osCredential.getDomainName()))
-                        .authenticate()
-                        .getAccess();
-            case KeystoneCredentialView.CB_KEYSTONE_V3_PROJECT_SCOPE:
-                return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
-                        .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
-                        .scopeToProject(Identifier.byName(osCredential.getProjectName()), Identifier.byName(osCredential.getProjectDomain()))
-                        .authenticate()
-                        .getAccess();
-            default:
-                throw new CloudConnectorException("Unsupported keystone version");
+        if (osCredential.getVersion().equals(KeystoneCredentialView.CB_KEYSTONE_V2)) {
+            return OSFactory.builder().endpoint(osCredential.getEndpoint())
+                    .credentials(osCredential.getUserName(), osCredential.getPassword())
+                    .tenantName(osCredential.getTenantName())
+                    .authenticate().getAccess();
+        } else if (osCredential.getScope().equals(KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE)) {
+            return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
+                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
+                    .authenticate()
+                    .getAccess();
+        } else if (osCredential.getScope().equals(KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE)) {
+            return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
+                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
+                    .scopeToDomain(Identifier.byName(osCredential.getDomainName()))
+                    .authenticate()
+                    .getAccess();
+        } else if (osCredential.getScope().equals(KeystoneCredentialView.CB_KEYSTONE_V3_PROJECT_SCOPE)) {
+            return OSFactory.builderV3().endpoint(osCredential.getEndpoint())
+                    .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
+                    .scopeToProject(Identifier.byName(osCredential.getProjectName()), Identifier.byName(osCredential.getProjectDomain()))
+                    .authenticate()
+                    .getAccess();
+        } else {
+            throw new CloudConnectorException("Unsupported keystone version");
         }
     }
 

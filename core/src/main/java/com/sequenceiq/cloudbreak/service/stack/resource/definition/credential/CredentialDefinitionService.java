@@ -28,23 +28,29 @@ public class CredentialDefinitionService {
     private PBEStringCleanablePasswordEncryptor encryptor;
 
     public Map<String, Object> processProperties(CloudPlatform cloudPlatform, Map<String, Object> properties) {
+        return processValues(getDefinition(cloudPlatform), properties, false);
+    }
+
+    public Map<String, Object> revertProperties(CloudPlatform cloudPlatform, Map<String, Object> properties) {
+        return processValues(getDefinition(cloudPlatform), properties, true);
+    }
+
+    private Definition getDefinition(CloudPlatform cloudPlatform) {
         String json = definitionService.getResourceDefinition(cloudPlatform.name(), RESOURCE_TYPE);
-        Definition definition;
         try {
-            definition = JsonUtil.readValue(json, Definition.class);
+            return JsonUtil.readValue(json, Definition.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return processValues(definition, properties);
     }
 
-    private Map<String, Object> processValues(Definition definition, Map<String, Object> properties) {
+    private Map<String, Object> processValues(Definition definition, Map<String, Object> properties, boolean revert) {
         Map<String, Object> processed = new HashMap<>();
-        processed.putAll(processValues(properties, definition.getDefaultValues()));
+        processed.putAll(processValues(properties, definition.getDefaultValues(), revert));
         Object selector = properties.get(SELECTOR);
         if (selector != null) {
             processed.put(SELECTOR, selector);
-            processed.putAll(processValues(properties, collectSelectorValues(definition, String.valueOf(selector))));
+            processed.putAll(processValues(properties, collectSelectorValues(definition, String.valueOf(selector)), revert));
         }
         return processed;
     }
@@ -70,13 +76,13 @@ public class CredentialDefinitionService {
         return null;
     }
 
-    private Map<String, Object> processValues(Map<String, Object> properties, List<Value> values) {
+    private Map<String, Object> processValues(Map<String, Object> properties, List<Value> values, boolean revert) {
         Map<String, Object> processed = new HashMap<>();
         for (Value value : values) {
             String key = value.getName();
             String property = getProperty(properties, key);
             if (isEncrypted(value)) {
-                property = encryptor.encrypt(property);
+                property = revert ? encryptor.decrypt(property) : encryptor.encrypt(property);
             }
             processed.put(key, property);
         }
