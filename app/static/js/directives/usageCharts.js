@@ -28,7 +28,7 @@ cloudbreakApp.directive('usagecharts', function() {
                     x_accessor: 'date',
                     y_accessor: 'hours',
                     interpolate: 'linear',
-                    legend: ['GCP', 'AZURE', 'AWS', 'OPENSTACK'],
+                    legend: ['GCP', 'AZURE_RM', 'AWS', 'OPENSTACK'],
                     legend_target: '.legend',
                     missing_is_zero: false,
                     linked: true,
@@ -67,7 +67,7 @@ cloudbreakApp.directive('usagecharts', function() {
                     createChart('GCP running hours', gcpUsage, 'gcpChart', (gcpMaxHour > 0));
                     unitedChartData.push(gcpUsage);
                 }
-                if (value.cloud == 'all' || value.cloud == 'AZURE') {
+                if (value.cloud == 'all' || value.cloud == 'AZURE_RM') {
                     element.append('<div class="col-xs-12 col-sm-6 col-md-6"><div id="azureChart" /></div>');
                     createChart('AZURE running hours', azureUsage, 'azureChart', (azureMaxHour > 0));
                     unitedChartData.push(azureUsage);

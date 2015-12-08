@@ -59,7 +59,7 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
         }
 
         $scope.createAzureNetwork = function() {
-            $scope.network.cloudPlatform = "AZURE";
+            $scope.network.cloudPlatform = "AZURE_RM";
             doCreateNetwork();
         }
 
