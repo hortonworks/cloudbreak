@@ -98,34 +98,42 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.createOpenstackCredential = function() {
             $scope.credentialOpenstack.cloudPlatform = "OPENSTACK";
             $scope.credentialInCreation = true;
+            if ($scope.credentialOpenstack.parameters.keystoneVersion === "cb-keystone-v2") {
+                $scope.credentialOpenstack.parameters.selector = $scope.credentialOpenstack.parameters.keystoneVersion;
+            } else {
+                $scope.credentialOpenstack.parameters.selector = $scope.credentialOpenstack.parameters.keystoneAuthScope;
+            }
+            delete $scope.credentialOpenstack.parameters.keystoneVersion;
+            delete $scope.credentialOpenstack.parameters.keystoneAuthScope;
 
             if ($scope.credentialOpenstack.public) {
-                AccountCredential.save($scope.credentialOpenstack, function(result) {
-                    handleOpenstackCredentialSuccess(result)
-                }, function(error) {
-                    $scope.showError(error, $rootScope.msg.openstack_credential_failed);
-                    $scope.credentialInCreation = false;
-                    $scope.showErrorMessageAlert();
-                });
+                AccountCredential.save($scope.credentialOpenstack, handleOpenstackCredentialSuccess, handleOpenstackCredentailCreationError);
             } else {
-                UserCredential.save($scope.credentialOpenstack, function(result) {
-                    handleOpenstackCredentialSuccess(result)
-                }, function(error) {
-                    $scope.showError(error, $rootScope.msg.openstack_credential_failed);
-                    $scope.credentialInCreation = false;
-                    $scope.showErrorMessageAlert();
-                });
+                UserCredential.save($scope.credentialOpenstack, handleOpenstackCredentialSuccess, handleOpenstackCredentailCreationError);
             }
 
             function handleOpenstackCredentialSuccess(result) {
                 $scope.credentialOpenstack.id = result.id;
                 $rootScope.credentials.push($scope.credentialOpenstack);
-                $scope.credentialOpenstack = {};
+                $scope.credentialOpenstack = {parameters:{keystoneVersion:"cb-keystone-v2"}};
                 $scope.showSuccess($filter("format")($rootScope.msg.openstack_credential_success, String(result.id)));
                 $scope.openstackCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
                 $scope.credentialInCreation = false;
                 $scope.unShowErrorMessageAlert();
+            }
+
+            function handleOpenstackCredentailCreationError(error) {
+                if ($scope.credentialOpenstack.parameters.selector === "cb-keystone-v2") {
+                    $scope.credentialOpenstack.parameters.keystoneVersion = $scope.credentialOpenstack.parameters.selector;
+                } else {
+                    $scope.credentialOpenstack.parameters.keystoneVersion = "cb-keystone-v3";
+                    $scope.credentialOpenstack.parameters.keystoneAuthScope = $scope.credentialOpenstack.parameters.selector;
+                }
+                delete $scope.credentialOpenstack.parameters.selector;
+                $scope.showError(error, $rootScope.msg.openstack_credential_failed);
+                $scope.credentialInCreation = false;
+                $scope.showErrorMessageAlert();
             }
         }
 
