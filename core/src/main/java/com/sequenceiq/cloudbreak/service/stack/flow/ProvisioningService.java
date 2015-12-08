@@ -14,9 +14,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 
 @Service
@@ -28,7 +27,7 @@ public class ProvisioningService {
     private StackRepository stackRepository;
 
     @Inject
-    private CloudPlatformResolver cloudPlatformResolver;
+    private ServiceProviderConnectorAdapter connector;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
@@ -36,7 +35,6 @@ public class ProvisioningService {
     public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties)
             throws CloudbreakSecuritySetupException {
         stack = stackRepository.findOneWithLists(stack.getId());
-        CloudPlatformConnector connector = cloudPlatformResolver.connector(cloudPlatform);
         Set<Resource> resources = connector.buildStack(stack, setupProperties);
         return new ProvisionComplete(cloudPlatform, stack.getId(), resources);
     }

@@ -23,7 +23,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.common.type.StatusRequest;
@@ -50,14 +49,13 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageNameUtil;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
@@ -97,7 +95,7 @@ public class StackService {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
     @Inject
-    private CloudPlatformResolver platformResolver;
+    private ServiceProviderConnectorAdapter connector;
     @Inject
     private ImageNameUtil imageNameUtil;
 
@@ -188,7 +186,6 @@ public class StackService {
     }
 
     public Stack create(CbUser user, Stack stack) {
-        checkCloudPlatform(stack, "create");
         Stack savedStack = null;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -200,8 +197,7 @@ public class StackService {
             instanceGroupRepository.save(savedStack.getInstanceGroups());
             tlsSecurityService.copyClientKeys(stack.getId());
             tlsSecurityService.storeSSHKeys(stack);
-            CloudPlatformConnector cloudPlatformConnector = platformResolver.connector(savedStack.cloudPlatform());
-            imageService.create(savedStack, cloudPlatformConnector.getPlatformParameters(stack));
+            imageService.create(savedStack, connector.getPlatformParameters(stack));
             flowManager.triggerProvisioning(new ProvisionRequest(savedStack.cloudPlatform(), savedStack.getId()));
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
@@ -213,7 +209,7 @@ public class StackService {
     }
 
     private void setPlatformVariant(Stack stack) {
-        stack.setPlatformVariant(platformResolver.connector(stack.cloudPlatform()).checkAndGetPlatformVariant(stack).value());
+        stack.setPlatformVariant(connector.checkAndGetPlatformVariant(stack).value());
     }
 
     public void delete(Long id, CbUser user) {
@@ -234,7 +230,6 @@ public class StackService {
 
     public void removeInstance(CbUser user, Long stackId, String instanceId) {
         Stack stack = get(stackId);
-        checkCloudPlatform(stack, "removeInstance");
         InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
         if (instanceMetaData == null) {
             throw new NotFoundException(String.format("Metadata for instance %s not found.", instanceId));
@@ -247,7 +242,6 @@ public class StackService {
 
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = get(stackId);
-        checkCloudPlatform(stack, "updateStatus: " + status.name());
         Cluster cluster = null;
         if (stack.getCluster() != null) {
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
@@ -311,7 +305,6 @@ public class StackService {
 
     public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson) {
         Stack stack = get(stackId);
-        checkCloudPlatform(stack, "updateNodeCount");
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
@@ -426,14 +419,6 @@ public class StackService {
             flowManager.triggerForcedTermination(new StackForcedDeleteRequest(stack.cloudPlatform(), stack.getId()));
         } else {
             LOGGER.info("Stack is already deleted.");
-        }
-    }
-
-    // TODO Have to be removed when the termination of the old version of azure clusters won't be supported anymore
-    private void checkCloudPlatform(Stack stack, String operation) {
-        if (stack.getCredential().cloudPlatform() == CloudPlatform.AZURE) {
-            throw new BadRequestException(String.format("Unsupported operation: %s, on old azure clusters the only supported operation is the termination.",
-                    operation));
         }
     }
 

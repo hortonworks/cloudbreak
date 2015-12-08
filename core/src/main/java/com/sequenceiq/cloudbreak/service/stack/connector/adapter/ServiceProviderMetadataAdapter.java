@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
@@ -48,7 +47,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ServiceProviderMetadataAdapter implements MetadataSetup {
+public class ServiceProviderMetadataAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderMetadataAdapter.class);
 
@@ -65,7 +64,6 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
 
-    @Override
     public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
@@ -90,7 +88,6 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
         }
     }
 
-    @Override
     public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName, Integer scalingAdjustment) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
@@ -115,7 +112,6 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
         }
     }
 
-    @Override
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
@@ -151,12 +147,10 @@ public class ServiceProviderMetadataAdapter implements MetadataSetup {
         }
     }
 
-    @Override
     public ResourceType getInstanceResourceType() {
         return null;
     }
 
-    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.ADAPTER;
     }

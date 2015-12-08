@@ -30,6 +30,6 @@ public class CloudbreakEventToJsonConverterTest extends AbstractEntityConverterT
 
     @Override
     public CloudbreakEvent createSource() {
-        return TestUtil.azureCloudbreakEvent(1L);
+        return TestUtil.gcpCloudbreakEvent(1L);
     }
 }

@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderSetupAdapter;
 
 @Component
 public class ImageStatusCheckerTask extends StackBasedStatusCheckerTask<ImageCheckerContext> {
@@ -23,7 +23,7 @@ public class ImageStatusCheckerTask extends StackBasedStatusCheckerTask<ImageChe
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageStatusCheckerTask.class);
 
     @Inject
-    private CloudPlatformResolver cloudPlatformResolver;
+    private ServiceProviderSetupAdapter provisioning;
 
     @Inject
     private NotificationSender notificationSender;
@@ -31,7 +31,7 @@ public class ImageStatusCheckerTask extends StackBasedStatusCheckerTask<ImageChe
     @Override
     public boolean checkStatus(ImageCheckerContext t) {
         try {
-            ImageStatusResult imageStatusResult = cloudPlatformResolver.provisioning(t.getStack().cloudPlatform()).checkImage(t.getStack());
+            ImageStatusResult imageStatusResult = provisioning.checkImage(t.getStack());
             if (imageStatusResult.getImageStatus().equals(ImageStatus.CREATE_FAILED)) {
                 notificationSender.send(getImageCopyNotification(imageStatusResult, t.getStack()));
                 throw new CloudbreakServiceException("Image copy operation finished with failed status.");

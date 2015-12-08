@@ -90,31 +90,6 @@ public class CredentialParametersValidatorTest {
     }
 
     @Test
-    public void validAzureCredentialJsonWillReturnTrue() {
-        CredentialRequest credentialJson = new CredentialRequest();
-        credentialJson.setCloudPlatform(CloudPlatform.AZURE);
-        credentialJson.setDescription("description");
-        credentialJson.setName("name");
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName(), "id");
-        credentialJson.setParameters(parameters);
-        credentialJson.setPublicKey("ssh key");
-        assertEquals(underTest.isValid(credentialJson, constraintValidatorContext), true);
-    }
-
-    @Test
-    public void validAzureCredentialJsonSubscriptionIdMissingValidationFails() {
-        CredentialRequest credentialJson = new CredentialRequest();
-        credentialJson.setCloudPlatform(CloudPlatform.AZURE);
-        credentialJson.setDescription("description");
-        credentialJson.setName("name");
-        Map<String, Object> parameters = new HashMap<>();
-        credentialJson.setParameters(parameters);
-        credentialJson.setPublicKey("ssh key");
-        assertEquals(underTest.isValid(credentialJson, constraintValidatorContext), false);
-    }
-
-    @Test
     public void validGcpCredentialJsonWillReturnTrue() {
         CredentialRequest credentialJson = new CredentialRequest();
         credentialJson.setCloudPlatform(CloudPlatform.GCP);

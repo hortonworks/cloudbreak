@@ -77,7 +77,7 @@ public class StackUpdaterTest {
     @Test
     public void addStackResourcesWithThreeNewResource() {
         Stack stack = TestUtil.stack();
-        List<Resource> resources = TestUtil.generateAzureResources(5);
+        List<Resource> resources = TestUtil.generateGcpResources(5);
 
         when(stackRepository.findById(anyLong())).thenReturn(stack);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);

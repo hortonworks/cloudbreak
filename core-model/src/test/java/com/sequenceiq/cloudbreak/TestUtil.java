@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
@@ -115,17 +114,6 @@ public class TestUtil {
         return new CbUser("userid", "testuser", "testaccount", Arrays.asList(CbUserRole.ADMIN, CbUserRole.USER), "givenname", "familyname", new Date());
     }
 
-    public static Credential azureCredential() {
-        AzureCredential azureCredential = new AzureCredential();
-        azureCredential.setPublicKey(AZURE_PUB_KEY);
-        azureCredential.setPublicInAccount(false);
-        azureCredential.setArchived(false);
-        azureCredential.setSubscriptionId("subscription-id");
-        azureCredential.setId(1L);
-        azureCredential.setLoginUserName("cb");
-        return azureCredential;
-    }
-
     public static Credential awsCredential() {
         AwsCredential awsCredential = new AwsCredential();
         awsCredential.setPublicKey(AZURE_PUB_KEY);
@@ -184,7 +172,7 @@ public class TestUtil {
         stack.setOwner("userid");
         stack.setAccount("account");
         stack.setId(1L);
-        stack.setInstanceGroups(generateAzureInstanceGroups(3));
+        stack.setInstanceGroups(generateGcpInstanceGroups(3));
         stack.setSecurityGroup(securityGroup(1L));
         stack.setStatusReason("statusReason");
         stack.setRegion("region");
@@ -193,14 +181,11 @@ public class TestUtil {
             case AWS:
                 stack.setInstanceGroups(generateAwsInstanceGroups(3));
                 break;
-            case AZURE:
-                stack.setInstanceGroups(generateAzureInstanceGroups(3));
-                break;
             case GCP:
-                stack.setInstanceGroups(generateAzureInstanceGroups(3));
+                stack.setInstanceGroups(generateGcpInstanceGroups(3));
                 break;
             case OPENSTACK:
-                stack.setInstanceGroups(generateAzureInstanceGroups(3));
+                stack.setInstanceGroups(generateOpenStackInstanceGroups(3));
                 break;
             default:
                 break;
@@ -241,24 +226,6 @@ public class TestUtil {
         instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, openstackTemplate(1L)));
         for (int i = 0; i < count - 1; i++) {
             instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, openstackTemplate(1L)));
-        }
-        return instanceGroups;
-    }
-
-    public static Set<InstanceGroup> generateAzureInstanceGroups(int count) {
-        Set<InstanceGroup> instanceGroups = new HashSet<>();
-        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, azureTemplate(1L)));
-        for (int i = 0; i < count - 1; i++) {
-            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, azureTemplate(1L)));
-        }
-        return instanceGroups;
-    }
-
-    public static Set<InstanceGroup> generateAzureInstanceGroupsByNodeCount(int ...count) {
-        Set<InstanceGroup> instanceGroups = new HashSet<>();
-        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, azureTemplate(1L), count[0]));
-        for (int i = 1; i < count.length; i++) {
-            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, azureTemplate(1L), count[i]));
         }
         return instanceGroups;
     }
@@ -316,17 +283,6 @@ public class TestUtil {
         return instanceMetaDatas;
     }
 
-    public static Template azureTemplate(Long id) {
-        Template azureTemplate = new Template();
-        azureTemplate.setInstanceType(STANDARD_A5);
-        azureTemplate.setId(id);
-        azureTemplate.setVolumeCount(1);
-        azureTemplate.setVolumeSize(100);
-        azureTemplate.setName("templateName");
-        azureTemplate.setCloudPlatform(CloudPlatform.AZURE);
-        return azureTemplate;
-    }
-
     public static Template awsTemplate(Long id) {
         Template awsTemplate = new Template();
         awsTemplate.setInstanceType("c3.2xlarge");
@@ -371,13 +327,13 @@ public class TestUtil {
     }
 
     public static Stack stack() {
-        return stack(AVAILABLE, azureCredential());
+        return stack(AVAILABLE, gcpCredential());
     }
 
     public static List<Cluster> generateCluster(int count) {
         List<Cluster> clusters = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            clusters.add(cluster(TestUtil.blueprint(), stack(AVAILABLE, azureCredential()), (long) i));
+            clusters.add(cluster(TestUtil.blueprint(), stack(AVAILABLE, gcpCredential()), (long) i));
         }
         return clusters;
     }
@@ -407,7 +363,7 @@ public class TestUtil {
         hostGroup.setName(DUMMY_NAME);
         hostGroup.setRecipes(TestUtil.recipes(1));
         hostGroup.setHostMetadata(TestUtil.hostMetadata(hostGroup, 1));
-        hostGroup.setInstanceGroup(TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.azureTemplate(1L)));
+        hostGroup.setInstanceGroup(TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.gcpTemplate(1L)));
         return hostGroup;
     }
 
@@ -448,24 +404,6 @@ public class TestUtil {
         return recipes;
     }
 
-    public static List<Resource> generateAzureResources(int count) {
-        List<Resource> resources = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            resources.add(azureResource(Long.valueOf(i), "master"));
-        }
-        return resources;
-    }
-
-    public static Resource azureResource(Long id, String instanceGroup) {
-        Resource resource = new Resource();
-        resource.setId(id);
-        resource.setStack(stack());
-        resource.setInstanceGroup(instanceGroup);
-        resource.setResourceName("testResource");
-        resource.setResourceType(ResourceType.AZURE_VIRTUAL_MACHINE);
-        return resource;
-    }
-
     public static Blueprint blueprint() {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
@@ -478,12 +416,12 @@ public class TestUtil {
     public static List<CloudbreakUsage> generateAzureCloudbreakUsages(int count) {
         List<CloudbreakUsage> cloudbreakUsages = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            cloudbreakUsages.add(azureCloudbreakUsage(Long.valueOf(i)));
+            cloudbreakUsages.add(gcpCloudbreakUsage(Long.valueOf(i)));
         }
         return cloudbreakUsages;
     }
 
-    public static CloudbreakUsage azureCloudbreakUsage(Long id) {
+    public static CloudbreakUsage gcpCloudbreakUsage(Long id) {
         CloudbreakUsage cloudbreakUsage = new CloudbreakUsage();
         cloudbreakUsage.setId(id);
         cloudbreakUsage.setInstanceGroup("master");
@@ -493,22 +431,22 @@ public class TestUtil {
         cloudbreakUsage.setInstanceHours(1L);
         cloudbreakUsage.setInstanceType("xlarge");
         cloudbreakUsage.setOwner("owner");
-        cloudbreakUsage.setProvider(CloudPlatform.AZURE.name());
+        cloudbreakUsage.setProvider(CloudPlatform.GCP.name());
         cloudbreakUsage.setRegion("Central US");
         cloudbreakUsage.setStackName("usagestack");
         cloudbreakUsage.setStackId(1L);
         return cloudbreakUsage;
     }
 
-    public static List<CloudbreakEvent> generateAzureCloudbreakEvents(int count) {
+    public static List<CloudbreakEvent> generateGcpCloudbreakEvents(int count) {
         List<CloudbreakEvent> cloudbreakEvents = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            cloudbreakEvents.add(azureCloudbreakEvent(Long.valueOf(i)));
+            cloudbreakEvents.add(gcpCloudbreakEvent(Long.valueOf(i)));
         }
         return cloudbreakEvents;
     }
 
-    public static CloudbreakEvent azureCloudbreakEvent(Long id) {
+    public static CloudbreakEvent gcpCloudbreakEvent(Long id) {
         CloudbreakEvent cloudbreakEvent = new CloudbreakEvent();
         cloudbreakEvent.setId(id);
         cloudbreakEvent.setInstanceGroup("master");
@@ -520,7 +458,7 @@ public class TestUtil {
         cloudbreakEvent.setEventTimestamp(new Date());
         cloudbreakEvent.setEventMessage("message");
         cloudbreakEvent.setEventType("eventType");
-        cloudbreakEvent.setCloud(CloudPlatform.AZURE.name());
+        cloudbreakEvent.setCloud(CloudPlatform.GCP.name());
         cloudbreakEvent.setBlueprintName("blueprintName");
         cloudbreakEvent.setBlueprintId(1L);
         cloudbreakEvent.setStackStatus(Status.AVAILABLE);
@@ -566,5 +504,32 @@ public class TestUtil {
         securityGroup.setStatus(ResourceStatus.DEFAULT);
         securityGroup.setSecurityRules(securityRules);
         return securityGroup;
+    }
+
+    public static Set<InstanceGroup> generateGcpInstanceGroupsByNodeCount(int ...count) {
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, gcpTemplate(1L), count[0]));
+        for (int i = 1; i < count.length; i++) {
+            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, gcpTemplate(1L), count[i]));
+        }
+        return instanceGroups;
+    }
+
+    public static List<Resource> generateGcpResources(int count) {
+        List<Resource> resources = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            resources.add(gcpResource(Long.valueOf(i), "master"));
+        }
+        return resources;
+    }
+
+    public static Resource gcpResource(Long id, String instanceGroup) {
+        Resource resource = new Resource();
+        resource.setId(id);
+        resource.setStack(stack());
+        resource.setInstanceGroup(instanceGroup);
+        resource.setResourceName("testResource");
+        resource.setResourceType(ResourceType.GCP_INSTANCE);
+        return resource;
     }
 }

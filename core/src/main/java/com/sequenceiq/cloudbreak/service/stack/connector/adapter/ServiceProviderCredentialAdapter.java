@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
@@ -24,7 +23,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ServiceProviderCredentialAdapter implements CredentialHandler<Credential> {
+public class ServiceProviderCredentialAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderCredentialAdapter.class);
 
@@ -37,12 +36,10 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
 
-    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.ADAPTER;
     }
 
-    @Override
     public Credential init(Credential credential) {
         if (!credential.passwordAuthenticationRequired()) {
             rsaPublicKeyValidator.validate(credential.getPublicKey());
@@ -72,7 +69,6 @@ public class ServiceProviderCredentialAdapter implements CredentialHandler<Crede
         return credential;
     }
 
-    @Override
     public Credential update(Credential credential) throws Exception {
         return credential;
     }

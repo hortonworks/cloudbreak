@@ -47,7 +47,7 @@ public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterT
         // WHEN
         CloudbreakUsageJson result = underTest.convert(getSource());
         // THEN
-        assertEquals(CloudPlatform.AZURE.name(), result.getProvider());
+        assertEquals(CloudPlatform.GCP.name(), result.getProvider());
         assertEquals("john.smith@example.com", result.getUsername());
         assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone"));
     }
@@ -83,7 +83,7 @@ public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterT
 
     @Override
     public CloudbreakUsage createSource() {
-        return TestUtil.azureCloudbreakUsage(1L);
+        return TestUtil.gcpCloudbreakUsage(1L);
     }
 
     private CbUser createCbUser() {

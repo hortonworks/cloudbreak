@@ -84,18 +84,18 @@ public class ReactorFlowManagerTest {
 
     @Test
     public void shouldReturnTheNextFailureTransition() throws Exception {
-        ProvisionRequest provisionRequest =  new ProvisionRequest(CloudPlatform.AZURE, 1L);
-        StackStatusUpdateRequest stackStatusUpdateRequest = new StackStatusUpdateRequest(CloudPlatform.AZURE, 1L, StatusRequest.STARTED);
-        ClusterStatusUpdateRequest clusterStatusUpdateRequest = new ClusterStatusUpdateRequest(1L, StatusRequest.STARTED, CloudPlatform.AZURE);
-        StackDeleteRequest stackDeleteRequest = new StackDeleteRequest(CloudPlatform.AZURE, 1L);
-        StackForcedDeleteRequest stackForcedDeleteRequest = new StackForcedDeleteRequest(CloudPlatform.AZURE, 1L);
-        UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(CloudPlatform.AZURE, 1L, 1, "master", ScalingType.DOWNSCALE_ONLY_CLUSTER);
-        RemoveInstanceRequest removeInstanceRequest = new RemoveInstanceRequest(CloudPlatform.AZURE, 1L, "instanceId");
+        ProvisionRequest provisionRequest =  new ProvisionRequest(CloudPlatform.GCP, 1L);
+        StackStatusUpdateRequest stackStatusUpdateRequest = new StackStatusUpdateRequest(CloudPlatform.GCP, 1L, StatusRequest.STARTED);
+        ClusterStatusUpdateRequest clusterStatusUpdateRequest = new ClusterStatusUpdateRequest(1L, StatusRequest.STARTED, CloudPlatform.GCP);
+        StackDeleteRequest stackDeleteRequest = new StackDeleteRequest(CloudPlatform.GCP, 1L);
+        StackForcedDeleteRequest stackForcedDeleteRequest = new StackForcedDeleteRequest(CloudPlatform.GCP, 1L);
+        UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(CloudPlatform.GCP, 1L, 1, "master", ScalingType.DOWNSCALE_ONLY_CLUSTER);
+        RemoveInstanceRequest removeInstanceRequest = new RemoveInstanceRequest(CloudPlatform.GCP, 1L, "instanceId");
         UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(1L, new HostGroupAdjustmentJson(), new HashSet<String>(),
-                new ArrayList<HostMetadata>(), true, CloudPlatform.AZURE, ScalingType.DOWNSCALE_ONLY_CLUSTER);
-        UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = new UpdateAllowedSubnetsRequest(CloudPlatform.AZURE, 1L, new ArrayList<SecurityRule>());
+                new ArrayList<HostMetadata>(), true, CloudPlatform.GCP, ScalingType.DOWNSCALE_ONLY_CLUSTER);
+        UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = new UpdateAllowedSubnetsRequest(CloudPlatform.GCP, 1L, new ArrayList<SecurityRule>());
         ClusterUserNamePasswordUpdateRequest clusterUserNamePasswordUpdateRequest =
-                new ClusterUserNamePasswordUpdateRequest(1L, "admin", "admin1", CloudPlatform.AZURE);
+                new ClusterUserNamePasswordUpdateRequest(1L, "admin", "admin1", CloudPlatform.GCP);
 
         flowManager.triggerProvisioning(provisionRequest);
         flowManager.triggerClusterInstall(provisionRequest);

@@ -1,16 +1,5 @@
 package com.sequenceiq.cloudbreak.common.type;
-//TODO Clean this enum class
 public enum ResourceType {
-    // AZURE
-    AZURE_VIRTUAL_MACHINE,
-    AZURE_CLOUD_SERVICE,
-    AZURE_RESERVED_IP,
-    AZURE_BLOB,
-    AZURE_STORAGE,
-    AZURE_NETWORK,
-    AZURE_AFFINITY_GROUP,
-    AZURE_SERVICE_CERTIFICATE,
-
     // AWS
     CLOUDFORMATION_STACK,
     AWS_RESERVED_IP,

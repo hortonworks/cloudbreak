@@ -38,21 +38,15 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteria;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration
@@ -81,18 +75,6 @@ public class AppConfig {
 
     @Value("${cb.container.threadpool.capacity.size:" + CB_CONTAINER_THREADPOOL_CAPACITY_SIZE + "}")
     private int containerteQueueCapacity;
-
-    @Inject
-    private List<CloudPlatformConnector> cloudPlatformConnectorList;
-
-    @Inject
-    private List<ProvisionSetup> provisionSetups;
-
-    @Inject
-    private List<MetadataSetup> metadataSetups;
-
-    @Inject
-    private List<CredentialHandler<? extends Credential>> credentialHandlers;
 
     @Inject
     private List<FileSystemConfigurator> fileSystemConfigurators;
@@ -139,42 +121,6 @@ public class AppConfig {
     @Bean
     public ParallelContainerRunner simpleParalellContainerRunnerExecutor() {
         return new ExecutorBasedParallelContainerRunner(containerBootstrapBuilderExecutor());
-    }
-
-    @Bean
-    public Map<CloudPlatform, CloudPlatformConnector> platformConnectors() {
-        Map<CloudPlatform, CloudPlatformConnector> map = new HashMap<>();
-        for (CloudPlatformConnector provisionService : cloudPlatformConnectorList) {
-            map.put(provisionService.getCloudPlatform(), provisionService);
-        }
-        return map;
-    }
-
-    @Bean
-    public Map<CloudPlatform, ProvisionSetup> provisionSetups() {
-        Map<CloudPlatform, ProvisionSetup> map = new HashMap<>();
-        for (ProvisionSetup provisionSetup : provisionSetups) {
-            map.put(provisionSetup.getCloudPlatform(), provisionSetup);
-        }
-        return map;
-    }
-
-    @Bean
-    public Map<CloudPlatform, MetadataSetup> metadataSetups() {
-        Map<CloudPlatform, MetadataSetup> map = new HashMap<>();
-        for (MetadataSetup metadataSetup : metadataSetups) {
-            map.put(metadataSetup.getCloudPlatform(), metadataSetup);
-        }
-        return map;
-    }
-
-    @Bean
-    public Map<CloudPlatform, CredentialHandler> credentialHandlers() {
-        Map<CloudPlatform, CredentialHandler> map = new HashMap<>();
-        for (CredentialHandler credentialHandler : credentialHandlers) {
-            map.put(credentialHandler.getCloudPlatform(), credentialHandler);
-        }
-        return map;
     }
 
     @Bean

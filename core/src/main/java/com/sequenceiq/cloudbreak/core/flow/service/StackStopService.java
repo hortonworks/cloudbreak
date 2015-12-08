@@ -11,8 +11,8 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @Service
 public class StackStopService {
@@ -26,7 +26,7 @@ public class StackStopService {
     private CloudbreakEventService cloudbreakEventService;
 
     @Inject
-    private CloudPlatformResolver platformResolver;
+    private ServiceProviderConnectorAdapter connector;
 
     public boolean isStopPossible(FlowContext context) throws CloudbreakException {
         StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
@@ -44,7 +44,7 @@ public class StackStopService {
         StackStatusUpdateContext stackStatusUpdateContext = (StackStatusUpdateContext) context;
         long stackId = stackStatusUpdateContext.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
-        platformResolver.connector(stack.cloudPlatform()).stopAll(stack);
+        connector.stopAll(stack);
         return stackStatusUpdateContext;
     }
 

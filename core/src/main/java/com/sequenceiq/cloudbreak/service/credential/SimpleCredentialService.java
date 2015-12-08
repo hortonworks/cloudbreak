@@ -21,9 +21,9 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 
 @Service
 public class SimpleCredentialService implements CredentialService {
@@ -37,7 +37,7 @@ public class SimpleCredentialService implements CredentialService {
     private StackRepository stackRepository;
 
     @Inject
-    private CloudPlatformResolver platformResolver;
+    private ServiceProviderCredentialAdapter credentialAdapter;
 
     @Inject
     private NotificationSender notificationSender;
@@ -72,7 +72,7 @@ public class SimpleCredentialService implements CredentialService {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
-        platformResolver.credential(credential.cloudPlatform()).init(credential);
+        credentialAdapter.init(credential);
         Credential savedCredential;
         try {
             savedCredential = credentialRepository.save(credential);
@@ -126,7 +126,7 @@ public class SimpleCredentialService implements CredentialService {
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         } else {
-            return platformResolver.credential(credential.cloudPlatform()).update(credential);
+            return credentialAdapter.update(credential);
         }
     }
 

@@ -51,7 +51,7 @@ public class InstanceGroupToJsonConverterTest extends AbstractEntityConverterTes
 
     @Override
     public InstanceGroup createSource() {
-        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.azureTemplate(1L));
+        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.gcpTemplate(1L));
         instanceGroup.setInstanceMetaData(getInstanceMetaData(instanceGroup));
         return instanceGroup;
     }

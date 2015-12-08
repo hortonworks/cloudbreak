@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ImageCheckerContext;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ImageStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderSetupAdapter;
 import com.sequenceiq.cloudbreak.service.stack.event.CheckImageComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.PrepareImageComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
@@ -26,7 +26,7 @@ public class ProvisioningSetupService {
     private StackRepository stackRepository;
 
     @Inject
-    private CloudPlatformResolver cloudPlatformResolver;
+    private ServiceProviderSetupAdapter provisioning;
 
     @Inject
     private PersistenceNotifier persistenceNotifier;
@@ -38,14 +38,11 @@ public class ProvisioningSetupService {
     private ImageStatusCheckerTask imageStatusCheckerTask;
 
     public ProvisionSetupComplete setup(Stack stack) throws Exception {
-        return (ProvisionSetupComplete)
-                cloudPlatformResolver.provisioning(stack.cloudPlatform()).setupProvisioning(stack);
+        return (ProvisionSetupComplete) provisioning.setupProvisioning(stack);
     }
 
     public PrepareImageComplete prepareImage(Stack stack) throws Exception {
-        PrepareImageComplete prepareImageComplete = (PrepareImageComplete)
-                cloudPlatformResolver.provisioning(stack.cloudPlatform()).prepareImage(stack);
-        return prepareImageComplete;
+        return (PrepareImageComplete) provisioning.prepareImage(stack);
     }
 
     public CheckImageComplete checkImage(Stack stack) throws Exception {

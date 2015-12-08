@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -13,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.type.Status;
@@ -29,13 +27,11 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 
 @Component
 public class ClusterBootstrapperErrorHandler {
@@ -53,20 +49,20 @@ public class ClusterBootstrapperErrorHandler {
     @Inject
     private HostMetadataRepository hostMetadataRepository;
 
-    @javax.annotation.Resource
-    private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
-
     @Inject
     private CloudbreakEventService eventService;
-
-    @Inject
-    private CloudPlatformResolver platformResolver;
 
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private ServiceProviderConnectorAdapter connector;
+
+    @Inject
+    private ServiceProviderMetadataAdapter metadata;
 
     private enum Msg {
 
@@ -138,16 +134,14 @@ public class ClusterBootstrapperErrorHandler {
 
     private void deleteResourceAndDependencies(Stack stack, InstanceMetaData instanceMetaData) {
         LOGGER.info("Rolling back instance [name: {}, id: {}]", instanceMetaData.getId(), instanceMetaData.getInstanceId());
-        CloudPlatformConnector cloudPlatformConnector = platformResolver.connector(stack.cloudPlatform());
         Set<String> instanceIds = new HashSet<>();
         instanceIds.add(instanceMetaData.getInstanceId());
-        cloudPlatformConnector.removeInstances(stack, instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
+        connector.removeInstances(stack, instanceIds, instanceMetaData.getInstanceGroup().getGroupName());
         LOGGER.info("Deleted instance [name: {}, id: {}]", instanceMetaData.getId(), instanceMetaData.getInstanceId());
     }
 
     private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {
-        MetadataSetup metadataSetup = platformResolver.metadata(stack.cloudPlatform());
-        ResourceType instanceResourceType = metadataSetup.getInstanceResourceType();
+        ResourceType instanceResourceType = metadata.getInstanceResourceType();
         Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), instanceMetaData.getInstanceId(), instanceResourceType);
         if (resource != null) {
             resourceRepository.delete(resource.getId());

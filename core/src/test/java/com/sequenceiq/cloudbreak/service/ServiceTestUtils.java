@@ -8,7 +8,6 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -127,14 +126,6 @@ public final class ServiceTestUtils {
 
     public static Credential createCredential(String owner, String account, CloudPlatform platform) {
         switch (platform) {
-            case AZURE:
-                AzureCredential azureCredential = new AzureCredential();
-                azureCredential.setId(1L);
-                azureCredential.setOwner(owner);
-                azureCredential.setAccount(account);
-                azureCredential.setPublicInAccount(true);
-                azureCredential.setPublicKey(PUBLIC_KEY);
-                return azureCredential;
             case AWS:
                 AwsCredential awsCredential = new AwsCredential();
                 awsCredential.setId(1L);
@@ -163,18 +154,6 @@ public final class ServiceTestUtils {
 
     public static Template createTemplate(String owner, String account, CloudPlatform platform) {
         switch (platform) {
-            case AZURE:
-                Template azureTemplate = new Template();
-                azureTemplate.setId(1L);
-                azureTemplate.setOwner(owner);
-                azureTemplate.setAccount(account);
-                azureTemplate.setInstanceType(STANDARD_D1);
-                azureTemplate.setVolumeCount(1);
-                azureTemplate.setVolumeSize(100);
-                azureTemplate.setDescription("azure test template");
-                azureTemplate.setPublicInAccount(true);
-                azureTemplate.setCloudPlatform(CloudPlatform.AZURE);
-                return azureTemplate;
             case AWS:
                 Template awsTemplate = new Template();
                 awsTemplate.setId(1L);

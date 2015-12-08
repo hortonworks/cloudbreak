@@ -69,14 +69,13 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
+public class ServiceProviderConnectorAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderConnectorAdapter.class);
     private static final String ROLLBACK_MESSAGE = "stack.infrastructure.create.rollback";
@@ -100,7 +99,6 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
     @Inject
     private InstanceMetadataService instanceMetadataService;
 
-    @Override
     public Set<Resource> buildStack(Stack stack, Map<String, Object> setupProperties) {
         LOGGER.info("Assembling launch request for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -126,7 +124,6 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         }
     }
 
-    @Override
     public void startAll(Stack stack) {
         LOGGER.info("Assembling start request for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -158,7 +155,6 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         }
     }
 
-    @Override
     public void stopAll(Stack stack) {
         LOGGER.info("Assembling stop request for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -190,7 +186,6 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         }
     }
 
-    @Override
     public Set<Resource> addInstances(Stack stack, Integer adjustment, String instanceGroup) {
         LOGGER.debug("Assembling upscale stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -222,7 +217,6 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         }
     }
 
-    @Override
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -257,7 +251,6 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         }
     }
 
-    @Override
     public void deleteStack(Stack stack, Credential credential) {
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -285,13 +278,11 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         }
     }
 
-    @Override
     public void rollback(Stack stack, Set<Resource> resourceSet) {
         LOGGER.info("Rollback the whole stack for {}", stack.getId());
         deleteStack(stack, stack.getCredential());
     }
 
-    @Override
     public void updateAllowedSubnets(Stack stack) {
         LOGGER.debug("Assembling update subnet event for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -318,12 +309,10 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         }
     }
 
-    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.ADAPTER;
     }
 
-    @Override
     public Set<String> getSSHFingerprints(Stack stack, String gateway) {
         Set<String> result = new HashSet<>();
         LOGGER.debug("Get SSH fingerprints of gateway instance for stack: {}", stack);
@@ -351,7 +340,6 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         return result;
     }
 
-    @Override
     public PlatformParameters getPlatformParameters(Stack stack) {
         LOGGER.debug("Get platform parameters for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -374,7 +362,6 @@ public class ServiceProviderConnectorAdapter implements CloudPlatformConnector {
         }
     }
 
-    @Override
     public Variant checkAndGetPlatformVariant(Stack stack) {
         LOGGER.debug("Get platform variant for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));

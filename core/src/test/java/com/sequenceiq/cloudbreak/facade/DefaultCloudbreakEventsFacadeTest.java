@@ -39,7 +39,7 @@ public class DefaultCloudbreakEventsFacadeTest {
 
     @Test
     public void findUsagesForParametersConvertUsagesToJson() {
-        List<CloudbreakEvent> cloudbreakEvents = TestUtil.generateAzureCloudbreakEvents(10);
+        List<CloudbreakEvent> cloudbreakEvents = TestUtil.generateGcpCloudbreakEvents(10);
         when(cloudbreakEventService.cloudbreakEvents(anyString(), anyLong())).thenReturn(cloudbreakEvents);
         when(conversionService.convert(anyObject(), any(TypeDescriptor.class), any(TypeDescriptor.class))).thenReturn(new ArrayList<CloudbreakEventsJson>());
 

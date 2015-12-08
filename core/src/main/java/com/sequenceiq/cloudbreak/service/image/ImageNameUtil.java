@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_AMI_MAP;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AZURE_IMAGE_URI;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AZURE_RM_IMAGE;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_GCP_SOURCE_IMAGE_PATH;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_IMAGE;
@@ -46,9 +45,6 @@ public class ImageNameUtil {
             case AWS:
                 selectedImage = prepareAmis().get(region);
                 break;
-            case AZURE:
-                selectedImage = selectImageName(azureImage, CB_AZURE_IMAGE_URI);
-                break;
             case GCP:
                 selectedImage = selectImageName(gcpImage, CB_GCP_SOURCE_IMAGE_PATH);
                 break;
@@ -72,9 +68,6 @@ public class ImageNameUtil {
         switch (cloudPlatform) {
             case AWS:
                 selectedImage = prepareAmis().get(stack.getRegion());
-                break;
-            case AZURE:
-                selectedImage = selectImageName(azureImage, CB_AZURE_IMAGE_URI);
                 break;
             case GCP:
                 selectedImage = selectImageName(gcpImage, CB_GCP_SOURCE_IMAGE_PATH);

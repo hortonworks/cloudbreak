@@ -29,10 +29,10 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.service.CloudPlatformResolver;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @Service
 public class TerminationService {
@@ -40,7 +40,7 @@ public class TerminationService {
     private static final String DELIMITER = "_";
 
     @Inject
-    private CloudPlatformResolver platformResolver;
+    private ServiceProviderConnectorAdapter connector;
 
     @Inject
     private StackRepository stackRepository;
@@ -63,7 +63,7 @@ public class TerminationService {
     public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {
         final Stack stack = stackRepository.findOneWithLists(stackId);
         try {
-            platformResolver.connector(cloudPlatform).deleteStack(stack, stack.getCredential());
+            connector.deleteStack(stack, stack.getCredential());
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);

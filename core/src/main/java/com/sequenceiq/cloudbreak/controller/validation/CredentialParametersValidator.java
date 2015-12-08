@@ -50,9 +50,6 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
             case AWS:
                 valid = validateParams(request.getParameters(), context, requiredAWSParams);
                 break;
-            case AZURE:
-                valid = validateParams(request.getParameters(), context, requiredAzureParams);
-                break;
             case GCP:
                 valid = validateParams(request.getParameters(), context, requiredGcpParams);
                 break;
