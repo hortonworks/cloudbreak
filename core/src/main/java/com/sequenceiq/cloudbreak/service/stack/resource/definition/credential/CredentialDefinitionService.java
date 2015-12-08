@@ -27,7 +27,7 @@ public class CredentialDefinitionService {
     @Inject
     private PBEStringCleanablePasswordEncryptor encryptor;
 
-    public Map<String, Object> processProperties(CloudPlatform cloudPlatform, Map<String, Object> properties) throws RuntimeException {
+    public Map<String, Object> processProperties(CloudPlatform cloudPlatform, Map<String, Object> properties) {
         String json = definitionService.getResourceDefinition(cloudPlatform.name(), RESOURCE_TYPE);
         Definition definition;
         try {
@@ -38,7 +38,7 @@ public class CredentialDefinitionService {
         return processValues(definition, properties);
     }
 
-    private Map<String, Object> processValues(Definition definition, Map<String, Object> properties) throws MissingParameterException {
+    private Map<String, Object> processValues(Definition definition, Map<String, Object> properties) {
         Map<String, Object> processed = new HashMap<>();
         processed.putAll(processValues(properties, definition.getDefaultValues()));
         Object selector = properties.get(SELECTOR);
@@ -49,7 +49,7 @@ public class CredentialDefinitionService {
         return processed;
     }
 
-    private List<Value> collectSelectorValues(Definition definition, String selectorName) throws MissingParameterException {
+    private List<Value> collectSelectorValues(Definition definition, String selectorName) {
         List<Value> values = new ArrayList<>();
         List<Selector> selectors = definition.getSelectors();
         String currentSelector = selectorName;
@@ -61,7 +61,7 @@ public class CredentialDefinitionService {
         return values;
     }
 
-    private Selector findSelector(List<Selector> selectors, String selector) throws MissingParameterException {
+    private Selector findSelector(List<Selector> selectors, String selector) {
         for (Selector s : selectors) {
             if (s.getName().equals(selector)) {
                 return s;
@@ -70,7 +70,7 @@ public class CredentialDefinitionService {
         return null;
     }
 
-    private Map<String, Object> processValues(Map<String, Object> properties, List<Value> values) throws MissingParameterException {
+    private Map<String, Object> processValues(Map<String, Object> properties, List<Value> values) {
         Map<String, Object> processed = new HashMap<>();
         for (Value value : values) {
             String key = value.getName();
@@ -92,7 +92,7 @@ public class CredentialDefinitionService {
         return null != object;
     }
 
-    private String getProperty(Map<String, Object> properties, String key) throws MissingParameterException {
+    private String getProperty(Map<String, Object> properties, String key) {
         Object value = properties.get(key);
         if (value == null) {
             throw new MissingParameterException(String.format("Missing '%s' property!", key));

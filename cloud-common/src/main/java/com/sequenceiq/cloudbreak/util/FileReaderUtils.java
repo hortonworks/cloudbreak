@@ -22,7 +22,7 @@ public final class FileReaderUtils {
     private FileReaderUtils() {
     }
 
-    public static final String readFileFromClasspathQuietly(String fileName) {
+    public static String readFileFromClasspathQuietly(String fileName) {
         try {
             return readFileFromClasspath(fileName);
         } catch (IOException e) {
@@ -31,7 +31,7 @@ public final class FileReaderUtils {
         }
     }
 
-    public static final String readFileFromClasspath(String fileName) throws IOException {
+    public static String readFileFromClasspath(String fileName) throws IOException {
         StringBuilder sb = new StringBuilder();
         BufferedReader br;
         br = new BufferedReader(new InputStreamReader(new ClassPathResource(fileName).getInputStream(), "UTF-8"));
@@ -41,17 +41,17 @@ public final class FileReaderUtils {
         return sb.toString();
     }
 
-    public static final String readFileFromPath(String fileName) throws IOException {
+    public static String readFileFromPath(String fileName) throws IOException {
         String br = IOUtils.toString(new FileInputStream(fileName));
         return BaseEncoding.base64().encode(br.getBytes());
     }
 
-    public static final String readBinaryFileFromPath(String fileName) throws IOException {
+    public static String readBinaryFileFromPath(String fileName) throws IOException {
         Path path = Paths.get(fileName);
         return BaseEncoding.base64().encode(Files.readAllBytes(path));
     }
 
-    public static final String readFileFromPathToString(String fileName) throws IOException {
+    public static String readFileFromPathToString(String fileName) throws IOException {
         Path path = Paths.get(fileName);
         return new String(Files.readAllBytes(path));
     }

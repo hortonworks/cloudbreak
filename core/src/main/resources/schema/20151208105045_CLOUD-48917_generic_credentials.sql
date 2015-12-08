@@ -4,7 +4,7 @@
 ALTER TABLE credential ADD COLUMN attributes TEXT;
 ALTER TABLE credential ADD COLUMN cloudplatform VARCHAR(255);
 
-UPDATE credential SET attributes = json_build_object('userName', username, 'password', password, 'tenantName', tenantname, 'endpoint', endpoint, 'userDomain', userdomain, 'keystoneVersion', keystoneversion, 'keystoneAuthScope', keystoneauthscope, 'projectName', projectname, 'projectDomainName', projectdomainname, 'domainName', domainname) WHERE dtype = 'OpenStackCredential';
+UPDATE credential SET attributes = json_build_object('selector', 'cb-keystone-v2', 'userName', username, 'password', password, 'tenantName', tenantname, 'endpoint', endpoint, 'userDomain', userdomain, 'keystoneVersion', keystoneversion, 'keystoneAuthScope', keystoneauthscope, 'projectName', projectname, 'projectDomainName', projectdomainname, 'domainName', domainname) WHERE dtype = 'OpenStackCredential';
 UPDATE credential SET attributes = json_build_object('serviceAccountId', serviceaccountid, 'serviceAccountPrivateKey', serviceaccountprivatekey, 'projectId', projectid) WHERE dtype = 'GcpCredential';
 UPDATE credential SET attributes = json_build_object('subscriptionId', subscriptionid, 'tenantId', tenantid, 'accessKey', acceskey, 'secretKey', secretkey) WHERE dtype = 'AzureRmCredential';
 UPDATE credential SET attributes = json_build_object('roleArn', rolearn, 'keyPairName', keypairname) WHERE dtype = 'AwsCredential';

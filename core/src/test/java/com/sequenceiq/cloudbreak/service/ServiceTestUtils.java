@@ -4,15 +4,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Status;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -25,13 +22,8 @@ public final class ServiceTestUtils {
     public static final String PUBLIC_KEY = "mypublickey";
     private static final String C3LARGE_INSTANCE = "c3.large";
     private static final String N1_STANDARD_1 = "n1-standard-1";
-    private static final String STANDARD_D1 = "Standard_D1";
 
     private ServiceTestUtils() {
-    }
-
-    public static Blueprint createBlueprint() {
-        return createBlueprint(DUMMY_OWNER, DUMMY_ACCOUNT);
     }
 
     public static Blueprint createBlueprint(String owner, String account) {
@@ -127,18 +119,19 @@ public final class ServiceTestUtils {
     public static Credential createCredential(String owner, String account, CloudPlatform platform) {
         switch (platform) {
             case AWS:
-                AwsCredential awsCredential = new AwsCredential();
+                Credential awsCredential = new Credential();
                 awsCredential.setId(1L);
                 awsCredential.setOwner(owner);
+                awsCredential.setCloudPlatform(CloudPlatform.AWS);
                 awsCredential.setAccount(account);
                 awsCredential.setPublicInAccount(true);
-                awsCredential.setRoleArn("rolearn");
                 awsCredential.setPublicKey(PUBLIC_KEY);
                 return awsCredential;
             case GCP:
-                GcpCredential gcpCredential = new GcpCredential();
+                Credential gcpCredential = new Credential();
                 gcpCredential.setId(1L);
                 gcpCredential.setOwner(owner);
+                gcpCredential.setCloudPlatform(CloudPlatform.GCP);
                 gcpCredential.setAccount(account);
                 gcpCredential.setPublicInAccount(true);
                 gcpCredential.setPublicKey(PUBLIC_KEY);
@@ -194,7 +187,4 @@ public final class ServiceTestUtils {
         return event;
     }
 
-    public static DescribeInstancesResult createDescribeInstanceResult() {
-        return new DescribeInstancesResult();
-    }
 }
