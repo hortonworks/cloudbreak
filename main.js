@@ -333,6 +333,8 @@ function continueInit() {
   updateCloudbreakGroups = function (token, userId, requestedScopes) {
       if (requestedScopes == undefined || requestedScopes == null) {
           updateGroup(token, userId, 'cloudbreak.templates')
+          updateGroup(token, userId, 'cloudbreak.networks')
+          updateGroup(token, userId, 'cloudbreak.securitygroups')
           updateGroup(token, userId, 'cloudbreak.stacks')
           updateGroup(token, userId, 'cloudbreak.blueprints')
           updateGroup(token, userId, 'cloudbreak.credentials')
