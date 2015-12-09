@@ -40,14 +40,12 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="sl_ambariServerIp">{{msg.active_cluster_ambari_address_label}}</label>
                                 <div class="col-sm-9">
-                                    <p id="sl_ambariServerIp" class="form-control-static">
-                                        <div ng-if="activeCluster.cluster.ambariServerIp != null">
-                                            <a ng-show="activeCluster.cluster.ambariServerIp != null" target="_blank" href="http://{{activeCluster.cluster.ambariServerIp}}:8080">http://{{activeCluster.cluster.ambariServerIp}}:8080</a>
-                                        </div>
-                                        <div ng-if="activeCluster.cluster.ambariServerIp == null">
-                                            <a ng-show="activeCluster.cluster.ambariServerIp == null" target="_blank" href="">{{msg.active_cluster_ambari_not_available_label}}</a>
-                                        </div>
-                                    </p>
+                                    <div ng-if="activeCluster.cluster.ambariServerIp != null">
+                                        <a target="_blank" class="form-control-static review-a" href="http://{{activeCluster.cluster.ambariServerIp}}:8080">http://{{activeCluster.cluster.ambariServerIp}}:8080</a>
+                                    </div>
+                                    <div ng-if="activeCluster.cluster.ambariServerIp == null">
+                                        <a target="_blank" class="form-control-static review-a" href="">{{msg.active_cluster_ambari_not_available_label}}</a>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -129,7 +127,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="sl_network_active">{{msg.active_cluster_network_label}}</label>
                                 <div class="networkselect col-sm-8">
-                                    <a id="sl_network_active" class="networkselect form-control-static review-a" ng-repeat="network in $root.networks|filter: { id: $root.activeCluster.networkId }:false" segment="#panel-network-collapse{{$root.activeCluster.networkId}}">{{network.name}}</a>
+                                    <a id="sl_network_active" class="networkselect form-control-static review-a" ng-repeat="network in $root.networks|filter: { id: $root.activeCluster.networkId }:notStrictFilter" segment="#panel-network-collapse{{$root.activeCluster.networkId}}">{{network.name}}</a>
                                 </div>
                             </div>
                             <div class="row" style="margin-top: 20px;    margin-bottom: 30px;">
