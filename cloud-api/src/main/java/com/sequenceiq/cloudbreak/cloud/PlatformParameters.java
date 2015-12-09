@@ -8,7 +8,6 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 
 /**
  * Platform parameters.
- *
  */
 public interface PlatformParameters {
 
@@ -46,4 +45,12 @@ public interface PlatformParameters {
      * @return the {@link AvailabilityZones} of a platform
      */
     AvailabilityZones availabilityZones();
+
+    /**
+     * Return the definition of a resource in JSON format.
+     *
+     * @param resource type of the resource (available ones: "credential")
+     * @return the definition in JSON
+     */
+    String resourceDefinition(String resource);
 }

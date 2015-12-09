@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Credential;
 
 public class RsaPublicKeyValidatorTest {
@@ -128,7 +127,7 @@ public class RsaPublicKeyValidatorTest {
     }
 
     private Credential azureCredential(String publicKey) {
-        Credential credential = new AwsCredential();
+        Credential credential = new Credential();
         credential.setPublicKey(publicKey);
         return credential;
     }

@@ -24,7 +24,7 @@ public class ArmClient {
     }
 
     public AzureRMClient createAccess(ArmCredentialView armCredential) {
-        return new AzureRMClient(armCredential.getTenantId(), armCredential.getAccesKey(), armCredential.getSecretKey(), armCredential.getSubscriptionId());
+        return new AzureRMClient(armCredential.getTenantId(), armCredential.getAccessKey(), armCredential.getSecretKey(), armCredential.getSubscriptionId());
     }
 
 

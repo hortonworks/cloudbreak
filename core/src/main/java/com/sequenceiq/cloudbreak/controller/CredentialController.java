@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UnknownFormatConversionException;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -27,15 +26,10 @@ import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.Credential
 import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AzureRmCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
-import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -50,9 +44,6 @@ public class CredentialController {
     @Inject
     private CredentialService credentialService;
 
-    @Inject
-    private Decorator<Credential> credentialDecorator;
-
     @ApiOperation(value = CredentialOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "user/credentials", method = RequestMethod.POST)
     @ResponseBody
@@ -61,7 +52,7 @@ public class CredentialController {
         return createCredential(user, credentialRequest, false);
     }
 
-    @ApiOperation(value =  CredentialOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
+    @ApiOperation(value = CredentialOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     @RequestMapping(value = "account/credentials", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> saveAccountCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialRequest credentialRequest) {
@@ -143,47 +134,18 @@ public class CredentialController {
 
     private ResponseEntity<IdJson> createCredential(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
         Credential credential = convert(credentialRequest, publicInAccount);
-        credential = credentialDecorator.decorate(credential);
         credential = credentialService.create(user, credential);
         return new ResponseEntity<>(new IdJson(credential.getId()), HttpStatus.CREATED);
     }
 
     private Credential convert(CredentialRequest json, boolean publicInAccount) {
-        Credential converted = null;
-        switch (json.getCloudPlatform()) {
-        case AWS:
-            converted = conversionService.convert(json, AwsCredential.class);
-            break;
-        case GCP:
-            converted = conversionService.convert(json, GcpCredential.class);
-            break;
-        case OPENSTACK:
-            converted = conversionService.convert(json, OpenStackCredential.class);
-            break;
-        case AZURE_RM:
-            converted = conversionService.convert(json, AzureRmCredential.class);
-            break;
-        default:
-            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", json.getCloudPlatform()));
-        }
+        Credential converted = conversionService.convert(json, Credential.class);
         converted.setPublicInAccount(publicInAccount);
         return converted;
     }
 
     private CredentialResponse convert(Credential credential) {
-
-        switch (credential.cloudPlatform()) {
-        case AWS:
-            return conversionService.convert((AwsCredential) credential, CredentialResponse.class);
-        case GCP:
-            return conversionService.convert((GcpCredential) credential, CredentialResponse.class);
-        case OPENSTACK:
-            return conversionService.convert((OpenStackCredential) credential, CredentialResponse.class);
-        case AZURE_RM:
-            return conversionService.convert((AzureRmCredential) credential, CredentialResponse.class);
-        default:
-            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
-        }
+        return conversionService.convert(credential, CredentialResponse.class);
     }
 
     private Set<CredentialResponse> convertCredentials(Set<Credential> credentials) {

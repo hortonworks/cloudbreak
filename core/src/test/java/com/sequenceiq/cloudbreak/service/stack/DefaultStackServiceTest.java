@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -174,7 +174,7 @@ public class DefaultStackServiceTest {
     }
 
     private Stack stack(Status stackStatus, Status clusterStatus) {
-        GcpCredential gcpCredential = new GcpCredential();
+        Credential gcpCredential = new Credential();
         Stack stack = new Stack();
         stack.setStatus(stackStatus);
         stack.setCredential(gcpCredential);

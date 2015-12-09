@@ -1,27 +1,24 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.CredentialResponse;
-import com.sequenceiq.cloudbreak.controller.validation.AWSCredentialParam;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
-public class AwsCredentialToJsonConverter extends AbstractConversionServiceAwareConverter<AwsCredential, CredentialResponse> {
+public class CredentialToJsonConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialResponse> {
     @Override
-    public CredentialResponse convert(AwsCredential source) {
+    public CredentialResponse convert(Credential source) {
         CredentialResponse credentialJson = new CredentialResponse();
         credentialJson.setId(source.getId());
-        credentialJson.setCloudPlatform(CloudPlatform.AWS);
+        credentialJson.setCloudPlatform(source.cloudPlatform());
         credentialJson.setName(source.getName());
         credentialJson.setPublicInAccount(source.isPublicInAccount());
-        Map<String, Object> params = new HashMap<>();
-        params.put(AWSCredentialParam.ROLE_ARN.getName(), source.getRoleArn());
-        credentialJson.setParameters(params);
+        Json attributes = source.getAttributes();
+        if (attributes != null) {
+            credentialJson.setParameters(attributes.getMap());
+        }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         credentialJson.setPublicKey(source.getPublicKey());
         credentialJson.setLoginUserName(source.getLoginUserName());

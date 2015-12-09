@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -12,6 +15,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -56,7 +61,7 @@ import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
                         + " AND c.archived IS FALSE")
 })
 
-public abstract class Credential {
+public class Credential {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "credential_generator")
@@ -81,6 +86,14 @@ public abstract class Credential {
 
     @Column(columnDefinition = "boolean default false")
     private boolean archived;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CloudPlatform cloudPlatform;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json attributes;
 
     public Credential() {
 
@@ -142,8 +155,6 @@ public abstract class Credential {
         this.publicKey = publicKey;
     }
 
-    public abstract CloudPlatform cloudPlatform();
-
     public boolean isArchived() {
         return archived;
     }
@@ -166,5 +177,21 @@ public abstract class Credential {
 
     public String getLoginPassword() {
         return publicKey.replaceAll("Basic:", "").trim();
+    }
+
+    public CloudPlatform cloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
+    public Json getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Json attributes) {
+        this.attributes = attributes;
     }
 }

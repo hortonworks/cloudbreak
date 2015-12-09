@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
 public class GcpPlatformParameters implements PlatformParameters {
@@ -75,6 +76,11 @@ public class GcpPlatformParameters implements PlatformParameters {
             regions.put(region.region(), region.availabilityZones());
         }
         return new AvailabilityZones(regions);
+    }
+
+    @Override
+    public String resourceDefinition(String resource) {
+        return FileReaderUtils.readFileFromClasspathQuietly("definitions/gcp-" + resource + ".json");
     }
 
     @Override

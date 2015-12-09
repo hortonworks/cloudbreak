@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
@@ -34,13 +33,11 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.GcpCredential;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -50,29 +47,10 @@ import com.sequenceiq.cloudbreak.domain.Template;
 
 public class TestUtil {
 
-    public static final String DUMMY_ADDRESS_PREFIX_CIDR = "dummyAddressPrefixCIDR";
     public static final String DUMMY_DESCRIPTION = "dummyDescription";
-    public static final String DUMMY_VPC_ID = "dummyVpcId";
     public static final String N1_HIGHCPU_16_INSTANCE = "n1-highcpu-16";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
-
-    private static final String AZURE_CERTIFICATE_CONTENT =
-            "MIICsDCCAhmgAwIBAgIJAPtq+czPZYU/MA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV\n"
-                    + "BAYTAkFVMRMwEQYDVQQIsdfsd21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX\n"
-                    + "aWRnaXRzIFB0eSBMdGQwHhcNMTQwNTEzMDIxNDUwWhcNMTUwNTEzMDIxNDUwWjBF\n"
-                    + "MQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50\n"
-                    + "ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB\n"
-                    + "gQCvv6nBCp3wiqDVT0g1dEAJvfLiTU6oPVau9FCaNWrxJgkR697kuxMNhY4CpLXS\n"
-                    + "DgmSh/guI4iN5pmQtJ5RJsVBZRHWEu7k+GdvSFkNJ/7+i1t2DOjNtnOxGQ6TpjZg\n"
-                    + "lyDGNW2m2IY9iaaTzzwhowCcfMMwC+S0OzZ5AT3YE152XQIDAQABo4GnMIGkMB0G\n"
-                    + "A1UdDgQWBBR/lhZljxO+cPl9EQmfSb2sndrKFDB1BgNVHSMEbjBsgBR/lhZljxO+\n"
-                    + "cPl9EQmfSb2sndrKFKFJpEcwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgTClNvbWUt\n"
-                    + "U3RhdGUxITAfBgNVBAoTGsdfdGVybmV0IFdpZGdpdHMgUHR5IEx0ZIIJAPtq+czP\n"
-                    + "ZYU/MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEABYXu5HwJ8F9LyPrD\n"
-                    + "HkUQUM6HRoybllBZWf0uwrM5Mey/pYwhouR1PNd2/y6OXt5mjzxLG/53YvidfrEG\n"
-                    + "I5QW2HYwS3jZ2zlOLx5fj+wmeenxNrMxgP7XkbkVcBa76wdfZ1xBAr0ybXb13Gi2\n"
-                    + "TA0+meQcD7qPGKxxijqwU5Y1QTw=\n";
 
     private static final String AZURE_PUB_KEY =
             "-----BEGIN CERTIFICATE-----\n"
@@ -93,9 +71,6 @@ public class TestUtil {
                     + "TA0+meQcD7qPGKxxijqwU5Y1QTw=\n"
                     + "-----END CERTIFICATE-----";
     private static final String DUMMY_NAME = "dummyName";
-    private static final String DUMMY_INTERNET_GATEWAT_ID = "dummyInternetGatewatId";
-    private static final String DUMMY_SSH_LOCATION = "dummySshLocation";
-    private static final String STANDARD_A5 = "Standard_A5";
 
     private TestUtil() {
     }
@@ -115,11 +90,11 @@ public class TestUtil {
     }
 
     public static Credential awsCredential() {
-        AwsCredential awsCredential = new AwsCredential();
+        Credential awsCredential = new Credential();
         awsCredential.setPublicKey(AZURE_PUB_KEY);
         awsCredential.setPublicInAccount(false);
         awsCredential.setArchived(false);
-        awsCredential.setRoleArn("rolearn");
+        awsCredential.setCloudPlatform(CloudPlatform.AWS);
         awsCredential.setDescription(DUMMY_DESCRIPTION);
         awsCredential.setId(1L);
         awsCredential.setLoginUserName("cb");
@@ -128,30 +103,14 @@ public class TestUtil {
     }
 
     public static Credential gcpCredential() {
-        GcpCredential credential = new GcpCredential();
-        credential.setProjectId("dummyProjectId");
-        credential.setServiceAccountId("dummyServiceAccountId");
-        credential.setServiceAccountPrivateKey("dummyServiceAccountPrivateKey");
+        Credential credential = new Credential();
         credential.setPublicKey(AZURE_PUB_KEY);
         credential.setId(1L);
         credential.setName(DUMMY_NAME);
+        credential.setCloudPlatform(CloudPlatform.GCP);
         credential.setLoginUserName("cb");
         credential.setPublicInAccount(true);
         credential.setDescription(DUMMY_DESCRIPTION);
-        return credential;
-    }
-
-    public static Credential openStackCredential() {
-        OpenStackCredential credential = new OpenStackCredential();
-        credential.setUserName("dummyUserName");
-        credential.setPassword("dummyPassword");
-        credential.setEndpoint("dummyEndpoint");
-        credential.setTenantName("dummyTenant");
-        credential.setDescription(DUMMY_DESCRIPTION);
-        credential.setId(1L);
-        credential.setLoginUserName("cb");
-        credential.setName(DUMMY_NAME);
-        credential.setPublicInAccount(true);
         return credential;
     }
 
@@ -506,7 +465,7 @@ public class TestUtil {
         return securityGroup;
     }
 
-    public static Set<InstanceGroup> generateGcpInstanceGroupsByNodeCount(int ...count) {
+    public static Set<InstanceGroup> generateGcpInstanceGroupsByNodeCount(int... count) {
         Set<InstanceGroup> instanceGroups = new HashSet<>();
         instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, gcpTemplate(1L), count[0]));
         for (int i = 1; i < count.length; i++) {

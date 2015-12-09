@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
 public class OpenStackParameters implements PlatformParameters {
@@ -66,6 +67,11 @@ public class OpenStackParameters implements PlatformParameters {
         Map<Region, List<AvailabilityZone>> availabiltyZones = new HashMap<>();
         availabiltyZones.put(region("local"), new ArrayList<AvailabilityZone>());
         return new AvailabilityZones(availabiltyZones);
+    }
+
+    @Override
+    public String resourceDefinition(String resource) {
+        return FileReaderUtils.readFileFromClasspathQuietly("definitions/openstack-" + resource + ".json");
     }
 
     @Override
