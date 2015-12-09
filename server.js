@@ -59,6 +59,8 @@ var config = {
     clientSecret: process.env.ULU_OAUTH_CLIENT_SECRET,
     clientScopes: 'openid' +
         '+cloudbreak.templates' +
+        '+cloudbreak.networks' +
+        '+cloudbreak.securitygroups' +
         '+cloudbreak.credentials' +
         '+cloudbreak.blueprints' +
         '+cloudbreak.recipes' +

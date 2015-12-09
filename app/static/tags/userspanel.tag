@@ -73,13 +73,13 @@
                                                 <tr>
                                                     <th scope="row">Networks</th>
                                                     <td class="is-visible">
-                                                        <input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.templates.write">
+                                                        <input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.networks.write">
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Security Groups</th>
                                                     <td class="is-visible">
-                                                        <input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.templates.write">
+                                                        <input type="checkbox" name="stch1" id="stch1" ng-model="invite.scopes.securitygroups.write">
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -172,13 +172,13 @@
                                                     <tr>
                                                         <th scope="row">Networks</th>
                                                         <td class="is-visible">
-                                                            <input type="checkbox" disabled name="nwch1" id="nwch1" ng-checked="isWriteScope('templates', actualuser.groups)">
+                                                            <input type="checkbox" disabled name="nwch1" id="nwch1" ng-checked="isWriteScope('networks', actualuser.groups)">
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row">Security Groups</th>
                                                         <td class="is-visible">
-                                                            <input type="checkbox" disabled name="stgch1" id="stgch1" ng-checked="isWriteScope('templates', actualuser.groups)">
+                                                            <input type="checkbox" disabled name="stgch1" id="stgch1" ng-checked="isWriteScope('securitygroups', actualuser.groups)">
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -257,13 +257,13 @@
                                                     <tr>
                                                         <th scope="row">Networks</th>
                                                         <td class="is-visible">
-                                                            <input type="checkbox" disabled name="nwch1" id="nwch1" ng-checked="isWriteScope('templates', actualuser.groups)">
+                                                            <input type="checkbox" disabled name="nwch1" id="nwch1" ng-checked="isWriteScope('networks', actualuser.groups)">
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row">Security Groups</th>
                                                         <td class="is-visible">
-                                                            <input type="checkbox" disabled name="stgch1" id="stgch1" ng-checked="isWriteScope('templates', actualuser.groups)">
+                                                            <input type="checkbox" disabled name="stgch1" id="stgch1" ng-checked="isWriteScope('securitygroups', actualuser.groups)">
                                                         </td>
                                                     </tr>
                                                 </tbody>
