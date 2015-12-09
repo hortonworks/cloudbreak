@@ -103,8 +103,6 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             } else {
                 $scope.credentialOpenstack.parameters.selector = $scope.credentialOpenstack.parameters.keystoneAuthScope;
             }
-            delete $scope.credentialOpenstack.parameters.keystoneVersion;
-            delete $scope.credentialOpenstack.parameters.keystoneAuthScope;
 
             if ($scope.credentialOpenstack.public) {
                 AccountCredential.save($scope.credentialOpenstack, handleOpenstackCredentialSuccess, handleOpenstackCredentailCreationError);
@@ -124,13 +122,6 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             }
 
             function handleOpenstackCredentailCreationError(error) {
-                if ($scope.credentialOpenstack.parameters.selector === "cb-keystone-v2") {
-                    $scope.credentialOpenstack.parameters.keystoneVersion = $scope.credentialOpenstack.parameters.selector;
-                } else {
-                    $scope.credentialOpenstack.parameters.keystoneVersion = "cb-keystone-v3";
-                    $scope.credentialOpenstack.parameters.keystoneAuthScope = $scope.credentialOpenstack.parameters.selector;
-                }
-                delete $scope.credentialOpenstack.parameters.selector;
                 $scope.showError(error, $rootScope.msg.openstack_credential_failed);
                 $scope.credentialInCreation = false;
                 $scope.showErrorMessageAlert();
