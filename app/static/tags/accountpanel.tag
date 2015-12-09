@@ -98,13 +98,13 @@
                                         <tr>
                                             <th scope="row">Networks</th>
                                             <td class="is-visible">
-                                                <input type="checkbox" disabled name="nwcrch1" id="nwcrch1" ng-checked="isWriteScope('templates', userDetails.groups)">
+                                                <input type="checkbox" disabled name="nwcrch1" id="nwcrch1" ng-checked="isWriteScope('networks', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Security Groups</th>
                                             <td class="is-visible">
-                                                <input type="checkbox" disabled name="sgstch1" id="sgstch1" ng-checked="isWriteScope('templates', userDetails.groups)">
+                                                <input type="checkbox" disabled name="sgstch1" id="sgstch1" ng-checked="isWriteScope('securitygroups', userDetails.groups)">
                                             </td>
                                         </tr>
                                     </tbody>
