@@ -37,8 +37,8 @@ public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrati
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         // WHEN
         // TODO publicInAccount
-        String id = getClient().postOpenStackCredential(credentialName, "OpenStack credential for integartiontest", userName, password, tenantName, endpoint,
-                publicKey, false);
+        String id = getClient().postOpenStackCredential(credentialName, "OpenStack credential for integration test", userName, password, tenantName, endpoint,
+                publicKey, "cb-keystone-v2", "cb-keystone-v2", null, null, null, null, null, false);
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);
