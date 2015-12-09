@@ -891,5 +891,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.toggleRecipes = function(index) {
             $scope.recipesToShow[index] = $scope.recipesToShow[index] ? false : true;
         }
+
+        $scope.notStrictFilter = function(a, b) {
+            return a == b;
+        }
     }
 ]);
