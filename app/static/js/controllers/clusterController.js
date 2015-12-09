@@ -563,6 +563,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 setSecurityGroup();
                 setRegion();
                 initWizard();
+                $scope.cluster.platformVariant = $rootScope.params.defaultVariants[$rootScope.activeCredential.cloudPlatform];
             }
         });
 
@@ -836,10 +837,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             var variants = [];
             if ($rootScope.activeCredential !== undefined) {
                 variants = $rootScope.params.platformVariants[$rootScope.activeCredential.cloudPlatform];
-                var defaultVariant = $rootScope.params.defaultVariants[$rootScope.activeCredential.cloudPlatform];
-                if (defaultVariant) {
-                    $scope.cluster.platformVariant = defaultVariant;
-                }
             }
             return variants;
         }

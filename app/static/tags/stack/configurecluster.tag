@@ -56,9 +56,7 @@
 <div class="form-group" ng-show="showAdvancedOptionForm && cluster.platformVariant">
     <label class="col-sm-3 control-label" for="platformVariant">{{msg.cluster_form_platform_variant_label}}</label>
     <div class="col-sm-3">
-        <select class="form-control" id="platformVariant" ng-model="cluster.platformVariant">
-            <option ng-repeat="variant in getPlatformVariants()" value="{{variant}}">{{variant}}</option>
-        </select>
+        <select class="form-control" id="platformVariant" ng-model="cluster.platformVariant" ng-options="variant as variant for variant in getPlatformVariants()"></select>
     </div>
 </div>
 <div class="form-group">
