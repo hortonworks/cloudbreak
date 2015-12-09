@@ -98,40 +98,39 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.createOpenstackCredential = function() {
             $scope.credentialOpenstack.cloudPlatform = "OPENSTACK";
             $scope.credentialInCreation = true;
+            if ($scope.credentialOpenstack.parameters.keystoneVersion === "cb-keystone-v2") {
+                $scope.credentialOpenstack.parameters.selector = $scope.credentialOpenstack.parameters.keystoneVersion;
+            } else {
+                $scope.credentialOpenstack.parameters.selector = $scope.credentialOpenstack.parameters.keystoneAuthScope;
+            }
 
             if ($scope.credentialOpenstack.public) {
-                AccountCredential.save($scope.credentialOpenstack, function(result) {
-                    handleOpenstackCredentialSuccess(result)
-                }, function(error) {
-                    $scope.showError(error, $rootScope.msg.openstack_credential_failed);
-                    $scope.credentialInCreation = false;
-                    $scope.showErrorMessageAlert();
-                });
+                AccountCredential.save($scope.credentialOpenstack, handleOpenstackCredentialSuccess, handleOpenstackCredentailCreationError);
             } else {
-                UserCredential.save($scope.credentialOpenstack, function(result) {
-                    handleOpenstackCredentialSuccess(result)
-                }, function(error) {
-                    $scope.showError(error, $rootScope.msg.openstack_credential_failed);
-                    $scope.credentialInCreation = false;
-                    $scope.showErrorMessageAlert();
-                });
+                UserCredential.save($scope.credentialOpenstack, handleOpenstackCredentialSuccess, handleOpenstackCredentailCreationError);
             }
 
             function handleOpenstackCredentialSuccess(result) {
                 $scope.credentialOpenstack.id = result.id;
                 $rootScope.credentials.push($scope.credentialOpenstack);
-                $scope.credentialOpenstack = {};
+                $scope.credentialOpenstack = {parameters:{keystoneVersion:"cb-keystone-v2"}};
                 $scope.showSuccess($filter("format")($rootScope.msg.openstack_credential_success, String(result.id)));
                 $scope.openstackCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
                 $scope.credentialInCreation = false;
                 $scope.unShowErrorMessageAlert();
             }
+
+            function handleOpenstackCredentailCreationError(error) {
+                $scope.showError(error, $rootScope.msg.openstack_credential_failed);
+                $scope.credentialInCreation = false;
+                $scope.showErrorMessageAlert();
+            }
         }
 
         $scope.createAzureRmCredential = function() {
             $scope.credentialAzureRm.cloudPlatform = "AZURE_RM";
-            $scope.credentialAzureRm.publicKey = $base64.encode($scope.credentialAzureRm.publicKey)
+            $scope.credentialInCreation = true;
 
             if ($scope.credentialAzureRm.public) {
                 AccountCredential.save($scope.credentialAzureRm, function(result) {
@@ -139,7 +138,6 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 }, function(error) {
                     $scope.showError(error, $rootScope.msg.azure_rm_credential_failed);
                     $scope.credentialInCreation = false;
-                    $scope.credentialAzureRm.publicKey = $base64.decode($scope.credentialAzureRm.publicKey);
                     $scope.showErrorMessageAlert();
                 });
             } else {
@@ -148,7 +146,6 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 }, function(error) {
                     $scope.showError(error, $rootScope.msg.azure_rm_credential_failed);
                     $scope.credentialInCreation = false;
-                    $scope.credentialAzureRm.publicKey = $base64.decode($scope.credentialAzureRm.publicKey);
                     $scope.showErrorMessageAlert();
                 });
             }
