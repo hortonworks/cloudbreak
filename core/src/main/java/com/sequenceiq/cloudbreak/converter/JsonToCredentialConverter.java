@@ -16,8 +16,9 @@ import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.Cr
 
 @Component
 public class JsonToCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialRequest, Credential> {
-
-    private static final String SSH_USER = "cloudbreak";
+    private static final String SSH_USER_CENT = "centos";
+    private static final String SSH_USER_CB = "cloudbreak";
+    private static final String SSH_USER_EC2 = "ec2-user";
 
     @Inject
     private CredentialDefinitionService credentialDefinitionService;
@@ -41,8 +42,19 @@ public class JsonToCredentialConverter extends AbstractConversionServiceAwareCon
         if (source.getLoginUserName() != null) {
             throw new BadRequestException("You can not modify the default user!");
         }
-        credential.setLoginUserName(SSH_USER);
+        setUserName(credential, source.getParameters());
         return credential;
+    }
+
+    //TODO remove this part completely when cloudbreak user is used everywhere
+    private void setUserName(Credential credential, Map<String, Object> parameters) {
+        if (parameters.containsKey("keystoneVersion")) {
+            credential.setLoginUserName(SSH_USER_CENT);
+        } else if (parameters.containsKey("roleArn")) {
+            credential.setLoginUserName(SSH_USER_EC2);
+        } else {
+            credential.setLoginUserName(SSH_USER_CB);
+        }
     }
 
 }
