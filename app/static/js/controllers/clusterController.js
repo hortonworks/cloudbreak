@@ -145,7 +145,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.selectedBlueprintChange = function() {
             var tmpCloudPlatform = $rootScope.activeCredential.cloudPlatform;
             var templatesByProvider = $filter('filter')($rootScope.templates, {
-                cloudPlatform: tmpCloudPlatform.split("_")[0]
+                cloudPlatform: tmpCloudPlatform
             }, true);
             var tmpTemplate = $filter('orderBy')(templatesByProvider, 'name', false)[0];
             var tmpTemplateId = null;
@@ -588,7 +588,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function setNetwork() {
             if ($rootScope.activeCredential != undefined) {
                 angular.forEach($rootScope.networks, function(data) {
-                    if (data.cloudPlatform === $rootScope.activeCredential.cloudPlatform.split("_")[0]) {
+                    if (data.cloudPlatform === $rootScope.activeCredential.cloudPlatform) {
                         $scope.cluster.networkId = data.id;
                         return;
                     }
