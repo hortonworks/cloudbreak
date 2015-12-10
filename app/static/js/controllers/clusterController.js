@@ -203,8 +203,18 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
-        $scope.visibleServiceValue = function(element) {
-            return element.indexOf("null") !== 0;
+        $scope.isVisibleServiceValue = function(element) {
+            return element.indexOf("null") !== 0
+        }
+
+        $scope.isEmptyObj = function(obj) {
+            var prop;
+            for (prop in obj) {
+                if (obj.hasOwnProperty(prop)) {
+                    return false
+                }
+            }
+            return true
         }
 
         $scope.createCluster = function() {

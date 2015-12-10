@@ -206,6 +206,9 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                         if (success.cluster.hostGroups != null) {
                             $rootScope.activeCluster.cluster.hostGroups = success.cluster.hostGroups;
                         }
+                        if (success.cluster.serviceEndPoints != null) {
+                            $rootScope.activeCluster.cluster.serviceEndPoints = success.cluster.serviceEndPoints;
+                        }
                     }
                     // refresh instance metadata
                     var metadata = []
