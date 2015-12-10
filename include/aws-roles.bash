@@ -81,6 +81,9 @@ aws-show-role() {
 
     : ${roleName:= $AWS_ROLE_NAME}
 
+    local arnName=$($AWS iam get-role --role-name cbreak-deployer --query 'Role.Arn' --out text)
+     info "Full reference: $arnName"
+
     aws-show-role-assumers $roleName
     aws-show-role-inline-policies $roleName
     aws-show-role-managed-policies $roleName
