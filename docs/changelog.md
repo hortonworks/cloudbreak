@@ -5,6 +5,7 @@
 - consul recursor now exculdes both docker ip and bridge ip to avoid recursive dns recursor chain
 - docs fixed about getting default credentials (cbd login)
 - updates cb-shell to 0.5.37 to fix ssl issues
+- `cbd aws show-role` takes parameter, and defaults to AWS_ROLE_NAME
 
 ### Added
 
