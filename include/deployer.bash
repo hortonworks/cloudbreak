@@ -119,20 +119,7 @@ init-profile() {
         info "$CBD_PROFILE already exists, now you are ready to run:"
         echo "cbd generate" | blue
     else
-        # if cbd runs on boot2docker (ie osx)
-        if boot2docker version &> /dev/null; then
-            if [[ "$(boot2docker status)" == "running" ]]; then
-                echo "export PUBLIC_IP=$(boot2docker ip)" > $CBD_PROFILE
-                echo "export PRIVATE_IP=$(boot2docker ip)" >> $CBD_PROFILE
-                boot2docker shellinit 2>/dev/null >> $CBD_PROFILE
-            else
-                echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
-                echo "boot2docker start" | blue
-                echo ' eval "$(boot2docker shellinit)"' | blue
-            fi
-        else
-            # this is for linux
-
+        if is_linux; then
             # on amazon
             if curl -m 1 -f 169.254.169.254/latest/ &>/dev/null ; then
                 echo "export PUBLIC_IP=$(curl 169.254.169.254/latest/meta-data/public-hostname)" > $CBD_PROFILE
@@ -148,6 +135,16 @@ init-profile() {
             if ! [ -f $CBD_PROFILE ]; then
                 warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
                 echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
+            fi
+        else
+            if [[ "$(boot2docker status)" == "running" ]]; then
+                echo "export PUBLIC_IP=$(boot2docker ip)" > $CBD_PROFILE
+                echo "export PRIVATE_IP=$(boot2docker ip)" >> $CBD_PROFILE
+                boot2docker shellinit 2>/dev/null >> $CBD_PROFILE
+            else
+                echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
+                echo "boot2docker start" | blue
+                echo ' eval "$(boot2docker shellinit)"' | blue
             fi
         fi
         _exit 2
