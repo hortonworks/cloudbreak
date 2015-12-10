@@ -1,5 +1,4 @@
 <div class="form-group">
-{{activeCredential.cloudPlatform}}
     <label class="col-sm-3 control-label" for="selectClusterNetwork">{{msg.cluster_form_network_label}}</label>
     <div class="col-sm-8">
         <select class="form-control" id="selectClusterNetwork" ng-model="cluster.networkId" required>
