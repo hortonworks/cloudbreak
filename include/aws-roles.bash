@@ -78,7 +78,8 @@ aws-show-role() {
     declare desc="Show assumers and policies for an AWS role"
     
     declare roleName=$1
-    : ${roleName:? required}
+
+    : ${roleName:= $AWS_ROLE_NAME}
 
     aws-show-role-assumers $roleName
     aws-show-role-inline-policies $roleName
