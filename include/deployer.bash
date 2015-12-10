@@ -334,6 +334,7 @@ main() {
         cmd-export aws-show-role
         cmd-export aws-generate-role
         cmd-export aws-delete-role
+        cmd-export aws-list-roles
 
         cmd-export-ns azure "Azure namespace"
         cmd-export azure-deploy-dash

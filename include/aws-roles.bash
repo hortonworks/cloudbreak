@@ -58,6 +58,12 @@ aws-show-role-inline-policies() {
     done
 }
 
+aws-list-roles() {
+    declare desc="Lists all roles available to you"
+
+    $AWS iam list-roles --query Roles[].RoleName --out table
+}
+
 aws-show-role-managed-policies() {
      declare roleName=$1
     
