@@ -1,0 +1,2 @@
+gcp:
+  default: sequenceiqimage/cb-centos71-amb212-2015-10-279.tar.gz

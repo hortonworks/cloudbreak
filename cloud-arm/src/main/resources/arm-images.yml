@@ -1,0 +1,14 @@
+azure_rm:
+  East Asia: https://sequenceiqeastasia.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  East US: https://sequenceiqeastus.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  Central US: https://sequenceiqcentralus.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  North Europe: https://sequenceiqnortheurope.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  South Central US: https://sequenceiqsouthcentralus.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  North Central US: https://sequenceiqnorthcentralus.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  East US 2: https://sequenceiqeastus2.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  Japan East: https://sequenceiqjapaneast.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  Japan West: https://sequenceiqjapanwest.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  Southeast Asia: https://sequenceiqsoutheastasia.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  West US: https://sequenceiqwestus.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  West Europe: https://sequenceiqwesteurope.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd
+  Brazil South: https://sequenceiqbrazilsouth.blob.core.windows.net/images/cb-centos71-amb212-2015-10-296_2015-October-29_13-7-os-2015-10-29.vhd

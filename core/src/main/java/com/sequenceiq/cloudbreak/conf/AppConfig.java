@@ -27,8 +27,14 @@ import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -79,9 +85,20 @@ public class AppConfig {
     @Inject
     private List<FileSystemConfigurator> fileSystemConfigurators;
 
+    @Inject
+    private ConfigurableEnvironment environment;
+
     @PostConstruct
-    public void init() {
+    public void init() throws IOException {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
+        ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
+        Resource [] mappingLocations = patternResolver.getResources("classpath*:*-images.yml");
+        YamlPropertySourceLoader load = new YamlPropertySourceLoader();
+        for (Resource resource : mappingLocations) {
+            String filename = resource.getFilename();
+            environment.getPropertySources().addLast(load.load(filename, new ClassPathResource(filename), null));
+        }
     }
 
     @Bean
