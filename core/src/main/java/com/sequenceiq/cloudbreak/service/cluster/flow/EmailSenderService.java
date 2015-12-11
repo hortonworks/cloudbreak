@@ -5,22 +5,24 @@ import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SUCCESS_CLUSTER_INSTALLER_MAIL_TEMPLATE_PATH;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
-import javax.inject.Inject;
-
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
-import freemarker.template.Configuration;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+
+import freemarker.template.Configuration;
 
 @Service
 public class EmailSenderService {
@@ -66,7 +68,7 @@ public class EmailSenderService {
         UPSCALE_SUCCESS("SUCCESS", "Cloudbreak Cluster Upscale Success",
                 "Your cluster '%s' is ready to use after the upscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
         DOWN_SCALE_SUCCESS("SUCCESS", "Cloudbreak Cluster Downscale Success",
-                "Your cluster '%s' is ready to use after the dwnscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
+                "Your cluster '%s' is ready to use after the downscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
         TERMINATION_SUCCESS("SUCCESS", "Cloudbreak Cluster Termination Success",
                 "Your cluster '%s' was successfully terminated."),
         TERMINATION_FAILURE("FAILED", "Cloudbreak Cluster Termination Failed",
