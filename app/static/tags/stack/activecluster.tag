@@ -175,7 +175,7 @@
                                 </div>
                             </div>
                         </form>
-                        <div class="panel panel-default" ng-show="activeCluster.cluster.serviceEndPoints ">
+                        <div class="panel panel-default" ng-hide="isEmptyObj($root.activeCluster.cluster.serviceEndPoints)">
                             <div class="panel-heading">
                                 <h5><a data-toggle="collapse" data-target="#cluster-exposed-ports-collapse01"><i class="fa fa-link fa-fw"></i>{{msg.active_cluster_service_title_label}}</a></h5>
                             </div>
@@ -197,9 +197,9 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <tr ng-repeat="(key, value) in activeCluster.cluster.serviceEndPoints" ng-show="visibleServiceValue(value)">
+                                                        <tr ng-repeat="(key, value) in $root.activeCluster.cluster.serviceEndPoints">
                                                             <td data-title="'servicename'" class="col-md-4">{{key}}</td>
-                                                            <td data-title="'address'" class="col-md-3"><a target="_blank" href="http://{{value}}">{{value}}</a></td>
+                                                            <td data-title="'address'" class="col-md-3"><a target="_blank" href="{{isVisibleServiceValue(value) ? 'http://'+value : '#' }}">{{isVisibleServiceValue(value) ? value : msg.active_cluster_pending}}</a></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -246,9 +246,9 @@
                                         </thead>
                                         <tbody>
                                             <tr ng-repeat="instance in filteredActiveClusterData | orderBy: ['instanceGroup', 'privateIp']" ng-class="instance.state == 'UNHEALTHY' ? 'danger' : ''">
-                                                <td class="col-md-4" data-title="'name'">{{instance.instanceId||'pending...'}}</td>
-                                                <td class="col-md-2" data-title="'public IP'">{{instance.publicIp||'pending...'}}</td>
-                                                <td class="col-md-2" data-title="'private IP'">{{instance.privateIp||'pending...'}}</td>
+                                                <td class="col-md-4" data-title="'name'">{{instance.instanceId||msg.active_cluster_pending}}</td>
+                                                <td class="col-md-2" data-title="'public IP'">{{instance.publicIp||msg.active_cluster_pending}}</td>
+                                                <td class="col-md-2" data-title="'private IP'">{{instance.privateIp||msg.active_cluster_pending}}</td>
                                                 <td class="col-md-2 text-center" data-title="'host group'"><span class="label label-default">{{instance.instanceGroup}}</span></td>
                                                 <td class="col-md-1 text-center" data-title="'state'">
                                                     <div ng-if="activeCluster.status != 'WAIT_FOR_SYNC' && activeCluster.cluster.status != 'WAIT_FOR_SYNC'">
