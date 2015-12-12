@@ -4,6 +4,8 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
     function($scope, $rootScope, $filter, UserSecurityGroup, AccountSecurityGroup, GlobalSecurityGroup) {
 
         $rootScope.securitygroups = AccountSecurityGroup.query();
+        $scope.showAlert = false;
+        $scope.alertMessage = "";
         initializeFormsAndScopeSecurityGroup();
 
         $scope.createSecurityGroup = function() {
@@ -48,7 +50,6 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         }
 
         function doCreateSecurityGroup() {
-
             var newRules = [];
             angular.forEach($scope.securitygroup.tmpsecurityRules, function(rule) {
                 var newRule = null;
@@ -74,13 +75,15 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
                 AccountSecurityGroup.save($scope.securitygroup, function(result) {
                     handleSecurityGroupCreationSuccess(result)
                 }, function(error) {
-                    $scope.showError(error, "failed");
+                    $scope.showError(error, $rootScope.msg.securitygroup_creation_failure + $scope.securitygroup.name);
+                    $scope.showErrorMessageAlert();
                 });
             } else {
                 UserSecurityGroup.save($scope.securitygroup, function(result) {
                     handleSecurityGroupCreationSuccess(result)
                 }, function(error) {
-                    $scope.showError(error, "failed");
+                    $scope.showError(error, $rootScope.msg.securitygroup_creation_failure + $scope.securitygroup.name);
+                    $scope.showErrorMessageAlert();
                 });
             }
         }
@@ -128,6 +131,16 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
             };
             $scope.tmpsecportForm = {};
             $scope.securitygroupForm = {};
+        }
+
+        $scope.unShowErrorMessageAlert = function() {
+            $scope.showAlert = false;
+            $scope.alertMessage = "";
+        }
+
+        $scope.showErrorMessageAlert = function() {
+            $scope.showAlert = true;
+            $scope.alertMessage = $scope.statusMessage;
         }
 
     }

@@ -20,6 +20,7 @@
                 </p>
 
                 <!-- ............ CREATE FORM ............................................. -->
+                <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
                 <div class="panel panel-default">
                     <div id="panel-create-securitygroup-collapse" class="panel-collapse panel-under-btn-collapse collapse">
