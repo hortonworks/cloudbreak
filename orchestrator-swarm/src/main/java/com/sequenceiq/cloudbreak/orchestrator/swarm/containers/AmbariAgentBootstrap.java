@@ -45,7 +45,6 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
         LOGGER.info("Creating Ambari agent container on: {}", nodeName);
 
         Bind[] binds = new BindsBuilder()
-                .add("/usr/local/public_host_script.sh", "/etc/ambari-agent/conf/public-hostname.sh")
                 .add("/data/jars")
                 .addLog(logVolumePath)
                 .add(dataVolumes).build();
