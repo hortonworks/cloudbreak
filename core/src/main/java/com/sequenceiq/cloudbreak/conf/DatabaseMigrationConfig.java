@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import javax.inject.Inject;
-import javax.sql.DataSource;
-
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Properties;
 
-import com.sequenceiq.cloudbreak.logger.InfoLoggingOutputStream;
+import javax.inject.Inject;
+import javax.sql.DataSource;
+
 import org.apache.commons.io.Charsets;
 import org.apache.ibatis.migration.DataSourceConnectionProvider;
 import org.apache.ibatis.migration.FileMigrationLoader;
@@ -44,10 +44,16 @@ public class DatabaseMigrationConfig {
             DataSourceConnectionProvider dataSourceConnectionProvider = new DataSourceConnectionProvider(dataSource);
             DatabaseOperationOption operationOption = new DatabaseOperationOption();
             operationOption.setRemoveCRs(true);
-            PrintStream streamOut = new PrintStream(new InfoLoggingOutputStream(LOGGER));
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             FileMigrationLoader migrationsLoader = fileMigrationLoader();
             LOGGER.info("Applying the necessary database migration scripts from location: '{}'....", schemaLocation);
-            upOperation = upOperation.operate(dataSourceConnectionProvider, migrationsLoader, operationOption, streamOut);
+            upOperation = upOperation.operate(dataSourceConnectionProvider, migrationsLoader, operationOption, new PrintStream(outStream));
+            String migrationResult = outStream.toString().trim();
+            if (migrationResult.isEmpty()) {
+                LOGGER.info("Schema is up to date. No migration necessary.");
+            } else {
+                LOGGER.warn("Migration result:\n{}", migrationResult);
+            }
         }
         return upOperation;
     }
