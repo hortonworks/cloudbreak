@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.concurrent.GuardedMethod;
 import com.sequenceiq.cloudbreak.concurrent.LockedMethod;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -159,7 +158,7 @@ public class SimpleFlowFacade implements FlowFacade {
             ProvisioningContext provisioningContext = (ProvisioningContext) context;
             Stack stack = stackService.getById(provisioningContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
-            metadataSetupService.setupMetadata(provisioningContext.getCloudPlatform(), stack);
+            metadataSetupService.setupMetadata(stack);
             cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), BillingStatus.BILLING_STARTED.name(),
                     cloudbreakMessagesService.getMessage(Msg.FLOW_STACK_PROVISIONED.code()));
             cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), AVAILABLE.name(),
@@ -180,10 +179,9 @@ public class SimpleFlowFacade implements FlowFacade {
         LOGGER.debug("Metadata collect. Context: {}", context);
         try {
             Long stackId = context.getStackId();
-            CloudPlatform cloudPlarform = context.getCloudPlatform();
             Stack stack = stackService.getById(stackId);
             MDCBuilder.buildMdcContext(stack);
-            metadataSetupService.collectMetadata(cloudPlarform, stack);
+            metadataSetupService.collectMetadata(stack);
             LOGGER.debug("Metadata collect DONE.");
             return context;
         } catch (Exception e) {

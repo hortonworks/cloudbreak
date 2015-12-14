@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.openstack.metadata;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Address;
 import org.openstack4j.model.compute.Server;
@@ -16,8 +18,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 public class ComputeApiExtractor implements CloudInstanceMetaDataExtractor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputeApiExtractor.class);
 
+    @Inject
+    private HypervisorExtractor hypervisorExtractor;
+
     @Override
     public CloudInstanceMetaData extractMetadata(OSClient client, Server server, String instanceId) {
+        String hypervisor = hypervisorExtractor.getHypervisor(server);
         String privateIp = null;
         String floatingIp = null;
         Map<String, List<? extends Address>> adrMap = server.getAddresses().getAddresses();
@@ -41,6 +47,6 @@ public class ComputeApiExtractor implements CloudInstanceMetaDataExtractor {
                 }
             }
         }
-        return new CloudInstanceMetaData(privateIp, floatingIp);
+        return new CloudInstanceMetaData(privateIp, floatingIp, hypervisor);
     }
 }

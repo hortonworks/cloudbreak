@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.openstack.metadata;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.network.NetFloatingIP;
@@ -19,8 +21,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 public class PortApiExtractor implements CloudInstanceMetaDataExtractor {
     private static final Logger LOGGER = LoggerFactory.getLogger(PortApiExtractor.class);
 
+    @Inject
+    private HypervisorExtractor hypervisorExtractor;
+
     @Override
     public CloudInstanceMetaData extractMetadata(OSClient client, Server server, String instanceId) {
+        String hypervisor = hypervisorExtractor.getHypervisor(server);
         LOGGER.debug("Address map was empty, trying to extract ips");
         List<? extends Port> ports = client.networking().port().list(getPortListOptions(instanceId));
         String portId = ports.get(0).getId();
@@ -28,7 +34,7 @@ public class PortApiExtractor implements CloudInstanceMetaDataExtractor {
         NetFloatingIP ips = floatingIps.get(0);
         LOGGER.info("PrivateIp of instance: {} is {}", server.getName(), ips.getFixedIpAddress());
         LOGGER.info("FloatingIp of instance: {} is {}", server.getName(), ips.getFloatingIpAddress());
-        return new CloudInstanceMetaData(ips.getFixedIpAddress(), ips.getFloatingIpAddress());
+        return new CloudInstanceMetaData(ips.getFixedIpAddress(), ips.getFloatingIpAddress(), hypervisor);
     }
 
     private PortListOptions getPortListOptions(String instanceId) {

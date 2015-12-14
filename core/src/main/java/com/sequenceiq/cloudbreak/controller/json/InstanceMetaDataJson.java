@@ -15,8 +15,6 @@ public class InstanceMetaDataJson implements JsonEntity {
     private String publicIp;
     @ApiModelProperty(InstanceMetaDataModelDescription.INSTANCE_ID)
     private String instanceId;
-    @ApiModelProperty(InstanceMetaDataModelDescription.VOLUME_COUNT)
-    private Integer volumeCount;
     @ApiModelProperty(InstanceMetaDataModelDescription.AMBARI_SERVER)
     private Boolean ambariServer;
     @ApiModelProperty(InstanceMetaDataModelDescription.DISCOVERY_FQDN)
@@ -60,14 +58,6 @@ public class InstanceMetaDataJson implements JsonEntity {
 
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
-    }
-
-    public Integer getVolumeCount() {
-        return volumeCount;
-    }
-
-    public void setVolumeCount(Integer volumeCount) {
-        this.volumeCount = volumeCount;
     }
 
     public Boolean getAmbariServer() {

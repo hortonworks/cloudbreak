@@ -7,10 +7,8 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -26,21 +24,19 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.converter.spi.CloudVmMetadataStatusToCoreInstanceMetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
-import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 
 import reactor.bus.Event;
@@ -58,13 +54,11 @@ public class ServiceProviderMetadataAdapter {
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
     @Inject
-    private CloudVmMetadataStatusToCoreInstanceMetaDataConverter instanceConverter;
-    @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
 
-    public Set<CoreInstanceMetaData> collectMetadata(Stack stack) {
+    public List<CloudVmMetaDataStatus> collectMetadata(Stack stack) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
@@ -79,16 +73,16 @@ public class ServiceProviderMetadataAdapter {
             LOGGER.info("Result: {}", res);
             if (res.getException() != null) {
                 LOGGER.error("Failed to collect metadata", res.getException());
-                return Collections.emptySet();
+                return Collections.emptyList();
             }
-            return new HashSet<>(instanceConverter.convert(res.getResults()));
+            return res.getResults();
         } catch (InterruptedException e) {
             LOGGER.error(format("Error while executing collectMetadata, stack: %s", cloudContext), e);
             throw new OperationException(e);
         }
     }
 
-    public Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resourceList, String instanceGroupName, Integer scalingAdjustment) {
+    public List<CloudVmMetaDataStatus> collectNewMetadata(Stack stack) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
@@ -103,9 +97,9 @@ public class ServiceProviderMetadataAdapter {
             LOGGER.info("Result: {}", res);
             if (res.getException() != null) {
                 LOGGER.error(format("Failed to collect metadata, stack: %s", cloudContext), res.getException());
-                return Collections.emptySet();
+                return Collections.emptyList();
             }
-            return new HashSet<>(instanceConverter.convert(res.getResults()));
+            return res.getResults();
         } catch (InterruptedException e) {
             LOGGER.error(format("Error while collecting new metadata for stack: %s", cloudContext), e);
             throw new OperationException(e);

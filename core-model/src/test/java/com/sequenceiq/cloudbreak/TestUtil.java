@@ -220,7 +220,6 @@ public class TestUtil {
     public static InstanceMetaData instanceMetaData(Long id, InstanceStatus instanceStatus, boolean ambariServer, InstanceGroup instanceGroup) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(instanceStatus);
-        instanceMetaData.setVolumeCount(1);
         instanceMetaData.setAmbariServer(ambariServer);
         instanceMetaData.setConsulServer(true);
         instanceMetaData.setDiscoveryFQDN("test");

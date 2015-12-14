@@ -23,7 +23,6 @@
           "privateIp": "10.0.0.1",
           "publicIp": "52.53.54.55",
           "instanceId": "instance",
-          "volumeCount": 1,
           "ambariServer": false,
           "discoveryFQDN": "instance",
           "instanceGroup": "gateway-group",

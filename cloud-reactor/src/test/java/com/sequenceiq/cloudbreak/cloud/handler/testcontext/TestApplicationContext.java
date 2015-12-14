@@ -157,7 +157,7 @@ public class TestApplicationContext {
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
         CloudVmInstanceStatus collectInstanceStatus = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS);
         when(collector.collect((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
-                .thenReturn(Arrays.asList(new CloudVmMetaDataStatus(collectInstanceStatus, new CloudInstanceMetaData("privateIp", "publicIp"))));
+                .thenReturn(Arrays.asList(new CloudVmMetaDataStatus(collectInstanceStatus, new CloudInstanceMetaData("privateIp", "publicIp", "hypervisor"))));
         when(instanceConnector.start((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
         when(instanceConnector.stop((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))

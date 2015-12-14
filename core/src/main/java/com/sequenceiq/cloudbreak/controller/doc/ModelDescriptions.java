@@ -131,11 +131,8 @@ public class ModelDescriptions {
         public static final String PRIVATE_IP = "private ip of the insctance";
         public static final String PUBLIC_IP = "public ip of the instance";
         public static final String INSTANCE_ID = "id of the instance";
-        public static final String VOLUME_COUNT = "number of volumes";
         public static final String AMBARI_SERVER = "ambari server address";
-        public static final String DOCKER_SUBNET = "docker subnet";
         public static final String DISCOVERY_FQDN = "the fully qualified domain name of the node in the service discovery cluster";
-        public static final String CONTAINER_COUNT = "number of the containers";
     }
 
     public static class FailurePolicyModelDescription {
@@ -152,7 +149,6 @@ public class ModelDescriptions {
     }
 
     public static class EventModelDescription {
-        public static final String NODE_COUNT = "computed node count of the stack";
         public static final String TYPE = "type of the event";
         public static final String TIMESTAMP = "timestamp of the event";
         public static final String MESSAGE = "message of the event";
