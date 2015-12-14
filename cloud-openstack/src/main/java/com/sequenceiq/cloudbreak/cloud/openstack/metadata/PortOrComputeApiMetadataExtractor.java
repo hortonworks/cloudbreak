@@ -10,10 +10,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 
 @Component("cloudInstanceMetadataExtractor")
 public class PortOrComputeApiMetadataExtractor implements CloudInstanceMetaDataExtractor {
+
     @Inject
-    private CloudInstanceMetaDataExtractor portApiExtractor;
+    private PortApiExtractor portApiExtractor;
+
     @Inject
-    private CloudInstanceMetaDataExtractor computeApiExtractor;
+    private ComputeApiExtractor computeApiExtractor;
 
     @Override
     public CloudInstanceMetaData extractMetadata(OSClient client, Server server, String instanceId) {

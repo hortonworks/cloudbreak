@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -14,13 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -69,8 +71,8 @@ public class MetadataSetupService {
         }
     }
 
-    public String setupMetadata(final CloudPlatform cloudPlatform, Stack stack) throws Exception {
-        Set<InstanceMetaData> allInstanceMetadata = saveInstanceMetaData(stack, collectCoreMetadata(cloudPlatform, stack), InstanceStatus.CREATED);
+    public String setupMetadata(Stack stack) throws Exception {
+        Set<InstanceMetaData> allInstanceMetadata = saveInstanceMetaData(stack, collectCoreMetadata(stack), InstanceStatus.CREATED);
         for (InstanceMetaData instanceMetaData : allInstanceMetadata) {
             if (instanceMetaData.getAmbariServer()) {
                 return instanceMetaData.getPublicIp();
@@ -79,18 +81,17 @@ public class MetadataSetupService {
         return null;
     }
 
-    public void collectMetadata(final CloudPlatform cloudPlatform, Stack stack) {
-        saveInstanceMetaData(stack, collectCoreMetadata(cloudPlatform, stack), null);
+    public void collectMetadata(Stack stack) {
+        saveInstanceMetaData(stack, collectCoreMetadata(stack), null);
     }
 
-    public Set<String> setupNewMetadata(Long stackId, Set<Resource> resources, String instanceGroupName, Integer scalingAdjustment) {
-        Stack stack = stackService.getById(stackId);
+    public Set<String> setupNewMetadata(Stack stack, String instanceGroupName) {
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
-        Set<CoreInstanceMetaData> coreInstanceMetaData = collectNewMetadata(stack, resources, instanceGroupName, scalingAdjustment);
+        List<CloudVmMetaDataStatus> coreInstanceMetaData = metadata.collectNewMetadata(stack);
         saveInstanceMetaData(stack, coreInstanceMetaData, InstanceStatus.CREATED);
         Set<String> upscaleCandidateAddresses = new HashSet<>();
-        for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
-            upscaleCandidateAddresses.add(coreInstanceMetadataEntry.getPrivateIp());
+        for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
+            upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
         }
         InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
         int nodeCount = instanceGroup.getNodeCount() + coreInstanceMetaData.size();
@@ -102,8 +103,8 @@ public class MetadataSetupService {
         return upscaleCandidateAddresses;
     }
 
-    private Set<CoreInstanceMetaData> collectCoreMetadata(CloudPlatform cloudPlatform, Stack stack) {
-        Set<CoreInstanceMetaData> coreInstanceMetaData = metadata.collectMetadata(stack);
+    private List<CloudVmMetaDataStatus> collectCoreMetadata(Stack stack) {
+        List<CloudVmMetaDataStatus> coreInstanceMetaData = metadata.collectMetadata(stack);
         if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
             throw new WrongMetadataException(String.format(
                     "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
@@ -112,25 +113,27 @@ public class MetadataSetupService {
         return coreInstanceMetaData;
     }
 
-    private Set<InstanceMetaData> saveInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData, InstanceStatus status) {
+    private Set<InstanceMetaData> saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus>  cloudVmMetaDataStatusList, InstanceStatus status) {
         Boolean ambariServerFound = false;
         Set<InstanceMetaData> updatedInstanceMetadata = new HashSet<>();
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
-        for (CoreInstanceMetaData coreInstanceMetadataEntry : coreInstanceMetaData) {
+        for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
+            CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
+            CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
-            Long privateId = coreInstanceMetadataEntry.getPrivateId();
-            String instanceId = coreInstanceMetadataEntry.getInstanceId();
+            Long privateId = cloudInstance.getTemplate().getPrivateId();
+            String instanceId = cloudInstance.getInstanceId();
             InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
             // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
-            String group = instanceMetaDataEntry.getInstanceGroup() == null ? coreInstanceMetadataEntry.getInstanceGroupName()
-                    : instanceMetaDataEntry.getInstanceGroup().getGroupName();
+            String group = instanceMetaDataEntry.getInstanceGroup() == null ? cloudInstance.getTemplate().getGroupName() : instanceMetaDataEntry
+                    .getInstanceGroup().getGroupName();
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), group);
-            instanceMetaDataEntry.setPrivateIp(coreInstanceMetadataEntry.getPrivateIp());
+            instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
+            instanceMetaDataEntry.setPublicIp(md.getPublicIp());
+            instanceMetaDataEntry.setHypervisor(md.getHypervisor());
             instanceMetaDataEntry.setInstanceGroup(instanceGroup);
-            instanceMetaDataEntry.setPublicIp(coreInstanceMetadataEntry.getPublicIp());
             instanceMetaDataEntry.setInstanceId(instanceId);
             instanceMetaDataEntry.setPrivateId(privateId);
-            instanceMetaDataEntry.setVolumeCount(coreInstanceMetadataEntry.getVolumeCount());
             instanceMetaDataEntry.setStartDate(timeInMillis);
             if (!ambariServerFound && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
@@ -164,12 +167,4 @@ public class MetadataSetupService {
         return new InstanceMetaData();
     }
 
-    private Set<CoreInstanceMetaData> collectNewMetadata(Stack stack, Set<Resource> resources, String instanceGroup, Integer scalingAdjustment) {
-        try {
-            return metadata.collectNewMetadata(stack, resources, instanceGroup, scalingAdjustment);
-        } catch (Exception e) {
-            LOGGER.error("Unhandled exception occurred while updating stack metadata.", e);
-            throw e;
-        }
-    }
 }

@@ -5,17 +5,18 @@ public class CoreInstanceMetaData {
     private String instanceId;
     private String privateIp;
     private String publicIp;
-    private Integer volumeCount;
     private Long privateId;
     private String instanceGroupName;
+    private String hypervisor;
 
-    public CoreInstanceMetaData(String instanceId, Long privateId, String privateIp, String publicIp, Integer volumeCount, String instanceGroupName) {
+
+    public CoreInstanceMetaData(String instanceId, Long privateId, String privateIp, String publicIp, String instanceGroupName, String hypervisor) {
         this.instanceId = instanceId;
         this.privateId = privateId;
         this.privateIp = privateIp;
         this.publicIp = publicIp;
-        this.volumeCount = volumeCount;
         this.instanceGroupName = instanceGroupName;
+        this.hypervisor = hypervisor;
     }
 
     public String getInstanceId() {
@@ -30,15 +31,15 @@ public class CoreInstanceMetaData {
         return publicIp;
     }
 
-    public Integer getVolumeCount() {
-        return volumeCount;
-    }
-
     public String getInstanceGroupName() {
         return instanceGroupName;
     }
 
     public Long getPrivateId() {
         return privateId;
+    }
+
+    public String getHypervisor() {
+        return hypervisor;
     }
 }

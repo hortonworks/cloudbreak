@@ -300,11 +300,11 @@ public class SimpleStackFacade implements StackFacade {
         Stack stack = stackService.getById(actualCont.getStackId());
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         MDCBuilder.buildMdcContext(stack);
-        Integer scalingAdjustment = actualCont.getScalingAdjustment();
-        Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(
-                stack.getId(), actualCont.getResources(), actualCont.getInstanceGroup(), scalingAdjustment);
+
+        Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(stack, actualCont.getInstanceGroup());
         fireEventAndLog(actualCont.getStackId(), context, Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+        Integer scalingAdjustment = actualCont.getScalingAdjustment();
         hostGroupAdjustmentJson.setWithStackUpdate(false);
         hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
         if (stack.getCluster() != null) {

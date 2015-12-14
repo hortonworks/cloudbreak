@@ -72,13 +72,13 @@ public class InstanceMetaData implements ProvisionEntity {
     private Long privateId;
     private String privateIp;
     private String publicIp;
-    private Integer volumeCount;
     private String instanceId;
     private Boolean ambariServer;
     private Boolean consulServer;
     private String discoveryFQDN;
     @Enumerated(EnumType.STRING)
     private InstanceStatus instanceStatus;
+    private String hypervisor;
     @ManyToOne
     private InstanceGroup instanceGroup;
     private Long startDate;
@@ -110,14 +110,6 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setPublicIp(String publicIp) {
         this.publicIp = publicIp;
-    }
-
-    public Integer getVolumeCount() {
-        return volumeCount;
-    }
-
-    public void setVolumeCount(Integer volumeCount) {
-        this.volumeCount = volumeCount;
     }
 
     public Long getId() {
@@ -224,4 +216,11 @@ public class InstanceMetaData implements ProvisionEntity {
         return InstanceStatus.REGISTERED.equals(instanceStatus) || InstanceStatus.UNREGISTERED.equals(instanceStatus);
     }
 
+    public String getHypervisor() {
+        return hypervisor;
+    }
+
+    public void setHypervisor(String hypervisor) {
+        this.hypervisor = hypervisor;
+    }
 }
