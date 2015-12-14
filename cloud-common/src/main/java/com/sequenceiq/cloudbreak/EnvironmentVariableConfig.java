@@ -57,7 +57,7 @@ public class EnvironmentVariableConfig {
     public static final String CB_BAYWATCH_ENABLED = "true";
     public static final String CB_BAYWATCH_EXTERN_LOCATION = "";
 
-    public static final String CB_AZURE_IMAGE_NAME = "cb-centos71-amb212-2015-12-05_2015-12-05_22-35-os-2015-12-05.vhd";
+    public static final String CB_AZURE_IMAGE_NAME = "cb-centos71-amb212-2015-12-11_2015-12-11_16-24-os-2015-12-11.vhd";
     public static final String CB_AZURE_IMAGE_URI = "https://02589fae040d8westeurope2.blob.core.windows.net/images/" + CB_AZURE_IMAGE_NAME;
     public static final String CB_AZURE_RM_IMAGE = new StringBuilder()
             .append(String.format("EAST_ASIA:https://sequenceiqeastasia2.blob.core.windows.net/images/%s,", CB_AZURE_IMAGE_NAME))
