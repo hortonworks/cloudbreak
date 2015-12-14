@@ -8,6 +8,7 @@ migrate-config() {
     env-import UAA_SCHEMA_SCRIPTS_LOCATION "container"
     env-import SKIP_DB_MIGRATION_ON_START false
     env-import DB_MIGRATION_LOG "db_migration.log"
+    env-import VERBOSE_MIGRATION false
 }
 
 create-migrate-log() {
@@ -29,7 +30,6 @@ migrateError() {
 }
 
 migrate-execute-mybatis-migrations() {
-
     local docker_image_name=$1 && shift
     local service_name=$1 && shift
     local container_name=$(compose-get-container $service_name)
@@ -53,8 +53,11 @@ migrate-execute-mybatis-migrations() {
         --link $container_name:db \
         -v $scripts_location:/migrate/scripts \
         sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION "$@" \
-      | tee -a "$DB_MIGRATION_LOG"
-    )
+      | tee -a "$DB_MIGRATION_LOG")
+
+    if ${VERBOSE_MIGRATION}; then
+        warn "$migrateResult";
+    fi
 
     if grep -q "MyBatis Migrations SUCCESS" <<< "${migrateResult}"; then
         info "Migration SUCCESS: $service_name $@"
@@ -81,7 +84,7 @@ migrate-one-db() {
             local docker_image_name=sequenceiq/sultans-bin:${DOCKER_TAG_SULTANS}
             ;;
         *)
-            migrateError "Invalid database service name: $service_name. Supported databases: cbdb and pcdb"
+            migrateError "Invalid database service name: $service_name. Supported databases: cbdb, pcdb and uaadb"
             return 1
             ;;
     esac
@@ -93,13 +96,10 @@ migrate-one-db() {
 
 execute-migration() {
     if [ $# -eq 0 ]; then
-        migrate-one-db cbdb up
-        migrate-one-db cbdb pending
-        migrate-one-db pcdb up
-        migrate-one-db pcdb pending
         migrate-one-db uaadb up
         migrate-one-db uaadb pending
     else
+        VERBOSE_MIGRATION=true
         migrate-one-db "$@"
     fi
 }
