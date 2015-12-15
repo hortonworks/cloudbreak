@@ -14,7 +14,7 @@ import com.google.api.client.util.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.controller.json.PlatformVariantsJson;
+import com.sequenceiq.cloudbreak.model.PlatformVariantsJson;
 
 public class PlatformVariantsToJsonConverterTest extends AbstractEntityConverterTest<PlatformVariants> {
 

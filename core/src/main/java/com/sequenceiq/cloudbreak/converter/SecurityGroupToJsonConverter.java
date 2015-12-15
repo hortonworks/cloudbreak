@@ -6,8 +6,8 @@ import java.util.Set;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.SecurityGroupJson;
-import com.sequenceiq.cloudbreak.controller.json.SecurityRuleJson;
+import com.sequenceiq.cloudbreak.model.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.model.SecurityRuleJson;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 

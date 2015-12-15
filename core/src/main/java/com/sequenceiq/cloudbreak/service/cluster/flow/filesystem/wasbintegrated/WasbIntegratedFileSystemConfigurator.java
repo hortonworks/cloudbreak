@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.wasbintegrated;
 
-import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration.STORAGE_CONTAINER;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType.WASB_INTEGRATED;
+import static com.sequenceiq.cloudbreak.model.FileSystemConfiguration.STORAGE_CONTAINER;
+import static com.sequenceiq.cloudbreak.model.FileSystemType.WASB_INTEGRATED;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,13 +15,14 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.model.FileSystemType;
+import com.sequenceiq.cloudbreak.model.WasbIntegratedFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigException;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
 
 import groovyx.net.http.HttpResponseException;
 

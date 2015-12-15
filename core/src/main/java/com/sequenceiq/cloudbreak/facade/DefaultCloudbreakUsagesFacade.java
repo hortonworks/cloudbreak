@@ -10,9 +10,9 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsageGeneratorService;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesRetrievalService;
 

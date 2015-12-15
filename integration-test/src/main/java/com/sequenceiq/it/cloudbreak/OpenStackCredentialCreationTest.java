@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
@@ -7,6 +10,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.model.CredentialRequest;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -35,10 +39,24 @@ public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrati
         endpoint = StringUtils.hasLength(endpoint) ? endpoint : defaultEndpoint;
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
+
+        CredentialRequest credentialRequest = new CredentialRequest();
+        credentialRequest.setName(credentialName);
+        credentialRequest.setPublicKey(publicKey);
+        credentialRequest.setDescription("Aws Rm credential for integartiontest");
+        Map<String, Object> map = new HashMap<>();
+        map.put("tenantName", tenantName);
+        map.put("userName", userName);
+        map.put("password", password);
+        map.put("endpoint", endpoint);
+        map.put("keystoneAuthScope", "cb-keystone-v2");
+        map.put("keystoneVersion", "cb-keystone-v2");
+
+        credentialRequest.setParameters(map);
+        credentialRequest.setCloudPlatform("OPENSTACK");
         // WHEN
         // TODO publicInAccount
-        String id = getClient().postOpenStackCredential(credentialName, "OpenStack credential for integration test", userName, password, tenantName, endpoint,
-                publicKey, "cb-keystone-v2", "cb-keystone-v2", null, null, null, null, null, false);
+        String id = getCredentialEndpoint().postPrivate(credentialRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);

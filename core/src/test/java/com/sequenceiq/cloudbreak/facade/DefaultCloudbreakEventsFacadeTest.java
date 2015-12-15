@@ -21,8 +21,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.controller.json.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
+import com.sequenceiq.cloudbreak.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @RunWith(MockitoJUnitRunner.class)

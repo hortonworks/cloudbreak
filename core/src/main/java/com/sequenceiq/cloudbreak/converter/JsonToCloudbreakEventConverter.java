@@ -4,8 +4,8 @@ import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
+import com.sequenceiq.cloudbreak.model.CloudbreakEventsJson;
 
 @Component
 public class JsonToCloudbreakEventConverter extends AbstractConversionServiceAwareConverter<CloudbreakEventsJson, CloudbreakEvent> {

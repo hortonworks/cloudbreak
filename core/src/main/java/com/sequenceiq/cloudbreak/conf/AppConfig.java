@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.model.FileSystemType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration

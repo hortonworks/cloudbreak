@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
-import com.sequenceiq.cloudbreak.controller.json.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.converter.util.PlatformConverterUtil;
 
 @Component

@@ -10,7 +10,7 @@ import javax.validation.ConstraintValidatorContext;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.controller.json.TemplateRequest;
+import com.sequenceiq.cloudbreak.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
 public class TemplateValidator implements ConstraintValidator<ValidTemplate, TemplateRequest> {

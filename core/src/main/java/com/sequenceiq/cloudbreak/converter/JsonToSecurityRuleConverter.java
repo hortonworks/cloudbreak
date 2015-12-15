@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.SecurityRuleJson;
+import com.sequenceiq.cloudbreak.model.SecurityRuleJson;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 @Component

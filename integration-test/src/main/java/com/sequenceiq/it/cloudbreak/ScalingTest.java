@@ -8,7 +8,11 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.api.StackEndpoint;
+import com.sequenceiq.cloudbreak.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.model.UpdateStackJson;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class ScalingTest extends AbstractCloudbreakIntegrationTest {
@@ -27,20 +31,46 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
         int stackIntId = Integer.valueOf(stackId);
         // WHEN
-        CloudbreakClient client = getClient();
         if (scalingAdjustment < 0) {
-            client.putCluster(stackIntId, instanceGroup, scalingAdjustment, false);
+            UpdateClusterJson updateClusterJson = new UpdateClusterJson();
+            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+            hostGroupAdjustmentJson.setHostGroup(instanceGroup);
+            hostGroupAdjustmentJson.setWithStackUpdate(false);
+            hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
+            getClusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
             CloudbreakUtil.waitAndCheckClusterStatus(itContext, stackId, "AVAILABLE");
-            client.putStack(stackIntId, instanceGroup, scalingAdjustment);
+
+            UpdateStackJson updateStackJson = new UpdateStackJson();
+            InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+            instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
+            instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+            instanceGroupAdjustmentJson.setWithClusterEvent(false);
+            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+            getStackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
             CloudbreakUtil.waitAndCheckStackStatus(itContext, stackId, "AVAILABLE");
         } else {
-            client.putStack(stackIntId, instanceGroup, scalingAdjustment);
+            UpdateStackJson updateStackJson = new UpdateStackJson();
+            InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+            instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
+            instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+            instanceGroupAdjustmentJson.setWithClusterEvent(false);
+            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+            getStackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
             CloudbreakUtil.waitAndCheckStackStatus(itContext, stackId, "AVAILABLE");
-            client.putCluster(stackIntId, instanceGroup, scalingAdjustment, false);
+
+            UpdateClusterJson updateClusterJson = new UpdateClusterJson();
+            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+            hostGroupAdjustmentJson.setHostGroup(instanceGroup);
+            hostGroupAdjustmentJson.setWithStackUpdate(false);
+            hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
+            getClusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
             CloudbreakUtil.waitAndCheckClusterStatus(itContext, stackId, "AVAILABLE");
         }
         // THEN
-        CloudbreakUtil.checkClusterAvailability(client, stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
+        CloudbreakUtil.checkClusterAvailability(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_STACK, StackEndpoint.class),
+                stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
                 itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
     }
 }

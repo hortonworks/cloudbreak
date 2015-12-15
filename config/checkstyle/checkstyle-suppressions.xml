@@ -27,4 +27,9 @@
     <!-- suppress everything in package level JavaDoc files -->
     <suppress checks=".*" files="package-info.java"/>
 
+    <!-- suppressing checks in Cloudbreak-shell -->
+    <suppress id="sysout" files="CloudbreakShell.java|ShellConfiguration.java" />
+    <suppress id="printTrace" files="CloudbreakShell.java|ShellConfiguration.java" />
+    <suppress checks="CyclomaticComplexity|ParameterNumber|NPathComplexity" files=".*Commands.java|ResponseTransformer.java" />
+
 </suppressions>

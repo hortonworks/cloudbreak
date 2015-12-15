@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.controller.json.FailurePolicyJson;
+import com.sequenceiq.cloudbreak.model.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 
 public class JsonToFailurePolicyConverterTest extends AbstractJsonConverterTest<FailurePolicyJson> {

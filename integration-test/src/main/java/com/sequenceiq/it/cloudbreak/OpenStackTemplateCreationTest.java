@@ -10,6 +10,8 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.model.TemplateRequest;
+
 public class OpenStackTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     @Inject
     private TemplateAdditionHelper additionHelper;
@@ -29,7 +31,14 @@ public class OpenStackTemplateCreationTest extends AbstractCloudbreakIntegration
         // GIVEN
         // WHEN
         // TODO: publicInAccount
-        String id = getClient().postOpenStackTemplate(templateName, "OpenStack template for integration testing", instanceType, volumeCount, volumeSize, false);
+        TemplateRequest templateRequest = new TemplateRequest();
+        templateRequest.setName(templateName);
+        templateRequest.setDescription("OpenStack template for integration testing");
+        templateRequest.setCloudPlatform("OPENSTACK");
+        templateRequest.setInstanceType(instanceType);
+        templateRequest.setVolumeCount(Integer.valueOf(volumeCount));
+        templateRequest.setVolumeSize(Integer.valueOf(volumeSize));
+        String id = getTemplateEndpoint().postPrivate(templateRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         additionHelper.handleTemplateAdditions(getItContext(), id, additions);

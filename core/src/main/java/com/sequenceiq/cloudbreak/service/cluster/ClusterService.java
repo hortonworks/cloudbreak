@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.controller.json.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.CbUser;

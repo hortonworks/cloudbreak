@@ -9,7 +9,7 @@ public class NetworkDeleteByNameTest extends AbstractCloudbreakIntegrationTest {
     public void testDeleteTemplateByName(String networkName) throws Exception {
         // GIVEN
         // WHEN
-        getClient().deleteTemplateByName(networkName);
+        getNetworkEndpoint().deletePublic(networkName);
         // THEN no exception
     }
 }

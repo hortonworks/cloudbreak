@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.converter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.controller.json.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
+import com.sequenceiq.cloudbreak.model.AmbariStackDetailsJson;
 
 public class JsonToAmbariStackDetailsConverterTest extends AbstractJsonConverterTest<AmbariStackDetailsJson> {
 

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
+import com.sequenceiq.cloudbreak.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 
 public class JsonToHostGroupConverterTest extends AbstractJsonConverterTest<HostGroupJson> {

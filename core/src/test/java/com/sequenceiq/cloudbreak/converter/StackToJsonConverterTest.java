@@ -16,14 +16,14 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
-import com.sequenceiq.cloudbreak.controller.json.FailurePolicyJson;
-import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
-import com.sequenceiq.cloudbreak.controller.json.StackResponse;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.model.FailurePolicyJson;
+import com.sequenceiq.cloudbreak.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.model.StackResponse;
 
 public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack> {
 

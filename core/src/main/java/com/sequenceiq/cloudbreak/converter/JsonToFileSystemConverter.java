@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.FileSystemRequest;
+import com.sequenceiq.cloudbreak.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 
 @Component

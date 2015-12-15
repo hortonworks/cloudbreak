@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.controller.json.PlatformRegionsJson;
+import com.sequenceiq.cloudbreak.model.PlatformRegionsJson;
 import com.sequenceiq.cloudbreak.converter.util.PlatformConverterUtil;
 
 @Component

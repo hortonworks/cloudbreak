@@ -10,6 +10,8 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.model.TemplateRequest;
+
 public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     @Inject
     private TemplateAdditionHelper additionHelper;
@@ -29,7 +31,16 @@ public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         // WHEN
         // TODO: publicInAccount
-        String id = getClient().postGcpTemplate(gcpName, "GCP template for integration testing", gcpInstanceType, volumeType, volumeCount, volumeSize, false);
+        TemplateRequest templateRequest = new TemplateRequest();
+        templateRequest.setName(gcpName);
+        templateRequest.setDescription("GCP template for integration testing");
+        templateRequest.setCloudPlatform("GCP");
+        templateRequest.setInstanceType(gcpInstanceType);
+        templateRequest.setVolumeCount(Integer.valueOf(volumeCount));
+        templateRequest.setVolumeSize(Integer.valueOf(volumeSize));
+        templateRequest.setVolumeType(volumeType);
+        templateRequest.setCloudPlatform("GCP");
+        String id = getTemplateEndpoint().postPrivate(templateRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         additionHelper.handleTemplateAdditions(getItContext(), id, additions);

@@ -12,12 +12,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.controller.json.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
-import com.sequenceiq.cloudbreak.controller.json.FileSystemRequest;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.model.FileSystemRequest;
 
 public class JsonToClusterConverterTest extends AbstractJsonConverterTest<ClusterRequest> {
 

@@ -3,58 +3,41 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.doc.ContentType;
-import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.controller.doc.Notes;
-import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.TopologyOpDesctiption;
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
-import com.sequenceiq.cloudbreak.controller.json.TopologyRequest;
-import com.sequenceiq.cloudbreak.controller.json.TopologyResponse;
+import com.sequenceiq.cloudbreak.api.TopologyEndpoint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.model.IdJson;
+import com.sequenceiq.cloudbreak.model.TopologyRequest;
+import com.sequenceiq.cloudbreak.model.TopologyResponse;
 import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.service.topology.TopologyService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
-@Controller
-@Api(value = "/topologies", description = ControllerDescription.TOPOLOGY_DESCRIPTION, position = 9)
-public class TopologyController {
-    @Inject
+@Component
+public class TopologyController implements TopologyEndpoint {
+
+    @Autowired
     private TopologyService topologyService;
-    @Inject
+    @Autowired
     private TopologyRepository topologyRepository;
-    @Inject
+    @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
+    @Autowired
+    private AuthenticatedUserService authenticatedUserService;
 
-
-    @ApiOperation(value = TopologyOpDesctiption.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES)
-    @RequestMapping(value = "account/topologies", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<Set<TopologyResponse>> getAccountTopoligies(@ModelAttribute("user") CbUser user) {
+    @Override
+    public Set<TopologyResponse> getPublics() {
+        CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Set<Topology> stacks = topologyRepository.findAllInAccount(user.getAccount());
 
-        return new ResponseEntity<>(convert(stacks), HttpStatus.OK);
+        return convert(stacks);
     }
 
     private TopologyResponse convert(Topology topology) {
@@ -69,23 +52,19 @@ public class TopologyController {
         return jsons;
     }
 
-    @RequestMapping(value = "account/topologies", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = TopologyOpDesctiption.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES)
-    public ResponseEntity<IdJson> createAccountTopology(@ModelAttribute("user") CbUser user, @RequestBody @Valid TopologyRequest topologyRequest) {
+    @Override
+    public IdJson postPublic(TopologyRequest topologyRequest) {
+        CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Topology topology = conversionService.convert(topologyRequest, Topology.class);
         topology = topologyService.create(user, topology);
-        return new ResponseEntity<>(new IdJson(topology.getId()), HttpStatus.CREATED);
+        return new IdJson(topology.getId());
     }
 
-    @RequestMapping(value = "account/topologies/{id}", method = RequestMethod.DELETE)
-    @ResponseBody
-    @ApiOperation(value = TopologyOpDesctiption.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES)
-    public ResponseEntity<TemplateResponse> deleteTopology(@ModelAttribute("user") CbUser user, @PathVariable Long id,
-            @RequestParam(value = "forced", required = false, defaultValue = "false") Boolean forced) {
+    @Override
+    public void delete(Long id, Boolean forced) {
+        CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         topologyService.delete(id, user);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -1,11 +1,9 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.testng.Assert;
@@ -14,7 +12,10 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.api.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.StackEndpoint;
+import com.sequenceiq.cloudbreak.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.model.HostGroupJson;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -40,20 +41,33 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         Integer stackId = Integer.valueOf(stackIdStr);
         Integer blueprintId = Integer.valueOf(itContext.getContextParam(CloudbreakITContextConstants.BLUEPRINT_ID));
         List<HostGroup> hostgroups = itContext.getContextParam(CloudbreakITContextConstants.HOSTGROUP_ID, List.class);
-        List<Map<String, Object>> map = convertHostGroups(hostgroups, runRecipesOnHosts);
+        Set<HostGroupJson> hostGroupJsons1 = convertHostGroups(hostgroups, runRecipesOnHosts);
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_USER_ID, ambariUser);
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID, ambariPassword);
         // WHEN
         // TODO email needed
-        CloudbreakClient client = getClient();
-        client.postCluster(clusterName, ambariUser, ambariPassword, blueprintId, "Cluster for integration test", Integer.valueOf(stackId), map,
-                enableSecurity, kerberosMasterKey, kerberosAdmin, kerberosPassword);
+        ClusterRequest clusterRequest = new ClusterRequest();
+        clusterRequest.setName(clusterName);
+        clusterRequest.setDescription("Cluster for integration test");
+        clusterRequest.setKerberosAdmin(kerberosAdmin);
+        clusterRequest.setKerberosPassword(kerberosPassword);
+        clusterRequest.setKerberosMasterKey(kerberosMasterKey);
+        clusterRequest.setEnableSecurity(enableSecurity);
+        clusterRequest.setPassword(ambariPassword);
+        clusterRequest.setUserName(ambariUser);
+        clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
+        clusterRequest.setHostGroups(hostGroupJsons1);
+
+
+        ClusterEndpoint clusterEndpoint = itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_CLUSTER, ClusterEndpoint.class);
+        clusterEndpoint.post(Long.valueOf(stackId), clusterRequest);
         // THEN
         CloudbreakUtil.waitAndCheckStackStatus(itContext, stackIdStr, "AVAILABLE");
-        CloudbreakUtil.checkClusterAvailability(client, stackIdStr, ambariUser, ambariPassword);
+        CloudbreakUtil.checkClusterAvailability(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_STACK, StackEndpoint.class),
+                stackIdStr, ambariUser, ambariPassword);
     }
 
-    private List<Map<String, Object>> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts) {
+    private Set<HostGroupJson> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts) {
         Set<Long> recipeIds = Collections.emptySet();
         List<String> hostGroupsWithRecipe = Collections.emptyList();
         if (!runRecipesOnHosts.isEmpty()) {
@@ -61,15 +75,15 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
             Assert.assertFalse(recipeIds == null || recipeIds.isEmpty());
             hostGroupsWithRecipe = Arrays.asList(runRecipesOnHosts.split(","));
         }
-        List<Map<String, Object>> hgMaps = new ArrayList<>();
+        Set<HostGroupJson> hgMaps = new HashSet<>();
         for (HostGroup hostgroup : hostGroups) {
-            Map<String, Object> hgMap = new HashMap<>();
-            hgMap.put("name", hostgroup.getName());
-            hgMap.put("instanceGroupName", hostgroup.getInstanceGroupName());
+            HostGroupJson hostGroupJson = new HostGroupJson();
+            hostGroupJson.setName(hostgroup.getName());
+            hostGroupJson.setInstanceGroupName(hostgroup.getInstanceGroupName());
             if (hostGroupsWithRecipe.contains(hostgroup.getName())) {
-                hgMap.put("recipeIds", recipeIds);
+                hostGroupJson.setRecipeIds(recipeIds);
             }
-            hgMaps.add(hgMap);
+            hgMaps.add(hostGroupJson);
         }
         return hgMaps;
     }

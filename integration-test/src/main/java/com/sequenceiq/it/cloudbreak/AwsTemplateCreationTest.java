@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -9,6 +11,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import com.sequenceiq.cloudbreak.model.TemplateRequest;
 
 public class AwsTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     @Inject
@@ -29,8 +33,19 @@ public class AwsTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         // WHEN
         // TODO PublicInAccount, Encrypted
-        String id = getClient().postEc2Template(awsTemplateName, "Integration Test Template", "0.0.0.0/0", awsInstanceType, awsVolumeCount, awsVolumeSize,
-                awsVolumeType, false, false);
+        TemplateRequest templateRequest = new TemplateRequest();
+        templateRequest.setName(awsTemplateName);
+        templateRequest.setDescription("AWS template for integration testing");
+        templateRequest.setCloudPlatform("AWS");
+        templateRequest.setInstanceType(awsInstanceType);
+        templateRequest.setVolumeCount(Integer.valueOf(awsVolumeCount));
+        templateRequest.setVolumeSize(Integer.valueOf(awsVolumeSize));
+        templateRequest.setVolumeType(awsVolumeType);
+        Map<String, Object> map = new HashMap<>();
+        map.put("encrypted", false);
+        templateRequest.setParameters(map);
+        templateRequest.setCloudPlatform("AWS");
+        String id = getTemplateEndpoint().postPrivate(templateRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         templateAdditionHelper.handleTemplateAdditions(getItContext(), id, additions);

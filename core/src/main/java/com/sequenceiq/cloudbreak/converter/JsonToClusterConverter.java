@@ -4,12 +4,12 @@ import static com.sequenceiq.cloudbreak.common.type.Status.REQUESTED;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
-import com.sequenceiq.cloudbreak.controller.json.FileSystemBase;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.model.FileSystemBase;
 
 @Component
 public class JsonToClusterConverter extends AbstractConversionServiceAwareConverter<ClusterRequest, Cluster> {

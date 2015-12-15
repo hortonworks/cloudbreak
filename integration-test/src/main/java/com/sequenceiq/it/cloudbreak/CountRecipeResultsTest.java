@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,7 +22,9 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.api.StackEndpoint;
+import com.sequenceiq.cloudbreak.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.model.InstanceMetaDataJson;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
@@ -37,10 +38,10 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
         Assert.assertEquals(new File(defaultPrivateKeyFile).exists(), true, "Private cert file not found: " + defaultPrivateKeyFile);
         Assert.assertFalse(lookingFor.isEmpty());
 
-        CloudbreakClient client = getClient();
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        List<Map> instanceGroups = (List<Map>) ((Map) client.getStack(stackId)).get("instanceGroups");
+        StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_STACK, StackEndpoint.class);
+        List<InstanceGroupJson> instanceGroups = stackEndpoint.get(Long.valueOf(stackId)).getInstanceGroups();
         String[] files = lookingFor.split(",");
         List<String> publicIps = getPublicIps(instanceGroups, Arrays.asList(searchRecipesOnHosts.split(",")));
         List<Future> futures = new ArrayList<>(publicIps.size() * files.length);
@@ -71,12 +72,12 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
         Assert.assertEquals(count.get(), require.intValue(), "The number of existing files is different than required.");
     }
 
-    private List<String> getPublicIps(List<Map> instanceGroups, List<String> hostGroupsWithRecipe) {
+    private List<String> getPublicIps(List<InstanceGroupJson> instanceGroups, List<String> hostGroupsWithRecipe) {
         List<String> ips = new ArrayList<>();
-        for (Map instanceGroup : instanceGroups) {
-            if (hostGroupsWithRecipe.contains(instanceGroup.get("group"))) {
-                for (Map metaData : (List<Map>) instanceGroup.get("metadata")) {
-                    ips.add((String) metaData.get("publicIp"));
+        for (InstanceGroupJson instanceGroup : instanceGroups) {
+            if (hostGroupsWithRecipe.contains(instanceGroup.getGroup())) {
+                for (InstanceMetaDataJson metaData : instanceGroup.getMetadata()) {
+                    ips.add(metaData.getPublicIp());
                 }
             }
         }

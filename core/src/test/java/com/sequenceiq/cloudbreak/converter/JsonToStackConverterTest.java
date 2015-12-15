@@ -14,10 +14,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
-import com.sequenceiq.cloudbreak.controller.json.StackRequest;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.model.StackRequest;
 
 public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackRequest> {
 

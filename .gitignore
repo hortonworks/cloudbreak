@@ -24,3 +24,6 @@ suites_log/
 test-output/
 gradle/wrapper/
 Makefile
+*/build
+cloudbreak-shell.log
+cloud-break.cbh

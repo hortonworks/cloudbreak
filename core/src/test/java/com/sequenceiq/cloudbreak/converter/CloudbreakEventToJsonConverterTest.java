@@ -7,8 +7,8 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.controller.json.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
+import com.sequenceiq.cloudbreak.model.CloudbreakEventsJson;
 
 public class CloudbreakEventToJsonConverterTest extends AbstractEntityConverterTest<CloudbreakEvent> {
     private CloudbreakEventToJsonConverter underTest;

@@ -5,8 +5,8 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.model.CloudbreakUsageJson;
 
 public class JsonToCloudbreakUsageConverterTest extends AbstractJsonConverterTest<CloudbreakUsageJson> {
 
