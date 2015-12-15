@@ -52,4 +52,8 @@ hs_err_pid*
 >>>>>>> b494fa7... IDEA stuff + others added
 =======
 certs/
+<<<<<<< HEAD
 >>>>>>> 071443d... CLOUD-43527 owner based logging context
+=======
+/build
+>>>>>>> c8b2ed3... Update .gitignore
