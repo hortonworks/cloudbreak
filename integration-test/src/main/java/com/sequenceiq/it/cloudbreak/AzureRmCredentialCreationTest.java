@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
@@ -37,7 +36,7 @@ public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegration
         accesKey = StringUtils.hasLength(accesKey) ? accesKey : defaultAccesKey;
 
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
-        String publicKey = Base64.encodeBase64String(ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "").getBytes());
+        String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         // WHEN
         // TODO publicInAccount
         String id = getClient().postAzureRmCredential(credentialName, "Azure Rm credential for integartiontest", subscriptionId, tenantId, accesKey, secretKey,
