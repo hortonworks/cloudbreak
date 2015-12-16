@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!-- Use -Dlogging.config=classpath:logback-stdout.xml in IDEA to load this file -->
+
 <configuration scan="true" scanPeriod="30 seconds">
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -8,9 +10,9 @@
         </encoder>
     </appender>
 
-    <logger name="com.sequenceiq" level="DEBUG">
-        <appender-ref ref="STDOUT"/>
-    </logger>
+    <logger name="com.sequenceiq" level="DEBUG" />
+
+    <logger name="org.springframework.transaction" level="TRACE" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

@@ -8,31 +8,13 @@
         </encoder>
     </appender>
 
-    <logger name="com.sequenceiq" level="INFO" additivity="false">
+    <logger name="com.sequenceiq" level="INFO">
         <appender-ref ref="STDOUT"/>
     </logger>
-    <logger name="org.hibernate.type" level="INFO">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <logger name="org.hibernate" level="INFO">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <logger name="org.hibernate.SQL" level="INFO">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <logger name="sql-log" level="INFO">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
-        <level value="INFO"/>
-    </logger>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
-    <logger name="com.sequenceiq.cloud.azure.client">
-        <level value="INFO"/>
-    </logger>
-
 
     <appender name="OWNER_BASED" class="ch.qos.logback.classic.sift.SiftingAppender">
         <discriminator>
@@ -55,21 +37,7 @@
     <logger name="com.sequenceiq" level="DEBUG" additivity="false">
         <appender-ref ref="OWNER_BASED"/>
     </logger>
-    <logger name="org.hibernate.type" level="INFO">
-        <appender-ref ref="OWNER_BASED"/>
-    </logger>
-    <logger name="org.hibernate" level="INFO">
-        <appender-ref ref="OWNER_BASED"/>
-    </logger>
-    <logger name="org.hibernate.SQL" level="INFO">
-        <appender-ref ref="OWNER_BASED"/>
-    </logger>
-    <logger name="sql-log" level="INFO">
-        <appender-ref ref="OWNER_BASED"/>
-    </logger>
-    <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
-        <level value="OWNER_BASED"/>
-    </logger>
+
     <root level="INFO">
         <appender-ref ref="OWNER_BASED"/>
     </root>
