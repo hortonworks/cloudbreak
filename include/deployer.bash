@@ -84,8 +84,8 @@ cbd-update-release() {
 
         local url=https://github.com/sequenceiq/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
         info "Updating $SELF_EXECUTABLE from url: $url"
-        curl -Ls $url | tar -zx -C /tmp
-        mv /tmp/cbd $SELF_EXECUTABLE
+        curl -Ls $url | tar -zx -C $TEMP_DIR
+        mv $TEMP_DIR/cbd $SELF_EXECUTABLE
         debug $SELF_EXECUTABLE is updated
     else
         debug you have the latest version | green
@@ -98,8 +98,8 @@ cbd-update-snap() {
 
     url=$(cci-latest sequenceiq/cloudbreak-deployer $branch)
     info "Update $SELF_EXECUTABLE from: $url"
-    curl -Ls $url | tar -zx -C /tmp
-    mv /tmp/cbd $SELF_EXECUTABLE
+    curl -Ls $url | tar -zx -C $TEMP_DIR
+    mv $TEMP_DIR/cbd $SELF_EXECUTABLE
     debug $SELF_EXECUTABLE is updated
 }
 
@@ -285,6 +285,12 @@ start-and-migrate-cmd() {
     echo '  cbd login' | blue
 }
 
+create-temp-dir() {
+    debug "Creating '.tmp' directory if not exist"
+    TEMP_DIR=$(deps-dir)/tmp
+    mkdir -p $TEMP_DIR
+}
+
 _exit() {
     docker-kill-all-sidekicks
     exit $1
@@ -299,6 +305,7 @@ main() {
     deps-require sed
     load-profile "$@"
 
+    create-temp-dir
     circle-init
     compose-init
     aws-init

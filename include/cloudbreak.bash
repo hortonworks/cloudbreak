@@ -253,9 +253,9 @@ generate_uaa_check_diff() {
     local verbose="$1"
 
     if [ -f uaa.yml ]; then
-
-        generate_uaa_config_force /tmp/uaa-delme.yml
-        if diff /tmp/uaa-delme.yml uaa.yml &> /dev/null; then
+        local uaa_delme_path=$TEMP_DIR/uaa-delme.yml
+        generate_uaa_config_force $uaa_delme_path
+        if diff $uaa_delme_path uaa.yml &> /dev/null; then
             debug "uaa.yml exists and generate wouldn't change it"
             return 0
         else
@@ -267,10 +267,10 @@ generate_uaa_check_diff() {
 
             if [[ "$verbose" ]]; then
                 warn "expected change:"
-                diff /tmp/uaa-delme.yml uaa.yml || true
+                diff $uaa_delme_path uaa.yml || true
             else
                 debug "expected change:"
-                (diff /tmp/uaa-delme.yml uaa.yml || true) | debug-cat
+                (diff $uaa_delme_path uaa.yml || true) | debug-cat
             fi
             return 1
 
