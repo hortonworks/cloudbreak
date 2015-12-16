@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRe
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -36,15 +35,11 @@ public class ServiceProviderCredentialAdapter {
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
 
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.ADAPTER;
-    }
-
     public Credential init(Credential credential) {
         if (!credential.passwordAuthenticationRequired()) {
             rsaPublicKeyValidator.validate(credential.getPublicKey());
         }
-        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform().name(), credential.getOwner());
+        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform(), credential.getOwner());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
         CredentialVerificationRequest request = new CredentialVerificationRequest(cloudContext, cloudCredential);

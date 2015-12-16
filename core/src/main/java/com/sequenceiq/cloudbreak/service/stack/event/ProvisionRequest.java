@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack.event;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
 public class ProvisionRequest extends ProvisionEvent {
 
-    public ProvisionRequest(CloudPlatform cloudPlatform, Long stackId) {
+    public ProvisionRequest(Platform cloudPlatform, Long stackId) {
         super(cloudPlatform, stackId);
     }
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.event;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 
 public class UpdateInstancesRequest extends ProvisionEvent {
@@ -9,7 +9,7 @@ public class UpdateInstancesRequest extends ProvisionEvent {
     private String instanceGroup;
     private ScalingType scalingType;
 
-    public UpdateInstancesRequest(CloudPlatform cloudPlatform, Long stackId, Integer scalingAdjustment, String instanceGroup, ScalingType scalingType) {
+    public UpdateInstancesRequest(Platform cloudPlatform, Long stackId, Integer scalingAdjustment, String instanceGroup, ScalingType scalingType) {
         super(cloudPlatform, stackId);
         this.scalingAdjustment = scalingAdjustment;
         this.instanceGroup = instanceGroup;

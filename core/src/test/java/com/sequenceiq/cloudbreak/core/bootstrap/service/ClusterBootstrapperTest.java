@@ -22,8 +22,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.BootstrapApiContext;
@@ -48,6 +49,8 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterBootstrapperTest {
+
+    private static final com.sequenceiq.cloudbreak.cloud.model.Platform GCP_PLATFORM = Platform.platform(CloudConstants.GCP);
 
     @Mock
     private StackRepository stackRepository;
@@ -87,7 +90,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenEverythingWorksNormally() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, CloudPlatform.GCP).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
@@ -115,7 +118,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenTimeOutComesInClusterAvailabilityPoller() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, CloudPlatform.GCP).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
@@ -142,7 +145,7 @@ public class ClusterBootstrapperTest {
     @Test(expected = CancellationException.class)
     public void bootstrapClusterWhenOrchestratorDropCancelledException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, CloudPlatform.GCP).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
@@ -162,7 +165,7 @@ public class ClusterBootstrapperTest {
     @Test(expected = CloudbreakException.class)
     public void bootstrapClusterWhenOrchestratorDropFailedException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, CloudPlatform.GCP).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
@@ -182,7 +185,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenEverythingWorksNormallyWithMoreBootstrapSegment() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, CloudPlatform.GCP).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
@@ -209,7 +212,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapNewNodesInClusterWhenEverythingWorksNormally() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        StackScalingContext context = new StackScalingContext(1L, CloudPlatform.GCP, 2, "master1", new HashSet<Resource>(),
+        StackScalingContext context = new StackScalingContext(1L, GCP_PLATFORM, 2, "master1", new HashSet<Resource>(),
                 ScalingType.UPSCALE_ONLY_STACK, getPrivateIps(stack));
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -236,7 +239,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapNewNodesInClusterWhenBootstrapHappeningInTwoSegments() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        StackScalingContext context = new StackScalingContext(1L, CloudPlatform.GCP, 2, "master1", new HashSet<Resource>(),
+        StackScalingContext context = new StackScalingContext(1L, GCP_PLATFORM, 2, "master1", new HashSet<Resource>(),
                 ScalingType.UPSCALE_ONLY_STACK, getPrivateIps(stack));
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -262,7 +265,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapNewNodesInClusterWhenClusterAvailabilityDropTimeout() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        StackScalingContext context = new StackScalingContext(1L, CloudPlatform.GCP, 2, "master1", new HashSet<Resource>(),
+        StackScalingContext context = new StackScalingContext(1L, GCP_PLATFORM, 2, "master1", new HashSet<Resource>(),
                 ScalingType.UPSCALE_ONLY_STACK, getPrivateIps(stack));
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -289,7 +292,7 @@ public class ClusterBootstrapperTest {
     @Test(expected = CancellationException.class)
     public void bootstrapNewNodesInClusterWhenOrchestratorDropCancelledException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        StackScalingContext context = new StackScalingContext(1L, CloudPlatform.GCP, 2, "master1", new HashSet<Resource>(),
+        StackScalingContext context = new StackScalingContext(1L, GCP_PLATFORM, 2, "master1", new HashSet<Resource>(),
                 ScalingType.UPSCALE_ONLY_STACK, getPrivateIps(stack));
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -309,7 +312,7 @@ public class ClusterBootstrapperTest {
     @Test(expected = CloudbreakException.class)
     public void bootstrapNewNodesInClusterWhenOrchestratorDropFailedException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        StackScalingContext context = new StackScalingContext(1L, CloudPlatform.GCP, 2, "master1", new HashSet<Resource>(),
+        StackScalingContext context = new StackScalingContext(1L, GCP_PLATFORM, 2, "master1", new HashSet<Resource>(),
                 ScalingType.UPSCALE_ONLY_STACK, getPrivateIps(stack));
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);

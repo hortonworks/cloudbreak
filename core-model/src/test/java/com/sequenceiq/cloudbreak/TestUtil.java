@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
 
 import java.net.URL;
@@ -18,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
@@ -94,7 +96,7 @@ public class TestUtil {
         awsCredential.setPublicKey(AZURE_PUB_KEY);
         awsCredential.setPublicInAccount(false);
         awsCredential.setArchived(false);
-        awsCredential.setCloudPlatform(CloudPlatform.AWS);
+        awsCredential.setCloudPlatform(AWS);
         awsCredential.setDescription(DUMMY_DESCRIPTION);
         awsCredential.setId(1L);
         awsCredential.setLoginUserName("cb");
@@ -107,7 +109,7 @@ public class TestUtil {
         credential.setPublicKey(AZURE_PUB_KEY);
         credential.setId(1L);
         credential.setName(DUMMY_NAME);
-        credential.setCloudPlatform(CloudPlatform.GCP);
+        credential.setCloudPlatform(GCP);
         credential.setLoginUserName("cb");
         credential.setPublicInAccount(true);
         credential.setDescription(DUMMY_DESCRIPTION);
@@ -115,7 +117,7 @@ public class TestUtil {
     }
 
     public static Stack setEphemeral(Stack stack) {
-        if (stack.cloudPlatform().equals(CloudPlatform.AWS)) {
+        if (stack.cloudPlatform().equals(AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
                 (instanceGroup.getTemplate()).setVolumeType("ephemeral");
             }
@@ -245,7 +247,7 @@ public class TestUtil {
         Template awsTemplate = new Template();
         awsTemplate.setInstanceType("c3.2xlarge");
         awsTemplate.setId(id);
-        awsTemplate.setCloudPlatform(CloudPlatform.AWS);
+        awsTemplate.setCloudPlatform(AWS);
         awsTemplate.setVolumeCount(1);
         awsTemplate.setVolumeSize(100);
         awsTemplate.setVolumeType("standard");
@@ -259,7 +261,7 @@ public class TestUtil {
     public static Template openstackTemplate(Long id) {
         Template openStackTemplate = new Template();
         openStackTemplate.setInstanceType("Big");
-        openStackTemplate.setCloudPlatform(CloudPlatform.OPENSTACK);
+        openStackTemplate.setCloudPlatform(OPENSTACK);
         openStackTemplate.setId(id);
         openStackTemplate.setVolumeCount(1);
         openStackTemplate.setVolumeSize(100);
@@ -274,7 +276,7 @@ public class TestUtil {
         Template gcpTemplate = new Template();
         gcpTemplate.setInstanceType(N1_HIGHCPU_16_INSTANCE);
         gcpTemplate.setId(id);
-        gcpTemplate.setCloudPlatform(CloudPlatform.GCP);
+        gcpTemplate.setCloudPlatform(GCP);
         gcpTemplate.setVolumeCount(1);
         gcpTemplate.setVolumeSize(100);
         gcpTemplate.setDescription(DUMMY_DESCRIPTION);
@@ -389,7 +391,7 @@ public class TestUtil {
         cloudbreakUsage.setInstanceHours(1L);
         cloudbreakUsage.setInstanceType("xlarge");
         cloudbreakUsage.setOwner("owner");
-        cloudbreakUsage.setProvider(CloudPlatform.GCP.name());
+        cloudbreakUsage.setProvider(GCP);
         cloudbreakUsage.setRegion("Central US");
         cloudbreakUsage.setStackName("usagestack");
         cloudbreakUsage.setStackId(1L);
@@ -416,7 +418,7 @@ public class TestUtil {
         cloudbreakEvent.setEventTimestamp(new Date());
         cloudbreakEvent.setEventMessage("message");
         cloudbreakEvent.setEventType("eventType");
-        cloudbreakEvent.setCloud(CloudPlatform.GCP.name());
+        cloudbreakEvent.setCloud(GCP);
         cloudbreakEvent.setBlueprintName("blueprintName");
         cloudbreakEvent.setBlueprintId(1L);
         cloudbreakEvent.setStackStatus(Status.AVAILABLE);

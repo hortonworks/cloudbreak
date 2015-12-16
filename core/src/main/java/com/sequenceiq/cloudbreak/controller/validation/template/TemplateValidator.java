@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.validation.template;
 
+import java.util.Collection;
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
-import java.util.Collection;
-import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -35,7 +35,7 @@ public class TemplateValidator implements ConstraintValidator<ValidTemplate, Tem
     public boolean isValid(TemplateRequest value, ConstraintValidatorContext context) {
         boolean valid = true;
         VmType vmType = null;
-        Platform platform = Platform.platform(value.getCloudPlatform().name());
+        Platform platform = Platform.platform(value.getCloudPlatform());
         Map<Platform, Collection<VmType>> virtualMachines = cloudParameterService.getVmtypes().getVirtualMachines();
         VmType tempVmType = VmType.vmType(value.getInstanceType());
 

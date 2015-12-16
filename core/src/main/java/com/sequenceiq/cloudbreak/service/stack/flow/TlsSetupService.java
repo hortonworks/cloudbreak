@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CERT_DIR;
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_TLS_CERT_FILE;
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.io.ByteArrayInputStream;
@@ -21,7 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -75,7 +76,7 @@ public class TlsSetupService {
     @Value("#{'${cb.cert.dir:" + CB_CERT_DIR + "}' + '/' + '${cb.tls.cert.file:" + CB_TLS_CERT_FILE + "}'}")
     private String tlsCertificatePath;
 
-    public void setupTls(CloudPlatform cloudPlatform, Stack stack) throws CloudbreakException {
+    public void setupTls(Platform cloudPlatform, Stack stack) throws CloudbreakException {
         InstanceMetaData gateway = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         LOGGER.info("SSH into gateway node to setup certificates on gateway.");
         Set<String> sshFingerprints = connector.getSSHFingerprints(stack, gateway.getInstanceId());
@@ -88,7 +89,7 @@ public class TlsSetupService {
         LOGGER.info("SSHClient parameters: stackId: {}, publicIp: {},  user: {}", stack.getId(), publicIp, user);
         SSHClient ssh = new SSHClient();
         String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
-        HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints, stack.cloudPlatform());
+        HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints, platform(stack.cloudPlatform()));
         try {
             waitForSsh(stack, publicIp, hostKeyVerifier, user, privateKeyLocation);
             setupTemporarySsh(ssh, publicIp, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());

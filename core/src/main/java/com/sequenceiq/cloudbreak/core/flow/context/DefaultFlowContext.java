@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.core.flow.context;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
 public class DefaultFlowContext implements FlowContext {
     private Long stackId;
-    private CloudPlatform cloudPlatform;
+    private Platform cloudPlatform;
     private String errorReason;
 
-    public DefaultFlowContext(Long stackId, CloudPlatform cloudPlatform) {
+    public DefaultFlowContext(Long stackId, Platform cloudPlatform) {
         this.stackId = stackId;
         this.cloudPlatform = cloudPlatform;
     }
 
-    public DefaultFlowContext(Long stackId, CloudPlatform cloudPlatform, String errorReason) {
+    public DefaultFlowContext(Long stackId, Platform cloudPlatform, String errorReason) {
         this.stackId = stackId;
         this.cloudPlatform = cloudPlatform;
         this.errorReason = errorReason;
@@ -24,7 +24,7 @@ public class DefaultFlowContext implements FlowContext {
     }
 
     @Override
-    public CloudPlatform getCloudPlatform() {
+    public Platform getCloudPlatform() {
         return cloudPlatform;
     }
 

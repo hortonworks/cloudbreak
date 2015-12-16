@@ -78,7 +78,7 @@ dependencies {
     runtime project(':cloud-openstack')
     compile project(':cloud-arm')
     runtime project(':cloud-gcp')
-    compile project(':cloud-aws')
+    runtime project(':cloud-aws')
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 

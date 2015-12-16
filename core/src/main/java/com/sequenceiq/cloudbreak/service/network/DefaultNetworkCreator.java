@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.network;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.NetworkConfig;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -43,18 +45,18 @@ public class DefaultNetworkCreator {
 
         Network awsNetwork = new Network();
         setNetworkCommonFields(awsNetwork, DEFAULT_AWS_NETWORK_NAME, "Default network settings for AWS clusters.",
-                NetworkConfig.SUBNET_16, user, CloudPlatform.AWS);
+                NetworkConfig.SUBNET_16, user, AWS);
         networks.add(networkRepository.save(awsNetwork));
 
         Network gcpNetwork = new Network();
         setNetworkCommonFields(gcpNetwork, DEFAULT_GCP_NETWORK_NAME, "Default network settings for Gcp clusters.",
-                NetworkConfig.SUBNET_16, user, CloudPlatform.GCP);
+                NetworkConfig.SUBNET_16, user, GCP);
         networks.add(networkRepository.save(gcpNetwork));
 
         return networks;
     }
 
-    private void setNetworkCommonFields(Network network, String name, String description, String subnet, CbUser user, CloudPlatform platform) {
+    private void setNetworkCommonFields(Network network, String name, String description, String subnet, CbUser user, String platform) {
         network.setName(name);
         network.setDescription(description);
         network.setSubnetCIDR(subnet);

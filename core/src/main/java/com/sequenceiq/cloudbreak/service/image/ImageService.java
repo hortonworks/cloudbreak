@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -60,11 +62,11 @@ public class ImageService {
 
     public void create(Stack stack, PlatformParameters params) {
         try {
-            CloudPlatform cloudPlatform = stack.cloudPlatform();
-            String imageName = imageNameUtil.determineImageName(cloudPlatform, stack.getRegion());
+            Platform platform = platform(stack.cloudPlatform());
+            String imageName = imageNameUtil.determineImageName(platform, stack.getRegion());
             String tmpSshKey = tlsSecurityService.readPublicSshKey(stack.getId());
             String sshUser = stack.getCredential().getLoginUserName();
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(cloudPlatform, tmpSshKey, sshUser, params);
+            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, tmpSshKey, sshUser, params);
             Image image = new Image(imageName, userData);
             Component component = new Component(ComponentType.IMAGE, IMAGE_NAME, new Json(image), stack);
             componentRepository.save(component);

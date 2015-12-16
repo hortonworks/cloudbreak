@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STARTED;
 import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
 import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
@@ -33,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -452,7 +452,6 @@ public class SimpleStackFacade implements StackFacade {
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Updating allowed subnets.");
             fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_SUBNETS_UPDATING, UPDATE_IN_PROGRESS.name());
 
-            CloudPlatform cloudPlatform = stack.cloudPlatform();
             Map<String, Set<SecurityRule>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSecurityRules());
             Set<SecurityRule> newSecurityRules = modifiedSubnets.get(UPDATED_SUBNETS);
             stack.getSecurityGroup().setSecurityRules(newSecurityRules);
@@ -527,7 +526,6 @@ public class SimpleStackFacade implements StackFacade {
             String errorReason = actualContext.getErrorReason();
             fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, UPDATE_IN_PROGRESS.name(), errorReason);
             if (!stack.isStackInDeletionPhase()) {
-                final CloudPlatform cloudPlatform = actualContext.getCloudPlatform();
                 if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
                     LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
                 } else {
@@ -539,7 +537,7 @@ public class SimpleStackFacade implements StackFacade {
                 fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, CREATE_FAILED.name(), errorReason);
             }
 
-            context = new ProvisioningContext.Builder().setDefaultParams(stack.getId(), stack.cloudPlatform()).build();
+            context = new ProvisioningContext.Builder().setDefaultParams(stack.getId(), platform(stack.cloudPlatform())).build();
         } catch (Exception ex) {
             LOGGER.error("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
             stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, String.format("Rollback failed: %s", ex.getMessage()));

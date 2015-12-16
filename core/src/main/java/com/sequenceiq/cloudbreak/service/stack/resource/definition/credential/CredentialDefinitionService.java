@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.MissingParameterException;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.ResourceDefinitionService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -27,16 +27,16 @@ public class CredentialDefinitionService {
     @Inject
     private PBEStringCleanablePasswordEncryptor encryptor;
 
-    public Map<String, Object> processProperties(CloudPlatform cloudPlatform, Map<String, Object> properties) {
+    public Map<String, Object> processProperties(Platform cloudPlatform, Map<String, Object> properties) {
         return processValues(getDefinition(cloudPlatform), properties, false);
     }
 
-    public Map<String, Object> revertProperties(CloudPlatform cloudPlatform, Map<String, Object> properties) {
+    public Map<String, Object> revertProperties(Platform cloudPlatform, Map<String, Object> properties) {
         return processValues(getDefinition(cloudPlatform), properties, true);
     }
 
-    private Definition getDefinition(CloudPlatform cloudPlatform) {
-        String json = definitionService.getResourceDefinition(cloudPlatform.name(), RESOURCE_TYPE);
+    private Definition getDefinition(Platform cloudPlatform) {
+        String json = definitionService.getResourceDefinition(cloudPlatform.value(), RESOURCE_TYPE);
         try {
             return JsonUtil.readValue(json, Definition.class);
         } catch (IOException e) {

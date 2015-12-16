@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -32,7 +32,7 @@ public class ProvisioningService {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public ProvisionComplete buildStack(final CloudPlatform cloudPlatform, Stack stack, Map<String, Object> setupProperties)
+    public ProvisionComplete buildStack(final Platform cloudPlatform, Stack stack, Map<String, Object> setupProperties)
             throws CloudbreakSecuritySetupException {
         stack = stackRepository.findOneWithLists(stack.getId());
         Set<Resource> resources = connector.buildStack(stack, setupProperties);

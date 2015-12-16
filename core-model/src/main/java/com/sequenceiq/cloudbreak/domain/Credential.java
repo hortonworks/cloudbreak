@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.domain;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,7 +12,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
@@ -87,9 +84,8 @@ public class Credential {
     @Column(columnDefinition = "boolean default false")
     private boolean archived;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CloudPlatform cloudPlatform;
+    private String cloudPlatform;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -179,11 +175,11 @@ public class Credential {
         return publicKey.replaceAll("Basic:", "").trim();
     }
 
-    public CloudPlatform cloudPlatform() {
+    public String cloudPlatform() {
         return cloudPlatform;
     }
 
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+    public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
 

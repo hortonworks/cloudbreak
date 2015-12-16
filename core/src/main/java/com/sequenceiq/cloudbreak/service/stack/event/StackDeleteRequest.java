@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack.event;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
 public class StackDeleteRequest {
 
     private Long stackId;
-    private CloudPlatform cloudPlatform;
+    private Platform cloudPlatform;
 
-    public StackDeleteRequest(CloudPlatform cloudPlatform, Long stackId) {
+    public StackDeleteRequest(Platform cloudPlatform, Long stackId) {
         this.stackId = stackId;
         this.cloudPlatform = cloudPlatform;
     }
@@ -20,11 +20,11 @@ public class StackDeleteRequest {
         this.stackId = stackId;
     }
 
-    public CloudPlatform getCloudPlatform() {
+    public Platform getCloudPlatform() {
         return cloudPlatform;
     }
 
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+    public void setCloudPlatform(Platform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
 }

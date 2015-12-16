@@ -17,7 +17,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
@@ -34,16 +34,16 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    Map<InstanceGroupType, String> buildUserData(CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters parameters) {
+    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters parameters) {
         Map<InstanceGroupType, String> result = new HashMap<>();
         result.put(InstanceGroupType.GATEWAY, build(InstanceGroupType.GATEWAY, cloudPlatform, tmpSshKey, sshUser, parameters));
         result.put(InstanceGroupType.CORE, build(InstanceGroupType.CORE, cloudPlatform, null, null, parameters));
         return result;
     }
 
-    private String build(InstanceGroupType type, CloudPlatform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters params) {
+    private String build(InstanceGroupType type, Platform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters params) {
         Map<String, Object> model = new HashMap<>();
-        model.put("cloudPlatform", cloudPlatform);
+        model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
         model.put("platformDiskStartLabel", params.scriptParams().getStartLabel());
         if (type == InstanceGroupType.GATEWAY) {

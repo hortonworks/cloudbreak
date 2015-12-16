@@ -83,7 +83,7 @@ public class ClusterContainerRunner {
     private void initializeClusterContainers(DefaultFlowContext context, Boolean add, Set<String> candidateAddresses) throws CloudbreakException,
             CloudbreakOrchestratorException {
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
-        String cloudPlatform = context.getCloudPlatform().name();
+        String cloudPlatform = context.getCloudPlatform().value();
 
         Stack stack = stackRepository.findOneWithLists(context.getStackId());
         InstanceGroup gateway = stack.getGatewayInstanceGroup();

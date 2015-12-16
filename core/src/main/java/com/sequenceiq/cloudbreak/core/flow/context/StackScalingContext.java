@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.core.flow.context;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
 public class StackScalingContext extends DefaultFlowContext {
@@ -16,7 +16,7 @@ public class StackScalingContext extends DefaultFlowContext {
     private ScalingType scalingType;
     private Set<String> upscaleCandidateAddresses;
 
-    public StackScalingContext(Long stackId, CloudPlatform cp, Integer sa, String ig, Set<Resource> resources, ScalingType st, Set<String> uca) {
+    public StackScalingContext(Long stackId, Platform cp, Integer sa, String ig, Set<Resource> resources, ScalingType st, Set<String> uca) {
         super(stackId, cp);
         this.scalingAdjustment = sa;
         this.instanceGroup = ig;

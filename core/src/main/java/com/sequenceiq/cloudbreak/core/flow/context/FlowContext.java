@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.context;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
 /**
  * Marker for flow context objects.
@@ -10,6 +10,6 @@ public interface FlowContext {
 
     Long getStackId();
 
-    CloudPlatform getCloudPlatform();
+    Platform getCloudPlatform();
 
 }

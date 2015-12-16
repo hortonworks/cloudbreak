@@ -43,7 +43,6 @@ import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
@@ -494,7 +493,7 @@ public class Stack implements ProvisionEntity {
         return new ArrayList<>(instanceGroups);
     }
 
-    public CloudPlatform cloudPlatform() {
+    public String cloudPlatform() {
         return credential.cloudPlatform();
     }
 
@@ -597,7 +596,7 @@ public class Stack implements ProvisionEntity {
 
     public boolean infrastructureIsEphemeral() {
         boolean ephemeral = false;
-        if (CloudPlatform.AWS.equals(cloudPlatform())) {
+        if ("AWS".equals(cloudPlatform())) {
             for (InstanceGroup instanceGroup : instanceGroups) {
                 if ("ephemeral".equals(instanceGroup.getTemplate().getVolumeType())) {
                     ephemeral = true;
