@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +73,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 import groovyx.net.http.HttpResponseException;
 
 @Service
+@Transactional
 public class AmbariClusterService implements ClusterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterService.class);

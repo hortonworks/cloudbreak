@@ -28,8 +28,7 @@ import com.sequenceiq.cloudbreak.controller.json.TemplateResponse;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.TemplateRepository;
-import com.sequenceiq.cloudbreak.service.template.SimpleTemplateLoaderService;
+import com.sequenceiq.cloudbreak.service.template.DefaultTemplateLoaderService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -41,10 +40,7 @@ public class TemplateController {
     private TemplateService templateService;
 
     @Inject
-    private SimpleTemplateLoaderService templateLoaderService;
-
-    @Inject
-    private TemplateRepository templateRepository;
+    private DefaultTemplateLoaderService defaultTemplateLoaderService;
 
     @Inject
     @Qualifier("conversionService")
@@ -80,7 +76,7 @@ public class TemplateController {
     @ResponseBody
     public ResponseEntity<Set<TemplateResponse>> getAccountTemplates(@ModelAttribute("user") CbUser user) {
         MDCBuilder.buildUserMdcContext(user);
-        Set<Template> templates = templateLoaderService.loadTemplates(user);
+        Set<Template> templates = defaultTemplateLoaderService.loadTemplates(user);
         templates.addAll(templateService.retrieveAccountTemplates(user));
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }

@@ -42,7 +42,7 @@ public class SecurityGroupController {
     private SecurityGroupService securityGroupService;
 
     @Inject
-    private DefaultSecurityGroupCreator securityGroupCreator;
+    private DefaultSecurityGroupCreator defaultSecurityGroupCreator;
 
     @ApiOperation(value = SecurityGroupOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
     @RequestMapping(value = "user/securitygroups", method = RequestMethod.POST)
@@ -62,7 +62,7 @@ public class SecurityGroupController {
     @RequestMapping(value = "user/securitygroups", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<SecurityGroupJson>> getPrivateSecurityGroups(@ModelAttribute("user") CbUser user) {
-        Set<SecurityGroup> securityGroups = securityGroupCreator.createDefaultSecurityGroups(user);
+        Set<SecurityGroup> securityGroups = defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
         securityGroups.addAll(securityGroupService.retrievePrivateSecurityGroups(user));
         return new ResponseEntity<>(convert(securityGroups), HttpStatus.OK);
     }
@@ -71,7 +71,7 @@ public class SecurityGroupController {
     @RequestMapping(value = "account/securitygroups", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<SecurityGroupJson>> getAccountSecurityGroups(@ModelAttribute("user") CbUser user) {
-        Set<SecurityGroup> securityGroups = securityGroupCreator.createDefaultSecurityGroups(user);
+        Set<SecurityGroup> securityGroups = defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
         securityGroups.addAll(securityGroupService.retrieveAccountSecurityGroups(user));
         return new ResponseEntity<>(convert(securityGroups), HttpStatus.OK);
     }

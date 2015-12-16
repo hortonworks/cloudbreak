@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.facade;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsageGeneratorService;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesRetrievalService;
 
 @Service
+@Transactional
 public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
 
     @Inject

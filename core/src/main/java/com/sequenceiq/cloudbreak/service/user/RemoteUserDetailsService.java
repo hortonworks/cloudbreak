@@ -25,6 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -176,6 +177,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean hasResources(CbUser admin, String userId) {
         CbUser user = getDetails(userId, UserFilterField.USERID);
         LOGGER.info("{} / {} checks resources of {}", admin.getUserId(), admin.getUsername(), userId);

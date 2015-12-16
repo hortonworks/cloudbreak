@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,7 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
 @Service
+@Transactional
 public class StackService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);

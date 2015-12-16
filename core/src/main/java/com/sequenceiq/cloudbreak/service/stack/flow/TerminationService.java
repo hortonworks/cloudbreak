@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @Service
+@Transactional
 public class TerminationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminationService.class);
     private static final String DELIMITER = "_";
@@ -56,6 +59,9 @@ public class TerminationService {
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Inject
+    private HostMetadataRepository hostMetadataRepository;
 
     @Resource
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
@@ -82,6 +88,7 @@ public class TerminationService {
                 clusterRepository.save(cluster);
                 for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(cluster.getId())) {
                     hostGroup.getRecipes().clear();
+                    hostGroup.getHostMetadata().clear();
                     hostGroupRepository.save(hostGroup);
                 }
                 FileSystem fs = cluster.getFileSystem();
@@ -93,8 +100,9 @@ public class TerminationService {
             stack.setNetwork(null);
             stack.setSecurityGroup(null);
             stack.setName(terminatedName);
-            instanceMetaDataRepository.save(terminateMetaDataInstances(stack));
+            terminateMetaDataInstances(stack);
             stackRepository.save(stack);
+
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);
@@ -113,7 +121,7 @@ public class TerminationService {
         }
     }
 
-    private List<InstanceMetaData> terminateMetaDataInstances(Stack stack) {
+    private void terminateMetaDataInstances(Stack stack) {
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
         for (InstanceMetaData metaData : stack.getRunningInstanceMetaData()) {
             long timeInMillis = Calendar.getInstance().getTimeInMillis();
@@ -121,6 +129,6 @@ public class TerminationService {
             metaData.setInstanceStatus(InstanceStatus.TERMINATED);
             instanceMetaDatas.add(metaData);
         }
-        return instanceMetaDatas;
+        instanceMetaDataRepository.save(instanceMetaDatas);
     }
 }
