@@ -127,8 +127,9 @@ compose-generate-check-diff() {
     local verbose="$1"
 
     if [ -f docker-compose.yml ]; then
-         compose-generate-yaml-force /tmp/docker-compose-delme.yml
-         if diff /tmp/docker-compose-delme.yml docker-compose.yml &>/dev/null; then
+        local compose_delme_path=$TEMP_DIR/docker-compose-delme.yml
+         compose-generate-yaml-force $compose_delme_path
+         if diff $compose_delme_path docker-compose.yml &>/dev/null; then
              debug "docker-compose.yml already exist, and generate wouldn't change it."
              return 0
         else
@@ -139,10 +140,10 @@ compose-generate-check-diff() {
             fi
             if [[ "$verbose" ]]; then
                 warn "expected change:"
-                diff /tmp/docker-compose-delme.yml docker-compose.yml || true
+                diff $compose_delme_path docker-compose.yml || true
             else
                 debug "expected change:"
-                (diff /tmp/docker-compose-delme.yml docker-compose.yml || true) | debug-cat
+                (diff $compose_delme_path docker-compose.yml || true) | debug-cat
             fi
             return 1
          fi

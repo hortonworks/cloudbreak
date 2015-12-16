@@ -97,10 +97,10 @@ docker-check-client-version() {
 }
 
 docker-check-server-version() {
-    docker version &> /tmp/cbd.log || noserver=1
+    docker version &> $TEMP_DIR/cbd.log || noserver=1
     if [[ "$noserver" ]]; then
         echo "[ERROR] docker version returned an error" | red
-        cat /tmp/cbd.log | yellow
+        cat $TEMP_DIR/cbd.log | yellow
         _exit 127
     fi
 
