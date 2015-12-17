@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -60,7 +60,7 @@ public class TerminationService {
     @Resource
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
 
-    public void terminateStack(Long stackId, CloudPlatform cloudPlatform) {
+    public void terminateStack(Long stackId, Platform cloudPlatform) {
         final Stack stack = stackRepository.findOneWithLists(stackId);
         try {
             connector.deleteStack(stack, stack.getCredential());

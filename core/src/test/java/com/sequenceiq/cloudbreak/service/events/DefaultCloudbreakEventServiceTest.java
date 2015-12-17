@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.events;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static org.mockito.BDDMockito.given;
 
 import org.junit.Assert;
@@ -14,7 +16,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -51,7 +52,7 @@ public class DefaultCloudbreakEventServiceTest {
     @Test
     public void testGenerateAwsStackEvent() throws Exception {
         //GIVEN
-        Template template = ServiceTestUtils.createTemplate(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, CloudPlatform.AWS);
+        Template template = ServiceTestUtils.createTemplate(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, AWS);
         Stack stack = ServiceTestUtils.createStack("John", "Acme", template, null);
 
         given(stackRepository.findById(1L)).willReturn(stack);
@@ -71,13 +72,13 @@ public class DefaultCloudbreakEventServiceTest {
 
         Assert.assertNotNull(event);
         Assert.assertEquals("The user name is not the expected", "John", event.getOwner());
-        Assert.assertEquals("The cloudprovider is not the expected", CloudPlatform.AWS.name(), event.getCloud());
+        Assert.assertEquals("The cloudprovider is not the expected", AWS, event.getCloud());
     }
 
     @Test
     public void testGenerateAzureStackEvent() throws Exception {
         //GIVEN
-        Template template = ServiceTestUtils.createTemplate(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, CloudPlatform.GCP);
+        Template template = ServiceTestUtils.createTemplate(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, GCP);
         Stack stack = ServiceTestUtils.createStack("John", "Acme", template, null);
 
         given(stackRepository.findById(1L)).willReturn(stack);
@@ -97,13 +98,13 @@ public class DefaultCloudbreakEventServiceTest {
 
         Assert.assertNotNull(event);
         Assert.assertEquals("The user name is not the expected", "John", event.getOwner());
-        Assert.assertEquals("The cloudprovider is not the expected", CloudPlatform.GCP.name(), event.getCloud());
+        Assert.assertEquals("The cloudprovider is not the expected", GCP, event.getCloud());
     }
 
     @Test
     public void testShouldClusterDataBePopulated() {
         //GIVEN
-        Template template = ServiceTestUtils.createTemplate(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, CloudPlatform.GCP);
+        Template template = ServiceTestUtils.createTemplate(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, GCP);
         Blueprint blueprint = ServiceTestUtils.createBlueprint(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT);
         Cluster cluster = ServiceTestUtils.createCluster("John", "Acme", blueprint);
         Stack stack = ServiceTestUtils.createStack("John", "Acme", template, cluster);

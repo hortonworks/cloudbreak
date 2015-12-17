@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.common.type.Status.START_REQUESTED;
@@ -164,7 +165,7 @@ public class AmbariClusterService implements ClusterService {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName(), ex);
         }
         if (stack.isAvailable()) {
-            flowManager.triggerClusterInstall(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
+            flowManager.triggerClusterInstall(new ProvisionRequest(platform(stack.cloudPlatform()), stack.getId()));
         }
         return cluster;
     }
@@ -228,14 +229,14 @@ public class AmbariClusterService implements ClusterService {
         if (decommissionRequest) {
             updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, new HashSet<String>(),
                     collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest),
-                    decommissionRequest, stack.cloudPlatform(),
+                    decommissionRequest, platform(stack.cloudPlatform()),
                     hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER);
             updateClusterStatusByStackId(stackId, UPDATE_REQUESTED);
             flowManager.triggerClusterDownscale(updateRequest);
         } else {
             updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment,
                     collectUpscaleCandidates(hostGroupAdjustment, cluster), new ArrayList<HostMetadata>(),
-                    decommissionRequest, stack.cloudPlatform(),
+                    decommissionRequest, platform(stack.cloudPlatform()),
                     ScalingType.UPSCALE_ONLY_CLUSTER);
             flowManager.triggerClusterUpscale(updateRequest);
         }
@@ -272,18 +273,18 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackService.get(stackId);
         flowManager.triggerClusterUserNamePasswordUpdate(
                 new ClusterUserNamePasswordUpdateRequest(stack.getId(), userNamePasswordJson.getUserName(),
-                        userNamePasswordJson.getPassword(), stack.cloudPlatform()));
+                        userNamePasswordJson.getPassword(), platform(stack.cloudPlatform())));
         return stack.getCluster();
     }
 
     private void sync(Stack stack, Cluster cluster, StatusRequest statusRequest) {
-        flowManager.triggerClusterSync(new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform()));
+        flowManager.triggerClusterSync(new ClusterStatusUpdateRequest(stack.getId(), statusRequest, platform(stack.cloudPlatform())));
     }
 
     private ClusterStatusUpdateRequest start(Stack stack, Cluster cluster, StatusRequest statusRequest) {
         ClusterStatusUpdateRequest retVal = null;
         if (stack.isStartInProgress()) {
-            retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
+            retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, platform(stack.cloudPlatform()));
             flowManager.triggerClusterStartRequested(retVal);
         } else {
             if (cluster.isAvailable()) {
@@ -298,7 +299,7 @@ public class AmbariClusterService implements ClusterService {
                         String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
             } else {
                 updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
-                retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
+                retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, platform(stack.cloudPlatform()));
                 flowManager.triggerClusterStart(retVal);
             }
         }
@@ -322,7 +323,7 @@ public class AmbariClusterService implements ClusterService {
                     String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
         } else if (cluster.isAvailable() || cluster.isStopFailed()) {
             updateClusterStatusByStackId(stack.getId(), STOP_REQUESTED);
-            retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, stack.cloudPlatform());
+            retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, platform(stack.cloudPlatform()));
             flowManager.triggerClusterStop(retVal);
         }
         return retVal;
@@ -404,7 +405,7 @@ public class AmbariClusterService implements ClusterService {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         cluster.setStatus(REQUESTED);
         clusterRepository.save(cluster);
-        flowManager.triggerClusterReInstall(new ProvisionRequest(stack.cloudPlatform(), stack.getId()));
+        flowManager.triggerClusterReInstall(new ProvisionRequest(platform(stack.cloudPlatform()), stack.getId()));
         return stack.getCluster();
     }
 

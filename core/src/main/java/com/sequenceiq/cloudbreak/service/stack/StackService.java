@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.isGateway;
 import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.Status.START_REQUESTED;
@@ -198,7 +199,7 @@ public class StackService {
             tlsSecurityService.copyClientKeys(stack.getId());
             tlsSecurityService.storeSSHKeys(stack);
             imageService.create(savedStack, connector.getPlatformParameters(stack));
-            flowManager.triggerProvisioning(new ProvisionRequest(savedStack.cloudPlatform(), savedStack.getId()));
+            flowManager.triggerProvisioning(new ProvisionRequest(platform(savedStack.cloudPlatform()), savedStack.getId()));
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
         } catch (CloudbreakSecuritySetupException e) {
@@ -237,7 +238,7 @@ public class StackService {
         if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
             throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
         }
-        flowManager.triggerStackRemoveInstance(new RemoveInstanceRequest(stack.cloudPlatform(), stack.getId(), instanceId));
+        flowManager.triggerStackRemoveInstance(new RemoveInstanceRequest(platform(stack.cloudPlatform()), stack.getId(), instanceId));
     }
 
     public void updateStatus(Long stackId, StatusRequest status) {
@@ -262,12 +263,12 @@ public class StackService {
     }
 
     private void sync(Stack stack, StatusRequest statusRequest) {
-        flowManager.triggerStackSync(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
+        flowManager.triggerStackSync(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
     }
 
     private void stop(Stack stack, Cluster cluster, StatusRequest statusRequest) {
         if (cluster != null && cluster.isStopInProgress()) {
-            flowManager.triggerStackStopRequested(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
+            flowManager.triggerStackStopRequested(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
         } else {
             if (stack.isStopped()) {
                 String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
@@ -284,7 +285,7 @@ public class StackService {
                         String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stack.getId()));
             } else {
                 stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED);
-                flowManager.triggerStackStop(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
+                flowManager.triggerStackStop(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
             }
         }
     }
@@ -299,7 +300,7 @@ public class StackService {
                     String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getId()));
         } else if (stack.isStopped() || stack.isStartFailed()) {
             stackUpdater.updateStackStatus(stack.getId(), START_REQUESTED);
-            flowManager.triggerStackStart(new StackStatusUpdateRequest(stack.cloudPlatform(), stack.getId(), statusRequest));
+            flowManager.triggerStackStart(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
         }
     }
 
@@ -312,13 +313,13 @@ public class StackService {
             validateHostGroupAdjustment(instanceGroupAdjustmentJson, stack, instanceGroupAdjustmentJson.getScalingAdjustment());
         }
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
-            UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
+            UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(platform(stack.cloudPlatform()), stack.getId(),
                     instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(),
                     instanceGroupAdjustmentJson.getWithClusterEvent() ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
             stackUpdater.updateStackStatus(stackId, UPDATE_REQUESTED);
             flowManager.triggerStackUpscale(updateInstancesRequest);
         } else {
-            UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
+            UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(platform(stack.cloudPlatform()), stack.getId(),
                     instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(), ScalingType.DOWNSCALE_ONLY_STACK);
             flowManager.triggerStackDownscale(updateInstancesRequest);
         }
@@ -404,7 +405,7 @@ public class StackService {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
         if (!stack.isDeleteCompleted()) {
-            flowManager.triggerTermination(new StackDeleteRequest(stack.cloudPlatform(), stack.getId()));
+            flowManager.triggerTermination(new StackDeleteRequest(platform(stack.cloudPlatform()), stack.getId()));
         } else {
             LOGGER.info("Stack is already deleted.");
         }
@@ -416,7 +417,7 @@ public class StackService {
             throw new BadRequestException("Stacks can be force deleted only by account admins or owners.");
         }
         if (!stack.isDeleteCompleted()) {
-            flowManager.triggerForcedTermination(new StackForcedDeleteRequest(stack.cloudPlatform(), stack.getId()));
+            flowManager.triggerForcedTermination(new StackForcedDeleteRequest(platform(stack.cloudPlatform()), stack.getId()));
         } else {
             LOGGER.info("Stack is already deleted.");
         }

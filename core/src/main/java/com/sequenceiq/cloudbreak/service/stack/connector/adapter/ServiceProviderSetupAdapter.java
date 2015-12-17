@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -49,14 +48,9 @@ public class ServiceProviderSetupAdapter {
     @Inject
     private ImageService imageService;
 
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.ADAPTER;
-    }
-
     public ProvisionEvent prepareImage(Stack stack) throws Exception {
-        CloudPlatform cloudPlatform = stack.cloudPlatform();
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         Image image = imageService.getImage(stack.getId());
@@ -70,7 +64,7 @@ public class ServiceProviderSetupAdapter {
                 LOGGER.error("Failed to prepare image", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());
             }
-            return new PrepareImageComplete(cloudPlatform, stack.getId());
+            return new PrepareImageComplete(cloudContext.getPlatform(), stack.getId());
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing prepare image", e);
             throw new OperationException(e);
@@ -79,7 +73,7 @@ public class ServiceProviderSetupAdapter {
 
     public ImageStatusResult checkImage(Stack stack) throws Exception {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         Image image = imageService.getImage(stack.getId());
@@ -101,9 +95,8 @@ public class ServiceProviderSetupAdapter {
     }
 
     public ProvisionEvent setupProvisioning(Stack stack) throws Exception {
-        CloudPlatform cloudPlatform = stack.cloudPlatform();
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
@@ -117,7 +110,7 @@ public class ServiceProviderSetupAdapter {
                 LOGGER.error("Failed to setup provisioning", res.getErrorDetails());
                 throw new OperationException(res.getErrorDetails());
             }
-            return new ProvisionSetupComplete(cloudPlatform, stack.getId());
+            return new ProvisionSetupComplete(cloudContext.getPlatform(), stack.getId());
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing provisioning setup", e);
             throw new OperationException(e);

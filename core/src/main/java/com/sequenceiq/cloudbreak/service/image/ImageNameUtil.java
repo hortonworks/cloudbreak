@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
 @Component
 public class ImageNameUtil {
@@ -18,8 +18,8 @@ public class ImageNameUtil {
     @Inject
     private Environment environment;
 
-    public String determineImageName(CloudPlatform cloudPlatform, String region) {
-        String platform = cloudPlatform.name().toLowerCase();
+    public String determineImageName(Platform cloudPlatform, String region) {
+        String platform = cloudPlatform.value().toLowerCase();
         String image = environment.getProperty(platform + "." + region);
         if (image == null) {
             image = environment.getProperty(platform + "." + DEFAULT);

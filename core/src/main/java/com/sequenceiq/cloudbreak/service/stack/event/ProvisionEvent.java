@@ -1,25 +1,25 @@
 package com.sequenceiq.cloudbreak.service.stack.event;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
 public class ProvisionEvent {
 
-    private CloudPlatform cloudPlatform;
+    private Platform cloudPlatform;
     private Long stackId;
 
     public ProvisionEvent() {
     }
 
-    public ProvisionEvent(CloudPlatform cloudPlatform, Long stackId) {
+    public ProvisionEvent(Platform cloudPlatform, Long stackId) {
         this.cloudPlatform = cloudPlatform;
         this.stackId = stackId;
     }
 
-    public CloudPlatform getCloudPlatform() {
+    public Platform getCloudPlatform() {
         return cloudPlatform;
     }
 
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+    public void setCloudPlatform(Platform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
 

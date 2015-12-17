@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.init;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.Status.WAIT_FOR_SYNC;
 
 import java.util.Arrays;
@@ -85,7 +86,7 @@ public class CloudbreakInitStates {
     private void restartStackDelete() {
         List<Stack> stacksDeleteInProgress = stackRepository.findByStatuses(Collections.singletonList(Status.DELETE_IN_PROGRESS));
         for (Stack stack : stacksDeleteInProgress) {
-            flowManager.triggerTermination(new StackDeleteRequest(stack.cloudPlatform(), stack.getId()));
+            flowManager.triggerTermination(new StackDeleteRequest(platform(stack.cloudPlatform()), stack.getId()));
         }
     }
 

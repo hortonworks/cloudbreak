@@ -14,7 +14,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -95,9 +94,8 @@ public class Template {
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CloudPlatform cloudPlatform;
+    private String cloudPlatform;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -203,11 +201,11 @@ public class Template {
         this.instanceType = instanceType;
     }
 
-    public CloudPlatform cloudPlatform() {
+    public String cloudPlatform() {
         return cloudPlatform;
     }
 
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+    public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
 

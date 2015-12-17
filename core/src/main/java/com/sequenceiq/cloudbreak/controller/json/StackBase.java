@@ -13,10 +13,9 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.StackModelDescription;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,7 +32,7 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(value = StackModelDescription.REGION, required = true)
     private String region;
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
-    private CloudPlatform cloudPlatform;
+    private String cloudPlatform;
     @ApiModelProperty(StackModelDescription.PLATFORM_VARIANT)
     private String platformVariant;
     @NotNull
@@ -88,12 +87,12 @@ public abstract class StackBase implements JsonEntity {
     }
 
     @JsonProperty("cloudPlatform")
-    public CloudPlatform getCloudPlatform() {
+    public String getCloudPlatform() {
         return cloudPlatform;
     }
 
     @JsonIgnore
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+    public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
 

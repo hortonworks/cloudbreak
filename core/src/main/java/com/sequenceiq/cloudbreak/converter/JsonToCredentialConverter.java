@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -7,7 +9,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.CredentialRequest;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -29,9 +30,9 @@ public class JsonToCredentialConverter extends AbstractConversionServiceAwareCon
         credential.setName(source.getName());
         credential.setDescription(source.getDescription());
         credential.setPublicKey(source.getPublicKey());
-        CloudPlatform cloudPlatform = source.getCloudPlatform();
+        String cloudPlatform = source.getCloudPlatform();
         credential.setCloudPlatform(cloudPlatform);
-        Map<String, Object> parameters = credentialDefinitionService.processProperties(cloudPlatform, source.getParameters());
+        Map<String, Object> parameters = credentialDefinitionService.processProperties(platform(cloudPlatform), source.getParameters());
         if (parameters != null && !parameters.isEmpty()) {
             try {
                 credential.setAttributes(new Json(parameters));

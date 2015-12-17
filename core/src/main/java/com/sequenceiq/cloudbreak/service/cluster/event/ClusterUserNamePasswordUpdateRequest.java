@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.service.cluster.event;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
 public class ClusterUserNamePasswordUpdateRequest {
 
     private Long stackId;
     private String newUserName;
     private String newPassword;
-    private CloudPlatform cloudPlatform;
+    private Platform cloudPlatform;
 
-    public ClusterUserNamePasswordUpdateRequest(long stackId, String newUserName, String newPassword, CloudPlatform cloudPlatform) {
+    public ClusterUserNamePasswordUpdateRequest(long stackId, String newUserName, String newPassword, Platform cloudPlatform) {
         this.stackId = stackId;
         this.newUserName = newUserName;
         this.newPassword = newPassword;
@@ -32,7 +32,7 @@ public class ClusterUserNamePasswordUpdateRequest {
         return newPassword;
     }
 
-    public CloudPlatform getCloudPlatform() {
+    public Platform getCloudPlatform() {
         return cloudPlatform;
     }
 }

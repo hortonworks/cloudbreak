@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -23,7 +25,7 @@ public class CredentialToCloudCredentialConverter {
     public CloudCredential convert(Credential credential) {
         Json attributes = credential.getAttributes();
         Map<String, Object> fields = attributes == null ? Collections.<String, Object>emptyMap() : attributes.getMap();
-        fields = definitionService.revertProperties(credential.cloudPlatform(), fields);
+        fields = definitionService.revertProperties(platform(credential.cloudPlatform()), fields);
         fields.put(CREDENTIAL_ID, credential.getId());
         return new CloudCredential(credential.getId(), credential.getName(), credential.getPublicKey(), credential.getLoginUserName(), fields);
     }

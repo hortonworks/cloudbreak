@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -48,7 +50,7 @@ public class ProvisioningSetupService {
     public CheckImageComplete checkImage(Stack stack) throws Exception {
         imageCheckerContextPollingService.pollWithTimeout(imageStatusCheckerTask, new ImageCheckerContext(stack),
                 IMAGE_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_IMAGE_OPS, MAX_FAILURE_COUNT);
-        return new CheckImageComplete(stack.cloudPlatform(), stack.getId());
+        return new CheckImageComplete(platform(stack.cloudPlatform()), stack.getId());
     }
 
 }

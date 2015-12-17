@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -17,7 +16,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 public abstract class TemplateBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
-    private CloudPlatform cloudPlatform;
+    private String cloudPlatform;
     @Size(max = 100, min = 5, message = "The length of the template's name has to be in range of 5 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The name of the template can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -52,11 +51,11 @@ public abstract class TemplateBase implements JsonEntity {
         this.description = description;
     }
 
-    public CloudPlatform getCloudPlatform() {
+    public String getCloudPlatform() {
         return cloudPlatform;
     }
 
-    public void setCloudPlatform(CloudPlatform type) {
+    public void setCloudPlatform(String type) {
         this.cloudPlatform = type;
     }
 

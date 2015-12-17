@@ -19,15 +19,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.common.type.StatusRequest;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ProvisioningSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.common.type.StatusRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
@@ -45,6 +46,8 @@ import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReactorFlowManagerTest {
+
+    private static final Platform GCP_PLATFORM = Platform.platform(CloudConstants.GCP);
 
     @Mock
     private EventBus reactor;
@@ -84,18 +87,18 @@ public class ReactorFlowManagerTest {
 
     @Test
     public void shouldReturnTheNextFailureTransition() throws Exception {
-        ProvisionRequest provisionRequest =  new ProvisionRequest(CloudPlatform.GCP, 1L);
-        StackStatusUpdateRequest stackStatusUpdateRequest = new StackStatusUpdateRequest(CloudPlatform.GCP, 1L, StatusRequest.STARTED);
-        ClusterStatusUpdateRequest clusterStatusUpdateRequest = new ClusterStatusUpdateRequest(1L, StatusRequest.STARTED, CloudPlatform.GCP);
-        StackDeleteRequest stackDeleteRequest = new StackDeleteRequest(CloudPlatform.GCP, 1L);
-        StackForcedDeleteRequest stackForcedDeleteRequest = new StackForcedDeleteRequest(CloudPlatform.GCP, 1L);
-        UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(CloudPlatform.GCP, 1L, 1, "master", ScalingType.DOWNSCALE_ONLY_CLUSTER);
-        RemoveInstanceRequest removeInstanceRequest = new RemoveInstanceRequest(CloudPlatform.GCP, 1L, "instanceId");
+        ProvisionRequest provisionRequest =  new ProvisionRequest(GCP_PLATFORM, 1L);
+        StackStatusUpdateRequest stackStatusUpdateRequest = new StackStatusUpdateRequest(GCP_PLATFORM, 1L, StatusRequest.STARTED);
+        ClusterStatusUpdateRequest clusterStatusUpdateRequest = new ClusterStatusUpdateRequest(1L, StatusRequest.STARTED, GCP_PLATFORM);
+        StackDeleteRequest stackDeleteRequest = new StackDeleteRequest(GCP_PLATFORM, 1L);
+        StackForcedDeleteRequest stackForcedDeleteRequest = new StackForcedDeleteRequest(GCP_PLATFORM, 1L);
+        UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(GCP_PLATFORM, 1L, 1, "master", ScalingType.DOWNSCALE_ONLY_CLUSTER);
+        RemoveInstanceRequest removeInstanceRequest = new RemoveInstanceRequest(GCP_PLATFORM, 1L, "instanceId");
         UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(1L, new HostGroupAdjustmentJson(), new HashSet<String>(),
-                new ArrayList<HostMetadata>(), true, CloudPlatform.GCP, ScalingType.DOWNSCALE_ONLY_CLUSTER);
-        UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = new UpdateAllowedSubnetsRequest(CloudPlatform.GCP, 1L, new ArrayList<SecurityRule>());
+                new ArrayList<HostMetadata>(), true, GCP_PLATFORM, ScalingType.DOWNSCALE_ONLY_CLUSTER);
+        UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = new UpdateAllowedSubnetsRequest(GCP_PLATFORM, 1L, new ArrayList<SecurityRule>());
         ClusterUserNamePasswordUpdateRequest clusterUserNamePasswordUpdateRequest =
-                new ClusterUserNamePasswordUpdateRequest(1L, "admin", "admin1", CloudPlatform.GCP);
+                new ClusterUserNamePasswordUpdateRequest(1L, "admin", "admin1", GCP_PLATFORM);
 
         flowManager.triggerProvisioning(provisionRequest);
         flowManager.triggerClusterInstall(provisionRequest);

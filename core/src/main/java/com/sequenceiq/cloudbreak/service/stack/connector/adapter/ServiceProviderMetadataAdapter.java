@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
@@ -60,7 +59,7 @@ public class ServiceProviderMetadataAdapter {
 
     public List<CloudVmMetaDataStatus> collectMetadata(Stack stack) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);
@@ -84,7 +83,7 @@ public class ServiceProviderMetadataAdapter {
 
     public List<CloudVmMetaDataStatus> collectNewMetadata(Stack stack) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudInstance> cloudInstances = getNewInstances(stack);
@@ -108,7 +107,7 @@ public class ServiceProviderMetadataAdapter {
 
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(),
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
@@ -144,11 +143,6 @@ public class ServiceProviderMetadataAdapter {
     public ResourceType getInstanceResourceType() {
         return null;
     }
-
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.ADAPTER;
-    }
-
 
     private List<CloudInstance> getNewInstances(Stack stack) {
         List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);

@@ -10,7 +10,6 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -40,7 +39,7 @@ public class NetworkJson implements JsonEntity {
     private Map<String, Object> parameters = new HashMap<>();
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     @NotNull
-    private CloudPlatform cloudPlatform;
+    private String cloudPlatform;
 
     @JsonProperty("id")
     public String getId() {
@@ -94,11 +93,11 @@ public class NetworkJson implements JsonEntity {
         this.parameters = parameters;
     }
 
-    public CloudPlatform getCloudPlatform() {
+    public String getCloudPlatform() {
         return cloudPlatform;
     }
 
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+    public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
 }

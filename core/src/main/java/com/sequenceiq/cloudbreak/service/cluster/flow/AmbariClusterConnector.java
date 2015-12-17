@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudPlatform.AZURE_RM;
 import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_DB;
@@ -52,7 +51,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
@@ -511,8 +510,7 @@ public class AmbariClusterConnector {
 
     private void decorateFsConfigurationProperties(FileSystemConfiguration fsConfiguration, Stack stack) {
         fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stack.getId());
-        CloudPlatform stackPlatform = CloudPlatform.valueOf(stack.getPlatformVariant());
-        if (AZURE_RM.equals(stackPlatform)) {
+        if (CloudConstants.AZURE_RM.equals(stack.getPlatformVariant())) {
             String resourceGroupName = stack.getResourceByType(ResourceType.ARM_TEMPLATE).getResourceName();
             fsConfiguration.addProperty(FileSystemConfiguration.RESOURCE_GROUP_NAME, resourceGroupName);
         }

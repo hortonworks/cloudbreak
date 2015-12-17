@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
@@ -95,7 +95,7 @@ public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConf
         } else {
             throw new FileSystemConfigException(
                     String.format("The WASB Integrated filesystem is only available on '%s' cloud platform and the '%s' parameter needs to be specified.",
-                            CloudPlatform.AZURE_RM, FileSystemConfiguration.RESOURCE_GROUP_NAME));
+                            CloudConstants.AZURE_RM, FileSystemConfiguration.RESOURCE_GROUP_NAME));
         }
     }
 

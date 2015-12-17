@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
@@ -46,8 +48,8 @@ public final class ServiceTestUtils {
 
     public static Stack createStack(String owner, String account) {
         return createStack(owner, account,
-                createTemplate(owner, account, CloudPlatform.AWS),
-                createCredential(owner, account, CloudPlatform.AWS),
+                createTemplate(owner, account, AWS),
+                createCredential(owner, account, AWS),
                 createCluster(owner, account, createBlueprint(owner, account)));
     }
 
@@ -70,8 +72,8 @@ public final class ServiceTestUtils {
     }
 
     public static Stack createStack(String owner, String account, Template template, Credential credential, Cluster cluster, Set<Resource> resources) {
-        Template template1 = createTemplate(CloudPlatform.AWS);
-        Template template2 = createTemplate(CloudPlatform.AWS);
+        Template template1 = createTemplate(AWS);
+        Template template2 = createTemplate(AWS);
         Set<InstanceGroup> instanceGroups = new HashSet<>();
         InstanceGroup instanceGroup1 = new InstanceGroup();
         instanceGroup1.setNodeCount(2);
@@ -116,13 +118,13 @@ public final class ServiceTestUtils {
         return createCluster(DUMMY_OWNER, DUMMY_ACCOUNT, createBlueprint(DUMMY_OWNER, DUMMY_ACCOUNT));
     }
 
-    public static Credential createCredential(String owner, String account, CloudPlatform platform) {
+    public static Credential createCredential(String owner, String account, String platform) {
         switch (platform) {
             case AWS:
                 Credential awsCredential = new Credential();
                 awsCredential.setId(1L);
                 awsCredential.setOwner(owner);
-                awsCredential.setCloudPlatform(CloudPlatform.AWS);
+                awsCredential.setCloudPlatform(platform);
                 awsCredential.setAccount(account);
                 awsCredential.setPublicInAccount(true);
                 awsCredential.setPublicKey(PUBLIC_KEY);
@@ -131,7 +133,7 @@ public final class ServiceTestUtils {
                 Credential gcpCredential = new Credential();
                 gcpCredential.setId(1L);
                 gcpCredential.setOwner(owner);
-                gcpCredential.setCloudPlatform(CloudPlatform.GCP);
+                gcpCredential.setCloudPlatform(platform);
                 gcpCredential.setAccount(account);
                 gcpCredential.setPublicInAccount(true);
                 gcpCredential.setPublicKey(PUBLIC_KEY);
@@ -141,11 +143,11 @@ public final class ServiceTestUtils {
         }
     }
 
-    public static Template createTemplate(CloudPlatform platform) {
+    public static Template createTemplate(String platform) {
         return createTemplate(DUMMY_OWNER, DUMMY_ACCOUNT, platform);
     }
 
-    public static Template createTemplate(String owner, String account, CloudPlatform platform) {
+    public static Template createTemplate(String owner, String account, String platform) {
         switch (platform) {
             case AWS:
                 Template awsTemplate = new Template();
@@ -158,7 +160,7 @@ public final class ServiceTestUtils {
                 awsTemplate.setVolumeSize(100);
                 awsTemplate.setDescription("aws test template");
                 awsTemplate.setPublicInAccount(true);
-                awsTemplate.setCloudPlatform(CloudPlatform.AWS);
+                awsTemplate.setCloudPlatform(AWS);
                 return awsTemplate;
             case GCP:
                 Template gcpTemplate = new Template();
@@ -171,7 +173,7 @@ public final class ServiceTestUtils {
                 gcpTemplate.setVolumeCount(1);
                 gcpTemplate.setVolumeSize(100);
                 gcpTemplate.setPublicInAccount(true);
-                gcpTemplate.setCloudPlatform(CloudPlatform.GCP);
+                gcpTemplate.setCloudPlatform(GCP);
                 return gcpTemplate;
             default:
                 return null;

@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.core.flow.context;
 import java.util.List;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 
 public class ClusterScalingContext extends DefaultFlowContext {
@@ -16,7 +16,7 @@ public class ClusterScalingContext extends DefaultFlowContext {
     private Set<String> upscaleCandidateAddresses;
     private ScalingType scalingType;
 
-    public ClusterScalingContext(Long stackId, CloudPlatform cloudPlatform, HostGroupAdjustmentJson hostGroupAdjustment, Set<String> upscaleCandidateAddresses,
+    public ClusterScalingContext(Long stackId, Platform cloudPlatform, HostGroupAdjustmentJson hostGroupAdjustment, Set<String> upscaleCandidateAddresses,
             List<HostMetadata> candidates, ScalingType scalingType) {
         super(stackId, cloudPlatform);
         this.hostGroupAdjustment = hostGroupAdjustment;

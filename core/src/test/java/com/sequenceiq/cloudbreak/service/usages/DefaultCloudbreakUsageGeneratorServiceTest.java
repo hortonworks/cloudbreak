@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
@@ -25,12 +26,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
@@ -98,7 +98,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
         given(stackUsageGenerator.generate(events)).willReturn(usages);
         Stack stack = ServiceTestUtils.createStack();
-        Template template = ServiceTestUtils.createTemplate(CloudPlatform.AWS);
+        Template template = ServiceTestUtils.createTemplate(AWS);
         template.setDeleted(true);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
@@ -169,7 +169,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
         given(stackUsageGenerator.generate(events)).willReturn(usages);
         Stack stack = ServiceTestUtils.createStack();
-        Template template = ServiceTestUtils.createTemplate(CloudPlatform.AWS);
+        Template template = ServiceTestUtils.createTemplate(AWS);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
         Set<InstanceGroup> instanceGroups = new HashSet<>();
@@ -200,7 +200,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
         given(stackUsageGenerator.generate(events)).willReturn(usages);
         Stack stack = ServiceTestUtils.createStack();
-        Template template = ServiceTestUtils.createTemplate(CloudPlatform.AWS);
+        Template template = ServiceTestUtils.createTemplate(AWS);
         template.setDeleted(true);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
@@ -229,7 +229,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         given(usageRepository.count()).willReturn(0L);
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
         given(stackUsageGenerator.generate(events)).willReturn(usages);
-        Template template = ServiceTestUtils.createTemplate(CloudPlatform.AWS);
+        Template template = ServiceTestUtils.createTemplate(AWS);
         template.setDeleted(true);
         Stack stack = ServiceTestUtils.createStack();
         InstanceGroup instanceGroup = new InstanceGroup();

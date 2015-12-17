@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -48,7 +50,7 @@ public class IntervalStackUsageGenerator {
                 Template template = instanceGroup.getTemplate();
                 String instanceType = getInstanceType(template);
                 String groupName = instanceGroup.getGroupName();
-                PriceGenerator priceGenerator = selectPriceGeneratorByPlatform(template.cloudPlatform());
+                PriceGenerator priceGenerator = selectPriceGeneratorByPlatform(platform(template.cloudPlatform()));
 
                 for (InstanceMetaData metaData : instanceGroup.getAllInstanceMetaData()) {
                     Map<String, Long> instanceHours = instanceUsageGenerator.getInstanceHours(metaData, startTime, stopTime);
@@ -66,10 +68,10 @@ public class IntervalStackUsageGenerator {
         return template.getInstanceType();
     }
 
-    private PriceGenerator selectPriceGeneratorByPlatform(CloudPlatform cloudPlatform) {
+    private PriceGenerator selectPriceGeneratorByPlatform(Platform cloudPlatform) {
         PriceGenerator result = null;
         for (PriceGenerator generator : priceGenerators) {
-            CloudPlatform generatorCloudPlatform = generator.getCloudPlatform();
+            Platform generatorCloudPlatform = generator.getCloudPlatform();
             if (cloudPlatform.equals(generatorCloudPlatform)) {
                 result = generator;
                 break;

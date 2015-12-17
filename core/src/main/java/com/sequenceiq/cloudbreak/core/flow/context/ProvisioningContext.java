@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
@@ -57,20 +57,20 @@ public class ProvisioningContext extends DefaultFlowContext {
 
     public static class Builder {
         private Long stackId;
-        private CloudPlatform cloudPlatform;
+        private Platform cloudPlatform;
         private String errorReason = "";
         private Map<String, Object> setupProperties = new HashMap<>();
         private Set<Resource> resources = new HashSet<>();
         private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
         private String ambariIp;
 
-        public Builder setDefaultParams(Long stackId, CloudPlatform cloudPlatform) {
+        public Builder setDefaultParams(Long stackId, Platform cloudPlatform) {
             this.stackId = stackId;
             this.cloudPlatform = cloudPlatform;
             return this;
         }
 
-        public Builder setDefaultParams(Long stackId, CloudPlatform cloudPlatform, String errorReason) {
+        public Builder setDefaultParams(Long stackId, Platform cloudPlatform, String errorReason) {
             this.stackId = stackId;
             this.cloudPlatform = cloudPlatform;
             this.errorReason = errorReason;

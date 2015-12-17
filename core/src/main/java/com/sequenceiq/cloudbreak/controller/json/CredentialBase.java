@@ -8,7 +8,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -21,7 +20,7 @@ public class CredentialBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
-    private CloudPlatform cloudPlatform;
+    private String cloudPlatform;
     @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PARAMETERS, required = true)
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 1000)
@@ -49,11 +48,11 @@ public class CredentialBase implements JsonEntity {
         this.name = name;
     }
 
-    public CloudPlatform getCloudPlatform() {
+    public String getCloudPlatform() {
         return cloudPlatform;
     }
 
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+    public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
 

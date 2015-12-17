@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -20,7 +21,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -97,7 +97,7 @@ public class IntervalStackUsageGeneratorTest {
         // GIVEN
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             Template template = new Template();
-            template.setCloudPlatform(CloudPlatform.AWS);
+            template.setCloudPlatform(AWS);
             template.setInstanceType(C3XLARGE_INSTANCE);
             instanceGroup.setTemplate(template);
         }
@@ -117,7 +117,7 @@ public class IntervalStackUsageGeneratorTest {
         // GIVEN
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             Template template = new Template();
-            template.setCloudPlatform(CloudPlatform.AWS);
+            template.setCloudPlatform(AWS);
             template.setInstanceType(C3XLARGE_INSTANCE);
             instanceGroup.setTemplate(template);
         }
@@ -137,7 +137,7 @@ public class IntervalStackUsageGeneratorTest {
         // GIVEN
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             Template template = new Template();
-            template.setCloudPlatform(CloudPlatform.AWS);
+            template.setCloudPlatform(AWS);
             template.setInstanceType(C3XLARGE_INSTANCE);
             instanceGroup.setTemplate(template);
         }

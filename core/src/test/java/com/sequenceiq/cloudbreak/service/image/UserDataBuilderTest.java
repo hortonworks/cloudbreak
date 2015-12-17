@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.cloud.arm.ArmConstants.AZURE_RM_PLATFORM;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
-import com.sequenceiq.cloudbreak.common.type.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -47,7 +48,7 @@ public class UserDataBuilderTest {
     public void testBuildUserDataAzure() throws IOException {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
-        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(CloudPlatform.AZURE_RM, "ssh-rsa test", "cloudbreak", getPlatformParameters());
+        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(AZURE_RM_PLATFORM, "ssh-rsa test", "cloudbreak", getPlatformParameters());
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }

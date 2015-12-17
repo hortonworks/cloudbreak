@@ -103,7 +103,7 @@ public class ArmTemplateBuilderTest {
     private CloudContext createCloudContext() {
         Stack stack = TestUtil.stack();
         Location location = location(region("region"), availabilityZone("availabilityZone"));
-        return new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform().name(), stack.getOwner(), stack.getPlatformVariant(), location);
+        return new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(), location);
     }
 
     @Ignore
