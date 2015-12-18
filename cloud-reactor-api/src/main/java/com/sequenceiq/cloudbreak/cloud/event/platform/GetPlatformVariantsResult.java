@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 
-public class GetPlatformVariantsResult extends CloudPlatformResult {
+public class GetPlatformVariantsResult extends CloudPlatformResult<CloudPlatformRequest> {
     private PlatformVariants platformVariants;
 
     public GetPlatformVariantsResult(CloudPlatformRequest<?> request, PlatformVariants platformVariants) {

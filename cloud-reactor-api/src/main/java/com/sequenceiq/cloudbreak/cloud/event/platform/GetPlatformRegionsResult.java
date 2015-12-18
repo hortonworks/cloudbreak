@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 
-public class GetPlatformRegionsResult extends CloudPlatformResult {
+public class GetPlatformRegionsResult extends CloudPlatformResult<CloudPlatformRequest> {
     private PlatformRegions platformRegions;
 
     public GetPlatformRegionsResult(CloudPlatformRequest<?> request, PlatformRegions platformRegions) {

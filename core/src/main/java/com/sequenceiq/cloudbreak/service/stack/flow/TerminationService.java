@@ -18,11 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -66,16 +66,6 @@ public class TerminationService {
     @Resource
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
 
-    public void terminateStack(Long stackId, Platform cloudPlatform) {
-        final Stack stack = stackRepository.findOneWithLists(stackId);
-        try {
-            connector.deleteStack(stack, stack.getCredential());
-        } catch (Exception ex) {
-            LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
-            throw new TerminationFailedException(ex);
-        }
-    }
-
     public void finalizeTermination(Long stackId) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         try {
@@ -102,7 +92,9 @@ public class TerminationService {
             stack.setName(terminatedName);
             terminateMetaDataInstances(stack);
             stackRepository.save(stack);
-
+            for (HostMetadata metadata : hostMetadataRepository.findHostsInCluster(stack.getCluster().getId())) {
+                hostMetadataRepository.delete(metadata.getId());
+            }
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class TerminateStackHandler implements CloudPlatformEventHandler<TerminateStackRequest> {
@@ -38,6 +39,8 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
     private PollTaskFactory statusCheckFactory;
     @Inject
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public Class<TerminateStackRequest> type() {
@@ -61,9 +64,7 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
                     statePollerResult = syncPollingScheduler.schedule(task);
                 }
                 if (!statePollerResult.getStatus().equals(ResourceStatus.DELETED)) {
-                    String statusReason = "Stack could not be terminated, Resource(s) could not be deleted on the provider side.";
-                    result = new TerminateStackResult(statusReason, null, request);
-                    LOGGER.info(statusReason);
+                    throw new CloudConnectorException("Stack could not be terminated, Resource(s) could not be deleted on the provider side.");
                 } else {
                     result = new TerminateStackResult(request);
                 }
@@ -79,10 +80,12 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
             }
             request.getResult().onNext(result);
             LOGGER.info("TerminateStackHandler finished");
+            eventBus.notify(result.selector(), new Event(terminateStackRequestEvent.getHeaders(), result));
         } catch (Exception e) {
             LOGGER.error("Failed to handle TerminateStackRequest: {}", e);
-            request.getResult().onNext(new TerminateStackResult("Stack termination failed.", e, request));
+            TerminateStackResult terminateStackResult = new TerminateStackResult("Stack termination failed.", e, request);
+            request.getResult().onNext(terminateStackResult);
+            eventBus.notify(terminateStackResult.selector(), new Event(terminateStackRequestEvent.getHeaders(), terminateStackResult));
         }
     }
-
 }

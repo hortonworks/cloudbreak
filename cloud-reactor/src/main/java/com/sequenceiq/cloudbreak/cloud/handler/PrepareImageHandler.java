@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareImageRequest> {
@@ -23,6 +24,9 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+    @Inject
+    private EventBus eventBus;
+
     @Override
     public Class<PrepareImageRequest> type() {
         return PrepareImageRequest.class;
@@ -39,10 +43,14 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
             Image image = request.getImage();
             connector.setup().prepareImage(auth, image);
 
-            request.getResult().onNext(new PrepareImageResult(request));
+            PrepareImageResult result = new PrepareImageResult(request);
+            request.getResult().onNext(result);
+            eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
             LOGGER.info("Prepare image finished for {}", cloudContext);
         } catch (Exception e) {
-            request.getResult().onNext(new PrepareImageResult(e, request));
+            PrepareImageResult failure = new PrepareImageResult(e, request);
+            request.getResult().onNext(failure);
+            eventBus.notify(failure.selector(), new Event(event.getHeaders(), failure));
         }
     }
 }

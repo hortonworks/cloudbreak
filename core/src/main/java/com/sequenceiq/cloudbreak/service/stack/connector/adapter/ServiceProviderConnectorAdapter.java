@@ -393,7 +393,7 @@ public class ServiceProviderConnectorAdapter {
     }
 
     private void validateResourceResults(CloudContext cloudContext, LaunchStackResult res) {
-        validateResourceResults(cloudContext, res.getException(), res.getResults(), true);
+        validateResourceResults(cloudContext, res.getErrorDetails(), res.getResults(), true);
     }
 
     private void validateResourceResults(CloudContext cloudContext, UpscaleStackResult res) {

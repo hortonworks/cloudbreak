@@ -5,7 +5,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class GetSSHFingerprintsResult extends CloudPlatformResult {
+public class GetSSHFingerprintsResult extends CloudPlatformResult<CloudPlatformRequest> {
 
     private Set<String> sshFingerprints;
 

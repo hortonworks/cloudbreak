@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 
-public class CredentialVerificationResult extends CloudPlatformResult {
+public class CredentialVerificationResult extends CloudPlatformResult<CloudPlatformRequest> {
 
     private CloudCredentialStatus cloudCredentialStatus;
 

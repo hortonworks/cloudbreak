@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 
-public class GetDiskTypesResult extends CloudPlatformResult {
+public class GetDiskTypesResult extends CloudPlatformResult<CloudPlatformRequest> {
     private PlatformDisks platformDisks;
 
     public GetDiskTypesResult(CloudPlatformRequest<?> request, PlatformDisks platformDisks) {

@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 
-public class CheckImageResult extends CloudPlatformResult {
+public class CheckImageResult extends CloudPlatformResult<CloudPlatformRequest> {
 
     private final ImageStatus imageStatus;
     private final Integer statusProgressValue;

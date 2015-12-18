@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.transform;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
@@ -19,8 +20,8 @@ public class ResourcesStatePollerResults {
         return new ResourcesStatePollerResult(context, status.getStatus(), status.getStatusReason(), results);
     }
 
-    public static LaunchStackResult transformToLaunchStackResult(ResourcesStatePollerResult result) {
-        return new LaunchStackResult(result.getCloudContext(), result.getResults());
+    public static LaunchStackResult transformToLaunchStackResult(LaunchStackRequest request, ResourcesStatePollerResult result) {
+        return new LaunchStackResult(request, result.getResults());
     }
 
     public static UpscaleStackResult transformToUpscaleStackResult(ResourcesStatePollerResult result) {
