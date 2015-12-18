@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
@@ -25,9 +26,10 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
-@Component
-public class SimpleTemplateLoaderService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleTemplateLoaderService.class);
+@Service
+@Transactional
+public class DefaultTemplateLoaderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTemplateLoaderService.class);
 
     @Value("#{'${cb.template.defaults:" + CB_TEMPLATE_DEFAULTS + "}'.split(',')}")
     private List<String> templateArray;

@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
-public class DefaultBlueprintLoaderService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlueprintLoaderService.class);
+public class BlueprintLoaderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintLoaderService.class);
 
     @Value("#{'${cb.blueprint.defaults:" + CB_BLUEPRINT_DEFAULTS + "}'.split(',')}")
     private List<String> blueprintArray;

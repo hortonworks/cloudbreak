@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller;
+package com.sequenceiq.cloudbreak.controller.advice;
 
 import java.nio.file.AccessDeniedException;
 
@@ -21,6 +21,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;

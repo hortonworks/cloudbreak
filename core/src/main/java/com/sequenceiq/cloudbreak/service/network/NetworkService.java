@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.network;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Service
+@Transactional
 public class NetworkService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkService.class);
 

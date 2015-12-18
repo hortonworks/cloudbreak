@@ -31,9 +31,8 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintLoaderService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -45,14 +44,11 @@ public class BlueprintController {
     private BlueprintService blueprintService;
 
     @Inject
-    private BlueprintRepository blueprintRepository;
-
-    @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
     @Inject
-    private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
+    private BlueprintLoaderService blueprintLoaderService;
 
     @RequestMapping(value = "user/blueprints", method = RequestMethod.POST)
     @ResponseBody
@@ -82,8 +78,8 @@ public class BlueprintController {
         MDCBuilder.buildUserMdcContext(user);
         Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
         if (blueprints.isEmpty()) {
-            Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
-            blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintRepository.save(blueprintsList));
+            Set<Blueprint> blueprintsList = blueprintLoaderService.loadBlueprints(user);
+            blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintService.save(blueprintsList));
         }
         Set<BlueprintResponse> jsons = toJsonList(blueprints);
         return new ResponseEntity<>(jsons, HttpStatus.OK);
@@ -111,7 +107,7 @@ public class BlueprintController {
     @ResponseBody
     public ResponseEntity<Set<BlueprintResponse>> getAccountBlueprints(@ApiIgnore @ModelAttribute("user") CbUser user) {
         MDCBuilder.buildUserMdcContext(user);
-        Set<Blueprint> blueprints = defaultBlueprintLoaderService.loadBlueprints(user);
+        Set<Blueprint> blueprints = blueprintLoaderService.loadBlueprints(user);
         blueprints.addAll(blueprintService.retrieveAccountBlueprints(user));
         return new ResponseEntity<>(toJsonList(blueprints), HttpStatus.OK);
     }
