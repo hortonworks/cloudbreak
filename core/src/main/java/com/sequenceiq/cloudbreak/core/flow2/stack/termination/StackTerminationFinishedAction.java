@@ -65,6 +65,6 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
             cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_COMPLETED.name(),
                     messagesService.getMessage(Msg.STACK_NOTIFICATION_EMAIL.code()));
         }
-        sendEvent(context.getFlowId(), StackTerminationEvent.STACK_TERMINATION_FINISHED_EVENT.stringRepresentation(), payload);
+        sendEvent(context.getFlowId(), StackTerminationEvent.TERMINATION_FINALIZED_EVENT.stringRepresentation(), payload);
     }
 }
