@@ -23,7 +23,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ALPINE 3.1
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
-    env-import DOCKER_TAG_CLOUDBREAK 1.1.0-rc.43
+    env-import DOCKER_TAG_CLOUDBREAK 1.1.0-rc.45
     env-import DOCKER_TAG_CBDB 1.1.0-rc.28
     env-import DOCKER_TAG_POSTGRES 9.4.1
     env-import DOCKER_TAG_PERISCOPE 1.0.0-rc.3
