@@ -24,3 +24,4 @@ application.yml
 suites_log/
 test-output/
 gradle/wrapper/
+Makefile
