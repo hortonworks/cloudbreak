@@ -59,7 +59,7 @@ public abstract class AbstarctAction<S extends FlowState, E extends FlowEvent, C
     }
 
     protected void initPayloadConverterMap(List<PayloadConverter<P>> payloadConverters) {
-        LOGGER.info("By default payloadconvertermap is empty.");
+        // By default payloadconvertermap is empty.
     }
 
     protected abstract C createFlowContext(StateContext<S, E> stateContext, P payload);
