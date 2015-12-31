@@ -250,7 +250,7 @@ function continueInit() {
             cbRequestArgs.data = req.body;
         }
         cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-        proxyRestClient.get(config.cloudbreakAddress + req.url, cbRequestArgs, function(data, response) {
+        proxyRestClient.get(concatAndResolveUrl(config.cloudbreakAddress) + req.url, cbRequestArgs, function(data, response) {
             if (data != null) {
                 res.setHeader('Content-disposition', 'attachment; filename=azure.cer');
                 res.setHeader('Content-type', 'application/x-x509-ca-cert');
@@ -275,7 +275,7 @@ function continueInit() {
         var token = req.session.token
         var userId = req.param('userId')
         cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-        proxyRestClient.get(config.cloudbreakAddress + req.url + "/resources", cbRequestArgs, function(data, response) {
+        proxyRestClient.get(concatAndResolveUrl(config.cloudbreakAddress) + req.url + "/resources", cbRequestArgs, function(data, response) {
             if (data === false) {
                 proxyRestClient.delete(config.sultansAddress + 'users/' + userId, cbRequestArgs, function(data, response) {
                     res.status(response.statusCode).send(data);
@@ -373,12 +373,21 @@ function continueInit() {
             cbRequestArgs.data = req.body;
         }
         cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-        method(config.cloudbreakAddress + req.url, cbRequestArgs, function(data, response) {
+        method(concatAndResolveUrl(config.cloudbreakAddress) + req.url, cbRequestArgs, function(data, response) {
             eliminateConfidentialParametersFromCredentials(req, data);
             res.status(response.statusCode).send(data);
         }).on('error', function(err) {
             res.status(500).send("Uluwatu could not connect to Cloudbreak.");
         });
+    }
+
+    function concatAndResolveUrl(url, concat) {
+        if( url.substr(-1) === "/" ) {
+          console.log(url.substring(0, url.length-1));
+          return url.substring(0, url.length-1);
+        }
+        //replaceAll("https:", "https://").replaceAll("http:", "http://");
+        return url;
     }
 
     function proxySultansRequest(req, res, method) {
