@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -59,7 +58,6 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Defau
             TerminateStackResult terminateStackResult = new TerminateStackResult(statusReason, new IllegalArgumentException(statusReason), terminateRequest);
             sendEvent(context.getFlowId(), StackTerminationEvent.TERMINATION_FAILED_EVENT.stringRepresentation(), terminateStackResult);
         } else {
-            MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(stack.getId(), DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
             cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(),
                     messagesService.getMessage(Msg.STACK_DELETE_IN_PROGRESS.code()));

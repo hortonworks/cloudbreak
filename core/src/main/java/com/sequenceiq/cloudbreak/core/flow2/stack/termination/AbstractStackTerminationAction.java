@@ -42,10 +42,8 @@ abstract class AbstractStackTerminationAction<P> extends AbstarctAction<StackTer
 
     @Override
     protected StackTerminationContext createFlowContext(StateContext<StackTerminationState, StackTerminationEvent> stateContext, P payload) {
-        // TODO remove code duplication if possible AbstractStackCreatAction has almost the same method
         String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
         Stack stack = stackService.getById(getStackId(payload));
-        // TODO LogAspect!!
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),

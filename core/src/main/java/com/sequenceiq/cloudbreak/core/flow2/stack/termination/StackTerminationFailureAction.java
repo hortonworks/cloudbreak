@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -57,7 +56,6 @@ public class StackTerminationFailureAction extends AbstractStackTerminationActio
     protected void doExecute(StackTerminationContext context, TerminateStackResult payload, Map<Object, Object> variables) {
         Stack stack = stackService.getById(context.getStack().getId());
         if (stack != null) {
-            MDCBuilder.buildMdcContext(stack);
             boolean forced = variables.get("FORCEDTERMINATION") != null;
             String stackUpdateMessage =
                     forced ? "The cluster and its infrastructure have been force terminated." : "Termination failed: " + payload.getErrorDetails().getMessage();
