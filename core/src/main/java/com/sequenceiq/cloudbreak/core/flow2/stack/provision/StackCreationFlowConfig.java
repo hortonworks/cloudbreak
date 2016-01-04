@@ -1,13 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.COLLECT_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_COPY_CHECK_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_COPY_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_PREPARATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.LAUNCH_STACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.SETUP_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.SSHFINGERPRINTS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.STACK_CREATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.STACK_CREATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.START_CREATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.COLLECTMETADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.IMAGESETUP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.IMAGE_CHECK_STATE;
@@ -16,6 +19,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.SETUP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.STACK_CREATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.START_PROVISIONING_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.TLS_SETUP_STATE;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,7 +51,9 @@ public final class StackCreationFlowConfig extends AbstractFlowConfiguration<Sta
             new Transition<>(IMAGESETUP_STATE, IMAGE_CHECK_STATE, IMAGE_PREPARATION_FINISHED_EVENT),
             new Transition<>(IMAGE_CHECK_STATE, IMAGE_CHECK_STATE, IMAGE_COPY_CHECK_EVENT),
             new Transition<>(IMAGE_CHECK_STATE, START_PROVISIONING_STATE, IMAGE_COPY_FINISHED_EVENT),
-            new Transition<>(START_PROVISIONING_STATE, PROVISIONING_FINISHED_STATE, LAUNCH_STACK_FINISHED_EVENT)
+            new Transition<>(START_PROVISIONING_STATE, PROVISIONING_FINISHED_STATE, LAUNCH_STACK_FINISHED_EVENT),
+            new Transition<>(PROVISIONING_FINISHED_STATE, COLLECTMETADATA_STATE, COLLECT_METADATA_FINISHED_EVENT),
+            new Transition<>(COLLECTMETADATA_STATE, TLS_SETUP_STATE, SSHFINGERPRINTS_EVENT)
     );
     private static final FlowEdgeConfig<StackCreationState, StackCreationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, PROVISIONING_FINISHED_STATE, STACK_CREATION_FINISHED_EVENT, STACK_CREATION_FAILED_STATE,

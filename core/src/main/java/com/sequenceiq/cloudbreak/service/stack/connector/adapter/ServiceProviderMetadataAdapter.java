@@ -69,8 +69,8 @@ public class ServiceProviderMetadataAdapter {
         try {
             CollectMetadataResult res = cmr.await();
             LOGGER.info("Result: {}", res);
-            if (res.getException() != null) {
-                LOGGER.error("Failed to collect metadata", res.getException());
+            if (res.getErrorDetails() != null) {
+                LOGGER.error("Failed to collect metadata", res.getErrorDetails());
                 return Collections.emptyList();
             }
             return res.getResults();
@@ -93,8 +93,8 @@ public class ServiceProviderMetadataAdapter {
         try {
             CollectMetadataResult res = cmr.await();
             LOGGER.info("Result: {}", res);
-            if (res.getException() != null) {
-                LOGGER.error(format("Failed to collect metadata, stack: %s", cloudContext), res.getException());
+            if (res.getErrorDetails() != null) {
+                LOGGER.error(format("Failed to collect metadata, stack: %s", cloudContext), res.getErrorDetails());
                 return Collections.emptyList();
             }
             return res.getResults();

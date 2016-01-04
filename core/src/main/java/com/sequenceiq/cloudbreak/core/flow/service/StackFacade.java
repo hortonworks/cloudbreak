@@ -5,8 +5,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 
 public interface StackFacade {
 
-    FlowContext setupTls(FlowContext context) throws CloudbreakException;
-
     FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException;
 
     FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException;

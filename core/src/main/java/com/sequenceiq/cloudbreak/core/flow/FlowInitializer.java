@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.DownscaleMetadataCollectHand
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendConsulMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataCollectHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.RemoveInstanceHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackDownscaleHandler;
@@ -40,7 +39,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.StackStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopRequestedHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.TlsSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpscaleMetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpscaleStackSyncHandler;
@@ -76,11 +74,9 @@ public class FlowInitializer implements InitializingBean {
         registerSyncClusterFlows();
         registerAuthenticationClusterChangeFlows();
 
-        reactor.on($(FlowPhases.METADATA_SETUP.name()), getHandlerForClass(MetadataSetupHandler.class));
         reactor.on($(FlowPhases.METADATA_COLLECT.name()), getHandlerForClass(MetadataCollectHandler.class));
         reactor.on($(FlowPhases.UPSCALE_METADATA_COLLECT.name()), getHandlerForClass(UpscaleMetadataCollectHandler.class));
         reactor.on($(FlowPhases.DOWNSCALE_METADATA_COLLECT.name()), getHandlerForClass(DownscaleMetadataCollectHandler.class));
-        reactor.on($(FlowPhases.TLS_SETUP.name()), getHandlerForClass(TlsSetupHandler.class));
         reactor.on($(FlowPhases.BOOTSTRAP_CLUSTER.name()), getHandlerForClass(BootstrapClusterHandler.class));
         reactor.on($(FlowPhases.CONSUL_METADATA_SETUP.name()), getHandlerForClass(ConsulMetadataSetupHandler.class));
         reactor.on($(FlowPhases.RUN_CLUSTER_CONTAINERS.name()), getHandlerForClass(ClusterContainersHandler.class));
@@ -123,12 +119,6 @@ public class FlowInitializer implements InitializingBean {
     }
 
     private void registerProvisioningFlows() {
-        transitionKeyService.registerTransition(MetadataSetupHandler.class, TransitionFactory
-                .createTransition(FlowPhases.METADATA_SETUP.name(), FlowPhases.TLS_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
-
-        transitionKeyService.registerTransition(TlsSetupHandler.class, TransitionFactory
-                .createTransition(FlowPhases.TLS_SETUP.name(), FlowPhases.BOOTSTRAP_CLUSTER.name(), FlowPhases.STACK_CREATION_FAILED.name()));
-
         transitionKeyService.registerTransition(BootstrapClusterHandler.class, TransitionFactory
                 .createTransition(FlowPhases.BOOTSTRAP_CLUSTER.name(), FlowPhases.CONSUL_METADATA_SETUP.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
