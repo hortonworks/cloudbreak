@@ -66,7 +66,8 @@ public class ImageService {
             String imageName = imageNameUtil.determineImageName(platform, stack.getRegion());
             String tmpSshKey = tlsSecurityService.readPublicSshKey(stack.getId());
             String sshUser = stack.getCredential().getLoginUserName();
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, tmpSshKey, sshUser, params);
+            String publicSssKey = stack.getCredential().getPublicKey();
+            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, tmpSshKey, sshUser, params);
             Image image = new Image(imageName, userData);
             Component component = new Component(ComponentType.IMAGE, IMAGE_NAME, new Json(image), stack);
             componentRepository.save(component);

@@ -34,25 +34,22 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters parameters) {
+    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, String pubKey, String tmpSshKey, String sshUser, PlatformParameters parameters) {
         Map<InstanceGroupType, String> result = new HashMap<>();
-        result.put(InstanceGroupType.GATEWAY, build(InstanceGroupType.GATEWAY, cloudPlatform, tmpSshKey, sshUser, parameters));
-        result.put(InstanceGroupType.CORE, build(InstanceGroupType.CORE, cloudPlatform, null, null, parameters));
+        result.put(InstanceGroupType.GATEWAY, build(InstanceGroupType.GATEWAY, cloudPlatform, pubKey, tmpSshKey, sshUser, parameters));
+        result.put(InstanceGroupType.CORE, build(InstanceGroupType.CORE, cloudPlatform, pubKey, tmpSshKey, sshUser, parameters));
         return result;
     }
 
-    private String build(InstanceGroupType type, Platform cloudPlatform, String tmpSshKey, String sshUser, PlatformParameters params) {
+    private String build(InstanceGroupType type, Platform cloudPlatform, String publicSssKey, String tmpSshKey, String sshUser, PlatformParameters params) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
         model.put("platformDiskStartLabel", params.scriptParams().getStartLabel());
-        if (type == InstanceGroupType.GATEWAY) {
-            model.put("gateway", true);
-            model.put("tmpSshKey", tmpSshKey);
-            model.put("sshUser", sshUser);
-        } else {
-            model.put("gateway", false);
-        }
+        model.put("gateway", type == InstanceGroupType.GATEWAY);
+        model.put("tmpSshKey", tmpSshKey);
+        model.put("sshUser", sshUser);
+        model.put("publicSshKey", publicSssKey);
         model.put("relocateDocker", relocateDocker);
         return build(model);
     }
