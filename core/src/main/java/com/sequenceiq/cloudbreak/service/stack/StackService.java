@@ -265,7 +265,11 @@ public class StackService {
     }
 
     private void sync(Stack stack, StatusRequest statusRequest) {
-        flowManager.triggerStackSync(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
+        if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
+            flowManager.triggerStackSync(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
+        } else {
+            LOGGER.warn("Stack could not be synchronized in {} state!", stack.getStatus());
+        }
     }
 
     private void stop(Stack stack, Cluster cluster, StatusRequest statusRequest) {

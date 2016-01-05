@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstancesStateRequest> {
@@ -26,6 +27,8 @@ public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstan
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public Class<GetInstancesStateRequest> type() {
@@ -37,15 +40,18 @@ public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstan
         LOGGER.info("Received event: {}", event);
         GetInstancesStateRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
+        GetInstancesStateResult result;
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudInstance> instances = request.getInstances();
             List<CloudVmInstanceStatus> instanceStatuses = connector.instances().check(auth, instances);
-            request.getResult().onNext(new GetInstancesStateResult(cloudContext, instanceStatuses));
+            result = new GetInstancesStateResult(request, instanceStatuses);
         } catch (Exception e) {
-            request.getResult().onNext(new GetInstancesStateResult(cloudContext, e));
+            result = new GetInstancesStateResult("Instance state synchronizing failed", e, request);
         }
+        request.getResult().onNext(result);
+        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
     }
 
 }

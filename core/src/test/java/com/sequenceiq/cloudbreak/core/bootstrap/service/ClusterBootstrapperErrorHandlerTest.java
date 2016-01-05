@@ -127,7 +127,6 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<String>());
         when(instanceGroupRepository.save(any(InstanceGroup.class))).then(returnsFirstArg());
         when(instanceMetaDataRepository.save(any(InstanceMetaData.class))).then(returnsFirstArg());
-        when(metadata.getInstanceResourceType()).thenReturn(ResourceType.GCP_INSTANCE);
         doNothing().when(resourceRepository).delete(anyLong());
         when(resourceRepository.findByStackIdAndNameAndType(anyLong(), anyString(), any(ResourceType.class))).thenReturn(new Resource());
         when(connector.removeInstances(any(Stack.class), anySet(), anyString())).thenReturn(new HashSet<String>());
@@ -165,7 +164,6 @@ public class ClusterBootstrapperErrorHandlerTest {
         verify(instanceGroupRepository, times(3)).save(any(InstanceGroup.class));
         verify(instanceMetaDataRepository, times(3)).save(any(InstanceMetaData.class));
         verify(connector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());
-        verify(metadata, times(3)).getInstanceResourceType();
         verify(resourceRepository, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), any(ResourceType.class));
         verify(resourceRepository, times(3)).delete(anyLong());
         verify(instanceGroupRepository, times(3)).findOneByGroupNameInStack(anyLong(), anyString());

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.event.resource;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
@@ -9,7 +10,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 
 public class GetInstancesStateRequest<T> extends CloudPlatformRequest<T> {
 
-    private List<CloudInstance> instances;
+    private final List<CloudInstance> instances;
+
+    public GetInstancesStateRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
+        super(cloudContext, cloudCredential);
+        this.instances = Collections.emptyList();
+    }
 
     public GetInstancesStateRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudInstance> instances) {
         super(cloudContext, cloudCredential);

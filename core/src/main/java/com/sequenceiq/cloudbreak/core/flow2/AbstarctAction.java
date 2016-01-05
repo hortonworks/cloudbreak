@@ -69,7 +69,7 @@ public abstract class AbstarctAction<S extends FlowState, E extends FlowEvent, C
 
     private P convertPayload(Object payload) {
         P result = null;
-        if (payloadClass.isAssignableFrom(payload.getClass())) {
+        if (payload == null || payloadClass.isAssignableFrom(payload.getClass())) {
             result = (P) payload;
         } else {
             for (PayloadConverter<P> payloadConverter : payloadConverters) {

@@ -93,8 +93,7 @@ public class InstanceTerminationHandler {
 
     private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {
         String instanceId = instanceMetaData.getInstanceId();
-        Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), instanceId,
-                metadata.getInstanceResourceType());
+        Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), instanceId, null);
         if (resource != null) {
             resourceRepository.delete(resource);
         } else {

@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -127,8 +126,8 @@ public class ServiceProviderMetadataAdapter {
                 GetInstancesStateResult res = stateRequest.await();
                 LOGGER.info("Result: {}", res);
                 if (res.isFailed()) {
-                    LOGGER.error("Failed to retrieve instance state", res.getException());
-                    throw new OperationException(res.getException());
+                    LOGGER.error("Failed to retrieve instance state", res.getErrorDetails());
+                    throw new OperationException(res.getErrorDetails());
                 }
                 return transform(res.getStatuses().get(0).getStatus());
             } catch (InterruptedException e) {
@@ -138,10 +137,6 @@ public class ServiceProviderMetadataAdapter {
         } else {
             return InstanceSyncState.DELETED;
         }
-    }
-
-    public ResourceType getInstanceResourceType() {
-        return null;
     }
 
     private List<CloudInstance> getNewInstances(Stack stack) {
