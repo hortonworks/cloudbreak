@@ -80,6 +80,6 @@ public class StackTerminationFailureAction extends AbstractStackTerminationActio
         } else {
             LOGGER.info("Stack was not found during termination. " + payload.getRequest());
         }
-        sendEvent(context.getFlowId(), StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation(), payload);
+        sendEvent(context.getFlowId(), StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation(), null);
     }
 }
