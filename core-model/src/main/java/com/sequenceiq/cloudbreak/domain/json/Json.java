@@ -29,6 +29,9 @@ public class Json {
 
     public Map<String, Object> getMap() {
         try {
+            if (value == null) {
+                return Collections.emptyMap();
+            }
             return get(Map.class);
         } catch (IOException e) {
             return Collections.emptyMap();

@@ -1,27 +1,25 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_RELOCATE;
+import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
+
+import javax.inject.Inject;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class UserDataBuilder {
@@ -56,7 +54,7 @@ public class UserDataBuilder {
 
     private String build(Map<String, Object> model) {
         try {
-            return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate("init/init.ftl", "UTF-8"), model);
+            return processTemplateIntoString(freemarkerConfiguration.getTemplate("init/init.ftl", "UTF-8"), model);
         } catch (IOException | TemplateException e) {
             LOGGER.error(e.getMessage(), e);
             throw new CloudConnectorException("Failed to process init script freemarker template", e);

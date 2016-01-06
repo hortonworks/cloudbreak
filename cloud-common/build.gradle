@@ -19,4 +19,5 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
     compile group: 'com.google.guava', name: 'guava', version: guavaVersion
+    compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
 }
