@@ -71,16 +71,6 @@ public class MetadataSetupService {
         }
     }
 
-    public String setupMetadata(Stack stack) throws Exception {
-        Set<InstanceMetaData> allInstanceMetadata = saveInstanceMetaData(stack, collectCoreMetadata(stack), InstanceStatus.CREATED);
-        for (InstanceMetaData instanceMetaData : allInstanceMetadata) {
-            if (instanceMetaData.getAmbariServer()) {
-                return instanceMetaData.getPublicIp();
-            }
-        }
-        return null;
-    }
-
     public void collectMetadata(Stack stack) {
         saveInstanceMetaData(stack, collectCoreMetadata(stack), null);
     }
@@ -103,17 +93,7 @@ public class MetadataSetupService {
         return upscaleCandidateAddresses;
     }
 
-    private List<CloudVmMetaDataStatus> collectCoreMetadata(Stack stack) {
-        List<CloudVmMetaDataStatus> coreInstanceMetaData = metadata.collectMetadata(stack);
-        if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
-            throw new WrongMetadataException(String.format(
-                    "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
-                    coreInstanceMetaData.size(), stack.getFullNodeCount()));
-        }
-        return coreInstanceMetaData;
-    }
-
-    private Set<InstanceMetaData> saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus>  cloudVmMetaDataStatusList, InstanceStatus status) {
+    public Set<InstanceMetaData> saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus>  cloudVmMetaDataStatusList, InstanceStatus status) {
         Boolean ambariServerFound = false;
         Set<InstanceMetaData> updatedInstanceMetadata = new HashSet<>();
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
@@ -148,6 +128,16 @@ public class MetadataSetupService {
             updatedInstanceMetadata.add(instanceMetaDataEntry);
         }
         return updatedInstanceMetadata;
+    }
+
+    private List<CloudVmMetaDataStatus> collectCoreMetadata(Stack stack) {
+        List<CloudVmMetaDataStatus> coreInstanceMetaData = metadata.collectMetadata(stack);
+        if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
+            throw new WrongMetadataException(String.format(
+                    "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
+                    coreInstanceMetaData.size(), stack.getFullNodeCount()));
+        }
+        return coreInstanceMetaData;
     }
 
     private InstanceMetaData createInstanceMetadataIfAbsent(Set<InstanceMetaData> allInstanceMetadata, Long privateId, String instanceId) {

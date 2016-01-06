@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetSSHFingerprintsRequest> {
@@ -37,6 +38,8 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
     private SyncPollingScheduler<InstanceConsoleOutputResult> syncPollingScheduler;
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public Class<GetSSHFingerprintsRequest> type() {
@@ -72,9 +75,12 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
                 fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, new HashSet<String>());
             }
             fingerprintsRequest.getResult().onNext(fingerprintsResult);
+            eventBus.notify(fingerprintsResult.selector(), new Event(getSSHFingerprintsRequestEvent.getHeaders(), fingerprintsResult));
             LOGGER.info("GetSSHFingerprintsHandler finished");
         } catch (Exception e) {
-            fingerprintsRequest.getResult().onNext(new GetSSHFingerprintsResult("Failed to get ssh fingerprints!", e, fingerprintsRequest));
+            GetSSHFingerprintsResult failure = new GetSSHFingerprintsResult("Failed to get ssh fingerprints!", e, fingerprintsRequest);
+            fingerprintsRequest.getResult().onNext(failure);
+            eventBus.notify(failure.selector(), new Event(getSSHFingerprintsRequestEvent.getHeaders(), failure));
         }
     }
 

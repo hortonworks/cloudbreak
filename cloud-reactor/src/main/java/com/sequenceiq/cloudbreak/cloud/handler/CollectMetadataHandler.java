@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class CollectMetadataHandler implements CloudPlatformEventHandler<CollectMetadataRequest> {
@@ -24,6 +25,8 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public Class<CollectMetadataRequest> type() {
@@ -31,19 +34,21 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
     }
 
     @Override
-    public void accept(Event<CollectMetadataRequest> launchStackRequestEvent) {
-        LOGGER.info("Received event: {}", launchStackRequestEvent);
-        CollectMetadataRequest request = launchStackRequestEvent.getData();
+    public void accept(Event<CollectMetadataRequest> collectMetadataRequestEvent) {
+        LOGGER.info("Received event: {}", collectMetadataRequestEvent);
+        CollectMetadataRequest request = collectMetadataRequestEvent.getData();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             List<CloudVmMetaDataStatus> instanceStatuses = connector.metadata().collect(ac, request.getCloudResource(), request.getVms());
-            CollectMetadataResult collectMetadataResult = new CollectMetadataResult(request.getCloudContext(), instanceStatuses);
+            CollectMetadataResult collectMetadataResult = new CollectMetadataResult(request, instanceStatuses);
             request.getResult().onNext(collectMetadataResult);
+            eventBus.notify(collectMetadataResult.selector(), new Event(collectMetadataRequestEvent.getHeaders(), collectMetadataResult));
             LOGGER.info("Metadata collection successfully finished");
         } catch (Exception e) {
-            request.getResult().onNext(new CollectMetadataResult(request.getCloudContext(), e));
+            CollectMetadataResult failure = new CollectMetadataResult(e, request);
+            request.getResult().onNext(failure);
+            eventBus.notify(failure.selector(), new Event(collectMetadataRequestEvent.getHeaders(), failure));
         }
     }
-
 }

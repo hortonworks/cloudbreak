@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 
 import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
+import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.common.type.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
@@ -24,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
@@ -32,8 +35,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.type.BillingStatus;
+import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
 import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -47,8 +53,11 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -56,6 +65,9 @@ import reactor.bus.EventBus;
 @Component
 public class StackCreationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationService.class);
+
+    @Inject
+    private StackService stackService;
     @Inject
     private StackUpdater stackUpdater;
     @Inject
@@ -74,6 +86,10 @@ public class StackCreationService {
     private InstanceGroupRepository instanceGroupRepository;
     @Inject
     private InstanceMetadataService instanceMetadataService;
+    @Inject
+    private MetadataSetupService metadatSetupService;
+    @Inject
+    private TlsSetupService tlsSetupService;
 
     public void startProvisioning(StackContext context) {
         Stack stack = context.getStack();
@@ -83,12 +99,13 @@ public class StackCreationService {
         instanceMetadataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
     }
 
-    public void provisioningFinished(StackContext context, LaunchStackResult result, Date startDate) {
+    public Stack provisioningFinished(StackContext context, LaunchStackResult result, Date startDate) {
         Stack stack = context.getStack();
         validateResourceResults(context.getCloudContext(), result);
         List<CloudResourceStatus> results = result.getResults();
         updateNodeCount(stack.getId(), context.getCloudStack().getGroups(), results, true);
         fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
+        return stackService.getById(stack.getId());
     }
 
     public CheckImageResult checkImage(StackContext context) {
@@ -106,6 +123,23 @@ public class StackCreationService {
             LOGGER.error("Error while executing check image", e);
             throw new OperationException(e);
         }
+    }
+
+    public Stack setupMetadata(StackContext context, CollectMetadataResult collectMetadataResult) {
+        Stack stack = context.getStack();
+        metadatSetupService.saveInstanceMetaData(stack, collectMetadataResult.getResults(), InstanceStatus.CREATED);
+        fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED, BillingStatus.BILLING_STARTED.name());
+        fireEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, AVAILABLE.name());
+        LOGGER.debug("Metadata setup DONE.");
+        return stackService.getById(stack.getId());
+    }
+
+    public Stack setupTls(StackContext context, GetSSHFingerprintsResult sshFingerprints) throws CloudbreakException {
+        LOGGER.info("Fingerprint has been determined: {}", sshFingerprints.getSshFingerprints());
+        Stack stack = context.getStack();
+        tlsSetupService.setupTls(stack, stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next().getPublicIp(),
+                stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
+        return stackService.getById(stack.getId());
     }
 
     public void handeStackCreationFailure(StackContext context, Exception errorDetails) {

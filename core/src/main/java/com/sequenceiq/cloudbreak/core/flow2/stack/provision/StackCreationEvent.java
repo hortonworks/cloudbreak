@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
+import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
@@ -17,6 +19,10 @@ public enum StackCreationEvent implements FlowEvent {
     IMAGE_COPY_FAILED_EVENT("IMAGECOPYFAILED"),
     LAUNCH_STACK_FINISHED_EVENT(LaunchStackResult.selector(LaunchStackResult.class)),
     LAUNCH_STACK_FAILED_EVENT(LaunchStackResult.failureSelector(LaunchStackResult.class)),
+    COLLECT_METADATA_FINISHED_EVENT(CollectMetadataResult.selector(CollectMetadataResult.class)),
+    COLLECT_METADATA_FAILED_EVENT(CollectMetadataResult.failureSelector(CollectMetadataResult.class)),
+    SSHFINGERPRINTS_EVENT(GetSSHFingerprintsResult.selector(GetSSHFingerprintsResult.class)),
+    SSHFINGERPRINTS_FAILED_EVENT(GetSSHFingerprintsResult.selector(GetSSHFingerprintsResult.class)),
     STACK_CREATION_FINISHED_EVENT("LAUNCHSTACKFINISHED"),
     STACK_CREATION_FAILED_EVENT("FAILHANDLED");
 

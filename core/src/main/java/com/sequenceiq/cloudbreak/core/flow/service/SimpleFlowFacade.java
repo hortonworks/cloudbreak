@@ -1,24 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
-import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
-
-import java.util.Arrays;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.concurrent.LockedMethod;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 
@@ -38,53 +30,6 @@ public class SimpleFlowFacade implements FlowFacade {
     @Inject
     private StackService stackService;
 
-    @Inject
-    private CloudbreakEventService cloudbreakEventService;
-
-    @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
-
-    private enum Msg {
-
-        FLOW_STACK_METADATA_COLLECTED("stack.metadata.collected"),
-        FLOW_STACK_PROVISIONED("flow.stack.provisioned"),
-        FLOW_STACK_SETUP_START("stack.setup.start"),
-        FLOW_STACK_SETUP("stack.setup.time");
-
-        private String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
-    }
-
-    @Override
-    public FlowContext setupMetadata(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Metadata setup. Context: {}", context);
-        try {
-            ProvisioningContext provisioningContext = (ProvisioningContext) context;
-            Stack stack = stackService.getById(provisioningContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            metadataSetupService.setupMetadata(stack);
-            cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), BillingStatus.BILLING_STARTED.name(),
-                    cloudbreakMessagesService.getMessage(Msg.FLOW_STACK_PROVISIONED.code()));
-            cloudbreakEventService.fireCloudbreakEvent(provisioningContext.getStackId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.FLOW_STACK_METADATA_COLLECTED.code()));
-            LOGGER.debug("Metadata setup DONE.");
-            return new ProvisioningContext.Builder()
-                    .setDefaultParams(provisioningContext.getStackId(), provisioningContext.getCloudPlatform())
-                    .setProvisionSetupProperties(provisioningContext.getSetupProperties())
-                    .build();
-        } catch (Exception e) {
-            LOGGER.error("Exception during metadata setup: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
     @Override
     public FlowContext collectMetadata(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Metadata collect. Context: {}", context);
@@ -97,19 +42,6 @@ public class SimpleFlowFacade implements FlowFacade {
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during metadata collect: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext setupTls(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Metadata setup. Context: {}", context);
-        try {
-            Stack stack = stackService.getById(context.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            return stackFacade.setupTls(context);
-        } catch (Exception e) {
-            LOGGER.error("Exception during metadata setup: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -573,11 +505,4 @@ public class SimpleFlowFacade implements FlowFacade {
             throw new CloudbreakException(e);
         }
     }
-
-    private void fireEventAndLog(Long stackId, FlowContext context, Msg msgCode, String eventType, Object... args) {
-        LOGGER.debug("{} [STACK_FLOW_STEP]. Context: {}", msgCode, context);
-        String message = cloudbreakMessagesService.getMessage(msgCode.code(), Arrays.asList(args));
-        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
-    }
-
 }

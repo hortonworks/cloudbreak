@@ -22,11 +22,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
@@ -76,16 +74,7 @@ public class TlsSetupService {
     @Value("#{'${cb.cert.dir:" + CB_CERT_DIR + "}' + '/' + '${cb.tls.cert.file:" + CB_TLS_CERT_FILE + "}'}")
     private String tlsCertificatePath;
 
-    public void setupTls(Platform cloudPlatform, Stack stack) throws CloudbreakException {
-        InstanceMetaData gateway = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        LOGGER.info("SSH into gateway node to setup certificates on gateway.");
-        Set<String> sshFingerprints = connector.getSSHFingerprints(stack, gateway.getInstanceId());
-        LOGGER.info("Fingerprint has been determined: {}", sshFingerprints);
-        setupTls(stack, gateway.getPublicIp(), stack.getCredential().getLoginUserName(), sshFingerprints);
-    }
-
-    private void setupTls(Stack stack, String publicIp, String user, Set<String> sshFingerprints) throws
-            CloudbreakException {
+    public void setupTls(Stack stack, String publicIp, String user, Set<String> sshFingerprints) throws CloudbreakException {
         LOGGER.info("SSHClient parameters: stackId: {}, publicIp: {},  user: {}", stack.getId(), publicIp, user);
         SSHClient ssh = new SSHClient();
         String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());

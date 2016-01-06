@@ -63,7 +63,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
-import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 
 @Service
 public class SimpleStackFacade implements StackFacade {
@@ -99,8 +98,6 @@ public class SimpleStackFacade implements StackFacade {
     private SecurityRuleRepository securityRuleRepository;
     @Inject
     private EmailSenderService emailSenderService;
-    @Inject
-    private TlsSetupService tlsSetupService;
     @Inject
     private StackSyncService stackSyncService;
     @Inject
@@ -330,15 +327,6 @@ public class SimpleStackFacade implements StackFacade {
             throw new CloudbreakException(e);
         }
         return context;
-    }
-
-    @Override
-    public FlowContext setupTls(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
-        tlsSetupService.setupTls(actualContext.getCloudPlatform(), stack);
-        return actualContext;
     }
 
     @Override

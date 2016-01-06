@@ -64,7 +64,7 @@ public abstract class AbstarctAction<S extends FlowState, E extends FlowEvent, C
 
     protected abstract C createFlowContext(StateContext<S, E> stateContext, P payload);
 
-    protected abstract void doExecute(C context, P payload, Map<Object, Object> variables);
+    protected abstract void doExecute(C context, P payload, Map<Object, Object> variables) throws Exception;
     protected abstract Object getFailurePayload(C flowContext, Exception ex);
 
     private P convertPayload(Object payload) {
