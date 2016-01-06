@@ -32,7 +32,8 @@ public enum Msg {
     STACK_INFRASTRUCTURE_DELETE_FAILED("stack.infrastructure.delete.failed"),
     STACK_INFRASTRUCTURE_START_FAILED("stack.infrastructure.start.failed"),
     STACK_INFRASTRUCTURE_STOP_FAILED("stack.infrastructure.stop.failed"),
-    STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE("stack.infrastructure.create.rollback");
+    STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE("stack.infrastructure.create.rollback"),
+    STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE("stack.sync.instance.status.couldnt.determine");
 
     private String code;
 

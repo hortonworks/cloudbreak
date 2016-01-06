@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-public enum StackTerminationState implements FlowState<StackTerminationState, StackTerminationEvent> {
+enum StackTerminationState implements FlowState<StackTerminationState, StackTerminationEvent> {
     INIT_STATE(),
     TERMINATION_FAILED_STATE(StackTerminationFailureAction.class),
     TERMINATION_STATE(StackTerminationAction.class, StackTerminationEvent.TERMINATION_FAILED_EVENT),

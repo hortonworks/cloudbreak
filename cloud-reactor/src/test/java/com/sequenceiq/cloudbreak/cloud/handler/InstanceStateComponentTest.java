@@ -19,7 +19,7 @@ public class InstanceStateComponentTest extends AbstractComponentTest<GetInstanc
 
         assertEquals(InstanceStatus.STARTED, result.getStatuses().get(0).getStatus());
         assertFalse(result.isFailed());
-        assertNull(result.getException());
+        assertNull(result.getErrorDetails());
     }
 
     @Override

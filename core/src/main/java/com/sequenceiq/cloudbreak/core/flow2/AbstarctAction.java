@@ -59,7 +59,7 @@ public abstract class AbstarctAction<S extends FlowState, E extends FlowEvent, C
     }
 
     protected void initPayloadConverterMap(List<PayloadConverter<P>> payloadConverters) {
-        LOGGER.info("By default payloadconvertermap is empty.");
+        // By default payloadconvertermap is empty.
     }
 
     protected abstract C createFlowContext(StateContext<S, E> stateContext, P payload);
@@ -69,7 +69,7 @@ public abstract class AbstarctAction<S extends FlowState, E extends FlowEvent, C
 
     private P convertPayload(Object payload) {
         P result = null;
-        if (payloadClass.isAssignableFrom(payload.getClass())) {
+        if (payload == null || payloadClass.isAssignableFrom(payload.getClass())) {
             result = (P) payload;
         } else {
             for (PayloadConverter<P> payloadConverter : payloadConverters) {

@@ -4,32 +4,30 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 
-public class GetInstancesStateResult {
+public class GetInstancesStateResult extends CloudPlatformResult<GetInstancesStateRequest<GetInstancesStateResult>> {
 
-    private final CloudContext cloudContext;
     private final List<CloudVmInstanceStatus> statuses;
-    private final Exception exception;
 
-    public GetInstancesStateResult(CloudContext cloudContext, List<CloudVmInstanceStatus> statuses) {
-        this.cloudContext = cloudContext;
-        this.statuses = statuses;
-        this.exception = null;
-    }
-
-    public GetInstancesStateResult(CloudContext cloudContext, Exception exception) {
-        this.cloudContext = cloudContext;
-        this.exception = exception;
+    public GetInstancesStateResult(GetInstancesStateRequest<GetInstancesStateResult> request) {
+        super(request);
         this.statuses = Collections.emptyList();
     }
 
-    public Exception getException() {
-        return exception;
+    public GetInstancesStateResult(GetInstancesStateRequest<GetInstancesStateResult> request, List<CloudVmInstanceStatus> statuses) {
+        super(request);
+        this.statuses = statuses;
+    }
+
+    public GetInstancesStateResult(String statusReason, Exception errorDetails, GetInstancesStateRequest<GetInstancesStateResult> request) {
+        super(statusReason, errorDetails, request);
+        this.statuses = Collections.emptyList();
     }
 
     public CloudContext getCloudContext() {
-        return cloudContext;
+        return getRequest().getCloudContext();
     }
 
     public List<CloudVmInstanceStatus> getStatuses() {
@@ -37,15 +35,15 @@ public class GetInstancesStateResult {
     }
 
     public boolean isFailed() {
-        return exception != null;
+        return getErrorDetails() != null;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("GetInstancesStateResult{");
-        sb.append("cloudContext=").append(cloudContext);
+        sb.append("cloudContext=").append(getCloudContext());
         sb.append(", statuses=").append(statuses);
-        sb.append(", exception=").append(exception);
+        sb.append(", exception=").append(getErrorDetails());
         sb.append('}');
         return sb.toString();
     }

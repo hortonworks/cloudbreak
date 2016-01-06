@@ -8,19 +8,23 @@ import static com.sequenceiq.cloudbreak.common.type.Status.WAIT_FOR_SYNC;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -92,6 +96,23 @@ public class StackSyncService {
         }
     }
 
+    public void updateInstances(Stack stack, List<InstanceMetaData> instanceMetaDataList, List<CloudVmInstanceStatus> instanceStatuses,
+            boolean stackStatusUpdateEnabled) {
+        Map<InstanceSyncState, Integer> counts = initInstanceStateCounts();
+        for (final InstanceMetaData metaData : instanceMetaDataList) {
+            CloudVmInstanceStatus status = Iterables.find(instanceStatuses, new Predicate<CloudVmInstanceStatus>() {
+                @Override
+                public boolean apply(@Nullable CloudVmInstanceStatus input) {
+                    return input.getCloudInstance().getInstanceId().equals(metaData.getInstanceId());
+                }
+            });
+            InstanceSyncState state = status == null ? InstanceSyncState.DELETED : transform(status.getStatus());
+            syncInstanceStatusByState(stack, counts, metaData, state);
+        }
+
+        handleSyncResult(stack, counts, stackStatusUpdateEnabled);
+    }
+
     public void sync(Long stackId, boolean stackStatusUpdateEnabled) {
         Stack stack = stackService.getById(stackId);
         if (stack.isStackInDeletionPhase() || stack.isModificationInProgress()) {
@@ -109,16 +130,7 @@ public class StackSyncService {
             InstanceGroup instanceGroup = instance.getInstanceGroup();
             try {
                 InstanceSyncState state = metadata.getState(stack, instanceGroup, instance.getInstanceId());
-                ResourceType instanceResourceType = metadata.getInstanceResourceType();
-                if (InstanceSyncState.DELETED.equals(state) && !instance.isTerminated()) {
-                    syncDeletedInstance(stack, stackId, instanceStateCounts, instance, instanceGroup, instanceResourceType);
-                } else if (InstanceSyncState.RUNNING.equals(state)) {
-                    syncRunningInstance(stack, stackId, instanceStateCounts, instance, instanceGroup);
-                } else if (InstanceSyncState.STOPPED.equals(state)) {
-                    syncStoppedInstance(stack, stackId, instanceStateCounts, instance, instanceGroup, instanceResourceType);
-                } else {
-                    instanceStateCounts.put(InstanceSyncState.IN_PROGRESS, instanceStateCounts.get(InstanceSyncState.IN_PROGRESS) + 1);
-                }
+                syncInstanceStatusByState(stack, instanceStateCounts, instance, state);
             } catch (CloudConnectorException e) {
                 LOGGER.warn(e.getMessage(), e);
                 eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
@@ -129,54 +141,54 @@ public class StackSyncService {
         handleSyncResult(stack, instanceStateCounts, stackStatusUpdateEnabled);
     }
 
-    private void syncStoppedInstance(Stack stack, Long stackId, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance,
-            InstanceGroup instanceGroup, ResourceType instanceResourceType) {
-        instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
-        if (!instance.isTerminated() && !stack.isStopped()) {
-            LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
-            deleteResourceIfNeeded(stackId, instance, instanceResourceType);
-            updateMetaDataToTerminated(stackId, instance, instanceGroup);
+    private void syncInstanceStatusByState(Stack stack, Map<InstanceSyncState, Integer> counts, InstanceMetaData metaData, InstanceSyncState state) {
+        if (InstanceSyncState.DELETED.equals(state) && !metaData.isTerminated()) {
+            syncDeletedInstance(stack, counts, metaData);
+        } else if (InstanceSyncState.RUNNING.equals(state)) {
+            syncRunningInstance(stack, counts, metaData);
+        } else if (InstanceSyncState.STOPPED.equals(state)) {
+            syncStoppedInstance(stack, counts, metaData);
+        } else {
+            counts.put(InstanceSyncState.IN_PROGRESS, counts.get(InstanceSyncState.IN_PROGRESS) + 1);
         }
     }
 
-    private void syncRunningInstance(Stack stack, Long stackId, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance,
-            InstanceGroup instanceGroup) {
+    private void syncStoppedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
+        instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
+        if (!instance.isTerminated() && !stack.isStopped()) {
+            LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
+            deleteResourceIfNeeded(stack, instance);
+            updateMetaDataToTerminated(stack, instance);
+        }
+    }
+
+    private void syncRunningInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
         instanceStateCounts.put(InstanceSyncState.RUNNING, instanceStateCounts.get(InstanceSyncState.RUNNING) + 1);
         if (stack.getStatus() == WAIT_FOR_SYNC && instance.isCreated()) {
             LOGGER.info("Instance '{}' is reported as created on the cloud provider but not member of the cluster, setting its state to FAILED.",
                     instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.FAILED);
             instanceMetaDataRepository.save(instance);
-            eventService.fireCloudbreakEvent(stackId, CREATE_FAILED.name(),
+            eventService.fireCloudbreakEvent(stack.getId(), CREATE_FAILED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_FAILED.code(), Arrays.asList(instance.getDiscoveryFQDN())));
         } else if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated() && !instance.isFailed()) {
             LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
-            createResourceIfNeeded(stack, instance, instanceGroup);
-            updateMetaDataToRunning(stackId, stack.getCluster(), instance, instanceGroup);
+            updateMetaDataToRunning(stack.getId(), stack.getCluster(), instance);
         }
     }
 
-    private void syncDeletedInstance(Stack stack, Long stackId, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance,
-            InstanceGroup instanceGroup, ResourceType instanceResourceType) {
+    private void syncDeletedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
         instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
         deleteHostFromCluster(stack, instance);
         if (!instance.isTerminated()) {
             LOGGER.info("Instance '{}' is reported as deleted on the cloud provider, setting its state to TERMINATED.", instance.getInstanceId());
-            deleteResourceIfNeeded(stackId, instance, instanceResourceType);
-            updateMetaDataToTerminated(stackId, instance, instanceGroup);
+            deleteResourceIfNeeded(stack, instance);
+            updateMetaDataToTerminated(stack, instance);
         }
     }
 
-    private void createResourceIfNeeded(Stack stack, InstanceMetaData instance, InstanceGroup instanceGroup) {
-        ResourceType resourceType = metadata.getInstanceResourceType();
-        if (resourceType != null) {
-            Resource resource = new Resource(resourceType, instance.getInstanceId(), stack, instanceGroup.getGroupName());
-            resourceRepository.save(resource);
-        }
-    }
-
-    private void deleteResourceIfNeeded(Long stackId, InstanceMetaData instance, ResourceType instanceResourceType) {
-        Resource resource = resourceRepository.findByStackIdAndNameAndType(stackId, instance.getInstanceId(), instanceResourceType);
+    private void deleteResourceIfNeeded(Stack stack, InstanceMetaData instance) {
+        Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), instance.getInstanceId(), null);
         if (resource != null) {
             resourceRepository.delete(resource);
         }
@@ -210,6 +222,25 @@ public class StackSyncService {
     private void updateStackStatusIfEnabled(Long stackId, Status status, String statusReason, boolean stackStatusUpdateEnabled) {
         if (stackStatusUpdateEnabled) {
             stackUpdater.updateStackStatus(stackId, status, statusReason);
+        }
+    }
+
+    private InstanceSyncState transform(com.sequenceiq.cloudbreak.cloud.model.InstanceStatus instanceStatus) {
+        switch (instanceStatus) {
+            case IN_PROGRESS:
+                return InstanceSyncState.IN_PROGRESS;
+            case STARTED:
+                return InstanceSyncState.RUNNING;
+            case STOPPED:
+                return InstanceSyncState.STOPPED;
+            case CREATED:
+                return InstanceSyncState.RUNNING;
+            case FAILED:
+                return InstanceSyncState.DELETED;
+            case TERMINATED:
+                return InstanceSyncState.DELETED;
+            default:
+                return InstanceSyncState.UNKNOWN;
         }
     }
 
@@ -255,16 +286,18 @@ public class StackSyncService {
         }
     }
 
-    private void updateMetaDataToTerminated(Long stackId, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup) {
+    private void updateMetaDataToTerminated(Stack stack, InstanceMetaData instanceMetaData) {
+        InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
         instanceGroup.setNodeCount(instanceGroup.getNodeCount() - 1);
         instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
         instanceMetaDataRepository.save(instanceMetaData);
         instanceGroupRepository.save(instanceGroup);
-        eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
+        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_DELETED_CBMETADATA.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
     }
 
-    private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup) {
+    private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData) {
+        InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
         instanceGroup.setNodeCount(instanceGroup.getNodeCount() + 1);
         HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), instanceMetaData.getDiscoveryFQDN());
         if (hostMetadata != null) {
