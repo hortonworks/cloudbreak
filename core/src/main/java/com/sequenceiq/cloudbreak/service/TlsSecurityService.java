@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CERT_DIR;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_TLS_CERT_FILE;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_TLS_PRIVATE_KEY_FILE;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,13 +41,13 @@ public class TlsSecurityService {
     private static final int DEFAULT_KEY_SIZE = 2048;
     private static final String SSH_KEY_PREFIX = "/cb-ssh-key-";
 
-    @Value("${cb.cert.dir:" + CB_CERT_DIR + "}")
+    @Value("${cb.cert.dir:}")
     private String certDir;
 
-    @Value("#{'${cb.cert.dir:" + CB_CERT_DIR + "}' + '/' + '${cb.tls.cert.file:" + CB_TLS_CERT_FILE + "}'}")
+    @Value("#{'${cb.cert.dir:}' + '${cb.tls.cert.file:}'}")
     private String clientCert;
 
-    @Value("#{'${cb.cert.dir:" + CB_CERT_DIR + "}' + '/' + '${cb.tls.private.key.file:" + CB_TLS_PRIVATE_KEY_FILE + "}'}")
+    @Value("#{'${cb.cert.dir:}' + '${cb.tls.private.key.file:}'}")
     private String clientPrivateKey;
 
     @Inject

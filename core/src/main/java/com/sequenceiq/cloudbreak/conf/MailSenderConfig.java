@@ -1,14 +1,5 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAIL_SMTP_AUTH;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAIL_SMTP_STARTTLS_ENABLE;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAIL_SMTP_TYPE;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_FROM;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_HOST;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_PASSWORD;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_PORT;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_USERNAME;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -34,28 +25,28 @@ import freemarker.template.TemplateException;
 
 @Configuration
 public class MailSenderConfig {
-    @Value("${cb.smtp.sender.host:" + CB_SMTP_SENDER_HOST + "}")
+    @Value("${cb.smtp.sender.host:}")
     private String host;
 
-    @Value("${cb.smtp.sender.port:" + CB_SMTP_SENDER_PORT + "}")
+    @Value("${cb.smtp.sender.port:}")
     private int port;
 
-    @Value("${cb.smtp.sender.username:" + CB_SMTP_SENDER_USERNAME + "}")
+    @Value("${cb.smtp.sender.username:}")
     private String userName;
 
-    @Value("${cb.smtp.sender.password:" + CB_SMTP_SENDER_PASSWORD + "}")
+    @Value("${cb.smtp.sender.password:}")
     private String password;
 
-    @Value("${cb.smtp.sender.from:" + CB_SMTP_SENDER_FROM + "}")
+    @Value("${cb.smtp.sender.from:}")
     private String msgFrom;
 
-    @Value("${cb.mail.smtp.auth:" + CB_MAIL_SMTP_AUTH + "}")
+    @Value("${cb.mail.smtp.auth:}")
     private String smtpAuth;
 
-    @Value("${cb.mail.smtp.starttls.enable:" + CB_MAIL_SMTP_STARTTLS_ENABLE + "}")
+    @Value("${cb.mail.smtp.starttls.enable:}")
     private String smtpStarttlsEnable;
 
-    @Value("${cb.mail.smtp.type:" + CB_MAIL_SMTP_TYPE + "}")
+    @Value("${cb.mail.smtp.type:}")
     private String smtpType;
 
     @Bean

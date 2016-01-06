@@ -1,14 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_OPENSTACK_HEAT_TEMPLATE_PATH;
 import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
-
-import javax.inject.Inject;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -22,21 +26,17 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NovaInstanceView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.OpenStackGroupView;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 @Service
 public class HeatTemplateBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeatTemplateBuilder.class);
 
-    @Value("${cb.openstack.heat.template.path:" + CB_OPENSTACK_HEAT_TEMPLATE_PATH + "}")
+    @Value("${cb.openstack.heat.template.path:}")
     private String openStackHeatTemplatePath;
-
 
     @Inject
     private OpenStackUtils openStackUtil;

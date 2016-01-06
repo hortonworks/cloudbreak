@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_AWS_RESOURCE_NAME_LENGTH;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,8 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 @Service
 public class CloudFormationStackUtil {
 
-
-    @Value("${cb.max.aws.resource.name.length:" + CB_MAX_AWS_RESOURCE_NAME_LENGTH + "}")
+    @Value("${cb.max.aws.resource.name.length:}")
     private int maxResourceNameLength;
 
     @Inject
