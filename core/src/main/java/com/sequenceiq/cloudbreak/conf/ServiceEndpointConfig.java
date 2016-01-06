@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_ADDRESS_RESOLVING_TIMEOUT;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +11,7 @@ import com.sequenceiq.cloudbreak.service.registry.ServiceAddressResolvingExcepti
 
 @Configuration
 public class ServiceEndpointConfig {
-    @Value("${cb.address.resolving.timeout:" + CB_ADDRESS_RESOLVING_TIMEOUT + "}")
+    @Value("${cb.address.resolving.timeout:}")
     private int resolvingTimeout;
 
     @Value("${cb.db.port.5432.tcp.addr:}")

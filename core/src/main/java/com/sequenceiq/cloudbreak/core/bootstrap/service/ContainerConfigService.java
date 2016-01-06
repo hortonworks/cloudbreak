@@ -1,14 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_DB;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_AMBARI_WARMUP;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_KERBEROS;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_LOGROTATE;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_MUNCHAUSEN;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DOCKER_CONTAINER_REGISTRATOR;
-
 import java.io.IOException;
 
 import javax.inject.Inject;
@@ -18,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.bootstrap.config.GenericConfig;
 import com.sequenceiq.cloudbreak.domain.Component;
@@ -40,27 +30,26 @@ public class ContainerConfigService {
     @Value("${cb.docker.container.ambari:}")
     private String ambariDockerImageName;
 
-    @Value("${cb.docker.container.registrator:" + CB_DOCKER_CONTAINER_REGISTRATOR + "}")
+    @Value("${cb.docker.container.registrator:}")
     private String registratorDockerImageName;
 
-    @Value("${cb.docker.container.docker.consul.watch.plugn:" + CB_DOCKER_CONTAINER_DOCKER_CONSUL_WATCH_PLUGN + "}")
+    @Value("${cb.docker.container.docker.consul.watch.plugn:}")
     private String consulWatchPlugnDockerImageName;
 
-    @Value("${cb.docker.container.ambari.db:" + CB_DOCKER_CONTAINER_AMBARI_DB + "}")
+    @Value("${cb.docker.container.ambari.db:}")
     private String postgresDockerImageName;
 
-    @Value("${cb.docker.container.kerberos:" + CB_DOCKER_CONTAINER_KERBEROS + "}")
+    @Value("${cb.docker.container.kerberos:}")
     private String kerberosDockerImageName;
 
-    @Value("${cb.docker.container.logrotate:" + CB_DOCKER_CONTAINER_LOGROTATE + "}")
+    @Value("${cb.docker.container.logrotate:}")
     private String logrotateDockerImageName;
 
-    @Value("${cb.docker.container.munchausen:" + CB_DOCKER_CONTAINER_MUNCHAUSEN + "}")
+    @Value("${cb.docker.container.munchausen:}")
     private String munchausenImageName;
 
     @Inject
     private ComponentRepository componentRepository;
-
 
     public ContainerConfig get(Stack stack, DockerContainer dc) {
         try {
@@ -76,7 +65,6 @@ public class ContainerConfigService {
             throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s"));
         }
     }
-
 
     private Component create(Stack stack, DockerContainer dc) {
         try {
@@ -116,20 +104,12 @@ public class ContainerConfigService {
         }
     }
 
-
     private String getAmbariImageName(Stack stack) {
         String imageName;
         if (stack.getCluster().getAmbariStackDetails() == null) {
-            imageName = determineImageName(warmAmbariDockerImageName, CB_DOCKER_CONTAINER_AMBARI_WARMUP);
+            imageName = warmAmbariDockerImageName;
         } else {
-            imageName = determineImageName(ambariDockerImageName, CB_DOCKER_CONTAINER_AMBARI);
-        }
-        return imageName;
-    }
-
-    private String determineImageName(String imageName, String defaultImageName) {
-        if (Strings.isNullOrEmpty(imageName)) {
-            return defaultImageName;
+            imageName = ambariDockerImageName;
         }
         return imageName;
     }
