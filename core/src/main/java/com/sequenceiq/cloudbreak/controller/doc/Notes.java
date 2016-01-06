@@ -42,6 +42,7 @@ public class Notes {
 
     public static final String USER_NOTES = "Users can be invited under an account by the administrator, and all resources "
             + "(e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users";
+    public static final String TOPOLOGY_NOTES = "A topology gives system administrators an easy way to associate compute nodes with data centers and racks.";
 
     private Notes() {
     }

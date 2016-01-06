@@ -27,6 +27,12 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete template by id";
     }
 
+    public static class TopologyOpDesctiption {
+        public static final String GET_PUBLIC = "retrieve topoligies";
+        public static final String POST_PUBLIC = "create topology as public resource";
+        public static final String DELETE_BY_ID = "delete topology by id";
+    }
+
     public static class CredentialOpDescription {
         public static final String POST_PRIVATE = "create credential as private resource";
         public static final String POST_PUBLIC = "create credential as public resource";
