@@ -26,6 +26,12 @@ uluwatuServices.factory('AccountTemplate', ['$resource',
     }
 ]);
 
+uluwatuServices.factory('AccountTopology', ['$resource',
+    function($resource) {
+        return $resource('account/topologies/:id');
+    }
+]);
+
 uluwatuServices.factory('GlobalTemplate', ['$resource',
     function($resource) {
         return $resource('templates/:id');
