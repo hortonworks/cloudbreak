@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH;
+
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +25,9 @@ public class OpenStackUtils {
     public static final String CB_INSTANCE_PRIVATE_ID = "cb_instance_private_id";
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackUtils.class);
 
-    @Value("${cb.max.openstack.resource.name.length:}")
+    @Value("${cb.max.openstack.resource.name.length:" + CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH + "}")
     private int maxResourceNameLength;
+
 
     public CloudResource getHeatResource(List<CloudResource> resourceList) {
 

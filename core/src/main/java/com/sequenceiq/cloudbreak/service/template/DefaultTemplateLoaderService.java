@@ -1,18 +1,13 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_TEMPLATE_DEFAULTS;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Service;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
@@ -23,13 +18,19 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
 public class DefaultTemplateLoaderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTemplateLoaderService.class);
 
-    @Value("#{'${cb.template.defaults:}'.split(',')}")
+    @Value("#{'${cb.template.defaults:" + CB_TEMPLATE_DEFAULTS + "}'.split(',')}")
     private List<String> templateArray;
 
     @Inject

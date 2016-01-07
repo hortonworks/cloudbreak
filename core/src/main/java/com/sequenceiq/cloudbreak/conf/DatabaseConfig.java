@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_DB;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_PASS;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_DB_ENV_USER;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
@@ -26,13 +30,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DatabaseConfig {
 
-    @Value("${cb.db.env.user:}")
+    @Value("${cb.db.env.user:" + CB_DB_ENV_USER + "}")
     private String dbUser;
 
-    @Value("${cb.db.env.pass:}")
+    @Value("${cb.db.env.pass:" + CB_DB_ENV_PASS + "}")
     private String dbPassword;
 
-    @Value("${cb.db.env.db:}")
+    @Value("${cb.db.env.db:" + CB_DB_ENV_DB + "}")
     private String dbName;
 
     @Value("${cb.hbm2ddl.strategy:validate}")

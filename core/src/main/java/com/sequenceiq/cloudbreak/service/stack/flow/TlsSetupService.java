@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CERT_DIR;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_TLS_CERT_FILE;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
@@ -69,7 +71,7 @@ public class TlsSetupService {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    @Value("#{'${cb.cert.dir:}' + '/' + '${cb.tls.cert.file:}'}")
+    @Value("#{'${cb.cert.dir:" + CB_CERT_DIR + "}' + '/' + '${cb.tls.cert.file:" + CB_TLS_CERT_FILE + "}'}")
     private String tlsCertificatePath;
 
     public void setupTls(Stack stack, String publicIp, String user, Set<String> sshFingerprints) throws CloudbreakException {

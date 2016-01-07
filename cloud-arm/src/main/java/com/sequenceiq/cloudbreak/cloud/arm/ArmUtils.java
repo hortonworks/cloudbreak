@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_ARM_CENTRAL_STORAGE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_AZURE_RESOURCE_NAME_LENGTH;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,10 +41,10 @@ public class ArmUtils {
     private static final int MAX_LENGTH_OF_NAME_SLICE = 8;
     private static final int MAX_LENGTH_OF_RESOURCE_NAME = 24;
 
-    @Value("${cb.max.openstack.resource.name.length:}")
+    @Value("${cb.max.openstack.resource.name.length:" + CB_MAX_AZURE_RESOURCE_NAME_LENGTH + "}")
     private int maxResourceNameLength;
 
-    @Value("${cb.arm.persistent.storage:}")
+    @Value("${cb.arm.persistent.storage:" + CB_ARM_CENTRAL_STORAGE + "}")
     private String persistentStorage;
 
     public CloudResource getTemplateResource(List<CloudResource> resourceList) {
