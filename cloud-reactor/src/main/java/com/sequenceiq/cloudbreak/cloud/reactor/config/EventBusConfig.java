@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.reactor.config;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_EVENTBUS_THREADPOOL_CORE_SIZE;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +15,7 @@ import reactor.fn.timer.Timer;
 @Configuration
 public class EventBusConfig {
 
-    @Value("${cb.eventbus.threadpool.core.size:" + CB_EVENTBUS_THREADPOOL_CORE_SIZE + "}")
+    @Value("${cb.eventbus.threadpool.core.size:}")
     private int eventBusThreadPoolSize;
 
     @Bean
