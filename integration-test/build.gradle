@@ -14,8 +14,6 @@ jar {
 
 apply plugin: 'spring-boot'
 
-mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
-
 dependencies {
     compile project(':cloud-common')
     compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
@@ -26,19 +24,19 @@ dependencies {
     }
     compile "org.springframework.boot:spring-boot-starter:${springBootVersion}"
     compile "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
-    compile "org.springframework:spring-web:4.1.4.RELEASE"
-    compile "org.springframework:spring-context-support:4.1.4.RELEASE"
+    compile "org.springframework:spring-web:${springFrameworkVersion}"
+    compile "org.springframework:spring-context-support:${springFrameworkVersion}"
     compile "org.apache.httpcomponents:httpclient:4.3.5"
-    compile 'javax:javaee-api:7.0'
-    compile 'org.apache.velocity:velocity:1.7'
-    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
-    compile 'com.jcraft:jsch:0.1.53'
-    compile "org.testng:testng:6.8.21"
+    compile "javax:javaee-api:${javaEEApiVersion}"
+    compile "org.apache.velocity:velocity:1.7"
+    compile "org.codehaus.jackson:jackson-mapper-asl:1.9.13"
+    compile "com.jcraft:jsch:0.1.53"
+    compile "org.testng:testng:6.9.10"
     compile ("org.uncommons:reportng:1.1.4") {
         exclude group: "velocity"
     }
     runtime "com.google.inject:guice:3.0"
-    runtime "org.hibernate:hibernate-validator:5.1.1.Final"
+    runtime "org.hibernate:hibernate-validator:${hibernateValidatorVersion}"
 }
 
 task buildInfo(type: BuildInfoTask) {

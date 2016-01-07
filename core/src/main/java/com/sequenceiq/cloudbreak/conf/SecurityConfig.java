@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.FilterChain;
@@ -9,6 +7,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.slf4j.Logger;
@@ -32,33 +35,32 @@ import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
-
 @Configuration
 public class SecurityConfig {
+
+    @Inject
+    private UserDetailsService userDetailsService;
+
+    @Inject
+    private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
+
+    @Bean MethodSecurityExpressionHandler expressionHandler() {
+        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        ownerBasedPermissionEvaluator.setUserDetailsService(userDetailsService);
+        expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
+        return expressionHandler;
+    }
 
     @Configuration
     @EnableGlobalMethodSecurity(prePostEnabled = true)
     protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
         @Inject
-        private UserDetailsService userDetailsService;
-
-        @Inject
-        private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
-
-        @Bean MethodSecurityExpressionHandler expressionHandler() {
-            DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-            ownerBasedPermissionEvaluator.setUserDetailsService(userDetailsService);
-            expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
-            return expressionHandler;
-        }
+        private MethodSecurityExpressionHandler expressionHandler;
 
         @Override
         protected MethodSecurityExpressionHandler createExpressionHandler() {
-            return expressionHandler();
+            return expressionHandler;
         }
     }
 
@@ -110,12 +112,7 @@ public class SecurityConfig {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
-            http.csrf()
-                    .disable()
-                    .headers()
-                    .contentTypeOptions()
-                    .and()
-                    .addFilterAfter(new ScimAccountGroupReaderFilter(userDetailsService), AbstractPreAuthenticatedProcessingFilter.class)
+            http.addFilterAfter(new ScimAccountGroupReaderFilter(userDetailsService), AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
 
                     .antMatchers(HttpMethod.GET, BLUEPRINT_URL_PATTERNS)
@@ -148,7 +145,12 @@ public class SecurityConfig {
                     .antMatchers("/account/usages/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
                     .antMatchers("/user/usages/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
                     .antMatchers("/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')")
-                    .antMatchers("/accountpreferences/*").access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')");
+                    .antMatchers("/accountpreferences/*").access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')")
+                    .and()
+                    .csrf()
+                    .disable()
+                    .headers()
+                    .contentTypeOptions();
         }
     }
 

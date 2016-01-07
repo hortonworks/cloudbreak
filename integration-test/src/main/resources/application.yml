@@ -125,7 +125,7 @@ integrationtest:
         - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
         AZURE_UPDOWN_SMOKE_TEST:
         - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
-        AZURE_UPDOWN_SMOKE_TEST:
+        AZURE_RM_UPDOWN_SMOKE_TEST:
         - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-updown.yaml
 
         # Kerberos test with cluster creation, stop-start and upscale-downscale

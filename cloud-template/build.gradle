@@ -17,7 +17,6 @@ dependencies {
     compile project(':cloud-reactor')
 
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-    compile group: 'org.springframework',           name: 'spring-context-support',         version: '4.0.3.RELEASE'
-    compile group: 'javax',                         name: 'javaee-api',                     version: '7.0'
+    compile group: 'javax',                         name: 'javaee-api',                     version: javaEEApiVersion
 
 }
