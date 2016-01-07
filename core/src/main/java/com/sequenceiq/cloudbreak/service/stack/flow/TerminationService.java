@@ -85,6 +85,9 @@ public class TerminationService {
                 if (fs != null) {
                     deleteFileSystemResources(stackId, fs);
                 }
+                for (HostMetadata metadata : hostMetadataRepository.findHostsInCluster(stack.getCluster().getId())) {
+                    hostMetadataRepository.delete(metadata.getId());
+                }
             }
             stack.setCredential(null);
             stack.setNetwork(null);
@@ -92,9 +95,6 @@ public class TerminationService {
             stack.setName(terminatedName);
             terminateMetaDataInstances(stack);
             stackRepository.save(stack);
-            for (HostMetadata metadata : hostMetadataRepository.findHostsInCluster(stack.getCluster().getId())) {
-                hostMetadataRepository.delete(metadata.getId());
-            }
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);
