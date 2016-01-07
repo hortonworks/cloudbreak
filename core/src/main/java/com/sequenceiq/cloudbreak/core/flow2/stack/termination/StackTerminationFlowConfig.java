@@ -38,7 +38,8 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     private static final List<Transition<StackTerminationState, StackTerminationEvent>> TRANSITIONS = Arrays.asList(
             new Transition<>(INIT_STATE, TERMINATION_STATE, TERMINATION_EVENT),
             new Transition<>(INIT_STATE, FORCE_TERMINATION_STATE, FORCE_TERMINATION_EVENT),
-            new Transition<>(TERMINATION_STATE, TERMINATION_FINISHED_STATE, TERMINATION_FINISHED_EVENT)
+            new Transition<>(TERMINATION_STATE, TERMINATION_FINISHED_STATE, TERMINATION_FINISHED_EVENT),
+            new Transition<>(FORCE_TERMINATION_STATE, TERMINATION_FINISHED_STATE, TERMINATION_FINISHED_EVENT)
     );
     private static final FlowEdgeConfig<StackTerminationState, StackTerminationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, TERMINATION_FINISHED_STATE, TERMINATION_FINALIZED_EVENT, TERMINATION_FAILED_STATE,
