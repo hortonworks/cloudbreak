@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_AZURE_RESOURCE_NAME_LENGTH;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,10 +9,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 
+
 public class ArmUtilsTest {
 
     private ArmUtils subject;
-    private final String maxResourceNameLength = "50";
+    private final String maxResourceNameLength = CB_MAX_AZURE_RESOURCE_NAME_LENGTH;
 
     @Before
     public void setUp() {

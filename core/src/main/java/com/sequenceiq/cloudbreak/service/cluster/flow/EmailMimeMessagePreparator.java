@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SMTP_SENDER_FROM;
+
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +14,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 @Service
 public class EmailMimeMessagePreparator {
 
-    @Value("${cb.smtp.sender.from:}")
+    @Value("${cb.smtp.sender.from:" + CB_SMTP_SENDER_FROM + "}")
     private String msgFrom;
 
     public MimeMessagePreparator prepareMessage(final CbUser user, final String subject, final String body) {

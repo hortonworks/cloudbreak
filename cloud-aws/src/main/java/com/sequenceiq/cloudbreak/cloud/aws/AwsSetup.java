@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_SPOTINSTANCE_ENABLED;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -32,7 +34,7 @@ public class AwsSetup implements Setup {
     private static final String VPC_DOES_NOT_EXIST_MSG = "The given internet gateway '%s' does not belong to the given VPC '%s'.";
     private static final int FINISHED_PROGRESS_VALUE = 100;
 
-    @Value("${cb.aws.spotinstances.enabled:}")
+    @Value("${cb.aws.spotinstances.enabled:" + CB_AWS_SPOTINSTANCE_ENABLED + "}")
     private boolean awsSpotinstanceEnabled;
 
     @Inject

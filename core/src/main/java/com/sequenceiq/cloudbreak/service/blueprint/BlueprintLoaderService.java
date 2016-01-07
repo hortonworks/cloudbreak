@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_BLUEPRINT_DEFAULTS;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,7 +27,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 public class BlueprintLoaderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintLoaderService.class);
 
-    @Value("#{'${cb.blueprint.defaults:}'.split(',')}")
+    @Value("#{'${cb.blueprint.defaults:" + CB_BLUEPRINT_DEFAULTS + "}'.split(',')}")
     private List<String> blueprintArray;
 
     @Inject

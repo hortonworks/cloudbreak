@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_THREADPOOL_CAPACITY_SIZE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_CONTAINER_THREADPOOL_CORE_SIZE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_INTERMEDIATE_THREADPOOL_CAPACITY_SIZE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_INTERMEDIATE_THREADPOOL_CORE_SIZE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_SUPPORTED_CONTAINER_ORCHESTRATORS;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_CAPACITY_SIZE;
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_THREADPOOL_CORE_SIZE;
+
 import java.io.IOException;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -53,25 +61,25 @@ public class AppConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
     private static final int TIMEOUT = 5_000;
 
-    @Value("#{'${cb.supported.container.orchestrators:}'.split(',')}")
+    @Value("#{'${cb.supported.container.orchestrators:" + CB_SUPPORTED_CONTAINER_ORCHESTRATORS + "}'.split(',')}")
     private List<String> orchestrators;
 
-    @Value("${cb.threadpool.core.size:}")
+    @Value("${cb.threadpool.core.size:" + CB_THREADPOOL_CORE_SIZE + "}")
     private int corePoolSize;
 
-    @Value("${cb.threadpool.capacity.size:}")
+    @Value("${cb.threadpool.capacity.size:" + CB_THREADPOOL_CAPACITY_SIZE + "}")
     private int queueCapacity;
 
-    @Value("${cb.intermediate.threadpool.core.size:}")
+    @Value("${cb.intermediate.threadpool.core.size:" + CB_INTERMEDIATE_THREADPOOL_CORE_SIZE + "}")
     private int intermediateCorePoolSize;
 
-    @Value("${cb.intermediate.threadpool.capacity.size:}")
+    @Value("${cb.intermediate.threadpool.capacity.size:" + CB_INTERMEDIATE_THREADPOOL_CAPACITY_SIZE + "}")
     private int intermediateQueueCapacity;
 
-    @Value("${cb.container.threadpool.core.size:}")
+    @Value("${cb.container.threadpool.core.size:" + CB_CONTAINER_THREADPOOL_CORE_SIZE + "}")
     private int containerCorePoolSize;
 
-    @Value("${cb.container.threadpool.capacity.size:}")
+    @Value("${cb.container.threadpool.capacity.size:" + CB_CONTAINER_THREADPOOL_CAPACITY_SIZE + "}")
     private int containerteQueueCapacity;
 
     @Inject

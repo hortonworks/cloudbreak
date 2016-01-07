@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.service;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_GCP_RESOURCE_NAME_LENGTH;
+
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -20,7 +22,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
     private static final int ATTACHED_DISKS_PART_COUNT = 4;
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
-    @Value("${cb.max.gcp.resource.name.length:}")
+    @Value("${cb.max.gcp.resource.name.length:" + CB_MAX_GCP_RESOURCE_NAME_LENGTH + "}")
     private int maxResourceNameLength;
 
     @Override

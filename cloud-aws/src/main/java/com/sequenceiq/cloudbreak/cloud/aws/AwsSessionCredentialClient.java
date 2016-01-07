@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_AWS_EXTERNAL_ID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +21,7 @@ public class AwsSessionCredentialClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsSessionCredentialClient.class);
     private static final int DEFAULT_SESSION_CREDENTIALS_DURATION = 3600;
 
-    @Value("${cb.aws.external.id:}")
+    @Value("${cb.aws.external.id:" + CB_AWS_EXTERNAL_ID + "}")
     private String externalId;
 
     @Cacheable(value = AwsCachingConfig.TEMPORARY_AWS_CREDENTIAL_CACHE, unless = "#awsCredential.getId() == null")

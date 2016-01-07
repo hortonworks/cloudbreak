@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.service;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH;
+
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -17,7 +19,7 @@ public class OpenStackResourceNameService extends CloudbreakResourceNameService 
     private static final int ATTACHED_DISKS_PART_COUNT = 4;
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
-    @Value("${cb.max.openstack.resource.name.length:}")
+    @Value("${cb.max.openstack.resource.name.length:" + CB_MAX_OPENSTACK_RESOURCE_NAME_LENGTH + "}")
     private int maxResourceNameLength;
 
     @Override

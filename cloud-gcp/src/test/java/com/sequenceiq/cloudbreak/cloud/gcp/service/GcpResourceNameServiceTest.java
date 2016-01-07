@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.service;
 
+import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_MAX_GCP_RESOURCE_NAME_LENGTH;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,7 +13,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class GcpResourceNameServiceTest {
 
     private ResourceNameService subject;
-    private final String maxResourceNameLength = "63";
+    private final String maxResourceNameLength = CB_MAX_GCP_RESOURCE_NAME_LENGTH;
 
     @Before
     public void setUp() throws Exception {
