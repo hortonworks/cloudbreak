@@ -1,0 +1,82 @@
+cb:
+  threadpool:
+    core.size: 40
+    capacity.size: 4000
+  intermediate.threadpool:
+    core.size: 40
+    capacity.size: 4000
+  container.threadpool:
+    core.size: 40
+    capacity.size: 4000
+  
+  cert:
+    dir: /certs
+
+  tls:
+    private.key.file: client-key.pem
+    cert.file: client.pem
+  
+  smtp.sender:
+    host:
+    port: 25
+    username:
+    password:
+    from: no-reply@sequenceiq.com
+  
+  db.env:
+    user: postgres
+    pass:
+    db: postgres
+  
+  aws:
+    spotinstances.enabled: false
+    external.id: provision-ambari
+    cf.template.new.path: templates/aws-cf-stack.ftl
+  
+  blueprint.defaults: hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster
+  template.default: minviable-gcp,minviable-azure,minviable-aws
+  
+  mail:
+    smtp:
+    auth: true
+    type: smtp
+    starttls.enable: true
+  success.cluster.installer.mail.template.path: templates/cluster-installer-mail-success.ftl
+  failed.cluster.installer.mail.template.path: templates/cluster-installer-mail-fail.ftl
+  
+  container.orchestrator: SWARM
+  supported.container.orchestrators: com.sequenceiq.cloudbreak.orchestrator.swarm.SwarmContainerOrchestrator
+  
+  docker:
+    container:
+      ambari: sequenceiq/ambari:2.1.2-v8
+      ambari.warm: sequenceiq/ambari:2.1.2-v8
+      ambari.db: postgres:9.4.1
+      registrator: sequenceiq/registrator:v5.2
+      docker.consul.watch.plugn: sequenceiq/docker-consul-watch-plugn:1.1
+      kerberos: sequenceiq/kerberos:2.1.0-consul
+      logrotate: sequenceiq/logrotate:v0.5.1
+      munchausen: sequenceiq/munchausen:0.5.5
+    relocate: true
+  
+  arm:
+    persistent.storage: cbstore
+    template.path: templates/arm-v2.ftl
+    parameter.path: templates/parameters.ftl
+
+  openstack:
+    heat.template.path: templates/openstack-heat.ftl
+    api.debug: false
+  
+  max:
+    azure.resource.name.length: 50
+    gcp.resource.name.length: 63
+    aws.resource.name.length: 50
+    openstack.resource.name.length: 120
+  
+  address.resolving.timeout: 60000
+  
+  eventbus.threadpool.core.size: 100
+  cloud.api.executorservice.pool.size: 40
+
+  platform.default.variants: OPENSTACK:HEAT

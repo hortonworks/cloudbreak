@@ -1,14 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_ARM_PARAMETER_PATH;
-import static com.sequenceiq.cloudbreak.EnvironmentVariableConfig.CB_ARM_TEMPLATE_PATH;
 import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
-
-import javax.inject.Inject;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmGroupView;
@@ -20,23 +24,19 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 @Service("ArmTemplateBuilder")
 public class ArmTemplateBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmTemplateBuilder.class);
 
-    @Value("${cb.arm.template.path:" + CB_ARM_TEMPLATE_PATH + "}")
+    @Value("${cb.arm.template.path:}")
     private String armTemplatePath;
 
-    @Value("${cb.arm.parameter.path:" + CB_ARM_PARAMETER_PATH + "}")
+    @Value("${cb.arm.parameter.path:}")
     private String armTemplateParametersPath;
 
     @Inject

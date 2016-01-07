@@ -19,7 +19,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.EnvironmentVariableConfig;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -54,11 +53,7 @@ public class CloudPlatformConnectors {
     }
 
     private Map<Platform, Variant> extractEnvironmentDefaultVariants() {
-        String variants = EnvironmentVariableConfig.CB_PLATFORM_DEFAULT_VARIANTS;
-        if (!Strings.isNullOrEmpty(platformDefaultVariants)) {
-            variants = platformDefaultVariants;
-        }
-        return toMap(variants);
+        return toMap(platformDefaultVariants);
     }
 
     private Map<Platform, Variant> toMap(String s) {
