@@ -53,8 +53,8 @@ dependencies {
     compile group: 'com.thoughtworks.xstream',      name: 'xstream',                        version: '1.4.7'
     compile group: 'com.github.fommil',             name: 'openssh',                        version: '1.0'
     compile group: 'javax.mail',                    name: 'mail',                           version: '1.5.0-b01'
-    compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: '1.47'
-    compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: '1.47'
+    compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
+    compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
     compile group: 'org.jasypt',                    name: 'jasypt',                         version: '1.9.2'
     compile group: 'com.wordnik',                   name: 'swagger-core',                   version: '1.5.2-M1'
     compile group: 'com.mangofactory',              name: 'swagger-springmvc',              version: '1.0.2'
