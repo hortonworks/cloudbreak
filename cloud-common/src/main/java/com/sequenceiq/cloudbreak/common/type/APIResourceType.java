@@ -8,5 +8,6 @@ public enum APIResourceType {
     CREDENTIAL,
     RECIPE,
     NETWORK,
+    TOPOLOGY,
     SECURITY_GROUP
 }
