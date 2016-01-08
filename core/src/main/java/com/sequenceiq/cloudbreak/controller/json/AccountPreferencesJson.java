@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 import static com.sequenceiq.cloudbreak.controller.doc.ModelDescriptions.AccountPreferencesModelDescription;
 
+import java.util.List;
+
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-
-import java.util.List;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
@@ -44,6 +44,9 @@ public class AccountPreferencesJson implements JsonEntity {
     @Min(value = 0, message = "The account time to live has to be greater than '-1'")
     @ApiModelProperty(AccountPreferencesModelDescription.ACCOUNT_TIME_TO_LIVE)
     private Long userTimeToLive;
+
+    @ApiModelProperty(AccountPreferencesModelDescription.PLATFORMS)
+    private String platforms;
 
     public Long getMaxNumberOfClusters() {
         return maxNumberOfClusters;
@@ -91,5 +94,13 @@ public class AccountPreferencesJson implements JsonEntity {
 
     public void setMaxNumberOfClustersPerUser(Long maxNumberOfClustersPerUser) {
         this.maxNumberOfClustersPerUser = maxNumberOfClustersPerUser;
+    }
+
+    public String getPlatforms() {
+        return platforms;
+    }
+
+    public void setPlatforms(String platforms) {
+        this.platforms = platforms;
     }
 }
