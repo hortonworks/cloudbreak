@@ -74,6 +74,10 @@ function addClusterListPanelJQEventListeners() {
         e.stopPropagation();
         goToPanel(this, 'securitygroup');
     });
+    $jq(document).on("click", ".topologyselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'topologies');
+    });
 
     function goToPanel(pane, type) {
         var segment = $jq(pane).attr('segment');
@@ -120,6 +124,10 @@ function addClusterFormJQEventListeners() {
     $jq(document).on("click", ".securitygroupselect", function(e) {
         e.stopPropagation();
         goToPanel(this, 'securitygroup');
+    });
+    $jq(document).on("click", ".topologyselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'topologies');
     });
 
     function goToPanel(pane, type) {
