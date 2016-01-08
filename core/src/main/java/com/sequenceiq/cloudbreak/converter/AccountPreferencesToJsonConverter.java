@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.controller.json.AccountPreferencesJson;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import org.springframework.stereotype.Component;
 
 @Component
 public class AccountPreferencesToJsonConverter extends AbstractConversionServiceAwareConverter<AccountPreferences, AccountPreferencesJson> {
@@ -20,6 +21,7 @@ public class AccountPreferencesToJsonConverter extends AbstractConversionService
         long userTimeToLive = source.getUserTimeToLive() == ZERO ? ZERO : source.getUserTimeToLive() / HOUR_IN_MS;
         json.setUserTimeToLive(userTimeToLive);
         json.setMaxNumberOfClustersPerUser(source.getMaxNumberOfClustersPerUser());
+        json.setPlatforms(source.getPlatforms());
         return json;
     }
 }

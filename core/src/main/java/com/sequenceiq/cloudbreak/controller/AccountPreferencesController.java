@@ -3,19 +3,6 @@ package com.sequenceiq.cloudbreak.controller;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
-import com.sequenceiq.cloudbreak.controller.doc.ContentType;
-import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.controller.doc.Notes;
-import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions;
-import com.sequenceiq.cloudbreak.controller.json.AccountPreferencesJson;
-import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
-import com.sequenceiq.cloudbreak.service.account.ScheduledAccountPreferencesValidator;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -26,6 +13,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.controller.doc.ContentType;
+import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.controller.doc.Notes;
+import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.controller.json.AccountPreferencesJson;
+import com.sequenceiq.cloudbreak.domain.AccountPreferences;
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
+import com.sequenceiq.cloudbreak.service.account.ScheduledAccountPreferencesValidator;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 @Controller
 @Api(value = "/accountpreferences", description = ControllerDescription.ACCOUNT_PREFERENCES_DESCRIPTION)
@@ -51,7 +52,7 @@ public class AccountPreferencesController {
     }
 
     @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.PUT_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
-    @RequestMapping(value = "accountpreferences", method = RequestMethod.PUT)
+    @RequestMapping(value = "accountpreferences", method = { RequestMethod.PUT, RequestMethod.POST })
     @ResponseBody
     public ResponseEntity<String> updateAccountPreferences(@ModelAttribute("user") CbUser user, @Valid @RequestBody AccountPreferencesJson updateRequest) {
         MDCBuilder.buildUserMdcContext(user);

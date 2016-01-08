@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,6 +33,8 @@ public class AccountPreferences {
     private String allowedInstanceTypes;
     private Long clusterTimeToLive;
     private Long userTimeToLive;
+    @Column(columnDefinition = "TEXT")
+    private String platforms;
 
     public String getAccount() {
         return account;
@@ -96,5 +99,13 @@ public class AccountPreferences {
 
     public void setMaxNumberOfClustersPerUser(Long maxNumberOfClustersPerUser) {
         this.maxNumberOfClustersPerUser = maxNumberOfClustersPerUser;
+    }
+
+    public String getPlatforms() {
+        return platforms;
+    }
+
+    public void setPlatforms(String platforms) {
+        this.platforms = platforms;
     }
 }
