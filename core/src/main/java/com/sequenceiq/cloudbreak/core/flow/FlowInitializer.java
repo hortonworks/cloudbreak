@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCredentialChangeHandl
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterInstallHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSecurityHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartRequestedHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
@@ -83,7 +82,6 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_INSTALL.name()), getHandlerForClass(ClusterInstallHandler.class));
         reactor.on($(FlowPhases.CLUSTER_RESET.name()), getHandlerForClass(ClusterResetHandler.class));
-        reactor.on($(FlowPhases.ENABLE_KERBEROS.name()), getHandlerForClass(ClusterSecurityHandler.class));
         reactor.on($(FlowPhases.STACK_START.name()), getHandlerForClass(StackStartHandler.class));
         reactor.on($(FlowPhases.STACK_STOP.name()), getHandlerForClass(StackStopHandler.class));
         reactor.on($(FlowPhases.UPSCALE_STACK_SYNC.name()), getHandlerForClass(UpscaleStackSyncHandler.class));
@@ -135,10 +133,7 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.STACK_CREATION_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterInstallHandler.class, TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_INSTALL.name(), FlowPhases.ENABLE_KERBEROS.name(), FlowPhases.NONE.name()));
-
-        transitionKeyService.registerTransition(ClusterSecurityHandler.class, TransitionFactory
-                .createTransition(FlowPhases.ENABLE_KERBEROS.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+                .createTransition(FlowPhases.CLUSTER_INSTALL.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerStartFlows() {

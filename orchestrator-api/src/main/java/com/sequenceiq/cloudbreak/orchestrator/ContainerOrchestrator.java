@@ -39,6 +39,9 @@ public interface ContainerOrchestrator {
             ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
+    void startHaveged(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException;
+
     void startConsulWatches(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, LogVolumePath logVolumePath,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 

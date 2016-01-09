@@ -9,7 +9,8 @@ public enum DockerContainer {
     REGISTRATOR("registrator"),
     MUNCHAUSEN("munchausen"),
     CONSUL_WATCH("consul-watch"),
-    LOGROTATE("logrotate");
+    LOGROTATE("logrotate"),
+    HAVEGED("haveged");
 
     private final String name;
 

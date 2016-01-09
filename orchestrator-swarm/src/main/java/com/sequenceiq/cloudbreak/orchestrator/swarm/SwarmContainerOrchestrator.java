@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariAgentBootst
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerDatabaseBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.ConsulWatchBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.HavegedBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.KerberosServerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.LogrotateBootsrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.MunchausenBootstrap;
@@ -177,6 +178,20 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (Future<Boolean> future : futures) {
                 future.get();
             }
+        } catch (Exception ex) {
+            throw new CloudbreakOrchestratorFailedException(ex);
+        }
+    }
+
+    @Override
+    public void startHaveged(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        try {
+            Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
+            runner(havegedBootstrap(cluster.getGatewayConfig(), imageName(containerConfig), gateway), getExitCriteria(), exitCriteriaModel,
+                    MDC.getCopyOfContextMap()).call();
+        } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
+            throw coe;
         } catch (Exception ex) {
             throw new CloudbreakOrchestratorFailedException(ex);
         }
@@ -396,6 +411,12 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     RegistratorBootstrap registratorBootstrap(GatewayConfig gatewayConfig, String imageName, Node gateway) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
         return new RegistratorBootstrap(dockerApiClient, imageName, gateway.getHostname(), gateway.getPrivateIp());
+    }
+
+    @VisibleForTesting
+    HavegedBootstrap havegedBootstrap(GatewayConfig gatewayConfig, String imageName, Node gateway) {
+        DockerClient dockerApiClient = swarmClient(gatewayConfig);
+        return new HavegedBootstrap(dockerApiClient, imageName, gateway.getHostname());
     }
 
     @VisibleForTesting

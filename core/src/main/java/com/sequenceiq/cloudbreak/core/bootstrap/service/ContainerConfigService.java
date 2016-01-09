@@ -48,6 +48,9 @@ public class ContainerConfigService {
     @Value("${cb.docker.container.munchausen:}")
     private String munchausenImageName;
 
+    @Value("${cb.docker.container.haveged:}")
+    private String havegedImageName;
+
     @Inject
     private ComponentRepository componentRepository;
 
@@ -92,6 +95,9 @@ public class ContainerConfigService {
                     break;
                 case LOGROTATE:
                     config = new GenericConfig.Builder(logrotateDockerImageName).build();
+                    break;
+                case HAVEGED:
+                    config = new GenericConfig.Builder(havegedImageName).build();
                     break;
                 default:
                     throw new CloudbreakServiceException(String.format("No configuration exist for %s", dc));

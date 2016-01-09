@@ -7,6 +7,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
@@ -60,6 +61,12 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     public void startAmbariAgents(ContainerOrchestratorCluster cluster, ContainerConfig config, String platform, LogVolumePath logVolumePath,
             ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+        return;
+    }
+
+    @Override
+    public void startHaveged(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
         return;
     }
 
