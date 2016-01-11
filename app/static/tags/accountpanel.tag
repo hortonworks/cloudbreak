@@ -55,54 +55,54 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="scopes">Scopes</label>
+                            <label class="col-sm-3 control-label" for="scopes">{{msg.account_details_scopes}}</label>
                             <div class="col-sm-4">
                                 <table class="table table-bordered table-striped responsive-utilities">
                                     <thead>
                                         <tr>
-                                            <th>Ability to</th>
-                                            <th>Create</th>
+                                            <th>{{msg.account_details_ability}}</th>
+                                            <th>{{msg.account_details_create}}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <th scope="row">Blueprints</th>
+                                            <th scope="row">{{msg.account_details_blueprints}}</th>
                                             <td class="is-visible">
                                                 <input type="checkbox" disabled name="bpch1" id="bpch1" ng-checked="isWriteScope('blueprints', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Recipes</th>
+                                            <th scope="row">{{msg.account_details_recipes}}</th>
                                             <td class="is-visible">
                                                 <input type="checkbox" disabled name="recch1" id="recch1" ng-checked="isWriteScope('recipes', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Templates</th>
+                                            <th scope="row">{{msg.account_details_templates}}</th>
                                             <td class="is-visible">
                                                 <input type="checkbox" disabled name="tmch1" id="tmch1" ng-checked="isWriteScope('templates', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Credentials</th>
+                                            <th scope="row">{{msg.account_details_credentials}}</th>
                                             <td class="is-visible">
                                                 <input type="checkbox" disabled name="crch1" id="crch1" ng-checked="isWriteScope('credentials', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Stacks</th>
+                                            <th scope="row">{{msg.account_details_stacks}}</th>
                                             <td class="is-visible">
                                                 <input type="checkbox" disabled name="stch1" id="stch1" ng-checked="isWriteScope('stacks', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Networks</th>
+                                            <th scope="row">{{msg.account_details_networks}}</th>
                                             <td class="is-visible">
                                                 <input type="checkbox" disabled name="nwcrch1" id="nwcrch1" ng-checked="isWriteScope('networks', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th scope="row">Security Groups</th>
+                                            <th scope="row">{{msg.account_details_securitygroups}}</th>
                                             <td class="is-visible">
                                                 <input type="checkbox" disabled name="sgstch1" id="sgstch1" ng-checked="isWriteScope('securitygroups', userDetails.groups)">
                                             </td>
@@ -111,7 +111,27 @@
                                 </table>
                             </div>
                         </div>
-
+                        <div class="">
+                            <label class="col-sm-3 control-label" for="scopes">{{msg.account_details_cloudplatforms}}</label>
+                            <div class="col-sm-4">
+                                <table class="table table-bordered table-striped responsive-utilities">
+                                    <thead>
+                                        <tr>
+                                            <th>{{msg.account_details_ability}}</th>
+                                            <th>{{msg.account_details_use}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="(platform, variants) in $root.params.platformVariants">
+                                            <th scope="row">{{platform}}</th>
+                                            <td class="is-visible">
+                                                <input type="checkbox" name="bpch1" id="bpch1" ng-checked="isChecked(platform)" ng-disabled="$root.params.platforms.length == 1 && isChecked(platform)" ng-click="changePlatformVisibility(platform)">
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
                     </form>
 

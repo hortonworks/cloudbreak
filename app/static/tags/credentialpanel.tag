@@ -29,30 +29,30 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector1">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureRmChange" type="button" class="btn btn-default" ng-click="createAzureRmCredentialRequest()">{{msg.azure_rm_label}}</a>
+                                        <a id="awsChange" ng-show="isVisible('AWS')" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">{{msg.aws_label}}</a>
+                                        <a id="azureRmChange" ng-show="isVisible('AZURE_RM')" type="button" class="btn btn-default" ng-click="createAzureRmCredentialRequest()">{{msg.azure_rm_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                        <a id="gcpChange" type="button" class="btn btn-default" ng-click="createGcpCredentialRequest()">{{msg.gcp_label}}</a>
-                                        <a id="openstackChange" type="button" class="btn btn-default" ng-click="createOpenstackCredentialRequest()">{{msg.openstack_label}}</a>
+                                        <a id="gcpChange" ng-show="isVisible('GCP')" type="button" class="btn btn-default" ng-click="createGcpCredentialRequest()">{{msg.gcp_label}}</a>
+                                        <a id="openstackChange" ng-show="isVisible('OPENSTACK')" type="button" class="btn btn-default" ng-click="createOpenstackCredentialRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
                             <div class="alert alert-info" role="alert" ng-show="credentialInCreation"><b>{{msg.credential_creation_wait_prefix}}</b> {{msg.credential_creation_wait_suffix}}</div>
-                            <form class="form-horizontal" role="form" name="awsCredentialForm" ng-show="awsCredential  && !credentialInCreation" name="awsCredentialForm">
+                            <form class="form-horizontal" role="form" name="awsCredentialForm" ng-show="awsCredential  && !credentialInCreation && isVisible('AWS')" name="awsCredentialForm">
                                 <div ng-include src="'tags/credential/awsform.tag'"></div>
                             </form>
-                            <form class="form-horizontal" role="form" name="azureRmCredentialForm" ng-show="azureRmCredential && !credentialInCreation">
+                            <form class="form-horizontal" role="form" name="azureRmCredentialForm" ng-show="azureRmCredential && !credentialInCreation && isVisible('AZURE_RM')">
                                 <div ng-include src="'tags/credential/azurermform.tag'"></div>
                             </form>
 
-                            <form class="form-horizontal" role="form" name="gcpCredentialForm" ng-show="gcpCredential && !credentialInCreation">
+                            <form class="form-horizontal" role="form" name="gcpCredentialForm" ng-show="gcpCredential && !credentialInCreation && isVisible('GCP')">
                                 <div ng-include src="'tags/credential/gcpform.tag'"></div>
                             </form>
 
-                            <form class="form-horizontal" role="form" name="openstackCredentialForm" ng-show="openstackCredential && !credentialInCreation">
+                            <form class="form-horizontal" role="form" name="openstackCredentialForm" ng-show="openstackCredential && !credentialInCreation && isVisible('OPENSTACK')">
                                 <div ng-include src="'tags/credential/openstackform.tag'"></div>
                             </form>
                         </div>
@@ -66,7 +66,7 @@
 
                     <!-- ............. CREDENTIAL ............................................... -->
 
-                    <div class="panel panel-default" ng-repeat="credential in $root.credentials  | orderBy:['cloudPlatform', 'name']">
+                    <div class="panel panel-default" ng-repeat="credential in $root.credentials  | filter:filterByVisiblePlatform | orderBy:['cloudPlatform', 'name']">
                         <div class="panel-heading">
                             <h5><a href="" data-toggle="collapse" data-parent="#credential-list-accordion"
                                    data-target="#panel-credential-collapse{{credential.id}}"><i class="fa fa-tag fa-fw"></i>{{credential.name}}</a>

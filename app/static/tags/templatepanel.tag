@@ -25,30 +25,30 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsTemplateChange" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureTemplateChange" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
+                                        <a id="awsTemplateChange" ng-show="isVisible('AWS')" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">{{msg.aws_label}}</a>
+                                        <a id="azureTemplateChange" ng-show="isVisible('AZURE_RM')" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                        <a id="gcpTemplateChange" class="btn btn-default" role="button" ng-click="createGcpTemplateRequest()">{{msg.gcp_label}}</a>
-                                        <a id="openstackTemplateChange" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">{{msg.openstack_label}}</a>
+                                        <a id="gcpTemplateChange" ng-show="isVisible('GCP')" class="btn btn-default" role="button" ng-click="createGcpTemplateRequest()">{{msg.gcp_label}}</a>
+                                        <a id="openstackTemplateChange" ng-show="isVisible('OPENSTACK')" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
-                            <form class="form-horizontal" role="form" name="azureTemplateForm" ng-show="azureTemplate">
+                            <form class="form-horizontal" role="form" name="azureTemplateForm" ng-show="azureTemplate && isVisible('AZURE_RM')">
                                 <div ng-include src="'tags/template/azureform.tag'"></div>
                             </form>
 
-                            <form class="form-horizontal" role="form" ng-show="awsTemplate" name="awsTemplateForm">
+                            <form class="form-horizontal" role="form" ng-show="awsTemplate && isVisible('AWS')" name="awsTemplateForm">
                                 <div ng-include src="'tags/template/awsform.tag'"></div>
                             </form>
 
-                            <form class="form-horizontal" role="form" ng-show="gcpTemplate" name="gcpTemplateForm" ng-show="gcpTemplate">
+                            <form class="form-horizontal" role="form" ng-show="gcpTemplate && isVisible('GCP')" name="gcpTemplateForm" ng-show="gcpTemplate">
                                 <div ng-include src="'tags/template/gcpform.tag'"></div>
                             </form>
-                            <form class="form-horizontal" role="form" ng-show="openstackTemplate" name="openstackTemplateForm" ng-show="openstackTemplate">
+                            <form class="form-horizontal" role="form" ng-show="openstackTemplate && isVisible('OPENSTACK')" name="openstackTemplateForm" ng-show="openstackTemplate">
                                 <div ng-include src="'tags/template/openstackform.tag'"></div>
                             </form>
                         </div>
@@ -62,7 +62,7 @@
 
                     <!-- .............. TEMPLATE .............................................. -->
 
-                    <div class="panel panel-default" ng-repeat="template in $root.templates | orderBy:['cloudPlatform', 'name']">
+                    <div class="panel panel-default" ng-repeat="template in $root.templates | filter:filterByVisiblePlatform | orderBy:['cloudPlatform', 'name']">
 
                         <div class="panel-heading">
                             <h5>

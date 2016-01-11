@@ -167,6 +167,14 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             return parseFloat(element.eventTimestamp);
         }
 
+        $scope.isVisible = function(platform) {
+            return $rootScope.params.platforms.indexOf(platform) > -1
+        }
+
+        $scope.filterByVisiblePlatform = function(resource) {
+            return $scope.isVisible(resource.cloudPlatform)
+        }
+
         function getUserPermission() {
             UserPermission.get(function(success) {
                 $scope.user.admin = success.admin;

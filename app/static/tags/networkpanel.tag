@@ -25,30 +25,30 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsNetworkChange" type="button" class="btn btn-info" role="button" ng-click="createAwsNetworkRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureNetworkChange" class="btn btn-default" role="button" ng-click="createAzureNetworkRequest()">{{msg.azure_label}}</a>
+                                        <a id="awsNetworkChange" ng-show="isVisible('AWS')" type="button" class="btn btn-info" role="button" ng-click="createAwsNetworkRequest()">{{msg.aws_label}}</a>
+                                        <a id="azureNetworkChange" ng-show="isVisible('AZURE_RM')" class="btn btn-default" role="button" ng-click="createAzureNetworkRequest()">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                        <a id="gcpNetworkChange" class="btn btn-default" role="button" ng-click="createGcpNetworkRequest()">{{msg.gcp_label}}</a>
-                                        <a id="openstackNetworkChange" class="btn btn-default" role="button" ng-click="createOpenstackNetworkRequest()">{{msg.openstack_label}}</a>
+                                        <a id="gcpNetworkChange" ng-show="isVisible('GCP')" class="btn btn-default" role="button" ng-click="createGcpNetworkRequest()">{{msg.gcp_label}}</a>
+                                        <a id="openstackNetworkChange" ng-show="isVisible('OPENSTACK')" class="btn btn-default" role="button" ng-click="createOpenstackNetworkRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
-                            <form class="form-horizontal" role="form" name="azureNetworkForm" ng-show="azureNetwork">
+                            <form class="form-horizontal" role="form" name="azureNetworkForm" ng-show="azureNetwork && isVisible('AZURE_RM')">
                                 <div ng-include src="'tags/network/azurenetworkform.tag'"></div>
                             </form>
 
-                            <form class="form-horizontal" role="form" ng-show="awsNetwork" name="awsNetworkForm">
+                            <form class="form-horizontal" role="form" ng-show="awsNetwork && isVisible('AWS')" name="awsNetworkForm">
                                 <div ng-include src="'tags/network/awsnetworkform.tag'"></div>
                             </form>
 
-                            <form class="form-horizontal" role="form" ng-show="gcpNetwork" name="gcpNetworkForm" ng-show="gcpNetwork">
+                            <form class="form-horizontal" role="form" ng-show="gcpNetwork && isVisible('GCP')" name="gcpNetworkForm" ng-show="gcpNetwork">
                                 <div ng-include src="'tags/network/gcpnetworkform.tag'"></div>
                             </form>
-                            <form class="form-horizontal" role="form" ng-show="openstackNetwork" name="openstackNetworkForm" ng-show="openstackNetwork">
+                            <form class="form-horizontal" role="form" ng-show="openstackNetwork && isVisible('OPENSTACK')" name="openstackNetworkForm" ng-show="openstackNetwork">
                                 <div ng-include src="'tags/network/openstacknetworkform.tag'"></div>
                             </form>
                         </div>
@@ -62,7 +62,7 @@
 
                     <!-- .............. TEMPLATE .............................................. -->
 
-                    <div class="panel panel-default" ng-repeat="network in $root.networks | orderBy:'name'">
+                    <div class="panel panel-default" ng-repeat="network in $root.networks | filter:filterByVisiblePlatform | orderBy:'name'">
 
                         <div class="panel-heading">
                             <h5>
@@ -79,19 +79,19 @@
                                 </a>
                             </p>
 
-                            <div class="panel-body" ng-if="network.cloudPlatform == 'AZURE_RM' ">
+                            <div class="panel-body" ng-if="network.cloudPlatform == 'AZURE_RM'">
                                 <div ng-include src="'tags/network/azurenetworklist.tag'"></div>
                             </div>
 
-                            <div class="panel-body" ng-if="network.cloudPlatform == 'GCP' ">
+                            <div class="panel-body" ng-if="network.cloudPlatform == 'GCP'">
                                 <div ng-include src="'tags/network/gcpnetworklist.tag'"></div>
                             </div>
 
-                            <div class="panel-body" ng-if="network.cloudPlatform == 'AWS' ">
+                            <div class="panel-body" ng-if="network.cloudPlatform == 'AWS'">
                                 <div ng-include src="'tags/network/awsnetworklist.tag'"></div>
                             </div>
 
-                            <div class="panel-body" ng-if="network.cloudPlatform == 'OPENSTACK' ">
+                            <div class="panel-body" ng-if="network.cloudPlatform == 'OPENSTACK'">
                                 <div ng-include src="'tags/network/openstacknetworklist.tag'"></div>
                             </div>
 
