@@ -514,6 +514,11 @@ uluwatuServices.factory('GlobalSecurityGroup', ['$resource',
         return $resource('securitygroups/:id');
     }
 ]);
+uluwatuServices.factory('AccountPreferences', ['$resource',
+    function($resource) {
+        return $resource('accountpreferences/:id');
+    }
+]);
 
 uluwatuServices.factory('PlatformParameters', ['$resource',
     function($resource) {

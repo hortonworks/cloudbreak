@@ -5,7 +5,19 @@
 var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'blockUI', 'ui.bootstrap', 'uluwatuControllers', 'uluwatuServices']);
 
 (function() {
-    fetchConfigData().then(fetchLocalConfigData).then(bootstrapApplication);
+    fetchAccountPreferences().then(fetchConfigData()).then(fetchLocalConfigData).then(bootstrapApplication);
+
+    function fetchAccountPreferences() {
+        var initInjector = angular.injector(["ng"]);
+        var $http = initInjector.get("$http");
+
+        return $http.get("/accountpreferences").then(function(response) {
+            cloudbreakApp.constant("accountpreferences", response.data);
+        }, function(errorResponse) {
+            cloudbreakApp.constant("accountpreferences", null);
+            console.log(errorResponse);
+        });
+    }
 
     function fetchConfigData() {
         var initInjector = angular.injector(["ng"]);
@@ -196,7 +208,20 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.displayNames = {};
             }
         }
-    ]);
+    ])
+    .run(['$rootScope', 'accountpreferences',
+        function($rootScope, accountpreferences) {
+            if (accountpreferences !== null && accountpreferences.platforms) {
+                $rootScope.params.platforms = accountpreferences.platforms.split(',')
+            } else {
+                var platforms = [];
+                angular.forEach($rootScope.params.platformVariants, function(value, key) {
+                    platforms.push(key)
+                })
+                $rootScope.params.platforms = platforms
+            }
+        }
+  ]);
 
 cloudbreakApp.directive('startdatevalidation', function($parse) {
     return {

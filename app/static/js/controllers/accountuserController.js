@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("accountuserController-logger");
 
-angular.module('uluwatuControllers').controller('accountuserController', ['$scope', '$rootScope', '$filter', 'UserInvite', 'AccountUsers', 'ActivateAccountUsers', 'UserPermission', 'AccountDetails', 'UserOperation',
-    function($scope, $rootScope, $filter, UserInvite, AccountUsers, ActivateAccountUsers, UserPermission, AccountDetails, UserOperation) {
+angular.module('uluwatuControllers').controller('accountuserController', ['$scope', '$rootScope', '$filter', 'UserInvite', 'AccountUsers', 'ActivateAccountUsers', 'UserPermission', 'AccountDetails', 'UserOperation','AccountPreferences',
+    function($scope, $rootScope, $filter, UserInvite, AccountUsers, ActivateAccountUsers, UserPermission, AccountDetails, UserOperation, AccountPreferences) {
 
         initInvite();
         $rootScope.accountUsers = [];
@@ -130,6 +130,38 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
                     $scope.showError(deleteError)
                 }
             );
+        }
+
+        $scope.changePlatformVisibility = function(platform) {
+            AccountPreferences.get().$promise.then(function(preferences) {
+                var platf = []
+                if (preferences.platforms) {
+                    platf = preferences.platforms.split(',')
+                } else {
+                    generateAllPlatform(platf);
+                }
+                if (platf.indexOf(platform) > -1) {
+                    if (platf.length > 1) {
+                        platf.splice(platf.indexOf(platform), 1)
+                    }
+                } else {
+                    platf.push(platform)
+                }
+                $rootScope.params.platforms = platf
+
+                preferences.platforms = platf.join()
+                AccountPreferences.save(preferences)
+            })
+        }
+
+        $scope.isChecked = function (platform) {
+            return $rootScope.params.platforms.indexOf(platform) > -1
+        }
+
+        function generateAllPlatform(platforms) {
+            angular.forEach($rootScope.params.platformVariants, function(value, key) {
+                this.push(key)
+            }, platforms)
         }
 
         function getUsersForAccount() {

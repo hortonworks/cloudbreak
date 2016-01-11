@@ -25,14 +25,14 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="openstackTopologyChange" class="btn btn-default" role="button" ng-click="createOpenstackTopologyRequest()">{{msg.openstack_label}}</a>
+                                        <a id="openstackTopologyChange" ng-show="isVisible('OPENSTACK')" class="btn btn-default" role="button" ng-click="createOpenstackTopologyRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
-                            <form class="form-horizontal" role="form" ng-show="openstackTopology" name="openstackTopologyForm" ng-show="openstackTopology">
+                            <form class="form-horizontal" role="form" ng-show="openstackTopology && isVisible('OPENSTACK')" name="openstackTopologyForm" ng-show="openstackTopology">
                                 <div ng-include src="'tags/topology/openstackform.tag'"></div>
                             </form>
                         </div>
@@ -46,7 +46,7 @@
 
                     <!-- .............. TOPOLOGY .............................................. -->
 
-                    <div class="panel panel-default" ng-repeat="topology in $root.topologies | orderBy:['cloudPlatform', 'name']">
+                    <div class="panel panel-default" ng-repeat="topology in $root.topologies | filter:filterByVisiblePlatform | orderBy:['cloudPlatform', 'name']">
 
                         <div class="panel-heading">
                             <h5>
