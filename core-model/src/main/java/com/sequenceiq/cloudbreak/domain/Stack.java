@@ -130,6 +130,8 @@ import com.sequenceiq.cloudbreak.common.type.Status;
                         + "LEFT JOIN FETCH s.resources "
                         + "LEFT JOIN FETCH s.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
+                        + "LEFT JOIN FETCH s.cluster c "
+                        + "LEFT JOIN FETCH c.hostGroups "
                         + "WHERE ((s.account= :account AND s.publicInAccount= true) OR s.owner= :user) "
                         + "AND s.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
@@ -138,6 +140,8 @@ import com.sequenceiq.cloudbreak.common.type.Status;
                         + "LEFT JOIN FETCH s.resources "
                         + "LEFT JOIN FETCH s.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
+                        + "LEFT JOIN FETCH s.cluster c "
+                        + "LEFT JOIN FETCH c.hostGroups "
                         + "WHERE s.account= :account "
                         + "AND s.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
