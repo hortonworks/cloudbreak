@@ -84,6 +84,7 @@ var config = {
     sultansAddress: null,
     cloudbreakAddress: null,
     periscopeAddress: null,
+    cloudbreakApiRootContext: '/api/v1'
 }
 
 if (config.addressResolvingRetryCount <= 0) {
@@ -128,6 +129,9 @@ function waitingForAddressesAndContinue() {
 }
 
 function continueInit() {
+    var cloudbreakApi = concatAndResolveUrl(config.cloudbreakAddress) + config.cloudbreakApiRootContext;
+    config.cloudbreakAddress = cloudbreakApi;
+
     if (config.hostAddress.slice(-1) !== '/') {
         config.hostAddress += '/';
     }
@@ -142,7 +146,8 @@ function continueInit() {
     identityServerClient.registerMethod("retrieveToken", config.identityServerAddress + "oauth/token", "POST");
 
     var proxyRestClient = new restClient.Client();
-    proxyRestClient.registerMethod("subscribe", config.cloudbreakAddress + "subscriptions", "POST");
+
+    proxyRestClient.registerMethod("subscribe", config.cloudbreakAddress + "/subscriptions", "POST");
 
     // cloudbreak config ===========================================================
 
@@ -373,7 +378,7 @@ function continueInit() {
             cbRequestArgs.data = req.body;
         }
         cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-        method(concatAndResolveUrl(config.cloudbreakAddress) + req.url, cbRequestArgs, function(data, response) {
+        method(cloudbreakApi + req.url, cbRequestArgs, function(data, response) {
             eliminateConfidentialParametersFromCredentials(req, data);
             res.status(response.statusCode).send(data);
         }).on('error', function(err) {
