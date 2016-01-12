@@ -3,6 +3,12 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import com.sequenceiq.cloudbreak.api.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -10,11 +16,6 @@ import com.sequenceiq.cloudbreak.model.IdJson;
 import com.sequenceiq.cloudbreak.model.NetworkJson;
 import com.sequenceiq.cloudbreak.service.network.DefaultNetworkCreator;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 
 @Component
 public class NetworkController implements NetworkEndpoint {

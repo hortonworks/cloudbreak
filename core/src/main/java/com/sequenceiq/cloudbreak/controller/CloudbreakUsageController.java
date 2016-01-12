@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.List;
+
 import javax.ws.rs.core.Response;
 
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.UsageEndpoint;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
@@ -10,8 +13,6 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.model.CloudbreakUsageJson;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class CloudbreakUsageController implements UsageEndpoint {

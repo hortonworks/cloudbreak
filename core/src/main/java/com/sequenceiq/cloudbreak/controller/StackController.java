@@ -8,7 +8,6 @@ import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.StackEndpoint;
@@ -74,44 +73,35 @@ public class StackController implements StackEndpoint {
     public Set<StackResponse> getPrivates() {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        Set<Stack> stacks = stackService.retrievePrivateStacks(user);
-        return convertStacks(stacks);
-    }
-
-    protected Set<StackResponse> convertStacks(Set<Stack> stacks) {
-        return (Set<StackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackResponse.class)));
+        return stackService.retrievePrivateStacks(user);
     }
 
     @Override
     public Set<StackResponse> getPublics() {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        Set<Stack> stacks = stackService.retrieveAccountStacks(user);
-        return convertStacks(stacks);
+        return stackService.retrieveAccountStacks(user);
     }
 
     @Override
     public StackResponse get(Long id) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        return stackService.convert(id);
+        return stackService.getJsonById(id);
     }
 
     @Override
     public StackResponse getPrivate(String name) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        Stack stack = stackService.getPrivateStack(name, user);
-        return conversionService.convert(stack, StackResponse.class);
+        return stackService.getPrivateStackJsonByName(name, user);
     }
 
     @Override
     public StackResponse getPublic(String name) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        Stack stack = stackService.getPublicStack(name, user);
-        return conversionService.convert(stack, StackResponse.class);
+        return stackService.getPublicStackJsonByName(name, user);
     }
 
     @Override

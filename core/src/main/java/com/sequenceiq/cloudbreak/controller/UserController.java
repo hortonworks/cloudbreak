@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.UserEndpoint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.model.UserRequest;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class UserController implements UserEndpoint {

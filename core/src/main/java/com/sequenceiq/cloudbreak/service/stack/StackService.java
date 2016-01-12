@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
@@ -110,15 +111,20 @@ public class StackService {
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    public Set<Stack> retrievePrivateStacks(CbUser user) {
-        return stackRepository.findForUser(user.getUserId());
+    public Set<StackResponse> retrievePrivateStacks(CbUser user) {
+        return convertStacks(stackRepository.findForUser(user.getUserId()));
     }
 
-    public Set<Stack> retrieveAccountStacks(CbUser user) {
+    private Set<StackResponse> convertStacks(Set<Stack> stacks) {
+        return (Set<StackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
+                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackResponse.class)));
+    }
+
+    public Set<StackResponse> retrieveAccountStacks(CbUser user) {
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
-            return stackRepository.findAllInAccount(user.getAccount());
+            return convertStacks(stackRepository.findAllInAccount(user.getAccount()));
         } else {
-            return stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
+            return convertStacks(stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount()));
         }
     }
 
@@ -130,7 +136,7 @@ public class StackService {
         return stackRepository.findForUser(owner);
     }
 
-    public StackResponse convert(Long id) {
+    public StackResponse getJsonById(Long id) {
         Stack stack = get(id);
         return conversionService.convert(stack, StackResponse.class);
     }
@@ -174,6 +180,23 @@ public class StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
         return stack;
+    }
+
+    public StackResponse getPrivateStackJsonByName(String name, CbUser cbUser) {
+        Stack stack = stackRepository.findByNameInUser(name, cbUser.getUserId());
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        return conversionService.convert(stack, StackResponse.class);
+    }
+
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    public StackResponse getPublicStackJsonByName(String name, CbUser cbUser) {
+        Stack stack = stackRepository.findOneByName(name, cbUser.getAccount());
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        return conversionService.convert(stack, StackResponse.class);
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")

@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -13,11 +19,6 @@ import com.sequenceiq.cloudbreak.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.model.IdJson;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.stereotype.Component;
 
 @Component
 public class BlueprintController implements BlueprintEndpoint {

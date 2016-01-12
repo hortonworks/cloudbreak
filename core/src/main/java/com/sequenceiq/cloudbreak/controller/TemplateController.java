@@ -3,6 +3,12 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import com.sequenceiq.cloudbreak.api.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -12,11 +18,6 @@ import com.sequenceiq.cloudbreak.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.service.template.DefaultTemplateLoaderService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 
 @Component
 public class TemplateController implements TemplateEndpoint {

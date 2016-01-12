@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
@@ -7,9 +11,12 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import javax.ws.rs.core.Response;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
@@ -34,12 +41,6 @@ import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterController implements ClusterEndpoint {

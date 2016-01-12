@@ -3,6 +3,11 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -10,10 +15,6 @@ import com.sequenceiq.cloudbreak.model.IdJson;
 import com.sequenceiq.cloudbreak.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.service.securitygroup.DefaultSecurityGroupCreator;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
 
 @Component
 public class SecurityGroupController implements SecurityGroupEndpoint {
