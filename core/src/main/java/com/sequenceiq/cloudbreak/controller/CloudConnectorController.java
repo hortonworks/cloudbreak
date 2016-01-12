@@ -8,8 +8,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.ConnectorEndpoint;
@@ -37,7 +35,6 @@ public class CloudConnectorController implements ConnectorEndpoint {
 
     @Override
     public Map<String, JsonEntity> getPlatforms() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         PlatformVariants pv = cloudParameterService.getPlatformVariants();
         PlatformDisks diskTypes = cloudParameterService.getDiskTypes();
         PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes();

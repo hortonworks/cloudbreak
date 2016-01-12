@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.model;
 
 public class GcsFileSystemConfiguration extends FileSystemConfiguration {
-    //@NotNull
+    @NotNull
     private String projectId;
-    //@NotNull
+    @NotNull
     private String serviceAccountEmail;
-    //@NotNull
+    @NotNull
     private String privateKeyEncoded;
-    //@NotNull
+    @NotNull
     private String defaultBucketName;
 
     public String getProjectId() {

@@ -38,6 +38,7 @@ public class NetworkJson implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.PARAMETERS, required = true)
     private Map<String, Object> parameters = new HashMap<>();
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
+    @NotNull
     private String cloudPlatform;
 
     @JsonProperty("id")

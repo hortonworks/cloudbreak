@@ -1,18 +1,20 @@
 package com.sequenceiq.cloudbreak.model;
 
+import javax.validation.constraints.NotNull;
+
 public class WasbIntegratedFileSystemConfiguration extends FileSystemConfiguration {
 
-    //@NotNull
+    @NotNull
     private String tenantId;
-    //@NotNull
+    @NotNull
     private String subscriptionId;
-    //@NotNull
+    @NotNull
     private String appId;
-    //@NotNull
+    @NotNull
     private String appPassword;
-    //@NotNull
+    @NotNull
     private String region;
-    //@NotNull
+    @NotNull
     private String storageName;
 
     public String getTenantId() {

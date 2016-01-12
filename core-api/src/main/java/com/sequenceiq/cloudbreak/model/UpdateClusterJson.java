@@ -2,25 +2,30 @@ package com.sequenceiq.cloudbreak.model;
 
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.common.type.StatusRequest;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("UpdateCluster")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateClusterJson implements JsonEntity {
 
-    //@ApiModelProperty(required = true)
+    @ApiModelProperty(required = true)
     private HostGroupAdjustmentJson hostGroupAdjustment;
-    //@ApiModelProperty(required = true)
+    @ApiModelProperty(required = true)
     private StatusRequest status;
-    //@ApiModelProperty(required = true)
+    @ApiModelProperty(required = true)
     private UserNamePasswordJson userNamePasswordJson;
-    //@ApiModelProperty(StackModelDescription.BLUEPRINT_ID)
+    @ApiModelProperty(StackModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
     private Boolean validateBlueprint = true;
     private Set<HostGroupJson> hostgroups;
-    //@Valid
+    @Valid
     private AmbariStackDetailsJson ambariStackDetails;
 
     public UpdateClusterJson() {

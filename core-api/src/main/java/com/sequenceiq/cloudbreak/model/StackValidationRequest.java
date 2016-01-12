@@ -3,7 +3,10 @@ package com.sequenceiq.cloudbreak.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.validation.constraints.NotNull;
+
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -13,10 +16,10 @@ public class StackValidationRequest implements JsonEntity {
     private Set<HostGroupJson> hostGroups = new HashSet<>();
     @ApiModelProperty(required = true)
     private Set<InstanceGroupJson> instanceGroups = new HashSet<>();
-    //@NotNull
+    @NotNull
     @ApiModelProperty(value = StackModelDescription.BLUEPRINT_ID, required = true)
     private Long blueprintId;
-    //@NotNull
+    @NotNull
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
     private Long networkId;
 

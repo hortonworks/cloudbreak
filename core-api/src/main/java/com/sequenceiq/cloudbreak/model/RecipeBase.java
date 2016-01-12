@@ -1,16 +1,18 @@
 package com.sequenceiq.cloudbreak.model;
 
+import java.util.Map;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
+import com.sequenceiq.cloudbreak.validation.ValidPlugin;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -30,7 +32,7 @@ abstract class RecipeBase implements JsonEntity {
     @ApiModelProperty(RecipeModelDescription.TIMEOUT)
     private Integer timeout;
 
-    //@ValidPlugin
+    @ValidPlugin
     @ApiModelProperty(value = RecipeModelDescription.PLUGINS, required = true)
     private Map<String, PluginExecutionType> plugins;
 
