@@ -13,13 +13,13 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.common.type.StatusRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.controller.validation.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -45,6 +44,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -124,7 +124,7 @@ public class StackService {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public Stack get(Long id) {
-        Stack stack = stackRepository.findById(id);
+        Stack stack = stackRepository.findOne(id);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }

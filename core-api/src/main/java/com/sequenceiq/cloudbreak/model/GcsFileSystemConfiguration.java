@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.model;
 
+import javax.validation.constraints.NotNull;
+
 public class GcsFileSystemConfiguration extends FileSystemConfiguration {
     @NotNull
     private String projectId;
