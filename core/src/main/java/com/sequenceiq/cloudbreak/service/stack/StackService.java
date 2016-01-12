@@ -124,7 +124,7 @@ public class StackService {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public Stack get(Long id) {
-        Stack stack = stackRepository.findOne(id);
+        Stack stack = stackRepository.findById(id);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }

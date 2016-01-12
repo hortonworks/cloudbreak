@@ -3,11 +3,14 @@ package com.sequenceiq.cloudbreak.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -27,7 +30,7 @@ public class StackResponse extends StackBase {
     private ClusterResponse cluster;
     @ApiModelProperty(StackModelDescription.STATUS_REASON)
     private String statusReason;
-    //@Valid
+    @Valid
     @ApiModelProperty
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
     @ApiModelProperty(StackModelDescription.CONSUL_SERVER_COUNT)
