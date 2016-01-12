@@ -5,6 +5,7 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.api.CoreApi;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -170,7 +171,9 @@ public class ShellConfiguration {
 
     private JAXRSClientFactoryBean jaxrsClientFactoryBean(String token) {
         JAXRSClientFactoryBean jaxrsClientFactoryBean = new JAXRSClientFactoryBean();
-        jaxrsClientFactoryBean.setAddress(cloudbreakAddress);
+        String addressWithoutLastSlash = cloudbreakAddress.endsWith("/") ? cloudbreakAddress.substring(0, cloudbreakAddress.length() - 1) : cloudbreakAddress;
+        String apiAddress = addressWithoutLastSlash + CoreApi.API_ROOT_CONTEXT;
+        jaxrsClientFactoryBean.setAddress(apiAddress);
         jaxrsClientFactoryBean.setProvider(JacksonJsonProvider.class);
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + token);

@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
+import javax.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,29 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
-import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
-import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.ConfigFileApplicationContextInitializer;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-import org.testng.ITestContext;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.sequenceiq.cloudbreak.api.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.ConnectorEndpoint;
+import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.NetworkEndpoint;
@@ -45,6 +30,21 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.cloudbreak.config.ITProps;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
+import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
+import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.ConfigFileApplicationContextInitializer;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.testng.ITestContext;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextTests {
@@ -81,11 +81,11 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     }
 
     @BeforeSuite(dependsOnMethods = "initContext")
-    @Parameters({ "cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName",
-            "stackName", "networkName", "securityGroupName" })
+    @Parameters({"cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName",
+            "stackName", "networkName", "securityGroupName"})
     public void initCloudbreakSuite(@Optional("") String cloudbreakServer, @Optional("") String cloudProvider, @Optional("") String credentialName,
-            @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName, @Optional("") String stackName,
-            @Optional("") String networkName, @Optional("") String securityGroupName) throws Exception {
+                                    @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName, @Optional("") String stackName,
+                                    @Optional("") String networkName, @Optional("") String securityGroupName) throws Exception {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
@@ -145,9 +145,11 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         return (T) clientFactory;
     }
 
-    private JAXRSClientFactoryBean jaxrsClientFactoryBean(String token, String cloudbreakServer) {
+    private JAXRSClientFactoryBean jaxrsClientFactoryBean(String token, String cloudbreakAddress) {
         JAXRSClientFactoryBean jaxrsClientFactoryBean = new JAXRSClientFactoryBean();
-        jaxrsClientFactoryBean.setAddress(cloudbreakServer);
+        String addressWithoutLastSlash = cloudbreakAddress.endsWith("/") ? cloudbreakAddress.substring(0, cloudbreakAddress.length() - 1) : cloudbreakAddress;
+        String apiAddress = addressWithoutLastSlash + CoreApi.API_ROOT_CONTEXT;
+        jaxrsClientFactoryBean.setAddress(apiAddress);
         jaxrsClientFactoryBean.setProvider(JacksonJsonProvider.class);
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + token);
