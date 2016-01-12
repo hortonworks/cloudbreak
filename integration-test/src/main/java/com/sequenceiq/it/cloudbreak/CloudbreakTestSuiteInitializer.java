@@ -11,7 +11,6 @@ import javax.inject.Inject;
 
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
-import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +25,7 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.sequenceiq.cloudbreak.api.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.ClusterEndpoint;

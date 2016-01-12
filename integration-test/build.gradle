@@ -30,12 +30,14 @@ dependencies {
     compile group:  'org.codehaus.jackson',         name: 'jackson-mapper-asl',       version: '1.9.13'
     compile group:  'com.jcraft',                   name: 'jsch',                     version: '0.1.53'
     compile group:  'org.testng',                   name: 'testng',                   version: '6.9.10'
-    compile group: 'org.apache.cxf',                name: 'cxf-rt-rs-client',         version: '3.1.0'
-    compile group: 'com.sun.jersey',                name: 'jersey-json',              version: '1.19'
-    compile group: 'org.codehaus.jackson',          name: 'jackson-mapper-asl',       version: '1.9.13'
-    compile group: 'org.apache.httpcomponents',     name: 'httpclient',               version: '4.3.5'
+    compile group:  'org.apache.cxf',               name: 'cxf-rt-rs-client',         version: '3.1.0'
+    compile group:  'com.sun.jersey',               name: 'jersey-json',              version: '1.19'
+    compile group:  'org.apache.httpcomponents',    name: 'httpclient',               version: '4.3.5'
+    compile group:  'com.fasterxml.jackson.jaxrs',  name: 'jackson-jaxrs-json-provider',  version: '2.3.2'
+    compile group:  'com.fasterxml.jackson.core',   name: 'jackson-databind',             version: jacksonVersion
 
-    compile ("org.uncommons:reportng:1.1.4") {
+
+  compile ("org.uncommons:reportng:1.1.4") {
         exclude group: "velocity"
     }
     runtime group: 'com.google.inject',             name: 'guice',                    version: '3.0'
