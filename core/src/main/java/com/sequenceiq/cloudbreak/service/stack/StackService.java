@@ -16,6 +16,9 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
@@ -45,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.model.StackResponse;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -102,6 +106,10 @@ public class StackService {
     @Inject
     private ImageNameUtil imageNameUtil;
 
+    @Autowired
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
+
     public Set<Stack> retrievePrivateStacks(CbUser user) {
         return stackRepository.findForUser(user.getUserId());
     }
@@ -120,6 +128,11 @@ public class StackService {
 
     public Set<Stack> retrieveOwnerStacks(String owner) {
         return stackRepository.findForUser(owner);
+    }
+
+    public StackResponse convert(Long id) {
+        Stack stack = get(id);
+        return conversionService.convert(stack, StackResponse.class);
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")

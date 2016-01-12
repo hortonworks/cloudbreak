@@ -1,9 +1,15 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import javax.ws.rs.core.Response;
-
 import java.util.Map;
 import java.util.Set;
+
+import javax.ws.rs.core.Response;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.StackEndpoint;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
@@ -24,11 +30,6 @@ import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.stereotype.Component;
 
 @Component
 public class StackController implements StackEndpoint {
@@ -94,8 +95,7 @@ public class StackController implements StackEndpoint {
     public StackResponse get(Long id) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        Stack stack = stackService.get(id);
-        return conversionService.convert(stack, StackResponse.class);
+        return stackService.convert(id);
     }
 
     @Override
