@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.api;
 
-public interface CoreApi {
-    static final String API_VERSION = "v1";
-    static final String API_ROOT_CONTEXT = "/api/" + API_VERSION;
+public class CoreApi {
+    public static final String API_VERSION = "v1";
+    public static final String API_ROOT_CONTEXT = "/api/" + API_VERSION;
+
+    private CoreApi() {
+    }
 }

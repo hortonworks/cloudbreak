@@ -13,6 +13,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.quartz.simpl.SimpleJobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -93,5 +95,10 @@ public class AppConfig implements AsyncConfigurer {
             LOGGER.error("Error creating task executor.", e);
         }
         return null;
+    }
+
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return new SimpleAsyncUncaughtExceptionHandler();
     }
 }

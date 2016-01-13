@@ -6,7 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.model.AmbariAddressJson;
+import com.sequenceiq.cloudbreak.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.model.UpdateStackJson;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.ScalingStatus;
@@ -40,25 +44,32 @@ public class ScalingRequest implements Runnable {
     public void run() {
         MDCBuilder.buildMdcContext(cluster);
         try {
-            CloudbreakClient client = cloudbreakService.getClient();
             int scalingAdjustment = desiredNodeCount - totalNodes;
             if (scalingAdjustment > 0) {
-                scaleUp(client, scalingAdjustment, totalNodes);
+                scaleUp(scalingAdjustment, totalNodes);
             } else {
-                scaleDown(client, scalingAdjustment, totalNodes);
+                scaleDown(scalingAdjustment, totalNodes);
             }
         } catch (Exception e) {
             LOGGER.error("Cannot retrieve an oauth token from the identity server", e);
         }
     }
 
-    private void scaleUp(CloudbreakClient client, int scalingAdjustment, int totalNodes) {
+    private void scaleUp(int scalingAdjustment, int totalNodes) {
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
+        AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
+        ambariAddressJson.setAmbariAddress(ambari);
         try {
             LOGGER.info("Sending request to add {} instance(s) and install services", scalingAdjustment);
-            int stackId = client.resolveToStackId(ambari);
-            client.putStack(stackId, hostGroup, scalingAdjustment, true);
+            Long stackId = cloudbreakService.stackEndpoint().getStackForAmbari(ambariAddressJson).getId();
+            UpdateStackJson updateStackJson = new UpdateStackJson();
+            InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
+            instanceGroupAdjustmentJson.setWithClusterEvent(true);
+            instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+            instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
+            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+            cloudbreakService.stackEndpoint().put(stackId, updateStackJson);
             historyService.createEntry(ScalingStatus.SUCCESS, "Upscale successfully triggered", totalNodes, policy);
         } catch (Exception e) {
             historyService.createEntry(ScalingStatus.FAILED, "Couldn't trigger upscaling due to: " + e.getMessage(), totalNodes, policy);
@@ -66,13 +77,21 @@ public class ScalingRequest implements Runnable {
         }
     }
 
-    private void scaleDown(CloudbreakClient client, int scalingAdjustment, int totalNodes) {
+    private void scaleDown(int scalingAdjustment, int totalNodes) {
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
+        AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
+        ambariAddressJson.setAmbariAddress(ambari);
         try {
             LOGGER.info("Sending request to remove {} node(s) from host group '{}'", scalingAdjustment, hostGroup);
-            int stackId = client.resolveToStackId(ambari);
-            client.putCluster(stackId, hostGroup, scalingAdjustment, true);
+            Long stackId = cloudbreakService.stackEndpoint().getStackForAmbari(ambariAddressJson).getId();
+            UpdateClusterJson updateClusterJson = new UpdateClusterJson();
+            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+            hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+            hostGroupAdjustmentJson.setWithStackUpdate(true);
+            hostGroupAdjustmentJson.setHostGroup(hostGroup);
+            updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
+            cloudbreakService.clusterEndpoint().put(stackId, updateClusterJson);
             historyService.createEntry(ScalingStatus.SUCCESS, "Downscale successfully triggered", totalNodes, policy);
         } catch (Exception e) {
             historyService.createEntry(ScalingStatus.FAILED, "Couldn't trigger downscaling due to: " + e.getMessage(), totalNodes, policy);

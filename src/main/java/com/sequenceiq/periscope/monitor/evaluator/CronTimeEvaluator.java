@@ -32,6 +32,14 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
         this.clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
     }
 
+    private boolean isTrigger(TimeAlert alert) {
+        return DateUtils.isTrigger(alert.getCron(), alert.getTimeZone(), MonitorUpdateRate.CLUSTER_UPDATE_RATE);
+    }
+
+    private boolean isPolicyAttached(BaseAlert alert) {
+        return alert.getScalingPolicy() != null;
+    }
+
     @Override
     public void run() {
         for (TimeAlert alert : alertRepository.findAllByCluster(clusterId)) {
@@ -44,13 +52,5 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
                 break;
             }
         }
-    }
-
-    private boolean isTrigger(TimeAlert alert) {
-        return DateUtils.isTrigger(alert.getCron(), alert.getTimeZone(), MonitorUpdateRate.CLUSTER_UPDATE_RATE);
-    }
-
-    private boolean isPolicyAttached(BaseAlert alert) {
-        return alert.getScalingPolicy() != null;
     }
 }

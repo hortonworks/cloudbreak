@@ -370,7 +370,6 @@ subprojects {
         deployerJars
         all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
         all*.exclude group: 'com.google.guava', module: 'guava-jdk5'
-        testCompile.exclude module: 'groovy-all'
     }
 
     dependencies {

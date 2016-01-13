@@ -7,13 +7,13 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.TlsConfiguration;
@@ -64,10 +64,9 @@ public class TlsSecurityService {
         byte[] serverCert;
 
         try {
-            CloudbreakClient client = cloudbreakService.getClient();
-            serverCert = client.getStackCertificate(stackId);
+            serverCert = Base64.decodeBase64(cloudbreakService.stackEndpoint().getCertificate(stackId).getCertificate());
             Files.write(stackCertDir.resolve(SERVER_CERT_FILE), serverCert, StandardOpenOption.CREATE);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new TlsConfigurationException("Failed to write server certificate to " + stackCertDir, e);
         }
 

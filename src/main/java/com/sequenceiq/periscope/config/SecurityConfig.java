@@ -91,14 +91,14 @@ public class SecurityConfig {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
-            http.csrf()
+            http.addFilterAfter(new ScimAccountGroupReaderFilter(userDetailsService), AbstractPreAuthenticatedProcessingFilter.class)
+                    .authorizeRequests()
+                    .antMatchers("/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks') and #oauth2.hasScope('periscope.cluster')")
+                    .and()
+                    .csrf()
                     .disable()
                     .headers()
-                    .contentTypeOptions()
-                    .and()
-                    .addFilterAfter(new ScimAccountGroupReaderFilter(userDetailsService), AbstractPreAuthenticatedProcessingFilter.class)
-                    .authorizeRequests()
-                    .antMatchers("/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks') and #oauth2.hasScope('periscope.cluster')");
+                    .contentTypeOptions();
         }
     }
 

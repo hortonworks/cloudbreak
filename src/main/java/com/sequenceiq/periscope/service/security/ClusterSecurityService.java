@@ -1,11 +1,11 @@
 package com.sequenceiq.periscope.service.security;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.model.AmbariAddressJson;
+import com.sequenceiq.cloudbreak.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.model.StackResponse;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
@@ -22,9 +22,8 @@ public class ClusterSecurityService {
     private TlsSecurityService tlsSecurityService;
 
     public boolean hasAccess(PeriscopeUser user, Ambari ambari) {
-        CloudbreakClient client = cloudbreakService.getClient();
         try {
-            return client.hasAccess(user.getId(), user.getAccount(), ambari.getHost());
+            return hasAccess(user.getId(), user.getAccount(), ambari.getHost());
         } catch (Exception e) {
             // if the cluster is unknown for cloudbreak
             // it should allow it to monitor
@@ -32,17 +31,31 @@ public class ClusterSecurityService {
         }
     }
 
+    private Boolean hasAccess(String userId, String account, String ambariAddress) throws Exception {
+        AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
+        ambariAddressJson.setAmbariAddress(ambariAddress);
+        StackResponse stack = cloudbreakService.stackEndpoint().getStackForAmbari(ambariAddressJson);
+        if (stack.getOwner() == userId) {
+            return true;
+        } else if (stack.isPublicInAccount() && stack.getAccount() == account) {
+            return true;
+        }
+        return false;
+    }
+
     public AmbariStack tryResolve(Ambari ambari) {
-        CloudbreakClient client = cloudbreakService.getClient();
         try {
             String host = ambari.getHost();
             String user = ambari.getUser();
             String pass = ambari.getPass();
-            long id = client.resolveToStackId(host);
+            AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
+            ambariAddressJson.setAmbariAddress(host);
+            StackResponse stack = cloudbreakService.stackEndpoint().getStackForAmbari(ambariAddressJson);
+            long id = stack.getId();
             SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(id);
             if (user == null && pass == null) {
-                Map<String, String> cluster = (Map<String, String>) client.getCluster("" + id);
-                return new AmbariStack(new Ambari(host, ambari.getPort(), cluster.get("userName"), cluster.get("password")), id, securityConfig);
+                ClusterResponse clusterResponse = cloudbreakService.clusterEndpoint().get(id);
+                return new AmbariStack(new Ambari(host, ambari.getPort(), clusterResponse.getUserName(), clusterResponse.getPassword()), id, securityConfig);
             } else {
                 return new AmbariStack(ambari, id, securityConfig);
             }

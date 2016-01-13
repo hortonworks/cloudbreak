@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.model.AmbariAddressJson;
+import com.sequenceiq.cloudbreak.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.model.IdJson;
 import com.sequenceiq.cloudbreak.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.model.StackRequest;
@@ -157,6 +158,11 @@ public class StackController implements StackEndpoint {
             stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
             return Response.status(Response.Status.ACCEPTED).build();
         }
+    }
+
+    @Override
+    public CertificateResponse getCertificate(Long stackId) {
+        return new CertificateResponse(tlsSecurityService.getCertificate(stackId));
     }
 
     @Override
