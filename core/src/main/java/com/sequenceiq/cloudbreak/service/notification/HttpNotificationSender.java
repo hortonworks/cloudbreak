@@ -7,6 +7,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
@@ -31,7 +35,11 @@ public class HttpNotificationSender implements NotificationSender {
         for (Subscription subscription : subscriptions) {
             String endpoint = subscription.getEndpoint();
             try {
-                restTemplate.postForLocation(endpoint, notification);
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+
+                HttpEntity<Notification> entity = new HttpEntity<>(notification, headers);
+                restTemplate.exchange(endpoint, HttpMethod.POST, entity, String.class);
             } catch (RestClientException ex) {
                 LOGGER.info("Could not send notification to the specified endpoint: '{}' Cause: {}", endpoint, ex.getMessage());
             }

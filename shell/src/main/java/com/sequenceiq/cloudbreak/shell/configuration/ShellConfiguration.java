@@ -5,7 +5,6 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.CoreApi;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -46,6 +45,7 @@ import com.sequenceiq.cloudbreak.api.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.ConnectorEndpoint;
+import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.NetworkEndpoint;
