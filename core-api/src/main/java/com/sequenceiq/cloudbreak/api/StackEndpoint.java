@@ -134,6 +134,7 @@ public interface StackEndpoint {
     Response put(@PathParam(value = "id")Long id, UpdateStackJson updateRequest);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
     @Path(value = "stacks/{id}/certificate")
     CertificateResponse getCertificate(@PathParam(value = "id") Long stackId);

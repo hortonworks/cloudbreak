@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.config;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,27 +34,30 @@ import com.sequenceiq.periscope.service.security.UserFilterField;
 @Configuration
 public class SecurityConfig {
 
+    @Inject
+    private UserDetailsService userDetailsService;
+
+    @Inject
+    private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
+
+    @Bean
+    MethodSecurityExpressionHandler expressionHandler() {
+        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        ownerBasedPermissionEvaluator.setUserDetailsService(userDetailsService);
+        expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
+        return expressionHandler;
+    }
+
     @Configuration
     @EnableGlobalMethodSecurity(prePostEnabled = true)
     protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
-        @Autowired
-        private UserDetailsService userDetailsService;
-
-        @Autowired
-        private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
-
-        @Bean
-        MethodSecurityExpressionHandler expressionHandler() {
-            DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-            ownerBasedPermissionEvaluator.setUserDetailsService(userDetailsService);
-            expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
-            return expressionHandler;
-        }
+        @Inject
+        private MethodSecurityExpressionHandler expressionHandler;
 
         @Override
         protected MethodSecurityExpressionHandler createExpressionHandler() {
-            return expressionHandler();
+            return expressionHandler;
         }
     }
 

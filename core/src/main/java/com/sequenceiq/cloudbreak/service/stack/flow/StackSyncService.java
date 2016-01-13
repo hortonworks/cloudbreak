@@ -114,7 +114,7 @@ public class StackSyncService {
     }
 
     public void sync(Long stackId, boolean stackStatusUpdateEnabled) {
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.findLazy(stackId);
         if (stack.isStackInDeletionPhase() || stack.isModificationInProgress()) {
             LOGGER.warn("Stack could not be synchronized in {} state!", stack.getStatus());
         } else {

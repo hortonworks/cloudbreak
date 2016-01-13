@@ -167,8 +167,7 @@ public class StackController implements StackEndpoint {
 
     @Override
     public StackResponse getStackForAmbari(AmbariAddressJson json) {
-        Stack stack = stackService.get(json.getAmbariAddress());
-        return conversionService.convert(stack, StackResponse.class);
+        return stackService.get(json.getAmbariAddress());
     }
 
     @Override

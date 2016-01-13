@@ -9,6 +9,10 @@ public class CertificateResponse {
     @ApiModelProperty(value = StackModelDescription.CERTIFICATE)
     private byte[] certificate;
 
+    public CertificateResponse() {
+
+    }
+
     public CertificateResponse(byte[] certificate) {
         this.certificate = certificate;
     }

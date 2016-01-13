@@ -41,7 +41,7 @@ public class AlertService {
     @Autowired
     private ClusterService clusterService;
     @Autowired
-    private Configuration freemarker;
+    private Configuration freemarkerConfiguration;
     @Autowired
     private AmbariClientProvider ambariClientProvider;
 
@@ -144,7 +144,7 @@ public class AlertService {
 
     private String getAlertDefinition(AmbariClient client, String name) throws Exception {
         Map<String, String> model = Collections.singletonMap("clusterName", client.getClusterName());
-        return processTemplateIntoString(freemarker.getTemplate(ALERT_PATH + name, "UTF-8"), model);
+        return processTemplateIntoString(freemarkerConfiguration.getTemplate(ALERT_PATH + name, "UTF-8"), model);
     }
 
     private void createAlert(AmbariClient client, String json, String alertName) {

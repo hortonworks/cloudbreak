@@ -64,7 +64,8 @@ public class TlsSecurityService {
         byte[] serverCert;
 
         try {
-            serverCert = Base64.decodeBase64(cloudbreakService.stackEndpoint().getCertificate(stackId).getCertificate());
+            byte[] certificate = cloudbreakService.stackEndpoint().getCertificate(stackId).getCertificate();
+            serverCert = Base64.decodeBase64(certificate);
             Files.write(stackCertDir.resolve(SERVER_CERT_FILE), serverCert, StandardOpenOption.CREATE);
         } catch (Exception e) {
             throw new TlsConfigurationException("Failed to write server certificate to " + stackCertDir, e);

@@ -19,7 +19,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.ClusterEndpoint;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
@@ -69,9 +68,6 @@ public class ClusterController implements ClusterEndpoint {
     private StackService stackService;
 
     @Autowired
-    private JsonHelper jsonHelper;
-
-    @Autowired
     private AuthenticatedUserService authenticatedUserService;
 
     @Override
@@ -114,9 +110,9 @@ public class ClusterController implements ClusterEndpoint {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.get(stackId);
-        Cluster cluster = clusterService.retrieveClusterForCurrentUser(stackId);
+        ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
-        return getClusterResponse(cluster, clusterJson);
+        return clusterService.getClusterResponse(cluster, clusterJson);
     }
 
     @Override
@@ -124,9 +120,9 @@ public class ClusterController implements ClusterEndpoint {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getPrivateStack(name, user);
-        Cluster cluster = clusterService.retrieveClusterForCurrentUser(stack.getId());
+        ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId());
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
-        return getClusterResponse(cluster, clusterJson);
+        return clusterService.getClusterResponse(cluster, clusterJson);
     }
 
     @Override
@@ -134,9 +130,9 @@ public class ClusterController implements ClusterEndpoint {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getPublicStack(name, user);
-        Cluster cluster = clusterService.retrieveClusterForCurrentUser(stack.getId());
+        ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId());
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
-        return getClusterResponse(cluster, clusterJson);
+        return clusterService.getClusterResponse(cluster, clusterJson);
     }
 
     @Override
@@ -216,11 +212,5 @@ public class ClusterController implements ClusterEndpoint {
         LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}, password: {}",
                 stackId, userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
         clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
-    }
-
-    private ClusterResponse getClusterResponse(Cluster cluster, String clusterJson) {
-        ClusterResponse response = conversionService.convert(cluster, ClusterResponse.class);
-        response.setCluster(jsonHelper.createJsonFromString(clusterJson));
-        return response;
     }
 }

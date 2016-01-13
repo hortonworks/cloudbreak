@@ -35,7 +35,7 @@ public class ClusterSecurityService {
         AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
         ambariAddressJson.setAmbariAddress(ambariAddress);
         StackResponse stack = cloudbreakService.stackEndpoint().getStackForAmbari(ambariAddressJson);
-        if (stack.getOwner() == userId) {
+        if (stack.getOwner().equals(userId)) {
             return true;
         } else if (stack.isPublicInAccount() && stack.getAccount() == account) {
             return true;

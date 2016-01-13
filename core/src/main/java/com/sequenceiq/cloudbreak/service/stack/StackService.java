@@ -166,12 +166,20 @@ public class StackService {
         return retStack;
     }
 
-    public Stack get(String ambariAddress) {
+    public StackResponse getByIdJson(Long id) {
+        Stack retStack = stackRepository.findOneWithLists(id);
+        if (retStack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", id));
+        }
+        return conversionService.convert(retStack, StackResponse.class);
+    }
+
+    public StackResponse get(String ambariAddress) {
         Stack stack = stackRepository.findByAmbari(ambariAddress);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack not found by Ambari address: '%s' not found", ambariAddress));
         }
-        return stack;
+        return conversionService.convert(stack, StackResponse.class);
     }
 
     public Stack getPrivateStack(String name, CbUser cbUser) {
@@ -180,6 +188,14 @@ public class StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
         return stack;
+    }
+
+    public StackResponse getPrivateStackJson(String name, CbUser cbUser) {
+        Stack stack = getPrivateStack(name, cbUser);
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        return conversionService.convert(stack, StackResponse.class);
     }
 
     public StackResponse getPrivateStackJsonByName(String name, CbUser cbUser) {
