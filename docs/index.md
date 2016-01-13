@@ -1,129 +1,56 @@
-Cloudbreak Deployer helps to deploy a Cloudbreak environment into Docker containers.
-For recent changes please check the [changelog](http://sequenceiq.com/cloudbreak-deployer/latest/changelog/).
+# Introduction
 
-Full documentation is generated [here](http://sequenceiq.com/cloudbreak-deployer/latest/)
+Cloudbreak simplifies the provisioning, management and monitoring of on-demand HDP clusters in virtual and cloud environments. Cloudbreak leverages the cloud infrastructure platforms to create host instances, uses Docker technology to deploy the requisite containers cloud-agnostically, and uses Apache Ambari (via Ambari Blueprints) to install and manage the HDP cluster.
 
-## Requirements
+Use the Cloudbreak UI or CLI to launch HDP clusters on public cloud infrastructure platforms such as Microsoft Azure, Amazon Web Services (AWS), and Google Cloud Platform (GCP) and the private cloud infrastructure platform OpenStack (available as Technical Preview).
 
-Currently only **Linux** and **OSX** 64 bit binaries are released for Cloudbreak Deployer. For anything else we will create a special Docker container.
-The deployment itself needs only **Docker 1.7.0** or later.
-Your firewall must be configured to let docker containers talk to each other, this is especially important on CentOS 7 where firewalld blocks some connections by default.
+Cloudbreak has two main components: the **Cloudbreak Application** and the **Cloudbreak Deployer**.
+
+The **Cloudbreak Application** is made up from microservices (Cloudbreak, Uluwatu, Sultans, ...). The **Cloudbreak Deployer** helps you to deploy the Cloudbreak application automatically in environments with Docker support. Once the Cloudbreak Application is deployed you can use it to provision HDP clusters in different cloud environments.
+
+> For an architectural overview of the Cloudbreak Deployer, the Cloudbreak Application, Apache Ambari, Docker and the rest of the Cloudbreak components, please follow this [link](architecture.md).
 
 ## Installation
 
-To install Cloudbreak Deployer, you just have to unzip the platform specific
-single binary to your PATH. The one-liner way is:
+The high-level process to be able to use Cloudbreak to install an HDP cluster includes the following steps:
 
-```
-curl https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/install | sh && cbd --version
-```
+1. **Install the Cloudbreak Deployer** by either: [installing the Cloudbreak Deployer](#install-deployer); or instantiating one of the [pre-built cloud images
+that includes Cloudbreak Deployer](#pre-built-images) pre-installed.
+2. **Configure the Cloudbreak Deployer and install the Cloudbreak Application**. Once you have installed Cloudbreak Deployer (cbd), it will start up several Docker containers: Cloudbreak API, Cloudbreak UI (called Uluwatu), Identity Server, and supporting databases. You have finished this step, if you are able to login in your browser to Cloudbreak UI (Uluwatu).
+3. **Provision an HDP Cluster** using the Cloudbreak Application.
 
-## Usage
+<div id="install-deployer"></div>
+### Installing the Cloudbreak Deployer
 
-**cbd** will generate some config files, and will download supporting binaries. It is
-advised that you create a dedicated directory for it:
+You can install the Cloudbreak Deployer on your own VM manually. Once installed, you will use the deployer to setup
+the Cloudbreak Application. We suggest you install the Cloudbreak Application as close to the
+desired HDP clusters as possible. For example, if you plan to launch clusters on AWS, install the Cloudbreak Application in AWS.
 
-```
-mkdir cloudbreak-deployment
-cd cloudbreak-deployment
-```
+Follow the instructions for [installing the Cloudbreak Deployer](onprem.md). Alternatively, you can consider using one of the [pre-built cloud images that includes Cloudbreak Deployer](#pre-built-images) pre-installed.
 
-### Initialize Profile
-First initialize your directory by creating a `Profile` file:
-
-```
-cbd init
-```
-It will create a `Profile` file in the current directory. The only required
-configuration is the `PUBLIC_IP`. This IP will be used for the Cloudbreak UI
-(called Uluwatu). In some case the `cbd` tool tries to guess it, if can't than will give a hint.
+> **IMPORTANT:** If you plan to use Cloudbreak on Azure, you **must** use the [Azure Setup](azure.md) instructions to configure the image.
 
 
-### Deploy Cloudbreak
+<div id="pre-built-images"></div>
+### Using the Pre-Built Cloud Images
 
-To start all the containers run:
+We have pre-built cloud images with Cloudbreak Deployer pre-installed. Following the steps will guide you through the provider specific configuration and launching clusters using that cloud provider.
 
-```
-cbd start
-```
+| Cloud | Cloud Image |
+|---|---|
+| AWS | You can follow the AWS instructions using this [link](aws-image.md). |
+| Azure | There are no pre-built cloud images available for Azure. See [Azure Setup](azure.md) to get the Cloudbreak Deployer installed and configured. |
+| GCP | You can follow the GCP instructions using this [link](gcp-image.md) |
+| OpenStack | You can follow the OpenStack instructions using this [link](openstack-image.md) |
 
-At the first time it will take more time, as it does additional steps:
-- download all the docker images, neded by Cloudbreak.
-- create **docker-compose.yml**: Full confirguration of containers needed for Cloudbreak deployment.
-- create **uaa.yml**: Identity Server configuration. (For example default user/password in the last line)
+## Learn More
 
-### Watch the logs
+For more information on Cloudbreak, Docker, Ambari and Ambari Blueprints, see:
 
-```
-cbd logs
-```
-
-### Pull Docker images
-
-All Cloudbreak components and the backend database is running inside containers.
-The **pull command is optional** but you can run it prior to `cbd start`
-
-```
-cbd pull
-```
-
-It will take some time, depending on your network connection, so you can grab a cup of coffee.
-
-
-## Default Credentials
-
-If you check the output of `cbd env` you can see the default principal/credential combination:
-- user: **admin@example.com**
-- password: **cloudbreak**
-
-These values are generated in the `uaa.yml` end section. To change these values, add 2 lines into your Profile:
-
-```
-export UAA_DEFAULT_USER_EMAIL=myself@example.com
-export UAA_DEFAULT_USER_PW=demo123
-```
-and than you need to recreate configs:
-```
-rm *.yml
-cbd generate
-```
-
-## Cloud Provider configuration
-
-In order to be able to assume roles on AWS you need to set up your AWS keys in the Profile file:
-```
-export AWS_ACCESS_KEY_ID=AKIA**************W7SA
-export AWS_SECRET_ACCESS_KEY=RWCT4Cs8******************/*skiOkWD
-```
-If you do not have plans to launch clusters in AWS, then you can safely skip these settings.
-
-For more details regarding accounts please check [Cloudbreak documentation](http://sequenceiq.com/cloudbreak/#accounts).
-
-
-## Debug
-
-If you want to have more detailed output set the `DEBUG` env variable to non-zero:
-
-```
-DEBUG=1 cbd some_command
-```
-
-You can also use the `doctor` command to diagnose your environment:
-
-```
-cbd doctor
-```
-
-## Update
-
-The tool is capable to upgrade itself to a newer version.
-
-```
-cbd update
-```
-
-## Credits
-
-This tool, and the PR driven release, is inspired from [glidergun](https://github.com/gliderlabs/glidergun). Actually it
-could be a fork of it. The reason it’s not a fork, because we wanted to have our own binary with all modules
-built in, so only a single binary is needed.
+| Resource | Description |
+|---|---|
+|[Cloudbreak Project](http://hortonworks.com/hadoop/cloudbreak/) | Cloudbreak is a tool to help simplify the provisioning of HDP clusters in virtual and cloud environments. |
+|[Cloudbreak Forums](hortonworks.com/community/forums/forum/cloudbreak/) | Get connected with the community in the Cloudbreak Forums. |
+|[Apache Ambari Project](http://hortonworks.com/hadoop/ambari/) | Apache Ambari is an operational platform for provisioning, managing, and monitoring Apache Hadoop clusters. Ambari exposes a robust set of REST APIs and a rich Web interface for cluster management. |
+|[Ambari Blueprints](https://cwiki.apache.org/confluence/display/AMBARI/Blueprints)| Ambari Blueprints are a declarative definition of a Hadoop cluster that Ambari can use to create Hadoop clusters. |
+|[Docker](https://www.docker.com/) | Docker is an open platform for developers and system administrators to build, ship, and run distributed applications. |

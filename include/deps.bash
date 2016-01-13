@@ -30,7 +30,7 @@ deps-install() {
 	tag="$(uname -s)_$(uname -m | grep -s 64 > /dev/null && echo amd64 || echo 386)"
 	if ! dep="$(echo "$index" | grep -i -e "^$version $tag " -e "^$version \* ")"; then
 		echo "!! Dependency not in index: $name $version" | red
-		exit 2
+		_exit 2
 	fi
 	IFS=' ' read v t url checksum <<< "$dep"
 	tmpdir="$(deps-dir)/tmp"
@@ -41,7 +41,7 @@ deps-install() {
 	if [[ "$checksum" ]]; then
 		if ! [[ "$(cat "$tmpfile" | checksum md5)" = "$checksum" ]]; then
 			echo "!! Dependency checksum failed: $name $version $checksum" | red
-			exit 2
+			_exit 2
 		fi
 	fi
 	cd "$tmpdir"

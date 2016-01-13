@@ -17,7 +17,7 @@ export MY_VAR=some_value
 export OTHER_VAR=dunno
 ```
 
-# Env specific Profile
+## Env specific Profile
 
 Let’s say you want to use a different version of Cloudbreak for **prod** and **qa** profile.
 You can specify the Docker image tag via: `DOCKER_TAG_CLOUDBREAK`.
@@ -38,59 +38,57 @@ CBD_DEFAULT_PROFILE=prod cbd some_commands
 
 For permanent setting you can `export CBD_DEFAULT_PROFILE=prod` in your `.bash_profile`.
 
-# Available Configurations
+## Available Configurations
 
-## SMTP
+### SMTP
 
-Put these lines into your `Profile`
+If you want to change SMTP parameters, put the corresponding lines into your `Profile`. You can also see the default values of the parameters in the following box.
 ```
 export CLOUDBREAK_SMTP_SENDER_USERNAME=
 export CLOUDBREAK_SMTP_SENDER_PASSWORD=
 export CLOUDBREAK_SMTP_SENDER_HOST=
-export CLOUDBREAK_SMTP_SENDER_PORT=
+export CLOUDBREAK_SMTP_SENDER_PORT=25
 export CLOUDBREAK_SMTP_SENDER_FROM=
+export CLOUDBREAK_SMTP_AUTH=true
+export CLOUDBREAK_SMTP_STARTTLS_ENABLE=true
+export CLOUDBREAK_SMTP_TYPE=smtp
 ```
 
-## Consul
+###Access from custom domains
 
-[Consul](http://consul.io) is used for dns resolution. All cloudbreak related services are registered as
-**someservice.service.consul**. Consul’s built in dns server is able to “fall-back” on an other dns server.
-This option is called `-recursor`. Clodbreak Deployer first tries to discover the dns settings of the host,
+Cloudbreak deployer uses UAA as an identity provider and supports multi tenancy. In UAA terminology this is referred as identity zones. An identity zone is accessed through a unique subdomain. If the standard UAA responds to [https://uaa.10.244.0.34.xip.io](https://uaa.10.244.0.34.xip.io) a zone on this UAA would be accessed through [https://testzone1.uaa.10.244.0.34.xip.io](https://testzone1.uaa.10.244.0.34.xip.io).
+
+As an example in our hosted deployment the `identity.sequenceiq.com` domain refers to our identity server and the `UAA_ZONE_DOMAIN` variable has to be set to that domain. This variable is necessary for UAA to identify which zone provider should handle the requests that arrives to the given domain.
+
+
+If you want to use a custom domain for your identity or deployment, put the `UAA_ZONE_DOMAIN` line into your
+`Profile`. You can see an example in the following box:
+```
+export UAA_ZONE_DOMAIN=my-subdomain.example.com
+```
+
+### Consul
+
+[Consul](http://consul.io) is used for DNS resolution. All Cloudbreak related services are registered as
+**someservice.service.consul**. Consul’s built in DNS server is able to “fall-back” on an other DNS server.
+This option is called `-recursor`. Clodbreak Deployer first tries to discover the DNS settings of the host,
 by looking for **nameserver** entry in `/etc/resolv.conf`. If it finds one consul will use it as a recursor,
 otherwise **8.8.8.8** will be used.
 
-For a full list of available consul config options, see the [docs](https://consul.io/docs/agent/options.html)
+For a full list of available consul config options, see the [docs](https://consul.io/docs/agent/options.html).
 
 You can pass any additional consul configuration by defining a `DOCKER_CONSUL_OPTIONS` in `Profile`.
 
-### List of configurations
-
-- **CB_AWS_AMI_MAP** : tbd
-- **CB_AZURE_IMAGE_URI** : tbd
-- **CB_BLUEPRINT_DEFAULTS** : tbd
-- **CB_TEMPLATE_DEFAULTS** : tbd 
-- **CB_DB_ENV_DB** : tbd
-- **CB_DB_ENV_PASS** : tbd
-- **CB_DB_ENV_USER** : tbd
-- **CB_GCP_SOURCE_IMAGE_PATH** : tbd
-- **CB_HBM2DDL_STRATEGY** : tbd
-- **CB_OPENSTACK_IMAGE** : tbd
-- **DOCKER_TAG_ALPINE** : tbd
-- **DOCKER_TAG_CBSHELL** : tbd
-- **DOCKER_TAG_CLOUDBREAK** : tbd
-- **DOCKER_TAG_CONSUL** : tbd
-- **DOCKER_TAG_PERISCOPE** : tbd
-- **DOCKER_TAG_POSTGRES** : tbd
-- **DOCKER_TAG_REGISTRATOR** : tbd
-- **DOCKER_TAG_SULTANS** : tbd
-- **DOCKER_TAG_UAA** : tbd
-- **DOCKER_TAG_ULUWATU** : tbd
-- **PERISCOPE_DB_HBM2DDL_STRATEGY** : tbd
+## Azure Resource manager command
+- **cbd azure configure-arm**
+- **cbd azure deploy-dash**
+See the documentation [here](/azure_pre_prov/#azure-application-setup-with-cloudbreak-deployer).
 
 ## Caveats
 
-The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting environment vars.
-Actually the following environment vars _are_ inherited:
+The **Cloudbreak Deployer** tool opens a clean bash subshell, without inheriting environment variables.
+
+Only the following environment variables _are_ inherited:
 
 - `HOME`
 - `DEBUG`

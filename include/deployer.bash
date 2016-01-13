@@ -1,6 +1,31 @@
+
+shorten_function() {
+  local max=25
+  local context=5
+  local word="$*"
+  
+  if [[ ${#word} -le ${max} ]]; then 
+      echo "${word}"
+  else
+      local keep=$(( ${#word} - (${max} - ${context} - 2) ))
+      echo "${word:0:${context}}..${word:$keep}"
+  fi
+}
 debug() {
   if [[ "$DEBUG" ]]; then
-      echo -e "[DEBUG] $*" | gray 1>&2
+      if [[ "$DEBUG" -eq 2 ]]; then
+          printf "[DEBUG][%-25s] %s\n" $(shorten_function "${FUNCNAME[1]}") "$*" | gray 1>&2
+      else
+        echo -e "[DEBUG] $*" | gray 1>&2
+      fi
+  fi
+}
+
+debug-cat() {
+  if [[ "$DEBUG" ]]; then
+      gray 1>&2
+  else
+      cat &> /dev/null
   fi
 }
 
@@ -56,11 +81,11 @@ cbd-update-release() {
 
     if [[ ${binver} != ${lastver} ]]; then
         debug upgrade needed |yellow
-        
+
         local url=https://github.com/sequenceiq/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
         info "Updating $SELF_EXECUTABLE from url: $url"
-        curl -Ls $url | tar -zx -C /tmp
-        mv /tmp/cbd $SELF_EXECUTABLE
+        curl -Ls $url | tar -zx -C $TEMP_DIR
+        mv $TEMP_DIR/cbd $SELF_EXECUTABLE
         debug $SELF_EXECUTABLE is updated
     else
         debug you have the latest version | green
@@ -73,8 +98,8 @@ cbd-update-snap() {
 
     url=$(cci-latest sequenceiq/cloudbreak-deployer $branch)
     info "Update $SELF_EXECUTABLE from: $url"
-    curl -Ls $url | tar -zx -C /tmp
-    mv /tmp/cbd $SELF_EXECUTABLE
+    curl -Ls $url | tar -zx -C $TEMP_DIR
+    mv $TEMP_DIR/cbd $SELF_EXECUTABLE
     debug $SELF_EXECUTABLE is updated
 }
 
@@ -94,28 +119,15 @@ init-profile() {
         info "$CBD_PROFILE already exists, now you are ready to run:"
         echo "cbd generate" | blue
     else
-        # if cbd runs on boot2docker (ie osx)
-        if boot2docker version &> /dev/null; then
-            if [[ "$(boot2docker status)" == "running" ]]; then
-                echo "export PUBLIC_IP=$(boot2docker ip)" > $CBD_PROFILE
-                echo "export PRIVATE_IP=$(boot2docker ip)" >> $CBD_PROFILE
-                boot2docker shellinit 2>/dev/null >> $CBD_PROFILE
-            else
-                echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
-                echo "boot2docker start" | blue
-                echo '$(boot2docker shellinit)' | blue
-            fi
-        else
-            # this is for linux
-
+        if is_linux; then
             # on amazon
-            if curl -f 169.254.169.254/latest/ &>/dev/null ; then
+            if curl -m 1 -f 169.254.169.254/latest/ &>/dev/null ; then
                 echo "export PUBLIC_IP=$(curl 169.254.169.254/latest/meta-data/public-hostname)" > $CBD_PROFILE
                 #echo "export PRIVATE_IP=$(curl 169.254.169.254/latest/meta-data/local-ipv4)" >> $CBD_PROFILE
             fi
 
             # on gce
-            if curl -f -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
+            if curl -m 1 -f -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
                 echo "export PUBLIC_IP=$(curl -f -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)" > $CBD_PROFILE
             fi
 
@@ -124,10 +136,20 @@ init-profile() {
                 warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
                 echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
             fi
+        else
+            if [[ "$(boot2docker status)" == "running" ]]; then
+                echo "export PUBLIC_IP=$(boot2docker ip)" > $CBD_PROFILE
+                echo "export PRIVATE_IP=$(boot2docker ip)" >> $CBD_PROFILE
+                boot2docker shellinit 2>/dev/null >> $CBD_PROFILE
+            else
+                echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
+                echo "boot2docker start" | blue
+                echo ' eval "$(boot2docker shellinit)"' | blue
+            fi
         fi
-        exit 2
+        _exit 2
     fi
-    
+
     doctor
 }
 
@@ -144,7 +166,7 @@ load-profile() {
             echo "cbd init" | blue
         fi
     fi
-    
+
     if [[ "$CBD_DEFAULT_PROFILE" && -f "Profile.$CBD_DEFAULT_PROFILE" ]]; then
         CBD_PROFILE="Profile.$CBD_DEFAULT_PROFILE"
 
@@ -159,26 +181,39 @@ doctor() {
     info "===> $desc"
     cbd-version
     if [[ "$(uname)" == "Darwin" ]]; then
-        debug "checking boot2docker on OSX only ..."
+        debug "checking OSX specific dependencies..."
         docker-check-boot2docker
+        if [[ $(is-sub-path $(dirname ~/.) $(pwd)) == 0 ]]; then
+          info "deployer location: OK"
+        else
+          error "Please relocate deployer under your home folder. On OSX other locations are not supported."
+          _exit 1
+        fi
     fi
 
     docker-check-version
-    deployer-generate
+    compose-generate-check-diff verbose
+    generate_uaa_check_diff verbose
 }
 
 cbd-find-root() {
     CBD_ROOT=$PWD
 }
 
+is-sub-path() {
+  declare desc="Checks first path contains secound one"
+
+  declare reference_path=$1
+  declare path=$2
+  local reference_size=${#reference_path}
+  [[ $reference_path == ${path:0:$reference_size} ]]
+  echo $?
+}
+
 deployer-delete() {
     declare desc="Deletes yaml files, and all dbs"
     cloudbreak-delete-dbs
-    deployer-delete-yamls
-}
-
-deployer-delete-yamls() {
-    rm -f uaa.yml docker-compose.yml
+    rm -f *.yml
 }
 
 deployer-generate() {
@@ -190,14 +225,24 @@ deployer-generate() {
 }
 
 deployer-regenerate() {
-    declare desc="Deletes and generates docker-compose.yml and uaa.yml"
+    declare desc="Backups and generates new docker-compose.yml and uaa.yml"
 
-    deployer-delete-yamls
+    regeneteInProgress=1
+    : ${datetime:=$(date +%Y%m%d-%H%M%S)}
     cloudbreak-generate-cert
+
+    if ! compose-generate-check-diff; then
+        info renaming: docker-compose.yml to: docker-compose-${datetime}.yml
+        mv docker-compose.yml docker-compose-${datetime}.yml
+    fi
     compose-generate-yaml
+    
+    if ! generate_uaa_check_diff; then
+        info renaming: uaa.yml to: uaa-${datetime}.yml
+        mv uaa.yml uaa-${datetime}.yml
+    fi
     generate_uaa_config
 }
-
 
 deployer-login() {
     declare desc="Shows Uluwatu (Cloudbreak UI) login url and credentials"
@@ -212,21 +257,60 @@ deployer-login() {
     echo "  $UAA_DEFAULT_USER_PW" | blue
 }
 
+start-and-migrate-cmd() {
+    declare desc="Starts containers with docker-compose and migrates the databases, migration can be skipped with SKIP_DB_MIGRATION_ON_START=1"
+    declare services="$@"
+
+    deployer-generate
+
+    if [[ "$SKIP_DB_MIGRATION_ON_START" != true ]]; then
+        migrate
+        if ! [[ "$services" ]]; then
+            debug "All services must be started"
+            local dbServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep "db$" | xargs)
+            local otherServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep -v "db$" | xargs)
+            if [[ $(docker-compose -p cbreak ps -q $dbServices | wc -l) -eq 3 ]]; then
+                debug "DB services: $dbServices are already running, start only other services"
+                services="${otherServices}"
+            fi
+        fi
+    fi
+
+    create-logfile
+    compose-up $services
+    info "Cloudbreak containers are started ..."
+    info "In a couple of minutes you can reach the UI (called Uluwatu)"
+    echo "  $ULU_HOST_ADDRESS" | blue
+    warn "Credentials are not printed here. You can get them by:"
+    echo '  cbd login' | blue
+}
+
+create-temp-dir() {
+    debug "Creating '.tmp' directory if not exist"
+    TEMP_DIR=$(deps-dir)/tmp
+    mkdir -p $TEMP_DIR
+}
+
+_exit() {
+    docker-kill-all-sidekicks
+    exit $1
+}
 
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 
     cbd-find-root
-    deps-init
 	color-init
-    deps-require sed
     load-profile "$@"
+    deps-init
+    deps-require sed
 
+    create-temp-dir
     circle-init
     compose-init
     aws-init
 
-    debug "CloudBreak Deployer $(bin-version)"
+    debug "Cloudbreak Deployer $(bin-version)"
 
     cmd-export cmd-help help
     cmd-export cbd-version version
@@ -243,20 +327,25 @@ main() {
         cmd-export deployer-regenerate regenerate
         cmd-export deployer-delete delete
         cmd-export compose-ps ps
-        cmd-export compose-up start
+        cmd-export start-and-migrate-cmd start
         cmd-export compose-kill kill
         cmd-export compose-logs logs
         cmd-export compose-pull pull
         cmd-export compose-pull-parallel pull-parallel
         cmd-export deployer-login login
 
-        cmd-export migrate-startdb startdb
+        cmd-export migrate-startdb-cmd startdb
         cmd-export migrate-cmd migrate
 
         cmd-export-ns aws "Amazon Webservice namespace"
         cmd-export aws-show-role
         cmd-export aws-generate-role
         cmd-export aws-delete-role
+        cmd-export aws-list-roles
+
+        cmd-export-ns azure "Azure namespace"
+        cmd-export azure-deploy-dash
+        cmd-export azure-configure-arm
 
         cmd-export-ns util "Util namespace"
         cmd-export util-cloudbreak-shell
@@ -269,7 +358,7 @@ main() {
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn
     fi
-    
+
 	if [[ "${!#}" == "-h" || "${!#}" == "--help" ]]; then
 		local args=("$@")
 		unset args[${#args[@]}-1]
@@ -277,5 +366,5 @@ main() {
 	else
 		cmd-ns "" "$@"
 	fi
-
+    docker-kill-all-sidekicks
 }

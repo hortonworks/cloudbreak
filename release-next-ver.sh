@@ -9,7 +9,7 @@ CHANGE_FILE=docs/changelog.md
 # edit changelog
 sed -i "s/## Unreleased/## $REL_DATE/" CHANGELOG.md
 printf '## Unreleased\n\n### Fixed\n\n### Added\n\n### Removed\n\n### Changed\n'| cat - $CHANGE_FILE | tee $CHANGE_FILE
-
+git commit -m "Prepare for release of $VER" $CHANGE_FILE
 
 git checkout -b release-${VER} origin/master
 git push origin release-$VER

@@ -55,7 +55,7 @@
             {% if copyright %}
                 <p>{{ copyright }}</p>
             {% endif %}
-            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+            <center>Documentation built with <a href="https://gliderlabs.com/pagebuilder">Pagebuilder</a>.</center>
         </footer>
 
         <script src="{{ base_url }}/js/jquery-1.10.2.min.js"></script>
@@ -93,6 +93,58 @@
             </div>
         </div>
 
+         <script>
+           $( document ).ready(function() {
+               $.getJSON("{{ config.site_url }}/versions.json", function(data) {
+               $("#versions-dropdown").append('<li><a href="{{ config.site_url }}/latest">latest ('+data.latest+')</a></li>');
+                $.each(data.versions, function( index, value ) {
+                  $("#versions-dropdown").append('<li><a href="{{ config.site_url }}/'+value+'">'+value+'</a></li>');
+                });
+               });
+
+               <!--AWS Table-->
+               $.getJSON("../providers/aws.json", function(data) {
+               $("#aws-image-details").append('<br>');
+               $("#aws-image-details").append('<br>');
+               $("#aws-image-details").append('<table>');
+                 $("#aws-image-details").append('<col width="290">');
+                 $("#aws-image-details").append('<col width="290">');
+                 $("#aws-image-details").append('<thead>');
+                  $("#aws-image-details").append('<tr>');
+                   $("#aws-image-details").append('<th halign="center" style="font-size: 14pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + "Region" + '</th>');
+                   $("#aws-image-details").append('<th halign="center" style="font-size: 14pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + "Image Name" + '</th>');
+                  $("#aws-image-details").append('</tr>');
+                 $("#aws-image-details").append('</thead>');
+                $("#aws-image-details").append('<tbody>');
+                 $.each(data.metadata, function( index, value ) {
+                 if (index.indexOf("region.") === 0) {
+                   shortIndex = index.substring(7)
+                  $("#aws-image-details").append('<tr>');
+                   $("#aws-image-details").append('<td halign="center" valign="center" text-align="left" style="font-size: 12pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + shortIndex + '</td>');
+                   $("#aws-image-details").append('<td halign="center" valign="center" text-align="right" style="font-size: 12pt;border:none;border-bottom:solid #DDDDDD 1.5pt;padding:6.0pt 6.0pt 6.0pt 6.0pt">' + value + '</td>');
+                  $("#aws-image-details").append('</tr>');
+                  }
+                 });
+                $("#aws-image-details").append('</tbody>');
+               $("#aws-image-details").append('</table>');
+               });
+
+               <!--OpenStack-->
+               $.getJSON("../providers/openstack.json", function(data) {
+               $("#openstack-image-details").append('<br>');
+               $("#openstack-image-details").append('<br>');
+               $("#openstack-image-details").append('<p style="font-size: 12pt"><code>LATEST_IMAGE:</code>' + data.id + '</p>');
+               $("#openstack-image-details").append('<pre><code style="font-size: 12pt;color:#333333">curl -L  https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cbd/openstack.image/' + data.version + '/file | tar -xz</code></pre>');
+               });
+
+               <!--GCP-->
+               $.getJSON("../providers/gcp.json", function(data) {
+               $("#gcp-image-details").append('<br>');
+               $("#gcp-image-details").append('<br>');
+               $("#gcp-image-details").append('<pre><code style="font-size: 12pt;color:#333333">gcloud compute images create ' + data.gcp.id + ' --source-uri gs://' + data.gcp.source_image + '</code></pre>');
+               });
+           });
+         </script>
     </body>
 </html>
 {% if current_page and current_page.is_homepage %}

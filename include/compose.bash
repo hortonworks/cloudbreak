@@ -2,6 +2,18 @@ compose-init() {
     deps-require docker-compose
     env-import CB_COMPOSE_PROJECT cbreak
     env-import CBD_LOG_NAME cbreak
+    env-import ULUWATU_VOLUME_HOST /dev/null
+    if [[ "$ULUWATU_VOLUME_HOST" != "/dev/null" ]]; then
+      ULUWATU_VOLUME_CONTAINER=/uluwatu
+    else
+      ULUWATU_VOLUME_CONTAINER=/tmp/null
+    fi
+    env-import SULTANS_VOLUME_HOST /dev/null
+    if [[ "$SULTANS_VOLUME_HOST" != "/dev/null" ]]; then
+      SULTANS_VOLUME_CONTAINER=/sultans
+    else
+      SULTANS_VOLUME_CONTAINER=/tmp/null
+    fi
 }
 
 dockerCompose() {
@@ -27,8 +39,8 @@ compose-pull-parallel() {
     declare desc="Pulls service images parallel"
 
     [ -f docker-compose.yml ] || deployer-generate
-    
-    sed -n "s/.*image: //p" docker-compose.yml | xargs -n1 -P 20 docker pull
+
+    sed -n "s/.*image://p" docker-compose.yml |sort -u|xargs -n1 -P 20 docker pull
 }
 
 create-logfile() {
@@ -40,20 +52,7 @@ create-logfile() {
 }
 
 compose-up() {
-    declare desc="Starts containers with docker-compose"
-    declare services="$@"
-
-    deployer-generate
-
-    create-logfile
-
-    dockerCompose up -d $services
-
-    info "CloudBreak containers are started ..."
-    info "In a couple of minutes you can reach the UI (called Uluwatu)"
-    echo "  $ULU_HOST_ADDRESS" | blue
-    warn "Credentials are not printed here. You can get them by:"
-    echo '  cbd env show|grep "UAA_DEFAULT_USER_PW\|UAA_DEFAULT_USER_EMAIL"' | blue
+    dockerCompose up -d "$@"
 }
 
 compose-kill() {
@@ -68,7 +67,7 @@ util-cleanup() {
 
     if [ ! -f docker-compose.yml ]; then
       error "docker-compose.yml file does not exists"
-      exit 126
+      _exit 126
     fi
 
     compose-remove-exited-containers
@@ -92,9 +91,8 @@ compose-get-old-images() {
     contentsarray=()
     for versionedImage in $keep_imgs
       do
-        image=(`echo $versionedImage | tr ":" " "`)
-        image_name=${image[0]}
-        image_version=${image[1]}
+        image_name="${versionedImage%:*}"
+        image_version="${versionedImage#*:}"
         remove_images=$(echo $all_imgs | tr ' ' "\n" | grep "$image_name:" | grep -v "$image_version")
         if [ -n "$remove_images" ]; then
           contentsarray+="${remove_images[@]} "
@@ -124,22 +122,49 @@ compose-logs() {
     dockerCompose logs "$@"
 }
 
+compose-generate-check-diff() {
+    cloudbreak-config
+    local verbose="$1"
+
+    if [ -f docker-compose.yml ]; then
+        local compose_delme_path=$TEMP_DIR/docker-compose-delme.yml
+         compose-generate-yaml-force $compose_delme_path
+         if diff $compose_delme_path docker-compose.yml &>/dev/null; then
+             debug "docker-compose.yml already exist, and generate wouldn't change it."
+             return 0
+        else
+            if ! [[ "$regeneteInProgress" ]]; then
+                warn "docker-compose.yml already exists, BUT generate would create a DIFFERENT one!"
+                warn "please regenerate it:"
+                echo "  cbd regenerate" | blue
+            fi
+            if [[ "$verbose" ]]; then
+                warn "expected change:"
+                diff $compose_delme_path docker-compose.yml || true
+            else
+                debug "expected change:"
+                (diff $compose_delme_path docker-compose.yml || true) | debug-cat
+            fi
+            return 1
+         fi
+    fi
+    return 0
+}
+
 compose-generate-yaml() {
     declare desc="Generating docker-compose.yml based on Profile settings"
 
     cloudbreak-config
 
-    if [ -f docker-compose.yml ]; then
-         compose-generate-yaml-force /tmp/docker-compose-delme.yml
-         if diff /tmp/docker-compose-delme.yml docker-compose.yml &>/dev/null; then
-             debug "docker-compose.yml already exist, and generate wouldn't change it."
+    if ! compose-generate-check-diff; then
+        if [[ "$CBD_FORCE_START" ]]; then
+            warn "You have forced to start ..."
         else
-            warn "docker-compose.yml already exists, BUT generate would create a DIFFERENT one!"
-            warn "if you want to regenerate, remove it first:"
-            echo "  cbd regenerate" | blue
-            warn "expected change:"
-            (diff /tmp/docker-compose-delme.yml docker-compose.yml || true) | cyan
-         fi
+            warn "Please check the expected config changes with:"
+            echo "  cbd doctor" | blue
+            debug "If you want to ignore the changes, set the CBD_FORCE_START to true in Profile"
+            _exit 1
+        fi
     else
         info "generating docker-compose.yml"
         compose-generate-yaml-force docker-compose.yml
@@ -150,6 +175,10 @@ compose-generate-yaml-force() {
 
     declare composeFile=${1:? required: compose file path}
     debug "Generating docker-compose yaml: ${composeFile} ..."
+    if [[ -z "$AWS_SECRET_ACCESS_KEY" && -n "$AWS_SECRET_KEY"  ]]; then
+        debug "AWS_SECRET_ACCESS_KEY is not set, fall back to deprecated AWS_SECRET_KEY"
+        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
+    fi
     cat > ${composeFile} <<EOF
 consul:
     privileged: true
@@ -172,14 +201,6 @@ registrator:
         - consul
     command: consul://consul:8500
 
-ambassador:
-    privileged: true
-    volumes:
-        - "/var/run/docker.sock:/var/run/docker.sock"
-    dns: $PRIVATE_IP
-    image: sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR
-    command: --omnimode
-
 logsink:
     ports:
         - 3333
@@ -187,7 +208,7 @@ logsink:
         - SERVICE_NAME=logsink
     volumes:
         - .:/tmp
-    image: sequenceiq/socat:latest
+    image: sequenceiq/socat:1.0.0
     command: socat -u TCP-LISTEN:3333,reuseaddr,fork OPEN:/tmp/cbreak.log,creat,append
 
 logspout:
@@ -196,23 +217,16 @@ logspout:
     environment:
         - SERVICE_NAME=logspout
         - DEBUG=true
-        - BACKEND_1111=logsink.service.consul
         - LOGSPOUT=ignore
-        - ROUTE_URIS=tcp://backend:1111
+        - ROUTE_URIS=tcp://logsink:3333
         - "RAW_FORMAT={{.Container.Name}} | {{.Data}}\n"
     links:
-        - ambassador:backend
+        - logsink
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     image: gliderlabs/logspout:master
     entrypoint: ["/bin/sh"]
     command: -c 'sleep 1; /bin/logspout'
-
-ambassadorips:
-    privileged: true
-    net: container:ambassador
-    image: sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR
-    command: --setup-iptables
 
 uaadb:
     privileged: true
@@ -223,7 +237,7 @@ uaadb:
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
         - "$CB_DB_ROOT_PATH/uaadb:/var/lib/postgresql/data"
-    image: postgres:$DOCKER_TAG_POSTGRES
+    image: sequenceiq/uaadb:$DOCKER_TAG_UAADB
 
 identity:
     ports:
@@ -231,10 +245,8 @@ identity:
     environment:
         - SERVICE_NAME=identity
         # - SERVICE_CHECK_HTTP=/login
-        - IDENTITY_DB_URL=mydb:5432
-        - BACKEND_5432=uaadb.service.consul
-    links:
-        - ambassador:mydb
+        - IDENTITY_DB_URL=uaadb.service.consul:5434
+    dns: $PRIVATE_IP
     volumes:
       - ./uaa.yml:/uaa/uaa.yml
     image: sequenceiq/uaa:$DOCKER_TAG_UAA
@@ -282,18 +294,18 @@ cloudbreak:
         - ENDPOINTS_MAPPINGS_ENABLED=false
         - ENDPOINTS_BEANS_ENABLED=false
         - ENDPOINTS_ENV_ENABLED=false
-        - CB_IDENTITY_SERVER_URL=http://backend:8089
-        - CB_DB_PORT_5432_TCP_ADDR=backend
-        - CB_DB_PORT_5432_TCP_PORT=5432
-        - BACKEND_5432=cbdb.service.consul
-        - BACKEND_8089=identity.service.consul
+        - CB_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
+        - CB_IDENTITY_SERVICEID=identity.service.consul
+        - CB_DB_SERVICEID=cbdb.service.consul
         - SECURE_RANDOM=$SECURE_RANDOM
-    links:
-        - ambassador:backend
+        - CB_MAIL_SMTP_AUTH=$CLOUDBREAK_SMTP_AUTH
+        - CB_MAIL_SMTP_STARTTLS_ENABLE=$CLOUDBREAK_SMTP_STARTTLS_ENABLE
+        - CB_MAIL_SMTP_TYPE=$CLOUDBREAK_SMTP_TYPE
     ports:
         - 8080:8080
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
+    dns: $PRIVATE_IP
     image: sequenceiq/cloudbreak:$DOCKER_TAG_CLOUDBREAK
     command: bash
 
@@ -311,12 +323,13 @@ sultans:
         - SL_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
         - SL_CB_ADDRESS=$ULU_HOST_ADDRESS
         - SL_ADDRESS=$ULU_SULTANS_ADDRESS
-        - SL_UAA_ADDRESS=http://backend:8089
-        - BACKEND_8089=identity.service.consul
-    links:
-        - ambassador:backend
+        - SL_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
+        - SL_UAA_SERVICEID=identity.service.consul
     ports:
         - 3001:3000
+    volumes:
+        - $SULTANS_VOLUME_HOST:$SULTANS_VOLUME_CONTAINER
+    dns: $PRIVATE_IP
     image: sequenceiq/sultans-bin:$DOCKER_TAG_SULTANS
 
 uluwatu:
@@ -330,16 +343,16 @@ uluwatu:
         - ULU_HOST_ADDRESS=$ULU_HOST_ADDRESS
         - NODE_TLS_REJECT_UNAUTHORIZED=0
 
-        - ULU_IDENTITY_ADDRESS=http://backend:8089/
-        - ULU_CLOUDBREAK_ADDRESS=http://backend:8080
-        - ULU_PERISCOPE_ADDRESS=http://backend:8085/
-        - BACKEND_8089=identity.service.consul
-        - BACKEND_8080=cloudbreak.service.consul
-        - BACKEND_8085=periscope.service.consul
-    links:
-        - ambassador:backend
+        - ULU_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
+        - ULU_SULTANS_SERVICEID=sultans.service.consul
+        - ULU_IDENTITY_SERVICEID=identity.service.consul
+        - ULU_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
+        - ULU_PERISCOPE_SERVICEID=periscope.service.consul
     ports:
         - 3000:3000
+    volumes:
+        - $ULUWATU_VOLUME_HOST:$ULUWATU_VOLUME_CONTAINER
+    dns: $PRIVATE_IP
     image: sequenceiq/uluwatu-bin:$DOCKER_TAG_ULUWATU
 
 pcdb:
@@ -357,11 +370,6 @@ periscope:
         - PERISCOPE_DB_HBM2DDL_STRATEGY=$PERISCOPE_DB_HBM2DDL_STRATEGY
         - SERVICE_NAME=periscope
           #- SERVICE_CHECK_HTTP=/info
-        - PERISCOPE_SMTP_HOST=$CLOUDBREAK_SMTP_SENDER_HOST
-        - PERISCOPE_SMTP_USERNAME=$CLOUDBREAK_SMTP_SENDER_USERNAME
-        - PERISCOPE_SMTP_PASSWORD=$CLOUDBREAK_SMTP_SENDER_PASSWORD
-        - PERISCOPE_SMTP_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
-        - PERISCOPE_SMTP_PORT=$CLOUDBREAK_SMTP_SENDER_PORT
         - PERISCOPE_CLIENT_ID=$UAA_PERISCOPE_ID
         - PERISCOPE_CLIENT_SECRET=$UAA_PERISCOPE_SECRET
         - PERISCOPE_HOSTNAME_RESOLUTION=public
@@ -373,18 +381,14 @@ periscope:
         - ENDPOINTS_MAPPINGS_ENABLED=false
         - ENDPOINTS_BEANS_ENABLED=false
         - ENDPOINTS_ENV_ENABLED=false
-        - PERISCOPE_DB_TCP_ADDR=backend
-        - PERISCOPE_DB_TCP_PORT=5433
-        - PERISCOPE_CLOUDBREAK_URL=http://backend:8080
-        - PERISCOPE_IDENTITY_SERVER_URL=http://backend:8089/
-        - BACKEND_8080=cloudbreak.service.consul
-        - BACKEND_5433=pcdb.service.consul
-        - BACKEND_8089=identity.service.consul
+        - PERISCOPE_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
+        - PERISCOPE_DB_SERVICEID=pcdb.service.consul
+        - PERISCOPE_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
+        - PERISCOPE_IDENTITY_SERVICEID=identity.service.consul
         - SECURE_RANDOM=$SECURE_RANDOM
-    links:
-        - ambassador:backend
     ports:
         - 8085:8080
+    dns: $PRIVATE_IP
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
     image: sequenceiq/periscope:$DOCKER_TAG_PERISCOPE

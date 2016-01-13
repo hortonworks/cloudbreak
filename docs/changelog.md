@@ -2,6 +2,44 @@
 
 ### Fixed
 
+- consul recursor now exculdes both docker ip and bridge ip to avoid recursive dns recursor chain
+- docs fixed about getting default credentials (cbd login)
+- updates cb-shell to 0.5.37 to fix ssl issues
+- `cbd aws show-role` takes parameter, and defaults to AWS_ROLE_NAME
+
+### Added
+
+- Command `cbd aws list-roles` will lisst all role names
+- Command `cbd azure configure-arm` will create your arm application which can used by cloudbreak
+- Command `cbd azure deploy-dash` will deploy a dash application in your Azure account
+- Command `cbd start` will execute the migration by default. If SKIP_DB_MIGRATION_ON_START envvar set to true in Profile, the migration will be skipped
+- Using Dns SRV record in our services instead of ambassador
+- Using docker linking system in third party services instead of ambassador
+- Integration tests are added, where cbd binary is called, not only sourced functions
+- Docker based CentOS integration test make target added
+- Uaa db migration
+- SMTP default parameters added: `CLOUDBREAK_SMTP_AUTH` and `CLOUDBREAK_SMTP_STARTTLS_ENABLE` and `CLOUDBREAK_SMTP_TYPE`
+- Local development Uluwatu configuration by ULUWATU_VOLUME_HOST environment variable
+- Local development Sultans configuration by SULTANS_VOLUME_HOST environment variable
+- install script for fixed version and install-latest for latest release added
+- Each snapshot artifact is uploaded as http://public-repo-1.hortonworks.com/HDP/cloudbreak/cbd-snapshot-$(uname).tgz
+
+### Removed
+
+- Full removal of ambassador
+
+### Changed
+
+- `cbd start` doesn’t start if compose yaml regeneration is needed
+- `cbd generate` is less verbose, diff doesnt shown
+- `cbd doctor` shows diff if generate would change
+- `cbd regenerate` creates backup files if changes detected
+- sequenceiq/uaadb:1.0.1 is used instead of postgres:9.4.1
+
+## [v1.0.3] - 2015-09-03
+
+### Fixed
+
 - Authentication error with `cloudbreak-shell` and `cloudbreak-shell-quiet` is fixed
 - Command `cbd update <branch>` checks for artifact
 
@@ -13,6 +51,7 @@
 ### Removed
 
 ### Changed
+
 - sequenceiq/cloudbreak image updated to 1.0.3
 
 - debug() function made multiline capable. Use \n in messages

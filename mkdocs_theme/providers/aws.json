@@ -1,0 +1,28 @@
+{
+  "username": "sequenceiq",
+  "name": "cbd",
+  "tag": "sequenceiq/cbd",
+  "slug": "sequenceiq/cbd/amazon.image/1",
+  "artifact_type": "amazon.image",
+  "id": "ap-northeast-1:ami-3e735250,ap-southeast-1:ami-6fd2140c,ap-southeast-2:ami-56b3ed35,eu-central-1:ami-ea809386,eu-west-1:ami-a9e53dda,sa-east-1:ami-21fb414d,us-east-1:ami-8d047de7,us-west-1:ami-bedcb3de,us-west-2:ami-bdcbdddc",
+  "version": 1,
+  "metadata": {
+    "ami_id": "ami-3e735250,ami-6fd2140c,ami-56b3ed35,ami-ea809386,ami-a9e53dda,ami-21fb414d,ami-8d047de7,ami-bedcb3de,ami-bdcbdddc",
+    "region": "ap-northeast-1,ap-southeast-1,ap-southeast-2,eu-central-1,eu-west-1,sa-east-1,us-east-1,us-west-1,us-west-2",
+    "created": "2015-11-10 20:47:55 +0000",
+    "cbd_branch": "master",
+    "created_at": "1447188474",
+    "cbd_version": "1.0.3",
+    "region.eu-west-1": "ami-a9e53dda",
+    "region.sa-east-1": "ami-21fb414d",
+    "region.us-east-1": "ami-8d047de7",
+    "region.us-west-1": "ami-bedcb3de",
+    "region.us-west-2": "ami-bdcbdddc",
+    "yum_version_docker": "1.8.3",
+    "region.eu-central-1": "ami-ea809386",
+    "region.ap-northeast-1": "ami-3e735250",
+    "region.ap-southeast-1": "ami-6fd2140c",
+    "region.ap-southeast-2": "ami-56b3ed35"
+  },
+  "file": false
+}

@@ -58,6 +58,12 @@ aws-show-role-inline-policies() {
     done
 }
 
+aws-list-roles() {
+    declare desc="Lists all roles available to you"
+
+    $AWS iam list-roles --query Roles[].RoleName --out table
+}
+
 aws-show-role-managed-policies() {
      declare roleName=$1
     
@@ -78,7 +84,11 @@ aws-show-role() {
     declare desc="Show assumers and policies for an AWS role"
     
     declare roleName=$1
-    : ${roleName:? required}
+
+    : ${roleName:= $AWS_ROLE_NAME}
+
+    local arnName=$($AWS iam get-role --role-name cbreak-deployer --query 'Role.Arn' --out text)
+     info "Full reference: $arnName"
 
     aws-show-role-assumers $roleName
     aws-show-role-inline-policies $roleName

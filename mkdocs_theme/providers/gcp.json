@@ -1,0 +1,40 @@
+{
+  "docker_images": {
+    "cb_docker_container_alpine": "gliderlabs/alpine:3.1",
+    "cb_docker_container_ambari": "sequenceiq/ambari:2.1.2-v4",
+    "cb_docker_container_ambari_db": "postgres:9.4.1",
+    "cb_docker_container_ambari_warmup": "sequenceiq/ambari:2.1.2-v4",
+    "cb_docker_container_baywatch_client": "sequenceiq/baywatch-client:v1.0.0",
+    "cb_docker_container_baywatch_server": "sequenceiq/baywatch:v0.5.3",
+    "cb_docker_container_cert_tool": "ehazlett/cert-tool:0.0.3",
+    "cb_docker_container_consul": "sequenceiq/consul:v0.5.0-v5",
+    "cb_docker_container_docker_consul_watch_plugn": "sequenceiq/docker-consul-watch-plugn:1.0",
+    "cb_docker_container_gateway": "sequenceiq/cb-gateway-nginx:0.3",
+    "cb_docker_container_kerberos": "sequenceiq/kerberos:2.1.0-consul",
+    "cb_docker_container_list_others": null,
+    "cb_docker_container_logrotate": "sequenceiq/logrotate:v0.5.1",
+    "cb_docker_container_munchausen": "sequenceiq/munchausen:0.5.5",
+    "cb_docker_container_registrator": "sequenceiq/registrator:v5.2",
+    "cb_docker_container_swarm": "swarm:0.4.0"
+  },
+  "gcp": {
+    "builder": "packer.googlecompute",
+    "id": "cb-centos71-amb212-2015-11-05",
+    "import_script": "gcloud compute images create cb-centos71-amb212-2015-11-05 --source-uri gs://sequenceiqimage/cb-centos71-amb212-2015-11-05.tar.gz",
+    "source_image": "sequenceiqimage/cb-centos71-amb212-2015-11-05.tar.gz"
+  },
+  "metadata": {
+    "builder": "packer.googlecompute",
+    "id": "cb-centos71-amb212-2015-11-05",
+    "import_script": "gcloud compute images create cb-centos71-amb212-2015-11-05 --source-uri gs://sequenceiqimage/cb-centos71-amb212-2015-11-05.tar.gz",
+    "source_image": "sequenceiqimage/cb-centos71-amb212-2015-11-05.tar.gz",
+    "filename": "placeholder.img",
+    "created": "2015-11-11 11:21:24 +0000",
+    "created_at": "1447240884",
+    "all_docker_images": "sequenceiq/ambari:2.1.2-v4,sequenceiq/ambari:2.1.2-v4,sequenceiq/docker-consul-watch-plugn:1.0,sequenceiq/registrator:v5.2,sequenceiq/baywatch:v0.5.3,sequenceiq/baywatch-client:v1.0.0,sequenceiq/logrotate:v0.5.1,sequenceiq/kerberos:2.1.0-consul,postgres:9.4.1,sequenceiq/munchausen:0.5.5,sequenceiq/consul:v0.5.0-v5,sequenceiq/cb-gateway-nginx:0.3,gliderlabs/alpine:3.1,swarm:0.4.0,ehazlett/cert-tool:0.0.3,",
+    "yum_version_docker": "1.8.3",
+    "yum_version_kernel": "3.10.0-229.14.1.el7",
+    "yum_version_systemd": "208-20.el71.6"
+  }
+
+}
