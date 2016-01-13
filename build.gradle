@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> bfc26ff... CLOUD-932 proper versioning
 import org.ajoberstar.gradle.git.release.opinion.Strategies
 import org.ajoberstar.gradle.git.release.opinion.Strategies.BuildMetadata
 import org.ajoberstar.gradle.git.release.opinion.Strategies.PreRelease
 import org.ajoberstar.gradle.git.release.semver.ChangeScope
 import org.ajoberstar.gradle.git.release.semver.PartialSemVerStrategy
-<<<<<<< HEAD
-<<<<<<< HEAD
 import org.ajoberstar.gradle.git.release.semver.SemVerStrategyState
 import org.ajoberstar.gradle.git.release.semver.SemVerStrategy
 import org.ajoberstar.gradle.git.release.semver.TagUtil
@@ -19,606 +13,239 @@ import com.github.zafarkhaja.semver.Version
 import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.*
 
 final class VersionUtils {
-    final static Version getNearestPreReleaseVersion(Grgit grgit, SemVerStrategyState state, String label) {
-<<<<<<< HEAD
-        List versionTags = grgit.tag.list().inject([]) { list, tag ->
-            Version version = TagUtil.parseAsVersion(tag)
-            if (version) {
-                if (grgit.isAncestorOf(tag, state.currentHead)) {
-                    def reachableCommitLog = grgit.log {
-                        range tag.commit.id, state.currentHead.id
-                    }
-                    def distance = reachableCommitLog.size()
-                    def data = [version: version, distance: distance]
-                    list << data
-                }
-            }
-            list
+  final static Version getNearestPreReleaseVersion(Grgit grgit, SemVerStrategyState state, String label) {
+    List versionTags = grgit.tag.list().inject([]) { list, tag ->
+      Version version = TagUtil.parseAsVersion(tag)
+      if (version) {
+        if (grgit.isAncestorOf(tag, state.currentHead)) {
+          def reachableCommitLog = grgit.log {
+            range tag.commit.id, state.currentHead.id
+          }
+          def distance = reachableCommitLog.size()
+          def data = [version: version, distance: distance]
+          list << data
         }
-
-        Map preRelease = versionTags.findAll { versionTag ->
-            versionTag.version.preReleaseVersion.contains(label)
-        }.min { a, b ->
-            a.distance <=> b.distance ?: (a.version <=> b.version) * -1
-        }
-        return preRelease.version
+      }
+      list
     }
+
+    Map preRelease = versionTags.findAll { versionTag ->
+      versionTag.version.preReleaseVersion.contains(label)
+    }.min { a, b ->
+      a.distance <=> b.distance ?: (a.version <=> b.version) * -1
+    }
+    return preRelease.version
+  }
 }
 
 final class VersionStrategies {
 
+  private Grgit grgit
+
+  public VersionStrategies(Grgit grgit) {
+    this.grgit = grgit
+  }
+
+  final class Normal {
+
     private Grgit grgit
 
-    public VersionStrategies(Grgit grgit) {
-        this.grgit = grgit
+    public Normal(Grgit grgit) {
+      this.grgit = grgit
     }
 
-    final class Normal {
-
-        private Grgit grgit
-
-        public Normal(Grgit grgit) {
-            this.grgit = grgit
+    final PartialSemVerStrategy INCREMENT_FROM_PRE_RELEASE = closure { state ->
+      def nearestAny = state.nearestVersion.any
+      if ("dev".equals(state.stageFromProp) && ("".equals(nearestAny.preReleaseVersion) || nearestAny.preReleaseVersion.contains("rc"))) {
+        switch (state.scopeFromProp) {
+          case ChangeScope.MAJOR:
+            return state.copyWith(inferredNormal: nearestAny.incrementMajorVersion())
+          case ChangeScope.MINOR:
+            return state.copyWith(inferredNormal: nearestAny.incrementMinorVersion())
+          case ChangeScope.PATCH:
+            return state.copyWith(inferredNormal: nearestAny.incrementPatchVersion())
+          default:
+            return state
         }
-
-        final PartialSemVerStrategy INCREMENT_FROM_PRE_RELEASE = closure { state ->
-=======
-=======
-import org.ajoberstar.gradle.git.release.semver.SemVerStrategyState
->>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
-import org.ajoberstar.gradle.git.release.semver.SemVerStrategy
-import org.ajoberstar.gradle.git.release.semver.TagUtil
-import org.ajoberstar.grgit.Grgit
-import com.github.zafarkhaja.semver.Version
-
-
-import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.*
-
-final class VersionUtils {
-    final static Version getNearestRcVersion(Grgit grgit, SemVerStrategyState state) {
-=======
->>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
-        List versionTags = grgit.tag.list().inject([]) { list, tag ->
-            Version version = TagUtil.parseAsVersion(tag)
-            if (version) {
-                if (grgit.isAncestorOf(tag, state.currentHead)) {
-                    def reachableCommitLog = grgit.log {
-                        range tag.commit.id, state.currentHead.id
-                    }
-                    def distance = reachableCommitLog.size()
-                    def data = [version: version, distance: distance]
-                    list << data
-                }
-            }
-            list
+      } else if ("rc".equals(state.stageFromProp)) {
+        if ("".equals(nearestAny.preReleaseVersion)) {
+          return state.copyWith(inferredNormal: nearestAny.incrementPatchVersion())
+        } else if (state.scopeFromProp == ChangeScope.PATCH) {
+          def rcVersion = VersionUtils.getNearestPreReleaseVersion(grgit, state, "rc")
+          return state.copyWith(inferredNormal: rcVersion.normalVersion)
+        } else {
+          return state.copyWith(inferredNormal: nearestAny.normalVersion)
         }
-
-        Map preRelease = versionTags.findAll { versionTag ->
-            versionTag.version.preReleaseVersion.contains(label)
-        }.min { a, b ->
-            a.distance <=> b.distance ?: (a.version <=> b.version) * -1
-        }
-        return preRelease.version
+      } else {
+        return state.copyWith(inferredNormal: nearestAny.normalVersion)
+      }
     }
-}
+  }
 
-final class VersionStrategies {
+  final class PreRelStrategies {
 
-<<<<<<< HEAD
-    static final class Normal {
-        static final PartialSemVerStrategy INCREMENT_FROM_RC = closure { state ->
->>>>>>> bfc26ff... CLOUD-932 proper versioning
-=======
     private Grgit grgit
+    private String preReleaseLabel
 
-    public VersionStrategies(Grgit grgit) {
-        this.grgit = grgit
+    public PreRelStrategies(Grgit grgit, String preReleaseLabel) {
+      this.grgit = grgit
+      this.preReleaseLabel = preReleaseLabel
     }
 
-    final class Normal {
-
-        private Grgit grgit
-
-        public Normal(Grgit grgit) {
-            this.grgit = grgit
+    final PartialSemVerStrategy COUNT_INCREMENTED = closure { state ->
+      def nearest = state.nearestVersion
+      def nearestPreRelease
+      def nearestRc = VersionUtils.getNearestPreReleaseVersion(grgit, state, "rc")
+      def currentPreIdents = state.inferredPreRelease ? state.inferredPreRelease.split('\\.') as List : []
+      if (preReleaseLabel.equals("rc") || (preReleaseLabel.equals("dev") && nearestRc.preReleaseVersion.equals("rc.1"))){
+        nearestPreRelease = nearestRc
+      } else {
+        nearestPreRelease = VersionUtils.getNearestPreReleaseVersion(grgit, state, "dev")
+      }
+      if (nearestPreRelease == nearest.normal || nearestPreRelease.normalVersion != state.inferredNormal) {
+        currentPreIdents << '1'
+      } else {
+        def nearestPreIdents = nearestPreRelease.preReleaseVersion.split('\\.')
+        if (nearestPreIdents.size() <= currentPreIdents.size()) {
+          currentPreIdents << '1'
+        } else if (currentPreIdents == nearestPreIdents[0..(currentPreIdents.size() - 1)]) {
+          def count = parseIntOrZero(nearestPreIdents[currentPreIdents.size()])
+          currentPreIdents << Integer.toString(count + 1)
+        } else {
+          currentPreIdents << '1'
         }
-
-        final PartialSemVerStrategy INCREMENT_FROM_PRE_RELEASE = closure { state ->
->>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
-            def nearestAny = state.nearestVersion.any
-            if ("dev".equals(state.stageFromProp) && ("".equals(nearestAny.preReleaseVersion) || nearestAny.preReleaseVersion.contains("rc"))) {
-                switch (state.scopeFromProp) {
-                    case ChangeScope.MAJOR:
-                        return state.copyWith(inferredNormal: nearestAny.incrementMajorVersion())
-                    case ChangeScope.MINOR:
-                        return state.copyWith(inferredNormal: nearestAny.incrementMinorVersion())
-                    case ChangeScope.PATCH:
-                        return state.copyWith(inferredNormal: nearestAny.incrementPatchVersion())
-                    default:
-                        return state
-                }
-<<<<<<< HEAD
-<<<<<<< HEAD
-            } else if ("rc".equals(state.stageFromProp)) {
-                if ("".equals(nearestAny.preReleaseVersion)) {
-                    return state.copyWith(inferredNormal: nearestAny.incrementPatchVersion())
-                } else if (state.scopeFromProp == ChangeScope.PATCH) {
-                    def rcVersion = VersionUtils.getNearestPreReleaseVersion(grgit, state, "rc")
-                    return state.copyWith(inferredNormal: rcVersion.normalVersion)
-                } else {
-                    return state.copyWith(inferredNormal: nearestAny.normalVersion)
-                }
-=======
->>>>>>> bfc26ff... CLOUD-932 proper versioning
-=======
-            } else if ("rc".equals(state.stageFromProp)) {
-                if ("".equals(nearestAny.preReleaseVersion)) {
-                    return state.copyWith(inferredNormal: nearestAny.incrementPatchVersion())
-                } else if (state.scopeFromProp == ChangeScope.PATCH) {
-                    def rcVersion = VersionUtils.getNearestPreReleaseVersion(grgit, state, "rc")
-                    return state.copyWith(inferredNormal: rcVersion.normalVersion)
-                } else {
-                    return state.copyWith(inferredNormal: nearestAny.normalVersion)
-                }
->>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
-            } else {
-                return state.copyWith(inferredNormal: nearestAny.normalVersion)
-            }
-        }
+      }
+      return state.copyWith(inferredPreRelease: currentPreIdents.join('.'))
     }
+  }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-    final class PreRelStrategies {
+  final SemVerStrategy FEATURE_BRANCH = Strategies.DEFAULT.copyWith(
+          name: 'feature-branch',
+          stages: ['fb'] as SortedSet,
+          allowDirtyRepo: true,
+          preReleaseStrategy: all(PreRelease.STAGE_FLOAT, PreRelease.COUNT_COMMITS_SINCE_ANY, PreRelease.SHOW_UNCOMMITTED),
+          buildMetadataStrategy: BuildMetadata.COMMIT_ABBREVIATED_ID,
+          createTag: false
+  )
 
-        private Grgit grgit
-        private String preReleaseLabel
+  final SemVerStrategy DEV = Strategies.DEFAULT.copyWith(
+          name: 'development',
+          stages: ['dev'] as SortedSet,
+          allowDirtyRepo: true,
+          normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
+          preReleaseStrategy: all(PreRelease.STAGE_FIXED, new PreRelStrategies(grgit, "dev").COUNT_INCREMENTED)
+  )
 
-        public PreRelStrategies(Grgit grgit, String preReleaseLabel) {
-            this.grgit = grgit
-            this.preReleaseLabel = preReleaseLabel
-=======
-    final class RcStrategies {
-=======
-    final class PreRelStrategies {
->>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
+  final SemVerStrategy RC = Strategies.DEFAULT.copyWith(
+          name: 'pre-release',
+          stages: ['rc'] as SortedSet,
+          allowDirtyRepo: true,
+          normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
+          preReleaseStrategy: all(PreRelease.STAGE_FIXED, new PreRelStrategies(grgit, "rc").COUNT_INCREMENTED),
+          enforcePrecedence: false
+  )
 
-        private Grgit grgit
-        private String preReleaseLabel
-
-        public PreRelStrategies(Grgit grgit, String preReleaseLabel) {
-            this.grgit = grgit
-<<<<<<< HEAD
->>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
-=======
-            this.preReleaseLabel = preReleaseLabel
->>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
-        }
-
-        final PartialSemVerStrategy COUNT_INCREMENTED = closure { state ->
-            def nearest = state.nearestVersion
-<<<<<<< HEAD
-<<<<<<< HEAD
-            def nearestPreRelease
-            def nearestRc = VersionUtils.getNearestPreReleaseVersion(grgit, state, "rc")
-            def currentPreIdents = state.inferredPreRelease ? state.inferredPreRelease.split('\\.') as List : []
-            if (preReleaseLabel.equals("rc") || (preReleaseLabel.equals("dev") && nearestRc.preReleaseVersion.equals("rc.1"))){
-                nearestPreRelease = nearestRc
-            } else {
-                nearestPreRelease = VersionUtils.getNearestPreReleaseVersion(grgit, state, "dev")
-            }
-            if (nearestPreRelease == nearest.normal || nearestPreRelease.normalVersion != state.inferredNormal) {
-                currentPreIdents << '1'
-            } else {
-                def nearestPreIdents = nearestPreRelease.preReleaseVersion.split('\\.')
-=======
-            def nearestRc = VersionUtils.getNearestRcVersion(grgit, state)
-=======
-            def nearestPreRelease
-            def nearestRc = VersionUtils.getNearestPreReleaseVersion(grgit, state, "rc")
->>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
-            def currentPreIdents = state.inferredPreRelease ? state.inferredPreRelease.split('\\.') as List : []
-            if (preReleaseLabel.equals("rc") || (preReleaseLabel.equals("dev") && nearestRc.preReleaseVersion.equals("rc.1"))){
-                nearestPreRelease = nearestRc
-            } else {
-                nearestPreRelease = VersionUtils.getNearestPreReleaseVersion(grgit, state, "dev")
-            }
-            if (nearestPreRelease == nearest.normal || nearestPreRelease.normalVersion != state.inferredNormal) {
-                currentPreIdents << '1'
-            } else {
-<<<<<<< HEAD
-                def nearestPreIdents = nearestRc.preReleaseVersion.split('\\.')
->>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
-=======
-                def nearestPreIdents = nearestPreRelease.preReleaseVersion.split('\\.')
->>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
-                if (nearestPreIdents.size() <= currentPreIdents.size()) {
-                    currentPreIdents << '1'
-                } else if (currentPreIdents == nearestPreIdents[0..(currentPreIdents.size() - 1)]) {
-                    def count = parseIntOrZero(nearestPreIdents[currentPreIdents.size()])
-                    currentPreIdents << Integer.toString(count + 1)
-                } else {
-                    currentPreIdents << '1'
-                }
-            }
-            return state.copyWith(inferredPreRelease: currentPreIdents.join('.'))
-        }
-    }
-
-    final SemVerStrategy FEATURE_BRANCH = Strategies.DEFAULT.copyWith(
-<<<<<<< HEAD
-=======
-    static final SemVerStrategy FEATURE_BRANCH = Strategies.DEFAULT.copyWith(
->>>>>>> bfc26ff... CLOUD-932 proper versioning
-=======
->>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
-            name: 'feature-branch',
-            stages: ['fb'] as SortedSet,
-            allowDirtyRepo: true,
-            preReleaseStrategy: all(PreRelease.STAGE_FLOAT, PreRelease.COUNT_COMMITS_SINCE_ANY, PreRelease.SHOW_UNCOMMITTED),
-            buildMetadataStrategy: BuildMetadata.COMMIT_ABBREVIATED_ID,
-            createTag: false
-    )
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-    final SemVerStrategy DEV = Strategies.DEFAULT.copyWith(
-            name: 'development',
-            stages: ['dev'] as SortedSet,
-            allowDirtyRepo: true,
-            normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
-            preReleaseStrategy: all(PreRelease.STAGE_FIXED, new PreRelStrategies(grgit, "dev").COUNT_INCREMENTED)
-<<<<<<< HEAD
-    )
-
-    final SemVerStrategy RC = Strategies.DEFAULT.copyWith(
-            name: 'pre-release',
-            stages: ['rc'] as SortedSet,
-            allowDirtyRepo: true,
-            normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
-            preReleaseStrategy: all(PreRelease.STAGE_FIXED, new PreRelStrategies(grgit, "rc").COUNT_INCREMENTED),
-            enforcePrecedence: false
-    )
-
-    final SemVerStrategy FINAL = Strategies.DEFAULT.copyWith(
-=======
-    static final SemVerStrategy DEV = Strategies.DEFAULT.copyWith(
-=======
-    final SemVerStrategy DEV = Strategies.DEFAULT.copyWith(
->>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
-            name: 'development',
-            stages: ['dev'] as SortedSet,
-            allowDirtyRepo: true,
-            normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
-            preReleaseStrategy: all(PreRelease.STAGE_FIXED, PreRelease.COUNT_INCREMENTED)
-=======
->>>>>>> 8dc4711... CLOUD-50000 release failed on master when master is ff-merged to rc
-    )
-
-    final SemVerStrategy RC = Strategies.DEFAULT.copyWith(
-            name: 'pre-release',
-            stages: ['rc'] as SortedSet,
-            allowDirtyRepo: true,
-            normalStrategy: new Normal(grgit).INCREMENT_FROM_PRE_RELEASE,
-            preReleaseStrategy: all(PreRelease.STAGE_FIXED, new PreRelStrategies(grgit, "rc").COUNT_INCREMENTED),
-            enforcePrecedence: false
-    )
-
-<<<<<<< HEAD
-    static final SemVerStrategy FINAL = Strategies.DEFAULT.copyWith(
->>>>>>> bfc26ff... CLOUD-932 proper versioning
-=======
-    final SemVerStrategy FINAL = Strategies.DEFAULT.copyWith(
->>>>>>> a08b5f0... CLOUD-932 always work with latest rc tag when scope is rc
-            name: 'release',
-            stages: ['final'] as SortedSet,
-            allowDirtyRepo: true,
-            enforcePrecedence: false
-    )
+  final SemVerStrategy FINAL = Strategies.DEFAULT.copyWith(
+          name: 'release',
+          stages: ['final'] as SortedSet,
+          allowDirtyRepo: true,
+          enforcePrecedence: false
+  )
 }
 
-<<<<<<< HEAD
 buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath "org.ajoberstar:gradle-git:1.2.0"
-        classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
-    }
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    classpath "org.ajoberstar:gradle-git:1.2.0"
+    classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
+  }
 }
 
 apply plugin: 'org.ajoberstar.release-opinion'
 
 release {
-    grgit = Grgit.open(project.file('.'))
+  grgit = Grgit.open(project.file('.'))
 
-    VersionStrategies versionStrategies = new VersionStrategies(grgit)
+  VersionStrategies versionStrategies = new VersionStrategies(grgit)
 
-    versionStrategy versionStrategies.FINAL
-    versionStrategy versionStrategies.RC
-    versionStrategy versionStrategies.FEATURE_BRANCH
-    versionStrategy versionStrategies.DEV
+  versionStrategy versionStrategies.FINAL
+  versionStrategy versionStrategies.RC
+  versionStrategy versionStrategies.FEATURE_BRANCH
+  versionStrategy versionStrategies.DEV
 
-    defaultVersionStrategy = versionStrategies.FEATURE_BRANCH
+  defaultVersionStrategy = versionStrategies.FEATURE_BRANCH
 
-    tagStrategy {
-        prefixNameWithV = false
-    }
+  tagStrategy {
+    prefixNameWithV = false
+  }
 }
 
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 
 allprojects {
-    apply plugin: 'idea'
-    apply plugin: 'eclipse'
-    group = 'com.sequenceiq'
+  apply plugin: 'idea'
+  apply plugin: 'eclipse'
+  group = 'com.sequenceiq'
 }
 
 subprojects {
-    apply plugin: 'java'
-    apply plugin: 'maven'
-    apply plugin: 'checkstyle'
+  apply plugin: 'java'
+  apply plugin: 'maven'
+  apply plugin: 'checkstyle'
 
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+  sourceCompatibility = 1.7
+  targetCompatibility = 1.7
 
-    configurations {
-        deployerJars
-        all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-        all*.exclude group: 'com.google.guava', module: 'guava-jdk5'
-    }
-
-    dependencies {
-        deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE")
-    }
-
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                configuration = configurations.deployerJars
-                repository(url: "s3://maven.sequenceiq.com/releases") {
-                    authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
-                }
-                snapshotRepository(url: "s3://maven.sequenceiq.com/snapshots") {
-                    authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
-                }
-            }
-        }
-    }
-
-    checkstyleMain {
-        ignoreFailures = false
-        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
-        configProperties = ['config_loc': "$rootDir/config/checkstyle"]
-    }
-
-    checkstyleTest {
-        ignoreFailures = false
-        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
-        configProperties = ['config_loc': "$rootDir/config/checkstyle"]
-    }
-
-    dependencies {
-        checkstyle('com.puppycrawl.tools:checkstyle:5.7') {
-            exclude group: 'com.google.guava'
-        }
-        checkstyle("com.google.guava:guava:16.0.1") { force = true }
-    }
-
-    repositories {
-        mavenCentral()
-        maven { url "http://maven.sequenceiq.com/releases" }
-        mavenLocal()
-=======
-=======
->>>>>>> bfc26ff... CLOUD-932 proper versioning
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath "org.ajoberstar:gradle-git:1.2.0"
-        classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE"
-    }
-}
-
-apply plugin: 'org.ajoberstar.release-opinion'
-
-release {
-    grgit = Grgit.open(project.file('.'))
-
-    VersionStrategies versionStrategies = new VersionStrategies(grgit)
-
-    versionStrategy versionStrategies.FINAL
-    versionStrategy versionStrategies.RC
-    versionStrategy versionStrategies.FEATURE_BRANCH
-    versionStrategy versionStrategies.DEV
-
-    defaultVersionStrategy = versionStrategies.FEATURE_BRANCH
-
-    tagStrategy {
-        prefixNameWithV = false
-    }
-}
-
-def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
-
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'spring-boot'
-apply plugin: 'maven'
-apply plugin: 'checkstyle'
-apply plugin: 'jacoco'
-apply plugin: 'sonar-runner'
-apply plugin: 'license-report'
-
-sourceCompatibility = 1.7
-group = 'com.sequenceiq'
-mainClassName = 'com.sequenceiq.periscope.PeriscopeApplication'
-
-allprojects {
-    ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
-}
-
-jar { baseName = 'periscope' }
-
-configurations {
+  configurations {
     deployerJars
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-    all*.exclude group: 'log4j'
-}
+    all*.exclude group: 'com.google.guava', module: 'guava-jdk5'
+  }
 
-uploadArchives {
+  dependencies {
+    deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE")
+  }
+
+  uploadArchives {
     repositories {
-        mavenDeployer {
-            configuration = configurations.deployerJars
-            repository(url: "s3://maven.sequenceiq.com/releases") {
-                authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
-            }
-            snapshotRepository(url: "s3://maven.sequenceiq.com/snapshots") {
-                authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
-            }
+      mavenDeployer {
+        configuration = configurations.deployerJars
+        repository(url: "s3://maven.sequenceiq.com/releases") {
+          authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
         }
+        snapshotRepository(url: "s3://maven.sequenceiq.com/snapshots") {
+          authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
+        }
+      }
     }
-}
+  }
 
-repositories {
+  checkstyleMain {
+    ignoreFailures = false
+    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+    configProperties = ['config_loc': "$rootDir/config/checkstyle"]
+  }
+
+  checkstyleTest {
+    ignoreFailures = false
+    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+    configProperties = ['config_loc': "$rootDir/config/checkstyle"]
+  }
+
+  dependencies {
+    checkstyle('com.puppycrawl.tools:checkstyle:5.7') {
+      exclude group: 'com.google.guava'
+    }
+    checkstyle("com.google.guava:guava:16.0.1") { force = true }
+  }
+
+  repositories {
     mavenCentral()
-    maven { url "http://maven.sequenceiq.com/snapshots" }
     maven { url "http://maven.sequenceiq.com/releases" }
-    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/public" }
-    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/releases" }
-    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/snapshots" }
-}
-
-dependencies {
-    compile("org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE")
-    compile("org.springframework.security:spring-security-web:3.2.3.RELEASE")
-    compile("org.springframework.security.oauth:spring-security-oauth2:2.0.3.RELEASE")
-    compile("org.springframework.boot:spring-boot-starter-data-jpa:1.0.2.RELEASE")
-    compile("org.springframework:spring-context-support:4.0.3.RELEASE")
-    compile("org.apache.commons:commons-lang3:3.3.2")
-    compile("org.hsqldb:hsqldb:2.3.2")
-    compile("org.apache.hadoop:hadoop-yarn-client:${hadoopVersion}")
-    compile("org.apache.hadoop:hadoop-yarn-server-resourcemanager:${hadoopVersion}")
-    compile("org.apache.hadoop:hadoop-common:${hadoopVersion}")
-    compile("com.sequenceiq:ambari-client20:2.0.22")
-    compile("javax.servlet:javax.servlet-api:3.0.1")
-    compile("com.sequenceiq:cloudbreak-rest-client:0.4.10")
-    compile("org.freemarker:freemarker:2.3.20")
-    compile("javax.mail:mail:1.4.7")
-    compile("org.apache.httpcomponents:httpclient:4.3.5")
-    compile("joda-time:joda-time:2.5")
-    compile("net.sf.ehcache:ehcache:2.8.3")
-    compile("org.postgresql:postgresql:9.3-1101-jdbc41")
-    compile("org.hibernate:hibernate-validator:5.1.1.Final")
-    compile("org.quartz-scheduler:quartz:2.2.1")
-    compile("org.springframework.boot:spring-boot-actuator:1.0.2.RELEASE")
-    compile("dnsjava:dnsjava:2.1.7")
-    compile("org.mybatis:mybatis-migrations:3.2.0")
-    testCompile("junit:junit:4.11")
-    testCompile("org.mockito:mockito-all:1.9.5")
-    testCompile("org.springframework:spring-test:4.0.2.RELEASE")
-    deployerJars 'org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE'
-}
-
-springBoot { mainClass = "com.sequenceiq.periscope.PeriscopeApplication" }
-
-checkstyleMain {
-    ignoreFailures = false
-    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
-}
-
-checkstyleTest {
-    ignoreFailures = false
-    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
-}
-
-test {
-    include 'com/sequenceiq/**'
-    testLogging.showStandardStreams = true
-    ignoreFailures = false
-    beforeTest { descriptor ->
-        logger.lifecycle("Running test: " + descriptor)
-    }
-    onOutput { descriptor, event ->
-        logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message)
-    }
-    jacoco {
-        append = false
-        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
-        classDumpFile = file("$buildDir/jacoco/classpathdumps")
-    }
-}
-
-jacoco {
-    toolVersion = "0.6.2.201302030002"
-    reportsDir = file("$buildDir/reports/jacoco")
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled false
-        csv.enabled false
-        html.destination "${buildDir}/jacocoHtml"
->>>>>>> 413c239... PERI-3 initial spring boot app
-    }
-}
-
-sonarRunner {
-    sonarProperties {
-        property "sonar.host.url", "$config.sonar_host_url"
-        property "sonar.jdbc.url", "$config.sonar_jdbc_url"
-        property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
-        property "sonar.jdbc.username", "$System.env.SONAR_USERNAME"
-        property "sonar.jdbc.password", "$System.env.SONAR_PASSWORD"
-        property "project.reporting.outputEncoding", "UTF-8"
-        property "sonar.projectKey", "periscope"
-        property "sonar.projectName", "periscope"
-    }
-}
-
-
-task wrapper(type: Wrapper) { gradleVersion = "2.3" }
-
-task buildInfo(type: BuildInfoTask) {
-    destination = file("$buildDir")
-    applicationPropertiesPath = "$buildDir"
-    basename = jar.baseName
-    buildVersion = version
-}
-
-compileJava.dependsOn buildInfo
-
-class BuildInfoTask extends DefaultTask {
-    File destination = new File("build.info")
-    String applicationPropertiesPath
-    String basename
-    String buildVersion
-
-    @TaskAction
-    def writeBuildInfo() {
-        destination.mkdirs()
-        File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
-        applicationDestination.mkdirs()
-        new File(destination, "build.info").withWriter { out ->
-            [
-                    "ARTIFACT_BASENAME=" + basename,
-                    "ARTIFACT_VERSION=" + buildVersion,
-            ].each { out.println it }
-        }
-        new File(applicationDestination, "application.properties").withWriter { out ->
-            [
-                    "info.app.name=" + basename,
-                    "info.app.version=" + buildVersion
-            ].each { out.println it }
-        }
-    }
+    mavenLocal()
+  }
 }

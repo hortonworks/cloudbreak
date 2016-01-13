@@ -13,8 +13,6 @@ gradle
 *.jks
 atlassian*
 userdatas/
-<<<<<<< HEAD
-<<<<<<< HEAD
 out/
 curl_config_admin_user
 *.suml

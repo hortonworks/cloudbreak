@@ -80,10 +80,7 @@
         </module>
         <module name="CyclomaticComplexity">
             <property name="max" value="10" />
-<<<<<<< HEAD
             <!-- property name="switchBlockAsSingleDecisionPoint" value="true" / -->
-=======
->>>>>>> 413c239... PERI-3 initial spring boot app
         </module>
         <module name="NPathComplexity">
             <property name="max" value="256" />
@@ -159,14 +156,6 @@
             <property name="classes" value="java.lang.Boolean,java.lang.Integer,java.lang.Long,java.lang.Float,java.lang.Double" />
         </module>
         <module name="IllegalInstantiation">
-<<<<<<< HEAD
-=======
-        	<property name="id" value="string-instantiation"/>
-            <!-- use valueOf() -->
-            <property name="classes" value="java.lang.String" />
-        </module>
-        <module name="IllegalInstantiation">
->>>>>>> 413c239... PERI-3 initial spring boot app
             <!-- use alternative classes -->
             <property name="classes" value="java.util.Vector" />
         </module>
@@ -177,11 +166,7 @@
         </module>
         <module name="IllegalThrows" />
         <module name="IllegalCatch">
-<<<<<<< HEAD
             <property name="illegalClassNames" value="java.lang.IllegalStateException, java.lang.IllegalArgumentException" />
-=======
-            <property name="illegalClassNames" value="java.lang.NullPointerException, java.lang.IllegalStateException, java.lang.IllegalArgumentException" />
->>>>>>> 413c239... PERI-3 initial spring boot app
         </module>
         <module name="IllegalType">
             <property name="format" value="^$" />
@@ -222,12 +207,8 @@
 
         <!-- Makes suppression comments available -->
         <module name="FileContentsHolder" />
-<<<<<<< HEAD
 
 
-=======
-        <!-- -->
->>>>>>> 413c239... PERI-3 initial spring boot app
     </module>
 
     <!-- Deprecation -->
@@ -243,10 +224,7 @@
         <property name="fileExtensions" value="java" />
     </module>
     <module name="RegexpMultiline">
-<<<<<<< HEAD
         <property name="id" value="printTrace" />
-=======
->>>>>>> 413c239... PERI-3 initial spring boot app
         <property name="format" value="\.printStackTrace\(\)" />
         <property name="message" value="Avoid printing exception stack-trace onto console. Use logger or re-throw (in a wrapper)." />
         <property name="fileExtensions" value="java" />
@@ -335,13 +313,10 @@
         <property name="onCommentFormat" value="ENUM ITEMS END" />
         <property name="checkFormat" value="JavadocVariable" />
     </module>
-<<<<<<< HEAD
     <module name="SuppressionCommentFilter">
         <property name="offCommentFormat" value="BEGIN GENERATED CODE"/>
         <property name="onCommentFormat" value="END GENERATED CODE"/>
     </module>
-=======
->>>>>>> 413c239... PERI-3 initial spring boot app
     <module name="SuppressionFilter">
         <property name="file" value="${config_loc}/checkstyle-suppressions.xml" />
     </module>

@@ -47,6 +47,6 @@ public class AmbariConfigurationServiceTest {
 
         Configuration configuration = AmbariConfigurationService.getConfiguration(ambariClient, HostResolution.PUBLIC);
 
-        assertEquals(configuration.get(rm), "azure-address.cloudapp.net:8050");
+        assertEquals(configuration.get(rm), "acloudapp.net:8050");
     }
 }

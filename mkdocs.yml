@@ -1,6 +1,2 @@
-<<<<<<< HEAD
 site_name: Cloudbreak
-=======
-site_name: Periscope
->>>>>>> ac1c754... PERI-2 added mkdocs file
 theme: bootstrap
