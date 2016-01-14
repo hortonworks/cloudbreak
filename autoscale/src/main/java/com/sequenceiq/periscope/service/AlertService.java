@@ -2,7 +2,9 @@ package com.sequenceiq.periscope.service;
 
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -126,9 +128,18 @@ public class AlertService {
         }
     }
 
-    public List<Map<String, String>> getAlertDefinitions(long clusterId) {
+    public List<Map<String, Object>> getAlertDefinitions(long clusterId) {
         Cluster cluster = clusterService.findOneByUser(clusterId);
-        return ambariClientProvider.createAmbariClient(cluster).getAlertDefinitions();
+        List<Map<String, Object>> ret = new ArrayList<>();
+        List<Map<String, String>> alertDefinitions = ambariClientProvider.createAmbariClient(cluster).getAlertDefinitions();
+        for (Map<String, String> alertDefinition : alertDefinitions) {
+            Map<String, Object> tmp = new HashMap<>();
+            for (Map.Entry<String, String> stringStringEntry : alertDefinition.entrySet()) {
+                tmp.put(stringStringEntry.getKey(), stringStringEntry.getValue());
+            }
+            ret.add(tmp);
+        }
+        return ret;
     }
 
     public void addPeriscopeAlerts(Cluster cluster) {

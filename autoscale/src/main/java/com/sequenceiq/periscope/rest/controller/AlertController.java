@@ -59,7 +59,7 @@ public class AlertController {
     }
 
     @RequestMapping(value = "/metric/definitions", method = RequestMethod.GET)
-    public ResponseEntity<List<Map<String, String>>> getAlertDefinitions(@PathVariable long clusterId) {
+    public ResponseEntity<List<Map<String, Object>>> getAlertDefinitions(@PathVariable long clusterId) {
         return new ResponseEntity<>(alertService.getAlertDefinitions(clusterId), HttpStatus.OK);
     }
 

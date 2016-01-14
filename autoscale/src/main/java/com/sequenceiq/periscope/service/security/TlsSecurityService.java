@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +63,7 @@ public class TlsSecurityService {
         byte[] serverCert;
 
         try {
-            byte[] certificate = cloudbreakService.stackEndpoint().getCertificate(stackId).getCertificate();
-            serverCert = Base64.decodeBase64(certificate);
+            serverCert = cloudbreakService.stackEndpoint().getCertificate(stackId).getCertificate();
             Files.write(stackCertDir.resolve(SERVER_CERT_FILE), serverCert, StandardOpenOption.CREATE);
         } catch (Exception e) {
             throw new TlsConfigurationException("Failed to write server certificate to " + stackCertDir, e);
