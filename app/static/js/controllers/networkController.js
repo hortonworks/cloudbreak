@@ -64,23 +64,13 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
         }
 
         function doCreateNetwork() {
-            var isPublicInAccount = $scope.network.publicInAccount;
-            console.log($scope.network)
-            if (isPublicInAccount) {
-                AccountNetwork.save($scope.network, function(result) {
-                    handleNetworkCreationSuccess(result)
-                }, function(error) {
-                    $scope.showError(error, $rootScope.msg.network_creation_failure + $scope.network.name);
-                    $scope.showErrorMessageAlert();
-                });
-            } else {
-                UserNetwork.save($scope.network, function(result) {
-                    handleNetworkCreationSuccess(result)
-                }, function(error) {
-                    $scope.showError(error, $rootScope.msg.network_creation_failure + $scope.network.name);
-                    $scope.showErrorMessageAlert();
-                });
-            }
+            var save = $scope.network.publicInAccount ? AccountNetwork.save : UserNetwork.save;
+            save($scope.network, function(result) {
+                handleNetworkCreationSuccess(result)
+            }, function(error) {
+                $scope.showError(error, $rootScope.msg.network_creation_failure + $scope.network.name);
+                $scope.showErrorMessageAlert();
+            });
         }
 
         function handleNetworkCreationSuccess(result) {
@@ -114,6 +104,23 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
             $scope.azureNetworkForm.$setPristine();
             $scope.openstackNetworkForm.$setPristine();
             $scope.network = {};
+        }
+
+        $scope.filterByCloudPlatform = function (topology) {
+            return (topology.cloudPlatform === 'AWS' && $scope.awsNetwork) ||
+                    (topology.cloudPlatform === 'GCP' && $scope.gcpNetwork) ||
+                    (topology.cloudPlatform === 'AZURE_RM' && $scope.azureNetwork) ||
+                    (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackNetwork)
+        }
+
+        $scope.getTopologyNameById = function (topologyId) {
+            var result;
+            angular.forEach($rootScope.topologies, function(topology) {
+                if (topology.id === topologyId) {
+                    result = topology.name;
+                }
+            });
+            return result;
         }
 
         $scope.unShowErrorMessageAlert = function() {

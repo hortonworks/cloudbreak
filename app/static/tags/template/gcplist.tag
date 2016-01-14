@@ -44,5 +44,13 @@
             <p id="gcplgcpVolumeType" class="form-control-static">{{$root.displayNames.getDisk('GCP', template.volumeType)}}</p>
         </div>
     </div>
+    <div class="form-group" ng-show="template.topologyId">
+        <label class="col-sm-3 control-label" for="aws-topology">{{msg.template_form_topology_label}}</label>
+
+        <div class="col-sm-9">
+            <p id="aws-topology" class="form-control-static">{{getTopologyNameById(template.topologyId)}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
 
 </form>

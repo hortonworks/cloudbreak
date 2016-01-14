@@ -214,7 +214,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 volumeType: $rootScope.params.defaultDisks.AWS,
                 instanceType: $rootScope.params.defaultVmTypes.AWS,
                 parameters: {
-                    sshLocation: "0.0.0.0/0",                  
+                    sshLocation: "0.0.0.0/0",
                     encrypted: false
                 }
             }
@@ -249,6 +249,23 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             }
         }
 
+        $scope.filterByCloudPlatform = function (topology) {
+            return (topology.cloudPlatform === 'AWS' && $scope.awsTemplate) ||
+                    (topology.cloudPlatform === 'GCP' && $scope.gcpTemplate) ||
+                    (topology.cloudPlatform === 'AZURE_RM' && $scope.azureTemplate) ||
+                    (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackTemplate)
+        }
+
+        $scope.getTopologyNameById = function (topologyId) {
+            var result;
+            angular.forEach($rootScope.topologies, function(topology) {
+                if (topology.id === topologyId) {
+                    result = topology.name;
+                }
+            });
+            return result;
+        }
+        
         $scope.unShowErrorMessageAlert = function() {
             $scope.showAlert = false;
             $scope.alertMessage = "";

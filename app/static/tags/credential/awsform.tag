@@ -52,6 +52,15 @@
 </div>
 
 <div class="form-group">
+    <label class="col-sm-3 control-label" for="topologySelect">{{msg.credential_select_topology}}</label>
+    <div class="col-sm-8">
+        <select class="form-control" id="topologySelect" name="topologySelect" ng-model="credentialAws.topologyId" ng-options="topology.id as topology.name for topology in $root.topologies | filter: filterByCloudPlatform | orderBy:'name'" >
+            <option value="">-- {{msg.credential_select_topology.toLowerCase()}} --</option>
+        </select>
+    </div>
+</div>
+
+<div class="form-group">
     <label class="col-sm-3 control-label" for="credPublic">{{msg.public_in_account_label}}</label>
     <div class="col-sm-9">
         <input type="checkbox" name="credPublic" id="credPublic" ng-model="credentialAws.public">

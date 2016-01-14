@@ -2,7 +2,7 @@
     <label class="col-sm-3 control-label" for="openstack_tclusterName">{{msg.name_label}}</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="openstack_tclusterName" ng-model="openstackTemp.name" ng-minlength="5" ng-maxlength="100" required id="openstack_tclusterName" placeholder="{{msg.name_placeholder}}">
+        <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="openstack_tclusterName" ng-model="topologyTemp.name" ng-minlength="5" ng-maxlength="100" required id="openstack_tclusterName" placeholder="{{msg.name_placeholder}}">
         <div class="help-block" ng-show="openstackTopologyForm.openstack_tclusterName.$dirty && openstackTopologyForm.openstack_tclusterName.$invalid">
             <i class="fa fa-warning"></i> {{msg.topology_name_invalid}}
         </div>
@@ -15,7 +15,7 @@
     <label class="col-sm-3 control-label" for="openstack_tdescription">{{msg.description_label}}</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" name="openstack_tdescription" ng-model="openstackTemp.description" ng-maxlength="1000" id="openstack_tdescription" placeholder="{{msg.topology_form_description_placeholder}}">
+        <input type="text" class="form-control" name="openstack_tdescription" ng-model="topologyTemp.description" ng-maxlength="1000" id="openstack_tdescription" placeholder="{{msg.topology_form_description_placeholder}}">
         <div class="help-block" ng-show="openstackTopologyForm.openstack_tdescription.$dirty && openstackTopologyForm.openstack_tdescription.$invalid">
             <i class="fa fa-warning"></i> {{msg.topology_description_invalid}}
         </div>
@@ -27,7 +27,7 @@
     <label class="col-sm-3 control-label" for="openstack_tendpoint">{{msg.topology_endpoint_label}}</label>
 
     <div class="col-sm-9">
-        <input type="text" name="openstack_tendpoint" class="form-control" ng-model="openstackTemp.endpoint" id="openstack_tendpoint" placeholder="endpoint">
+        <input type="text" name="openstack_tendpoint" class="form-control" ng-model="topologyTemp.endpoint" id="openstack_tendpoint" placeholder="endpoint">
         <div class="help-block" ng-show="openstackTopologyForm.openstack_tendpoint.$dirty && openstackTopologyForm.openstack_tendpoint.$invalid"><i class="fa fa-warning"></i>{{msg.topology_endpoint_invalid}}
         </div>
         <!-- .col-sm-9 -->
@@ -71,7 +71,7 @@
             </div>
         </ng-form>
         <div style="padding-top: 10px;">
-            <table class="table table-bordered">
+            <table class="table table-bordered" ng-show="isAnyMappingSet()">
                 <thead>
                     <tr>
                         <th>{{msg.topology_hypervisor_table_label}}</th>
@@ -80,7 +80,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(hypervisor, rack) in openstackTemp.nodes">
+                    <tr ng-repeat="(hypervisor, rack) in topologyTemp.nodes">
                         <td>{{hypervisor}}</td>
                         <td>{{rack}}</td>
                         <td><span id="deleteMapping" class="label label-danger" ng-click="deleteMapping(hypervisor)" role="button"><i class="fa fa-minus"></i></span></td>
@@ -93,7 +93,7 @@
 
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">
-        <a id="createOpenstackTopology" ng-disabled="openstackTopologyForm.openstack_tclusterName.$invalid" class="btn btn-success btn-block" ng-click="createOpenstackTopology()" role="button"><i class="fa fa-plus fa-fw"></i>
+        <a id="createOpenstackTopology" ng-disabled="openstackTopologyForm.openstack_tclusterName.$invalid" class="btn btn-success btn-block" ng-click="createTopology('OPENSTACK')" role="button"><i class="fa fa-plus fa-fw"></i>
                 {{modify ? msg.topology_form_modify : msg.topology_form_create}}</a>
     </div>
 </div>

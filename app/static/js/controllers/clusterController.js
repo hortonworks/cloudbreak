@@ -905,5 +905,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.notStrictFilter = function(a, b) {
             return a == b;
         }
+
+        $scope.filterByTopology = function(resource) {
+            return !resource.topologyId || ($rootScope.activeCredential && resource.topologyId == $rootScope.activeCredential.topologyId)
+        }
     }
 ]);
