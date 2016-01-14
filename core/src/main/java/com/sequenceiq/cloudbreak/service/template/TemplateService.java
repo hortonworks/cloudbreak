@@ -116,6 +116,7 @@ public class TemplateService {
             if (!user.getUserId().equals(template.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
                 throw new BadRequestException("Templates can be deleted only by account admins or owners.");
             }
+            template.setTopology(null);
             if (ResourceStatus.USER_MANAGED.equals(template.getStatus())) {
                 templateRepository.delete(template);
             } else {
@@ -130,6 +131,7 @@ public class TemplateService {
                 Date now = new Date();
                 String terminatedName = template.getName() + DELIMITER + now.getTime();
                 template.setName(terminatedName);
+                template.setTopology(null);
                 template.setDeleted(true);
                 if (ResourceStatus.DEFAULT.equals(template.getStatus())) {
                     template.setStatus(ResourceStatus.DEFAULT_DELETED);

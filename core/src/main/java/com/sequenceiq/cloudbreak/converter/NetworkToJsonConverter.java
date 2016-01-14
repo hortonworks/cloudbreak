@@ -22,6 +22,9 @@ public class NetworkToJsonConverter extends AbstractConversionServiceAwareConver
         if (attributes != null) {
             json.setParameters(attributes.getMap());
         }
+        if (source.getTopology() != null) {
+            json.setTopologyId(source.getTopology().getId());
+        }
         return json;
     }
 }

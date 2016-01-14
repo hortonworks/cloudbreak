@@ -9,6 +9,7 @@ public class ModelDescriptions {
     public static final String CLOUD_PLATFORM = "type of cloud provider";
     public static final String OWNER = "id of the resource owner that is provided by OAuth provider";
     public static final String ACCOUNT = "account id of the resource owner that is provided by OAuth provider";
+    public static final String TOPOLOGY_ID = "id of the topology the resource belongs to";
 
     private ModelDescriptions() {
     }

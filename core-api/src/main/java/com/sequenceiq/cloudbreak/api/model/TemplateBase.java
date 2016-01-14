@@ -43,6 +43,9 @@ public abstract class TemplateBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, readOnly = true)
     private boolean publicInAccount;
 
+    @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
+    private Long topologyId;
+
     public String getDescription() {
         return description;
     }
@@ -114,5 +117,13 @@ public abstract class TemplateBase implements JsonEntity {
 
     public void setInstanceType(String instanceType) {
         this.instanceType = instanceType;
+    }
+
+    public Long getTopologyId() {
+        return topologyId;
+    }
+
+    public void setTopologyId(Long topologyId) {
+        this.topologyId = topologyId;
     }
 }

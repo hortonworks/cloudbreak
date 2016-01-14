@@ -143,6 +143,7 @@ public class CredentialService {
     private void archiveCredential(Credential credential) {
         credential.setName(generateArchiveName(credential.getName()));
         credential.setArchived(true);
+        credential.setTopology(null);
         credentialRepository.save(credential);
     }
 }

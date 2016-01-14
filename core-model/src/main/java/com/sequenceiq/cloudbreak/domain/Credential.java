@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
@@ -90,6 +91,9 @@ public class Credential {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
+
+    @ManyToOne
+    private Topology topology;
 
     public Credential() {
 
@@ -189,5 +193,13 @@ public class Credential {
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
+    }
+
+    public Topology getTopology() {
+        return topology;
+    }
+
+    public void setTopology(Topology topology) {
+        this.topology = topology;
     }
 }

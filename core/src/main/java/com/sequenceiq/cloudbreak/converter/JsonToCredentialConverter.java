@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
+import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class JsonToCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialRequest, Credential> {
@@ -23,6 +24,8 @@ public class JsonToCredentialConverter extends AbstractConversionServiceAwareCon
 
     @Inject
     private CredentialDefinitionService credentialDefinitionService;
+    @Inject
+    private TopologyService topologyService;
 
     @Override
     public Credential convert(CredentialRequest source) {
@@ -44,6 +47,9 @@ public class JsonToCredentialConverter extends AbstractConversionServiceAwareCon
             throw new BadRequestException("You can not modify the default user!");
         }
         setUserName(credential, source.getParameters());
+        if (source.getTopologyId() != null) {
+            credential.setTopology(topologyService.get(source.getTopologyId()));
+        }
         return credential;
     }
 
