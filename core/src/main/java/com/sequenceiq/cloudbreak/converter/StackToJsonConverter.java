@@ -4,9 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -16,6 +20,9 @@ import com.sequenceiq.cloudbreak.api.model.StackResponse;
 
 @Component
 public class StackToJsonConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {
+
+    @Inject
+    private ConversionService conversionService;
 
     @Override
     public StackResponse convert(Stack source) {
@@ -38,7 +45,9 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         stackJson.setRegion(source.getRegion());
         stackJson.setAvailabilityZone(source.getAvailabilityZone());
         stackJson.setOnFailureAction(source.getOnFailureActionAction());
-        stackJson.setSecurityGroupId(source.getSecurityGroup().getId());
+        if (source.getSecurityGroup()!=null) {
+            stackJson.setSecurityGroupId(source.getSecurityGroup().getId());
+        }
         List<InstanceGroupJson> templateGroups = new ArrayList<>();
         templateGroups.addAll(convertInstanceGroups(source.getInstanceGroups()));
         stackJson.setInstanceGroups(templateGroups);
@@ -57,6 +66,9 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         }
         stackJson.setParameters(source.getParameters());
         stackJson.setPlatformVariant(source.getPlatformVariant());
+        if (source.getOrchestrator()!=null) {
+            stackJson.setOrchestrator(conversionService.convert(source.getOrchestrator(), OrchestratorResponse.class));
+        }
         return stackJson;
     }
 

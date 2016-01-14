@@ -14,6 +14,8 @@ public class ClusterResponse {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
+    @ApiModelProperty(ModelDescriptions.NAME)
+    private String name;
     @ApiModelProperty(ClusterModelDescription.STATUS)
     private String status;
     @ApiModelProperty(ClusterModelDescription.HOURS)
@@ -60,6 +62,14 @@ public class ClusterResponse {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getStatus() {

@@ -72,7 +72,7 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public Response post(Long stackId, ClusterRequest request) {
-        CbUser user = authenticatedUserService.getCbUser();
+       CbUser user = authenticatedUserService.getCbUser();
         if (request.getEnableSecurity()
                 && (request.getKerberosMasterKey() == null || request.getKerberosAdmin() == null || request.getKerberosPassword() == null)) {
             return Response.status(Response.Status.ACCEPTED).build();
@@ -121,6 +121,7 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public Response put(Long stackId, UpdateClusterJson updateJson) throws CloudbreakSecuritySetupException {
+        CbUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordJson userNamePasswordJson = updateJson.getUserNamePasswordJson();
@@ -142,14 +143,14 @@ public class ClusterController implements ClusterEndpoint {
         }
 
         if (updateJson.getHostGroupAdjustment() != null) {
-            clusterHostgroupAdjusmentChange(stackId, updateJson, stack);
+            clusterHostgroupAdjustmentChange(stackId, updateJson, stack);
             return Response.status(Response.Status.ACCEPTED).build();
         }
         LOGGER.error("Invalid cluster update request received. Stack id: {}", stackId);
         throw new BadRequestException("Invalid update cluster request!");
     }
 
-    private void clusterHostgroupAdjusmentChange(Long stackId, UpdateClusterJson updateJson, Stack stack)
+    private void clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterJson updateJson, Stack stack)
             throws CloudbreakSecuritySetupException {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format(
@@ -171,7 +172,8 @@ public class ClusterController implements ClusterEndpoint {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupJson json : updateJson.getHostgroups()) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getInstanceGroupName(), json.getRecipeIds(), false);
+            // TODO:
+            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getConstraint(), json.getRecipeIds(), false);
             hostGroups.add(hostGroupService.save(hostGroup));
         }
         AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();

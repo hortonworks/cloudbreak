@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
-import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
 
 import java.util.Map;
 
@@ -52,13 +52,11 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
     protected void doExecute(StackTerminationContext context, TerminateStackResult payload, Map<Object, Object> variables) {
         LOGGER.info("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
+        terminationService.finalizeTermination(stack.getId(), true);
         cloudbreakEventService.fireCloudbreakEvent(stack.getId(), BILLING_STOPPED.name(),
                 messagesService.getMessage(Msg.STACK_BILLING_STOPPED.code()));
-        stackUpdater.updateStackStatus(stack.getId(), DELETE_COMPLETED,
-                "The cluster and its infrastructure have successfully been terminated.");
         cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_COMPLETED.name(),
                 messagesService.getMessage(Msg.STACK_DELETE_COMPLETED.code()));
-        terminationService.finalizeTermination(stack.getId());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
             emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());

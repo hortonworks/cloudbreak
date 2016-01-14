@@ -196,7 +196,8 @@ public class ClusterCommands implements CommandMarker {
             for (Map<String, Object> hostGroupListEntity : context.getHostGroups().values()) {
                 HostGroupJson hostGroupJson = new HostGroupJson();
                 hostGroupJson.setName(hostGroupListEntity.keySet().iterator().next().toString());
-                hostGroupJson.setInstanceGroupName(hostGroupListEntity.keySet().iterator().next().toString());
+                //TODO: constraint
+//                hostGroupJson.setInstanceGroupName(hostGroupListEntity.keySet().iterator().next().toString());
                 hostGroupJson.setRecipeIds((Set<Long>) hostGroupListEntity.values().iterator().next());
                 hostGroupList.add(hostGroupJson);
             }

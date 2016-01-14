@@ -28,27 +28,27 @@ public abstract class StackBase implements JsonEntity {
     private String name;
     @ApiModelProperty(value = StackModelDescription.AVAILABILITY_ZONE, required = false)
     private String availabilityZone;
-    @NotNull
+//    @NotNull
     @ApiModelProperty(value = StackModelDescription.REGION, required = true)
     private String region;
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
     @ApiModelProperty(StackModelDescription.PLATFORM_VARIANT)
     private String platformVariant;
-    @NotNull
+//    @NotNull
     @ApiModelProperty(value = StackModelDescription.CREDENTIAL_ID, required = true)
     private Long credentialId;
     @ApiModelProperty(StackModelDescription.FAILURE_ACTION)
-    private OnFailureAction onFailureAction = OnFailureAction.ROLLBACK;
+    private OnFailureAction onFailureAction = OnFailureAction.DO_NOTHING;
     @ApiModelProperty(StackModelDescription.FAILURE_POLICY)
     private FailurePolicyJson failurePolicy;
     @Valid
     @ApiModelProperty(required = true)
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
-    @NotNull
+//    @NotNull
     @ApiModelProperty(value = StackModelDescription.SECURITY_GROUP_ID, required = true)
     private Long securityGroupId;
-    @NotNull
+//    @NotNull
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
     private Long networkId;
     @ApiModelProperty(StackModelDescription.PARAMETERS)

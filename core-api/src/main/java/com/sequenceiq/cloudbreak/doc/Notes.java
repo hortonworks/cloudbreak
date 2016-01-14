@@ -15,6 +15,9 @@ public class Notes {
             + "- and on top of the infrastructural setup they collect the information such as the used machine images, "
             + "the datacenter location, instance types, and can capture and control region-specific infrastructure variations. "
             + "We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.";
+    public static final String CONSTRAINT_NOTES = "A constraint template tells Cloudbreak the resource constraints "
+            + "(cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created on"
+            + "environments where there is no one-to-one mapping between containers and nodes, like Mesos.";
     public static final String CREDENTIAL_NOTES = "Cloudbreak is launching Hadoop clusters on the user's behalf - "
             + "on different cloud providers. One key point is that Cloudbreak does not store your "
             + "Cloud provider account details (such as username, password, keys, private SSL certificates, etc). "

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.util.JsonUtil.readValue;
 import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
 
@@ -18,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -31,9 +34,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @Service
@@ -66,13 +67,15 @@ public class TerminationService {
     @Resource
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
 
-    public void finalizeTermination(Long stackId) {
+    public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         try {
             Date now = new Date();
             String terminatedName = stack.getName() + DELIMITER + now.getTime();
             Cluster cluster = stack.getCluster();
-            if (cluster != null) {
+            if (!force && cluster != null) {
+                throw new TerminationFailedException(String.format("There is a cluster installed on stack '%s', terminate it first!.", stackId ));
+            } else if (cluster!=null) {
                 cluster.setName(terminatedName);
                 cluster.setBlueprint(null);
                 cluster.setSssdConfig(null);
@@ -96,6 +99,7 @@ public class TerminationService {
             stack.setName(terminatedName);
             terminateMetaDataInstances(stack);
             stackRepository.save(stack);
+            stackUpdater.updateStackStatus(stackId, DELETE_COMPLETED, "Stack was terminated successfully.");
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);

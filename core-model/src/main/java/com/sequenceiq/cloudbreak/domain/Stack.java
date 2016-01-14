@@ -239,6 +239,8 @@ public class Stack implements ProvisionEntity {
     private Credential credential;
     @Column(columnDefinition = "TEXT")
     private String platformVariant;
+    @Column(columnDefinition = "TEXT")
+    private String cloudPlatform;
     @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Cluster cluster;
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
@@ -259,6 +261,8 @@ public class Stack implements ProvisionEntity {
     private Network network;
     @ManyToOne
     private SecurityGroup securityGroup;
+    @OneToOne
+    private Orchestrator orchestrator;
     private Long created;
 
     public Set<InstanceGroup> getInstanceGroups() {
@@ -405,6 +409,14 @@ public class Stack implements ProvisionEntity {
         this.securityConfig = securityConfig;
     }
 
+    public Orchestrator getOrchestrator() {
+        return orchestrator;
+    }
+
+    public void setOrchestrator(Orchestrator orchestrator) {
+        this.orchestrator = orchestrator;
+    }
+
     public String getAvailabilityZone() {
         return availabilityZone;
     }
@@ -419,6 +431,14 @@ public class Stack implements ProvisionEntity {
 
     public void setPlatformVariant(String platformVariant) {
         this.platformVariant = platformVariant;
+    }
+
+    public String cloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {
@@ -495,10 +515,6 @@ public class Stack implements ProvisionEntity {
 
     public List<InstanceGroup> getInstanceGroupsAsList() {
         return new ArrayList<>(instanceGroups);
-    }
-
-    public String cloudPlatform() {
-        return credential.cloudPlatform();
     }
 
     public boolean isStackInDeletionPhase() {

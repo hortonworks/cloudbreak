@@ -49,6 +49,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     public ClusterResponse convert(Cluster source) {
         ClusterResponse clusterResponse = new ClusterResponse();
         clusterResponse.setId(source.getId());
+        clusterResponse.setName(source.getName());
         clusterResponse.setStatus(source.getStatus().name());
         clusterResponse.setStatusReason(source.getStatusReason());
         if (source.getBlueprint() != null) {
@@ -103,7 +104,8 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 Map<String, HostGroup> hostGroupMap = blueprintValidator.createHostGroupMap(hostGroups);
                 JsonNode componentsNode = blueprintValidator.getComponentsNode(hostGroupNode);
                 HostGroup actualHostgroup = hostGroupMap.get(hostGroupName);
-                InstanceMetaData next = actualHostgroup.getInstanceGroup().getInstanceMetaData().iterator().next();
+                //TODO
+                InstanceMetaData next = actualHostgroup.getConstraint().getInstanceGroup().getInstanceMetaData().iterator().next();
                 for (JsonNode componentNode : componentsNode) {
                     String componentName = componentNode.get("name").asText();
                     StackServiceComponentDescriptor componentDescriptor = stackServiceComponentDescs.get(componentName);

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -41,17 +41,34 @@ public class StackDecorator implements Decorator<Stack> {
 
     @Override
     public Stack decorate(Stack subject, Object... data) {
-        subject.setSecurityGroup(securityGroupService.get((Long) data[DecorationData.SECURITY_GROUP_ID.ordinal()]));
-        subject.setCredential(credentialService.get((Long) data[DecorationData.CREDENTIAL_ID.ordinal()]));
-        int consulServers = getConsulServerCount((Integer) data[DecorationData.USR_CONSUL_SERVER_COUNT.ordinal()], subject.getFullNodeCount());
-        subject.setConsulServers(consulServers);
-        Network network = networkService.getById((Long) data[DecorationData.NETWORK_ID.ordinal()]);
-        subject.setNetwork(network);
+        Object credentialId = data[DecorationData.CREDENTIAL_ID.ordinal()];
+        if (credentialId != null) {
+            Object securityGroupId = data[DecorationData.SECURITY_GROUP_ID.ordinal()];
+            Object networkId = data[DecorationData.NETWORK_ID.ordinal()];
+            if (subject.getInstanceGroups() == null || securityGroupId == null || networkId == null) {
+                throw new BadRequestException("Instance groups, security group and network must be specified!");
+            }
+            Credential credential = credentialService.get((Long) credentialId);
+            subject.setCloudPlatform(credential.cloudPlatform());
+            subject.setCredential(credential);
+            subject.setSecurityGroup(securityGroupService.get((Long) securityGroupId));
+            int consulServers = getConsulServerCount((Integer) data[DecorationData.USR_CONSUL_SERVER_COUNT.ordinal()], subject.getFullNodeCount());
+            subject.setConsulServers(consulServers);
 
-        if (subject.getFailurePolicy() != null) {
-            validatFailurePolicy(subject, consulServers, subject.getFailurePolicy());
+            subject.setNetwork(networkService.getById((Long) networkId));
+            if (subject.getOrchestrator() != null) {
+                throw new BadRequestException("Orchestrator cannot be configured for the stack!");
+            }
+            if (subject.getFailurePolicy() != null) {
+                validatFailurePolicy(subject, consulServers, subject.getFailurePolicy());
+            }
+            validate(subject);
+        } else {
+            subject.setCloudPlatform("BYOS");
+            if (subject.getOrchestrator() == null) {
+                throw new BadRequestException("If credential is not provided, orchestrator details cannot be empty.");
+            }
         }
-        validate(subject);
         return subject;
     }
 

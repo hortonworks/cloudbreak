@@ -95,7 +95,8 @@ public class HadoopConfigurationService {
         Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
         Map<String, Map<String, Map<String, String>>> hadoopConfig = new HashMap<>();
         for (HostGroup hostGroup : hostGroups) {
-            int volumeCount = hostGroup.getInstanceGroup().getTemplate().getVolumeCount();
+            //TODO
+            int volumeCount = hostGroup.getConstraint().getInstanceGroup().getTemplate().getVolumeCount();
             Map<String, Map<String, String>> componentConfig = new HashMap<>();
             for (String serviceName : serviceConfigs.keySet()) {
                 componentConfig.putAll(getProperties(serviceName, false, volumeCount));

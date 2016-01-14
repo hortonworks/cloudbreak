@@ -250,7 +250,8 @@ public class BlueprintValidatorTest {
     private HostGroup createHostGroup(String groupName, InstanceGroup instanceGroup) {
         HostGroup group = new HostGroup();
         group.setName(groupName);
-        group.setInstanceGroup(instanceGroup);
+        //TODO
+//        group.setInstanceGroup(instanceGroup);
         return group;
     }
 

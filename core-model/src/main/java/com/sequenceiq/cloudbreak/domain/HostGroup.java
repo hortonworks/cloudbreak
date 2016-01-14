@@ -35,12 +35,7 @@ import javax.persistence.SequenceGenerator;
                 name = "HostGroup.findAllHostGroupsByRecipe",
                 query = "SELECT h FROM HostGroup h "
                         + "JOIN h.recipes r "
-                        + "WHERE r.id= :recipeId"),
-        @NamedQuery(
-                name = "HostGroup.findHostGroupsByInstanceGroupName",
-                query = "SELECT h FROM HostGroup h "
-                        + "WHERE h.cluster.id= :clusterId "
-                        + "AND h.instanceGroup.groupName= :instanceGroupName")
+                        + "WHERE r.id= :recipeId")
 })
 public class HostGroup {
 
@@ -56,7 +51,7 @@ public class HostGroup {
     private Cluster cluster;
 
     @OneToOne
-    private InstanceGroup instanceGroup;
+    private Constraint constraint;
 
     @OneToMany(mappedBy = "hostGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostMetadata> hostMetadata = new HashSet<>();
@@ -88,12 +83,12 @@ public class HostGroup {
         this.cluster = cluster;
     }
 
-    public InstanceGroup getInstanceGroup() {
-        return instanceGroup;
+    public Constraint getConstraint() {
+        return constraint;
     }
 
-    public void setInstanceGroup(InstanceGroup instanceGroup) {
-        this.instanceGroup = instanceGroup;
+    public void setConstraint(Constraint constraint) {
+        this.constraint = constraint;
     }
 
     public Set<HostMetadata> getHostMetadata() {

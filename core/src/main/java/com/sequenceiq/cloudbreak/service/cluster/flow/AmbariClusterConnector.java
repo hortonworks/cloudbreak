@@ -216,10 +216,18 @@ public class AmbariClusterConnector {
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, blueprintText);
+            // TODO: nodeCount will simply come from hg->hosts associations
             int nodeCount = stack.getFullNodeCountWithoutDecommissionedNodes() - stack.getGateWayNodeCount();
 
             Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
+            // TODO:
+            // in the previous step, we only started a few agents where marathon was able to start them, but hostgroups were not part of it
+            // we don't know which hostgroup was meant for which ambari agent, we don't know how to associate hgs with host
+            // - we need that info from the previous step, so an input like (hg->hosts is needed from the previous step)
+            // it's easy to set it up there -> start some containers for a hg, get the ip addresses and put it in the map (it's ok for swarm as well)
+            // this way we won't have to rely on instance group information (finding alive hosts, we will know exactly where the agent was started)
             Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
+            // host metadata needs to be saved in the previous step as well
             hostGroups = saveHostMetadata(cluster, hostGroupMappings);
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
@@ -230,6 +238,7 @@ public class AmbariClusterConnector {
                 executeSssdRecipe(stack, null);
             }
 
+            // TODO: do not run it at all, if recipes are not supported
             if (fs != null) {
                 addFsRecipes(blueprintText, fs, hostGroups);
             }
@@ -955,7 +964,7 @@ public class AmbariClusterConnector {
         for (HostGroup hostGroup : hostGroups) {
             List<Map<String, String>> instanceMetaMapping = new ArrayList<>();
             Map<String, String> topologyMapping = getTopologyMapping(hostGroup);
-            List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(hostGroup.getInstanceGroup().getId());
+            List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(hostGroup.getConstraint().getInstanceGroup().getId());
             for (InstanceMetaData meta : metas) {
                 Map instanceMeta = new HashMap();
                 instanceMeta.put(FQDN, meta.getDiscoveryFQDN());
@@ -994,7 +1003,8 @@ public class AmbariClusterConnector {
     }
 
     private List<String> findFreeHosts(Long stackId, HostGroup hostGroup, int scalingAdjustment) {
-        Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
+        //TODO
+        Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getConstraint().getInstanceGroup().getId());
         Set<InstanceMetaData> instances = FluentIterable.from(unregisteredHosts).limit(scalingAdjustment).toSet();
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_ADDING_NODE_TO_HOSTGROUP.code(),

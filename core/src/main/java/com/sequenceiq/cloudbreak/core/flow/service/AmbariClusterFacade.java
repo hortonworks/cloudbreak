@@ -343,7 +343,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
         context = new StackScalingContext(stack.getId(),
-                actualContext.getCloudPlatform(), actualContext.getCandidates().size() * (-1), hostGroup.getInstanceGroup().getGroupName(),
+                actualContext.getCloudPlatform(), actualContext.getCandidates().size() * (-1), hostGroup.getConstraint().getInstanceGroup().getGroupName(),
                 null, actualContext.getScalingType(), null);
         return context;
     }

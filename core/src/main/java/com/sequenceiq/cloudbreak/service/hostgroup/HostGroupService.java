@@ -24,7 +24,4 @@ public class HostGroupService {
         return hostGroupRepository.save(hostGroup);
     }
 
-    public HostGroup getByClusterIdAndInstanceGroupName(Long clusterId, String instanceGroupName) {
-        return hostGroupRepository.findHostGroupsByInstanceGroupName(clusterId, instanceGroupName);
-    }
 }

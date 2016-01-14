@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
@@ -53,6 +55,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -69,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackForcedDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Service
 @Transactional
@@ -89,7 +93,11 @@ public class StackService {
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
     @Inject
+    private OrchestratorRepository orchestratorRepository;
+    @Inject
     private TlsSecurityService tlsSecurityService;
+    @Inject
+    private TerminationService terminationService;
     @Inject
     private FlowManager flowManager;
     @Inject
@@ -242,19 +250,28 @@ public class StackService {
 
     @Transactional(Transactional.TxType.NEVER)
     public Stack create(CbUser user, Stack stack) {
-        Stack savedStack = null;
+        Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
         setPlatformVariant(stack);
         MDCBuilder.buildMdcContext(stack);
         try {
+            if (stack.getOrchestrator() != null) {
+                orchestratorRepository.save(stack.getOrchestrator());
+            }
             savedStack = stackRepository.save(stack);
             MDCBuilder.buildMdcContext(savedStack);
-            instanceGroupRepository.save(savedStack.getInstanceGroups());
-            tlsSecurityService.copyClientKeys(stack.getId());
-            tlsSecurityService.storeSSHKeys(stack);
-            imageService.create(savedStack, connector.getPlatformParameters(stack));
-            flowManager.triggerProvisioning(new ProvisionRequest(platform(savedStack.cloudPlatform()), savedStack.getId()));
+            if (!"BYOS".equals(stack.cloudPlatform())) {
+                instanceGroupRepository.save(savedStack.getInstanceGroups());
+                tlsSecurityService.copyClientKeys(stack.getId());
+                tlsSecurityService.storeSSHKeys(stack);
+                imageService.create(savedStack, connector.getPlatformParameters(stack));
+                flowManager.triggerProvisioning(new ProvisionRequest(platform(savedStack.cloudPlatform()), savedStack.getId()));
+            } else {
+                savedStack.setStatus(Status.AVAILABLE);
+                savedStack.setCreated(new Date().getTime());
+                stackRepository.save(savedStack);
+            }
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
         } catch (CloudbreakSecuritySetupException e) {
@@ -432,7 +449,8 @@ public class StackService {
         HostGroup hostGroup = Iterables.find(stack.getCluster().getHostGroups(), new Predicate<HostGroup>() {
             @Override
             public boolean apply(@Nullable HostGroup input) {
-                return input.getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup());
+                // TODO: why instancegroups?
+                return input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup());
             }
         });
         if (hostGroup == null) {
@@ -455,7 +473,7 @@ public class StackService {
             throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroup));
         }
         if (isGateway(instanceGroup.getInstanceGroupType())) {
-            throw new BadRequestException("The Ambari server instancegroup modification is not enabled.");
+            throw new BadRequestException("The Ambari server instance group modification is not enabled.");
         }
     }
 
@@ -465,7 +483,11 @@ public class StackService {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
         if (!stack.isDeleteCompleted()) {
-            flowManager.triggerTermination(new StackDeleteRequest(platform(stack.cloudPlatform()), stack.getId()));
+            if (!"BYOS".equals(stack.cloudPlatform())) {
+                flowManager.triggerTermination(new StackDeleteRequest(platform(stack.cloudPlatform()), stack.getId()));
+            } else {
+                terminationService.finalizeTermination(stack.getId(), false);
+            }
         } else {
             LOGGER.info("Stack is already deleted.");
         }

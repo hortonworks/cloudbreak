@@ -75,6 +75,8 @@ dependencies {
     runtime project(':cloud-openstack')
     runtime project(':cloud-gcp')
     runtime project(':cloud-aws')
+    runtime project(':cloud-byos')
+
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 

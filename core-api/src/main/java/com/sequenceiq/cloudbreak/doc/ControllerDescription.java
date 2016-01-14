@@ -5,6 +5,7 @@ public class ControllerDescription {
     public static final String BLUEPRINT_DESCRIPTION = "Operations on blueprints";
     public static final String CREDENTIAL_DESCRIPTION = "Operations on credentials";
     public static final String TEMPLATE_DESCRIPTION = "Operations on templates";
+    public static final String CONSTRAINT_TEMPLATE_DESCRIPTION = "Operations on constraint templates";
     public static final String TOPOLOGY_DESCRIPTION = "Operations on topologies";
     public static final String STACK_DESCRIPTION = "Operations on stacks";
     public static final String CLUSTER_DESCRIPTION = "Operations on clusters";

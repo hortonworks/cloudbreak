@@ -63,7 +63,11 @@ import com.sequenceiq.cloudbreak.api.model.Status;
         @NamedQuery(
                 name = "Cluster.findByNameInAccount",
                 query = "SELECT c FROM Cluster c "
-                        + "WHERE c.name= :name and c.account= :account")
+                        + "WHERE c.name= :name and c.account= :account"),
+        @NamedQuery(
+                name = "Cluster.findAllClustersForConstraintTemplate",
+                query = "SELECT c FROM Cluster c inner join c.hostGroups hg "
+                        + "WHERE hg.constraint.constraintTemplate.id = :id"),
 })
 public class Cluster implements ProvisionEntity {
 

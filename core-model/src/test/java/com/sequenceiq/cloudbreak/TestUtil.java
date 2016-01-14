@@ -336,7 +336,7 @@ public class TestUtil {
         hostGroup.setName(DUMMY_NAME);
         hostGroup.setRecipes(TestUtil.recipes(1));
         hostGroup.setHostMetadata(TestUtil.hostMetadata(hostGroup, 1));
-        hostGroup.setInstanceGroup(TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.gcpTemplate(1L)));
+        //hostGroup.setInstanceGroup(TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.gcpTemplate(1L)));
         return hostGroup;
     }
 
