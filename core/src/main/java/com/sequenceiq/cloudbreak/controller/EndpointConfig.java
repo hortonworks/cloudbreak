@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.controller;
 
 import javax.ws.rs.ApplicationPath;
 
+import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.mapper.AccessDeniedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.AuthenticationCredentialsNotFoundExceptionMapper;
@@ -22,8 +25,6 @@ import com.sequenceiq.cloudbreak.controller.mapper.SpringBadRequestExceptionMapp
 import com.sequenceiq.cloudbreak.controller.mapper.SubscriptionAlreadyExistExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.TypeMismatchExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.UnsupportedOperationFailedExceptionMapper;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.stereotype.Component;
 
 @ApplicationPath(CoreApi.API_ROOT_CONTEXT)
 //TODO find a working solution for storing response codes globally
