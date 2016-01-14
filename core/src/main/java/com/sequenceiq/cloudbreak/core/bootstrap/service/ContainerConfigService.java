@@ -24,11 +24,11 @@ public class ContainerConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContainerConfigService.class);
 
-    @Value("${cb.docker.container.ambari.warm:}")
-    private String warmAmbariDockerImageName;
+    @Value("${cb.docker.container.ambari.agent:}")
+    private String ambariAgent;
 
-    @Value("${cb.docker.container.ambari:}")
-    private String ambariDockerImageName;
+    @Value("${cb.docker.container.ambari.server:}")
+    private String ambariServer;
 
     @Value("${cb.docker.container.registrator:}")
     private String registratorDockerImageName;
@@ -74,9 +74,10 @@ public class ContainerConfigService {
             ContainerConfig config;
             switch (dc) {
                 case AMBARI_SERVER:
+                    config = new GenericConfig.Builder(ambariServer).build();
+                    break;
                 case AMBARI_AGENT:
-                    String imageName = getAmbariImageName(stack);
-                    config = new GenericConfig.Builder(imageName).build();
+                    config = new GenericConfig.Builder(ambariAgent).build();
                     break;
                 case AMBARI_DB:
                     config = new GenericConfig.Builder(postgresDockerImageName).build();
@@ -108,16 +109,6 @@ public class ContainerConfigService {
         } catch (IOException e) {
             throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s"));
         }
-    }
-
-    private String getAmbariImageName(Stack stack) {
-        String imageName;
-        if (stack.getCluster().getAmbariStackDetails() == null) {
-            imageName = warmAmbariDockerImageName;
-        } else {
-            imageName = ambariDockerImageName;
-        }
-        return imageName;
     }
 
 }

@@ -120,7 +120,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void startAmbariServer(ContainerOrchestratorCluster cluster, ContainerConfig dbConfig, ContainerConfig serverConfig, String platform,
-            LogVolumePath logVolumePath, Boolean localAgentRequired, ExitCriteriaModel exitCriteriaModel)
+            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try {
             Node gateway = getGatewayNode(cluster.getGatewayConfig().getPublicAddress(), cluster.getNodes());
@@ -128,10 +128,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
             runner(ambariServerBootstrap(cluster.getGatewayConfig(), imageName(serverConfig), gateway, platform, logVolumePath),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
-            if (localAgentRequired) {
-                runner(ambariAgentBootstrap(cluster.getGatewayConfig(), imageName(serverConfig), gateway, String.valueOf(new Date().getTime()),
-                        platform, logVolumePath), getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();
-            }
         } catch (CloudbreakOrchestratorCancelledException | CloudbreakOrchestratorFailedException coe) {
             throw coe;
         } catch (Exception ex) {
@@ -442,8 +438,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @VisibleForTesting
     AmbariServerDatabaseBootstrap ambariServerDatabaseBootstrap(GatewayConfig gatewayConfig, String dbImageName, Node gateway, LogVolumePath logVolumePath) {
         DockerClient dockerApiClient = swarmClient(gatewayConfig);
-        return new AmbariServerDatabaseBootstrap(dockerApiClient, dbImageName, gateway.getHostname(), gateway.getDataVolumes(),
-                logVolumePath);
+        return new AmbariServerDatabaseBootstrap(dockerApiClient, dbImageName, gateway.getHostname(), logVolumePath);
     }
 
     @VisibleForTesting

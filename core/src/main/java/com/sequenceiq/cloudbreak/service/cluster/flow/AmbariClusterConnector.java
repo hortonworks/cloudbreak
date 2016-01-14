@@ -980,12 +980,6 @@ public class AmbariClusterConnector {
         return waitForAmbariOperations(stack, ambariClient, clusterInstallRequest, INSTALL_AMBARI_PROGRESS_STATE);
     }
 
-    private PollingResult waitForInstallToStart(Stack stack, AmbariClient ambariClient) {
-        Map<String, Integer> clusterInstallRequest = new HashMap<>();
-        clusterInstallRequest.put("CLUSTER_INSTALL", 1);
-        return waitForAmbariOperations(stack, ambariClient, clusterInstallRequest, INSTALL_AMBARI_PROGRESS_STATE);
-    }
-
     private List<String> findFreeHosts(Long stackId, HostGroup hostGroup, int scalingAdjustment) {
         Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInInstanceGroup(hostGroup.getInstanceGroup().getId());
         Set<InstanceMetaData> instances = FluentIterable.from(unregisteredHosts).limit(scalingAdjustment).toSet();

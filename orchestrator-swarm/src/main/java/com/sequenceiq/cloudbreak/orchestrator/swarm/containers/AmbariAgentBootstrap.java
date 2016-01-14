@@ -55,10 +55,8 @@ public class AmbariAgentBootstrap implements ContainerBootstrap {
                 .withPrivileged(true)
                 .withBinds(binds)
                 .withName(name)
-                .withEnv(String.format("constraint:node==%s", nodeName),
-                        String.format("CLOUD_PLATFORM=%s", cloudPlatform),
-                        "HADOOP_CLASSPATH=/data/jars/*:/usr/lib/hadoop/lib/*")
-                .withCmd("/start-agent"), nodeName);
+                .withEnv(String.format("constraint:node==%s", nodeName))
+                .withCmd(String.format("systemd.setenv=CLOUD_PLATFORM=%s", cloudPlatform)), nodeName);
 
         startContainer(docker, name);
 

@@ -101,8 +101,7 @@ public class ClusterContainerRunner {
             containerOrchestrator.startRegistrator(orchestratorCluster, containerConfigService.get(stack, REGISTRATOR),
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             containerOrchestrator.startAmbariServer(orchestratorCluster, containerConfigService.get(stack, AMBARI_DB),
-                    containerConfigService.get(stack, AMBARI_SERVER), cloudPlatform, logVolumePath,
-                    cluster.isSecure(), stackDeletionBasedExitCriteriaModel(stack.getId()));
+                    containerConfigService.get(stack, AMBARI_SERVER), cloudPlatform, logVolumePath, stackDeletionBasedExitCriteriaModel(stack.getId()));
             if (cluster.isSecure()) {
                 containerOrchestrator.startHaveged(orchestratorCluster, containerConfigService.get(stack, HAVEGED),
                         stackDeletionBasedExitCriteriaModel(stack.getId()));

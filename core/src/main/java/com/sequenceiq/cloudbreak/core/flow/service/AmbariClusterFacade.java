@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.ENABLE_SECURITY_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
@@ -27,10 +26,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterContainerRunner;

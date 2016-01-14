@@ -49,11 +49,8 @@ public class AmbariServerBootstrap implements ContainerBootstrap {
                 .withBinds(binds)
                 .withPortBindings(new Ports(ExposedPort.tcp(PORT), new Ports.Binding("0.0.0.0", PORT)))
                 .withName(name)
-                .withEnv(String.format("constraint:node==%s", nodeName),
-                        "POSTGRES_DB=localhost",
-                        String.format("CLOUD_PLATFORM=%s", cloudPlatform),
-                        "SERVICE_NAME=ambari-8080")
-                .withCmd("/start-server"), nodeName);
+                .withEnv(String.format("constraint:node==%s", nodeName), "SERVICE_NAME=ambari-8080")
+                .withCmd(String.format("systemd.setenv=POSTGRES_DB=localhost systemd.setenv=CLOUD_PLATFORM=%s", cloudPlatform)), nodeName);
 
         startContainer(docker, name);
 
