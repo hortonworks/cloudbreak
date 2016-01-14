@@ -35,11 +35,14 @@ public class Flow2Handler implements Consumer<Event<?>> {
             if (flowId == null) {
                 LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
                 FlowConfiguration<?, ?> flowConfig = flowConfigurationMap.get(key);
-                flowId = UUID.randomUUID().toString();
-                Flow<?, ?> flow = flowConfig.createFlow(flowId);
-                runningFlows.put(flowId, flow);
-                flow.start();
-                flow.sendEvent((String) event.getKey(), payload);
+                // TODO this needs becuse we have two flow implementations in the same time and we want to avoid conflicts
+                if (flowConfig != null) {
+                    flowId = UUID.randomUUID().toString();
+                    Flow<?, ?> flow = flowConfig.createFlow(flowId);
+                    runningFlows.put(flowId, flow);
+                    flow.start();
+                    flow.sendEvent((String) event.getKey(), payload);
+                }
             } else {
                 LOGGER.debug("flow control event arrived: key: {}, flowid: {}, payload: {}", key, flowId, payload);
                 Flow<?, ?> flow = runningFlows.get(flowId);
