@@ -15,7 +15,6 @@ jar {
 apply plugin: 'spring-boot'
 
 dependencies {
-    compile project(':cloud-common')
     compile project(':core-api')
     compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
         exclude group: 'org.slf4j';

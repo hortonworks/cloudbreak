@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyCollection;
@@ -50,7 +49,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.bus.EventBus;
@@ -71,7 +70,7 @@ public class AmbariClusterConnectorTest {
     private AmbariClient ambariClient;
 
     @Mock
-    private TLSClientConfig tlsClientConfig;
+    private HttpClientConfig httpClientConfig;
 
     @Mock
     private StackRepository stackRepository;
@@ -133,14 +132,14 @@ public class AmbariClusterConnectorTest {
         stack.setCluster(cluster);
         cluster.setHostGroups(new HashSet<HostGroup>());
         cluster.setConfigStrategy(ConfigStrategy.NEVER_APPLY);
-        when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenReturn(tlsClientConfig);
-        when(ambariClient.extendBlueprintGlobalConfiguration(anyString(), anyMap())).thenReturn(blueprint.getBlueprintText());
+        when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenReturn(httpClientConfig);
+        when(ambariClient.extendBlueprintGlobalConfiguration(anyString(), anyMap())).thenReturn("");
         when(hostMetadataRepository.findHostsInCluster(anyLong())).thenReturn(new HashSet<HostMetadata>());
         when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn(blueprint.getBlueprintText());
         when(ambariClient.addBlueprint(anyString())).thenReturn("");
         when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<String, Map<String, Map<String, String>>>());
-        when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), anyString(), anyString())).thenReturn(ambariClient);
-        when(ambariClientProvider.getDefaultAmbariClient(any(TLSClientConfig.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyString(), anyString())).thenReturn(ambariClient);
+        when(ambariClientProvider.getDefaultAmbariClient(any(HttpClientConfig.class))).thenReturn(ambariClient);
         when(hostsPollingService.pollWithTimeoutSingleFailure(any(AmbariHostsStatusCheckerTask.class), any(AmbariHostsCheckerContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(hostGroupRepository.findHostGroupsInCluster(anyLong())).thenReturn(cluster.getHostGroups());
@@ -154,15 +153,9 @@ public class AmbariClusterConnectorTest {
         when(ambariClient.deleteUser(anyString())).thenReturn("");
         when(ambariClient.createUser(anyString(), anyString(), anyBoolean())).thenReturn("");
         when(ambariClient.changePassword(anyString(), anyString(), anyString(), anyBoolean())).thenReturn("");
-        when(ambariClientProvider.getSecureAmbariClient(any(TLSClientConfig.class), any(Cluster.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getSecureAmbariClient(any(HttpClientConfig.class), any(Cluster.class))).thenReturn(ambariClient);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(clusterRepository.findOneWithLists(anyLong())).thenReturn(cluster);
-    }
-
-    @Test
-    public void testInstallAmbari() throws Exception {
-        Cluster result = underTest.buildAmbariCluster(stack);
-        assertEquals(cluster, result);
     }
 
     @Test(expected = AmbariOperationFailedException.class)
@@ -192,12 +185,6 @@ public class AmbariClusterConnectorTest {
         verify(ambariClient, times(0)).changePassword(anyString(), anyString(), anyString(), anyBoolean());
         verify(ambariClient, times(1)).deleteUser(anyString());
         verify(ambariClient, times(1)).createUser(anyString(), anyString(), anyBoolean());
-    }
-
-    @Test(expected = CloudbreakSecuritySetupException.class)
-    public void testChangeAmbariCredentialsWhenCreateAmbariClientDropException() throws Exception {
-        when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenThrow(new CloudbreakSecuritySetupException("sdfsdfsd"));
-        underTest.credentialChangeAmbariCluster(stack.getId(), "admin123", "admin1");
     }
 
     private Map<String, List<String>> createStringListMap() {

@@ -22,7 +22,6 @@ public class ContainerOrchestratorResolverTest {
 
     @Test
     public void getOrchestratorWhenExist() throws CloudbreakException {
-        ReflectionTestUtils.setField(underTest, "containerOrchestratorName", "test1");
         Map<String, ContainerOrchestrator> map = new HashMap<>();
         TestOneMockContainerOrchestrator testOneMockContainerOrchestrator = new TestOneMockContainerOrchestrator();
         map.put(testOneMockContainerOrchestrator.name(), testOneMockContainerOrchestrator);
@@ -30,13 +29,12 @@ public class ContainerOrchestratorResolverTest {
         map.put(testTwoMockContainerOrchestrator.name(), testTwoMockContainerOrchestrator);
         ReflectionTestUtils.setField(underTest, "containerOrchestrators", map);
 
-        ContainerOrchestrator containerOrchestrator = underTest.get();
+        ContainerOrchestrator containerOrchestrator = underTest.get("SWARM");
         assertNotNull(containerOrchestrator);
     }
 
     @Test(expected = CloudbreakException.class)
     public void getOrchestratorWhenNotExist() throws CloudbreakException {
-        ReflectionTestUtils.setField(underTest, "containerOrchestratorName", "test3");
         Map<String, ContainerOrchestrator> map = new HashMap<>();
         TestOneMockContainerOrchestrator testOneMockContainerOrchestrator = new TestOneMockContainerOrchestrator();
         map.put(testOneMockContainerOrchestrator.name(), testOneMockContainerOrchestrator);
@@ -44,20 +42,20 @@ public class ContainerOrchestratorResolverTest {
         map.put(testTwoMockContainerOrchestrator.name(), testTwoMockContainerOrchestrator);
         ReflectionTestUtils.setField(underTest, "containerOrchestrators", map);
 
-        underTest.get();
+        underTest.get("SWARM1");
     }
 
     class TestOneMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
         public String name() {
-            return "test1";
+            return "SWARM";
         }
     }
 
     class TestTwoMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
         public String name() {
-            return "test2";
+            return "MESOS";
         }
     }
 }

@@ -16,8 +16,8 @@ import org.springframework.statemachine.action.Action;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
-public abstract class AbstarctAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P> implements Action<S, E> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstarctAction.class);
+public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P> implements Action<S, E> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAction.class);
 
     @Inject
     private EventBus eventBus;
@@ -25,7 +25,7 @@ public abstract class AbstarctAction<S extends FlowState, E extends FlowEvent, C
     private Class<P> payloadClass;
     private List<PayloadConverter<P>> payloadConverters;
 
-    protected AbstarctAction(Class<P> payloadClass) {
+    protected AbstractAction(Class<P> payloadClass) {
         this.payloadClass = payloadClass;
     }
 

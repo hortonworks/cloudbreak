@@ -25,7 +25,11 @@ import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
         @NamedQuery(
                 name = "HostMetadata.findHostInClusterByName",
                 query = "SELECT h FROM HostMetadata h "
-                        + "WHERE h.hostGroup.cluster.id= :clusterId AND h.hostName = :hostName")
+                        + "WHERE h.hostGroup.cluster.id= :clusterId AND h.hostName = :hostName"),
+        @NamedQuery(
+                name = "HostMetadata.findEmptyContainerHostsInHostGroup",
+                query = "SELECT h FROM HostMetadata h "
+                        + "WHERE h.hostGroup.id= :hostGroupId AND h.hostMetadataState= 'CONTAINER_RUNNING'")
 })
 public class HostMetadata {
 

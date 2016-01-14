@@ -23,12 +23,14 @@ import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -45,6 +47,9 @@ public class ClusterBootstrapper {
 
     @Inject
     private StackRepository stackRepository;
+
+    @Inject
+    private OrchestratorRepository orchestratorRepository;
 
     @Inject
     private PollingService<BootstrapApiContext> bootstrapApiPollingService;
@@ -82,7 +87,7 @@ public class ClusterBootstrapper {
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
-            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
+            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get("SWARM");
             bootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     bootstrapApiCheckerTask,
                     new BootstrapApiContext(stack, gatewayConfig, containerOrchestrator),
@@ -110,6 +115,13 @@ public class ClusterBootstrapper {
                     new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodes),
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
+            // TODO: put it in orchestrator api
+            Orchestrator orchestrator = new Orchestrator();
+            orchestrator.setApiEndpoint(gatewayInstance.getPublicIp() + ":443");
+            orchestrator.setType("SWARM");
+            orchestratorRepository.save(orchestrator);
+            stack.setOrchestrator(orchestrator);
+            stackRepository.save(stack);
             if (TIMEOUT.equals(pollingResult)) {
                 clusterBootstrapperErrorHandler.terminateFailedNodes(containerOrchestrator, stack, gatewayConfig, nodes);
             }
@@ -134,7 +146,7 @@ public class ClusterBootstrapper {
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
-            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
+            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get("SWARM");
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             for (int i = 0; i < nodeMap.size(); i++) {
                 containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i),

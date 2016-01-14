@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 @Component
 public class RecipeEngine {
@@ -58,7 +58,7 @@ public class RecipeEngine {
     }
 
     private void uploadConsulRecipes(Stack stack, Iterable<Recipe> recipes) throws CloudbreakSecuritySetupException {
-        TLSClientConfig clientConfig = null;
+        HttpClientConfig clientConfig = null;
         for (Recipe recipe : recipes) {
             for (String plugin : recipe.getPlugins().keySet()) {
                 if (plugin.startsWith("base64://")) {
@@ -129,7 +129,7 @@ public class RecipeEngine {
         LOGGER.info("Setting up recipe properties.");
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         pluginManager.prepareKeyValues(clientConfig, getAllPropertiesFromRecipes(hostGroups));
     }
 
@@ -144,7 +144,7 @@ public class RecipeEngine {
             boolean existingHostGroup) throws CloudbreakSecuritySetupException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         for (Recipe recipe : recipes) {
             Map<String, PluginExecutionType> plugins = new HashMap<>();
             for (Map.Entry<String, PluginExecutionType> entry : recipe.getPlugins().entrySet()) {
@@ -166,7 +166,7 @@ public class RecipeEngine {
     private void cleanupPluginsOnHosts(Stack stack, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances) throws CloudbreakSecuritySetupException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         Map<String, Set<String>> eventIdMap = pluginManager.cleanupPlugins(clientConfig, getHostnames(hostMetadata));
         pluginManager.waitForEventFinish(stack, instances, eventIdMap, DEFAULT_RECIPE_TIMEOUT);
     }

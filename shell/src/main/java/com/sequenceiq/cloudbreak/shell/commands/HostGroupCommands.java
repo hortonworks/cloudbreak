@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.shell.commands;
 
-import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderObjectMapValueMap;
+import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderObjectMap;
+import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderObjectValueMap;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -22,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
 @Component
@@ -58,9 +58,9 @@ public class HostGroupCommands implements CommandMarker {
             if (recipeNames != null) {
                 recipeIdSet.addAll(getRecipeIds(recipeNames, RecipeParameterType.NAME));
             }
-            Map.Entry<String, Object> hostGroupMapEntry = new HashMap.SimpleEntry<String, Object>(hostgroup.getName(), recipeIdSet);
-            context.putHostGroup(hostGroupMapEntry);
-            return renderObjectMapValueMap(context.getHostGroups(), "hostgroup", "instanceGroupName", "recipeIds");
+            context.putHostGroup(hostgroup.getName(),
+                    new HostgroupEntry(context.getInstanceGroups().get(hostgroup.getName()).getNodeCount(), recipeIdSet));
+            return renderObjectMap(context.getHostGroups(), "hostgroup", "instanceGroupName", "recipeIds");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -68,7 +68,7 @@ public class HostGroupCommands implements CommandMarker {
 
     @CliCommand(value = "hostgroup show", help = "Configure host groups")
     public String showHostGroup() throws Exception {
-        return renderObjectMapValueMap(context.getHostGroups(), "hostgroup", "instanceGroupName", "recipeIds");
+        return renderObjectValueMap(context.getHostGroups(), "hostgroup");
     }
 
     private enum RecipeParameterType {

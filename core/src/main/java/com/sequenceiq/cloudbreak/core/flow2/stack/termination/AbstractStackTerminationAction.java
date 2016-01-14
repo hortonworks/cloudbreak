@@ -20,13 +20,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow2.AbstarctAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-abstract class AbstractStackTerminationAction<P> extends AbstarctAction<StackTerminationState, StackTerminationEvent, StackTerminationContext, P> {
+abstract class AbstractStackTerminationAction<P> extends AbstractAction<StackTerminationState, StackTerminationEvent, StackTerminationContext, P> {
     @Inject
     private StackService stackService;
     @Inject

@@ -8,23 +8,31 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
 @Component
 public class ConsulServerFilter implements HostFilter {
 
     @Inject
+    private ClusterRepository clusterRepository;
+
+    @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Override
-    public List<HostMetadata> filter(long stackId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
+    public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
         List<HostMetadata> copy = new ArrayList<>(hosts);
-        for (HostMetadata host : hosts) {
-            InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(stackId, host.getHostName());
-            if (instanceMetaData != null && instanceMetaData.getConsulServer()) {
-                copy.remove(host);
+        Cluster cluster = clusterRepository.findById(clusterId);
+        if (!"BYOS".equals(cluster.getStack().cloudPlatform())) {
+            for (HostMetadata host : hosts) {
+                InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(cluster.getStack().getId(), host.getHostName());
+                if (instanceMetaData != null && instanceMetaData.getConsulServer()) {
+                    copy.remove(host);
+                }
             }
         }
         return copy;

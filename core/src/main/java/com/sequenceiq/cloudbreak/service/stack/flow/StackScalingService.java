@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -67,6 +68,8 @@ public class StackScalingService {
     private TlsSecurityService tlsSecurityService;
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
+    @Inject
+    private AmbariDecommissioner ambariDecommissioner;
     @Inject
     private ServiceProviderConnectorAdapter connector;
     @Inject
@@ -118,7 +121,7 @@ public class StackScalingService {
     private void removeHostmetadataIfExists(Stack stack, InstanceMetaData instanceMetaData, HostMetadata hostMetadata) {
         if (hostMetadata != null) {
             try {
-                ambariClusterConnector.deleteHostFromAmbari(stack, hostMetadata);
+                ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata);
                 hostMetadataRepository.delete(hostMetadata);
                 eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
@@ -176,7 +179,7 @@ public class StackScalingService {
 
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         ConsulClient client = ConsulUtils.createClient(clientConfig);
 
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {

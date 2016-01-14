@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -49,6 +50,12 @@ public interface ClusterEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
     ClusterResponse getPrivate(@PathParam(value = "name") String name);
+
+    @DELETE
+    @Path("stacks/{id}/cluster")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ClusterOpDescription.DELETE_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
+    void delete(@PathParam(value = "id") Long stackId) throws Exception;
 
     @PUT
     @Path("stacks/{id}/cluster")

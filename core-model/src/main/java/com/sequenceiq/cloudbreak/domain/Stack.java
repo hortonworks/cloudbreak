@@ -41,8 +41,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
@@ -78,11 +76,9 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
                         + "WHERE s.id= :id"),
         @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
-                query = "SELECT c FROM Stack c inner join c.instanceGroups tg "
-                        + "LEFT JOIN FETCH c.resources "
+                query = "SELECT distinct c FROM Stack c "
                         + "LEFT JOIN FETCH c.instanceGroups ig "
-                        + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE tg.template.id= :id"),
+                        + "WHERE ig.template.id= :id"),
         @NamedQuery(
                 name = "Stack.findStackForCluster",
                 query = "SELECT c FROM Stack c "
@@ -209,6 +205,11 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
                 name = "Stack.findByStatuses",
                 query = "SELECT s FROM Stack s "
                         + "WHERE s.status IN :statuses"
+        ),
+        @NamedQuery(
+                name = "Stack.findStacksWithoutEvents",
+                query = "SELECT s.id FROM Stack s "
+                        + "WHERE s.id NOT IN (SELECT DISTINCT e.stackId FROM CloudbreakEvent e)"
         )
 })
 public class Stack implements ProvisionEntity {
@@ -239,6 +240,8 @@ public class Stack implements ProvisionEntity {
     private Credential credential;
     @Column(columnDefinition = "TEXT")
     private String platformVariant;
+    @Column(columnDefinition = "TEXT")
+    private String cloudPlatform;
     @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Cluster cluster;
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
@@ -259,6 +262,8 @@ public class Stack implements ProvisionEntity {
     private Network network;
     @ManyToOne
     private SecurityGroup securityGroup;
+    @OneToOne
+    private Orchestrator orchestrator;
     private Long created;
 
     public Set<InstanceGroup> getInstanceGroups() {
@@ -405,6 +410,14 @@ public class Stack implements ProvisionEntity {
         this.securityConfig = securityConfig;
     }
 
+    public Orchestrator getOrchestrator() {
+        return orchestrator;
+    }
+
+    public void setOrchestrator(Orchestrator orchestrator) {
+        this.orchestrator = orchestrator;
+    }
+
     public String getAvailabilityZone() {
         return availabilityZone;
     }
@@ -419,6 +432,14 @@ public class Stack implements ProvisionEntity {
 
     public void setPlatformVariant(String platformVariant) {
         this.platformVariant = platformVariant;
+    }
+
+    public String cloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {
@@ -495,10 +516,6 @@ public class Stack implements ProvisionEntity {
 
     public List<InstanceGroup> getInstanceGroupsAsList() {
         return new ArrayList<>(instanceGroups);
-    }
-
-    public String cloudPlatform() {
-        return credential.cloudPlatform();
     }
 
     public boolean isStackInDeletionPhase() {
@@ -627,12 +644,8 @@ public class Stack implements ProvisionEntity {
         this.components = components;
     }
 
-    public String getMostSpecificZone() {
-        if (StringUtils.isNoneEmpty(availabilityZone)) {
-            return availabilityZone;
-        } else {
-            return region;
-        }
+    public boolean isInstanceGroupsSpecified() {
+        return instanceGroups != null && !instanceGroups.isEmpty();
     }
 
 }

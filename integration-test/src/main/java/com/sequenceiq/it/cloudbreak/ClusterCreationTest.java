@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.it.IntegrationTestContext;
 
@@ -77,7 +78,12 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         for (HostGroup hostgroup : hostGroups) {
             HostGroupJson hostGroupJson = new HostGroupJson();
             hostGroupJson.setName(hostgroup.getName());
-            hostGroupJson.setInstanceGroupName(hostgroup.getInstanceGroupName());
+
+
+            ConstraintJson constraintJson = new ConstraintJson();
+            constraintJson.setInstanceGroupName(hostgroup.getInstanceGroupName());
+            constraintJson.setHostCount(hostgroup.getHostCount());
+            hostGroupJson.setConstraint(constraintJson);
             if (hostGroupsWithRecipe.contains(hostgroup.getName())) {
                 hostGroupJson.setRecipeIds(recipeIds);
             }

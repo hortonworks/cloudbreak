@@ -31,7 +31,7 @@ public class AppMasterFilter implements HostFilter {
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<HostMetadata> filter(long stackId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
+    public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
         List<HostMetadata> result = new ArrayList<>(hosts);
         try {
             String resourceManagerAddress = config.get(ConfigParam.YARN_RM_WEB_ADDRESS.key());

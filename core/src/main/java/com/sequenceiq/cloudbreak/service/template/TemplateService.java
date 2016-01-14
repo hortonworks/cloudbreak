@@ -9,7 +9,6 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +68,7 @@ public class TemplateService {
         template.setAccount(user.getAccount());
         try {
             savedTemplate = templateRepository.save(template);
-        } catch (DataIntegrityViolationException ex) {
+        } catch (Exception ex) {
             throw new DuplicateKeyValueException(APIResourceType.TEMPLATE, template.getName(), ex);
         }
         return savedTemplate;

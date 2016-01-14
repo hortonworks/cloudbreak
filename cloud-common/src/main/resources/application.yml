@@ -51,10 +51,7 @@ cb:
     starttls.enable: true
   success.cluster.installer.mail.template.path: templates/cluster-installer-mail-success.ftl
   failed.cluster.installer.mail.template.path: templates/cluster-installer-mail-fail.ftl
-  
-  container.orchestrator: SWARM
-  supported.container.orchestrators: com.sequenceiq.cloudbreak.orchestrator.swarm.SwarmContainerOrchestrator
-  
+
   docker:
     container:
       ambari.server: hortonworks/ambari-server:2.2.1-v9

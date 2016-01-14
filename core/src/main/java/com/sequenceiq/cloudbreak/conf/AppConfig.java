@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.client.Client;
+
 import java.io.File;
 import java.io.IOException;
 import java.security.Security;
@@ -8,11 +13,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.client.Client;
-
+import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.client.IdentityClient;
+import com.sequenceiq.cloudbreak.client.RestClient;
+import com.sequenceiq.cloudbreak.client.config.ConfigKey;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,21 +42,6 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.client.IdentityClient;
-import com.sequenceiq.cloudbreak.client.RestClient;
-import com.sequenceiq.cloudbreak.client.config.ConfigKey;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration
 public class AppConfig implements ResourceLoaderAware {
@@ -83,6 +81,9 @@ public class AppConfig implements ResourceLoaderAware {
     private boolean certificateValidation;
 
     @Inject
+    private List<ContainerOrchestrator> containerOrchestrators;
+
+    @Inject
     private List<FileSystemConfigurator> fileSystemConfigurators;
 
     @Inject
@@ -119,31 +120,17 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    public Map<String, ContainerOrchestrator> containerOrchestrators() throws CloudbreakException {
+    public Map<String, ContainerOrchestrator> containerOrchestrators() {
         Map<String, ContainerOrchestrator> map = new HashMap<>();
-        for (String className : orchestrators) {
-            try {
-                Class<?> coClass = AppConfig.class.getClassLoader().loadClass(className);
-                if (ContainerOrchestrator.class.isAssignableFrom(coClass)) {
-                    ContainerOrchestrator co = (ContainerOrchestrator) coClass.newInstance();
-                    co.init(simpleParalellContainerRunnerExecutor(), stackDeletionBasedExitCriteria());
-                    map.put(co.name(), co);
-                }
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                throw new CloudbreakException("Invalid ContainerOrchestrator definition: " + className, e);
-            }
+        for (ContainerOrchestrator containerOrchestrator : containerOrchestrators) {
+            containerOrchestrator.init(simpleParallelContainerRunnerExecutor(), stackDeletionBasedExitCriteria());
+            map.put(containerOrchestrator.name(), containerOrchestrator);
         }
-
-        if (map.isEmpty()) {
-            LOGGER.error("No any ContainerOrchestrator has been loaded. Following ContainerOrchestrators were tried {}", orchestrators);
-            throw new CloudbreakException("No any ContainerOrchestrator has been loaded");
-        }
-
         return map;
     }
 
     @Bean
-    public ParallelContainerRunner simpleParalellContainerRunnerExecutor() {
+    public ParallelContainerRunner simpleParallelContainerRunnerExecutor() {
         return new ExecutorBasedParallelContainerRunner(containerBootstrapBuilderExecutor());
     }
 

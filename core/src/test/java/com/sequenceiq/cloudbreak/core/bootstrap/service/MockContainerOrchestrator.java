@@ -43,6 +43,11 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
+    public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+        return;
+    }
+
+    @Override
     public List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         return null;
@@ -59,7 +64,7 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void deleteContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+    public void deleteContainer(List<ContainerInfo> containerInfos, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
         return;
     }
 

@@ -57,6 +57,9 @@ public class DefaultCloudbreakEventServiceTest {
 
         given(stackRepository.findById(1L)).willReturn(stack);
         CloudbreakEvent stackEvent = new CloudbreakEvent();
+        stackEvent.setOwner("John");
+        stackEvent.setCloud(AWS);
+
         given(eventRepository.save(Mockito.any(CloudbreakEvent.class))).willReturn(stackEvent);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
@@ -64,11 +67,7 @@ public class DefaultCloudbreakEventServiceTest {
         CloudbreakEventData eventData = new CloudbreakEventData(1L, "STACK_CREATED", "Stack created");
 
         //WHEN
-        eventService.createStackEvent(eventData);
-
-        //THEN
-        BDDMockito.verify(eventRepository).save(captor.capture());
-        CloudbreakEvent event = captor.getValue();
+        CloudbreakEvent event = eventService.createStackEvent(eventData);
 
         Assert.assertNotNull(event);
         Assert.assertEquals("The user name is not the expected", "John", event.getOwner());
@@ -83,6 +82,8 @@ public class DefaultCloudbreakEventServiceTest {
 
         given(stackRepository.findById(1L)).willReturn(stack);
         CloudbreakEvent stackEvent = new CloudbreakEvent();
+        stackEvent.setCloud("AZURE");
+        stackEvent.setOwner("John");
         given(eventRepository.save(Mockito.any(CloudbreakEvent.class))).willReturn(stackEvent);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
@@ -90,15 +91,11 @@ public class DefaultCloudbreakEventServiceTest {
         CloudbreakEventData eventData = new CloudbreakEventData(1L, "STACK_CREATED", "Stack created");
 
         //WHEN
-        eventService.createStackEvent(eventData);
-
-        //THEN
-        BDDMockito.verify(eventRepository).save(captor.capture());
-        CloudbreakEvent event = captor.getValue();
+        CloudbreakEvent event = eventService.createStackEvent(eventData);
 
         Assert.assertNotNull(event);
         Assert.assertEquals("The user name is not the expected", "John", event.getOwner());
-        Assert.assertEquals("The cloudprovider is not the expected", GCP, event.getCloud());
+        Assert.assertEquals("The cloudprovider is not the expected", "AZURE", event.getCloud());
     }
 
     @Test

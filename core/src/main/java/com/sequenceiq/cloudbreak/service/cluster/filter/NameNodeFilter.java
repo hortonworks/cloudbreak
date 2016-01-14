@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ConfigParam;
 public class NameNodeFilter implements HostFilter {
 
     @Override
-    public List<HostMetadata> filter(long stackId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
+    public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
         List<HostMetadata> result = new ArrayList<>(hosts);
         try {
             String nameNode = config.get(ConfigParam.NAMENODE_HTTP_ADDRESS.key());

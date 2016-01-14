@@ -24,6 +24,8 @@ public interface ClusterFacade {
 
     FlowContext handleClusterCreationFailure(FlowContext context) throws CloudbreakException;
 
+    FlowContext handleClusterInstallationFailure(FlowContext context) throws CloudbreakException;
+
     FlowContext addClusterContainers(FlowContext context) throws CloudbreakException;
 
     FlowContext upscaleCluster(FlowContext context) throws CloudbreakException;

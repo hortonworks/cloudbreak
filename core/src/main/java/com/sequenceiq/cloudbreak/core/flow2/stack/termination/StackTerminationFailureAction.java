@@ -57,11 +57,21 @@ public class StackTerminationFailureAction extends AbstractStackTerminationActio
         Stack stack = stackService.getById(context.getStack().getId());
         if (stack != null) {
             boolean forced = variables.get("FORCEDTERMINATION") != null;
-            String stackUpdateMessage =
-                    forced ? "The cluster and its infrastructure have been force terminated." : "Termination failed: " + payload.getErrorDetails().getMessage();
-            Status status = forced ? DELETE_COMPLETED : DELETE_FAILED;
-            stackUpdater.updateStackStatus(stack.getId(), status, stackUpdateMessage);
-            Msg eventMessage = forced ? Msg.STACK_FORCED_DELETE_COMPLETED : Msg.STACK_INFRASTRUCTURE_DELETE_FAILED;
+            String stackUpdateMessage;
+            Msg eventMessage;
+            Status status;
+            if (!forced) {
+                stackUpdateMessage = "Termination failed: " + payload.getErrorDetails().getMessage();
+                status = DELETE_FAILED;
+                eventMessage = Msg.STACK_INFRASTRUCTURE_DELETE_FAILED;
+                stackUpdater.updateStackStatus(stack.getId(), status, stackUpdateMessage);
+            } else {
+                terminationService.finalizeTermination(stack.getId(), true);
+                clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
+                stackUpdateMessage = "Stack was force terminated.";
+                status = DELETE_COMPLETED;
+                eventMessage = Msg.STACK_FORCED_DELETE_COMPLETED;
+            }
             String message = messagesService.getMessage(eventMessage.code(), Arrays.asList(stackUpdateMessage));
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), status.name(), message);
             if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
@@ -72,10 +82,6 @@ public class StackTerminationFailureAction extends AbstractStackTerminationActio
                 }
                 cloudbreakEventService.fireCloudbreakEvent(stack.getId(), status.name(),
                         messagesService.getMessage(Msg.STACK_NOTIFICATION_EMAIL.code()));
-            }
-            if (forced) {
-                terminationService.finalizeTermination(stack.getId());
-                clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
             }
         } else {
             LOGGER.info("Stack was not found during termination. " + payload.getRequest());

@@ -14,14 +14,12 @@ public class ProvisioningContext extends DefaultFlowContext {
     private Map<String, String> userDataParams = new HashMap<>();
     private Set<Resource> resources = new HashSet<>();
     private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
-    private String ambariIp;
 
     private ProvisioningContext(Builder builder) {
         super(builder.stackId, builder.cloudPlatform, builder.errorReason);
         this.setupProperties = builder.setupProperties;
         this.resources = builder.resources;
         this.coreInstanceMetaData = builder.coreInstanceMetaData;
-        this.ambariIp = builder.ambariIp;
     }
 
     public Map<String, Object> getSetupProperties() {
@@ -40,17 +38,12 @@ public class ProvisioningContext extends DefaultFlowContext {
         return coreInstanceMetaData;
     }
 
-    public String getAmbariIp() {
-        return ambariIp;
-    }
-
     @Override public String toString() {
         final StringBuilder sb = new StringBuilder("ProvisioningContext{");
         sb.append(", setupProperties=").append(setupProperties);
         sb.append(", userDataParams=").append(userDataParams);
         sb.append(", resources=").append(resources);
         sb.append(", coreInstanceMetaData=").append(coreInstanceMetaData);
-        sb.append(", ambariIp='").append(ambariIp).append('\'');
         sb.append('}');
         return sb.toString();
     }
@@ -62,7 +55,6 @@ public class ProvisioningContext extends DefaultFlowContext {
         private Map<String, Object> setupProperties = new HashMap<>();
         private Set<Resource> resources = new HashSet<>();
         private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
-        private String ambariIp;
 
         public Builder setDefaultParams(Long stackId, Platform cloudPlatform) {
             this.stackId = stackId;
@@ -92,11 +84,6 @@ public class ProvisioningContext extends DefaultFlowContext {
             return this;
         }
 
-        public Builder setAmbariIp(String ambariIp) {
-            this.ambariIp = ambariIp;
-            return this;
-        }
-
         public Builder withProvisioningContext(ProvisioningContext provisioningContext) {
             this.stackId = provisioningContext.getStackId();
             this.cloudPlatform = provisioningContext.getCloudPlatform();
@@ -104,7 +91,6 @@ public class ProvisioningContext extends DefaultFlowContext {
             this.setupProperties = provisioningContext.getSetupProperties();
             this.resources = provisioningContext.getResources();
             this.coreInstanceMetaData = provisioningContext.getCoreInstanceMetaData();
-            this.ambariIp = provisioningContext.getAmbariIp();
             return this;
         }
 

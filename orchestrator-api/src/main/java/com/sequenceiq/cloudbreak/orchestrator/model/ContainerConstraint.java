@@ -10,23 +10,26 @@ import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
 public class ContainerConstraint {
 
     private final String[] cmd;
-    private final Double cpus;
-    private final Double mem;
     private final Integer instances;
     private final List<Integer> ports;
     private final List<List<String>> constraints;
-    private final Map<String, String> volumeBinds;
-    private final List<String> env;
+    private Map<String, String> env;
     private final String networkMode;
     private final TcpPortBinding tcpPortBinding;
-    private final Map<String, String> privateIpsByHostname;
-    private final ContainerName containerName;
+    private ContainerName containerName;
     private final Map<String, String> links;
+    private final String appName;
+
+    private List<String> hosts;
+    private Map<String, String> volumeBinds;
+    private Double cpu;
+    private Double mem;
+    private Double disk;
 
 
-    public ContainerConstraint(ContainerConstraint.Builder builder) {
+    private ContainerConstraint(ContainerConstraint.Builder builder) {
         this.cmd = builder.cmd;
-        this.cpus = builder.cpus;
+        this.cpu = builder.cpus;
         this.mem = builder.mem;
         this.instances = builder.instances;
         this.ports = builder.ports;
@@ -35,21 +38,15 @@ public class ContainerConstraint {
         this.env = builder.env;
         this.networkMode = builder.networkMode;
         this.tcpPortBinding = builder.tcpPortBinding;
-        this.privateIpsByHostname = builder.privateIpsByHostname;
+        this.hosts = builder.hosts;
         this.containerName = builder.containerName;
         this.links = builder.links;
+        this.appName = builder.appName;
+        this.disk = builder.disk;
     }
 
     public String[] getCmd() {
         return cmd;
-    }
-
-    public Double getCpus() {
-        return cpus;
-    }
-
-    public Double getMem() {
-        return mem;
     }
 
     public Integer getInstances() {
@@ -68,7 +65,7 @@ public class ContainerConstraint {
         return volumeBinds;
     }
 
-    public List<String> getEnv() {
+    public Map<String, String> getEnv() {
         return env;
     }
 
@@ -80,8 +77,16 @@ public class ContainerConstraint {
         return tcpPortBinding;
     }
 
-    public Map<String, String> getPrivateIpsByHostname() {
-        return privateIpsByHostname;
+    public List<String> getHosts() {
+        return hosts;
+    }
+
+    public Double getCpu() {
+        return cpu;
+    }
+
+    public Double getMem() {
+        return mem;
     }
 
     public ContainerName getContainerName() {
@@ -90,6 +95,14 @@ public class ContainerConstraint {
 
     public Map<String, String> getLinks() {
         return links;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public Double getDisk() {
+        return disk;
     }
 
     public static class Builder {
@@ -101,17 +114,19 @@ public class ContainerConstraint {
         private Integer instances;
         private List<List<String>> constraints = new ArrayList<>();
         private Map<String, String> volumeBinds = new HashMap<>();
-        private List<String> env = new ArrayList<>();
+        private Map<String, String> env = new HashMap<>();
         private String networkMode;
         private TcpPortBinding tcpPortBinding;
-        private Map<String, String> privateIpsByHostname = new HashMap<>();
+        private List<String> hosts = new ArrayList<>();
         private ContainerName containerName;
         private Map<String, String> links = new HashMap<>();
+        private String appName;
+        private Double disk;
 
         public Builder containerConstraint(ContainerConstraint containerConstraint) {
             this.cmd = containerConstraint.getCmd();
             this.ports = containerConstraint.getPorts();
-            this.cpus = containerConstraint.getCpus();
+            this.cpus = containerConstraint.getCpu();
             this.mem = containerConstraint.getMem();
             this.instances = containerConstraint.getInstances();
             this.constraints = containerConstraint.getConstraints();
@@ -119,9 +134,11 @@ public class ContainerConstraint {
             this.env = containerConstraint.getEnv();
             this.networkMode = containerConstraint.getNetworkMode();
             this.tcpPortBinding = containerConstraint.getTcpPortBinding();
-            this.privateIpsByHostname = containerConstraint.getPrivateIpsByHostname();
+            this.hosts = containerConstraint.getHosts();
             this.containerName = containerConstraint.getContainerName();
             this.links = containerConstraint.getLinks();
+            this.appName = containerConstraint.getAppName();
+            this.disk = containerConstraint.getDisk();
             return this;
         }
 
@@ -145,6 +162,11 @@ public class ContainerConstraint {
             return this;
         }
 
+        public Builder withDiskSize(Double diskSize) {
+            this.disk = diskSize;
+            return this;
+        }
+
         public Builder instances(Integer numberOfInstances) {
             this.instances = numberOfInstances;
             return this;
@@ -160,8 +182,8 @@ public class ContainerConstraint {
             return this;
         }
 
-        public Builder addEnv(List<String> env) {
-            this.env.addAll(env);
+        public Builder addEnv(Map<String, String> env) {
+            this.env.putAll(env);
             return this;
         }
 
@@ -175,8 +197,8 @@ public class ContainerConstraint {
             return this;
         }
 
-        public Builder addPrivateIpsByHostname(Map<String, String> privateIpsByHostname) {
-            this.privateIpsByHostname.putAll(privateIpsByHostname);
+        public Builder addHosts(List<String> hosts) {
+            this.hosts.addAll(hosts);
             return this;
         }
 
@@ -192,6 +214,11 @@ public class ContainerConstraint {
 
         public Builder addLink(String hostContainerLink, String link) {
             this.links.put(hostContainerLink, link);
+            return this;
+        }
+
+        public Builder withAppName(String appName) {
+            this.appName = appName;
             return this;
         }
 

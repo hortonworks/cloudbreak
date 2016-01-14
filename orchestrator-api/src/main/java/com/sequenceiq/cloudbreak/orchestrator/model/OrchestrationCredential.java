@@ -1,26 +1,22 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
+import java.util.Map;
+
 public class OrchestrationCredential {
 
-    private String publicApiAddress;
-    private String privateApiAddress;
-    private String tlsCertificateDir;
+    private String apiEndpoint;
+    private Map<String, Object> properties;
 
-    public OrchestrationCredential(String publicApiAddress, String privateApiAddress, String tlsCertificateDir) {
-        this.publicApiAddress = publicApiAddress;
-        this.privateApiAddress = privateApiAddress;
-        this.tlsCertificateDir = tlsCertificateDir;
+    public OrchestrationCredential(String apiEndpoint, Map<String, Object> properties) {
+        this.apiEndpoint = apiEndpoint;
+        this.properties = properties;
     }
 
-    public String getPublicApiAddress() {
-        return publicApiAddress;
+    public String getApiEndpoint() {
+        return apiEndpoint;
     }
 
-    public String getPrivateApiAddress() {
-        return privateApiAddress;
-    }
-
-    public String getTlsCertificateDir() {
-        return tlsCertificateDir;
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 }
