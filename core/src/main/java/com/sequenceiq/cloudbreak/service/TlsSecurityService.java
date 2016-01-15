@@ -44,10 +44,10 @@ public class TlsSecurityService {
     @Value("${cb.cert.dir:}")
     private String certDir;
 
-    @Value("#{'${cb.cert.dir:}' + '${cb.tls.cert.file:}'}")
+    @Value("#{'${cb.cert.dir:}/${cb.tls.cert.file:}'}")
     private String clientCert;
 
-    @Value("#{'${cb.cert.dir:}' + '${cb.tls.private.key.file:}'}")
+    @Value("#{'${cb.cert.dir:}/${cb.tls.private.key.file:}'}")
     private String clientPrivateKey;
 
     @Inject
