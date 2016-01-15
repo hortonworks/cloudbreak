@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.dash;
 
-import static com.sequenceiq.cloudbreak.common.type.PluginExecutionType.ALL_NODES;
-import static com.sequenceiq.cloudbreak.common.type.PluginExecutionType.ONE_NODE;
-import static com.sequenceiq.cloudbreak.model.FileSystemConfiguration.STORAGE_CONTAINER;
-import static com.sequenceiq.cloudbreak.model.FileSystemType.DASH;
+import static com.sequenceiq.cloudbreak.api.model.PluginExecutionType.ALL_NODES;
+import static com.sequenceiq.cloudbreak.api.model.PluginExecutionType.ONE_NODE;
+import static com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration.STORAGE_CONTAINER;
+import static com.sequenceiq.cloudbreak.api.model.FileSystemType.DASH;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.POST_INSTALL;
 
 import java.util.ArrayList;
@@ -12,8 +12,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.model.DashFileSystemConfiguration;
-import com.sequenceiq.cloudbreak.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.DashFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;

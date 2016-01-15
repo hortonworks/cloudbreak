@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.wasb;
 
-import static com.sequenceiq.cloudbreak.model.FileSystemConfiguration.STORAGE_CONTAINER;
-import static com.sequenceiq.cloudbreak.model.FileSystemType.WASB;
+import static com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration.STORAGE_CONTAINER;
+import static com.sequenceiq.cloudbreak.api.model.FileSystemType.WASB;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.model.WasbFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
-import com.sequenceiq.cloudbreak.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import org.springframework.stereotype.Component;
 
 @Component

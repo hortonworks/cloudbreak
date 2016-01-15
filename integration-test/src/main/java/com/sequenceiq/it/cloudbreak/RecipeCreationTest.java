@@ -10,9 +10,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
-import com.sequenceiq.cloudbreak.model.RecipeRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
+import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {

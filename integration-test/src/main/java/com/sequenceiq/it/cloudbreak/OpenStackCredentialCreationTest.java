@@ -10,7 +10,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrationTest {

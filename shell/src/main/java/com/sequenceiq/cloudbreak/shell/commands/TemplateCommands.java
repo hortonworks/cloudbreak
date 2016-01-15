@@ -16,10 +16,10 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.TemplateEndpoint;
-import com.sequenceiq.cloudbreak.model.IdJson;
-import com.sequenceiq.cloudbreak.model.TemplateRequest;
-import com.sequenceiq.cloudbreak.model.TemplateResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
+import com.sequenceiq.cloudbreak.api.model.IdJson;
+import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.shell.completion.AwsInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.AwsVolumeType;
 import com.sequenceiq.cloudbreak.shell.completion.AzureInstanceType;

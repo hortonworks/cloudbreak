@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.sequenceiq.cloudbreak.api.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.api.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.periscope.service.security.TokenService;
 
 @Service

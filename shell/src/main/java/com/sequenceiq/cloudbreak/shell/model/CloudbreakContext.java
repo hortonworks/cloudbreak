@@ -15,15 +15,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.api.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.api.TemplateEndpoint;
-import com.sequenceiq.cloudbreak.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.model.FileSystemType;
-import com.sequenceiq.cloudbreak.model.InstanceGroupJson;
-import com.sequenceiq.cloudbreak.model.StackResponse;
-import com.sequenceiq.cloudbreak.model.TemplateResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
+import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 /**

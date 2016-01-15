@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
-import com.sequenceiq.cloudbreak.api.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
+import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 

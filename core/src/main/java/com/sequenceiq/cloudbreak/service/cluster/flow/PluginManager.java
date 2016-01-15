@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;

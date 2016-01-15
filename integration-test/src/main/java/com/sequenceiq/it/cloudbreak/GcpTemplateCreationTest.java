@@ -10,7 +10,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.model.TemplateRequest;
+import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 
 public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     @Inject

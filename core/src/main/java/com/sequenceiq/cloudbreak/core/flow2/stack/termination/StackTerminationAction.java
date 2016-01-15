@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
-import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
 
 import java.util.Map;
 

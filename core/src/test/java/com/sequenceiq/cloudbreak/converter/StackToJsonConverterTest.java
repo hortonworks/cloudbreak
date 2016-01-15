@@ -20,10 +20,10 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.model.FailurePolicyJson;
-import com.sequenceiq.cloudbreak.model.InstanceGroupJson;
-import com.sequenceiq.cloudbreak.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.StackResponse;
 
 public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack> {
 

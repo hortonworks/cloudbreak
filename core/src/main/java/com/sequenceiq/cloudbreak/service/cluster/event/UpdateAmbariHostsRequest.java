@@ -6,7 +6,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 
 public class UpdateAmbariHostsRequest {
 

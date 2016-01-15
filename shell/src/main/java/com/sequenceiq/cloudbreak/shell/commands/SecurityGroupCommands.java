@@ -15,10 +15,10 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.SecurityGroupEndpoint;
-import com.sequenceiq.cloudbreak.model.IdJson;
-import com.sequenceiq.cloudbreak.model.SecurityGroupJson;
-import com.sequenceiq.cloudbreak.model.SecurityRuleJson;
+import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
+import com.sequenceiq.cloudbreak.api.model.IdJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupId;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupName;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;

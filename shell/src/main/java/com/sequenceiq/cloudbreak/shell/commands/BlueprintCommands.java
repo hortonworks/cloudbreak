@@ -23,9 +23,9 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.model.BlueprintRequest;
-import com.sequenceiq.cloudbreak.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
+import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;

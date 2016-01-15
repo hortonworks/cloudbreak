@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.model.SecurityRuleJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 public class JsonToSecurityRuleConverterTest extends AbstractJsonConverterTest<SecurityRuleJson> {

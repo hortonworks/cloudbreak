@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.model.FileSystemConfiguration;
-import com.sequenceiq.cloudbreak.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeScript;
 

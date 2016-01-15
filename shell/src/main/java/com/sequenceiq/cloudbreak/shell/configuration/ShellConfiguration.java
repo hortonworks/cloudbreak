@@ -41,21 +41,21 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.sequenceiq.cloudbreak.api.AccountPreferencesEndpoint;
-import com.sequenceiq.cloudbreak.api.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.api.ClusterEndpoint;
-import com.sequenceiq.cloudbreak.api.ConnectorEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.AccountPreferencesEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.api.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.api.EventEndpoint;
-import com.sequenceiq.cloudbreak.api.NetworkEndpoint;
-import com.sequenceiq.cloudbreak.api.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.SecurityGroupEndpoint;
-import com.sequenceiq.cloudbreak.api.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.SubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.TemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.UsageEndpoint;
-import com.sequenceiq.cloudbreak.api.UserEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.EventEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.SubscriptionEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.UsageEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.UserEndpoint;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 /**

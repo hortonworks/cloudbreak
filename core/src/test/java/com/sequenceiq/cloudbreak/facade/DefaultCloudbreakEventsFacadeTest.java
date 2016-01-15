@@ -22,7 +22,7 @@ import org.springframework.core.convert.TypeDescriptor;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
-import com.sequenceiq.cloudbreak.model.CloudbreakEventsJson;
+import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @RunWith(MockitoJUnitRunner.class)

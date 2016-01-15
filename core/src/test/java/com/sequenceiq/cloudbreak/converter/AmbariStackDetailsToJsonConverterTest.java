@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
-import com.sequenceiq.cloudbreak.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 
 public class AmbariStackDetailsToJsonConverterTest extends AbstractEntityConverterTest<AmbariStackDetails> {
 

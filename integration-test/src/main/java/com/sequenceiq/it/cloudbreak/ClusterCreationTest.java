@@ -12,10 +12,10 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.ClusterEndpoint;
-import com.sequenceiq.cloudbreak.api.StackEndpoint;
-import com.sequenceiq.cloudbreak.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {

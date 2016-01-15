@@ -6,9 +6,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.common.type.StatusRequest;
-import com.sequenceiq.cloudbreak.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.model.StatusRequest;
+import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class StatusUpdateTest extends AbstractCloudbreakIntegrationTest {

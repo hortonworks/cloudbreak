@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class BlueprintCreationTest extends AbstractCloudbreakIntegrationTest {

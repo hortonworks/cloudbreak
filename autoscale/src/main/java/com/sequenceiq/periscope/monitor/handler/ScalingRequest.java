@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.model.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.model.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.ScalingStatus;

@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 
 /**
  * Cloudbreak handles the entities on the Cloud provider side as generic resources and supports CRUD operations on them.
@@ -54,9 +54,7 @@ public interface ResourceConnector {
      * @throws Exception in case of any error
      */
     List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
-            AdjustmentType
-                    adjustmentType,
-            Long threshold) throws Exception;
+            AdjustmentType adjustmentType, Long threshold) throws Exception;
 
     /**
      * Invoked to check whether the resources have already reached a StatusGroup.PERMANENT state.

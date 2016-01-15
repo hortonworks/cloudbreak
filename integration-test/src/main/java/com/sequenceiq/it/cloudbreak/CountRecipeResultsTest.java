@@ -22,9 +22,9 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.sequenceiq.cloudbreak.api.StackEndpoint;
-import com.sequenceiq.cloudbreak.model.InstanceGroupJson;
-import com.sequenceiq.cloudbreak.model.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {

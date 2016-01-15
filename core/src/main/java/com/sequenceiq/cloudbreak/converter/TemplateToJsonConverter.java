@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.model.TemplateResponse;
+import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 
 @Component
 public class TemplateToJsonConverter extends AbstractConversionServiceAwareConverter<Template, TemplateResponse> {

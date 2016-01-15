@@ -36,8 +36,8 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 
 public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Cluster> {
 

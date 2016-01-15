@@ -24,10 +24,10 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.model.CredentialRequest;
-import com.sequenceiq.cloudbreak.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.model.IdJson;
+import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;

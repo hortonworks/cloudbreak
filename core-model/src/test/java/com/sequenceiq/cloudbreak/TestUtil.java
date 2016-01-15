@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
-import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -19,14 +19,14 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -307,7 +307,7 @@ public class TestUtil {
         cluster.setAmbariIp("10.0.0.1");
         cluster.setBlueprint(blueprint);
         cluster.setUpSince(new Date().getTime());
-        cluster.setStatus(Status.AVAILABLE);
+        cluster.setStatus(AVAILABLE);
         cluster.setStatusReason("statusReason");
         cluster.setUserName("admin");
         cluster.setPassword("admin");
@@ -421,9 +421,9 @@ public class TestUtil {
         cloudbreakEvent.setCloud(GCP);
         cloudbreakEvent.setBlueprintName("blueprintName");
         cloudbreakEvent.setBlueprintId(1L);
-        cloudbreakEvent.setStackStatus(Status.AVAILABLE);
+        cloudbreakEvent.setStackStatus(AVAILABLE);
         cloudbreakEvent.setNodeCount(1);
-        cloudbreakEvent.setClusterStatus(Status.AVAILABLE);
+        cloudbreakEvent.setClusterStatus(AVAILABLE);
         return cloudbreakEvent;
     }
 

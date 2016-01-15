@@ -15,8 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 
 public class CredentialCommandsTest {

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
-import com.sequenceiq.cloudbreak.api.NetworkEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.shell.completion.NetworkName;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 

@@ -17,7 +17,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.model.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.StackRequest;
 
 public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackRequest> {
 

@@ -9,9 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.StackEndpoint;
-import com.sequenceiq.cloudbreak.model.InstanceGroupJson;
-import com.sequenceiq.cloudbreak.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 
 import groovyx.net.http.HttpResponseException;

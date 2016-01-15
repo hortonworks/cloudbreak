@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.sync;
 
 import static com.sequenceiq.cloudbreak.core.flow2.stack.Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE;
-import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 
 import java.util.Map;
 

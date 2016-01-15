@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.shell.commands;
 
-import static com.sequenceiq.cloudbreak.common.type.StatusRequest.STARTED;
-import static com.sequenceiq.cloudbreak.common.type.StatusRequest.STOPPED;
 import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderSingleMap;
 
 import java.util.HashMap;
@@ -16,17 +14,18 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.ClusterEndpoint;
-import com.sequenceiq.cloudbreak.api.StackEndpoint;
-import com.sequenceiq.cloudbreak.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.model.FileSystemType;
-import com.sequenceiq.cloudbreak.model.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.model.HostGroupJson;
-import com.sequenceiq.cloudbreak.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.StatusRequest;
+import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
@@ -252,7 +251,7 @@ public class ClusterCommands implements CommandMarker {
     public String stopCluster() {
         try {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
-            updateClusterJson.setStatus(STOPPED);
+            updateClusterJson.setStatus(StatusRequest.STOPPED);
             clusterEndpoint.put(Long.valueOf(context.getStackId()), updateClusterJson);
             return "Cluster is stopping";
         } catch (Exception ex) {
@@ -264,7 +263,7 @@ public class ClusterCommands implements CommandMarker {
     public String startCluster() {
         try {
             UpdateStackJson updateStackJson = new UpdateStackJson();
-            updateStackJson.setStatus(STARTED);
+            updateStackJson.setStatus(StatusRequest.STARTED);
             stackEndpoint.put(Long.valueOf(context.getStackId()), updateStackJson);
             return "Cluster is starting";
         } catch (Exception ex) {

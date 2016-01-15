@@ -13,9 +13,9 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.NetworkEndpoint;
-import com.sequenceiq.cloudbreak.model.IdJson;
-import com.sequenceiq.cloudbreak.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
+import com.sequenceiq.cloudbreak.api.model.IdJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkJson;
 import com.sequenceiq.cloudbreak.shell.completion.NetworkId;
 import com.sequenceiq.cloudbreak.shell.completion.NetworkName;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;

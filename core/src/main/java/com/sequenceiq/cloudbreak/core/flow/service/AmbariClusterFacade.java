@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
-import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.common.type.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.ENABLE_SECURITY_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.START_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.START_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.common.type.Status.START_REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOP_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOP_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.ENABLE_SECURITY_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
 import java.util.Arrays;
@@ -28,9 +28,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterContainerRunner;

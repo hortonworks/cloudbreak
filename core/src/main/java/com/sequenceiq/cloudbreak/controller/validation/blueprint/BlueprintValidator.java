@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.blueprint;
 
-import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.GATEWAY;
 
 import java.io.IOException;
 import java.util.Collections;

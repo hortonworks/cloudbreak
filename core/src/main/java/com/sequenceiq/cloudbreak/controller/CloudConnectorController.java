@@ -10,17 +10,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.ConnectorEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
-import com.sequenceiq.cloudbreak.model.JsonEntity;
-import com.sequenceiq.cloudbreak.model.PlatformDisksJson;
-import com.sequenceiq.cloudbreak.model.PlatformRegionsJson;
-import com.sequenceiq.cloudbreak.model.PlatformVariantsJson;
-import com.sequenceiq.cloudbreak.model.PlatformVirtualMachinesJson;
-import com.sequenceiq.cloudbreak.model.VmTypeJson;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
+import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
 @Component

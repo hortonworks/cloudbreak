@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.common.type.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.common.type.Status.REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.Status.START_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.START_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.common.type.Status.START_REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOP_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOP_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -34,7 +34,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.api.model.Status;
 
 @Entity
 @Table(name = "Cluster", uniqueConstraints = {

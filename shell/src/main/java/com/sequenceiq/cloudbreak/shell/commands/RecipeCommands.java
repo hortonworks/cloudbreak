@@ -20,11 +20,11 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.common.type.PluginExecutionType;
-import com.sequenceiq.cloudbreak.model.IdJson;
-import com.sequenceiq.cloudbreak.model.RecipeRequest;
-import com.sequenceiq.cloudbreak.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
+import com.sequenceiq.cloudbreak.api.model.IdJson;
+import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
+import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 

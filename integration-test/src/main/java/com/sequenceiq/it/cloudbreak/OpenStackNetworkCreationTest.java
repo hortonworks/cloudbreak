@@ -8,7 +8,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkJson;
 
 public class OpenStackNetworkCreationTest extends AbstractCloudbreakIntegrationTest {
     @Test

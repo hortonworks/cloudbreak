@@ -3,9 +3,9 @@ package com.sequenceiq.periscope.service.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
