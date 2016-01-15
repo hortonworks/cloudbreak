@@ -3,13 +3,14 @@ var app = express();
 var uid = require('uid2');
 var sessionSecret = uid(30);
 var server = require('http').Server(app);
-var io = require('socket.io')(server);
+var io = require('socket.io').listen(server);
+var connect = require('connect');
 var session = require('express-session');
-var sessionStore = new session.MemoryStore();
-var cookieParser = require('cookie-parser')(sessionSecret)
+var sessionStore = new connect.middleware.session.MemoryStore();
+var cookieParser = require('cookie-parser')(sessionSecret);
 var sessionSocketIo = require('session.socket.io');
 var connectSid = 'uluwatu.sid';
-var sessionSockets = new sessionSocketIo(io, sessionStore, cookieParser, connectSid);
+var sessionSockets = new sessionSocketIo(io, sessionStore, cookieParser);
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
@@ -26,7 +27,7 @@ app.set('views', './app')
 app.set('view engine', 'html')
 app.use(express.static(path.join(__dirname, 'app/static')));
 app.use(cookieParser);
-app.use(session({
+var session = express.session({
     name: connectSid,
     genid: function(req) {
         return uid(30);
@@ -36,7 +37,9 @@ app.use(session({
     saveUninitialized: true,
     cookie: {},
     store: sessionStore
-}))
+});
+app.use(session);
+
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({
     'extended': 'true',
@@ -84,6 +87,7 @@ var config = {
     sultansAddress: null,
     cloudbreakAddress: null,
     periscopeAddress: null,
+    cloudbreakApiRootContext: '/api/v1'
 }
 
 if (config.addressResolvingRetryCount <= 0) {
@@ -128,6 +132,9 @@ function waitingForAddressesAndContinue() {
 }
 
 function continueInit() {
+    var cloudbreakApi = concatAndResolveUrl(config.cloudbreakAddress) + config.cloudbreakApiRootContext;
+    config.cloudbreakAddress = cloudbreakApi;
+
     if (config.hostAddress.slice(-1) !== '/') {
         config.hostAddress += '/';
     }
@@ -142,7 +149,8 @@ function continueInit() {
     identityServerClient.registerMethod("retrieveToken", config.identityServerAddress + "oauth/token", "POST");
 
     var proxyRestClient = new restClient.Client();
-    proxyRestClient.registerMethod("subscribe", config.cloudbreakAddress + "subscriptions", "POST");
+
+    proxyRestClient.registerMethod("subscribe", config.cloudbreakAddress + "/subscriptions", "POST");
 
     // cloudbreak config ===========================================================
 
@@ -195,7 +203,8 @@ function continueInit() {
             io.to(req.body.owner).emit('notification', req.body);
             res.send();
         } else {
-            console.log('No username in request body, nothing to do.')
+            console.log('No username in request body, nothing to do.');
+            res.send();
         }
     });
 
@@ -206,6 +215,7 @@ function continueInit() {
             subscribe()
         }
         var oauthFlowUrl = config.sultansRedirectAddress + 'oauth/authorize?response_type=code' + '&client_id=' + config.clientId + '&scope=' + config.clientScopes + '&redirect_uri=' + redirectUri
+
         if (!req.session.token) {
             res.redirect(oauthFlowUrl)
         } else {
@@ -373,12 +383,21 @@ function continueInit() {
             cbRequestArgs.data = req.body;
         }
         cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-        method(config.cloudbreakAddress + req.url, cbRequestArgs, function(data, response) {
+        method(cloudbreakApi + req.url, cbRequestArgs, function(data, response) {
             eliminateConfidentialParametersFromCredentials(req, data);
             res.status(response.statusCode).send(data);
         }).on('error', function(err) {
             res.status(500).send("Uluwatu could not connect to Cloudbreak.");
         });
+    }
+
+    function concatAndResolveUrl(url, concat) {
+        if( url.substr(-1) === "/" ) {
+          console.log(url.substring(0, url.length-1));
+          return url.substring(0, url.length-1);
+        }
+        //replaceAll("https:", "https://").replaceAll("http:", "http://");
+        return url;
     }
 
     function proxySultansRequest(req, res, method) {
@@ -451,14 +470,15 @@ function continueInit() {
 
     // socket ======================================================================
 
-    sessionSockets.on('connection', function(err, socket, session) {
-        if (session) {
-            retrieveUserByToken(session.token, function(data) {
-                socket.join(data.user_id)
-            });
-        } else {
-            console.log("No session found, websocket notifications won't work [socket ID: " + socket.id + "] " + err)
-        }
+
+    sessionSockets.on('connection', function (err, socket, session) {
+      if (session) {
+          retrieveUserByToken(session.token, function(data) {
+              socket.join(data.user_id)
+          });
+      } else {
+          console.log("No session found, websocket notifications won't work [socket ID: " + socket.id + "] " + err)
+      }
     });
 
     // errors  =====================================================================
