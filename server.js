@@ -3,13 +3,14 @@ var app = express();
 var uid = require('uid2');
 var sessionSecret = uid(30);
 var server = require('http').Server(app);
-var io = require('socket.io')(server);
+var io = require('socket.io').listen(server);
+var connect = require('connect');
 var session = require('express-session');
-var sessionStore = new session.MemoryStore();
-var cookieParser = require('cookie-parser')(sessionSecret)
+var sessionStore = new connect.middleware.session.MemoryStore();
+var cookieParser = require('cookie-parser')(sessionSecret);
 var sessionSocketIo = require('session.socket.io');
 var connectSid = 'uluwatu.sid';
-var sessionSockets = new sessionSocketIo(io, sessionStore, cookieParser, connectSid);
+var sessionSockets = new sessionSocketIo(io, sessionStore, cookieParser);
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
@@ -26,7 +27,7 @@ app.set('views', './app')
 app.set('view engine', 'html')
 app.use(express.static(path.join(__dirname, 'app/static')));
 app.use(cookieParser);
-app.use(session({
+var session = express.session({
     name: connectSid,
     genid: function(req) {
         return uid(30);
@@ -36,7 +37,9 @@ app.use(session({
     saveUninitialized: true,
     cookie: {},
     store: sessionStore
-}))
+});
+app.use(session);
+
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({
     'extended': 'true',
@@ -200,7 +203,8 @@ function continueInit() {
             io.to(req.body.owner).emit('notification', req.body);
             res.send();
         } else {
-            console.log('No username in request body, nothing to do.')
+            console.log('No username in request body, nothing to do.');
+            res.send();
         }
     });
 
@@ -211,6 +215,7 @@ function continueInit() {
             subscribe()
         }
         var oauthFlowUrl = config.sultansRedirectAddress + 'oauth/authorize?response_type=code' + '&client_id=' + config.clientId + '&scope=' + config.clientScopes + '&redirect_uri=' + redirectUri
+
         if (!req.session.token) {
             res.redirect(oauthFlowUrl)
         } else {
@@ -255,7 +260,7 @@ function continueInit() {
             cbRequestArgs.data = req.body;
         }
         cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-        proxyRestClient.get(concatAndResolveUrl(config.cloudbreakAddress) + req.url, cbRequestArgs, function(data, response) {
+        proxyRestClient.get(config.cloudbreakAddress + req.url, cbRequestArgs, function(data, response) {
             if (data != null) {
                 res.setHeader('Content-disposition', 'attachment; filename=azure.cer');
                 res.setHeader('Content-type', 'application/x-x509-ca-cert');
@@ -280,7 +285,7 @@ function continueInit() {
         var token = req.session.token
         var userId = req.param('userId')
         cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-        proxyRestClient.get(concatAndResolveUrl(config.cloudbreakAddress) + req.url + "/resources", cbRequestArgs, function(data, response) {
+        proxyRestClient.get(config.cloudbreakAddress + req.url + "/resources", cbRequestArgs, function(data, response) {
             if (data === false) {
                 proxyRestClient.delete(config.sultansAddress + 'users/' + userId, cbRequestArgs, function(data, response) {
                     res.status(response.statusCode).send(data);
@@ -465,14 +470,15 @@ function continueInit() {
 
     // socket ======================================================================
 
-    sessionSockets.on('connection', function(err, socket, session) {
-        if (session) {
-            retrieveUserByToken(session.token, function(data) {
-                socket.join(data.user_id)
-            });
-        } else {
-            console.log("No session found, websocket notifications won't work [socket ID: " + socket.id + "] " + err)
-        }
+
+    sessionSockets.on('connection', function (err, socket, session) {
+      if (session) {
+          retrieveUserByToken(session.token, function(data) {
+              socket.join(data.user_id)
+          });
+      } else {
+          console.log("No session found, websocket notifications won't work [socket ID: " + socket.id + "] " + err)
+      }
     });
 
     // errors  =====================================================================
