@@ -12,6 +12,7 @@
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="ContainerConfigService.java"/>
     <suppress checks="IllegalCatch" files="GcpProvisionSetup.java"/>
     <suppress checks="IllegalThrow" files="ConcurrentMethodExecutionAspect.java"/>
+    <suppress checks="RedundantModifier" files="CoreApi.java"/>
 
     <!-- suppressing checks in application runner classes -->
     <suppress id="sysout" files="VersionedApplication.java"/>
@@ -26,5 +27,17 @@
 
     <!-- suppress everything in package level JavaDoc files -->
     <suppress checks=".*" files="package-info.java"/>
+
+    <!-- suppressing checks in Cloudbreak-shell -->
+    <suppress id="sysout" files="CloudbreakShell.java|ShellConfiguration.java|TableRendererTest.java" />
+    <suppress id="printTrace" files="CloudbreakShell.java|ShellConfiguration.java" />
+    <suppress checks="CyclomaticComplexity|ParameterNumber|NPathComplexity" files=".*Commands.java|ResponseTransformer.java" />
+
+    <!-- suppressing checks in Autoscale -->
+    <suppress checks="HideUtilityClassConstructor" files="PeriscopeApplication.java" />
+    <suppress id="string-instantiation" files="AmbariConfigurationService.java"/>
+    <suppress id="string-instantiation" files="RemoteUserDetailsService.java"/>
+    <suppress checks="InnerAssignment" files="ScalingPolicyConverter.java" />
+    <suppress id="sysout" files="VersionedApplication.java"/>
 
 </suppressions>

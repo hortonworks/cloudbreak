@@ -3,7 +3,7 @@
 This is a standalone springboot application with which we can run cloudbreak specific testng testsuites parallel.
 
 ## Build:
-1. Build clodubreak with ./gradlew clean build:
+1. Build cloudbreak with ./gradlew clean build:
 2. The built jar file can be found in the integration-test/build/libs
 
 ## Run:

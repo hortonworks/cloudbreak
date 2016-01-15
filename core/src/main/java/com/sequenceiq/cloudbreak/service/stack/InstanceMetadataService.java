@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -25,9 +25,9 @@ public class InstanceMetadataService {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     public void updateInstanceStatus(Set<InstanceGroup> instanceGroup,
-            Map<InstanceGroupType, com.sequenceiq.cloudbreak.common.type.InstanceStatus> newStatusByGroupType) {
+            Map<InstanceGroupType, com.sequenceiq.cloudbreak.api.model.InstanceStatus> newStatusByGroupType) {
         for (InstanceGroup group : instanceGroup) {
-            com.sequenceiq.cloudbreak.common.type.InstanceStatus newStatus = newStatusByGroupType.get(group.getInstanceGroupType());
+            com.sequenceiq.cloudbreak.api.model.InstanceStatus newStatus = newStatusByGroupType.get(group.getInstanceGroupType());
             if (newStatus != null) {
                 for (InstanceMetaData instanceMetaData : group.getInstanceMetaData()) {
                     instanceMetaData.setInstanceStatus(newStatus);
@@ -37,7 +37,7 @@ public class InstanceMetadataService {
         }
     }
 
-    public void updateInstanceStatus(Set<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.common.type.InstanceStatus newStatus,
+    public void updateInstanceStatus(Set<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.api.model.InstanceStatus newStatus,
             Set<String> candidateAddresses) {
         for (InstanceGroup group : instanceGroup) {
             for (InstanceMetaData instanceMetaData : group.getInstanceMetaData()) {
@@ -58,7 +58,7 @@ public class InstanceMetadataService {
                 if (InstanceStatus.CREATE_REQUESTED == instanceTemplate.getStatus()) {
                     InstanceMetaData instanceMetaData = new InstanceMetaData();
                     instanceMetaData.setPrivateId(instanceTemplate.getPrivateId());
-                    instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.common.type.InstanceStatus.REQUESTED);
+                    instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.model.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
                     instanceMetaDataRepository.save(instanceMetaData);
                 }

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.notification;
 
 import java.util.Date;
 
-import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.api.model.Status;
 
 public class Notification {
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.init;
 
-import static com.sequenceiq.cloudbreak.common.type.Status.WAIT_FOR_SYNC;
+import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;

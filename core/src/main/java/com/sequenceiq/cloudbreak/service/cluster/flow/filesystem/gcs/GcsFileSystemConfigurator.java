@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.gcs;
 
-import static com.sequenceiq.cloudbreak.common.type.PluginExecutionType.ALL_NODES;
+import static com.sequenceiq.cloudbreak.api.model.PluginExecutionType.ALL_NODES;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.PRE_INSTALL;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType.GCS;
+import static com.sequenceiq.cloudbreak.api.model.FileSystemType.GCS;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.api.model.GcsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
-import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
-import com.sequenceiq.cloudbreak.common.type.Status;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;

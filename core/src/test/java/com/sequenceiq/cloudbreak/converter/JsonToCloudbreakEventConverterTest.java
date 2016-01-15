@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.converter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.controller.json.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
+import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 
 public class JsonToCloudbreakEventConverterTest extends AbstractJsonConverterTest<CloudbreakEventsJson> {
 

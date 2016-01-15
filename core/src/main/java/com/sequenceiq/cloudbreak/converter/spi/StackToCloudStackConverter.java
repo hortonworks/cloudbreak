@@ -138,7 +138,7 @@ public class StackToCloudStackConverter {
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData, Set<String> deleteRequests) {
         return deleteRequests.contains(metaData.getInstanceId()) ? InstanceStatus.DELETE_REQUESTED
-                : metaData.getInstanceStatus() == com.sequenceiq.cloudbreak.common.type.InstanceStatus.REQUESTED ? InstanceStatus.CREATE_REQUESTED
+                : metaData.getInstanceStatus() == com.sequenceiq.cloudbreak.api.model.InstanceStatus.REQUESTED ? InstanceStatus.CREATE_REQUESTED
                 : InstanceStatus.CREATED;
     }
 

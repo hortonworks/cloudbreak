@@ -224,6 +224,7 @@
         <property name="fileExtensions" value="java" />
     </module>
     <module name="RegexpMultiline">
+        <property name="id" value="printTrace" />
         <property name="format" value="\.printStackTrace\(\)" />
         <property name="message" value="Avoid printing exception stack-trace onto console. Use logger or re-throw (in a wrapper)." />
         <property name="fileExtensions" value="java" />

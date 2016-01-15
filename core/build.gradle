@@ -1,13 +1,13 @@
 buildscript {
-    repositories {
-        maven { url 'http://repo.spring.io/libs-release' }
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-        classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
-    }
+  repositories {
+    maven { url 'http://repo.spring.io/libs-release' }
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
+  }
 }
 
 apply plugin: 'jacoco'
@@ -16,12 +16,12 @@ apply plugin: 'license-report'
 apply plugin: 'spring-boot'
 
 bootRun {
-    systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
-    systemProperty 'spring.config.location', System.properties['spring.config.location']
+  systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+  systemProperty 'spring.config.location', System.properties['spring.config.location']
 }
-  
+
 jar {
-    baseName = 'cloudbreak'
+  baseName = 'cloudbreak'
 }
 
 dependencies {
@@ -38,8 +38,9 @@ dependencies {
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-aop',        version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-freemarker', version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
-    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: '2.0.8.RELEASE'
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-jersey',     version: springBootVersion
     compile (group: 'org.springframework.statemachine', name: 'spring-statemachine-core', version: '1.0.1.RELEASE') { exclude group: 'org.springframework' }
+    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: '2.0.8.RELEASE'
     compile group: 'javax',                         name: 'javaee-api',                     version: javaEEApiVersion
     compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
     compile group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
@@ -56,8 +57,7 @@ dependencies {
     compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
     compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
     compile group: 'org.jasypt',                    name: 'jasypt',                         version: '1.9.2'
-    compile group: 'com.wordnik',                   name: 'swagger-core',                   version: '1.5.2-M1'
-    compile group: 'com.mangofactory',              name: 'swagger-springmvc',              version: '1.0.2'
+    compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: '1.5.6'
     compile group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.17.0-rc'
     compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.17.0-rc')   { exclude module: 'servlet-api' }
     compile group: 'com.jcraft',                    name: 'jsch',                           version: '0.1.52'
@@ -80,77 +80,78 @@ dependencies {
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 
     testCompile project(path: ':core-model', configuration: 'tests')
-    testCompile "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
-    testCompile "org.springframework.boot:spring-boot-starter-freemarker:${springBootVersion}"
-    testCompile group: 'com.jayway.restassured',    name: 'rest-assured',                   version: '2.3.4'
-    testCompile group: 'com.jayway.restassured',    name: 'json-path',                      version: '2.3.4'
+    testCompile group: 'org.springframework.boot', name:'spring-boot-starter-test',         version:springBootVersion
+    testCompile group: 'org.springframework.boot', name:'spring-boot-starter-freemarker',   version:springBootVersion
+    testCompile group: 'com.jayway.restassured',   name: 'rest-assured',                   version: '2.3.4'
+    testCompile group: 'com.jayway.restassured',   name: 'json-path',                      version: '2.3.4'
+
 }
 
 sonarRunner {
-    sonarProperties {
-        property "sonar.host.url", "$config.sonar_host_url"
-        property "sonar.jdbc.url", "$config.sonar_jdbc_url"
-        property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
-        property "sonar.jdbc.username", "$System.env.SONAR_USERNAME"
-        property "sonar.jdbc.password", "$System.env.SONAR_PASSWORD"
-        property "project.reporting.outputEncoding", "UTF-8"
-        property "sonar.projectKey", "cloudbreak"
-        property "sonar.projectName", "cloudbreak"
-    }
+  sonarProperties {
+    property "sonar.host.url", "$config.sonar_host_url"
+    property "sonar.jdbc.url", "$config.sonar_jdbc_url"
+    property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
+    property "sonar.jdbc.username", "$System.env.SONAR_USERNAME"
+    property "sonar.jdbc.password", "$System.env.SONAR_PASSWORD"
+    property "project.reporting.outputEncoding", "UTF-8"
+    property "sonar.projectKey", "cloudbreak"
+    property "sonar.projectName", "cloudbreak"
+  }
 }
 
 jacoco {
-    toolVersion = "0.7.1.201405082137"
-    reportsDir = file("$buildDir/reports/jacoco")
+  toolVersion = "0.7.1.201405082137"
+  reportsDir = file("$buildDir/reports/jacoco")
 }
 
 jacocoTestReport {
-    reports {
-        xml.enabled false
-        csv.enabled false
-        html.destination "${buildDir}/jacocoHtml"
-    }
+  reports {
+    xml.enabled false
+    csv.enabled false
+    html.destination "${buildDir}/jacocoHtml"
+  }
 }
 
 test {
-    jacoco {
-        append = false
-        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
-        classDumpFile = file("$buildDir/jacoco/classpathdumps")
-    }
+  jacoco {
+    append = false
+    destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+    classDumpFile = file("$buildDir/jacoco/classpathdumps")
+  }
 }
 
 task buildInfo(type: BuildInfoTask) {
-    destination = file("$buildDir")
-    applicationPropertiesPath = "$buildDir"
-    basename = jar.baseName
-    buildVersion = version
+  destination = file("$buildDir")
+  applicationPropertiesPath = "$buildDir"
+  basename = jar.baseName
+  buildVersion = version
 }
 
 compileJava.dependsOn buildInfo
 
 class BuildInfoTask extends DefaultTask {
-    File destination = new File("build.info")
-    String applicationPropertiesPath
-    String basename
-    String buildVersion
+  File destination = new File("build.info")
+  String applicationPropertiesPath
+  String basename
+  String buildVersion
 
-    @TaskAction
-    def writeBuildInfo() {
-        destination.mkdirs()
-        File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
-        applicationDestination.mkdirs()
-        new File(destination, "build.info").withWriter { out ->
-            [
-                    "ARTIFACT_BASENAME=" + basename,
-                    "ARTIFACT_VERSION=" + buildVersion,
-            ].each { out.println it }
-        }
-        new File(applicationDestination, "application.properties").withWriter { out ->
-            [
-                    "info.app.name=" + basename,
-                    "info.app.version=" + buildVersion
-            ].each { out.println it }
-        }
+  @TaskAction
+  def writeBuildInfo() {
+    destination.mkdirs()
+    File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
+    applicationDestination.mkdirs()
+    new File(destination, "build.info").withWriter { out ->
+      [
+              "ARTIFACT_BASENAME=" + basename,
+              "ARTIFACT_VERSION=" + buildVersion,
+      ].each { out.println it }
     }
+    new File(applicationDestination, "application.properties").withWriter { out ->
+      [
+              "info.app.name=" + basename,
+              "info.app.version=" + buildVersion
+      ].each { out.println it }
+    }
+  }
 }

@@ -4,6 +4,7 @@
 .project
 .classpath
 .gradle
+gradle
 .idea
 *.iml
 .apib
@@ -24,3 +25,17 @@ suites_log/
 test-output/
 gradle/wrapper/
 Makefile
+*/build
+cloudbreak-shell.log
+cloud-break.cbh
+*.class
+
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+hs_err_pid
+/build

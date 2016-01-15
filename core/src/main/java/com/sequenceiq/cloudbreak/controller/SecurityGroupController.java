@@ -3,131 +3,104 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.doc.ContentType;
-import com.sequenceiq.cloudbreak.controller.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.controller.doc.Notes;
-import com.sequenceiq.cloudbreak.controller.doc.OperationDescriptions.SecurityGroupOpDescription;
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.api.model.IdJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.service.securitygroup.DefaultSecurityGroupCreator;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
-@Controller
-@Api(value = "/securitygroups", description = ControllerDescription.SECURITY_GROUPS_DESCRIPTION, position = 9)
-public class SecurityGroupController {
-    @Inject
+@Component
+public class SecurityGroupController implements SecurityGroupEndpoint {
+    @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    @Inject
+    @Autowired
     private SecurityGroupService securityGroupService;
 
-    @Inject
+    @Autowired
     private DefaultSecurityGroupCreator defaultSecurityGroupCreator;
 
-    @ApiOperation(value = SecurityGroupOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    @RequestMapping(value = "user/securitygroups", method = RequestMethod.POST)
-    @ResponseBody
-    public ResponseEntity<IdJson> createPrivateSecurityGroup(@ModelAttribute("user") CbUser user, @RequestBody @Valid SecurityGroupJson securityGroupJson) {
+    @Autowired
+    private AuthenticatedUserService authenticatedUserService;
+
+    @Override
+    public IdJson postPrivate(SecurityGroupJson securityGroupJson) {
+        CbUser user = authenticatedUserService.getCbUser();
         return createSecurityGroup(user, securityGroupJson, false);
     }
 
-    @ApiOperation(value = SecurityGroupOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    @RequestMapping(value = "account/securitygroups", method = RequestMethod.POST)
-    @ResponseBody
-    public ResponseEntity<IdJson> createAccountSecurityGroup(@ModelAttribute("user") CbUser user, @RequestBody @Valid SecurityGroupJson securityGroupJson) {
+    @Override
+    public IdJson postPublic(SecurityGroupJson securityGroupJson) {
+        CbUser user = authenticatedUserService.getCbUser();
         return createSecurityGroup(user, securityGroupJson, true);
     }
 
-    @ApiOperation(value = SecurityGroupOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    @RequestMapping(value = "user/securitygroups", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<Set<SecurityGroupJson>> getPrivateSecurityGroups(@ModelAttribute("user") CbUser user) {
+    @Override
+    public Set<SecurityGroupJson> getPrivates() {
+        CbUser user = authenticatedUserService.getCbUser();
         Set<SecurityGroup> securityGroups = defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
         securityGroups.addAll(securityGroupService.retrievePrivateSecurityGroups(user));
-        return new ResponseEntity<>(convert(securityGroups), HttpStatus.OK);
+        return convert(securityGroups);
     }
 
-    @ApiOperation(value = SecurityGroupOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    @RequestMapping(value = "account/securitygroups", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<Set<SecurityGroupJson>> getAccountSecurityGroups(@ModelAttribute("user") CbUser user) {
+    @Override
+    public Set<SecurityGroupJson> getPublics() {
+        CbUser user = authenticatedUserService.getCbUser();
         Set<SecurityGroup> securityGroups = defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
         securityGroups.addAll(securityGroupService.retrieveAccountSecurityGroups(user));
-        return new ResponseEntity<>(convert(securityGroups), HttpStatus.OK);
+        return convert(securityGroups);
     }
 
-    @ApiOperation(value = SecurityGroupOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    @RequestMapping(value = "securitygroups/{id}", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<SecurityGroupJson> getSecurityGroup(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+    @Override
+    public SecurityGroupJson get(Long id) {
         SecurityGroup securityGroup = securityGroupService.get(id);
-        return new ResponseEntity<>(convert(securityGroup), HttpStatus.OK);
+        return convert(securityGroup);
     }
 
-    @ApiOperation(value = SecurityGroupOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    @RequestMapping(value = "user/securitygroups/{name}", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<SecurityGroupJson> getSecurityGroupInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    @Override
+    public SecurityGroupJson getPrivate(String name) {
+        CbUser user = authenticatedUserService.getCbUser();
         SecurityGroup securityGroup = securityGroupService.getPrivateSecurityGroup(name, user);
-        return new ResponseEntity<>(convert(securityGroup), HttpStatus.OK);
+        return convert(securityGroup);
     }
 
-    @ApiOperation(value = SecurityGroupOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    @RequestMapping(value = "account/securitygroups/{name}", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<SecurityGroupJson> getSecurityGroupInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    @Override
+    public SecurityGroupJson getPublic(String name) {
+        CbUser user = authenticatedUserService.getCbUser();
         SecurityGroup securityGroup = securityGroupService.getPublicSecurityGroup(name, user);
-        return new ResponseEntity<>(convert(securityGroup), HttpStatus.OK);
+        return convert(securityGroup);
     }
 
-    @ApiOperation(value = SecurityGroupOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    @RequestMapping(value = "securitygroups/{id}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public ResponseEntity<SecurityGroupJson> deleteNetworkById(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+    @Override
+    public void delete(Long id) {
+        CbUser user = authenticatedUserService.getCbUser();
         securityGroupService.delete(id, user);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @ApiOperation(value = SecurityGroupOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    @RequestMapping(value = "account/securitygroups/{name}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public ResponseEntity<SecurityGroupJson> deletePublicSecurityGroup(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    @Override
+    public void deletePublic(String name) {
+        CbUser user = authenticatedUserService.getCbUser();
         securityGroupService.delete(name, user);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @ApiOperation(value = SecurityGroupOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    @RequestMapping(value = "user/securitygroups/{name}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public ResponseEntity<SecurityGroupJson> deletePrivateSecurityGroup(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+    @Override
+    public void deletePrivate(String name) {
+        CbUser user = authenticatedUserService.getCbUser();
         securityGroupService.delete(name, user);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private ResponseEntity<IdJson> createSecurityGroup(CbUser user, SecurityGroupJson securityGroupJson, boolean publicInAccount) {
+    private IdJson createSecurityGroup(CbUser user, SecurityGroupJson securityGroupJson, boolean publicInAccount) {
         SecurityGroup securityGroup = convert(securityGroupJson, publicInAccount);
         securityGroup = securityGroupService.create(user, securityGroup);
-        return new ResponseEntity<>(new IdJson(securityGroup.getId()), HttpStatus.CREATED);
+        return new IdJson(securityGroup.getId());
     }
 
     private SecurityGroup convert(SecurityGroupJson securityGroupJson, boolean publicInAccount) {

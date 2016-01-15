@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.common.type.Status.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -22,7 +22,7 @@ import com.ecwid.consul.v1.ConsulClient;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;

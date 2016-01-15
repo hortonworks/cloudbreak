@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkJson;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 

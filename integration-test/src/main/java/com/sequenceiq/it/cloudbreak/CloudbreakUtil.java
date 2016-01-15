@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 
 import groovyx.net.http.HttpResponseException;
@@ -39,28 +41,28 @@ public class CloudbreakUtil {
         return waitForStatus(itContext, stackId, desiredStatus, "clusterStatus");
     }
 
-    public static void checkClusterAvailability(CloudbreakClient client, String stackId, String ambariUser, String ambariPassowrd) throws Exception {
-        Map<String, Object> stack = (Map<String, Object>) client.getStack(stackId);
+    public static void checkClusterAvailability(StackEndpoint stackEndpoint, String stackId, String ambariUser, String ambariPassowrd) throws Exception {
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
 
-        Assert.assertEquals(((Map<String, Object>) stack.get("cluster")).get("status"), "AVAILABLE", "The cluster hasn't been started!");
-        Assert.assertEquals(stack.get("status"), "AVAILABLE", "The stack hasn't been started!");
+        Assert.assertEquals(stackResponse.getCluster().getStatus(), "AVAILABLE", "The cluster hasn't been started!");
+        Assert.assertEquals(stackResponse.getStatus(), "AVAILABLE", "The stack hasn't been started!");
 
-        String ambariIp = (String) ((Map<String, Object>) stack.get("cluster")).get("ambariServerIp");
+        String ambariIp = stackResponse.getCluster().getAmbariServerIp();
         Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
 
         AmbariClient ambariClient = new AmbariClient(ambariIp, DEFAULT_AMBARI_PORT, ambariUser, ambariPassowrd);
         Assert.assertEquals(ambariClient.healthCheck(), "RUNNING", "The Ambari server is not running!");
-        Assert.assertEquals(ambariClient.getClusterHosts().size(), getNodeCount(stack) - 1,
+        Assert.assertEquals(ambariClient.getClusterHosts().size(), getNodeCount(stackResponse) - 1,
                 "The number of cluster nodes in the stack differs from the number of nodes registered in ambari");
     }
 
-    public static void checkClusterStopped(CloudbreakClient client, String stackId, String ambariUser, String ambariPassowrd) throws Exception {
-        Map<String, Object> stack = (Map<String, Object>) client.getStack(stackId);
+    public static void checkClusterStopped(StackEndpoint stackEndpoint, String stackId, String ambariUser, String ambariPassowrd) throws Exception {
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
 
-        Assert.assertEquals(((Map<String, Object>) stack.get("cluster")).get("status"), "STOPPED", "The cluster is not stopped!");
-        Assert.assertEquals(stack.get("status"), "STOPPED", "The stack is not stopped!");
+        Assert.assertEquals(stackResponse.getCluster().getStatus(), "STOPPED", "The cluster is not stopped!");
+        Assert.assertEquals(stackResponse.getStatus(), "STOPPED", "The stack is not stopped!");
 
-        String ambariIp = (String) stack.get("ambariServerIp");
+        String ambariIp = stackResponse.getCluster().getAmbariServerIp();
         AmbariClient ambariClient = new AmbariClient(ambariIp, DEFAULT_AMBARI_PORT, ambariUser, ambariPassowrd);
         Assert.assertFalse(isAmbariRunning(ambariClient), "The Ambari server is running in stopped state!");
     }
@@ -96,10 +98,9 @@ public class CloudbreakUtil {
         do {
             LOGGER.info("Waiting for stack status {}, stack id: {}, current status {} ...", desiredStatus, stackId, stackStatus);
             sleep();
-            CloudbreakClient client = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
-
+            StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_STACK, StackEndpoint.class);
             try {
-                Map<String, Object> statusResult = (Map<String, Object>) client.getFullStackStatus(Integer.valueOf(stackId));
+                Map<String, Object> statusResult = stackEndpoint.status(Long.valueOf(stackId));
                 stackStatus = (String) statusResult.get(statusPath);
             } catch (Exception exception) {
                 if (exception instanceof HttpResponseException && ((HttpResponseException) exception).getStatusCode() == HttpStatus.NOT_FOUND.value()) {
@@ -128,11 +129,11 @@ public class CloudbreakUtil {
         }
     }
 
-    private static int getNodeCount(Map<String, Object> stackResponse) {
-        List<Map<String, Object>> instanceGroups = (List<Map<String, Object>>) stackResponse.get("instanceGroups");
+    private static int getNodeCount(StackResponse stackResponse) {
+        List<InstanceGroupJson> instanceGroups = stackResponse.getInstanceGroups();
         int nodeCount = 0;
-        for (Map<String, Object> instanceGroup : instanceGroups) {
-            nodeCount += (Integer) instanceGroup.get("nodeCount");
+        for (InstanceGroupJson instanceGroup : instanceGroups) {
+            nodeCount += instanceGroup.getNodeCount();
         }
         return nodeCount;
     }

@@ -8,7 +8,8 @@ import javax.inject.Inject;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -54,7 +55,8 @@ public class ClusterDecorator implements Decorator<Cluster> {
         boolean validate = (boolean) data[DecorationData.VALIDATE_BLUEPRINT.ordinal()];
         if (validate) {
             Blueprint blueprint = blueprintService.get(blueprintId);
-            blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stackService.get(stackId).getInstanceGroups());
+            Stack stack = stackService.getById(stackId);
+            blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stack.getInstanceGroups());
         }
         return subject;
     }

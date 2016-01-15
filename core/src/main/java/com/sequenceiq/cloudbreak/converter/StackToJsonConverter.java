@@ -7,12 +7,12 @@ import java.util.Set;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
-import com.sequenceiq.cloudbreak.controller.json.FailurePolicyJson;
-import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
-import com.sequenceiq.cloudbreak.controller.json.StackResponse;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.StackResponse;
 
 @Component
 public class StackToJsonConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {

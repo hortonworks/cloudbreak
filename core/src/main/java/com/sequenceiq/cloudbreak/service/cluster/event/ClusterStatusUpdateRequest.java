@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.event;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.common.type.StatusRequest;
+import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 
 public class ClusterStatusUpdateRequest {
 

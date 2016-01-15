@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.controller.json.RecipeRequest;
+import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 public class JsonToRecipeConverterTest extends AbstractJsonConverterTest<RecipeRequest> {

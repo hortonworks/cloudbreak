@@ -1,0 +1,102 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+  }
+}
+
+jar {
+  baseName = 'periscope'
+}
+
+apply plugin: 'spring-boot'
+apply plugin: 'application'
+
+dependencies {
+    compile project(':core-api')
+
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter',                    version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',                version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-security',           version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-data-jpa',           version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-actuator',           version: springBootVersion
+    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',            version: '2.0.8.RELEASE'
+
+    compile group: 'org.springframework',           name: 'spring-context-support',                 version: springFrameworkVersion
+    compile group: 'org.apache.commons',            name: 'commons-lang3',                          version: apacheCommonsLangVersion
+    compile group: 'org.hsqldb',                    name: 'hsqldb',                                 version: '2.3.2'
+    compile group: 'org.apache.hadoop',             name: 'hadoop-yarn-client',                     version: hadoopVersion
+    compile group: 'org.apache.hadoop',             name: 'hadoop-yarn-server-resourcemanager',     version: hadoopVersion
+    compile group: 'org.apache.hadoop',             name: 'hadoop-common',                          version: hadoopVersion
+
+    compile group: 'com.sequenceiq',                name: 'ambari-client20',                        version: '2.0.22'
+    compile group: 'javax.servlet',                 name: 'javax.servlet-api',                      version: '3.0.1'
+    compile group: 'org.freemarker',                name: 'freemarker',                             version : freemarkerVersion
+    compile group: 'javax.mail',                    name: 'mail',                                   version: '1.5.0-b01'
+    compile group: 'org.apache.httpcomponents',     name: 'httpclient',                             version: '4.3.5'
+    compile group: 'joda-time',                     name: 'joda-time',                              version: '2.5'
+    compile group: 'net.sf.ehcache',                name: 'ehcache',                                version: '2.8.3'
+    compile group: 'org.postgresql',                name: 'postgresql',                             version: '9.3-1101-jdbc41'
+    compile group: 'org.hibernate',                 name: 'hibernate-validator',                    version: hibernateValidatorVersion
+    compile group: 'org.quartz-scheduler',          name: 'quartz',                                 version: '2.2.1'
+    compile group: 'dnsjava',                       name: 'dnsjava',                                version: '2.1.7'
+    compile group: 'org.mybatis',                   name: 'mybatis-migrations',                     version: '3.2.0'
+    compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',            version: '2.3.2'
+    compile group: 'org.apache.cxf',                name: 'cxf-rt-rs-client',                       version: '3.1.0'
+    testCompile group: 'junit',                     name: 'junit',                                  version: '4.11'
+    testCompile group: 'org.mockito',               name: 'mockito-all',                            version: '1.9.5'
+    testCompile group: 'org.springframework',       name: 'spring-test',                            version: springFrameworkVersion
+    testCompile group: 'org.springframework.boot', name:'spring-boot-starter-test',                 version: springBootVersion
+
+}
+
+task buildInfo(type: BuildInfoTask) {
+    destination = file("$buildDir")
+    applicationPropertiesPath = "$buildDir"
+    basename = jar.baseName
+    buildVersion = version
+}
+
+test {
+  include 'com/sequenceiq/**'
+  testLogging.showStandardStreams = true
+  ignoreFailures = false
+  beforeTest { descriptor ->
+    logger.lifecycle("Running test: " + descriptor)
+  }
+  onOutput { descriptor, event ->
+    logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message)
+  }
+}
+
+
+compileJava.dependsOn buildInfo
+
+class BuildInfoTask extends DefaultTask {
+    File destination = new File("build.info")
+    String applicationPropertiesPath
+    String basename
+    String buildVersion
+
+    @TaskAction
+    def writeBuildInfo() {
+        destination.mkdirs()
+        File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
+        applicationDestination.mkdirs()
+        new File(destination, "build.info").withWriter { out ->
+            [
+                    "ARTIFACT_BASENAME=" + basename,
+                    "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it }
+        }
+        new File(applicationDestination, "application.properties").withWriter { out ->
+            [
+                    "info.app.name=" + basename,
+                    "info.app.version=" + buildVersion
+            ].each { out.println it }
+        }
+    }
+}

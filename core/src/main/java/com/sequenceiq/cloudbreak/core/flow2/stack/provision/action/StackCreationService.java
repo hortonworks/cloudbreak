@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
-import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.common.type.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.common.type.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_IN_PROGRESS;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -24,6 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
@@ -36,9 +39,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.OnFailureAction;
-import com.sequenceiq.cloudbreak.common.type.Status;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;

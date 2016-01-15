@@ -2,15 +2,16 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.controller.json.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.common.type.Status;
-import com.sequenceiq.cloudbreak.common.type.StatusRequest;
+import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 
@@ -20,7 +21,7 @@ public interface ClusterService {
 
     Cluster retrieveClusterByStackId(Long stackId);
 
-    Cluster retrieveClusterForCurrentUser(Long stackId);
+    ClusterResponse retrieveClusterForCurrentUser(Long stackId);
 
     Cluster updateAmbariIp(Long clusterId, String ambariIp);
 
@@ -43,4 +44,6 @@ public interface ClusterService {
     Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, AmbariStackDetails ambariStackDetails);
 
     Cluster updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson);
+
+    ClusterResponse getClusterResponse(ClusterResponse response, String clusterJson);
 }

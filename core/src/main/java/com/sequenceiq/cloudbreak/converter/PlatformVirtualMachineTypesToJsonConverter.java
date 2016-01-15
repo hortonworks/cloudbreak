@@ -10,8 +10,8 @@ import com.google.api.client.util.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.controller.json.PlatformVirtualMachinesJson;
-import com.sequenceiq.cloudbreak.controller.json.VmTypeJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
+import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.converter.util.PlatformConverterUtil;
 
 @Component

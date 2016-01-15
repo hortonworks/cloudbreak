@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 
 @Component
 public class JsonToAmbariStackDetailsConverter extends AbstractConversionServiceAwareConverter<AmbariStackDetailsJson, AmbariStackDetails> {

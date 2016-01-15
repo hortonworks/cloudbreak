@@ -9,7 +9,7 @@ public class BlueprintDeleteByNameTest extends AbstractCloudbreakIntegrationTest
     public void testDeleteBlueprintByName(String blueprintName) throws Exception {
         // GIVEN
         // WHEN
-        getClient().deleteBlueprintByName(blueprintName);
+        getBlueprintEndpoint().deletePublic(blueprintName);
         // THEN no exception
     }
 }

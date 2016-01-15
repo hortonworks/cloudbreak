@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Maps;
-import com.sequenceiq.cloudbreak.controller.json.TopologyResponse;
+import com.sequenceiq.cloudbreak.api.model.TopologyResponse;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.TopologyRecord;
 

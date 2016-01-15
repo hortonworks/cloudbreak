@@ -10,6 +10,8 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+
 public class AzureTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     @Inject
     private TemplateAdditionHelper templateAdditionHelper;
@@ -29,7 +31,14 @@ public class AzureTemplateCreationTest extends AbstractCloudbreakIntegrationTest
         // GIVEN
         // WHEN
         // TODO publicInAccount
-        String id = getClient().postAzureTemplate(azureTemplateName, "azure integration test template", azureVmType, azureVolumeCount, azureVolumeSize, false);
+        TemplateRequest templateRequest = new TemplateRequest();
+        templateRequest.setName(azureTemplateName);
+        templateRequest.setDescription("AZURE template for integration testing");
+        templateRequest.setCloudPlatform("AZURE");
+        templateRequest.setInstanceType(azureVmType);
+        templateRequest.setVolumeCount(Integer.valueOf(azureVolumeCount));
+        templateRequest.setVolumeSize(Integer.valueOf(azureVolumeSize));
+        String id = getTemplateEndpoint().postPrivate(templateRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         templateAdditionHelper.handleTemplateAdditions(getItContext(), id, additions);

@@ -1,8 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -10,6 +9,12 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -30,16 +35,35 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
-        Map<String, Object> igMap = new HashMap<>();
+        List<InstanceGroupJson> igMap = new ArrayList<>();
         for (InstanceGroup ig : instanceGroups) {
-            igMap.put(ig.getName(), ig);
+            InstanceGroupJson instanceGroupJson = new InstanceGroupJson();
+            instanceGroupJson.setGroup(ig.getName());
+            instanceGroupJson.setNodeCount(ig.getNodeCount());
+            instanceGroupJson.setTemplateId(Long.valueOf(ig.getTemplateId()));
+            instanceGroupJson.setType(InstanceGroupType.valueOf(ig.getType()));
+            igMap.add(instanceGroupJson);
         }
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         String securityGroupId = itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID);
+        StackRequest stackRequest = new StackRequest();
+        stackRequest.setName(stackName);
+        stackRequest.setCredentialId(Long.valueOf(credentialId));
+        stackRequest.setRegion(region);
+        stackRequest.setOnFailureAction(OnFailureAction.valueOf(onFailureAction));
+        FailurePolicyJson failurePolicyJson = new FailurePolicyJson();
+        failurePolicyJson.setAdjustmentType(AdjustmentType.valueOf(adjustmentType));
+        failurePolicyJson.setThreshold(threshold);
+        stackRequest.setFailurePolicy(failurePolicyJson);
+        stackRequest.setNetworkId(Long.valueOf(networkId));
+        stackRequest.setSecurityGroupId(Long.valueOf(securityGroupId));
+        stackRequest.setPlatformVariant(variant);
+        stackRequest.setAvailabilityZone(availabilityZone);
+        stackRequest.setInstanceGroups(igMap);
+
         // WHEN
-        String stackId = getClient().postStack(stackName, credentialId, region, false, igMap, onFailureAction, threshold,
-                    adjustmentType, null, networkId, securityGroupId, null, null, variant, availabilityZone);
+        String stackId = getStackEndpoint().postPrivate(stackRequest).getId().toString();
         // THEN
         Assert.assertNotNull(stackId);
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);

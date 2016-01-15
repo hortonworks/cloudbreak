@@ -12,8 +12,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
@@ -40,11 +39,11 @@ import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceCom
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteria;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration
@@ -184,7 +183,7 @@ public class AppConfig {
     @Bean(name = "autoSSLAcceptorRestTemplate")
     public RestOperations autoSSLAcceptorRestTemplate() throws Exception {
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-        SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
+        org.apache.http.ssl.SSLContextBuilder sslContextBuilder = new org.apache.http.ssl.SSLContextBuilder();
         sslContextBuilder.loadTrustMaterial(null, new TrustStrategy() {
             @Override
             public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {

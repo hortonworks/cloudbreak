@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.common.type.Status.REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.Status.START_REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.service.cluster.DataNodeUtils.sortByUsedSpace;
 
 import java.io.IOException;
@@ -24,6 +24,8 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +34,11 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.common.type.Status;
-import com.sequenceiq.cloudbreak.common.type.StatusRequest;
+import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.controller.json.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
@@ -49,6 +50,9 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
@@ -126,6 +130,13 @@ public class AmbariClusterService implements ClusterService {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
+    @Inject
+    private JsonHelper jsonHelper;
+
+    @Inject
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
+
     private enum Msg {
         AMBARI_CLUSTER_START_IGNORED("ambari.cluster.start.ignored"),
         AMBARI_CLUSTER_STOP_IGNORED("ambari.cluster.stop.ignored"),
@@ -178,9 +189,9 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster retrieveClusterForCurrentUser(Long stackId) {
+    public ClusterResponse retrieveClusterForCurrentUser(Long stackId) {
         Stack stack = stackService.get(stackId);
-        return stack.getCluster();
+        return conversionService.convert(stack.getCluster(), ClusterResponse.class);
     }
 
     @Override
@@ -639,6 +650,11 @@ public class AmbariClusterService implements ClusterService {
                         cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
             }
         }
+    }
+
+    public ClusterResponse getClusterResponse(ClusterResponse response, String clusterJson) {
+        response.setCluster(jsonHelper.createJsonFromString(clusterJson));
+        return response;
     }
 
 }

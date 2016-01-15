@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAUL
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.RecipeRequest;
+import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component

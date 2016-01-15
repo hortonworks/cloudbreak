@@ -1,11 +1,14 @@
 package com.sequenceiq.it.cloudbreak;
 
-import static java.util.Collections.singletonMap;
+import java.util.Arrays;
 
 import org.testng.Assert;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
 
 public class SecurityGroupCreationTest extends AbstractCloudbreakIntegrationTest {
 
@@ -14,7 +17,16 @@ public class SecurityGroupCreationTest extends AbstractCloudbreakIntegrationTest
     public void testSecurityGroupCreation(@Optional("it-restricted-ambari") String name, @Optional("22,443,8080") String ports) throws Exception {
         // GIVEN
         // WHEN
-        String id = getClient().postSecurityGroup(name, "Security group created by IT", singletonMap("0.0.0.0/0", ports), null, false);
+        SecurityGroupJson securityGroupJson = new SecurityGroupJson();
+        securityGroupJson.setDescription("Security group created by IT");
+        securityGroupJson.setName(name);
+        SecurityRuleJson securityRuleJson = new SecurityRuleJson();
+        securityRuleJson.setProtocol("tcp");
+        securityRuleJson.setSubnet("0.0.0.0/0");
+        securityRuleJson.setPorts(ports);
+        securityGroupJson.setSecurityRules(Arrays.asList(securityRuleJson));
+
+        String id = getSecurityGroupEndpoint().postPrivate(securityGroupJson).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID, id, true);

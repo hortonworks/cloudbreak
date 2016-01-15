@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
-import com.sequenceiq.cloudbreak.controller.json.HostMetadataJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.HostMetadataJson;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Recipe;

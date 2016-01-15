@@ -1,37 +1,42 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.isGateway;
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.isGateway;
-import static com.sequenceiq.cloudbreak.common.type.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.common.type.Status.START_REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.common.type.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.Status.UPDATE_REQUESTED;
 
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-import com.sequenceiq.cloudbreak.common.type.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.common.type.StatusRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.controller.validation.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -102,15 +107,24 @@ public class StackService {
     @Inject
     private ImageNameUtil imageNameUtil;
 
-    public Set<Stack> retrievePrivateStacks(CbUser user) {
-        return stackRepository.findForUser(user.getUserId());
+    @Autowired
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
+
+    public Set<StackResponse> retrievePrivateStacks(CbUser user) {
+        return convertStacks(stackRepository.findForUser(user.getUserId()));
     }
 
-    public Set<Stack> retrieveAccountStacks(CbUser user) {
+    private Set<StackResponse> convertStacks(Set<Stack> stacks) {
+        return (Set<StackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
+                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackResponse.class)));
+    }
+
+    public Set<StackResponse> retrieveAccountStacks(CbUser user) {
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
-            return stackRepository.findAllInAccount(user.getAccount());
+            return convertStacks(stackRepository.findAllInAccount(user.getAccount()));
         } else {
-            return stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
+            return convertStacks(stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount()));
         }
     }
 
@@ -120,6 +134,11 @@ public class StackService {
 
     public Set<Stack> retrieveOwnerStacks(String owner) {
         return stackRepository.findForUser(owner);
+    }
+
+    public StackResponse getJsonById(Long id) {
+        Stack stack = get(id);
+        return conversionService.convert(stack, StackResponse.class);
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
@@ -147,12 +166,20 @@ public class StackService {
         return retStack;
     }
 
-    public Stack get(String ambariAddress) {
+    public StackResponse getByIdJson(Long id) {
+        Stack retStack = stackRepository.findOneWithLists(id);
+        if (retStack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", id));
+        }
+        return conversionService.convert(retStack, StackResponse.class);
+    }
+
+    public StackResponse get(String ambariAddress) {
         Stack stack = stackRepository.findByAmbari(ambariAddress);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack not found by Ambari address: '%s' not found", ambariAddress));
         }
-        return stack;
+        return conversionService.convert(stack, StackResponse.class);
     }
 
     public Stack getPrivateStack(String name, CbUser cbUser) {
@@ -161,6 +188,31 @@ public class StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
         return stack;
+    }
+
+    public StackResponse getPrivateStackJson(String name, CbUser cbUser) {
+        Stack stack = getPrivateStack(name, cbUser);
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        return conversionService.convert(stack, StackResponse.class);
+    }
+
+    public StackResponse getPrivateStackJsonByName(String name, CbUser cbUser) {
+        Stack stack = stackRepository.findByNameInUser(name, cbUser.getUserId());
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        return conversionService.convert(stack, StackResponse.class);
+    }
+
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    public StackResponse getPublicStackJsonByName(String name, CbUser cbUser) {
+        Stack stack = stackRepository.findOneByName(name, cbUser.getAccount());
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        return conversionService.convert(stack, StackResponse.class);
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")

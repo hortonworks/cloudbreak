@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
@@ -7,6 +10,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -39,8 +43,18 @@ public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegration
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         // WHEN
         // TODO publicInAccount
-        String id = getClient().postAzureRmCredential(credentialName, "Azure Rm credential for integartiontest", subscriptionId, tenantId, accesKey, secretKey,
-                publicKey, false);
+        CredentialRequest credentialRequest = new CredentialRequest();
+        credentialRequest.setName(credentialName);
+        credentialRequest.setPublicKey(publicKey);
+        credentialRequest.setDescription("Azure Rm credential for integartiontest");
+        Map<String, Object> map = new HashMap<>();
+        map.put("subscriptionId", subscriptionId);
+        map.put("tenantId", tenantId);
+        map.put("accesKey", accesKey);
+        map.put("secretKey", secretKey);
+        credentialRequest.setParameters(map);
+        credentialRequest.setCloudPlatform("AZURE_RM");
+        String id = getCredentialEndpoint().postPrivate(credentialRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, id, true);
