@@ -69,7 +69,7 @@ public class TlsSetupService {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    @Value("#{'${cb.cert.dir:}' + '/' + '${cb.tls.cert.file:}'}")
+    @Value("#{'${cb.cert.dir:}/${cb.tls.cert.file:}'}")
     private String tlsCertificatePath;
 
     public void setupTls(Stack stack, String publicIp, String user, Set<String> sshFingerprints) throws CloudbreakException {
