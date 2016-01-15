@@ -45,7 +45,7 @@ sendSimpleEmail = function(to, subject, content) {
         subject: subject,
         html: content}, function(error, info){
         if(error){
-            console.log(error);
+            console.log('Message not delivered: ' + error);
         }else{
             console.log('Message sent: ' + info.response);
         }
