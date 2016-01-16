@@ -25,7 +25,7 @@ public class BlueprintCreationTest extends AbstractCloudbreakIntegrationTest {
         blueprintRequest.setName(blueprintName);
         blueprintRequest.setDescription("Blueprint for integration testing");
         blueprintRequest.setAmbariBlueprint(mapper.readValue(blueprintContent, JsonNode.class));
-        String id = getBlueprintEndpoint().postPrivate(blueprintRequest).getId().toString();
+        String id = getCloudbreakClient().blueprintEndpoint().postPrivate(blueprintRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, id, true);

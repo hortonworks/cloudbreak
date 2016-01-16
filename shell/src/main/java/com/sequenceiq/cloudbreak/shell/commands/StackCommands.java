@@ -15,8 +15,6 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
@@ -34,6 +32,7 @@ import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
 import com.sequenceiq.cloudbreak.shell.exception.ValidationException;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
@@ -46,9 +45,7 @@ public class StackCommands implements CommandMarker {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private StackEndpoint stackEndpoint;
-    @Autowired
-    private ClusterEndpoint clusterEndpoint;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private ResponseTransformer responseTransformer;
 
@@ -99,7 +96,7 @@ public class StackCommands implements CommandMarker {
             instanceGroupAdjustmentJson.setWithClusterEvent(withClusterUpScale == null ? false : withClusterUpScale);
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup.getName());
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            stackEndpoint.put(Long.valueOf(context.getStackId()), updateStackJson);
+            cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
             return context.getStackId();
         } catch (Exception ex) {
             return ex.toString();
@@ -120,7 +117,7 @@ public class StackCommands implements CommandMarker {
             instanceGroupAdjustmentJson.setWithClusterEvent(false);
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup.getName());
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            stackEndpoint.put(Long.valueOf(context.getStackId()), updateStackJson);
+            cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
             return context.getStackId();
         } catch (Exception ex) {
             return ex.toString();
@@ -187,9 +184,9 @@ public class StackCommands implements CommandMarker {
             stackRequest.setInstanceGroups(instanceGroupJsonList);
 
             if (publicInAccount == null || !publicInAccount) {
-                id = stackEndpoint.postPrivate(stackRequest);
+                id = cloudbreakClient.stackEndpoint().postPrivate(stackRequest);
             } else {
-                id = stackEndpoint.postPublic(stackRequest);
+                id = cloudbreakClient.stackEndpoint().postPublic(stackRequest);
             }
             context.addStack(id.getId().toString(), name);
             context.setHint(Hints.CREATE_CLUSTER);
@@ -235,7 +232,7 @@ public class StackCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = false, help = "Name of the stack") String name) {
         try {
             if (id != null) {
-                StackResponse stack = stackEndpoint.get(Long.valueOf(id));
+                StackResponse stack = cloudbreakClient.stackEndpoint().get(Long.valueOf(id));
                 if (stack != null) {
                     context.addStack(id, stack.getName());
                     if (context.isCredentialAvailable()) {
@@ -249,7 +246,7 @@ public class StackCommands implements CommandMarker {
                 }
 
             } else if (name != null) {
-                StackResponse stack = stackEndpoint.getPublic(name);
+                StackResponse stack = cloudbreakClient.stackEndpoint().getPublic(name);
                 if (stack != null) {
                     Long stackId = stack.getId();
                     context.addStack(stackId.toString(), name);
@@ -271,7 +268,7 @@ public class StackCommands implements CommandMarker {
 
     private void prepareCluster(String stackId) {
         try {
-            ClusterResponse cluster = clusterEndpoint.get(Long.valueOf(stackId));
+            ClusterResponse cluster = cloudbreakClient.clusterEndpoint().get(Long.valueOf(stackId));
             if (cluster != null) {
                 String blueprintId = cluster.getBlueprintId().toString();
                 context.addBlueprint(blueprintId);
@@ -287,12 +284,12 @@ public class StackCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = false, help = "Name of the stack") String name) {
         try {
             if (id != null) {
-                stackEndpoint.delete(Long.valueOf(id), false);
+                cloudbreakClient.stackEndpoint().delete(Long.valueOf(id), false);
                 context.setHint(Hints.CREATE_CLUSTER);
                 context.removeStack(id);
                 return "Stack terminated with id: " + id;
             } else if (name != null) {
-                stackEndpoint.deletePublic(name, false);
+                cloudbreakClient.stackEndpoint().deletePublic(name, false);
                 context.setHint(Hints.CREATE_CLUSTER);
                 return "Stack terminated with name: " + name;
             }
@@ -305,7 +302,7 @@ public class StackCommands implements CommandMarker {
     @CliCommand(value = "stack list", help = "Shows all of your stack")
     public String listStacks() {
         try {
-            return renderSingleMap(responseTransformer.transformToMap(stackEndpoint.getPublics(), "id", "name"), "ID", "INFO");
+            return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.stackEndpoint().getPublics(), "id", "name"), "ID", "INFO");
         } catch (Exception ex) {
             return ex.toString();
         }
@@ -316,7 +313,7 @@ public class StackCommands implements CommandMarker {
         try {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.STOPPED);
-            stackEndpoint.put(Long.valueOf(context.getStackId()), updateStackJson);
+            cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
             return "Stack is stopping";
         } catch (Exception ex) {
             return MessageUtil.getMessage(ex);
@@ -328,7 +325,7 @@ public class StackCommands implements CommandMarker {
         try {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.STARTED);
-            stackEndpoint.put(Long.valueOf(context.getStackId()), updateStackJson);
+            cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
             return "Stack is starting";
         } catch (Exception ex) {
             return MessageUtil.getMessage(ex);
@@ -343,10 +340,10 @@ public class StackCommands implements CommandMarker {
         try {
             StackResponse stackResponse;
             if (id != null) {
-                stackResponse = stackEndpoint.get(Long.valueOf(id));
+                stackResponse = cloudbreakClient.stackEndpoint().get(Long.valueOf(id));
                 return renderSingleMap(responseTransformer.transformObjectToStringMap(stackResponse), "FIELD", "VALUE");
             } else if (name != null) {
-                stackResponse = stackEndpoint.getPublic(name);
+                stackResponse = cloudbreakClient.stackEndpoint().getPublic(name);
                 if (stackResponse != null) {
                     return renderSingleMap(responseTransformer.transformObjectToStringMap(stackResponse), "FIELD", "VALUE");
                 }

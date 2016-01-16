@@ -13,11 +13,11 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.NetworkJson;
 import com.sequenceiq.cloudbreak.shell.completion.NetworkId;
 import com.sequenceiq.cloudbreak.shell.completion.NetworkName;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -29,7 +29,7 @@ public class NetworkCommands implements CommandMarker {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private NetworkEndpoint networkEndpoint;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private ResponseTransformer responseTransformer;
 
@@ -46,7 +46,7 @@ public class NetworkCommands implements CommandMarker {
     @CliCommand(value = "network list", help = "Shows the currently available networks configurations")
     public String listNetworks() {
         try {
-            Set<NetworkJson> publics = networkEndpoint.getPublics();
+            Set<NetworkJson> publics = cloudbreakClient.networkEndpoint().getPublics();
             return renderSingleMap(responseTransformer.transformToMap(publics, "id", "name"), "ID", "INFO");
         } catch (Exception e) {
             return e.getMessage();
@@ -79,9 +79,9 @@ public class NetworkCommands implements CommandMarker {
 
             IdJson id;
             if (publicInAccount == null || !publicInAccount) {
-                id = networkEndpoint.postPrivate(networkJson);
+                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             } else {
-                id = networkEndpoint.postPublic(networkJson);
+                id = cloudbreakClient.networkEndpoint().postPublic(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), "AWS");
             return String.format(CREATE_SUCCESS_MSG, id);
@@ -113,9 +113,9 @@ public class NetworkCommands implements CommandMarker {
 
             IdJson id;
             if (publicInAccount == null || !publicInAccount) {
-                id = networkEndpoint.postPrivate(networkJson);
+                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             } else {
-                id = networkEndpoint.postPublic(networkJson);
+                id = cloudbreakClient.networkEndpoint().postPublic(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), "AZURE_RM");
             return String.format(CREATE_SUCCESS_MSG, id.getId());
@@ -145,9 +145,9 @@ public class NetworkCommands implements CommandMarker {
 
             IdJson id;
             if (publicInAccount == null || !publicInAccount) {
-                id = networkEndpoint.postPrivate(networkJson);
+                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             } else {
-                id = networkEndpoint.postPublic(networkJson);
+                id = cloudbreakClient.networkEndpoint().postPublic(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), "GCP");
             return String.format(CREATE_SUCCESS_MSG, id.getId());
@@ -179,9 +179,9 @@ public class NetworkCommands implements CommandMarker {
 
             IdJson id;
             if (publicInAccount == null || !publicInAccount) {
-                id = networkEndpoint.postPrivate(networkJson);
+                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             } else {
-                id = networkEndpoint.postPublic(networkJson);
+                id = cloudbreakClient.networkEndpoint().postPublic(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), "OPENSTACK");
             return String.format(CREATE_SUCCESS_MSG, id.getId());
@@ -203,7 +203,7 @@ public class NetworkCommands implements CommandMarker {
                 createHintAndAddNetworkToContext(id, provider);
                 msg = "Network is selected with id: " + id;
             } else if (name != null) {
-                NetworkJson aPublic = networkEndpoint.getPublic(name);
+                NetworkJson aPublic = cloudbreakClient.networkEndpoint().getPublic(name);
                 if (aPublic != null) {
                     createHintAndAddNetworkToContext(aPublic.getId(), name);
                     msg = "Network is selected with name: " + name;
@@ -223,11 +223,11 @@ public class NetworkCommands implements CommandMarker {
             String id = networkId == null ? null : networkId.getName();
             String name = networkName == null ? null : networkName.getName();
             if (id != null) {
-                networkEndpoint.delete(Long.valueOf(id));
+                cloudbreakClient.networkEndpoint().delete(Long.valueOf(id));
                 refreshNetworksInContext();
                 return String.format("Network deleted with %s id", id);
             } else if (name != null) {
-                networkEndpoint.deletePublic(name);
+                cloudbreakClient.networkEndpoint().deletePublic(name);
                 refreshNetworksInContext();
                 return String.format("Network deleted with %s name", name);
             }
@@ -245,10 +245,10 @@ public class NetworkCommands implements CommandMarker {
             String id = networkId == null ? null : networkId.getName();
             String name = networkName == null ? null : networkName.getName();
             if (id != null) {
-                NetworkJson networkJson = networkEndpoint.get(Long.valueOf(id));
+                NetworkJson networkJson = cloudbreakClient.networkEndpoint().get(Long.valueOf(id));
                 return renderSingleMap(responseTransformer.transformObjectToStringMap(networkJson), "FIELD", "VALUE");
             } else if (name != null) {
-                NetworkJson aPublic = networkEndpoint.getPublic(name);
+                NetworkJson aPublic = cloudbreakClient.networkEndpoint().getPublic(name);
                 return renderSingleMap(responseTransformer.transformObjectToStringMap(aPublic), "FIELD", "VALUE");
             }
             return "Network could not be found!";
@@ -281,7 +281,7 @@ public class NetworkCommands implements CommandMarker {
 
     private void refreshNetworksInContext() throws Exception {
         context.getNetworksByProvider().clear();
-        Set<NetworkJson> publics = networkEndpoint.getPublics();
+        Set<NetworkJson> publics = cloudbreakClient.networkEndpoint().getPublics();
         for (NetworkJson network : publics) {
             context.putNetwork(network.getId(), network.getCloudPlatform());
         }

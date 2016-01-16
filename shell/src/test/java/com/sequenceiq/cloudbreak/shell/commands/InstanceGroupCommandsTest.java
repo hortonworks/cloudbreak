@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 
@@ -33,6 +34,9 @@ public class InstanceGroupCommandsTest {
     private InstanceGroupCommands underTest;
 
     @Mock
+    private CloudbreakClient cloudbreakClient;
+
+    @Mock
     private TemplateEndpoint mockClient;
 
     @Mock
@@ -41,12 +45,13 @@ public class InstanceGroupCommandsTest {
     private TemplateResponse dummyResult;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         underTest = new InstanceGroupCommands();
         hostGroup = new InstanceGroup("master");
         MockitoAnnotations.initMocks(this);
         dummyResult = new TemplateResponse();
         dummyResult.setId(Long.valueOf(DUMMY_TEMPLATE_ID));
+        given(cloudbreakClient.templateEndpoint()).willReturn(mockClient);
     }
 
     @Test

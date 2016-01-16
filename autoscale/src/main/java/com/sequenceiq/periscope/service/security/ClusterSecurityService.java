@@ -10,13 +10,13 @@ import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.AmbariStack;
-import com.sequenceiq.periscope.service.CloudbreakService;
+import com.sequenceiq.periscope.model.CloudbreakClient;
 
 @Service
 public class ClusterSecurityService {
 
     @Autowired
-    private CloudbreakService cloudbreakService;
+    private CloudbreakClient cloudbreakClient;
 
     @Autowired
     private TlsSecurityService tlsSecurityService;
@@ -34,7 +34,7 @@ public class ClusterSecurityService {
     private Boolean hasAccess(String userId, String account, String ambariAddress) throws Exception {
         AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
         ambariAddressJson.setAmbariAddress(ambariAddress);
-        StackResponse stack = cloudbreakService.stackEndpoint().getStackForAmbari(ambariAddressJson);
+        StackResponse stack = cloudbreakClient.stackEndpoint().getStackForAmbari(ambariAddressJson);
         if (stack.getOwner().equals(userId)) {
             return true;
         } else if (stack.isPublicInAccount() && stack.getAccount() == account) {
@@ -50,11 +50,11 @@ public class ClusterSecurityService {
             String pass = ambari.getPass();
             AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
             ambariAddressJson.setAmbariAddress(host);
-            StackResponse stack = cloudbreakService.stackEndpoint().getStackForAmbari(ambariAddressJson);
+            StackResponse stack = cloudbreakClient.stackEndpoint().getStackForAmbari(ambariAddressJson);
             long id = stack.getId();
             SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(id);
             if (user == null && pass == null) {
-                ClusterResponse clusterResponse = cloudbreakService.clusterEndpoint().get(id);
+                ClusterResponse clusterResponse = cloudbreakClient.clusterEndpoint().get(id);
                 return new AmbariStack(new Ambari(host, ambari.getPort(), clusterResponse.getUserName(), clusterResponse.getPassword()), id, securityConfig);
             } else {
                 return new AmbariStack(ambari, id, securityConfig);

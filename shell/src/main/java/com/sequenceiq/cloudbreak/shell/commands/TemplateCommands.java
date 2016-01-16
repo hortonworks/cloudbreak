@@ -16,7 +16,6 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.shell.completion.AwsVolumeType;
 import com.sequenceiq.cloudbreak.shell.completion.AzureInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.GcpInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.GcpVolumeType;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -40,7 +40,7 @@ public class TemplateCommands implements CommandMarker {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private TemplateEndpoint templateEndpoint;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private ResponseTransformer responseTransformer;
 
@@ -67,7 +67,7 @@ public class TemplateCommands implements CommandMarker {
     @CliCommand(value = "template list", help = "Shows the currently available cloud templates")
     public String listTemplates() {
         try {
-            Set<TemplateResponse> publics = templateEndpoint.getPublics();
+            Set<TemplateResponse> publics = cloudbreakClient.templateEndpoint().getPublics();
             return renderSingleMap(responseTransformer.transformToMap(publics, "id", "name"), "ID", "INFO");
         } catch (Exception e) {
             return e.getMessage();
@@ -100,9 +100,9 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setVolumeSize(volumeSize);
 
             if (publicInAccount(publicInAccount)) {
-                id = templateEndpoint.postPublic(templateRequest);
+                id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
             } else {
-                id = templateEndpoint.postPrivate(templateRequest);
+                id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
             }
             createOrSelectBlueprintHint();
             return "Template created, id: " + id.getId().toString();
@@ -148,9 +148,9 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setParameters(params);
 
             if (publicInAccount(publicInAccount)) {
-                id = templateEndpoint.postPublic(templateRequest);
+                id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
             } else {
-                id = templateEndpoint.postPrivate(templateRequest);
+                id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
             }
             createOrSelectBlueprintHint();
             return "Template created, id: " + id.getId();
@@ -190,9 +190,9 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setVolumeSize(volumeSize);
 
             if (publicInAccount(publicInAccount)) {
-                id = templateEndpoint.postPublic(templateRequest);
+                id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
             } else {
-                id = templateEndpoint.postPrivate(templateRequest);
+                id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
             }
             createOrSelectBlueprintHint();
             return "Template created, id: " + id.getId().toString();
@@ -229,9 +229,9 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setVolumeType(volumeType == null ? "pd-standard" : volumeType.getName());
 
             if (publicInAccount(publicInAccount)) {
-                id = templateEndpoint.postPublic(templateRequest);
+                id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
             } else {
-                id = templateEndpoint.postPrivate(templateRequest);
+                id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
             }
             createOrSelectBlueprintHint();
             return "Template created, id: " + id.getId().toString();
@@ -251,9 +251,10 @@ public class TemplateCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = false, help = "Name of the template") String name) {
         try {
             if (id != null) {
-                return renderSingleMap(responseTransformer.transformObjectToStringMap(templateEndpoint.get(Long.valueOf(id))), "FIELD", "VALUE");
+                return renderSingleMap(
+                        responseTransformer.transformObjectToStringMap(cloudbreakClient.templateEndpoint().get(Long.valueOf(id))), "FIELD", "VALUE");
             } else if (name != null) {
-                TemplateResponse aPublic = templateEndpoint.getPublic(name);
+                TemplateResponse aPublic = cloudbreakClient.templateEndpoint().getPublic(name);
                 if (aPublic != null) {
                     return renderSingleMap(responseTransformer.transformObjectToStringMap(aPublic), "FIELD", "VALUE");
                 }
@@ -270,10 +271,10 @@ public class TemplateCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = false, help = "Name of the template") String name) {
         try {
             if (id != null) {
-                templateEndpoint.delete(Long.valueOf(id));
+                cloudbreakClient.templateEndpoint().delete(Long.valueOf(id));
                 return String.format("Template has been selected, id: %s", id);
             } else if (name != null) {
-                templateEndpoint.deletePublic(name);
+                cloudbreakClient.templateEndpoint().deletePublic(name);
                 return String.format("Tempalte has been selected, name: %s", name);
             }
             return "No template specified.";

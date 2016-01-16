@@ -45,7 +45,7 @@ public class AwsTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
         map.put("encrypted", false);
         templateRequest.setParameters(map);
         templateRequest.setCloudPlatform("AWS");
-        String id = getTemplateEndpoint().postPrivate(templateRequest).getId().toString();
+        String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         templateAdditionHelper.handleTemplateAdditions(getItContext(), id, additions);

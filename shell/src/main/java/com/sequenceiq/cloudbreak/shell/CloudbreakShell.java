@@ -21,16 +21,10 @@ import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.event.ShellStatus;
 import org.springframework.shell.event.ShellStatusListener;
 
-import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.NetworkJson;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -53,19 +47,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private CredentialEndpoint credentialEndpoint;
-    @Autowired
-    private BlueprintEndpoint blueprintEndpoint;
-    @Autowired
-    private StackEndpoint stackEndpoint;
-    @Autowired
-    private RecipeEndpoint recipeEndpoint;
-    @Autowired
-    private SecurityGroupEndpoint securityGroupEndpoint;
-    @Autowired
-    private NetworkEndpoint networkEndpoint;
-    @Autowired
-    private ConnectorEndpoint connectorEndpoint;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private ResponseTransformer responseTransformer;
 
@@ -172,23 +154,23 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
     }
 
     private void initResourceAccessibility() throws Exception {
-        if (!credentialEndpoint.getPublics().isEmpty()) {
+        if (!cloudbreakClient.credentialEndpoint().getPublics().isEmpty()) {
             context.setCredentialAccessible();
         }
-        if (!blueprintEndpoint.getPublics().isEmpty()) {
+        if (!cloudbreakClient.blueprintEndpoint().getPublics().isEmpty()) {
             context.setBlueprintAccessible();
         }
-        if (!stackEndpoint.getPublics().isEmpty()) {
+        if (!cloudbreakClient.stackEndpoint().getPublics().isEmpty()) {
             context.setStackAccessible();
         }
-        if (!recipeEndpoint.getPublics().isEmpty()) {
+        if (!cloudbreakClient.recipeEndpoint().getPublics().isEmpty()) {
             context.setRecipeAccessible();
         }
-        Set<NetworkJson> publics = networkEndpoint.getPublics();
+        Set<NetworkJson> publics = cloudbreakClient.networkEndpoint().getPublics();
         for (NetworkJson network : publics) {
             context.putNetwork(network.getId(), network.getCloudPlatform());
         }
-        Set<SecurityGroupJson> securityGroups = securityGroupEndpoint.getPublics();
+        Set<SecurityGroupJson> securityGroups = cloudbreakClient.securityGroupEndpoint().getPublics();
         for (SecurityGroupJson securityGroup : securityGroups) {
             context.putSecurityGroup(securityGroup.getId().toString(), securityGroup.getName());
         }
@@ -201,11 +183,11 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         Map<String, Map<String, Collection<String>>> availabilityZones = Collections.EMPTY_MAP;
         Map<String, List<Map<String, String>>> instanceTypes = new HashMap<>();
         try {
-            platformToVariants = connectorEndpoint.getPlatformVariants().getPlatformToVariants();
-            regions = connectorEndpoint.getRegions().getRegions();
-            availabilityZones = connectorEndpoint.getRegions().getAvailabilityZones();
-            volumeTypes = connectorEndpoint.getDisktypes().getDiskTypes();
-            Map<String, Collection<VmTypeJson>> virtualMachines = connectorEndpoint.getVmTypes().getVirtualMachines();
+            platformToVariants = cloudbreakClient.connectorEndpoint().getPlatformVariants().getPlatformToVariants();
+            regions = cloudbreakClient.connectorEndpoint().getRegions().getRegions();
+            availabilityZones = cloudbreakClient.connectorEndpoint().getRegions().getAvailabilityZones();
+            volumeTypes = cloudbreakClient.connectorEndpoint().getDisktypes().getDiskTypes();
+            Map<String, Collection<VmTypeJson>> virtualMachines = cloudbreakClient.connectorEndpoint().getVmTypes().getVirtualMachines();
             for (Map.Entry<String, Collection<VmTypeJson>> vmCloud : virtualMachines.entrySet()) {
                 List<Map<String, String>> tmp = new ArrayList<>();
                 for (VmTypeJson vmTypeJson : vmCloud.getValue()) {

@@ -9,7 +9,7 @@ public class TemplateDeleteByNameTest extends AbstractCloudbreakIntegrationTest 
     public void testDeleteTemplateByName(String templateName) throws Exception {
         // GIVEN
         // WHEN
-        getTemplateEndpoint().deletePublic(templateName);
+        getCloudbreakClient().templateEndpoint().deletePublic(templateName);
         // THEN no exception
     }
 }

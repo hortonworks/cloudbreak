@@ -8,12 +8,12 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.model.CloudbreakClient;
 
 public class ScalingTest extends AbstractCloudbreakIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingTest.class);
@@ -38,7 +38,7 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            getClusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
+            getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
             CloudbreakUtil.waitAndCheckClusterStatus(itContext, stackId, "AVAILABLE");
 
             UpdateStackJson updateStackJson = new UpdateStackJson();
@@ -47,7 +47,7 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setWithClusterEvent(false);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            getStackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
+            getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
             CloudbreakUtil.waitAndCheckStackStatus(itContext, stackId, "AVAILABLE");
         } else {
             UpdateStackJson updateStackJson = new UpdateStackJson();
@@ -56,7 +56,7 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setWithClusterEvent(false);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            getStackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
+            getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
             CloudbreakUtil.waitAndCheckStackStatus(itContext, stackId, "AVAILABLE");
 
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
@@ -65,11 +65,12 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            getClusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
+            getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
             CloudbreakUtil.waitAndCheckClusterStatus(itContext, stackId, "AVAILABLE");
         }
         // THEN
-        CloudbreakUtil.checkClusterAvailability(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_STACK, StackEndpoint.class),
+        CloudbreakUtil.checkClusterAvailability(
+                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint(),
                 stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
                 itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
     }

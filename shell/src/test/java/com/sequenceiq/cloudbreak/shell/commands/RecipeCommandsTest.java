@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 
 public class RecipeCommandsTest {
@@ -34,6 +35,9 @@ public class RecipeCommandsTest {
     private RecipeEndpoint recipeEndpoint;
 
     @Mock
+    private CloudbreakClient cloudbreakClient;
+
+    @Mock
     private CloudbreakContext mockContext;
 
     @Mock
@@ -42,11 +46,12 @@ public class RecipeCommandsTest {
     private RecipeResponse dummyResult;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         underTest = new RecipeCommands();
         MockitoAnnotations.initMocks(this);
         dummyResult = new RecipeResponse();
         dummyResult.setId(Long.valueOf(RECIPE_ID));
+        given(cloudbreakClient.recipeEndpoint()).willReturn(recipeEndpoint);
     }
 
     @Test

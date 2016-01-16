@@ -27,7 +27,7 @@ public class OpenStackNetworkCreationTest extends AbstractCloudbreakIntegrationT
         networkJson.setParameters(map);
         networkJson.setCloudPlatform("OPENSTACK");
 
-        String id = getNetworkEndpoint().postPrivate(networkJson).getId().toString();
+        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkJson).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);

@@ -20,11 +20,11 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
@@ -34,7 +34,7 @@ public class RecipeCommands implements CommandMarker {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private RecipeEndpoint recipeEndpoint;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private ResponseTransformer responseTransformer;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -67,7 +67,7 @@ public class RecipeCommands implements CommandMarker {
     @CliCommand(value = "recipe list", help = "Shows the currently available recipes")
     public String listRecipes() {
         try {
-            return renderSingleMap(responseTransformer.transformToMap(recipeEndpoint.getPublics(), "id", "name"), "ID", "INFO");
+            return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.recipeEndpoint().getPublics(), "id", "name"), "ID", "INFO");
         } catch (Exception ex) {
             return ex.toString();
         }
@@ -83,9 +83,9 @@ public class RecipeCommands implements CommandMarker {
             IdJson id;
             RecipeRequest recipeRequest = mapper.readValue(json, RecipeRequest.class);
             if (publicInAccount) {
-                id = recipeEndpoint.postPublic(recipeRequest);
+                id = cloudbreakClient.recipeEndpoint().postPublic(recipeRequest);
             } else {
-                id = recipeEndpoint.postPrivate(recipeRequest);
+                id = cloudbreakClient.recipeEndpoint().postPrivate(recipeRequest);
             }
             return String.format("Recipe '%s' has been added with id: %s", recipeRequest.getName(), id.getId());
         } catch (Exception ex) {
@@ -100,9 +100,9 @@ public class RecipeCommands implements CommandMarker {
         try {
             RecipeResponse recipeMap = null;
             if (id != null) {
-                recipeMap = recipeEndpoint.get(Long.valueOf(id));
+                recipeMap = cloudbreakClient.recipeEndpoint().get(Long.valueOf(id));
             } else if (name != null) {
-                recipeMap = recipeEndpoint.getPublic(name);
+                recipeMap = cloudbreakClient.recipeEndpoint().getPublic(name);
             } else {
                 return "Recipe not specified.";
             }
@@ -126,10 +126,10 @@ public class RecipeCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = false, help = "Name of the recipe") String name) {
         try {
             if (id != null) {
-                recipeEndpoint.delete(Long.valueOf(id));
+                cloudbreakClient.recipeEndpoint().delete(Long.valueOf(id));
                 return String.format("Recipe deleted with %s id", id);
             } else if (name != null) {
-                recipeEndpoint.deletePublic(name);
+                cloudbreakClient.recipeEndpoint().deletePublic(name);
                 return String.format("Recipe deleted with %s name", name);
             }
             return "Recipe not specified (select recipe by --id or --name)";
@@ -175,9 +175,9 @@ public class RecipeCommands implements CommandMarker {
             recipeRequest.setPlugins(plugins);
             IdJson id;
             if (publicInAccount) {
-                id = recipeEndpoint.postPublic(recipeRequest);
+                id = cloudbreakClient.recipeEndpoint().postPublic(recipeRequest);
             } else {
-                id = recipeEndpoint.postPrivate(recipeRequest);
+                id = cloudbreakClient.recipeEndpoint().postPrivate(recipeRequest);
             }
             return String.format("Recipe '%s' has been stored with id: %s", name, id.getId());
         } catch (Exception ex) {

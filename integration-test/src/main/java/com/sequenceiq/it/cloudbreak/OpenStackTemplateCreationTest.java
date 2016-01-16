@@ -38,7 +38,7 @@ public class OpenStackTemplateCreationTest extends AbstractCloudbreakIntegration
         templateRequest.setInstanceType(instanceType);
         templateRequest.setVolumeCount(Integer.valueOf(volumeCount));
         templateRequest.setVolumeSize(Integer.valueOf(volumeSize));
-        String id = getTemplateEndpoint().postPrivate(templateRequest).getId().toString();
+        String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         additionHelper.handleTemplateAdditions(getItContext(), id, additions);

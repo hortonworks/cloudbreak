@@ -32,29 +32,31 @@ public class StatusUpdateTest extends AbstractCloudbreakIntegrationTest {
         if (newStatus.equals(STOPPED)) {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.valueOf(newStatus));
-            getClusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
+            getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
             CloudbreakUtil.waitAndCheckClusterStatus(getItContext(), stackId, STOPPED);
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.valueOf(newStatus));
-            getStackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
-            getStackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
+            getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
+            getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
             CloudbreakUtil.waitAndCheckStackStatus(getItContext(), stackId, STOPPED);
         } else {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.valueOf(newStatus));
-            getStackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
+            getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
             CloudbreakUtil.waitAndCheckStackStatus(getItContext(), stackId, "AVAILABLE");
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.valueOf(newStatus));
-            getClusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
+            getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
             CloudbreakUtil.waitAndCheckClusterStatus(getItContext(), stackId, "AVAILABLE");
         }
         // THEN
         if (newStatus.equals(STARTED)) {
-            CloudbreakUtil.checkClusterAvailability(getStackEndpoint(), stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
+            CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), stackId,
+                    itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
                     itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         } else if (newStatus.equals(STOPPED)) {
-            CloudbreakUtil.checkClusterStopped(getStackEndpoint(), stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
+            CloudbreakUtil.checkClusterStopped(getCloudbreakClient().stackEndpoint(), stackId,
+                    itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
                     itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
         }
     }

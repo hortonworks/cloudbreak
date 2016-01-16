@@ -26,7 +26,7 @@ public class SecurityGroupCreationTest extends AbstractCloudbreakIntegrationTest
         securityRuleJson.setPorts(ports);
         securityGroupJson.setSecurityRules(Arrays.asList(securityRuleJson));
 
-        String id = getSecurityGroupEndpoint().postPrivate(securityGroupJson).getId().toString();
+        String id = getCloudbreakClient().securityGroupEndpoint().postPrivate(securityGroupJson).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID, id, true);

@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
+import com.sequenceiq.periscope.model.CloudbreakClient;
 import com.sequenceiq.periscope.model.TlsConfiguration;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
-import com.sequenceiq.periscope.service.CloudbreakService;
 
 @Service
 public class TlsSecurityService {
@@ -37,7 +37,7 @@ public class TlsSecurityService {
     private String clientPrivateKeyName;
 
     @Autowired
-    private CloudbreakService cloudbreakService;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private SecurityConfigRepository securityConfigRepository;
 
@@ -63,7 +63,7 @@ public class TlsSecurityService {
         byte[] serverCert;
 
         try {
-            serverCert = cloudbreakService.stackEndpoint().getCertificate(stackId).getCertificate();
+            serverCert = cloudbreakClient.stackEndpoint().getCertificate(stackId).getCertificate();
             Files.write(stackCertDir.resolve(SERVER_CERT_FILE), serverCert, StandardOpenOption.CREATE);
         } catch (Exception e) {
             throw new TlsConfigurationException("Failed to write server certificate to " + stackCertDir, e);

@@ -1,16 +1,12 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
-import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,26 +21,18 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.sequenceiq.cloudbreak.api.endpoint.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
-import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.SubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.UsageEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.cloudbreak.config.ITProps;
+import com.sequenceiq.it.cloudbreak.model.CloudbreakClient;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
@@ -90,33 +78,24 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
+        String token = itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN);
 
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_ACCOUNTPREFERENCES, endPointFactory(AccountPreferencesEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_CLUSTER, endPointFactory(ClusterEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_CONNECTOR, endPointFactory(ConnectorEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_CREDENTIAL, endPointFactory(CredentialEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_EVENT, endPointFactory(EventEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_NETWORK, endPointFactory(NetworkEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_RECIPE, endPointFactory(RecipeEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_SECURITYGROUP, endPointFactory(SecurityGroupEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_STACK, endPointFactory(StackEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_SUBSCRIPTION, endPointFactory(SubscriptionEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_TEMPLATE, endPointFactory(TemplateEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_USAGE, endPointFactory(UsageEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_USER, endPointFactory(UserEndpoint.class, cloudbreakServer));
-        itContext.putContextParam(CloudbreakITContextConstants.ENDPOINT_BLUEPRINT, endPointFactory(BlueprintEndpoint.class, cloudbreakServer));
-
-        putBlueprintToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_BLUEPRINT, BlueprintEndpoint.class), blueprintName);
-        putNetworkToContext(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_NETWORK, NetworkEndpoint.class), cloudProvider, networkName);
-        putSecurityGroupToContext(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_SECURITYGROUP, SecurityGroupEndpoint.class),
+        itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, new CloudbreakClient(cloudbreakServer, token));
+        putBlueprintToContextIfExist(
+                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).blueprintEndpoint(), blueprintName);
+        putNetworkToContext(
+                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).networkEndpoint(), cloudProvider, networkName);
+        putSecurityGroupToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).securityGroupEndpoint(),
                 securityGroupName);
-        putCredentialToContext(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_CREDENTIAL, CredentialEndpoint.class), cloudProvider,
+        putCredentialToContext(
+                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialEndpoint(), cloudProvider,
                 credentialName);
-        putStackToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_STACK, StackEndpoint.class), stackName);
+        putStackToContextIfExist(
+                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint(), stackName);
         if (StringUtils.hasLength(instanceGroups)) {
             List<String[]> instanceGroupStrings = templateAdditionHelper.parseCommaSeparatedRows(instanceGroups);
             itContext.putContextParam(CloudbreakITContextConstants.TEMPLATE_ID,
-                    createInstanceGroups(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_TEMPLATE, TemplateEndpoint.class),
+                    createInstanceGroups(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).templateEndpoint(),
                             instanceGroupStrings));
         }
         if (StringUtils.hasLength(hostGroups)) {
@@ -137,27 +116,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             }
         }
     }
-
-    private <T extends Object> T endPointFactory(Class<T> clazz, String cloudbreakServer) throws Exception {
-        String token = itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN);
-        JAXRSClientFactoryBean jaxrsClientFactoryBean = jaxrsClientFactoryBean(token, cloudbreakServer);
-        jaxrsClientFactoryBean.setResourceClass(clazz);
-        Object clientFactory = JAXRSClientFactory.fromClient(jaxrsClientFactoryBean.create(), clazz, true);
-        return (T) clientFactory;
-    }
-
-    private JAXRSClientFactoryBean jaxrsClientFactoryBean(String token, String cloudbreakAddress) {
-        JAXRSClientFactoryBean jaxrsClientFactoryBean = new JAXRSClientFactoryBean();
-        String addressWithoutLastSlash = cloudbreakAddress.endsWith("/") ? cloudbreakAddress.substring(0, cloudbreakAddress.length() - 1) : cloudbreakAddress;
-        String apiAddress = addressWithoutLastSlash + CoreApi.API_ROOT_CONTEXT;
-        jaxrsClientFactoryBean.setAddress(apiAddress);
-        jaxrsClientFactoryBean.setProvider(JacksonJsonProvider.class);
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + token);
-        jaxrsClientFactoryBean.setHeaders(headers);
-        return jaxrsClientFactoryBean;
-    }
-
 
     private void putNetworkToContext(NetworkEndpoint endpoint, String cloudProvider, String networkName) throws Exception {
         endpoint.getPublics();
@@ -237,7 +195,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Parameters("cleanUp")
     public void cleanUp(@Optional("true") boolean cleanUp) throws Exception {
         if (isCleanUpNeeded(cleanUp)) {
-            StackEndpoint client = itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_STACK, StackEndpoint.class);
+            StackEndpoint client = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
             String stackId = itContext.getCleanUpParameter(CloudbreakITContextConstants.STACK_ID);
             for (int i = 0; i < cleanUpRetryCount; i++) {
                 if (deleteStack(client, stackId)) {
@@ -257,7 +215,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                 Set<String> deletedTemplates = new HashSet<>();
                 for (InstanceGroup ig : instanceGroups) {
                     if (!deletedTemplates.contains(ig.getTemplateId())) {
-                        deleteTemplate(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_TEMPLATE, TemplateEndpoint.class), ig.getTemplateId());
+                        deleteTemplate(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).templateEndpoint(),
+                                ig.getTemplateId());
                         deletedTemplates.add(ig.getTemplateId());
                     }
                 }
@@ -265,16 +224,16 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             Set<Long> recipeIds = itContext.getContextParam(CloudbreakITContextConstants.RECIPE_ID, Set.class);
             if (recipeIds != null) {
                 for (Long recipeId : recipeIds) {
-                    deleteRecipe(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_RECIPE, RecipeEndpoint.class), recipeId);
+                    deleteRecipe(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).recipeEndpoint(), recipeId);
                 }
             }
-            deleteCredential(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_CREDENTIAL, CredentialEndpoint.class),
+            deleteCredential(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialEndpoint(),
                     itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
-            deleteBlueprint(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_BLUEPRINT, BlueprintEndpoint.class),
+            deleteBlueprint(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).blueprintEndpoint(),
                     itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
-            deleteNetwork(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_NETWORK, NetworkEndpoint.class),
+            deleteNetwork(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).networkEndpoint(),
                     itContext.getCleanUpParameter(CloudbreakITContextConstants.NETWORK_ID));
-            deleteSecurityGroup(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_SECURITYGROUP, SecurityGroupEndpoint.class),
+            deleteSecurityGroup(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).securityGroupEndpoint(),
                     itContext.getCleanUpParameter(CloudbreakITContextConstants.SECURITY_GROUP_ID));
         }
     }
