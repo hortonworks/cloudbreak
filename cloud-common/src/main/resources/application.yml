@@ -49,8 +49,8 @@ cb:
   
   docker:
     container:
-      ambari.server: hortonworks/ambari-server:latest
-      ambari.agent: hortonworks/ambari-agent:latest
+      ambari.server: hortonworks/ambari-server:2.2.1-v1
+      ambari.agent: hortonworks/ambari-agent:2.2.1-v1
       ambari.db: postgres:9.4.1
       registrator: sequenceiq/registrator:v5.2
       docker.consul.watch.plugn: sequenceiq/docker-consul-watch-plugn:1.1

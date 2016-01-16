@@ -106,6 +106,7 @@ public class AmbariClusterConnector {
     private static final String DOMAIN = "node.dc1.consul";
     private static final String KEY_TYPE = "PERSISTED";
     private static final String PRINCIPAL = "/admin";
+    private static final String CONFIG_STRATEGY = "NEVER_APPLY";
 
     @Inject
     private StackRepository stackRepository;
@@ -233,12 +234,12 @@ public class AmbariClusterConnector {
             String blueprintName = cluster.getBlueprint().getBlueprintName();
             if (cluster.isSecure()) {
                 ambariClient.createSecureCluster(clusterName, blueprintName,
-                        hostGroupMappings, cluster.getKerberosAdmin() + PRINCIPAL, cluster.getKerberosPassword(), KEY_TYPE);
+                        hostGroupMappings, CONFIG_STRATEGY, cluster.getKerberosAdmin() + PRINCIPAL, cluster.getKerberosPassword(), KEY_TYPE);
                 PollingResult pollingResult = waitForAmbariOperationsToStart(stack, ambariClient,
                         singletonMap("INSTALL_START", 1), AmbariOperationType.START_OPERATION_STATE);
                 checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
             } else {
-                ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings);
+                ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, CONFIG_STRATEGY);
             }
             PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
