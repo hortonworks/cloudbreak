@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint;
 
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -30,13 +31,13 @@ public interface SecurityGroupEndpoint {
     @Path("user/securitygroups")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    IdJson postPrivate(SecurityGroupJson securityGroupJson);
+    IdJson postPrivate(@Valid SecurityGroupJson securityGroupJson);
 
     @POST
     @Path("account/securitygroups")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    IdJson postPublic(SecurityGroupJson securityGroupJson);
+    IdJson postPublic(@Valid SecurityGroupJson securityGroupJson);
 
     @GET
     @Path("user/securitygroups")

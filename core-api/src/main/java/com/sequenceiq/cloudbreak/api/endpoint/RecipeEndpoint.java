@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint;
 
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -31,13 +32,13 @@ public interface RecipeEndpoint {
     @Path("user/recipes")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RecipeOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES)
-    IdJson postPrivate(RecipeRequest recipeRequest);
+    IdJson postPrivate(@Valid RecipeRequest recipeRequest);
 
     @POST
     @Path("account/recipes")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RecipeOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES)
-    IdJson postPublic(RecipeRequest recipeRequest);
+    IdJson postPublic(@Valid RecipeRequest recipeRequest);
 
     @GET
     @Path("user/recipes")

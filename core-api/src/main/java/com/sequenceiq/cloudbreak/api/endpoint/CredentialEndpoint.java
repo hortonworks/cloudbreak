@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint;
 
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -31,13 +32,13 @@ public interface CredentialEndpoint {
     @Path("user/credentials")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.CredentialOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
-    IdJson postPrivate(CredentialRequest credentialRequest);
+    IdJson postPrivate(@Valid CredentialRequest credentialRequest);
 
     @POST
     @Path("account/credentials")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.CredentialOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
-    IdJson postPublic(CredentialRequest credentialRequest);
+    IdJson postPublic(@Valid CredentialRequest credentialRequest);
 
     @GET
     @Path("user/credentials")

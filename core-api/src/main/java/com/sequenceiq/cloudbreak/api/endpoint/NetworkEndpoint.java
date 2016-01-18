@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint;
 
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -42,7 +43,7 @@ public interface NetworkEndpoint {
     @Path("account/networks")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.NetworkOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.NETWORK_NOTES)
-    IdJson postPublic(NetworkJson networkJson);
+    IdJson postPublic(@Valid NetworkJson networkJson);
 
     @GET
     @Path("account/networks")
@@ -66,7 +67,7 @@ public interface NetworkEndpoint {
     @Path("user/networks")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.NetworkOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.NETWORK_NOTES)
-    IdJson postPrivate(NetworkJson networkJson);
+    IdJson postPrivate(@Valid NetworkJson networkJson);
 
     @GET
     @Path("user/networks")
