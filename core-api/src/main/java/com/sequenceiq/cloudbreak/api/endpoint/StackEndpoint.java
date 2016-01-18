@@ -4,6 +4,7 @@ package com.sequenceiq.cloudbreak.api.endpoint;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -42,25 +43,25 @@ public interface StackEndpoint {
     @Path("user/stacks")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
-    IdJson postPrivate(StackRequest stackRequest);
+    IdJson postPrivate(@Valid StackRequest stackRequest);
 
     @POST
     @Path("account/stacks")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
-    IdJson postPublic(StackRequest stackRequest);
+    IdJson postPublic(@Valid StackRequest stackRequest);
 
     @POST
     @Path("stacks/validate")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.VALIDATE, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
-    Response validate(StackValidationRequest stackValidationRequest);
+    Response validate(@Valid StackValidationRequest stackValidationRequest);
 
     @POST
     @Path(value = "stacks/ambari")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_AMBARI_ADDRESS, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
-    StackResponse getStackForAmbari(AmbariAddressJson json);
+    StackResponse getStackForAmbari(@Valid AmbariAddressJson json);
 
     @GET
     @Path("user/stacks")
@@ -131,7 +132,7 @@ public interface StackEndpoint {
     @Path("stacks/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
-    Response put(@PathParam(value = "id")Long id, UpdateStackJson updateRequest);
+    Response put(@PathParam(value = "id")Long id, @Valid UpdateStackJson updateRequest);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

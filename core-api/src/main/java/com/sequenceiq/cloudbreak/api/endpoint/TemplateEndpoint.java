@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint;
 
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -31,13 +32,13 @@ public interface TemplateEndpoint {
     @Path("user/templates")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.TemplateOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES)
-    IdJson postPrivate(TemplateRequest templateRequest);
+    IdJson postPrivate(@Valid TemplateRequest templateRequest);
 
     @POST
     @Path("account/templates")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.TemplateOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES)
-    IdJson postPublic(TemplateRequest templateRequest);
+    IdJson postPublic(@Valid TemplateRequest templateRequest);
 
     @GET
     @Path("user/templates")

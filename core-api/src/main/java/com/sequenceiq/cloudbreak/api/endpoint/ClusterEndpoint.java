@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -29,7 +30,7 @@ public interface ClusterEndpoint {
     @Path("stacks/{id}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterOpDescription.POST_FOR_STACK, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
-    Response post(@PathParam(value = "id") Long id, ClusterRequest request);
+    Response post(@PathParam(value = "id") Long id, @Valid ClusterRequest request);
 
     @GET
     @Path("stacks/{id}/cluster")
@@ -53,6 +54,6 @@ public interface ClusterEndpoint {
     @Path("stacks/{id}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterOpDescription.PUT_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
-    Response put(@PathParam(value = "id") Long stackId, UpdateClusterJson updateJson) throws Exception;
+    Response put(@PathParam(value = "id") Long stackId, @Valid UpdateClusterJson updateJson) throws Exception;
 
 }

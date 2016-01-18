@@ -16,8 +16,7 @@ dependencies {
   compile group: 'io.swagger',                    name: 'swagger-annotations',            version: '1.5.6'
   compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
   compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
-
-
+  compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

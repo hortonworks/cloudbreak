@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -16,6 +17,6 @@ public interface SubscriptionEndpoint {
     @POST
     @Path("subscriptions")
     @Produces(MediaType.APPLICATION_JSON)
-    IdJson subscribe(SubscriptionRequest subscriptionRequest);
+    IdJson subscribe(@Valid SubscriptionRequest subscriptionRequest);
 
 }
