@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 
 public class TemplateCommandsTest {
     private static final String TEMPLATE_ID = "50";
@@ -25,14 +26,18 @@ public class TemplateCommandsTest {
     @Mock
     private TemplateEndpoint templateEndpoint;
 
+    @Mock
+    private CloudbreakClient cloudbreakClient;
+
     private TemplateResponse dummyResult;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         underTest = new TemplateCommands();
         MockitoAnnotations.initMocks(this);
         dummyResult = new TemplateResponse();
         dummyResult.setId(Long.valueOf(TEMPLATE_ID));
+        given(cloudbreakClient.templateEndpoint()).willReturn(templateEndpoint);
     }
 
     @Test

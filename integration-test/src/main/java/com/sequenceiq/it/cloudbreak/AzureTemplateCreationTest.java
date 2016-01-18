@@ -38,7 +38,7 @@ public class AzureTemplateCreationTest extends AbstractCloudbreakIntegrationTest
         templateRequest.setInstanceType(azureVmType);
         templateRequest.setVolumeCount(Integer.valueOf(azureVolumeCount));
         templateRequest.setVolumeSize(Integer.valueOf(azureVolumeSize));
-        String id = getTemplateEndpoint().postPrivate(templateRequest).getId().toString();
+        String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         templateAdditionHelper.handleTemplateAdditions(getItContext(), id, additions);

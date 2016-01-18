@@ -15,9 +15,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
@@ -59,11 +56,7 @@ public class CloudbreakContext {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
-    private BlueprintEndpoint blueprintEndpoint;
-    @Autowired
-    private CredentialEndpoint credentialEndpoint;
-    @Autowired
-    private TemplateEndpoint templateEndpoint;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private ResponseTransformer responseTransformer;
 
@@ -139,7 +132,7 @@ public class CloudbreakContext {
     }
 
     public void addBlueprint(String id) throws Exception {
-        Set<BlueprintResponse> publics = blueprintEndpoint.getPublics();
+        Set<BlueprintResponse> publics = cloudbreakClient.blueprintEndpoint().getPublics();
         this.instanceGroups = new HashMap<>();
         this.hostGroups = new HashMap<>();
 
@@ -179,10 +172,10 @@ public class CloudbreakContext {
     }
 
     public void setCredential(String id) throws Exception {
-        CredentialResponse credential = credentialEndpoint.get(Long.valueOf(id));
+        CredentialResponse credential = cloudbreakClient.credentialEndpoint().get(Long.valueOf(id));
         this.activeCloudPlatform = credential.getCloudPlatform();
         List<TemplateResponse> templateResponses = new ArrayList<>();
-        for (TemplateResponse templateResponse : templateEndpoint.getPublics()) {
+        for (TemplateResponse templateResponse : cloudbreakClient.templateEndpoint().getPublics()) {
             if (this.activeCloudPlatform.equals(templateResponse.getCloudPlatform())) {
                 templateResponses.add(templateResponse);
             }

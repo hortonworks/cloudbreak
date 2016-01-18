@@ -40,7 +40,7 @@ public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
         templateRequest.setVolumeSize(Integer.valueOf(volumeSize));
         templateRequest.setVolumeType(volumeType);
         templateRequest.setCloudPlatform("GCP");
-        String id = getTemplateEndpoint().postPrivate(templateRequest).getId().toString();
+        String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         additionHelper.handleTemplateAdditions(getItContext(), id, additions);

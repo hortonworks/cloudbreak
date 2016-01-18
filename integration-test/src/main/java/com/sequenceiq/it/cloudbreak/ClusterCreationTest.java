@@ -13,10 +13,10 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.model.CloudbreakClient;
 
 public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
 
@@ -59,11 +59,12 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         clusterRequest.setHostGroups(hostGroupJsons1);
 
 
-        ClusterEndpoint clusterEndpoint = itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_CLUSTER, ClusterEndpoint.class);
+        ClusterEndpoint clusterEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).clusterEndpoint();
         clusterEndpoint.post(Long.valueOf(stackId), clusterRequest);
         // THEN
         CloudbreakUtil.waitAndCheckStackStatus(itContext, stackIdStr, "AVAILABLE");
-        CloudbreakUtil.checkClusterAvailability(itContext.getContextParam(CloudbreakITContextConstants.ENDPOINT_STACK, StackEndpoint.class),
+        CloudbreakUtil.checkClusterAvailability(
+                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint(),
                 stackIdStr, ambariUser, ambariPassword);
     }
 

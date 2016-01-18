@@ -23,9 +23,9 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -36,7 +36,7 @@ public class BlueprintCommands implements CommandMarker {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private BlueprintEndpoint blueprintEndpoint;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private ResponseTransformer responseTransformer;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -75,7 +75,7 @@ public class BlueprintCommands implements CommandMarker {
     public String addBlueprint() {
         String message = "Default blueprints added";
         try {
-            blueprintEndpoint.getPublics();
+            cloudbreakClient.blueprintEndpoint().getPublics();
         } catch (Exception e) {
             message = "Failed to add the default blueprints: " + e.getMessage();
         }
@@ -88,10 +88,10 @@ public class BlueprintCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = false, help = "Name of the blueprint") String name) {
         try {
             if (id != null) {
-                blueprintEndpoint.delete(Long.valueOf(id));
+                cloudbreakClient.blueprintEndpoint().delete(Long.valueOf(id));
                 return String.format("Blueprint deleted with %s id", id);
             } else if (name != null) {
-                blueprintEndpoint.deletePublic(name);
+                cloudbreakClient.blueprintEndpoint().deletePublic(name);
                 return String.format("Blueprint deleted with %s name", name);
             } else {
                 return "No blueprint specified (select a blueprint by --id or --name)";
@@ -104,7 +104,7 @@ public class BlueprintCommands implements CommandMarker {
     @CliCommand(value = "blueprint list", help = "Shows the currently available blueprints")
     public String listBlueprints() {
         try {
-            Set<BlueprintResponse> publics = blueprintEndpoint.getPublics();
+            Set<BlueprintResponse> publics = cloudbreakClient.blueprintEndpoint().getPublics();
             return renderSingleMap(responseTransformer.transformToMap(publics, "id", "blueprintName"), "ID", "INFO");
         } catch (Exception ex) {
             return ex.toString();
@@ -118,9 +118,9 @@ public class BlueprintCommands implements CommandMarker {
         try {
             BlueprintResponse blueprintResponse;
             if (id != null) {
-                blueprintResponse = blueprintEndpoint.get(Long.valueOf(id));
+                blueprintResponse = cloudbreakClient.blueprintEndpoint().get(Long.valueOf(id));
             } else if (name != null) {
-                blueprintResponse = blueprintEndpoint.getPublic(name);
+                blueprintResponse = cloudbreakClient.blueprintEndpoint().getPublic(name);
             } else {
                 return "No blueprints specified.";
             }
@@ -139,13 +139,13 @@ public class BlueprintCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = false, help = "Name of the blueprint") String name) {
         try {
             if (id != null) {
-                if (blueprintEndpoint.get(Long.valueOf(id)) != null) {
+                if (cloudbreakClient.blueprintEndpoint().get(Long.valueOf(id)) != null) {
                     context.addBlueprint(id);
                     context.setHint(Hints.CONFIGURE_INSTANCEGROUP);
                     return String.format("Blueprint has been selected, id: %s", id);
                 }
             } else if (name != null) {
-                BlueprintResponse blueprint = blueprintEndpoint.getPublic(name);
+                BlueprintResponse blueprint = cloudbreakClient.blueprintEndpoint().getPublic(name);
                 if (blueprint != null) {
                     context.addBlueprint(blueprint.getId().toString());
                     context.setHint(Hints.CONFIGURE_INSTANCEGROUP);
@@ -175,12 +175,12 @@ public class BlueprintCommands implements CommandMarker {
                 blueprintRequest.setAmbariBlueprint(mapper.readValue(json, JsonNode.class));
                 String id;
                 if (publicInAccount) {
-                    id = blueprintEndpoint.postPublic(blueprintRequest).getId().toString();
+                    id = cloudbreakClient.blueprintEndpoint().postPublic(blueprintRequest).getId().toString();
                 } else {
-                    id = blueprintEndpoint.postPrivate(blueprintRequest).getId().toString();
+                    id = cloudbreakClient.blueprintEndpoint().postPrivate(blueprintRequest).getId().toString();
                 }
                 context.addBlueprint(id);
-                if (blueprintEndpoint.getPublics().isEmpty()) {
+                if (cloudbreakClient.blueprintEndpoint().getPublics().isEmpty()) {
                     context.setHint(Hints.CONFIGURE_INSTANCEGROUP);
                 } else {
                     context.setHint(Hints.SELECT_STACK);

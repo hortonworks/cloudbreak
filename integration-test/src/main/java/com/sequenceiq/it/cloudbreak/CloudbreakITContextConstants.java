@@ -15,20 +15,7 @@ public class CloudbreakITContextConstants {
     public static final String AMBARI_USER_ID = "AMBARI_USER";
     public static final String AMBARI_PASSWORD_ID = "AMBARI_PASSWORD";
 
-    public static final String ENDPOINT_ACCOUNTPREFERENCES = "ENDPOINT_ACCOUNTPREFERENCES";
-    public static final String ENDPOINT_CLUSTER = "ENDPOINT_CLUSTER";
-    public static final String ENDPOINT_CONNECTOR = "ENDPOINT_CONNECTOR";
-    public static final String ENDPOINT_CREDENTIAL = "ENDPOINT_CREDENTIAL";
-    public static final String ENDPOINT_EVENT = "ENDPOINT_EVENT";
-    public static final String ENDPOINT_NETWORK = "ENDPOINT_NETWORK";
-    public static final String ENDPOINT_RECIPE = "ENDPOINT_RECIPE";
-    public static final String ENDPOINT_SECURITYGROUP = "ENDPOINT_SECURITYGROUP";
-    public static final String ENDPOINT_STACK = "ENDPOINT_STACK";
-    public static final String ENDPOINT_SUBSCRIPTION = "ENDPOINT_SUBSCRIPTION";
-    public static final String ENDPOINT_TEMPLATE = "ENDPOINT_TEMPLATE";
-    public static final String ENDPOINT_USAGE = "ENDPOINT_USAGE";
-    public static final String ENDPOINT_USER = "ENDPOINT_USER";
-    public static final String ENDPOINT_BLUEPRINT = "ENDPOINT_BLUEPRINT";
+    public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
 
     private CloudbreakITContextConstants() {
     }

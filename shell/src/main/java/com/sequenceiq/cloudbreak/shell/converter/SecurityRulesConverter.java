@@ -7,6 +7,7 @@ import org.springframework.shell.core.MethodTarget;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 
 public class SecurityRulesConverter extends AbstractConverter {
+
     public SecurityRulesConverter() {
 
     }

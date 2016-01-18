@@ -24,10 +24,10 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -40,7 +40,7 @@ public class CredentialCommands implements CommandMarker {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private CredentialEndpoint credentialEndpoint;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private ResponseTransformer responseTransformer;
 
@@ -75,9 +75,10 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = false, help = "Name of the credential") String name) {
         try {
             if (id != null) {
-                return renderSingleMap(responseTransformer.transformObjectToStringMap(credentialEndpoint.get(Long.valueOf(id))), "FIELD", "VALUE");
+                return renderSingleMap(
+                        responseTransformer.transformObjectToStringMap(cloudbreakClient.credentialEndpoint().get(Long.valueOf(id))), "FIELD", "VALUE");
             } else if (name != null) {
-                CredentialResponse aPublic = credentialEndpoint.getPublic(name);
+                CredentialResponse aPublic = cloudbreakClient.credentialEndpoint().getPublic(name);
                 if (aPublic != null) {
                     return renderSingleMap(responseTransformer.transformObjectToStringMap(aPublic), "FIELD", "VALUE");
                 }
@@ -94,10 +95,10 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = false, help = "Name of the credential") String name) {
         try {
             if (id != null) {
-                credentialEndpoint.delete(Long.valueOf(id));
+                cloudbreakClient.credentialEndpoint().delete(Long.valueOf(id));
                 return String.format("Credential deleted, id: %s", id);
             } else if (name != null) {
-                credentialEndpoint.deletePublic(name);
+                cloudbreakClient.credentialEndpoint().deletePublic(name);
                 return String.format("Credential deleted, name: %s", name);
             }
             return "No credential specified (select a credential by --id or --name)";
@@ -109,7 +110,7 @@ public class CredentialCommands implements CommandMarker {
     @CliCommand(value = "credential list", help = "Shows all of your credentials")
     public String listCredentials() {
         try {
-            return renderSingleMap(responseTransformer.transformToMap(credentialEndpoint.getPublics(), "id", "name"), "ID", "INFO");
+            return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.credentialEndpoint().getPublics(), "id", "name"), "ID", "INFO");
         } catch (Exception ex) {
             return ex.toString();
         }
@@ -122,13 +123,13 @@ public class CredentialCommands implements CommandMarker {
         try {
 
             if (id != null) {
-                if (credentialEndpoint.get(Long.valueOf(id)) != null) {
+                if (cloudbreakClient.credentialEndpoint().get(Long.valueOf(id)) != null) {
                     context.setCredential(id);
                     createOrSelectTemplateHint();
                     return "Credential selected, id: " + id;
                 }
             } else if (name != null) {
-                CredentialResponse aPublic = credentialEndpoint.getPublic(name);
+                CredentialResponse aPublic = cloudbreakClient.credentialEndpoint().getPublic(name);
                 context.setCredential(aPublic.getId().toString());
                 createOrSelectTemplateHint();
                 return "Credential selected, name: " + name;
@@ -218,9 +219,9 @@ public class CredentialCommands implements CommandMarker {
 
             IdJson idJson;
             if (publicInAccount) {
-                idJson = credentialEndpoint.postPublic(credentialRequest);
+                idJson = cloudbreakClient.credentialEndpoint().postPublic(credentialRequest);
             } else {
-                idJson = credentialEndpoint.postPrivate(credentialRequest);
+                idJson = cloudbreakClient.credentialEndpoint().postPrivate(credentialRequest);
             }
             context.setCredential(idJson.getId().toString());
             createOrSelectTemplateHint();
@@ -270,9 +271,9 @@ public class CredentialCommands implements CommandMarker {
 
             IdJson id;
             if (publicInAccount) {
-                id = credentialEndpoint.postPublic(credentialRequest);
+                id = cloudbreakClient.credentialEndpoint().postPublic(credentialRequest);
             } else {
-                id = credentialEndpoint.postPrivate(credentialRequest);
+                id = cloudbreakClient.credentialEndpoint().postPrivate(credentialRequest);
             }
             context.setCredential(id.getId().toString());
             createOrSelectTemplateHint();
@@ -336,9 +337,9 @@ public class CredentialCommands implements CommandMarker {
 
             IdJson id;
             if (publicInAccount) {
-                id = credentialEndpoint.postPublic(credentialRequest);
+                id = cloudbreakClient.credentialEndpoint().postPublic(credentialRequest);
             } else {
-                id = credentialEndpoint.postPrivate(credentialRequest);
+                id = cloudbreakClient.credentialEndpoint().postPrivate(credentialRequest);
             }
             context.setCredential(id.getId().toString());
             createOrSelectTemplateHint();
@@ -408,9 +409,9 @@ public class CredentialCommands implements CommandMarker {
 
             IdJson id;
             if (publicInAccount) {
-                id = credentialEndpoint.postPublic(credentialRequest);
+                id = cloudbreakClient.credentialEndpoint().postPublic(credentialRequest);
             } else {
-                id = credentialEndpoint.postPrivate(credentialRequest);
+                id = cloudbreakClient.credentialEndpoint().postPrivate(credentialRequest);
             }
             context.setCredential(id.getId().toString());
             createOrSelectTemplateHint();
@@ -421,7 +422,7 @@ public class CredentialCommands implements CommandMarker {
     }
 
     private void createOrSelectTemplateHint() throws Exception {
-        if (credentialEndpoint.getPublics().isEmpty()) {
+        if (cloudbreakClient.credentialEndpoint().getPublics().isEmpty()) {
             context.setHint(Hints.ADD_BLUEPRINT);
         } else {
             context.setHint(Hints.SELECT_BLUEPRINT);

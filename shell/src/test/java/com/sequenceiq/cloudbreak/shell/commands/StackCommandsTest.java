@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 
@@ -29,18 +30,22 @@ public class StackCommandsTest {
     private StackEndpoint stackEndpoint;
 
     @Mock
+    private CloudbreakClient cloudbreakClient;
+
+    @Mock
     private CloudbreakContext mockContext;
 
     private StackResponse dummyResult;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         underTest = new StackCommands();
         MockitoAnnotations.initMocks(this);
         dummyResult = new StackResponse();
         dummyResult.setId(Long.valueOf(STACK_ID));
         dummyResult.setName(STACK_NAME);
         given(mockContext.isCredentialAvailable()).willReturn(true);
+        given(cloudbreakClient.stackEndpoint()).willReturn(stackEndpoint);
     }
 
     @Test

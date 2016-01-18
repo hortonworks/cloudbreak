@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
-import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 
 @Component
@@ -28,7 +28,7 @@ public class HostGroupCommands implements CommandMarker {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private RecipeEndpoint recipeEndpoint;
+    private CloudbreakClient cloudbreakClient;
 
     @CliAvailabilityIndicator(value = "hostgroup configure")
     public boolean isCreateHostGroupAvailable() {
@@ -79,10 +79,10 @@ public class HostGroupCommands implements CommandMarker {
                     RecipeResponse resp = null;
                     switch (type) {
                         case ID:
-                            resp = recipeEndpoint.get(Long.valueOf(input));
+                            resp = cloudbreakClient.recipeEndpoint().get(Long.valueOf(input));
                             break;
                         case NAME:
-                            resp = recipeEndpoint.getPublic(input);
+                            resp = cloudbreakClient.recipeEndpoint().getPublic(input);
                             break;
                         default:
                             throw new UnsupportedOperationException();

@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.shell.converter.StackRegionConverter;
 @Configuration
 public class ConverterConfiguration {
 
-
     @Bean
     Converter simpleFileConverter() {
         return new SimpleFileConverter();

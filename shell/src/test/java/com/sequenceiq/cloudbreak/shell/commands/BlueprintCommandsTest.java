@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 
@@ -26,6 +27,9 @@ public class BlueprintCommandsTest {
     private BlueprintCommands underTest;
 
     @Mock
+    private CloudbreakClient cloudbreakClient;
+
+    @Mock
     private BlueprintEndpoint blueprintEndpoint;
 
     @Mock
@@ -34,11 +38,12 @@ public class BlueprintCommandsTest {
     private BlueprintResponse dummyResult;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         underTest = new BlueprintCommands();
         MockitoAnnotations.initMocks(this);
         dummyResult = new BlueprintResponse();
         dummyResult.setId(BLUEPRINT_ID);
+        given(cloudbreakClient.blueprintEndpoint()).willReturn(blueprintEndpoint);
     }
 
     @Test

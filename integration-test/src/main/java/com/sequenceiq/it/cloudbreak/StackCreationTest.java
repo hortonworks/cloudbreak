@@ -63,7 +63,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         stackRequest.setInstanceGroups(igMap);
 
         // WHEN
-        String stackId = getStackEndpoint().postPrivate(stackRequest).getId().toString();
+        String stackId = getCloudbreakClient().stackEndpoint().postPrivate(stackRequest).getId().toString();
         // THEN
         Assert.assertNotNull(stackId);
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);

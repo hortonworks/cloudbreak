@@ -14,11 +14,11 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
 import com.google.common.primitives.Longs;
-import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
@@ -29,7 +29,7 @@ public class InstanceGroupCommands implements CommandMarker {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private TemplateEndpoint templateEndpoint;
+    private CloudbreakClient cloudbreakClient;
 
     @CliAvailabilityIndicator(value = "instancegroup configure")
     public boolean isCreateInstanceGroupAvailable() {
@@ -54,7 +54,7 @@ public class InstanceGroupCommands implements CommandMarker {
             if (instanceGroupTemplateId != null) {
                 templateId = instanceGroupTemplateId.getName();
             } else if (instanceGroupTemplateName != null) {
-                TemplateResponse aPublic = templateEndpoint.getPublic(instanceGroupTemplateName.getName());
+                TemplateResponse aPublic = cloudbreakClient.templateEndpoint().getPublic(instanceGroupTemplateName.getName());
                 if (aPublic != null) {
                     templateId = aPublic.getId().toString();
                 } else {

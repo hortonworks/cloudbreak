@@ -15,13 +15,13 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupId;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupName;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -33,7 +33,7 @@ public class SecurityGroupCommands implements CommandMarker {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private SecurityGroupEndpoint securityGroupEndpoint;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private ResponseTransformer responseTransformer;
 
@@ -91,9 +91,9 @@ public class SecurityGroupCommands implements CommandMarker {
             securityGroupJson.setSecurityRules(securityRuleJsonList);
 
             if (publicInAccount) {
-                id = securityGroupEndpoint.postPublic(securityGroupJson);
+                id = cloudbreakClient.securityGroupEndpoint().postPublic(securityGroupJson);
             } else {
-                id = securityGroupEndpoint.postPrivate(securityGroupJson);
+                id = cloudbreakClient.securityGroupEndpoint().postPrivate(securityGroupJson);
             }
             context.putSecurityGroup(id.getId().toString(), name);
             context.setActiveSecurityGroupId(id.getId().toString());
@@ -107,7 +107,7 @@ public class SecurityGroupCommands implements CommandMarker {
     @CliCommand(value = "securitygroup list", help = "Shows the currently available security groups")
     public String listSecurityGroups() {
         try {
-            Set<SecurityGroupJson> publics = securityGroupEndpoint.getPublics();
+            Set<SecurityGroupJson> publics = cloudbreakClient.securityGroupEndpoint().getPublics();
             Map<String, String> updatedGroups = new HashMap<>();
             for (SecurityGroupJson aPublic : publics) {
                 updatedGroups.put(aPublic.getId().toString(), aPublic.getName());
@@ -155,10 +155,10 @@ public class SecurityGroupCommands implements CommandMarker {
             String id = groupId == null ? null : groupId.getName();
             String name = groupName == null ? null : groupName.getName();
             if (id != null) {
-                SecurityGroupJson securityGroupJson = securityGroupEndpoint.get(Long.valueOf(id));
+                SecurityGroupJson securityGroupJson = cloudbreakClient.securityGroupEndpoint().get(Long.valueOf(id));
                 return renderSingleMap(responseTransformer.transformObjectToStringMap(securityGroupJson), "FIELD", "VALUE");
             } else if (name != null) {
-                SecurityGroupJson aPublic = securityGroupEndpoint.getPublic(name);
+                SecurityGroupJson aPublic = cloudbreakClient.securityGroupEndpoint().getPublic(name);
                 return renderSingleMap(responseTransformer.transformObjectToStringMap(aPublic), "FIELD", "VALUE");
             }
             return "Security group could not be found!";
@@ -175,11 +175,11 @@ public class SecurityGroupCommands implements CommandMarker {
             String id = securityGroupId == null ? null : securityGroupId.getName();
             String name = securityGroupName == null ? null : securityGroupName.getName();
             if (id != null) {
-                securityGroupEndpoint.delete(Long.valueOf(id));
+                cloudbreakClient.securityGroupEndpoint().delete(Long.valueOf(id));
                 refreshSecurityGroupsInContext();
                 return String.format("SecurityGroup deleted with %s id", name);
             } else if (name != null) {
-                securityGroupEndpoint.deletePublic(name);
+                cloudbreakClient.securityGroupEndpoint().deletePublic(name);
                 refreshSecurityGroupsInContext();
                 return String.format("SecurityGroup deleted with %s name", name);
             }
@@ -191,7 +191,7 @@ public class SecurityGroupCommands implements CommandMarker {
 
     private void refreshSecurityGroupsInContext() throws Exception {
         context.getSecurityGroups().clear();
-        Set<SecurityGroupJson> publics = securityGroupEndpoint.getPublics();
+        Set<SecurityGroupJson> publics = cloudbreakClient.securityGroupEndpoint().getPublics();
         for (SecurityGroupJson securityGroup : publics) {
             context.putSecurityGroup(securityGroup.getId().toString(), securityGroup.getName());
         }

@@ -7,14 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
-import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.shell.completion.NetworkName;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 public class NetworkNameConverter extends AbstractConverter<NetworkName> {
 
     @Autowired
-    private NetworkEndpoint networkEndpoint;
+    private CloudbreakClient cloudbreakClient;
 
     @Autowired
     private ResponseTransformer responseTransformer;
@@ -30,7 +30,7 @@ public class NetworkNameConverter extends AbstractConverter<NetworkName> {
     @Override
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
-            Map<String, String> networksMap = responseTransformer.transformToMap(networkEndpoint.getPublics(), "id", "name");
+            Map<String, String> networksMap = responseTransformer.transformToMap(cloudbreakClient.networkEndpoint().getPublics(), "id", "name");
             return getAllPossibleValues(completions, networksMap.values());
         } catch (Exception e) {
             return false;

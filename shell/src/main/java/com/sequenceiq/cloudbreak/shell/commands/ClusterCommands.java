@@ -14,8 +14,6 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -27,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
+import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -38,9 +37,7 @@ public class ClusterCommands implements CommandMarker {
     @Autowired
     private CloudbreakContext context;
     @Autowired
-    private ClusterEndpoint clusterEndpoint;
-    @Autowired
-    private StackEndpoint stackEndpoint;
+    private CloudbreakClient cloudbreakClient;
     @Autowired
     private ResponseTransformer responseTransformer;
 
@@ -114,7 +111,7 @@ public class ClusterCommands implements CommandMarker {
     @CliCommand(value = "cluster show", help = "Shows the cluster by stack id")
     public Object configCluster() {
         try {
-            ClusterResponse clusterResponse = clusterEndpoint.get(Long.valueOf(context.getStackId()));
+            ClusterResponse clusterResponse = cloudbreakClient.clusterEndpoint().get(Long.valueOf(context.getStackId()));
             return renderSingleMap(responseTransformer.transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
         } catch (IndexOutOfBoundsException ex) {
             return "There was no cluster for this account.";
@@ -137,7 +134,7 @@ public class ClusterCommands implements CommandMarker {
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            clusterEndpoint.put(Long.valueOf(context.getStackId()), updateClusterJson);
+            cloudbreakClient.clusterEndpoint().put(Long.valueOf(context.getStackId()), updateClusterJson);
             return context.getStackId();
         } catch (Exception ex) {
             return ex.toString();
@@ -159,7 +156,7 @@ public class ClusterCommands implements CommandMarker {
             hostGroupAdjustmentJson.setWithStackUpdate(withStackDownScale == null ? false : withStackDownScale);
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            clusterEndpoint.put(Long.valueOf(context.getStackId()), updateClusterJson);
+            cloudbreakClient.clusterEndpoint().put(Long.valueOf(context.getStackId()), updateClusterJson);
             return context.getStackId();
         } catch (Exception ex) {
             return ex.toString();
@@ -169,7 +166,7 @@ public class ClusterCommands implements CommandMarker {
     @CliCommand(value = "cluster show", help = "Shows the cluster by stack id")
     public Object showCluster() {
         try {
-            ClusterResponse clusterResponse = clusterEndpoint.get(Long.valueOf(context.getStackId()));
+            ClusterResponse clusterResponse = cloudbreakClient.clusterEndpoint().get(Long.valueOf(context.getStackId()));
             return renderSingleMap(responseTransformer.transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
         } catch (IndexOutOfBoundsException ex) {
             return "There was no cluster for this account.";
@@ -238,7 +235,7 @@ public class ClusterCommands implements CommandMarker {
             ambariStackDetailsJson.setVersion(version);
             clusterRequest.setAmbariStackDetails(ambariStackDetailsJson);
 
-            clusterEndpoint.post(Long.valueOf(context.getStackId()), clusterRequest);
+            cloudbreakClient.clusterEndpoint().post(Long.valueOf(context.getStackId()), clusterRequest);
             context.setHint(Hints.NONE);
             context.resetFileSystemConfiguration();
             return "Cluster creation started";
@@ -252,7 +249,7 @@ public class ClusterCommands implements CommandMarker {
         try {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.STOPPED);
-            clusterEndpoint.put(Long.valueOf(context.getStackId()), updateClusterJson);
+            cloudbreakClient.clusterEndpoint().put(Long.valueOf(context.getStackId()), updateClusterJson);
             return "Cluster is stopping";
         } catch (Exception ex) {
             return MessageUtil.getMessage(ex);
@@ -264,7 +261,7 @@ public class ClusterCommands implements CommandMarker {
         try {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.STARTED);
-            stackEndpoint.put(Long.valueOf(context.getStackId()), updateStackJson);
+            cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
             return "Cluster is starting";
         } catch (Exception ex) {
             return MessageUtil.getMessage(ex);
