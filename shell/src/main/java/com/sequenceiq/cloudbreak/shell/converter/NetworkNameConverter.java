@@ -3,20 +3,21 @@ package com.sequenceiq.cloudbreak.shell.converter;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.NetworkName;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 public class NetworkNameConverter extends AbstractConverter<NetworkName> {
 
-    @Autowired
+    @Inject
     private CloudbreakClient cloudbreakClient;
 
-    @Autowired
+    @Inject
     private ResponseTransformer responseTransformer;
 
     public NetworkNameConverter() {

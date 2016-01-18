@@ -7,7 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -18,16 +19,16 @@ import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 
 @Component
 public class HostGroupCommands implements CommandMarker {
 
-    @Autowired
+    @Inject
     private CloudbreakContext context;
-    @Autowired
+    @Inject
     private CloudbreakClient cloudbreakClient;
 
     @CliAvailabilityIndicator(value = "hostgroup configure")

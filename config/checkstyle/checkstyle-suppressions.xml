@@ -13,6 +13,8 @@
     <suppress checks="IllegalCatch" files="GcpProvisionSetup.java"/>
     <suppress checks="IllegalThrow" files="ConcurrentMethodExecutionAspect.java"/>
     <suppress checks="RedundantModifier" files="CoreApi.java"/>
+    <suppress checks="RegexpMultilineCheck" files="ShellConfiguration.java"/>
+
 
     <!-- suppressing checks in application runner classes -->
     <suppress id="sysout" files="VersionedApplication.java"/>

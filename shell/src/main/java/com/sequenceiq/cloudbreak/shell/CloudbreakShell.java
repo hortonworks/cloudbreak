@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -24,7 +26,7 @@ import org.springframework.shell.event.ShellStatusListener;
 import com.sequenceiq.cloudbreak.api.model.NetworkJson;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -40,15 +42,15 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
     public static final String FAILED = "FAILED";
     public static final String SUCCESS = "SUCCESS";
 
-    @Autowired
+    @Inject
     private CommandLine commandLine;
-    @Autowired
+    @Inject
     private JLineShellComponent shell;
-    @Autowired
+    @Inject
     private CloudbreakContext context;
-    @Autowired
+    @Inject
     private CloudbreakClient cloudbreakClient;
-    @Autowired
+    @Inject
     private ResponseTransformer responseTransformer;
 
     @Value("${sequenceiq.user:}")
@@ -124,6 +126,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
     }
 
     public static void main(String[] args) throws IOException {
+
         if ((args.length == 1 && ("--help".equals(args[0]) || "-h".equals(args[0]))) || args.length == 0) {
             System.out.println(
                     "\nCloudbreak Shell: Interactive command line tool for managing Cloudbreak.\n\n"
@@ -137,6 +140,8 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
                             + " [default: https://identity.sequenceiq.com].\n"
                             + "  --sequenceiq.user=<USER>                        Username of the SequenceIQ user [default: user@sequenceiq.com].\n"
                             + "  --sequenceiq.password=<PASSWORD>                Password of the SequenceIQ user [default: password].\n"
+                            + "  --cert.validation=<boolean>                     Validate SSL certificates, shall be disabled for self signed certificates"
+                            + " [default: true].\n"
                             + "Note:\n"
                             + "  Please specify the username and password of your SequenceIQ user."
             );
@@ -144,7 +149,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         } else {
             if (!VersionedApplication.versionedApplication().showVersionInfo(args)) {
                 try {
-                    new SpringApplicationBuilder(CloudbreakShell.class).showBanner(false).run(args);
+                    new SpringApplicationBuilder(CloudbreakShell.class).web(false).bannerMode(Banner.Mode.OFF).run(args);
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.out.println("Cloudbreak shell cannot be started.");

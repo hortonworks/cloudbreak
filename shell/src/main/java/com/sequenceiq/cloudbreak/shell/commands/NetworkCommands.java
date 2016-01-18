@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -15,9 +16,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.NetworkId;
 import com.sequenceiq.cloudbreak.shell.completion.NetworkName;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -26,11 +27,11 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 public class NetworkCommands implements CommandMarker {
     private static final String CREATE_SUCCESS_MSG = "Network created and selected successfully, with id: '%s'";
 
-    @Autowired
+    @Inject
     private CloudbreakContext context;
-    @Autowired
+    @Inject
     private CloudbreakClient cloudbreakClient;
-    @Autowired
+    @Inject
     private ResponseTransformer responseTransformer;
 
     @CliAvailabilityIndicator({ "network list", "network create --AWS", "network create --AZURE", "network create --GCP", "network create --OPENSTACK" })
