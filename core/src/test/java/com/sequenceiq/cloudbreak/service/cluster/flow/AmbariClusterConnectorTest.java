@@ -30,6 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -128,6 +129,7 @@ public class AmbariClusterConnectorTest {
         cluster = TestUtil.cluster(blueprint, stack, 1L);
         stack.setCluster(cluster);
         cluster.setHostGroups(new HashSet<HostGroup>());
+        cluster.setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenReturn(tlsClientConfig);
         when(ambariClient.extendBlueprintGlobalConfiguration(anyString(), anyMap())).thenReturn("");
         when(hostMetadataRepository.findHostsInCluster(anyLong())).thenReturn(new HashSet<HostMetadata>());

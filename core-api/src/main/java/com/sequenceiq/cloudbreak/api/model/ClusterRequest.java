@@ -9,6 +9,7 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public class ClusterRequest {
@@ -53,6 +54,8 @@ public class ClusterRequest {
     private AmbariStackDetailsJson ambariStackDetails;
     @Valid
     private FileSystemRequest fileSystem;
+    @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
+    private ConfigStrategy configStrategy = ConfigStrategy.ONLY_STACK_DEFAULTS_APPLY;
 
     public String getDescription() {
         return description;
@@ -164,5 +167,13 @@ public class ClusterRequest {
 
     public void setFileSystem(FileSystemRequest fileSystem) {
         this.fileSystem = fileSystem;
+    }
+
+    public ConfigStrategy getConfigStrategy() {
+        return configStrategy;
+    }
+
+    public void setConfigStrategy(ConfigStrategy configStrategy) {
+        this.configStrategy = configStrategy;
     }
 }

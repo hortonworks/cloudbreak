@@ -70,6 +70,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source.getHostGroups(), source.getBlueprint(), source.getAmbariIp()));
+        clusterResponse.setConfigStrategy(source.getConfigStrategy());
         return clusterResponse;
     }
 
