@@ -5,8 +5,6 @@ import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.createContainer;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.startContainer;
 
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,15 +21,12 @@ public class AmbariServerDatabaseBootstrap implements ContainerBootstrap {
     private final DockerClient docker;
     private final String imageName;
     private final String nodeName;
-    private final Set<String> dataVolumes;
     private final LogVolumePath logVolumePath;
 
-    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName, String nodeName, Set<String> dataVolumes,
-            LogVolumePath logVolumePath) {
+    public AmbariServerDatabaseBootstrap(DockerClient docker, String imageName, String nodeName, LogVolumePath logVolumePath) {
         this.docker = docker;
         this.imageName = imageName;
         this.nodeName = nodeName;
-        this.dataVolumes = dataVolumes;
         this.logVolumePath = logVolumePath;
     }
 

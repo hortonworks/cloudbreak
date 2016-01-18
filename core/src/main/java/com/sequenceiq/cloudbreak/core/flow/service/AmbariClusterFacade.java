@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.ENABLE_SECURITY_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
@@ -27,10 +26,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterContainerRunner;
@@ -54,7 +53,6 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
-import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -106,9 +104,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     private HostGroupService hostGroupService;
 
     @Inject
-    private ClusterSecurityService securityService;
-
-    @Inject
     private ClusterContainerRunner containerRunner;
 
     @Inject
@@ -139,15 +134,12 @@ public class AmbariClusterFacade implements ClusterFacade {
         AMBARI_CLUSTER_SCALED_DOWN("ambari.cluster.scaled.down"),
         AMBARI_CLUSTER_RESET("ambari.cluster.reset"),
         AMBARI_CLUSTER_RUN_CONTAINERS("ambari.cluster.run.containers"),
-        AMBARI_CLUSTER_CONFIGURING_SECURITY("ambari.cluster.configuring.security"),
-        AMBARI_CLUSTER_CONFIGURED_SECURITY("ambari.cluster.configured.security"),
         AMBARI_CLUSTER_CHANGING_CREDENTIAL("ambari.cluster.changing.credential"),
         AMBARI_CLUSTER_CHANGED_CREDENTIAL("ambari.cluster.changed.credential"),
         AMBARI_CLUSTER_START_REQUESTED("ambari.cluster.start.requested"),
         AMBARI_CLUSTER_START_FAILED("ambari.cluster.start.failed"),
         AMBARI_CLUSTER_STOP_FAILED("ambari.cluster.stop.failed"),
         AMBARI_CLUSTER_CREATE_FAILED("ambari.cluster.create.failed"),
-        AMBARI_CLUSTER_CONFIGURE_SECURITY_FAILED("ambari.cluster.configure.security.failed"),
         AMBARI_CLUSTER_SCALING_FAILED("ambari.cluster.scaling.failed");
 
         private String code;
@@ -371,30 +363,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         return context;
     }
 
-    public FlowContext enableSecurity(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(stack);
-        if (cluster == null) {
-            LOGGER.debug("There is no cluster installed on the stack");
-        } else {
-            MDCBuilder.buildMdcContext(cluster);
-            if (cluster.isSecure()) {
-                stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Configuring cluster security.");
-                fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CONFIGURING_SECURITY, UPDATE_IN_PROGRESS.name());
-                clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
-                securityService.enableKerberosSecurity(stack);
-                clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
-                stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Cluster security has been configured.");
-                fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CONFIGURED_SECURITY, AVAILABLE.name());
-            } else {
-                LOGGER.info("Cluster security is not requested.");
-            }
-        }
-        return context;
-    }
-
     @Override
     public FlowContext startRequested(FlowContext context) throws CloudbreakException {
         StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
@@ -475,23 +443,6 @@ public class AmbariClusterFacade implements ClusterFacade {
             fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
         return actualContext;
-    }
-
-    @Override
-    public FlowContext handleSecurityEnableFailure(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(cluster);
-        clusterService.updateClusterStatusByStackId(stack.getId(), ENABLE_SECURITY_FAILED, actualContext.getErrorReason());
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CONFIGURE_SECURITY_FAILED, ENABLE_SECURITY_FAILED.name());
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
-            fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
-        }
-
-        return context;
     }
 
     @Override

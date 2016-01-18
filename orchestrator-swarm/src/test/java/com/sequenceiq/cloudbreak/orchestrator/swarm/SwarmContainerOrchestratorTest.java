@@ -14,8 +14,6 @@ import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -229,26 +227,7 @@ public class SwarmContainerOrchestratorTest {
                 any(Node.class), any(LogVolumePath.class));
 
         underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), false, exitCriteriaModel());
-    }
-
-    @Test
-    public void ambariServerStartWithAgentInClusterWhenEverythingWorksFine() throws Exception {
-        when(ambariServerBootstrap.call()).thenReturn(true);
-        doReturn(ambariServerBootstrap).when(underTestSpy).ambariServerBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class));
-        when(ambariAgentBootstrap.call()).thenReturn(true);
-        doReturn(ambariAgentBootstrap).when(underTestSpy).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
-        when(ambariServerDatabaseBootstrap.call()).thenReturn(true);
-        doReturn(ambariServerDatabaseBootstrap).when(underTestSpy).ambariServerDatabaseBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), any(LogVolumePath.class));
-
-        underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), true, exitCriteriaModel());
-
-        verify(underTestSpy, times(1)).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
+                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorCancelledException.class)
@@ -261,7 +240,7 @@ public class SwarmContainerOrchestratorTest {
                 any(Node.class), any(LogVolumePath.class));
 
         underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), false, exitCriteriaModel());
+                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -274,7 +253,7 @@ public class SwarmContainerOrchestratorTest {
                 any(LogVolumePath.class));
 
         underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), false, exitCriteriaModel());
+                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -287,7 +266,7 @@ public class SwarmContainerOrchestratorTest {
                 any(Node.class), any(LogVolumePath.class));
 
         underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), false, exitCriteriaModel());
+                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), exitCriteriaModel());
     }
 
     @Test

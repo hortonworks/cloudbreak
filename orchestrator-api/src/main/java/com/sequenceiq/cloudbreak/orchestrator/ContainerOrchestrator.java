@@ -32,11 +32,13 @@ public interface ContainerOrchestrator {
             throws CloudbreakOrchestratorException;
 
     void startAmbariServer(ContainerOrchestratorCluster cluster, ContainerConfig dbConfig, ContainerConfig serverConfig, String platform,
-            LogVolumePath logVolumePath, Boolean localAgentRequired, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException;
+            LogVolumePath logVolumePath, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
     void startAmbariAgents(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, String platform, LogVolumePath logVolumePath,
             ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException;
+
+    void startHaveged(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
     void startConsulWatches(ContainerOrchestratorCluster cluster, ContainerConfig containerConfig, LogVolumePath logVolumePath,

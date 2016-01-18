@@ -102,6 +102,11 @@ public class AmbariClusterConnector {
     private static final int MAX_ATTEMPTS_FOR_REGION_DECOM = 500;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
+    private static final String REALM = "NODE.DC1.CONSUL";
+    private static final String DOMAIN = "node.dc1.consul";
+    private static final String KEY_TYPE = "PERSISTED";
+    private static final String PRINCIPAL = "/admin";
+    private static final String CONFIG_STRATEGY = "NEVER_APPLY";
 
     @Inject
     private StackRepository stackRepository;
@@ -135,8 +140,6 @@ public class AmbariClusterConnector {
     private DNDecommissionStatusCheckerTask dnDecommissionStatusCheckerTask;
     @Inject
     private RSDecommissionStatusCheckerTask rsDecommissionStatusCheckerTask;
-    @Inject
-    private ClusterSecurityService securityService;
     @Inject
     private AmbariHostsRemover ambariHostsRemover;
     @Inject
@@ -227,7 +230,17 @@ public class AmbariClusterConnector {
                 recipeEngine.setupRecipes(stack, hostGroups);
                 recipeEngine.executePreInstall(stack);
             }
-            ambariClient.createCluster(cluster.getName(), cluster.getBlueprint().getBlueprintName(), hostGroupMappings);
+            String clusterName = cluster.getName();
+            String blueprintName = cluster.getBlueprint().getBlueprintName();
+            if (cluster.isSecure()) {
+                ambariClient.createSecureCluster(clusterName, blueprintName,
+                        hostGroupMappings, CONFIG_STRATEGY, cluster.getKerberosAdmin() + PRINCIPAL, cluster.getKerberosPassword(), KEY_TYPE);
+                PollingResult pollingResult = waitForAmbariOperationsToStart(stack, ambariClient,
+                        singletonMap("INSTALL_START", 1), AmbariOperationType.START_OPERATION_STATE);
+                checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
+            } else {
+                ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, CONFIG_STRATEGY);
+            }
             PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
             if (recipesFound) {
@@ -391,8 +404,6 @@ public class AmbariClusterConnector {
         int adjustment = Math.abs(adjustmentRequest.getScalingAdjustment());
         String hostGroupName = adjustmentRequest.getHostGroup();
         LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroupName);
-
-
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP.code(), asList(adjustment, hostGroupName)), hostGroupName);
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
@@ -400,7 +411,7 @@ public class AmbariClusterConnector {
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
         PollingResult pollingResult = startServiceIfNeeded(stack, ambariClient, blueprintName);
         if (isSuccess(pollingResult)) {
-            Set<String> components = getHadoopComponents(cluster, ambariClient, hostGroupName, blueprintName);
+            Set<String> components = getHadoopComponents(ambariClient, hostGroupName, blueprintName);
             Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(decommissionCandidates, stack, adjustment);
             List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
             pollingResult = waitForAmbariOperations(stack, ambariClient, decommissionComponents(ambariClient, hostList, components),
@@ -472,8 +483,7 @@ public class AmbariClusterConnector {
         boolean hostDeleted = false;
         TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getCluster());
-        Set<String> components = getHadoopComponents(stack.getCluster(), ambariClient, data.getHostGroup().getName(),
-                stack.getCluster().getBlueprint().getBlueprintName());
+        Set<String> components = getHadoopComponents(ambariClient, data.getHostGroup().getName(), stack.getCluster().getBlueprint().getBlueprintName());
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());
             if ("UNKNOWN".equals(hostState)) {
@@ -632,12 +642,8 @@ public class AmbariClusterConnector {
         }
     }
 
-    private Set<String> getHadoopComponents(Cluster cluster, AmbariClient ambariClient, String hostGroupName, String blueprintName) {
-        Set<String> components = new HashSet<>(ambariClient.getComponentsCategory(blueprintName, hostGroupName).keySet());
-        if (cluster.isSecure()) {
-            components.add(ClusterSecurityService.KERBEROS_CLIENT);
-        }
-        return components;
+    private Set<String> getHadoopComponents(AmbariClient ambariClient, String hostGroupName, String blueprintName) {
+        return ambariClient.getComponentsCategory(blueprintName, hostGroupName).keySet();
     }
 
     private Cluster handleClusterCreationSuccess(Stack stack, Cluster cluster) {
@@ -932,6 +938,11 @@ public class AmbariClusterConnector {
             blueprintText = ambariClient.extendBlueprintHostGroupConfiguration(blueprintText, hostGroupConfig);
             Map<String, Map<String, String>> globalConfig = hadoopConfigurationService.getGlobalConfiguration(cluster);
             blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, globalConfig);
+            if (cluster.isSecure()) {
+                InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
+                String gatewayHost = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId()).get(0);
+                blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);
+            }
             ambariClient.addBlueprint(blueprintText);
             LOGGER.info("Blueprint added to Ambari.");
         } catch (IOException e) {
@@ -988,9 +999,6 @@ public class AmbariClusterConnector {
             String hGroupName = hostGroup.getHostGroup();
             ambariClient.addComponentsToHosts(hosts, blueprintName, hGroupName);
             ambariClient.addHostsToConfigGroups(hosts, hGroupName);
-            if (cluster.isSecure()) {
-                ambariClient.addComponentsToHosts(hosts, asList(securityService.KERBEROS_CLIENT));
-            }
             requests.put("Install components to the new hosts", ambariClient.installAllComponentsOnHosts(hosts));
             if (cluster.isSecure()) {
                 requests.put("Re-generate missing keytabs", ambariClient.generateKeytabs(true));
@@ -1014,6 +1022,11 @@ public class AmbariClusterConnector {
     private PollingResult waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests, AmbariOperationType type) {
         LOGGER.info("Waiting for Ambari operations to finish. [Operation requests: {}]", operationRequests);
         return ambariOperationService.waitForAmbariOperations(stack, ambariClient, operationRequests, type);
+    }
+
+    private PollingResult waitForAmbariOperationsToStart(Stack stack, AmbariClient ambariClient, Map<String, Integer> requests, AmbariOperationType type) {
+        LOGGER.info("Waiting for Ambari operations to start. [Operation requests: {}]", requests);
+        return ambariOperationService.waitForOperationsToStart(stack, ambariClient, requests, type);
     }
 
     private PollingResult waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient) {

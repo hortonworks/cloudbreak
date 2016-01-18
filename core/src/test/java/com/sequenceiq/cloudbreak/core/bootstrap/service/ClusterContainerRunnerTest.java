@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -80,7 +78,8 @@ public class ClusterContainerRunnerTest {
 
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(containerConfigService, "ambariDockerImageName", "sequence/testcont:0.1.1");
+        ReflectionTestUtils.setField(containerConfigService, "ambariAgent", "sequence/testcont:0.1.1");
+        ReflectionTestUtils.setField(containerConfigService, "ambariServer", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "registratorDockerImageName", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "consulWatchPlugnDockerImageName", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "postgresDockerImageName", "sequence/testcont:0.1.1");
@@ -106,7 +105,7 @@ public class ClusterContainerRunnerTest {
         underTest.runClusterContainers(provisioningContext);
 
         verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), eq(true), any(ExitCriteriaModel.class));
+                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startKerberosServer(any(ContainerOrchestratorCluster.class),
                 any(ContainerConfig.class), any(LogVolumePath.class), any(KerberosConfiguration.class), any(ExitCriteriaModel.class));
     }
@@ -166,7 +165,7 @@ public class ClusterContainerRunnerTest {
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
+                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
@@ -226,7 +225,7 @@ public class ClusterContainerRunnerTest {
         verify(mockContainerOrchestrator, times(1)).startAmbariAgents(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class), anyString(),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(0)).startAmbariServer(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
-                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), anyBoolean(), any(ExitCriteriaModel.class));
+                any(ContainerConfig.class), anyString(), any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startConsulWatches(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),
                 any(LogVolumePath.class), any(ExitCriteriaModel.class));
         verify(mockContainerOrchestrator, times(1)).startLogrotate(any(ContainerOrchestratorCluster.class), any(ContainerConfig.class),

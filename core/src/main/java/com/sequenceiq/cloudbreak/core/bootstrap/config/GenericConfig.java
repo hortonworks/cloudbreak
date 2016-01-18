@@ -16,7 +16,6 @@ public class GenericConfig {
 
     public static class Builder {
 
-
         private final String name;
 
         private final String version;
@@ -24,13 +23,12 @@ public class GenericConfig {
         public Builder(String imageNameAndVersion) {
             String[] image = imageNameAndVersion.split(":");
             this.name = image[0];
-            this.version = image[1];
+            this.version = image.length > 1 ? image[1] : "latest";
         }
 
         public ContainerConfig build() {
             return new GenericConfig(this).getContainerConfig();
         }
-
 
     }
 }

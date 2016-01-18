@@ -49,14 +49,15 @@ cb:
   
   docker:
     container:
-      ambari: sequenceiq/ambari:2.1.2-v8
-      ambari.warm: sequenceiq/ambari:2.1.2-v8
+      ambari.server: hortonworks/ambari-server:2.2.1-v1
+      ambari.agent: hortonworks/ambari-agent:2.2.1-v1
       ambari.db: postgres:9.4.1
       registrator: sequenceiq/registrator:v5.2
       docker.consul.watch.plugn: sequenceiq/docker-consul-watch-plugn:1.1
-      kerberos: sequenceiq/kerberos:2.1.0-consul
+      kerberos: sequenceiq/kerberos:1.1
       logrotate: sequenceiq/logrotate:v0.5.1
       munchausen: sequenceiq/munchausen:0.5.5
+      haveged: sequenceiq/haveged:1.0
     relocate: true
   
   arm:

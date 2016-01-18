@@ -1,2 +1,2 @@
 gcp:
-  default: sequenceiqimage/cb-centos71-amb212-2015-12-06.tar.gz
+  default: sequenceiqimage/cb-centos71-amb221-2016-01-15.tar.gz

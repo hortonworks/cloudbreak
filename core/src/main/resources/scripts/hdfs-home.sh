@@ -3,13 +3,19 @@
 : ${LOGFILE:=/var/log/consul-watch/consul_handler.log}
 
 create_user_home(){
-  if ! su hdfs -c "hadoop fs -ls /user/$1" 2> /dev/null; then
-    su hdfs -c "hadoop fs -mkdir /user/$1" 2> /dev/null
-    su hdfs -c "hadoop fs -chown $1:hadoop /user/$1" 2> /dev/null
+su hdfs<<EOF
+  if [ -d /etc/security/keytabs ]; then
+  	kinit -V -kt /etc/security/keytabs/dn.service.keytab dn/$(hostname -f)@NODE.DC1.CONSUL
+  fi
+
+  if ! hadoop fs -ls /user/$1 2> /dev/null; then
+    hadoop fs -mkdir /user/$1 2> /dev/null
+    hadoop fs -chown $1:hadoop /user/$1 2> /dev/null
     echo "created /user/$1"
   else
     echo "/user/$1 already exists, skipping..."
   fi
+EOF
 }
 
 main(){

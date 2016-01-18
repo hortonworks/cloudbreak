@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.CONSUL_WATCH;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.HAVEGED;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.KERBEROS;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LOGROTATE;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.REGISTRATOR;
@@ -100,9 +101,10 @@ public class ClusterContainerRunner {
             containerOrchestrator.startRegistrator(orchestratorCluster, containerConfigService.get(stack, REGISTRATOR),
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             containerOrchestrator.startAmbariServer(orchestratorCluster, containerConfigService.get(stack, AMBARI_DB),
-                    containerConfigService.get(stack, AMBARI_SERVER), cloudPlatform, logVolumePath,
-                    cluster.isSecure(), stackDeletionBasedExitCriteriaModel(stack.getId()));
+                    containerConfigService.get(stack, AMBARI_SERVER), cloudPlatform, logVolumePath, stackDeletionBasedExitCriteriaModel(stack.getId()));
             if (cluster.isSecure()) {
+                containerOrchestrator.startHaveged(orchestratorCluster, containerConfigService.get(stack, HAVEGED),
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
                 KerberosConfiguration kerberosConfiguration = new KerberosConfiguration(cluster.getKerberosMasterKey(), cluster.getKerberosAdmin(),
                         cluster.getKerberosPassword());
                 containerOrchestrator.startKerberosServer(orchestratorCluster, containerConfigService.get(stack, KERBEROS), logVolumePath,
