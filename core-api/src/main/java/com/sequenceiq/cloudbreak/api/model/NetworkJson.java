@@ -41,6 +41,9 @@ public class NetworkJson implements JsonEntity {
     @NotNull
     private String cloudPlatform;
 
+    @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
+    private Long topologyId;
+
     @JsonProperty("id")
     public String getId() {
         return id;
@@ -99,5 +102,13 @@ public class NetworkJson implements JsonEntity {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public Long getTopologyId() {
+        return topologyId;
+    }
+
+    public void setTopologyId(Long topologyId) {
+        this.topologyId = topologyId;
     }
 }

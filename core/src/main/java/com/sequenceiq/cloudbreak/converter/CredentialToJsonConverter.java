@@ -1,13 +1,20 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
+import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class CredentialToJsonConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialResponse> {
+
+    @Inject
+    private TopologyService topologyService;
+
     @Override
     public CredentialResponse convert(Credential source) {
         CredentialResponse credentialJson = new CredentialResponse();
@@ -22,6 +29,9 @@ public class CredentialToJsonConverter extends AbstractConversionServiceAwareCon
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         credentialJson.setPublicKey(source.getPublicKey());
         credentialJson.setLoginUserName(source.getLoginUserName());
+        if (source.getTopology() != null) {
+            credentialJson.setTopologyId(source.getTopology().getId());
+        }
         return credentialJson;
     }
 }

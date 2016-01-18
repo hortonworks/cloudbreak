@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,9 +12,12 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class JsonToTemplateConverter extends AbstractConversionServiceAwareConverter<TemplateRequest, Template> {
+    @Inject
+    private TopologyService topologyService;
 
     @Override
     public Template convert(TemplateRequest source) {
@@ -33,6 +38,9 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
             } catch (JsonProcessingException e) {
                 throw new BadRequestException("Invalid parameters");
             }
+        }
+        if (source.getTopologyId() != null) {
+            template.setTopology(topologyService.get(source.getTopologyId()));
         }
         return template;
     }

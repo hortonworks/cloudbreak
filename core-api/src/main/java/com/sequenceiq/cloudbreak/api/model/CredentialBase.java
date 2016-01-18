@@ -32,6 +32,9 @@ public class CredentialBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PUBLIC_KEY, required = true)
     private String publicKey;
 
+    @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
+    private Long topologyId;
+
     public String getDescription() {
         return description;
     }
@@ -78,5 +81,13 @@ public class CredentialBase implements JsonEntity {
 
     public void setLoginUserName(String loginUserName) {
         this.loginUserName = loginUserName;
+    }
+
+    public Long getTopologyId() {
+        return topologyId;
+    }
+
+    public void setTopologyId(Long topologyId) {
+        this.topologyId = topologyId;
     }
 }

@@ -24,6 +24,9 @@ public class TemplateToJsonConverter extends AbstractConversionServiceAwareConve
         }
         templateJson.setCloudPlatform(source.cloudPlatform());
         templateJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
+        if (source.getTopology() != null) {
+            templateJson.setTopologyId(source.getTopology().getId());
+        }
         return templateJson;
     }
 }
