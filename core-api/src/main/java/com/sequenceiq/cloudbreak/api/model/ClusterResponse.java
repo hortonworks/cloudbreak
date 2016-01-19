@@ -39,6 +39,8 @@ public class ClusterResponse {
     private AmbariStackDetailsJson ambariStackDetails;
     @ApiModelProperty(ClusterModelDescription.SERVICE_ENDPOINT_MAP)
     private Map<String, String> serviceEndPoints = new HashMap<>();
+    @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
+    private ConfigStrategy configStrategy;
 
     public String getDescription() {
         return description;
@@ -159,5 +161,13 @@ public class ClusterResponse {
 
     public void setServiceEndPoints(Map<String, String> serviceEndPoints) {
         this.serviceEndPoints = serviceEndPoints;
+    }
+
+    public ConfigStrategy getConfigStrategy() {
+        return configStrategy;
+    }
+
+    public void setConfigStrategy(ConfigStrategy configStrategy) {
+        this.configStrategy = configStrategy;
     }
 }

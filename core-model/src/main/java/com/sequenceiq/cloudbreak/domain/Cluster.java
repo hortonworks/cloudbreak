@@ -34,6 +34,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.Status;
 
 @Entity
@@ -113,6 +114,9 @@ public class Cluster implements ProvisionEntity {
 
     @ManyToOne
     private FileSystem fileSystem;
+
+    @Enumerated(EnumType.STRING)
+    private ConfigStrategy configStrategy;
 
     public Stack getStack() {
         return stack;
@@ -352,5 +356,13 @@ public class Cluster implements ProvisionEntity {
                 || STOP_IN_PROGRESS.equals(status)
                 || START_IN_PROGRESS.equals(status)
                 || DELETE_IN_PROGRESS.equals(status);
+    }
+
+    public ConfigStrategy getConfigStrategy() {
+        return configStrategy;
+    }
+
+    public void setConfigStrategy(ConfigStrategy configStrategy) {
+        this.configStrategy = configStrategy;
     }
 }

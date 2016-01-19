@@ -26,6 +26,7 @@ import org.springframework.core.convert.ConversionService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
@@ -81,6 +82,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     public void testConvert() throws IOException {
         // GIVEN
         mockAll();
+        getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
         // WHEN
         ClusterResponse result = underTest.convert(getSource());
@@ -95,6 +97,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         // GIVEN
         mockAll();
         getSource().setAmbariStackDetails(null);
+        getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
         // WHEN
         ClusterResponse result = underTest.convert(getSource());

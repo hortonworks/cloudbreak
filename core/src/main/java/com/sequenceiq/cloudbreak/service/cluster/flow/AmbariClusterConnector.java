@@ -106,7 +106,6 @@ public class AmbariClusterConnector {
     private static final String DOMAIN = "node.dc1.consul";
     private static final String KEY_TYPE = "PERSISTED";
     private static final String PRINCIPAL = "/admin";
-    private static final String CONFIG_STRATEGY = "NEVER_APPLY";
 
     @Inject
     private StackRepository stackRepository;
@@ -232,16 +231,17 @@ public class AmbariClusterConnector {
             }
             String clusterName = cluster.getName();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
+            String configStrategy = cluster.getConfigStrategy().name();
             if (cluster.isSecure()) {
                 ambariClient.createSecureCluster(clusterName, blueprintName,
-                        hostGroupMappings, CONFIG_STRATEGY, cluster.getKerberosAdmin() + PRINCIPAL, cluster.getKerberosPassword(), KEY_TYPE);
-                PollingResult pollingResult = waitForAmbariOperationsToStart(stack, ambariClient,
-                        singletonMap("INSTALL_START", 1), AmbariOperationType.START_OPERATION_STATE);
-                checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
+                        hostGroupMappings, configStrategy, cluster.getKerberosAdmin() + PRINCIPAL, cluster.getKerberosPassword(), KEY_TYPE);
             } else {
-                ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, CONFIG_STRATEGY);
+                ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy);
             }
-            PollingResult pollingResult = waitForClusterInstall(stack, ambariClient);
+            PollingResult pollingResult = waitForAmbariOperationsToStart(stack, ambariClient,
+                    singletonMap("INSTALL_START", 1), AmbariOperationType.START_OPERATION_STATE);
+            checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
+            pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
             if (recipesFound) {
                 recipeEngine.executePostInstall(stack);
