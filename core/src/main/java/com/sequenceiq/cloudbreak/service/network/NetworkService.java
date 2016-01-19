@@ -33,6 +33,7 @@ public class NetworkService {
     @Inject
     private StackRepository stackRepository;
 
+    @Transactional(Transactional.TxType.NEVER)
     public Network create(CbUser user, Network network) {
         LOGGER.info("Creating network: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         network.setOwner(user.getUserId());
@@ -77,6 +78,7 @@ public class NetworkService {
         return network;
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public void delete(Long id, CbUser user) {
         LOGGER.info("Deleting network with id: {}", id);
         Network network = get(id);

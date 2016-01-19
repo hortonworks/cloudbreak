@@ -29,6 +29,7 @@ public class RecipeService {
     @Inject
     private HostGroupRepository hostGroupRepository;
 
+    @Transactional(Transactional.TxType.NEVER)
     public Recipe create(CbUser user, Recipe recipe) {
         recipe.setOwner(user.getUserId());
         recipe.setAccount(user.getAccount());

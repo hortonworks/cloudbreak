@@ -18,7 +18,7 @@ public class UnsupportedOperationFailedExceptionMapper implements ExceptionMappe
     @Override
     public Response toResponse(UnsupportedOperationException exception) {
         MDCBuilder.buildMdcContext();
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), exception);
         return Response.status(Response.Status.BAD_REQUEST).entity(new ExceptionResult(exception.getMessage()))
                 .build();
     }

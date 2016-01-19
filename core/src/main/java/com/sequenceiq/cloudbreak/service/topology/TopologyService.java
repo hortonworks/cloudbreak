@@ -38,6 +38,7 @@ public class TopologyService {
         }
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public Topology create(CbUser user, Topology topology) {
         LOGGER.debug("Creating topology: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Topology savedTopology = null;

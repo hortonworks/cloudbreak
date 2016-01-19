@@ -28,7 +28,7 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
             }
             result.addValidationError(key, violation.getMessage());
         }
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), exception);
         return Response.status(Response.Status.BAD_REQUEST).entity(result)
                 .build();
     }

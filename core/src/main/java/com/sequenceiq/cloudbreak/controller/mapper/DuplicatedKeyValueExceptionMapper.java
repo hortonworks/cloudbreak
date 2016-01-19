@@ -19,7 +19,7 @@ public class DuplicatedKeyValueExceptionMapper implements ExceptionMapper<Duplic
     @Override
     public Response toResponse(DuplicateKeyValueException exception) {
         MDCBuilder.buildMdcContext();
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), exception);
         return Response.status(Response.Status.CONFLICT).entity(new ExceptionResult(
                 String.format("The %s name '%s' is already taken, please choose a different one",
                         exception.getResourceType().toString().toLowerCase(),

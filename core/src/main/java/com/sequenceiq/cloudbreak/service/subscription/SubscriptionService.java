@@ -17,6 +17,7 @@ public class SubscriptionService {
     @Inject
     private SubscriptionRepository subscriptionRepository;
 
+    @Transactional(Transactional.TxType.NEVER)
     public Long subscribe(Subscription subscription) {
         List<Subscription> clientSubscriptions = subscriptionRepository.findByClientId(subscription.getClientId());
         for (Subscription s : clientSubscriptions) {

@@ -155,6 +155,7 @@ public class AmbariClusterService implements ClusterService {
 
 
     @Override
+    @Transactional(Transactional.TxType.NEVER)
     public Cluster create(CbUser user, Long stackId, Cluster cluster) {
         Stack stack = stackService.get(stackId);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -195,6 +196,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    @Transactional(Transactional.TxType.NEVER)
     public Cluster updateAmbariIp(Long clusterId, String ambariIp) {
         Cluster cluster = clusterRepository.findById(clusterId);
         cluster.setAmbariIp(ambariIp);
@@ -343,6 +345,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    @Transactional(Transactional.TxType.NEVER)
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
         Cluster cluster = stackService.findLazy(stackId).getCluster();
@@ -355,11 +358,13 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    @Transactional(Transactional.TxType.NEVER)
     public Cluster updateClusterStatusByStackId(Long stackId, Status status) {
         return updateClusterStatusByStackId(stackId, status, "");
     }
 
     @Override
+    @Transactional(Transactional.TxType.NEVER)
     public Cluster updateCluster(Cluster cluster) {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
         cluster = clusterRepository.save(cluster);
@@ -367,6 +372,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    @Transactional(Transactional.TxType.NEVER)
     public Cluster updateClusterUsernameAndPassword(Cluster cluster, String userName, String password) {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
         cluster.setUserName(userName);
@@ -376,6 +382,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    @Transactional(Transactional.TxType.NEVER)
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.findLazy(stackId);
         if (stack.getCluster() == null) {
@@ -396,6 +403,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    @Transactional(Transactional.TxType.NEVER)
     public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, AmbariStackDetails ambariStackDetails) {
         if (blueprintId == null || hostGroups == null) {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");

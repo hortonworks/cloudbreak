@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
@@ -19,6 +19,7 @@ public class HostGroupService {
         return hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
     }
 
+    @Transactional(javax.transaction.Transactional.TxType.NEVER)
     public HostGroup save(HostGroup hostGroup) {
         return hostGroupRepository.save(hostGroup);
     }

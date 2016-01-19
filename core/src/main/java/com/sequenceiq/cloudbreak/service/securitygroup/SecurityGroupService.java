@@ -33,6 +33,7 @@ public class SecurityGroupService {
     @Inject
     private StackRepository stackRepository;
 
+    @Transactional(Transactional.TxType.NEVER)
     public SecurityGroup create(CbUser user, SecurityGroup securityGroup) {
         LOGGER.info("Creating SecurityGroup: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         securityGroup.setOwner(user.getUserId());

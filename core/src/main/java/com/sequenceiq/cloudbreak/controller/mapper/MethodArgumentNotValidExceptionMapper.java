@@ -20,8 +20,7 @@ public class MethodArgumentNotValidExceptionMapper implements ExceptionMapper<Me
     @Override
     public Response toResponse(MethodArgumentNotValidException exception) {
         MDCBuilder.buildMdcContext();
-        LOGGER.error(exception.getMessage());
-
+        LOGGER.error(exception.getMessage(), exception);
         ValidationResult result = new ValidationResult();
         for (FieldError err : exception.getBindingResult().getFieldErrors()) {
             result.addValidationError(err.getField(), err.getDefaultMessage());
