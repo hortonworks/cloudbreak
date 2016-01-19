@@ -66,6 +66,7 @@ public class CredentialService {
         }
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public Credential create(CbUser user, Credential credential) {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
@@ -98,6 +99,7 @@ public class CredentialService {
         }
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public void delete(Long id, CbUser user) {
         Credential credential = credentialRepository.findByIdInAccount(id, user.getAccount());
         if (credential == null) {
@@ -106,6 +108,7 @@ public class CredentialService {
         delete(credential, user);
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public void delete(String name, CbUser user) {
         Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (credential == null) {
@@ -114,6 +117,7 @@ public class CredentialService {
         delete(credential, user);
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public Credential update(Long id) throws Exception {
         Credential credential = get(id);
         if (credential == null) {

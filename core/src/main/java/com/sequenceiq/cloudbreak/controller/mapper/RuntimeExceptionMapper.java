@@ -18,7 +18,7 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
     @Override
     public Response toResponse(RuntimeException exception) {
         MDCBuilder.buildMdcContext();
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), exception);
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ExceptionResult("Internal server error"))
                 .build();
     }

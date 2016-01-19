@@ -19,7 +19,7 @@ public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestExce
     @Override
     public Response toResponse(BadRequestException exception) {
         MDCBuilder.buildMdcContext();
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), exception);
         return Response.status(Response.Status.BAD_REQUEST).entity(new ExceptionResult(exception.getMessage()))
                 .build();
     }

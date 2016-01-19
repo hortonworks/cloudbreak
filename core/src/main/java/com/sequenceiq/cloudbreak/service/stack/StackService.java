@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -240,6 +240,7 @@ public class StackService {
         forceDelete(stack, user);
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public Stack create(CbUser user, Stack stack) {
         Stack savedStack = null;
         stack.setOwner(user.getUserId());
@@ -397,6 +398,7 @@ public class StackService {
         blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public Stack save(Stack stack) {
         return stackRepository.save(stack);
     }

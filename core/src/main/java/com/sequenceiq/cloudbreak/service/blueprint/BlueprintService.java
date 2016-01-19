@@ -65,6 +65,7 @@ public class BlueprintService {
         return blueprint;
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public Blueprint create(CbUser user, Blueprint blueprint) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint = null;
@@ -110,6 +111,7 @@ public class BlueprintService {
         delete(blueprint, user);
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public Iterable<Blueprint> save(Iterable<Blueprint> entities) {
         return blueprintRepository.save(entities);
     }

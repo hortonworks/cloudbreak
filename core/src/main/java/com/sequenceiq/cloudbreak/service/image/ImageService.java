@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 
 @Service
+@Transactional
 public class ImageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
@@ -60,6 +62,7 @@ public class ImageService {
 
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public void create(Stack stack, PlatformParameters params) {
         try {
             Platform platform = platform(stack.cloudPlatform());

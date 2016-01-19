@@ -19,7 +19,7 @@ public class AuthenticationCredentialsNotFoundExceptionMapper implements Excepti
     @Override
     public Response toResponse(AuthenticationCredentialsNotFoundException exception) {
         MDCBuilder.buildMdcContext();
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), exception);
         return Response.status(Response.Status.UNAUTHORIZED).entity(new ExceptionResult(exception.getMessage()))
                 .build();
     }

@@ -18,7 +18,7 @@ public class HttpMediaTypeNotSupportedExceptionMapper implements ExceptionMapper
     @Override
     public Response toResponse(HttpMediaTypeNotSupportedException exception) {
         MDCBuilder.buildMdcContext();
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), exception);
         return Response.status(Response.Status.NOT_ACCEPTABLE).entity(exception.getMessage()).build();
     }
 }

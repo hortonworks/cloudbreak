@@ -11,9 +11,11 @@ import com.sequenceiq.cloudbreak.controller.mapper.AuthenticationCredentialsNotF
 import com.sequenceiq.cloudbreak.controller.mapper.BadRequestExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.ConstraintViolationExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.ConversionFailedExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.DataIntegrityViolationExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.EntityNotFoundExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.HibernateConstraintViolationException;
 import com.sequenceiq.cloudbreak.controller.mapper.HttpMediaTypeNotSupportedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.HttpMessageNotReadableExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.HttpRequestMethodNotSupportedExceptionMapper;
@@ -64,6 +66,8 @@ public class EndpointConfig extends ResourceConfig {
         register(SubscriptionAlreadyExistExceptionMapper.class);
         register(TypeMismatchExceptionMapper.class);
         register(UnsupportedOperationFailedExceptionMapper.class);
+        register(HibernateConstraintViolationException.class);
+        register(DataIntegrityViolationExceptionMapper.class);
 
         register(RuntimeExceptionMapper.class);
         register(DefaultExceptionMapper.class);
