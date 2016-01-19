@@ -51,6 +51,11 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
                         + "WHERE i.instanceGroup.id = :instanceGroupId "
                         + "AND i.instanceStatus <> 'TERMINATED' "),
         @NamedQuery(
+                name = "InstanceMetaData.findAliveInstancesInInstanceGroup",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.instanceGroup.id = :instanceGroupId "
+                        + "AND i.instanceStatus <> 'TERMINATED' "),
+        @NamedQuery(
                 name = "InstanceMetaData.findRemovableInstances",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
