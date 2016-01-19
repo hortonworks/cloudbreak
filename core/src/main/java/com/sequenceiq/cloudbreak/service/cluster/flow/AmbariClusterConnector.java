@@ -50,15 +50,17 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
+import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
@@ -72,6 +74,8 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.domain.TopologyRecord;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -84,9 +88,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
-import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
@@ -106,6 +108,8 @@ public class AmbariClusterConnector {
     private static final String DOMAIN = "node.dc1.consul";
     private static final String KEY_TYPE = "PERSISTED";
     private static final String PRINCIPAL = "/admin";
+    private static final String CONFIG_STRATEGY = "NEVER_APPLY";
+    private static final String FQDN = "fqdn";
 
     @Inject
     private StackRepository stackRepository;
@@ -212,7 +216,7 @@ public class AmbariClusterConnector {
             int nodeCount = stack.getFullNodeCountWithoutDecommissionedNodes() - stack.getGateWayNodeCount();
 
             Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
-            Map<String, List<String>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
+            Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
             hostGroups = saveHostMetadata(cluster, hostGroupMappings);
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
@@ -873,14 +877,14 @@ public class AmbariClusterConnector {
         return stopped;
     }
 
-    private Set<HostGroup> saveHostMetadata(Cluster cluster, Map<String, List<String>> hostGroupMappings) {
+    private Set<HostGroup> saveHostMetadata(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings) {
         Set<HostGroup> hostGroups = new HashSet<>();
-        for (Entry<String, List<String>> hostGroupMapping : hostGroupMappings.entrySet()) {
+        for (Entry<String, List<Map<String, String>>> hostGroupMapping : hostGroupMappings.entrySet()) {
             Set<HostMetadata> hostMetadata = new HashSet<>();
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupMapping.getKey());
-            for (String hostName : hostGroupMapping.getValue()) {
+            for (Map<String, String> hostNameMap : hostGroupMapping.getValue()) {
                 HostMetadata hostMetadataEntry = new HostMetadata();
-                hostMetadataEntry.setHostName(hostName);
+                hostMetadataEntry.setHostName(hostNameMap.get(FQDN));
                 hostMetadataEntry.setHostGroup(hostGroup);
                 hostMetadata.add(hostMetadataEntry);
             }
@@ -964,15 +968,42 @@ public class AmbariClusterConnector {
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private Map<String, List<String>> buildHostGroupAssociations(Set<HostGroup> hostGroups) throws InvalidHostGroupHostAssociation {
-        Map<String, List<String>> hostGroupMappings = new HashMap<>();
+    private Map<String, List<Map<String, String>>> buildHostGroupAssociations(Set<HostGroup> hostGroups) throws InvalidHostGroupHostAssociation {
+        Map<String, List<Map<String, String>>> hostGroupMappings = new HashMap<>();
         LOGGER.info("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (HostGroup hostGroup : hostGroups) {
-            hostGroupMappings.put(hostGroup.getName(),
-                    instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(hostGroup.getInstanceGroup().getId()));
+            List<Map<String, String>> instanceMetaMapping = new ArrayList<>();
+            Map<String, String> topologyMapping = getTopologyMapping(hostGroup);
+            List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(hostGroup.getInstanceGroup().getId());
+            for (InstanceMetaData meta : metas) {
+                Map instanceMeta = new HashMap();
+                instanceMeta.put(FQDN, meta.getDiscoveryFQDN());
+                if (meta.getHypervisor() != null) {
+                    instanceMeta.put("hypervisor", meta.getHypervisor());
+                    instanceMeta.put("rack", topologyMapping.get(meta.getHypervisor()));
+                }
+                instanceMetaMapping.add(instanceMeta);
+            }
+            hostGroupMappings.put(hostGroup.getName(), instanceMetaMapping);
         }
         LOGGER.info("Computed host-hostGroup associations: {}", hostGroupMappings);
         return hostGroupMappings;
+    }
+
+    private Map<String, String> getTopologyMapping(HostGroup hg) {
+        Map<String, String> result = new HashMap();
+        LOGGER.info("Computing hypervisor - rack mapping based on topology");
+        Topology topology = hg.getCluster().getStack().getCredential().getTopology();
+        if (topology == null) {
+            return result;
+        }
+        List<TopologyRecord> records = topology.getRecords();
+        if (records != null) {
+            for (TopologyRecord t : records) {
+                result.put(t.getHypervisor(), t.getRack());
+            }
+        }
+        return result;
     }
 
     private PollingResult waitForClusterInstall(Stack stack, AmbariClient ambariClient) {
