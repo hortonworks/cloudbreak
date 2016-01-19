@@ -1,17 +1,14 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm;
 
 
-import static com.sequenceiq.cloudbreak.orchestrator.swarm.OrchestratorTestUtil.containerOrchestratorCluster;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.OrchestratorTestUtil.createRunner;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.OrchestratorTestUtil.exitCriteria;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.OrchestratorTestUtil.exitCriteriaModel;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.OrchestratorTestUtil.gatewayConfig;
-import static com.sequenceiq.cloudbreak.orchestrator.swarm.OrchestratorTestUtil.generateLogVolume;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.OrchestratorTestUtil.generateNodes;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.OrchestratorTestUtil.parallelContainerRunner;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -20,6 +17,14 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.MunchausenBootstrap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,25 +32,6 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariAgentBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.AmbariServerDatabaseBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.ConsulWatchBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.KerberosServerBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.LogrotateBootsrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.MunchausenBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.RegistratorBootstrap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SwarmContainerOrchestratorTest {
@@ -63,27 +49,6 @@ public class SwarmContainerOrchestratorTest {
 
     @Mock
     private MunchausenBootstrap munchausenBootstrap;
-
-    @Mock
-    private RegistratorBootstrap registratorBootstrap;
-
-    @Mock
-    private AmbariServerBootstrap ambariServerBootstrap;
-
-    @Mock
-    private AmbariAgentBootstrap ambariAgentBootstrap;
-
-    @Mock
-    private AmbariServerDatabaseBootstrap ambariServerDatabaseBootstrap;
-
-    @Mock
-    private KerberosServerBootstrap kerberosServerBootstrap;
-
-    @Mock
-    private ConsulWatchBootstrap consulWatchBootstrap;
-
-    @Mock
-    private LogrotateBootsrap logrotateBootsrap;
 
     @Mock
     private Future<Boolean> future;
@@ -180,249 +145,4 @@ public class SwarmContainerOrchestratorTest {
         underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), CONSUL_LOG_PATH,
                 exitCriteriaModel());
     }
-
-    @Test
-    public void registratorStartInClusterWhenEverythingWorksFine() throws Exception {
-        when(registratorBootstrap.call()).thenReturn(true);
-        doReturn(registratorBootstrap).when(underTestSpy).registratorBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
-
-        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("registrator",
-                "0.0.1"), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorCancelledException.class)
-    public void registratorStartInClusterWhenOrchestratorCancelled() throws Exception {
-        when(registratorBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(registratorBootstrap).when(underTestSpy).registratorBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
-
-        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("registrator",
-                "0.0.1"), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void registratorStartInClusterWhenOrchestratorFailed() throws Exception {
-        when(registratorBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(registratorBootstrap).when(underTestSpy).registratorBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
-
-        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("registrator",
-                "0.0.1"), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void registratorStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
-        when(registratorBootstrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(registratorBootstrap).when(underTestSpy).registratorBootstrap(any(GatewayConfig.class), anyString(), any(Node.class));
-
-        underTestSpy.startRegistrator(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("registrator",
-                "0.0.1"), exitCriteriaModel());
-    }
-
-    @Test
-    public void ambariServerStartInClusterWhenEverythingWorksFine() throws Exception {
-        when(ambariServerBootstrap.call()).thenReturn(true);
-        doReturn(ambariServerBootstrap).when(underTestSpy).ambariServerBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class));
-        when(ambariServerDatabaseBootstrap.call()).thenReturn(true);
-        doReturn(ambariServerDatabaseBootstrap).when(underTestSpy).ambariServerDatabaseBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), any(LogVolumePath.class));
-
-        underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorCancelledException.class)
-    public void ambariServerStartInClusterWhenOrchestratorCancelled() throws Exception {
-        when(ambariServerBootstrap.call()).thenReturn(true);
-        doReturn(ambariServerBootstrap).when(underTestSpy).ambariServerBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class));
-        when(ambariServerDatabaseBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(ambariServerDatabaseBootstrap).when(underTestSpy).ambariServerDatabaseBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), any(LogVolumePath.class));
-
-        underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void ambariServerStartInClusterWhenOrchestratorFailed() throws Exception {
-        when(ambariServerBootstrap.call()).thenReturn(true);
-        doReturn(ambariServerBootstrap).when(underTestSpy).ambariServerBootstrap(any(GatewayConfig.class), anyString(), any(Node.class),
-                anyString(), any(LogVolumePath.class));
-        when(ambariServerDatabaseBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("cancelled"));
-        doReturn(ambariServerDatabaseBootstrap).when(underTestSpy).ambariServerDatabaseBootstrap(any(GatewayConfig.class), anyString(), any(Node.class),
-                any(LogVolumePath.class));
-
-        underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void ambariServerStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
-        when(ambariServerBootstrap.call()).thenReturn(true);
-        doReturn(ambariServerBootstrap).when(underTestSpy).ambariServerBootstrap(any(GatewayConfig.class), anyString(), any(Node.class),
-                anyString(), any(LogVolumePath.class));
-        when(ambariServerDatabaseBootstrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(ambariServerDatabaseBootstrap).when(underTestSpy).ambariServerDatabaseBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), any(LogVolumePath.class));
-
-        underTestSpy.startAmbariServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)),
-                new ContainerConfig("serverdb", "0.0.1"), new ContainerConfig("serverdb", "0.0.1"), "azure", generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test
-    public void ambariAgentStartInClusterWhenEverythingWorksFine() throws Exception {
-        when(ambariAgentBootstrap.call()).thenReturn(true);
-        doReturn(ambariAgentBootstrap).when(underTestSpy).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
-
-        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("agent", "0.0.1"),
-                "azure", generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void ambariAgentStartInClusterWhenOrchestratorCancelled() throws Exception {
-        when(ambariAgentBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(ambariAgentBootstrap).when(underTestSpy).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
-
-        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("agent", "0.0.1"),
-                "azure", generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void ambariAgentStartInClusterWhenOrchestratorFailed() throws Exception {
-        when(ambariAgentBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(ambariAgentBootstrap).when(underTestSpy).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
-
-        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("agent", "0.0.1"),
-                "azure", generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void ambariAgentStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
-        when(ambariAgentBootstrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(ambariAgentBootstrap).when(underTestSpy).ambariAgentBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), anyString(), any(LogVolumePath.class));
-
-        underTestSpy.startAmbariAgents(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("agent", "0.0.1"),
-                "azure", generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test
-    public void logRotateStartInClusterWhenEverythingWorksFine() throws Exception {
-        when(logrotateBootsrap.call()).thenReturn(true);
-        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
-
-        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("rotate", "0.0.1"),
-                exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void logRotateStartInClusterWhenOrchestratorCancelled() throws Exception {
-        when(logrotateBootsrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
-
-        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("rotate", "0.0.1"),
-                exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void logRotateStartInClusterWhenOrchestratorFailed() throws Exception {
-        when(logrotateBootsrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
-
-        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("rotate", "0.0.1"),
-                exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void logRotateStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
-        when(logrotateBootsrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(logrotateBootsrap).when(underTestSpy).logrotateBootsrap(any(GatewayConfig.class), anyString(), any(Node.class), anyString());
-
-        underTestSpy.startLogrotate(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("rotate", "0.0.1"),
-                exitCriteriaModel());
-    }
-
-    @Test
-    public void consulWatchStartInClusterWhenEverythingWorksFine() throws Exception {
-        when(consulWatchBootstrap.call()).thenReturn(true);
-        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class));
-
-        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("watch", "0.0.1"),
-                generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void consulWatchStartInClusterWhenOrchestratorCancelled() throws Exception {
-        when(consulWatchBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class));
-
-        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("watch", "0.0.1"),
-                generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void consulWatchStartInClusterWhenOrchestratorFailed() throws Exception {
-        when(consulWatchBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class));
-
-        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("watch", "0.0.1"),
-                generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void consulWatchStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
-        when(consulWatchBootstrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(consulWatchBootstrap).when(underTestSpy).consulWatchBootstrap(any(GatewayConfig.class), anyString(),
-                any(Node.class), anyString(), any(LogVolumePath.class));
-
-        underTestSpy.startConsulWatches(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("watch", "0.0.1"),
-                generateLogVolume(), exitCriteriaModel());
-    }
-
-    @Test
-    public void kerberosServerStartInClusterWhenEverythingWorksFine() throws Exception {
-        when(kerberosServerBootstrap.call()).thenReturn(true);
-        doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
-                any(Node.class), any(LogVolumePath.class));
-
-        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
-                generateLogVolume(), new KerberosConfiguration("", "", ""), exitCriteriaModel());
-    }
-
-    @Test
-    public void kerberosServerStartInClusterWhenOrchestratorCancelled() throws Exception {
-        when(registratorBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
-        doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
-                any(Node.class), any(LogVolumePath.class));
-
-        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
-                generateLogVolume(), new KerberosConfiguration("", "", ""), exitCriteriaModel());
-    }
-
-    @Test
-    public void kerberosServerStartInClusterWhenOrchestratorFailed() throws Exception {
-        when(registratorBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
-        doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
-                any(Node.class), any(LogVolumePath.class));
-
-        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
-                generateLogVolume(), new KerberosConfiguration("", "", ""), exitCriteriaModel());
-    }
-
-    @Test
-    public void kerberosServerStartInClusterWhenNullPointerOccurredAndOrchestratorFailedComes() throws Exception {
-        when(registratorBootstrap.call()).thenThrow(new NullPointerException("null"));
-        doReturn(kerberosServerBootstrap).when(underTestSpy).kerberosServerBootstrap(any(KerberosConfiguration.class), any(GatewayConfig.class), anyString(),
-                any(Node.class), any(LogVolumePath.class));
-
-        underTestSpy.startKerberosServer(containerOrchestratorCluster(gatewayConfig(), generateNodes(FIX_NODE_COUNT)), new ContainerConfig("bserver", "0.0.1"),
-                generateLogVolume(), new KerberosConfiguration("", "", ""), exitCriteriaModel());
-    }
-
 }
