@@ -4,7 +4,9 @@ migrate-config() {
 
     env-import DOCKER_TAG_MIGRATION 1.0.0
     env-import CB_SCHEMA_SCRIPTS_LOCATION "container"
+    env-import CB_SCHEMA_MIGRATION_AUTO true
     env-import PERISCOPE_SCHEMA_SCRIPTS_LOCATION "container"
+    env-import PERISCOPE_SCHEMA_MIGRATION_AUTO true
     env-import UAA_SCHEMA_SCRIPTS_LOCATION "container"
     env-import SKIP_DB_MIGRATION_ON_START false
     env-import DB_MIGRATION_LOG "db_migration.log"
