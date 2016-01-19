@@ -269,7 +269,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
                     return;
                 } else {
-                    $scope.cluster.ambariStackDetails.os = "redhat6";
+                    $scope.cluster.ambariStackDetails.os = "redhat7";
                     if ($scope.isUndefined($scope.cluster.ambariStackDetails.verify)) {
                         $scope.cluster.ambariStackDetails.verify = false;
                     }
@@ -733,7 +733,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
                     return;
                 } else {
-                    $rootScope.reinstallClusterObject.ambariStackDetails.os = "redhat6";
+                    $rootScope.reinstallClusterObject.ambariStackDetails.os = "redhat7";
                     if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.verify)) {
                         $rootScope.reinstallClusterObject.ambariStackDetails.verify = false;
                     }
