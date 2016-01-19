@@ -26,7 +26,7 @@ public class DatabaseMigrationConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMigrationConfig.class);
     private static final String DEFAULT_SCHEMA_LOCATION_IN_CONTAINER = "/schema";
     private static final String SCHEMA_IN_CONTAINER = "container";
-    private static final String DEFAULT_SCHEMA_LOCATION_IN_SOURCE = "src/main/resources/schema";
+    private static final String DEFAULT_SCHEMA_LOCATION_IN_SOURCE = "autoscale/src/main/resources/schema";
     private static final String PENDING_OPERATION_WARNING_MSG = "WARNING: Running pending migrations out of order can create unexpected results.";
 
     @Value("${periscope.schema.scripts.location:" + DEFAULT_SCHEMA_LOCATION_IN_SOURCE + "}")
