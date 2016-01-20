@@ -12,6 +12,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.model.CloudbreakClient;
 
@@ -46,7 +47,7 @@ public class CloudbreakUtil {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
 
         Assert.assertEquals(stackResponse.getCluster().getStatus(), "AVAILABLE", "The cluster hasn't been started!");
-        Assert.assertEquals(stackResponse.getStatus(), "AVAILABLE", "The stack hasn't been started!");
+        Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
 
         String ambariIp = stackResponse.getCluster().getAmbariServerIp();
         Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
@@ -61,7 +62,7 @@ public class CloudbreakUtil {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
 
         Assert.assertEquals(stackResponse.getCluster().getStatus(), "STOPPED", "The cluster is not stopped!");
-        Assert.assertEquals(stackResponse.getStatus(), "STOPPED", "The stack is not stopped!");
+        Assert.assertEquals(stackResponse.getStatus(), Status.STOPPED, "The stack is not stopped!");
 
         String ambariIp = stackResponse.getCluster().getAmbariServerIp();
         AmbariClient ambariClient = new AmbariClient(ambariIp, DEFAULT_AMBARI_PORT, ambariUser, ambariPassowrd);
