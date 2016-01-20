@@ -2,7 +2,7 @@
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_cloudPlatform">{{msg.active_cluster_platform_label}}</label>
         <div class="col-sm-8">
-            <p id="sl_cloudPlatform" class="form-control-static">{{activeCredential.cloudPlatform}}</p>
+            <p id="sl_cloudPlatform" class="form-control-static">{{activeCredential ? activeCredential.cloudPlatform : activeStack.orchestrator.type}}</p>
         </div>
     </div>
     <div class="form-group">
@@ -19,7 +19,7 @@
             <p id="sl_cloudPlatform" class="form-control-static">{{cluster.password}}</p>
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-show="activeCredential">
         <label class="col-sm-3 control-label" for="sl_region">{{msg.active_cluster_region_label}}</label>
         <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'AWS' ">
             <p id="sl_region" class="form-control-static">{{$root.displayNames.getRegion(activeCredential.cloudPlatform, cluster.region)}}</p>
@@ -36,11 +36,14 @@
     </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_credential_active">{{msg.active_cluster_credential_label}}</label>
-        <div class="credentialselect col-sm-8">
-            <a id="sl_credential_active" segment="#panel-credential-collapse{{activeCredential.id}}" class="credentialselect form-control-static review-a" ng-repeat="credential in $root.credentials|filter: { id: activeCredential.id }:true">{{credential.name}}</a>
+        <div class="credentialselect col-sm-8" ng-show="activeCredential">
+            <a id="sl_credential_active" segment="#panel-credential-collapse-{{activeCredential.id}}" class="credentialselect form-control-static review-a">{{activeCredential.name}}</a>
+        </div>
+        <div class="credentialselect col-sm-8" ng-show="activeStack">
+            <a id="sl_credential_active" segment="#panel-credential-collapse-imported{{activeStack.id}}" class="credentialselect form-control-static review-a">{{activeStack.name}}</a>
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-show="activeCredential">
         <label class="col-sm-3 control-label" for="sl_network_active">{{msg.active_cluster_network_label}}</label>
         <div class="networkselect col-sm-8">
             <a id="sl_network_active" class="networkselect form-control-static review-a" ng-repeat="network in $root.networks|filter: { id: cluster.networkId }:false" segment="#panel-network-collapse{{cluster.networkId}}">{{network.name}}</a>
@@ -50,7 +53,7 @@
 
 
     <div class="row" style="margin-top: 20px;">
-        <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs">
+        <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs" ng-show="activeCredential">
             <ul id="myTabs" class="nav nav-tabs" role="tablist">
                 <li role="presentation" ng-class="{true:'active', false:''}[group.group == cluster.activeGroup]" ng-repeat="group in cluster.instanceGroups| orderBy: 'group'"><a ng-click="changeActiveGroup(group.group)" href="" id="{{group.group}}-tab" role="tab" data-toggle="tab" aria-controls="{{group.group}}" aria-expanded="true">{{group.group}}</a></li>
             </ul>
@@ -74,6 +77,34 @@
                             <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
                             <div class="col-sm-5 col-lg-6">
                                 <div class="host-group-table row" ng-repeat="hostgroup in blueprint.ambariBlueprint.host_groups|filter: { name: group.group }:true">
+                                    <div class="list-group">
+                                        <a href="" class="list-group-item active" style="text-decoration: none;    font-size: 15px;">{{hostgroup.name}}</a>
+                                        <a href="" ng-repeat="component in hostgroup.components" class="list-group-item" style="text-decoration: none;    font-size: 15px;">{{component.name}}</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs" ng-show="activeStack">
+            <ul id="myTabs" class="nav nav-tabs" role="tablist">
+                <li role="presentation" ng-class="{true:'active', false:''}[group.name == cluster.activeGroup]" ng-repeat="group in cluster.hostGroups| orderBy: 'name'"><a ng-click="changeActiveGroup(group.name)" href="" id="{{group.name}}-tab" role="tab" data-toggle="tab" aria-controls="{{group.name}}" aria-expanded="true">{{group.name}}</a></li>
+            </ul>
+            <div id="myTabContent" class="tab-content">
+                <div role="tabpanel" class="tab-pane fade active review-tab" ng-class="{true:'in', false:''}[group.name == cluster.activeGroup]" ng-hide="group.name != cluster.activeGroup" ng-show="group.name == cluster.activeGroup" ng-repeat="group in cluster.hostGroups" id="{{group.name}}" aria-labelledby="{{group.name}}-tab">
+                    <div class="container">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label" for="sl_template_active">Constraint template: </label>
+                            <div class="templateselect col-sm-9">
+                                <a id="sl_template_active" class="templateselect form-control-static review-a" ng-repeat="template in $root.constraints|filter: { name: group.constraint.constraintTemplateName }:true" segment="#panel-constraint-collapse{{template.id}}">{{template.name}}</a>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-repeat="blueprint in $root.blueprints|filter: { id: cluster.blueprintId }:true">
+                            <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
+                            <div class="col-sm-5 col-lg-6">
+                                <div class="host-group-table row" ng-repeat="hostgroup in blueprint.ambariBlueprint.host_groups|filter: { name: group.name }:true">
                                     <div class="list-group">
                                         <a href="" class="list-group-item active" style="text-decoration: none;    font-size: 15px;">{{hostgroup.name}}</a>
                                         <a href="" ng-repeat="component in hostgroup.components" class="list-group-item" style="text-decoration: none;    font-size: 15px;">{{component.name}}</a>

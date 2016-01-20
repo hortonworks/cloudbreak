@@ -8,7 +8,7 @@
                 <i class="fa fa-angle-down fa-2x fa-fw-forced"></i>
             </a>
             <h4>
-                <span class="badge pull-right">{{$root.credentials.length}}</span> {{msg.credential_manage_title}}
+                <span class="badge pull-right">{{$root.credentials.length + ($root.importedStacks | filter:filterByImportedStack).length}}</span> {{msg.credential_manage_title}}
             </h4>
         </div>
 
@@ -31,6 +31,7 @@
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsChange" ng-if="isVisible('AWS')" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">{{msg.aws_label}}</a>
                                         <a id="azureRmChange" ng-if="isVisible('AZURE_RM')" type="button" class="btn btn-default" ng-click="createAzureRmCredentialRequest()">{{msg.azure_rm_label}}</a>
+                                        <a id="mesosChange" ng-if="isVisible('BYOS')" type="button" class="btn btn-default" ng-click="importMesosStackRequest()">{{msg.mesos_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
                                         <a id="gcpChange" ng-if="isVisible('GCP')" type="button" class="btn btn-default" ng-click="createGcpCredentialRequest()">{{msg.gcp_label}}</a>
@@ -54,6 +55,9 @@
 
                             <form class="form-horizontal" role="form" name="openstackCredentialForm" ng-show="openstackCredential && !credentialInCreation && isVisible('OPENSTACK')">
                                 <div ng-include src="'tags/credential/openstackform.tag'"></div>
+                            </form>
+                            <form class="form-horizontal" role="form" name="mesosImportStackForm" ng-show="mesosCredential && !credentialInCreation && isVisible('BYOS')">
+                                <div ng-include src="'tags/credential/mesosform.tag'"></div>
                             </form>
                         </div>
                     </div>
@@ -104,6 +108,30 @@
                     </div>
                     <!-- .panel -->
 
+                    <div class="panel panel-default" ng-repeat="importedStack in $root.importedStacks  | filter:filterByImportedStack | orderBy:['name']">
+                        <div class="panel-heading">
+                            <h5><a href="" data-toggle="collapse" data-parent="#credential-list-accordion"
+                                   data-target="#panel-credential-collapse-imported{{importedStack.id}}"><i class="fa fa-tag fa-fw"></i>{{importedStack.name}}</a>
+                                <span class="label label-info pull-right" >{{importedStack.orchestrator.type}}</span>
+                                <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="importedStack.public"></i>
+
+                            </h5>
+                        </div>
+                        <div id="panel-credential-collapse-imported{{importedStack.id}}" class="panel-collapse collapse">
+
+                            <p class="btn-row-over-panel">
+                                <a href="" class="btn btn-danger" role="button" ng-click="deleteImportedStack(importedStack)">
+                                    <i class="fa fa-times fa-fw"></i>
+                                    <span> {{msg.credential_list_delete}}</span>
+                                </a>
+                            </p>
+
+                            <div class="panel-body">
+                                <div ng-include src="'tags/credential/mesoslist.tag'"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- .panel -->
 
                 </div>
                 <!-- #credential-list-accordion -->

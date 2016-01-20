@@ -31,12 +31,15 @@
                     <li class="dropdown" id="menu-credential">
                         <a href="" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-tag fa-fw"></i>
-                            <span ng-class="$root.activeCredential === undefined ? 'text-danger' : 'text'">{{$root.activeCredential === undefined ? msg.dashboard_select_credential_label : $root.activeCredential.name}}</span>
+                            <span ng-class="$root.activeCredential === undefined && $root.activeStack === undefined? 'text-danger' : 'text'">{{$root.activeCredential === undefined ? ($root.activeStack === undefined ? msg.dashboard_select_credential_label : $root.activeStack.name) : $root.activeCredential.name}}</span>
                             <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
                             <li ng-repeat="credential in $root.credentials | filter:filterByVisiblePlatform | orderBy:'name'">
                                 <a href="" id="{{credential.id}}" value="{{credential.name}}" ng-click="$root.activeCredential = credential">{{credential.name}}</a>
+                            </li>
+                            <li ng-repeat="importedStack in $root.importedStacks | filter:filterByImportedStack | orderBy:'name'">
+                                <a href="" id="{{importedStack.id}}" value="{{importedStack.name}}" ng-click="$root.activeStack = importedStack">{{importedStack.name}}</a>
                             </li>
                             <li class="divider"></li>
                             <li>
@@ -100,7 +103,7 @@
 
                 <!-- create cluster button -->
                 <div class="col-sm-3 col-xs-2">
-                    <button id="create-cluster-btn" ng-disabled="activeCredential === undefined" class="btn btn-success btn-block btn-collapse-title" role="button">
+                    <button id="create-cluster-btn" ng-disabled="activeCredential === undefined && activeStack === undefined" class="btn btn-success btn-block btn-collapse-title" role="button">
                         <i class="fa fa-plus fa-fw"></i>
                         <span> {{msg.dashboard_create_cluster_label}}</span>
                     </button>
