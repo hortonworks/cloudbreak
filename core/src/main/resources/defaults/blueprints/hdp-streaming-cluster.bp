@@ -228,6 +228,6 @@
   "Blueprints": {
     "blueprint_name": "hdp-streaming-cluster",
     "stack_name": "HDP",
-    "stack_version": "2.3"
+    "stack_version": "2.4"
   }
 }

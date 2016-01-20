@@ -206,7 +206,7 @@
   "Blueprints": {
     "blueprint_name": "hdp-spark-cluster",
     "stack_name": "HDP",
-    "stack_version": "2.3"
+    "stack_version": "2.4"
   }
 }
     
