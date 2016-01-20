@@ -18,6 +18,10 @@ apply plugin: 'application'
 dependencies {
     compile project(':core-api')
 
+    compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+        exclude group: 'org.slf4j';
+    }
+
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter',                    version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',                version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-security',           version: springBootVersion
@@ -27,19 +31,8 @@ dependencies {
 
     compile group: 'org.springframework',           name: 'spring-context-support',                 version: springFrameworkVersion
     compile group: 'org.apache.commons',            name: 'commons-lang3',                          version: apacheCommonsLangVersion
-    compile group: 'org.hsqldb',                    name: 'hsqldb',                                 version: '2.3.2'
-    compile (group: 'org.apache.hadoop',             name: 'hadoop-yarn-client',                     version: hadoopVersion) {
-            exclude group: 'com.sun.jersey'
-    }
-    compile (group: 'org.apache.hadoop',             name: 'hadoop-yarn-server-resourcemanager',     version: hadoopVersion) {
-        exclude group: 'com.sun.jersey'
-    }
-    compile (group: 'org.apache.hadoop',             name: 'hadoop-common',                          version: hadoopVersion) {
-        exclude group: 'com.sun.jersey'
-    }
+    compile (group: 'org.apache.hadoop',            name: 'hadoop-yarn-api',                        version: hadoopVersion)
 
-    compile group: 'com.sequenceiq',                name: 'ambari-client20',                        version: '2.0.22'
-    compile group: 'javax.servlet',                 name: 'javax.servlet-api',                      version: '3.0.1'
     compile group: 'org.freemarker',                name: 'freemarker',                             version : freemarkerVersion
     compile group: 'javax.mail',                    name: 'mail',                                   version: '1.5.0-b01'
     compile group: 'joda-time',                     name: 'joda-time',                              version: '2.5'
@@ -49,10 +42,11 @@ dependencies {
     compile group: 'org.quartz-scheduler',          name: 'quartz',                                 version: '2.2.1'
     compile group: 'dnsjava',                       name: 'dnsjava',                                version: '2.1.7'
     compile group: 'org.mybatis',                   name: 'mybatis-migrations',                     version: '3.2.0'
+
     testCompile group: 'junit',                     name: 'junit',                                  version: '4.11'
     testCompile group: 'org.mockito',               name: 'mockito-all',                            version: '1.9.5'
     testCompile group: 'org.springframework',       name: 'spring-test',                            version: springFrameworkVersion
-    testCompile group: 'org.springframework.boot', name:'spring-boot-starter-test',                 version: springBootVersion
+    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',                version: springBootVersion
 
 }
 
