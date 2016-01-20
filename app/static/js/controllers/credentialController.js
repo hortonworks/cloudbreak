@@ -61,6 +61,13 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             });
         }
 
+        $scope.filterByCloudPlatform = function (topology) {
+            return (topology.cloudPlatform === 'AWS' && $scope.awsCredential) ||
+                    (topology.cloudPlatform === 'GCP' && $scope.gcpCredential) ||
+                    (topology.cloudPlatform === 'AZURE_RM' && $scope.azureRmCredential) ||
+                    (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackCredential)
+        }
+
         $scope.createAwsCredential = function() {
             $scope.credentialAws.cloudPlatform = "AWS";
             $scope.credentialInCreation = true;
@@ -218,6 +225,16 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.showError(error);
             });
 
+        }
+
+        $scope.getTopologyNameById = function (topologyId) {
+            var result;
+            angular.forEach($rootScope.topologies, function(topology) {
+                if (topology.id === topologyId) {
+                    result = topology.name;
+                }
+            });
+            return result;
         }
 
         $scope.unShowErrorMessageAlert = function() {

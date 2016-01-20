@@ -33,7 +33,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="templateName{{$index}}">{{msg.cluster_form_hostgroup_template_label}}</label>
                                 <div class="col-sm-8">
-                                    <select class="form-control" id="template-name-{{$index}}" name="template-name-{{$index}}" ng-model="instanceGroup.templateId" ng-options="template.id as template.name for template in $root.templates | filter: {'cloudPlatform': activeCredential.cloudPlatform} | orderBy:'name'" required>
+                                    <select class="form-control" id="template-name-{{$index}}" name="template-name-{{$index}}" ng-model="instanceGroup.templateId" ng-options="template.id as template.name for template in $root.templates | filter:filterByTopology | filter: {'cloudPlatform': activeCredential.cloudPlatform} | orderBy:'name'" required>
                                     </select>
                                 </div>
                             </div>

@@ -24,14 +24,32 @@
                         <div class="panel-body">
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">
+
                                     <div class="btn-group btn-group-justified">
-                                        <a id="openstackTopologyChange" ng-show="isVisible('OPENSTACK')" class="btn btn-default" role="button" ng-click="createOpenstackTopologyRequest()">{{msg.openstack_label}}</a>
+                                        <a id="awsTopologyChange" ng-show="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsTopology, 'btn-default':!awsTopology}" role="button" ng-click="createAwsTopologyRequest()">{{msg.aws_label}}</a>
+                                        <a id="azureTopologyChange" ng-show="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureTopology, 'btn-default':!azureTopology}" role="button" ng-click="createAzureTopologyRequest()">{{msg.azure_label}}</a>
                                     </div>
+                                    <div class="btn-group btn-group-justified">
+                                        <a id="gcpTopologyChange" ng-show="isVisible('GCP')" class="btn btn-default" ng-class="{'btn':true, 'btn-info':gcpTopology, 'btn-default':!gcpTopology}" role="button" ng-click="createGcpTopologyRequest()">{{msg.gcp_label}}</a>
+                                        <a id="openstackTopologyChange" ng-show="isVisible('OPENSTACK')" ng-class="{'btn':true, 'btn-info':openstackTopology, 'btn-default':!openstackTopology}" role="button" ng-click="createOpenstackTopologyRequest()">{{msg.openstack_label}}</a>
+                                    </div>
+
                                 </div>
                             </div>
 
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
+                            <form class="form-horizontal" role="form" name="azureTopologyForm" ng-show="azureTopology && isVisible('AZURE_RM')">
+                                <div ng-include src="'tags/topology/azureform.tag'"></div>
+                            </form>
+
+                            <form class="form-horizontal" role="form" ng-show="awsTopology && isVisible('AWS')" name="awsTopologyForm">
+                                <div ng-include src="'tags/topology/awsform.tag'"></div>
+                            </form>
+
+                            <form class="form-horizontal" role="form" ng-show="gcpTopology && isVisible('GCP')" name="gcpTopologyForm" ng-show="gcpTopology">
+                                <div ng-include src="'tags/topology/gcpform.tag'"></div>
+                            </form>
                             <form class="form-horizontal" role="form" ng-show="openstackTopology && isVisible('OPENSTACK')" name="openstackTopologyForm" ng-show="openstackTopology">
                                 <div ng-include src="'tags/topology/openstackform.tag'"></div>
                             </form>
@@ -63,13 +81,22 @@
                                 </a>
                             </p>
                             <p class="btn-row-over-panel">
-                                <a style="width: 90px" href="" class="btn btn-warning" role="button" ng-click="modifyTopology(topology)" data-toggle="collapse" data-target="#panel-create-topologies-collapse">
+                                <a style="width: 90px" href="" class="btn btn-warning" role="button" ng-show="topology.cloudPlatform === 'OPENSTACK'" ng-click="modifyTopology(topology)" data-toggle="collapse" data-target="#panel-create-topologies-collapse">
                                     <i class="fa fa-times fa-fw"></i><span> modify</span>
                                 </a>
                             </p>
 
-                            <div class="panel-body" ng-if="topology.cloudPlatform == 'OPENSTACK' ">
+                            <div class="panel-body" ng-if="topology.cloudPlatform === 'OPENSTACK' ">
                                 <div ng-include src="'tags/topology/openstacklist.tag'"></div>
+                            </div>
+                            <div class="panel-body" ng-if="topology.cloudPlatform === 'AWS' ">
+                                <div ng-include src="'tags/topology/awslist.tag'"></div>
+                            </div>
+                            <div class="panel-body" ng-if="topology.cloudPlatform === 'GCP' ">
+                                <div ng-include src="'tags/topology/gcplist.tag'"></div>
+                            </div>
+                            <div class="panel-body" ng-if="topology.cloudPlatform === 'AZURE_RM' ">
+                                <div ng-include src="'tags/topology/azurelist.tag'"></div>
                             </div>
 
                         </div>

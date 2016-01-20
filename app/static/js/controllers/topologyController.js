@@ -7,39 +7,108 @@ angular.module('uluwatuControllers').controller('topologyController', ['$scope',
 
         $rootScope.topologies = AccountTopology.query();
         $scope.openstackTopologyForm = {};
-        initializeOpenstackTemp();
+        $scope.awsTopologyForm = {};
+        $scope.azureTopologyForm = {};
+        $scope.gcpTopologyForm = {};
+        initializeTemps();
         $scope.showAlert = false;
         $scope.alertMessage = "";
-        $scope.openstackTopology = true;
+        $scope.openstackTopology = false;
+        $scope.azureTopology = false;
+        $scope.gcpTopology = false;
+        $scope.awsTopology = true;
         $scope.tmpMapping = {}
         $scope.modify = false
         $scope.modifyTopology = {}
 
-        $scope.createOpenstackTopologyRequest = function() {
-            $scope.openstackTopology = true;
+        function createTopologyRequest(type) {
+            if (type === 'OPENSTACK') {
+                $scope.createOpenstackTopologyRequest()
+            }
+            if (type === 'AWS') {
+                $scope.createAwsTopologyRequest()
+            }
+            if (type === 'GCP') {
+                $scope.createGcpTopologyRequest()
+            }
+            if (type === 'AZURE_RM') {
+                $scope.createAzureTopologyRequest()
+            }
         }
 
-        $scope.createOpenstackTopology = function() {
-            $scope.openstackTemp.cloudPlatform = 'OPENSTACK';
-            AccountTopology.save($scope.openstackTemp, function(result) {
-                handleOpenstackTopologySuccess(result)
+        $scope.createOpenstackTopologyRequest = function() {
+            $scope.openstackTopology = true;
+            $scope.azureTopology = false;
+            $scope.gcpTopology = false;
+            $scope.awsTopology = false;
+        }
+
+        $scope.createAwsTopologyRequest = function() {
+            $scope.openstackTopology = false;
+            $scope.azureTopology = false;
+            $scope.gcpTopology = false;
+            $scope.awsTopology = true;
+        }
+
+        $scope.createGcpTopologyRequest = function() {
+            $scope.openstackTopology = false;
+            $scope.azureTopology = false;
+            $scope.gcpTopology = true;
+            $scope.awsTopology = false;
+        }
+
+        $scope.createAzureTopologyRequest = function() {
+            $scope.openstackTopology = false;
+            $scope.azureTopology = true;
+            $scope.gcpTopology = false;
+            $scope.awsTopology = false;
+        }
+
+        $scope.createTopology = function(type) {
+            if (!$scope.modify) {
+                $scope.topologyTemp.cloudPlatform = type;
+            }
+            AccountTopology.save($scope.topologyTemp, function(result) {
+                handleTopologySuccess(result, $scope.topologyTemp)
             }, function(error) {
                 $scope.showError(error, $rootScope.msg.openstack_topology_failed);
                 $scope.showErrorMessageAlert();
             });
 
-            function handleOpenstackTopologySuccess(result) {
-                $scope.openstackTemp.id = result.id;
+            function handleTopologySuccess(result, localTopology) {
+                localTopology.id = result.id;
                 if (!$scope.modify) {
-                    $rootScope.topologies.push($scope.openstackTemp);
+                    $rootScope.topologies.push(localTopology);
                 }
-                initializeOpenstackTemp();
-                $scope.showSuccess($filter("format")($scope.modify ? $rootScope.msg.openstack_topology_modify_success : $rootScope.msg.openstack_topology_success, String(result.id)));
+                initializeTemps();
+                $scope.showSuccess($filter("format")(getCreateMessage(type, result.id)));
                 $scope.modify = false
-                $scope.openstackTopologyForm.$setPristine();
+                setAllFormPristine()
                 collapseCreateTopologyFormPanel();
                 $scope.unShowErrorMessageAlert()
             }
+        }
+
+        function getCreateMessage(type, id) {
+            if (type === 'OPENSTACK') {
+                return $filter("format")($scope.modify ? $rootScope.msg.openstack_topology_modify_success : $rootScope.msg.openstack_topology_success, String(id))
+            }
+            if (type === 'AWS') {
+                return $filter("format")($scope.modify ? $rootScope.msg.aws_topology_modify_success : $rootScope.msg.aws_topology_success, String(id))
+            }
+            if (type === 'GCP') {
+                return $filter("format")($scope.modify ? $rootScope.msg.gcp_topology_modify_success : $rootScope.msg.gcp_topology_success, String(id))
+            }
+            if (type === 'AZURE_RM') {
+                return $filter("format")($scope.modify ? $rootScope.msg.azure_topology_modify_success : $rootScope.msg.azure_topology_success, String(id))
+            }
+        }
+
+        function setAllFormPristine() {
+            $scope.openstackTopologyForm.$setPristine();
+            $scope.awsTopologyForm.$setPristine();
+            $scope.gcpTopologyForm.$setPristine();
+            $scope.azureTopologyForm.$setPristine();
         }
 
         $scope.deleteTopology = function(topology) {
@@ -54,13 +123,13 @@ angular.module('uluwatuControllers').controller('topologyController', ['$scope',
         }
 
         $scope.addMapping = function(form) {
-            $scope.openstackTemp.nodes[$scope.tmpMapping.hypervisor] = $scope.tmpMapping.rack
+            $scope.topologyTemp.nodes[$scope.tmpMapping.hypervisor] = $scope.tmpMapping.rack
             $scope.tmpMapping = {}
             form.$setPristine();
         }
 
         $scope.deleteMapping = function(hypervisor) {
-            delete $scope.openstackTemp.nodes[hypervisor]
+            delete $scope.topologyTemp.nodes[hypervisor]
         }
 
         $scope.deleteMappingFrom = function(topology, hypervisor) {
@@ -69,15 +138,16 @@ angular.module('uluwatuControllers').controller('topologyController', ['$scope',
 
         $scope.modifyTopology = function(topology) {
             $scope.modify = true
+            createTopologyRequest(topology.cloudPlatform)
             $scope.tmpModifyTopology = angular.copy(topology)
-            $scope.openstackTemp = topology
+            $scope.topologyTemp = topology
         }
 
         $scope.cancelModify = function() {
             $scope.modify = false;
-            if ($scope.tmpModifyTopology && $scope.openstackTemp.id) {
+            if ($scope.tmpModifyTopology && $scope.topologyTemp.id) {
                 var topology = $filter('filter')($rootScope.topologies, {
-                        id: $scope.openstackTemp.id
+                        id: $scope.topologyTemp.id
                     })[0],
                     indx = $rootScope.topologies.indexOf(topology);
                 if (indx > -1) {
@@ -85,7 +155,7 @@ angular.module('uluwatuControllers').controller('topologyController', ['$scope',
                 }
                 $scope.tmpModifyTopology = undefined
             }
-            initializeOpenstackTemp();
+            initializeTemps();
         }
 
         $scope.cleanupScope = function() {
@@ -108,7 +178,7 @@ angular.module('uluwatuControllers').controller('topologyController', ['$scope',
                         }
                     });
                     $scope.$apply(function() {
-                        $scope.openstackTemp.nodes = tmpMap
+                        $scope.topologyTemp.nodes = tmpMap
                     });
                 }
             });
@@ -121,10 +191,14 @@ angular.module('uluwatuControllers').controller('topologyController', ['$scope',
         }
 
 
-        function initializeOpenstackTemp() {
-            $scope.openstackTemp = {
+        function initializeTemps() {
+            $scope.topologyTemp = {
                 nodes: {}
             }
+        }
+
+        $scope.isAnyMappingSet = function() {
+            return Object.keys($scope.topologyTemp.nodes).length > 0
         }
 
         $scope.unShowErrorMessageAlert = function() {

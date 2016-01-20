@@ -2,7 +2,7 @@
     <label class="col-sm-3 control-label" for="selectClusterNetwork">{{msg.cluster_form_network_label}}</label>
     <div class="col-sm-8">
         <select class="form-control" id="selectClusterNetwork" ng-model="cluster.networkId" required>
-            <option ng-repeat="network in $root.networks | filter:{cloudPlatform: activeCredential.cloudPlatform} | orderBy:'name'" value="{{network.id}}">{{network.name}}</option>
+            <option ng-repeat="network in $root.networks | filter:filterByTopology | filter:{cloudPlatform: activeCredential.cloudPlatform} | orderBy:'name'" value="{{network.id}}">{{network.name}}</option>
         </select>
     </div>
 </div>
