@@ -26,6 +26,8 @@ import org.springframework.core.convert.ConversionService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
@@ -37,8 +39,6 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 
 public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Cluster> {
 
@@ -129,18 +129,6 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         // THEN
         assertEquals(1L, (long) result.getId());
         assertNotNull(result.getAmbariStackDetails());
-    }
-
-    @Test
-    public void testConvertWithGangliaComponent() throws IOException {
-        // GIVEN
-        mockAll();
-        given(instanceMetaData.getPublicIp()).willReturn("dummyPublicIp");
-        given(stackServiceComponentDescs.get(anyString())).willReturn(new StackServiceComponentDescriptor("GANGLIA_SERVER", "MASTER", 1, 1));
-        // WHEN
-        ClusterResponse result = underTest.convert(getSource());
-        // THEN
-        assertEquals("dummyPublicIp/ganglia", result.getServiceEndPoints().get("Ganglia"));
     }
 
     @Test

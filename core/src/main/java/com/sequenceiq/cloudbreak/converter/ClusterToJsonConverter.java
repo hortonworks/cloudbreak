@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
@@ -22,10 +25,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
-import com.sequenceiq.cloudbreak.service.network.ExposedService;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
 
@@ -114,18 +113,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                             String.format("%s:%s%s", next.getPublicIp(), port.getPort(), port.getExposedService().getPostFix()));
                 }
             }
-            if ("GANGLIA_SERVER".equals(componentDescriptor.getName())) {
-                result.put("Ganglia", String.format("%s/%s", next.getPublicIp(), "ganglia"));
-            }
         }
     }
 
-    private Optional<Port> getPortForService(ExposedService exposedService, List<Port> ports) {
-        for (Port port : ports) {
-            if (port.getExposedService().getServiceName().equals(exposedService.getServiceName())) {
-                return Optional.fromNullable(port);
-            }
-        }
-        return Optional.absent();
-    }
 }
