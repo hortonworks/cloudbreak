@@ -49,6 +49,8 @@ public class IntegrationTestApp implements CommandLineRunner {
     private int fullTestRegionIndex;
     @Value("${integrationtest.fulltest.regnum:-1}")
     private int fullTestRegionNumber;
+    @Value("${integrationtest.outputdir:.}")
+    private String outputDirectory;
 
     @Inject
     private TestNG testng;
@@ -63,6 +65,7 @@ public class IntegrationTestApp implements CommandLineRunner {
     public void run(String... args) throws Exception {
         testng.setSuiteThreadPoolSize(suiteThreadPoolSize);
         testng.setVerbose(2);
+        testng.setOutputDirectory(outputDirectory + "/test-output");
         testng.addListener(new ThreadLocalTestListener());
         testng.addListener(new HTMLReporter());
         testng.addListener(new JUnitXMLReporter());

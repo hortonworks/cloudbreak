@@ -14,7 +14,7 @@
         </discriminator>
         <sift>
             <appender name="FILE-${suite}" class="ch.qos.logback.core.FileAppender">
-                <file>suites_log/${suite}-${date}.log</file>
+                <file>${LOG_PATH}/suites_log/${suite}-${date}.log</file>
                 <append>true</append>
                 <layout class="ch.qos.logback.classic.PatternLayout">
                     <encoder>

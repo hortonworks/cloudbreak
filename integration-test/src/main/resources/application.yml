@@ -2,7 +2,14 @@ spring:
     freemarker:
         checkTemplateLocation: false
 
+# The logfiles will be created in this directory, LOG_PATH system property will be set and can be used in logback.xml
+# http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-logging.html#boot-features-logging-file-output
+logging:
+    path: ${integrationtest.outputdir}
+
 integrationtest:
+    outputdir: .
+
     # uaa properties
     uaa:
         server:
@@ -135,4 +142,3 @@ integrationtest:
         # Recipe test with cluster creation and upscale
         GCP_UP_RECIPE_TEST:
         - classpath:/testsuites/gcp/recipe/gcp-clustercreate-up.yaml
-
