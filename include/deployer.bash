@@ -3,8 +3,8 @@ shorten_function() {
   local max=25
   local context=5
   local word="$*"
-  
-  if [[ ${#word} -le ${max} ]]; then 
+
+  if [[ ${#word} -le ${max} ]]; then
       echo "${word}"
   else
       local keep=$(( ${#word} - (${max} - ${context} - 2) ))
@@ -236,7 +236,7 @@ deployer-regenerate() {
         mv docker-compose.yml docker-compose-${datetime}.yml
     fi
     compose-generate-yaml
-    
+
     if ! generate_uaa_check_diff; then
         info renaming: uaa.yml to: uaa-${datetime}.yml
         mv uaa.yml uaa-${datetime}.yml
@@ -350,6 +350,7 @@ main() {
         cmd-export-ns util "Util namespace"
         cmd-export util-cloudbreak-shell
         cmd-export util-cloudbreak-shell-quiet
+        cmd-export util-cloudbreak-shell-remote
         cmd-export util-token
         cmd-export util-local-dev
         cmd-export util-cleanup

@@ -202,6 +202,24 @@ util-cloudbreak-shell() {
     _cloudbreak-shell -it
 }
 
+util-cloudbreak-shell-remote(){
+    declare desc="Show CloudbreakShell run command"
+
+    cloudbreak-config
+
+    echo "If you want to run CloudbreakShell on your local machine then please copy and paste the next command:"
+    echo docker run -it \
+        --rm --name cloudbreak-shell \
+        -e CLOUDBREAK_ADDRESS=http://$PUBLIC_IP:8080 \
+        -e IDENTITY_ADDRESS=http://$PUBLIC_IP:8089 \
+        -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
+        -e SEQUENCEIQ_PASSWORD=$UAA_DEFAULT_USER_PW \
+        -w /data \
+        -v $PWD:/data \
+        sequenceiq/cb-shell:$DOCKER_TAG_CLOUDBREAK_SHELL
+
+}
+
 util-cloudbreak-shell-quiet() {
     declare desc="Starts a non-interactive CloudbreakShell, commands from stdin."
     _cloudbreak-shell -i
