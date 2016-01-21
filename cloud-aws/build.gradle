@@ -17,7 +17,6 @@ dependencies {
   compile project(':cloud-common')
   compile project(':cloud-reactor')
 
-  compile group: 'javax',                         name: 'javaee-api',                     version: javaEEApiVersion
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   compile group: 'commons-io',                    name: 'commons-io',                     version: '2.4'

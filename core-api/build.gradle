@@ -12,7 +12,6 @@ jar {
 
 dependencies {
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  compile group: 'javax',                         name: 'javaee-api',                     version: javaEEApiVersion
   compile group: 'io.swagger',                    name: 'swagger-annotations',            version: '1.5.6'
   compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
 
