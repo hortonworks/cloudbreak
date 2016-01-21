@@ -33,8 +33,8 @@ public class AzureTemplateCreationTest extends AbstractCloudbreakIntegrationTest
         // TODO publicInAccount
         TemplateRequest templateRequest = new TemplateRequest();
         templateRequest.setName(azureTemplateName);
-        templateRequest.setDescription("AZURE template for integration testing");
-        templateRequest.setCloudPlatform("AZURE");
+        templateRequest.setDescription("AZURE_RM template for integration testing");
+        templateRequest.setCloudPlatform("AZURE_RM");
         templateRequest.setInstanceType(azureVmType);
         templateRequest.setVolumeCount(Integer.valueOf(azureVolumeCount));
         templateRequest.setVolumeSize(Integer.valueOf(azureVolumeSize));
