@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.topology;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -12,9 +13,16 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.repository.NetworkRepository;
+import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
@@ -27,6 +35,15 @@ public class TopologyService {
 
     @Inject
     private TopologyRepository topologyRepository;
+
+    @Inject
+    private CredentialRepository credentialRepository;
+
+    @Inject
+    private TemplateRepository templateRepository;
+
+    @Inject
+    private NetworkRepository networkRepository;
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public Topology get(Long id) {
@@ -62,10 +79,17 @@ public class TopologyService {
 
     private void delete(Topology topology, CbUser user) {
         LOGGER.debug("Deleting topology. {} - {}", new Object[]{topology.getId(), topology.getName()});
-        Date now = new Date();
-        String terminatedName = topology.getName() + DELIMITER + now.getTime();
-        topology.setName(terminatedName);
-        topology.setDeleted(true);
-        topologyRepository.save(topology);
+        Set<Credential> credentials = credentialRepository.findByTopology(topology.getId());
+        Set<Template> templates = templateRepository.findByTopology(topology.getId());
+        Set<Network> networks = networkRepository.findByTopology(topology.getId());
+        if (credentials.isEmpty() && templates.isEmpty() && networks.isEmpty()) {
+            Date now = new Date();
+            String terminatedName = topology.getName() + DELIMITER + now.getTime();
+            topology.setName(terminatedName);
+            topology.setDeleted(true);
+            topologyRepository.save(topology);
+        } else {
+            throw new BadRequestException(String.format("Topology '%d' is in use, cannot be deleted.", topology.getId()));
+        }
     }
 }

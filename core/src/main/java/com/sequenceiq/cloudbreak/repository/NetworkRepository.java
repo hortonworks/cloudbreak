@@ -30,4 +30,6 @@ public interface NetworkRepository extends CrudRepository<Network, Long> {
     Set<Network> findAllInAccount(@Param("account") String account);
 
     Set<Network> findAllDefaultInAccount(@Param("account") String account);
+
+    Set<Network> findByTopology(@Param("topologyId") Long topologyId);
 }
