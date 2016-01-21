@@ -16,8 +16,6 @@ dependencies {
     compile project(':cloud-reactor-api')
     compile project(':core-api')
 
-
-    compile group: 'javax',                         name: 'javaee-api',                     version: javaEEApiVersion
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
     compile group: 'org.springframework',           name: 'spring-tx',                      version: springFrameworkVersion
     compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion

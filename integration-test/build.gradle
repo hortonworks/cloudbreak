@@ -24,7 +24,6 @@ dependencies {
     compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test', version: springBootVersion
     compile group:  'org.springframework',          name: 'spring-web',               version: springFrameworkVersion
     compile group:  'org.springframework',          name: 'spring-context-support',   version: springFrameworkVersion
-    compile group:  'javax',                        name: 'javaee-api',               version: javaEEApiVersion
     compile group:  'org.apache.velocity',          name: 'velocity',                 version: '1.7'
     compile group:  'com.jcraft',                   name: 'jsch',                     version: '0.1.53'
     compile group:  'org.testng',                   name: 'testng',                   version: '6.9.10'

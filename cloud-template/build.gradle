@@ -17,6 +17,5 @@ dependencies {
     compile project(':cloud-reactor')
 
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-    compile group: 'javax',                         name: 'javaee-api',                     version: javaEEApiVersion
 
 }
