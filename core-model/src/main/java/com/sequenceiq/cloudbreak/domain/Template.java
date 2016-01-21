@@ -25,6 +25,10 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 })
 @NamedQueries({
         @NamedQuery(
+                name = "Template.findByTopology",
+                query = "SELECT t FROM Template t "
+                        + "WHERE t.topology.id = :topologyId"),
+        @NamedQuery(
                 name = "Template.findForUser",
                 query = "SELECT t FROM Template t "
                         + "WHERE t.owner= :user AND deleted IS NOT TRUE "
