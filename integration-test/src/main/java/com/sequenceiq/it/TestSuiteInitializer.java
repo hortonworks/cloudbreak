@@ -8,14 +8,12 @@ import org.springframework.boot.test.ConfigFileApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.StringUtils;
-import org.testng.Assert;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
-import com.sequenceiq.it.util.RestUtil;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
@@ -52,9 +50,9 @@ public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
         uaaUser = getString(uaaUser, defaultUaaUser);
         uaaPassword = getString(uaaPassword, defaultUaaPassword);
 
-        String accessToken = RestUtil.getToken(uaaServer, uaaUser, uaaPassword);
-        Assert.assertNotNull(accessToken, "Access token cannot be null.");
-        itContext.putContextParam(IntegrationTestContext.AUTH_TOKEN, accessToken);
+        itContext.putContextParam(IntegrationTestContext.IDENTITY_URL, uaaServer);
+        itContext.putContextParam(IntegrationTestContext.AUTH_USER, uaaUser);
+        itContext.putContextParam(IntegrationTestContext.AUTH_PASSWORD, uaaPassword);
     }
 
     private String getString(String paramValue, String defaultValue) {

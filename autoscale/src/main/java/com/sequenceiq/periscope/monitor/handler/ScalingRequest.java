@@ -1,8 +1,9 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -11,11 +12,11 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.ScalingStatus;
 import com.sequenceiq.periscope.log.MDCBuilder;
-import com.sequenceiq.periscope.model.CloudbreakClient;
 import com.sequenceiq.periscope.service.HistoryService;
 
 @Component("ScalingRequest")
@@ -28,9 +29,9 @@ public class ScalingRequest implements Runnable {
     private final Cluster cluster;
     private final ScalingPolicy policy;
 
-    @Autowired
+    @Inject
     private CloudbreakClient cloudbreakClient;
-    @Autowired
+    @Inject
     private HistoryService historyService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {

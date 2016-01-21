@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -19,12 +20,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.AwsInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.AwsVolumeType;
 import com.sequenceiq.cloudbreak.shell.completion.AzureInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.GcpInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.GcpVolumeType;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -37,11 +38,11 @@ public class TemplateCommands implements CommandMarker {
     public static final int VOLUME_COUNT_MAX = 8;
     public static final int VOLUME_SIZE_MIN = 1;
     public static final int VOLUME_SIZE_MAX = 1024;
-    @Autowired
+    @Inject
     private CloudbreakContext context;
-    @Autowired
+    @Inject
     private CloudbreakClient cloudbreakClient;
-    @Autowired
+    @Inject
     private ResponseTransformer responseTransformer;
 
     @CliAvailabilityIndicator(value = "template list")

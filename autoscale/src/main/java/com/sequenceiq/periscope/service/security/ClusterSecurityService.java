@@ -1,24 +1,25 @@
 package com.sequenceiq.periscope.service.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.AmbariStack;
-import com.sequenceiq.periscope.model.CloudbreakClient;
 
 @Service
 public class ClusterSecurityService {
 
-    @Autowired
-    private CloudbreakClient cloudbreakClient;
+    @Inject
+    private CloudbreakClient cloudbreakClient;;
 
-    @Autowired
+    @Inject
     private TlsSecurityService tlsSecurityService;
 
     public boolean hasAccess(PeriscopeUser user, Ambari ambari) {

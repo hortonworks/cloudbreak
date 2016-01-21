@@ -14,7 +14,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 
 public class TemplateCommandsTest {
     private static final String TEMPLATE_ID = "50";

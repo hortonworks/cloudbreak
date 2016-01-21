@@ -10,18 +10,18 @@ import static org.mockito.Mockito.doNothing;
 
 import java.io.File;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 
 public class RecipeCommandsTest {

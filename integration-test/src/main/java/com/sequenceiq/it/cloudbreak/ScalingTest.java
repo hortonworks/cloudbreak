@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.model.CloudbreakClient;
 
 public class ScalingTest extends AbstractCloudbreakIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingTest.class);

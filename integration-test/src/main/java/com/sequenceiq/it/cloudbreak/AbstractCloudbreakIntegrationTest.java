@@ -20,9 +20,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
-import com.sequenceiq.it.cloudbreak.model.CloudbreakClient;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)

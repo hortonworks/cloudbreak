@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.shell.configuration;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +16,10 @@ import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.plugin.HistoryFileNameProvider;
 import org.springframework.shell.plugin.support.DefaultHistoryFileNameProvider;
 
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.api.exception.SSLConnectionException;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 /**
@@ -26,6 +28,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 @Configuration
 public class ShellConfiguration {
 
+    private static final String CLIENT_ID = "cloudbreak_shell";
 
     @Value("${cloudbreak.address:https://cloudbreak-api.sequenceiq.com}")
     private String cloudbreakAddress;
@@ -39,22 +42,35 @@ public class ShellConfiguration {
     @Value("${sequenceiq.password:}")
     private String password;
 
+    @Value("${shell.debug:false}")
+    private boolean debug;
+
+    @Value("${cert.validation:true}")
+    private boolean certificateValidation;
+
     @Value("${cmdfile:}")
     private String cmdFile;
 
     @Bean
-    CloudbreakClient cloudbreakClient() throws Exception {
-        return new CloudbreakClient(cloudbreakAddress, identityServerAddress, user, password);
+    static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
+
+    @Bean
+    public CloudbreakClient cloudbreakClient() {
+        try {
+            return new CloudbreakClientBuilder(cloudbreakAddress, identityServerAddress, CLIENT_ID).withCredential(user, password).
+                    withDebug(debug).withCertificateValidation(certificateValidation).build();
+        } catch (SSLConnectionException e) {
+            System.out.println(String.format("%s Try to start the shell with --shell.cert.validation=false parameter.", e.getMessage()));
+            System.exit(1);
+        }
+        return null;
     }
 
     @Bean
     ResponseTransformer responseTransformer() {
         return new ResponseTransformer();
-    }
-
-    @Bean
-    static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
-        return new PropertySourcesPlaceholderConfigurer();
     }
 
     @Bean

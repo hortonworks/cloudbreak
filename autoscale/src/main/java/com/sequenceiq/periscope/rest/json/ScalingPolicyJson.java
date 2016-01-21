@@ -3,7 +3,6 @@ package com.sequenceiq.periscope.rest.json;
 import javax.validation.constraints.Pattern;
 
 import com.sequenceiq.periscope.domain.AdjustmentType;
-import com.sun.istack.NotNull;
 
 public class ScalingPolicyJson implements Json {
 
@@ -14,7 +13,7 @@ public class ScalingPolicyJson implements Json {
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
     private long alertId;
-    @NotNull
+
     private String hostGroup;
 
     public Long getId() {

@@ -25,8 +25,8 @@ import com.jcraft.jsch.Session;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.model.CloudbreakClient;
 
 public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
 

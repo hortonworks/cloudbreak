@@ -29,10 +29,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.cloudbreak.config.ITProps;
-import com.sequenceiq.it.cloudbreak.model.CloudbreakClient;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
@@ -70,17 +70,21 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     }
 
     @BeforeSuite(dependsOnMethods = "initContext")
-    @Parameters({ "cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName",
+    @Parameters({"cloudbreakServer", "cloudProvider", "credentialName", "instanceGroups", "hostGroups", "blueprintName",
             "stackName", "networkName", "securityGroupName" })
     public void initCloudbreakSuite(@Optional("") String cloudbreakServer, @Optional("") String cloudProvider, @Optional("") String credentialName,
-                                    @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName,
-                                    @Optional("") String stackName, @Optional("") String networkName, @Optional("") String securityGroupName) throws Exception {
+            @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName,
+            @Optional("") String stackName, @Optional("") String networkName, @Optional("") String securityGroupName) throws Exception {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
-        String token = itContext.getContextParam(IntegrationTestContext.AUTH_TOKEN);
+        String identity = itContext.getContextParam(IntegrationTestContext.IDENTITY_URL);
+        String user = itContext.getContextParam(IntegrationTestContext.AUTH_USER);
+        String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);
 
-        itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, new CloudbreakClient(cloudbreakServer, token));
+        CloudbreakClient cloudbreakClient = new CloudbreakClient.CloudbreakClientBuilder(cloudbreakServer, identity, "cloudbreak_shell")
+                .withCertificateValidation(false).withCredential(user, password).build();
+        itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
         putBlueprintToContextIfExist(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).blueprintEndpoint(), blueprintName);
         putNetworkToContext(

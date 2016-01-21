@@ -15,9 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -27,7 +28,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -37,11 +38,11 @@ public class CredentialCommands implements CommandMarker {
 
     private List<Map> maps = new ArrayList<>();
 
-    @Autowired
+    @Inject
     private CloudbreakContext context;
-    @Autowired
+    @Inject
     private CloudbreakClient cloudbreakClient;
-    @Autowired
+    @Inject
     private ResponseTransformer responseTransformer;
 
     @CliAvailabilityIndicator(value = "credential list")

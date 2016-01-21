@@ -11,10 +11,17 @@ jar {
 }
 
 dependencies {
-  compile group: 'javax.ws.rs',                   name: 'javax.ws.rs-api',                version: '2.0.1'
+  compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'javax',                         name: 'javaee-api',                     version: javaEEApiVersion
   compile group: 'io.swagger',                    name: 'swagger-annotations',            version: '1.5.6'
   compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
+
+  compile group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'
+  compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+
+  compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
   compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
   compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
 }

@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -15,10 +16,10 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.primitives.Longs;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
@@ -26,9 +27,9 @@ import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 @Component
 public class InstanceGroupCommands implements CommandMarker {
 
-    @Autowired
+    @Inject
     private CloudbreakContext context;
-    @Autowired
+    @Inject
     private CloudbreakClient cloudbreakClient;
 
     @CliAvailabilityIndicator(value = "instancegroup configure")

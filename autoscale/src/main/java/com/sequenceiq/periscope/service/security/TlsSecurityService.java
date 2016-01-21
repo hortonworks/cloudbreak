@@ -7,15 +7,16 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
-import com.sequenceiq.periscope.model.CloudbreakClient;
 import com.sequenceiq.periscope.model.TlsConfiguration;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 
@@ -36,9 +37,9 @@ public class TlsSecurityService {
     @Value("#{'${periscope.cert.dir:" + CERT_DIR + "}' + '/' + '${periscope.tls.private.key.file:client-key.pem}'}")
     private String clientPrivateKeyName;
 
-    @Autowired
+    @Inject
     private CloudbreakClient cloudbreakClient;
-    @Autowired
+    @Inject
     private SecurityConfigRepository securityConfigRepository;
 
     public SecurityConfig prepareSecurityConfig(Long stackId) {

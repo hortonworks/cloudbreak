@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -27,12 +28,12 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
 import com.sequenceiq.cloudbreak.shell.exception.ValidationException;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
@@ -42,11 +43,11 @@ import com.sequenceiq.cloudbreak.shell.util.MessageUtil;
 @Component
 public class StackCommands implements CommandMarker {
 
-    @Autowired
+    @Inject
     private CloudbreakContext context;
-    @Autowired
+    @Inject
     private CloudbreakClient cloudbreakClient;
-    @Autowired
+    @Inject
     private ResponseTransformer responseTransformer;
 
     @CliAvailabilityIndicator(value = "stack list")
