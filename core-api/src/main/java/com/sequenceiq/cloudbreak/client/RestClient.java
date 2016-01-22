@@ -51,7 +51,7 @@ public class RestClient {
     }
 
     private static Client constructClient(ConfigKey configKey) {
-        LOGGER.info("Contructing jax rs client: {}", configKey);
+        LOGGER.info("Constructing jax rs client: {}", configKey);
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
 

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
@@ -110,6 +111,10 @@ public class GcpProvisionSetup implements Setup {
     @Override
     public void prerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         LOGGER.debug("setup has been executed");
+    }
+
+    @Override
+    public void validateFileSystem(FileSystem fileSystem) throws Exception {
     }
 
     private boolean containsSpecificImage(ImageList imageList, String imageUrl) {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
@@ -40,5 +41,13 @@ public interface Setup {
      * @param persistenceNotifier  if a resource has been created during this prerequisit check then the Cloud provider can persist them to Cloudbreak's
      */
     void prerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier);
+
+    /**
+     * Hadoop supports multiple filesystems instead of HDFS. These filesystems can be validated before cluster creation.
+     *
+     * @param fileSystem filesystem to validate
+     * @throws Exception exception is thrown when the filesystem does not meet the desired requirements
+     */
+    void validateFileSystem(FileSystem fileSystem) throws Exception;
 
 }

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -84,6 +85,10 @@ public class AwsSetup implements Setup {
         }
 
         LOGGER.debug("setup has been executed");
+    }
+
+    @Override
+    public void validateFileSystem(FileSystem fileSystem) throws Exception {
     }
 
     public boolean isExistingVPC(Network network) {

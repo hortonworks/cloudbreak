@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud;
 
 /**
- * In order to inegrate a Cloud provider into the Cloudbreak this interface needs to be implemented.  Loading of the Cloud provider specific code
+ * In order to integrate a Cloud provider into the Cloudbreak this interface needs to be implemented.  Loading of the Cloud provider specific code
  * is automatically done by Cloudbreak, if the class which implements this interface is on the classpath. Cloud providers implementations are
  * stored in a map in Cloudbreak and the {@link CloudPlatformAware} is used as key to identify the different implementations.
  */
