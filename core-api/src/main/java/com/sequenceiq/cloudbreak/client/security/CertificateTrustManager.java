@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.client.security;
 
-import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -8,12 +7,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509ExtendedTrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,30 +39,10 @@ public class CertificateTrustManager {
 
     public static SSLContext sslContext() {
         // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = new TrustManager[]{new X509ExtendedTrustManager() {
+        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
                 return null;
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] x509Certificates, String s, Socket socket) throws CertificateException {
-                // Trust everything
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] x509Certificates, String s, Socket socket) throws CertificateException {
-                // Trust everything
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) throws CertificateException {
-                // Trust everything
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) throws CertificateException {
-                // Trust everything
             }
 
             @Override
@@ -82,7 +59,7 @@ public class CertificateTrustManager {
         try {
             // Install the all-trusting trust manager
             SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(new KeyManager[0], trustAllCerts, new SecureRandom());
+            sc.init(null, trustAllCerts, new SecureRandom());
             LOGGER.warn("Trust all SSL cerificates has been installed");
             return sc;
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
