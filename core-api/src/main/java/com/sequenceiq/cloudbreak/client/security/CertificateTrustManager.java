@@ -42,16 +42,19 @@ public class CertificateTrustManager {
         TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
+                LOGGER.info("accept all issuer");
                 return null;
             }
 
             @Override
             public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                LOGGER.info("checkClientTrusted");
                 // Trust everything
             }
 
             @Override
             public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                LOGGER.info("checkServerTrusted");
                 // Trust everything
             }
         }
