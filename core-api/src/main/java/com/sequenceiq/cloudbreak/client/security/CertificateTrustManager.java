@@ -1,17 +1,15 @@
 package com.sequenceiq.cloudbreak.client.security;
 
 import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.glassfish.jersey.SslConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,21 +19,6 @@ public class CertificateTrustManager {
 
     private CertificateTrustManager() {
     }
-
-    public static HostnameVerifier hostnameVerifier() {
-
-        // Do not verify host names
-        return new HostnameVerifier() {
-
-            @Override
-            public boolean verify(String hostname, SSLSession sslSession) {
-                LOGGER.info("verify hostname: {}", hostname);
-                return true;
-            }
-        };
-
-    }
-
 
     public static SSLContext sslContext() {
         // Create a trust manager that does not validate certificate chains
@@ -61,11 +44,11 @@ public class CertificateTrustManager {
         };
         try {
             // Install the all-trusting trust manager
-            SSLContext sc = SSLContext.getInstance("TLS");
+            SSLContext sc = SslConfigurator.newInstance().createSSLContext();
             sc.init(null, trustAllCerts, new SecureRandom());
             LOGGER.warn("Trust all SSL cerificates has been installed");
             return sc;
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        } catch (KeyManagementException e) {
             LOGGER.error(e.getMessage(), e);
             throw new RuntimeException("F", e);
         }

@@ -23,6 +23,10 @@ dependencies {
   compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
   compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
   compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
+  compile group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: '4.5.1'
+  compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
+
+
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
