@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.client.config;
 
 
 public class ConfigKey {
+
     private boolean secure;
     private boolean debug;
 

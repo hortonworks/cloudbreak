@@ -79,6 +79,8 @@ public class CloudbreakClient {
         this.password = password;
         this.tokenCache = configTokenCache();
         refresh();
+        LOGGER.info("CloudbreakClient has been created with user / pass. cloudbreak: {}, identity: {}, clientId: {}, configKey: {}", cloudbreakAddress,
+                identityServerAddress, clientId, configKey);
     }
 
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String secret, String clientId, ConfigKey configKey) {
@@ -88,6 +90,8 @@ public class CloudbreakClient {
         this.secret = secret;
         this.tokenCache = configTokenCache();
         refresh();
+        LOGGER.info("CloudbreakClient has been created with a secret. cloudbreak: {}, identity: {}, clientId: {}, configKey: {}", cloudbreakAddress,
+                identityServerAddress, clientId, configKey);
     }
 
     private ExpiringMap<String, String> configTokenCache() {

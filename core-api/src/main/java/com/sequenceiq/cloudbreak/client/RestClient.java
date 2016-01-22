@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -11,40 +12,27 @@ import org.glassfish.jersey.filter.LoggingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.exception.RestClientInitializationException;
 import com.sequenceiq.cloudbreak.client.config.ConfigKey;
 import com.sequenceiq.cloudbreak.client.security.CertificateTrustManager;
-
-import jersey.repackaged.com.google.common.cache.CacheBuilder;
-import jersey.repackaged.com.google.common.cache.CacheLoader;
-import jersey.repackaged.com.google.common.cache.LoadingCache;
 
 public class RestClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestClient.class);
 
-    private static LoadingCache<ConfigKey, Client> clients;
+    private static ConcurrentMap<ConfigKey, Client> clients = new ConcurrentHashMap<>();
 
     private RestClient() {
     }
 
     static synchronized Client get(ConfigKey configKey) {
-        try {
-
-            if (clients == null) {
-                clients = CacheBuilder.newBuilder()
-                        .build(
-                                new CacheLoader<ConfigKey, Client>() {
-                                    public Client load(ConfigKey key) {
-                                        return constructClient(key);
-                                    }
-                                });
-            }
-
-            return clients.get(configKey);
-        } catch (ExecutionException e) {
-            throw new RestClientInitializationException("Failed to setup RestClient", e);
+        Client client = clients.get(configKey);
+        if (client == null) {
+            client = constructClient(configKey);
+            clients.put(configKey, client);
         }
+        LOGGER.info("RestClient cache size: {}, key: {}, fetched client: {}", clients.size(), configKey, client);
+        return client;
+
     }
 
     private static Client constructClient(ConfigKey configKey) {

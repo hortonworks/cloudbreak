@@ -30,16 +30,4 @@
         <appender-ref ref="SUITE_BASED" />
     </root>
 
-    <logger name="groovyx.net.http" level="DEBUG" additivity="false">
-        <appender-ref ref="SUITE_BASED" />
-    </logger>
-    <logger name="org.apache.http" level="DEBUG" additivity="false">
-        <appender-ref ref="SUITE_BASED" />
-    </logger>
-    <logger name="org.apache.http.headers" level="DEBUG" additivity="false">
-        <appender-ref ref="SUITE_BASED" />
-    </logger>
-    <logger name="org.apache.http.wire" level="DEBUG" additivity="false">
-        <appender-ref ref="SUITE_BASED" />
-    </logger>
 </configuration>

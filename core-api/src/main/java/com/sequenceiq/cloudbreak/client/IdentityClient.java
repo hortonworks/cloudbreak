@@ -35,11 +35,11 @@ public class IdentityClient {
 
     private final String clientId;
 
-
     public IdentityClient(String identityServerAddress, String clientId, ConfigKey configKey) {
         this.identityServerAddress = identityServerAddress;
         this.clientId = clientId;
         this.client = RestClient.get(configKey);
+        LOGGER.info("IdentityClient has been created. identity: {}, clientId: {}, configKey: {}", identityServerAddress, clientId, configKey);
     }
 
     public AccessToken getToken(String user, String password) {

@@ -83,7 +83,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);
 
         CloudbreakClient cloudbreakClient = new CloudbreakClient.CloudbreakClientBuilder(cloudbreakServer, identity, "cloudbreak_shell")
-                .withCertificateValidation(false).withCredential(user, password).build();
+                .withCertificateValidation(false).withDebug(true).withCredential(user, password).build();
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
         putBlueprintToContextIfExist(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).blueprintEndpoint(), blueprintName);
