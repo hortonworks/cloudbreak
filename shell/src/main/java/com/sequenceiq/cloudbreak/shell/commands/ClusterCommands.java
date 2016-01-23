@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
+import com.sequenceiq.cloudbreak.shell.util.CloudbreakUtil;
 import com.sequenceiq.cloudbreak.shell.util.MessageUtil;
 
 @Component
@@ -41,6 +43,8 @@ public class ClusterCommands implements CommandMarker {
     private CloudbreakClient cloudbreakClient;
     @Inject
     private ResponseTransformer responseTransformer;
+    @Inject
+    private CloudbreakUtil cloudbreakUtil;
 
     @CliAvailabilityIndicator(value = "cluster create")
     public boolean isClusterCreateCommandAvailable() {
@@ -164,18 +168,6 @@ public class ClusterCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "cluster show", help = "Shows the cluster by stack id")
-    public Object showCluster() {
-        try {
-            ClusterResponse clusterResponse = cloudbreakClient.clusterEndpoint().get(Long.valueOf(context.getStackId()));
-            return renderSingleMap(responseTransformer.transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
-        } catch (IndexOutOfBoundsException ex) {
-            return "There was no cluster for this account.";
-        } catch (Exception ex) {
-            return ex.toString();
-        }
-    }
-
     @CliCommand(value = "cluster create", help = "Create a new cluster based on a blueprint and optionally a recipe")
     public String createCluster(
             @CliOption(key = "userName", mandatory = false, unspecifiedDefaultValue = "admin", help = "Username of the Ambari server") String userName,
@@ -193,8 +185,8 @@ public class ClusterCommands implements CommandMarker {
                     help = "Kerberos security status") Boolean enableSecurity,
             @CliOption(key = "kerberosMasterKey", mandatory = false, specifiedDefaultValue = "key", help = "Kerberos mater key") String kerberosMasterKey,
             @CliOption(key = "kerberosAdmin", mandatory = false, specifiedDefaultValue = "admin", help = "Kerberos admin name") String kerberosAdmin,
-            @CliOption(key = "kerberosPassword", mandatory = false, specifiedDefaultValue = "admin", help = "Kerberos admin password") String kerberosPassword
-    ) {
+            @CliOption(key = "kerberosPassword", mandatory = false, specifiedDefaultValue = "admin", help = "Kerberos admin password") String kerberosPassword,
+            @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             Set<HostGroupJson> hostGroupList = new HashSet<>();
             for (Map<String, Object> hostGroupListEntity : context.getHostGroups().values()) {
@@ -204,6 +196,7 @@ public class ClusterCommands implements CommandMarker {
                 hostGroupJson.setRecipeIds((Set<Long>) hostGroupListEntity.values().iterator().next());
                 hostGroupList.add(hostGroupJson);
             }
+            wait = wait == null ? false : wait;
             ClusterRequest clusterRequest = new ClusterRequest();
             clusterRequest.setName(context.getStackName());
             clusterRequest.setDescription(description);
@@ -239,7 +232,8 @@ public class ClusterCommands implements CommandMarker {
             cloudbreakClient.clusterEndpoint().post(Long.valueOf(context.getStackId()), clusterRequest);
             context.setHint(Hints.NONE);
             context.resetFileSystemConfiguration();
-            return "Cluster creation started";
+            return wait ? cloudbreakUtil.waitAndCheckClusterStatus(Long.valueOf(context.getStackId()), Status.AVAILABLE.name())
+                    : "Cluster creation started";
         } catch (Exception ex) {
             return ex.toString();
         }

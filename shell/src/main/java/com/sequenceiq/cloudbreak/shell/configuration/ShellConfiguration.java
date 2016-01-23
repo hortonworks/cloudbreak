@@ -95,7 +95,7 @@ public class ShellConfiguration {
     }
 
     @Bean
-    ObjectMapper getObjectMapper() {
+    ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
 

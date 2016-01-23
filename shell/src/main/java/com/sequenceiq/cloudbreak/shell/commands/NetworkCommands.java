@@ -72,20 +72,21 @@ public class NetworkCommands implements CommandMarker {
             networkJson.setCloudPlatform("AWS");
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put("vpcID", vpcId);
-            parameters.put("internetGatewayID", internetGatewayId);
+            parameters.put("vpcId", vpcId);
+            parameters.put("internetGatewayId", internetGatewayId);
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
 
             IdJson id;
-            if (publicInAccount == null || !publicInAccount) {
-                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
-            } else {
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
+            if (publicInAccount) {
                 id = cloudbreakClient.networkEndpoint().postPublic(networkJson);
+            } else {
+                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), "AWS");
-            return String.format(CREATE_SUCCESS_MSG, id);
+            return String.format(CREATE_SUCCESS_MSG, id.getId());
         } catch (Exception ex) {
             return ex.toString();
         }
@@ -104,7 +105,7 @@ public class NetworkCommands implements CommandMarker {
             networkJson.setName(name);
             networkJson.setDescription(description);
             networkJson.setPublicInAccount(publicInAccount == null ? false : publicInAccount);
-            networkJson.setCloudPlatform("AWS");
+            networkJson.setCloudPlatform("AZURE_RM");
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("addressPrefix", addressPrefix);
@@ -113,10 +114,11 @@ public class NetworkCommands implements CommandMarker {
             networkJson.setSubnetCIDR(subnet);
 
             IdJson id;
-            if (publicInAccount == null || !publicInAccount) {
-                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
-            } else {
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
+            if (publicInAccount) {
                 id = cloudbreakClient.networkEndpoint().postPublic(networkJson);
+            } else {
+                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), "AZURE_RM");
             return String.format(CREATE_SUCCESS_MSG, id.getId());
@@ -137,7 +139,7 @@ public class NetworkCommands implements CommandMarker {
             networkJson.setName(name);
             networkJson.setDescription(description);
             networkJson.setPublicInAccount(publicInAccount == null ? false : publicInAccount);
-            networkJson.setCloudPlatform("AWS");
+            networkJson.setCloudPlatform("GCP");
 
             Map<String, Object> parameters = new HashMap<>();
 
@@ -145,10 +147,11 @@ public class NetworkCommands implements CommandMarker {
             networkJson.setSubnetCIDR(subnet);
 
             IdJson id;
-            if (publicInAccount == null || !publicInAccount) {
-                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
-            } else {
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
+            if (publicInAccount) {
                 id = cloudbreakClient.networkEndpoint().postPublic(networkJson);
+            } else {
+                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), "GCP");
             return String.format(CREATE_SUCCESS_MSG, id.getId());
@@ -170,19 +173,20 @@ public class NetworkCommands implements CommandMarker {
             networkJson.setName(name);
             networkJson.setDescription(description);
             networkJson.setPublicInAccount(publicInAccount == null ? false : publicInAccount);
-            networkJson.setCloudPlatform("AWS");
+            networkJson.setCloudPlatform("OPENSTACK");
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put("publicNetID", publicNetID);
+            parameters.put("publicNetId", publicNetID);
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
 
             IdJson id;
-            if (publicInAccount == null || !publicInAccount) {
-                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
-            } else {
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
+            if (publicInAccount) {
                 id = cloudbreakClient.networkEndpoint().postPublic(networkJson);
+            } else {
+                id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), "OPENSTACK");
             return String.format(CREATE_SUCCESS_MSG, id.getId());
@@ -256,22 +260,6 @@ public class NetworkCommands implements CommandMarker {
         } catch (Exception ex) {
             return ex.getMessage();
         }
-    }
-
-    private Map<String, String> getNetworkFieldsAsSingleStringMap(Map<String, Object> networkFields) {
-        Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, Object> networkField : networkFields.entrySet()) {
-            if ("parameters".equals(networkField.getKey())) {
-                for (Map.Entry<String, Object> parameter : ((Map<String, Object>) networkField.getValue()).entrySet()) {
-                    if (parameter.getValue() != null) {
-                        result.put(parameter.getKey(), parameter.getValue().toString());
-                    }
-                }
-            } else {
-                result.put(networkField.getKey(), networkField.getValue().toString());
-            }
-        }
-        return result;
     }
 
     private void createHintAndAddNetworkToContext(String id, String provider) throws Exception {
