@@ -90,6 +90,7 @@ public class SecurityGroupCommands implements CommandMarker {
             }
 
             securityGroupJson.setSecurityRules(securityRuleJsonList);
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
 
             if (publicInAccount) {
                 id = cloudbreakClient.securityGroupEndpoint().postPublic(securityGroupJson);

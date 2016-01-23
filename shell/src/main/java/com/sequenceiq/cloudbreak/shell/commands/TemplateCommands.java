@@ -85,6 +85,7 @@ public class TemplateCommands implements CommandMarker {
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description
     ) {
         try {
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (volumeCount < VOLUME_COUNT_MIN || volumeCount > VOLUME_COUNT_MAX) {
                 return "volumeCount has to be between 1 and 8.";
             }
@@ -100,7 +101,7 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setVolumeCount(volumeCount);
             templateRequest.setVolumeSize(volumeSize);
 
-            if (publicInAccount(publicInAccount)) {
+            if (publicInAccount) {
                 id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
             } else {
                 id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
@@ -126,6 +127,7 @@ public class TemplateCommands implements CommandMarker {
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description
     ) {
         try {
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (volumeCount < VOLUME_COUNT_MIN || volumeCount > VOLUME_COUNT_MAX) {
                 return "volumeCount has to be between 1 and 8.";
             }
@@ -148,7 +150,7 @@ public class TemplateCommands implements CommandMarker {
             params.put("encrypted", encrypted == null ? false : encrypted);
             templateRequest.setParameters(params);
 
-            if (publicInAccount(publicInAccount)) {
+            if (publicInAccount) {
                 id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
             } else {
                 id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
@@ -174,6 +176,7 @@ public class TemplateCommands implements CommandMarker {
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description
     ) {
+        publicInAccount = publicInAccount == null ? false : publicInAccount;
         if (volumeCount < VOLUME_COUNT_MIN || volumeCount > VOLUME_COUNT_MAX) {
             return "volumeCount has to be between 1 and 8.";
         }
@@ -190,7 +193,7 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setVolumeCount(volumeCount);
             templateRequest.setVolumeSize(volumeSize);
 
-            if (publicInAccount(publicInAccount)) {
+            if (publicInAccount) {
                 id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
             } else {
                 id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
@@ -212,6 +215,7 @@ public class TemplateCommands implements CommandMarker {
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description
     ) {
+        publicInAccount = publicInAccount == null ? false : publicInAccount;
         if (volumeCount < VOLUME_COUNT_MIN || volumeCount > VOLUME_COUNT_MAX) {
             return "volumeCount has to be between 1 and 8.";
         }
@@ -229,7 +233,7 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setVolumeSize(volumeSize);
             templateRequest.setVolumeType(volumeType == null ? "pd-standard" : volumeType.getName());
 
-            if (publicInAccount(publicInAccount)) {
+            if (publicInAccount) {
                 id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
             } else {
                 id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
@@ -240,11 +244,6 @@ public class TemplateCommands implements CommandMarker {
             return ex.toString();
         }
     }
-
-    private boolean publicInAccount(Boolean publicInAccount) {
-        return publicInAccount == null ? false : publicInAccount;
-    }
-
 
     @CliCommand(value = "template show", help = "Shows the template by its id or name")
     public Object showTemplate(

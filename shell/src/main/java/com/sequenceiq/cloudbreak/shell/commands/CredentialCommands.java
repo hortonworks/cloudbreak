@@ -219,6 +219,7 @@ public class CredentialCommands implements CommandMarker {
             credentialRequest.setParameters(parameters);
 
             IdJson idJson;
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
                 idJson = cloudbreakClient.credentialEndpoint().postPublic(credentialRequest);
             } else {
@@ -271,6 +272,7 @@ public class CredentialCommands implements CommandMarker {
             credentialRequest.setParameters(parameters);
 
             IdJson id;
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
                 id = cloudbreakClient.credentialEndpoint().postPublic(credentialRequest);
             } else {
@@ -337,6 +339,7 @@ public class CredentialCommands implements CommandMarker {
             credentialRequest.setParameters(parameters);
 
             IdJson id;
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
                 id = cloudbreakClient.credentialEndpoint().postPublic(credentialRequest);
             } else {
@@ -409,6 +412,7 @@ public class CredentialCommands implements CommandMarker {
             credentialRequest.setParameters(parameters);
 
             IdJson id;
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
                 id = cloudbreakClient.credentialEndpoint().postPublic(credentialRequest);
             } else {

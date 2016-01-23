@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.shell.commands;
 
+import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderMultiValueMap;
 import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderSingleMap;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
@@ -23,9 +25,11 @@ import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -37,7 +41,9 @@ import com.sequenceiq.cloudbreak.shell.exception.ValidationException;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
+import com.sequenceiq.cloudbreak.shell.util.CloudbreakUtil;
 import com.sequenceiq.cloudbreak.shell.util.MessageUtil;
 
 @Component
@@ -49,6 +55,10 @@ public class StackCommands implements CommandMarker {
     private CloudbreakClient cloudbreakClient;
     @Inject
     private ResponseTransformer responseTransformer;
+    @Inject
+    private CloudbreakUtil cloudbreakUtil;
+    @Inject
+    private ObjectMapper objectMapper;
 
     @CliAvailabilityIndicator(value = "stack list")
     public boolean isStackListCommandAvailable() {
@@ -72,7 +82,7 @@ public class StackCommands implements CommandMarker {
         return context.isStackAvailable();
     }
 
-    @CliAvailabilityIndicator(value = "stack show")
+    @CliAvailabilityIndicator({ "stack show", "stack metadata" })
     public boolean isStackShowCommandAvailable() {
         return true;
     }
@@ -136,7 +146,8 @@ public class StackCommands implements CommandMarker {
             @CliOption(key = "threshold", mandatory = false, help = "threshold of failure") Long threshold,
             @CliOption(key = "diskPerStorage", mandatory = false, help = "disk per Storage Account on Azure") Integer diskPerStorage,
             @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
-            @CliOption(key = "dedicatedInstances", mandatory = false, help = "request dedicated instances on AWS") Boolean dedicatedInstances) {
+            @CliOption(key = "dedicatedInstances", mandatory = false, help = "request dedicated instances on AWS") Boolean dedicatedInstances,
+            @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             validateNetwork();
             validateSecurityGroup();
@@ -148,6 +159,8 @@ public class StackCommands implements CommandMarker {
                     availabilityZone = new StackAvailabilityZone(zonesByRegion.iterator().next());
                 }
             }
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
+            wait = wait == null ? false : wait;
             IdJson id;
             StackRequest stackRequest = new StackRequest();
             stackRequest.setName(name);
@@ -184,14 +197,14 @@ public class StackCommands implements CommandMarker {
             }
             stackRequest.setInstanceGroups(instanceGroupJsonList);
 
-            if (publicInAccount == null || !publicInAccount) {
-                id = cloudbreakClient.stackEndpoint().postPrivate(stackRequest);
-            } else {
+            if (publicInAccount) {
                 id = cloudbreakClient.stackEndpoint().postPublic(stackRequest);
+            } else {
+                id = cloudbreakClient.stackEndpoint().postPrivate(stackRequest);
             }
             context.addStack(id.getId().toString(), name);
             context.setHint(Hints.CREATE_CLUSTER);
-            return "Stack created, id: " + id.getId();
+            return wait ? cloudbreakUtil.waitAndCheckStackStatus(id.getId(), Status.AVAILABLE.name()) : "Stack created, id: " + id.getId();
         } catch (ValidationException e) {
             return e.getMessage();
         } catch (Exception ex) {
@@ -334,19 +347,37 @@ public class StackCommands implements CommandMarker {
     }
 
 
-    @CliCommand(value = "stack show", help = "Shows the stack by its id")
+    @CliCommand(value = "stack show", help = "Shows the stack by its id or name")
     public Object showStack(
             @CliOption(key = "id", mandatory = false, help = "Id of the stack") String id,
             @CliOption(key = "name", mandatory = false, help = "Name of the stack") String name) {
         try {
-            StackResponse stackResponse;
-            if (id != null) {
-                stackResponse = cloudbreakClient.stackEndpoint().get(Long.valueOf(id));
+            StackResponse stackResponse = getStackResponse(name, id);
+            if (stackResponse != null) {
                 return renderSingleMap(responseTransformer.transformObjectToStringMap(stackResponse), "FIELD", "VALUE");
-            } else if (name != null) {
-                stackResponse = cloudbreakClient.stackEndpoint().getPublic(name);
-                if (stackResponse != null) {
-                    return renderSingleMap(responseTransformer.transformObjectToStringMap(stackResponse), "FIELD", "VALUE");
+            }
+            return "No stack specified.";
+        } catch (Exception ex) {
+            return ex.toString();
+        }
+    }
+
+    @CliCommand(value = "stack metadata", help = "Shows the stack metadata")
+    public Object showStack(
+            @CliOption(key = "id", mandatory = false, help = "Id of the stack") String id,
+            @CliOption(key = "name", mandatory = false, help = "Name of the stack") String name,
+            @CliOption(key = "instancegroup", mandatory = false, help = "Instancegroup of the stack") String group,
+            @CliOption(key = "outputType", mandatory = false, help = "OutputType of the response") OutPutType outPutType) {
+        try {
+            outPutType = outPutType == null ? OutPutType.RAW : outPutType;
+            StackResponse stackResponse = getStackResponse(name, id);
+            if (stackResponse != null && stackResponse.getInstanceGroups() != null) {
+                Map<String, List<String>> stringListMap = collectMetadata(
+                        stackResponse.getInstanceGroups() == null ? new ArrayList<InstanceGroupJson>() : stackResponse.getInstanceGroups(), group);
+                if (outPutType.equals(OutPutType.RAW)) {
+                    return renderMultiValueMap(stringListMap, "FIELD", "VALUE");
+                } else if (outPutType.equals(OutPutType.JSON)) {
+                    return objectMapper.writeValueAsString(stringListMap);
                 }
             }
             return "No stack specified.";
@@ -355,5 +386,36 @@ public class StackCommands implements CommandMarker {
         }
     }
 
+    private StackResponse getStackResponse(String name, String id) {
+        if (id == null) {
+            return cloudbreakClient.stackEndpoint().getPublic(name);
+        } else {
+            return cloudbreakClient.stackEndpoint().get(Long.valueOf(id));
+        }
+    }
+
+    private Map<String, List<String>> collectMetadata(List<InstanceGroupJson> instanceGroups, final String group) {
+        final Map<String, List<String>> returnValues = new HashMap<>();
+        for (InstanceGroupJson instanceGroup : instanceGroups) {
+            List<String> list = new ArrayList<>();
+            for (InstanceMetaDataJson instanceMetaDataJson : instanceGroup.getMetadata()) {
+                if (instanceMetaDataJson.getPublicIp() != null) {
+                    list.add(instanceMetaDataJson.getPublicIp());
+                }
+            }
+            returnValues.put(instanceGroup.getGroup(), list);
+        }
+        if (everyGroupDataNeeded(group)) {
+            return returnValues;
+        }
+        return new HashMap<String, List<String>>() { {
+                put(group, returnValues.get(group));
+            }
+        };
+    }
+
+    private boolean everyGroupDataNeeded(String group) {
+        return group == null || "".equals(group);
+    }
 
 }

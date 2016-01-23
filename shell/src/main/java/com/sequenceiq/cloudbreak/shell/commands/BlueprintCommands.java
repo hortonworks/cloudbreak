@@ -40,7 +40,8 @@ public class BlueprintCommands implements CommandMarker {
     private CloudbreakClient cloudbreakClient;
     @Inject
     private ResponseTransformer responseTransformer;
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Inject
+    private ObjectMapper objectMapper;
 
     @CliAvailabilityIndicator(value = "blueprint list")
     public boolean isBlueprintListCommandAvailable() {
@@ -168,12 +169,13 @@ public class BlueprintCommands implements CommandMarker {
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the blueprint is public in the account") Boolean publicInAccount) {
         try {
             String message;
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
             String json = file == null ? IOUtils.toString(new URL(url)) : IOUtils.toString(new FileInputStream(file));
             if (json != null) {
                 BlueprintRequest blueprintRequest = new BlueprintRequest();
                 blueprintRequest.setName(name);
                 blueprintRequest.setDescription(description);
-                blueprintRequest.setAmbariBlueprint(mapper.readValue(json, JsonNode.class));
+                blueprintRequest.setAmbariBlueprint(objectMapper.readValue(json, JsonNode.class));
                 String id;
                 if (publicInAccount) {
                     id = cloudbreakClient.blueprintEndpoint().postPublic(blueprintRequest).getId().toString();
@@ -199,7 +201,7 @@ public class BlueprintCommands implements CommandMarker {
     private String getBlueprintName(String json) {
         String result = "";
         try {
-            result = mapper.readTree(json.getBytes()).get("Blueprints").get("blueprint_name").asText();
+            result = objectMapper.readTree(json.getBytes()).get("Blueprints").get("blueprint_name").asText();
         } catch (IOException e) {
             e.toString();
         }
@@ -209,7 +211,7 @@ public class BlueprintCommands implements CommandMarker {
     private  Map<String, List<String>> getComponentMap(String json) {
         Map<String, List<String>> map = new HashMap<>();
         try {
-            JsonNode hostGroups = mapper.readTree(json.getBytes()).get("host_groups");
+            JsonNode hostGroups = objectMapper.readTree(json.getBytes()).get("host_groups");
             for (JsonNode hostGroup : hostGroups) {
                 List<String> components = new ArrayList<>();
                 JsonNode componentsNodes = hostGroup.get("components");

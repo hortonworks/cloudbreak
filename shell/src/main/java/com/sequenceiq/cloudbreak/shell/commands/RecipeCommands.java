@@ -38,7 +38,8 @@ public class RecipeCommands implements CommandMarker {
     private CloudbreakClient cloudbreakClient;
     @Inject
     private ResponseTransformer responseTransformer;
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Inject
+    private ObjectMapper mapper;
 
     @CliAvailabilityIndicator(value = "recipe list")
     public boolean isRecipeListCommandAvailable() {
@@ -81,6 +82,7 @@ public class RecipeCommands implements CommandMarker {
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the recipe is public in the account") Boolean publicInAccount) {
         try {
             String json = file == null ? IOUtils.toString(new URL(url)) : IOUtils.toString(new FileInputStream(file));
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
             IdJson id;
             RecipeRequest recipeRequest = mapper.readValue(json, RecipeRequest.class);
             if (publicInAccount) {
