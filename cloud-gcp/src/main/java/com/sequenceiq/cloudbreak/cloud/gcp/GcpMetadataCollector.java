@@ -75,11 +75,11 @@ public class GcpMetadataCollector implements MetadataCollector {
             } catch (IOException e) {
                 LOGGER.warn(String.format("Instance %s is not reachable", cloudResource.getName()), e);
                 CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.UNKNOWN);
-                cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, null);
+                cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, CloudInstanceMetaData.EMPTY_METADATA);
             }
         } else {
             CloudVmInstanceStatus status = new CloudVmInstanceStatus(matchedInstance, InstanceStatus.TERMINATED);
-            cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, null);
+            cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, CloudInstanceMetaData.EMPTY_METADATA);
         }
         return cloudVmMetaDataStatus;
 

@@ -74,6 +74,9 @@ public class TlsSetupService {
 
     public void setupTls(Stack stack, String publicIp, String user, Set<String> sshFingerprints) throws CloudbreakException {
         LOGGER.info("SSHClient parameters: stackId: {}, publicIp: {},  user: {}", stack.getId(), publicIp, user);
+        if (publicIp == null) {
+            throw new CloudbreakException("Failed to connect to host, IP address not defined.");
+        }
         SSHClient ssh = new SSHClient();
         String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
         HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints, platform(stack.cloudPlatform()));
