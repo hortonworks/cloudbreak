@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.openstack.nativ;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
@@ -25,8 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackSetup;
 @Service
 public class OpenStackNativeConnector implements CloudConnector {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackNativeConnector.class);
-
     @Inject
     private OpenStackCredentialConnector credentialConnector;
     @Inject
@@ -41,7 +37,6 @@ public class OpenStackNativeConnector implements CloudConnector {
     private OpenStackParameters openStackParameters;
     @Inject
     private OpenStackNativeMetaDataCollector metadataCollector;
-
 
     @Override
     public Platform platform() {

@@ -1,14 +1,8 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -19,7 +13,14 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
+import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -28,18 +29,10 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class ClusterController implements ClusterEndpoint {
@@ -65,6 +58,9 @@ public class ClusterController implements ClusterEndpoint {
     private BlueprintValidator blueprintValidator;
 
     @Autowired
+    private FileSystemValidator fileSystemValidator;
+
+    @Autowired
     private StackService stackService;
 
     @Autowired
@@ -77,32 +73,12 @@ public class ClusterController implements ClusterEndpoint {
                 && (request.getKerberosMasterKey() == null || request.getKerberosAdmin() == null || request.getKerberosPassword() == null)) {
             return Response.status(Response.Status.ACCEPTED).build();
         }
-
         MDCBuilder.buildUserMdcContext(user);
-        if (request.getFileSystem() != null) {
-            validateFilesystemRequest(request.getFileSystem());
-        }
+        fileSystemValidator.validateFileSystem(stackService.getById(stackId).cloudPlatform(), request.getFileSystem());
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stackId, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint());
         clusterService.create(user, stackId, cluster);
         return Response.status(Response.Status.ACCEPTED).build();
-    }
-
-    private void validateFilesystemRequest(FileSystemRequest fileSystemRequest) {
-        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-        Validator validator = validatorFactory.getValidator();
-        try {
-            if (fileSystemRequest != null) {
-                String json = JsonUtil.writeValueAsString(fileSystemRequest.getProperties());
-                Object fsConfig = JsonUtil.readValue(json, fileSystemRequest.getType().getClazz());
-                Set<ConstraintViolation<Object>> violations = validator.validate(fsConfig);
-                if (!violations.isEmpty()) {
-                    throw new ConstraintViolationException(violations);
-                }
-            }
-        } catch (IOException e) {
-            throw new BadRequestException(e.getMessage(), e);
-        }
     }
 
     @Override

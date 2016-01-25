@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
@@ -48,6 +49,10 @@ public class OpenStackSetup implements Setup {
         OSClient osClient = openStackClient.createOSClient(authenticatedContext);
         verifyFlavors(osClient, stack.getGroups());
         LOGGER.debug("setup has been executed");
+    }
+
+    @Override
+    public void validateFileSystem(FileSystem fileSystem) throws Exception {
     }
 
     private void verifyFlavors(OSClient osClient, List<Group> instanceGroups) {

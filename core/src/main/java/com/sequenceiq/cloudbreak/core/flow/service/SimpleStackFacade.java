@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STARTED;
-import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
@@ -12,6 +9,9 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STARTED;
+import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
@@ -60,7 +60,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
-import com.sequenceiq.cloudbreak.service.stack.flow.ProvisioningService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 
@@ -88,8 +87,6 @@ public class SimpleStackFacade implements StackFacade {
     private ClusterBootstrapper clusterBootstrapper;
     @Inject
     private ConsulMetadataSetup consulMetadataSetup;
-    @Inject
-    private ProvisioningService provisioningService;
     @Inject
     private ClusterService clusterService;
     @Inject

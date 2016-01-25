@@ -11,11 +11,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
-import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackValidation;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
@@ -24,6 +19,12 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
+import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackValidation;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
@@ -52,6 +53,9 @@ public class StackController implements StackEndpoint {
 
     @Autowired
     private CloudParameterService parameterService;
+
+    @Autowired
+    private FileSystemValidator fileSystemValidator;
 
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
@@ -171,11 +175,12 @@ public class StackController implements StackEndpoint {
     }
 
     @Override
-    public Response validate(StackValidationRequest stackValidationRequest) {
+    public Response validate(StackValidationRequest request) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
+        StackValidation stackValidation = conversionService.convert(request, StackValidation.class);
         stackService.validateStack(stackValidation);
+        fileSystemValidator.validateFileSystem(request.getPlatform(), request.getFileSystem());
         return Response.status(Response.Status.ACCEPTED).build();
     }
 

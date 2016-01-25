@@ -20,6 +20,8 @@ dependencies {
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
     compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
     compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: '2.4.2'
+    compile group: 'com.microsoft.azure',           name: 'azure-storage',                  version:'4.0.0'
+
     compile ("com.microsoft.azure:adal4j:1.0.0") {
       exclude group: 'slf4j-api'
     }

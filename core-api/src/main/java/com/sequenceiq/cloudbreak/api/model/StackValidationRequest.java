@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -22,6 +23,10 @@ public class StackValidationRequest implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
     private Long networkId;
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
+    private String platform;
+    private FileSystemRequest fileSystem;
 
     public Set<HostGroupJson> getHostGroups() {
         return hostGroups;
@@ -53,5 +58,21 @@ public class StackValidationRequest implements JsonEntity {
 
     public void setNetworkId(Long netWorkId) {
         this.networkId = netWorkId;
+    }
+
+    public FileSystemRequest getFileSystem() {
+        return fileSystem;
+    }
+
+    public void setFileSystem(FileSystemRequest fileSystem) {
+        this.fileSystem = fileSystem;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
     }
 }

@@ -4,7 +4,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 public class WasbFileSystemConfiguration extends FileSystemConfiguration {
-
     @NotNull
     @Pattern(regexp = "^[a-z0-9]{3,24}$",
             message = "Must contain only numbers and lowercase letters and must be between 3 and 24 characters long.")
