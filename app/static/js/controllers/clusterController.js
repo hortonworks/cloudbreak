@@ -279,7 +279,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
             $scope.prepareParameters($scope.cluster);
-            UluwatuCluster.save($scope.cluster, function(result) {
+            UluwatuCluster.save($scope.cluster, $rootScope.activeCredential.cloudPlatform, function(result) {
                 var nodeCount = 0;
                 angular.forEach(result.instanceGroups, function(group) {
                     nodeCount += group.nodeCount;
