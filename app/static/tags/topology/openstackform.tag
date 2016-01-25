@@ -60,7 +60,7 @@
             <div class="form-group" ng-class="{ 'has-error': topologyMappingForm.rack.$dirty && topologyMappingForm.rack.$invalid }">
                 <label class="col-sm-3 control-label">{{msg.topology_rack_label}}</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" name="rack" placeholder="" ng-model="tmpMapping.rack" id="rack" ng-minlength="2" ng-pattern="/^[^\s]*$/" ng-trim="false" required>
+                    <input type="text" class="form-control" name="rack" placeholder="" ng-model="tmpMapping.rack" id="rack" ng-minlength="2" ng-pattern="/^\/[^\s]*$/" ng-trim="false" required>
                     <div class="help-block" ng-show="topologyMappingForm.rack.$dirty && topologyMappingForm.rack.$invalid">
                         <i class="fa fa-warning"></i> {{msg.topology_rack_invalid}}
                     </div>
