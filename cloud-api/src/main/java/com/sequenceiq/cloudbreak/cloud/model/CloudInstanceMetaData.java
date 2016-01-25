@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class CloudInstanceMetaData {
 
+    public static final CloudInstanceMetaData EMPTY_METADATA = new CloudInstanceMetaData(null, null, null);
+
     private final String privateIp;
     private final String publicIp;
     private final String hypervisor;

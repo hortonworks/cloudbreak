@@ -22,7 +22,7 @@ public enum StackCreationEvent implements FlowEvent {
     COLLECT_METADATA_FINISHED_EVENT(CollectMetadataResult.selector(CollectMetadataResult.class)),
     COLLECT_METADATA_FAILED_EVENT(CollectMetadataResult.failureSelector(CollectMetadataResult.class)),
     SSHFINGERPRINTS_EVENT(GetSSHFingerprintsResult.selector(GetSSHFingerprintsResult.class)),
-    SSHFINGERPRINTS_FAILED_EVENT(GetSSHFingerprintsResult.selector(GetSSHFingerprintsResult.class)),
+    SSHFINGERPRINTS_FAILED_EVENT(GetSSHFingerprintsResult.failureSelector(GetSSHFingerprintsResult.class)),
     STACK_CREATION_FINISHED_EVENT("LAUNCHSTACKFINISHED"),
     STACK_CREATION_FAILED_EVENT("FAILHANDLED");
 
