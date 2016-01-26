@@ -15,6 +15,7 @@ include 'cloud-template'
 include 'core-api'
 include 'shell'
 include 'autoscale'
+include 'auth'
 
 rootProject.name = 'cloudbreak'
 

@@ -39,3 +39,8 @@ cloud-break.cbh
 
 hs_err_pid
 /build
+
+test
+node_modules/
+npm-debug.log
+start-local.sh
