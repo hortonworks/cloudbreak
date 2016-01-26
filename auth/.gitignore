@@ -1,0 +1,7 @@
+.idea
+*.iml
+.DS_Store
+test
+node_modules/
+npm-debug.log
+start-local.sh
