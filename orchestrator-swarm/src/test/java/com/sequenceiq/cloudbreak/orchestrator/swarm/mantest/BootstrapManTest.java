@@ -7,18 +7,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
-import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.SwarmContainerOrchestrator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BootstrapManTest {
 
@@ -65,14 +61,14 @@ public class BootstrapManTest {
         //o.bootstrap(gatewayConfig, nodes, CONSUL_SERVER_SIZE, "/hadoopfs/fs1", new NoExitModel());
         //if(true) return;
 
-        ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
+        /*ContainerOrchestratorCluster cluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
         o.startRegistrator(cluster, new ContainerConfig("sequenceiq/registrator", "v5.2"), new NoExitModel());
 
         for (int i = 0; i < LOOP_SIZE; i++) {
             LOGGER.info("Iteration: {}", i);
             o.startConsulWatches(cluster, new ContainerConfig("sequenceiq/docker-consul-watch-plugn", "2.0.0-consul"), new LogVolumePath("/hadoopfs/fs1",
                     "/hadoopfs/fs1"), new NoExitModel());
-        }
+        }*/
 
         LOGGER.info("FINISHED");
 

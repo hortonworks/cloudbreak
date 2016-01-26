@@ -349,7 +349,7 @@ public class ClusterBootstrapperTest {
 
     class CancelledMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
-        public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, int consulServerCount,
+        public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount,
                 String consulLocation, ExitCriteriaModel exitCriteriaModel)
                 throws CloudbreakOrchestratorCancelledException {
             throw new CloudbreakOrchestratorCancelledException("cancelled");
@@ -374,7 +374,7 @@ public class ClusterBootstrapperTest {
 
     class FailedMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
-        public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, int consulServerCount,
+        public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount,
                 String consulLocation, ExitCriteriaModel exitCriteriaModel)
                 throws CloudbreakOrchestratorFailedException {
             throw new CloudbreakOrchestratorFailedException("failed");

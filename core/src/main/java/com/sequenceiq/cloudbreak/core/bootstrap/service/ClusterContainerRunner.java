@@ -9,15 +9,20 @@ import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.KERBEROS;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LOGROTATE;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.REGISTRATOR;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.DOMAIN_REALM;
+import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.REALM;
 
 import javax.inject.Inject;
 
-import org.springframework.stereotype.Component;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
@@ -28,23 +33,26 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
 import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterContainerRunner {
-
     private static final String CONTAINER_VOLUME_PATH = "/var/log";
     private static final String HOST_VOLUME_PATH = VolumeUtils.getLogVolume("logs");
+    private static final String HOST_NETWORK_MODE = "host";
+    private static final int AMBARI_PORT = 8080;
 
     @Inject
     private ClusterService clusterService;
@@ -85,38 +93,172 @@ public class ClusterContainerRunner {
             CloudbreakOrchestratorException {
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
         String cloudPlatform = context.getCloudPlatform().value();
-
         Stack stack = stackRepository.findOneWithLists(context.getStackId());
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                 gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
-
         Set<Node> nodes = getNodes(add, stack, candidateAddresses);
+        OrchestrationCredential credential = new OrchestrationCredential(gatewayConfig.getPublicAddress(), gatewayConfig.getPrivateAddress(),
+                gatewayConfig.getCertificateDir());
 
-        LogVolumePath logVolumePath = new LogVolumePath(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH);
-        ContainerOrchestratorCluster orchestratorCluster = new ContainerOrchestratorCluster(gatewayConfig, nodes);
         if (!add) {
             Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-            containerOrchestrator.startRegistrator(orchestratorCluster, containerConfigService.get(stack, REGISTRATOR),
+            Node gatewayNode = getGatewayNode(gatewayConfig.getPublicAddress(), nodes);
+
+            ContainerConstraint registratorConstraint = getRegistratorConstraint(gatewayNode);
+            containerOrchestrator.runContainer(containerConfigService.get(stack, REGISTRATOR), credential, registratorConstraint,
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
-            containerOrchestrator.startAmbariServer(orchestratorCluster, containerConfigService.get(stack, AMBARI_DB),
-                    containerConfigService.get(stack, AMBARI_SERVER), cloudPlatform, logVolumePath, stackDeletionBasedExitCriteriaModel(stack.getId()));
+
+            ContainerConstraint ambariServerDbConstraint = getAmbariServerDbConstraint(gatewayNode);
+            containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_DB), credential, ambariServerDbConstraint,
+                    stackDeletionBasedExitCriteriaModel(stack.getId()));
+
+            ContainerConstraint ambariServerConstraint = getAmbariServerConstraint(cloudPlatform, gatewayNode);
+            containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_SERVER), credential, ambariServerConstraint,
+                    stackDeletionBasedExitCriteriaModel(stack.getId()));
+
             if (cluster.isSecure()) {
-                containerOrchestrator.startHaveged(orchestratorCluster, containerConfigService.get(stack, HAVEGED),
+                ContainerConstraint havegedConstraint = getHavegedConstraint(gatewayNode);
+                containerOrchestrator.runContainer(containerConfigService.get(stack, HAVEGED), credential, havegedConstraint,
                         stackDeletionBasedExitCriteriaModel(stack.getId()));
-                KerberosConfiguration kerberosConfiguration = new KerberosConfiguration(cluster.getKerberosMasterKey(), cluster.getKerberosAdmin(),
-                        cluster.getKerberosPassword());
-                containerOrchestrator.startKerberosServer(orchestratorCluster, containerConfigService.get(stack, KERBEROS), logVolumePath,
-                        kerberosConfiguration, stackDeletionBasedExitCriteriaModel(stack.getId()));
+
+                ContainerConstraint kerberosServerConstraint = getKerberosServerConstraint(cluster, gatewayNode);
+                containerOrchestrator.runContainer(containerConfigService.get(stack, KERBEROS), credential, kerberosServerConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
             }
         }
-        containerOrchestrator.startAmbariAgents(orchestratorCluster, containerConfigService.get(stack, AMBARI_AGENT), cloudPlatform, logVolumePath,
+
+        runAmbariAgentContainers(add, candidateAddresses, containerOrchestrator, cloudPlatform, stack, credential);
+
+        Map<String, String> privateIpsByHostname = getPrivateIpsByHostname(nodes);
+        ContainerConstraint consulWatchConstraint = getConsulWatchConstraint(privateIpsByHostname);
+        containerOrchestrator.runContainer(containerConfigService.get(stack, CONSUL_WATCH), credential, consulWatchConstraint,
                 stackDeletionBasedExitCriteriaModel(stack.getId()));
-        containerOrchestrator.startConsulWatches(orchestratorCluster, containerConfigService.get(stack, CONSUL_WATCH), logVolumePath,
+
+        ContainerConstraint logrotateConstraint = getLogrotateConstraint(privateIpsByHostname);
+        containerOrchestrator.runContainer(containerConfigService.get(stack, LOGROTATE), credential, logrotateConstraint,
                 stackDeletionBasedExitCriteriaModel(stack.getId()));
-        containerOrchestrator.startLogrotate(orchestratorCluster, containerConfigService.get(stack, LOGROTATE),
-                stackDeletionBasedExitCriteriaModel(stack.getId()));
+    }
+
+    private Node getGatewayNode(String gatewayPublicAddress, Collection<Node> nodes) {
+        for (Node node : nodes) {
+            if (node.getPublicIp() != null && node.getPublicIp().equals(gatewayPublicAddress)) {
+                return node;
+            }
+        }
+        throw new RuntimeException("Gateway not found in cluster");
+    }
+
+    private ContainerConstraint getRegistratorConstraint(Node gatewayNode) {
+        return new ContainerConstraint.Builder()
+                .withName(REGISTRATOR.getName())
+                .networkMode(HOST_NETWORK_MODE)
+                .addVolumeBindings(ImmutableMap.of("/var/run/docker.sock", "/tmp/docker.sock"))
+                .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
+                .cmd(new String[]{String.format("consul://%s:8500", gatewayNode.getPrivateIp())})
+                .build();
+    }
+
+    private ContainerConstraint getAmbariServerDbConstraint(Node gatewayNode) {
+        return new ContainerConstraint.Builder()
+                .withName(AMBARI_DB.getName())
+                .networkMode(HOST_NETWORK_MODE)
+                .addVolumeBindings(ImmutableMap.of("/data/ambari-server/pgsql/data", "/var/lib/postgresql/data",
+                        HOST_VOLUME_PATH + "/consul-watch", HOST_VOLUME_PATH + "/consul-watch"))
+                .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
+                .addEnv(Arrays.asList(String.format("POSTGRES_PASSWORD=%s", "bigdata"), String.format("POSTGRES_USER=%s", "ambari")))
+                .build();
+    }
+
+    private ContainerConstraint getAmbariServerConstraint(String cloudPlatform, Node gatewayNode) {
+        return new ContainerConstraint.Builder()
+                .withName(AMBARI_SERVER.getName())
+                .networkMode(HOST_NETWORK_MODE)
+                .tcpPortBinding(new TcpPortBinding(AMBARI_PORT, "0.0.0.0", AMBARI_PORT))
+                .addVolumeBindings(ImmutableMap.of(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
+                .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
+                .addEnv(Arrays.asList("SERVICE_NAME=ambari-8080"))
+                .cmd(new String[]{String.format("systemd.setenv=POSTGRES_DB=localhost systemd.setenv=CLOUD_PLATFORM=%s", cloudPlatform)})
+                .build();
+    }
+
+    private ContainerConstraint getHavegedConstraint(Node gatewayNode) {
+        return new ContainerConstraint.Builder()
+                .withName(HAVEGED.getName())
+                .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
+                .build();
+    }
+
+    private ContainerConstraint getKerberosServerConstraint(Cluster cluster, Node gatewayNode) {
+        KerberosConfiguration kerberosConf = new KerberosConfiguration(cluster.getKerberosMasterKey(), cluster.getKerberosAdmin(),
+                cluster.getKerberosPassword());
+        return new ContainerConstraint.Builder()
+                .withName(KERBEROS.getName())
+                .networkMode(HOST_NETWORK_MODE)
+                .addVolumeBindings(ImmutableMap.of(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
+                .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
+                .addEnv(Arrays.asList(String.format("constraint:node==%s", gatewayNode.getHostname()),
+                        String.format("SERVICE_NAME=%s", KERBEROS.getName()),
+                        "NAMESERVER_IP=127.0.0.1",
+                        String.format("REALM=%s", REALM),
+                        String.format("DOMAIN_REALM=%s", DOMAIN_REALM),
+                        String.format("KERB_MASTER_KEY=%s", kerberosConf.getMasterKey()),
+                        String.format("KERB_ADMIN_USER=%s", kerberosConf.getUser()),
+                        String.format("KERB_ADMIN_PASS=%s", kerberosConf.getPassword())))
+                .build();
+    }
+
+    private void runAmbariAgentContainers(Boolean add, Set<String> candidateAddresses, ContainerOrchestrator orchestrator, String cloudPlatform, Stack stack,
+                                                OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            int volumeCount = instanceGroup.getTemplate().getVolumeCount();
+            Map<String, String> dataVolumeBinds = getDataVolumeBinds(volumeCount);
+            Map<String, String> privateIpsByHostname = getPrivateIpsByHostname(add, candidateAddresses, cred, instanceGroup);
+            ImmutableMap<String, String> volumeBinds = ImmutableMap.of("/data/jars", "/data/jars", HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH);
+            dataVolumeBinds.putAll(volumeBinds);
+            ContainerConstraint ambariAgentConstraint = getAmbariAgentConstraint(cloudPlatform, dataVolumeBinds, privateIpsByHostname);
+            orchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), cred, ambariAgentConstraint,
+                    stackDeletionBasedExitCriteriaModel(stack.getId()));
+        }
+    }
+
+    private Map<String, String> getDataVolumeBinds(long volumeCount) {
+        Map<String, String> dataVolumeBinds = new HashMap<>();
+        for (int i = 1; i <= volumeCount; i++) {
+            String dataVolumePath = VolumeUtils.VOLUME_PREFIX + i;
+            dataVolumeBinds.put(dataVolumePath, dataVolumePath);
+        }
+        return dataVolumeBinds;
+    }
+
+    private ContainerConstraint getAmbariAgentConstraint(String cloudPlatform, Map<String, String> dataVolumeBinds, Map<String, String> privateIpsByHostname) {
+        return new ContainerConstraint.Builder()
+                .withName(AMBARI_AGENT.getName())
+                .networkMode(HOST_NETWORK_MODE)
+                .addVolumeBindings(dataVolumeBinds)
+                .addPrivateIpsByHostname(privateIpsByHostname)
+                .cmd(new String[]{String.format("systemd.setenv=CLOUD_PLATFORM=%s", cloudPlatform)})
+                .build();
+    }
+
+    private ContainerConstraint getConsulWatchConstraint(Map<String, String> privateIpsByHostname) {
+        return new ContainerConstraint.Builder()
+                .withName(CONSUL_WATCH.getName())
+                .networkMode(HOST_NETWORK_MODE)
+                .addVolumeBindings(ImmutableMap.of("/var/run/docker.sock", "/var/run/docker.sock"))
+                .addPrivateIpsByHostname(privateIpsByHostname)
+                .cmd(new String[]{String.format("consul://127.0.0.1:8500")})
+                .build();
+    }
+
+    private ContainerConstraint getLogrotateConstraint(Map<String, String> privateIpsByHostname) {
+        return new ContainerConstraint.Builder()
+                .withName(LOGROTATE.getName())
+                .networkMode(HOST_NETWORK_MODE)
+                .addVolumeBindings(ImmutableMap.of("/var/lib/docker/containers", "/var/lib/docker/containers"))
+                .addPrivateIpsByHostname(privateIpsByHostname)
+                .build();
     }
 
     private Set<Node> getNodes(Boolean add, Stack stack, Set<String> candidateAddresses) {
@@ -131,9 +273,26 @@ public class ClusterContainerRunner {
                 nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryName(), dataVolumes));
             }
         }
-
         return nodes;
     }
 
+    private Map<String, String> getPrivateIpsByHostname(Boolean add, Set<String> candidateAddresses, OrchestrationCredential credential,
+                                                        InstanceGroup instanceGroup) {
+        Map<String, String> privateIpsByHostname = new HashMap<>();
+        for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+            String privateIp = instanceMetaData.getPrivateIp();
+            if (!privateIp.equals(credential.getPrivateApiAddress()) && (!add || candidateAddresses.contains(privateIp))) {
+                privateIpsByHostname.put(instanceMetaData.getDiscoveryName(), instanceMetaData.getPrivateIp());
+            }
+        }
+        return privateIpsByHostname;
+    }
 
+    private Map<String, String> getPrivateIpsByHostname(Set<Node> nodes) {
+        Map<String, String> privateIpsByHostname = new HashMap<>();
+        for (Node node : nodes) {
+            privateIpsByHostname.put(node.getHostname().trim(), node.getPrivateIp());
+        }
+        return privateIpsByHostname;
+    }
 }
