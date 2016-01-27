@@ -273,7 +273,7 @@
                 }
               },
               {
-                "apiVersion": "2015-05-01-preview",
+                "apiVersion": "2015-06-15",
                 "type": "Microsoft.Compute/virtualMachines",
                 "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                 "location": "[parameters('region')]",
@@ -343,6 +343,12 @@
                                 "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'), '${instance.instanceId}'))]"
                             }
                         ]
+                    },
+                    "diagnosticsProfile": {
+                      "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://',parameters('userAttachedDiskStorageAccountName'),'.blob.core.windows.net/')]"
+                      }
                     }
                 }
               }<#if (instance_index + 1) != groups[instanceGroup]?size>,</#if>

@@ -23,8 +23,6 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
@@ -306,33 +304,6 @@ public class ServiceProviderConnectorAdapter {
             LOGGER.error("Error while updating the stack: " + cloudContext, e);
             throw new OperationException(e);
         }
-    }
-
-    public Set<String> getSSHFingerprints(Stack stack, String gateway) {
-        Set<String> result = new HashSet<>();
-        LOGGER.debug("Get SSH fingerprints of gateway instance for stack: {}", stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        InstanceMetaData gatewayMetaData = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
-        GetSSHFingerprintsRequest<GetSSHFingerprintsResult> sSHFingerprintReq = new GetSSHFingerprintsRequest<>(cloudContext, cloudCredential, gatewayInstance);
-        LOGGER.info("Triggering GetSSHFingerprintsRequest stack event: {}", sSHFingerprintReq);
-        eventBus.notify(sSHFingerprintReq.selector(), Event.wrap(sSHFingerprintReq));
-        try {
-            GetSSHFingerprintsResult res = sSHFingerprintReq.await();
-            LOGGER.info("Get SSH fingerprints of gateway instance for stack result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get SSH fingerprint", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
-            }
-            result.addAll(res.getSshFingerprints());
-        } catch (InterruptedException e) {
-            LOGGER.error(format("Failed to get SSH fingerprints of gateway instance stack: %s", cloudContext), e);
-            throw new OperationException(e);
-        }
-        return result;
     }
 
     public PlatformParameters getPlatformParameters(Stack stack) {
