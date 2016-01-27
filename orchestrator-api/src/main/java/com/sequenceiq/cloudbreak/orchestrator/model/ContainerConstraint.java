@@ -10,22 +10,24 @@ import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
 public class ContainerConstraint {
 
     private final String[] cmd;
-    private final Double cpus;
-    private final Double mem;
     private final Integer instances;
     private final List<Integer> ports;
     private final List<List<String>> constraints;
-    private final Map<String, String> volumeBinds;
     private final List<String> env;
     private final String networkMode;
     private final TcpPortBinding tcpPortBinding;
-    private final List<String> hosts;
     private final String name;
     private final Map<String, String> links;
 
+    private final List<String> hosts;
+    private final Map<String, String> volumeBinds;
+    private final Double cpu;
+    private final Double mem;
+
+
     public ContainerConstraint(ContainerConstraint.Builder builder) {
         this.cmd = builder.cmd;
-        this.cpus = builder.cpus;
+        this.cpu = builder.cpus;
         this.mem = builder.mem;
         this.instances = builder.instances;
         this.ports = builder.ports;
@@ -41,14 +43,6 @@ public class ContainerConstraint {
 
     public String[] getCmd() {
         return cmd;
-    }
-
-    public Double getCpus() {
-        return cpus;
-    }
-
-    public Double getMem() {
-        return mem;
     }
 
     public Integer getInstances() {
@@ -83,6 +77,14 @@ public class ContainerConstraint {
         return hosts;
     }
 
+    public Double getCpu() {
+        return cpu;
+    }
+
+    public Double getMem() {
+        return mem;
+    }
+
     public String getName() {
         return name;
     }
@@ -110,7 +112,7 @@ public class ContainerConstraint {
         public Builder containerConstraint(ContainerConstraint containerConstraint) {
             this.cmd = containerConstraint.getCmd();
             this.ports = containerConstraint.getPorts();
-            this.cpus = containerConstraint.getCpus();
+            this.cpus = containerConstraint.getCpu();
             this.mem = containerConstraint.getMem();
             this.instances = containerConstraint.getInstances();
             this.constraints = containerConstraint.getConstraints();

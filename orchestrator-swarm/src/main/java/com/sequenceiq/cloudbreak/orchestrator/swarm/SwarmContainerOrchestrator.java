@@ -315,15 +315,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return null;
     }
 
-    private Node getGatewayNode(String gatewayAddress, Collection<Node> nodes) {
-        for (Node node : nodes) {
-            if (node.getPublicIp() != null && node.getPublicIp().equals(gatewayAddress)) {
-                return node;
-            }
-        }
-        throw new RuntimeException("Gateway not found in cluster");
-    }
-
     private Set<Node> getNodesWithoutGateway(String gatewayAddress, Collection<Node> nodes) {
         Set<Node> coreNodes = new HashSet<>();
         for (Node node : nodes) {
