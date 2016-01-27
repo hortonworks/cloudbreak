@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -156,11 +155,12 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "projectName", mandatory = false, help = "projectName of the credential for cb-keystone-v3-project-scope") String projectName,
             @CliOption(key = "sshKeyPath", mandatory = false, help = "path of a public SSH key file") File sshKeyPath,
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key file") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount
     ) {
-        if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty())) {
-            return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl";
+        if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
+            return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString";
         }
         String selector = null;
         String keyStoneVersion = null;
@@ -184,16 +184,18 @@ public class CredentialCommands implements CommandMarker {
         String sshKey;
         if (sshKeyPath != null) {
             try {
-                sshKey = new String(Files.readAllBytes(Paths.get(sshKeyPath.getPath()))).replaceAll("\n", "");
+                sshKey = IOUtils.toString(new FileReader(new File(sshKeyPath.getPath())));
             } catch (IOException e) {
                 return "File not found with ssh key.";
             }
-        } else {
+        } else if (sshKeyUrl != null) {
             try {
                 sshKey = readUrl(sshKeyUrl);
             } catch (IOException e) {
                 return "Url not found with ssh key.";
             }
+        } else {
+            sshKey = sshKeyString;
         }
 
         try {
@@ -239,25 +241,28 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "roleArn", mandatory = true, help = "roleArn of the credential") String roleArn,
             @CliOption(key = "sshKeyPath", mandatory = false, help = "path of a public SSH key file") File sshKeyPath,
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key file") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description
     ) {
-        if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty())) {
-            return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl";
+        if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
+            return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString";
         }
         String sshKey;
         if (sshKeyPath != null) {
             try {
-                sshKey = new String(Files.readAllBytes(Paths.get(sshKeyPath.getPath()))).replaceAll("\n", "");
+                sshKey = IOUtils.toString(new FileReader(new File(sshKeyPath.getPath())));
             } catch (IOException e) {
                 return "File not found with ssh key.";
             }
-        } else {
+        } else if (sshKeyUrl != null) {
             try {
                 sshKey = readUrl(sshKeyUrl);
             } catch (IOException e) {
                 return "Url not found with ssh key.";
             }
+        } else {
+            sshKey = sshKeyString;
         }
         try {
             CredentialRequest credentialRequest = new CredentialRequest();
@@ -295,25 +300,28 @@ public class CredentialCommands implements CommandMarker {
             File serviceAccountPrivateKeyPath,
             @CliOption(key = "sshKeyPath", mandatory = false, help = "path of a public SSH key file") File sshKeyPath,
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key url") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description
     ) {
-        if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty())) {
-            return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl";
+        if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
+            return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString";
         }
         String sshKey;
         if (sshKeyPath != null) {
             try {
-                sshKey = new String(Files.readAllBytes(Paths.get(sshKeyPath.getPath()))).replaceAll("\n", "");
+                sshKey = IOUtils.toString(new FileReader(new File(sshKeyPath.getPath())));
             } catch (IOException e) {
                 return "File not found with ssh key.";
             }
-        } else {
+        } else if (sshKeyUrl != null) {
             try {
                 sshKey = readUrl(sshKeyUrl);
             } catch (IOException e) {
                 return "Url not found with ssh key.";
             }
+        } else {
+            sshKey = sshKeyString;
         }
 
         String serviceAccountPrivateKey;
@@ -376,11 +384,12 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "password", mandatory = true, help = "password of the credential") String password,
             @CliOption(key = "sshKeyPath", mandatory = false, help = "sshKeyPath of the template") File sshKeyPath,
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "sshKeyUrl of the template") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description
     ) {
-        if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty())) {
-            return "SshKey cannot be null if password null";
+        if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
+            return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString";
         }
         String sshKey;
         if (sshKeyPath != null) {
@@ -389,12 +398,14 @@ public class CredentialCommands implements CommandMarker {
             } catch (IOException e) {
                 return "File not found with ssh key.";
             }
-        } else {
+        } else if (sshKeyUrl != null) {
             try {
                 sshKey = readUrl(sshKeyUrl);
             } catch (IOException e) {
                 return "Url not found with ssh key.";
             }
+        } else {
+            sshKey = sshKeyString;
         }
         try {
             CredentialRequest credentialRequest = new CredentialRequest();
