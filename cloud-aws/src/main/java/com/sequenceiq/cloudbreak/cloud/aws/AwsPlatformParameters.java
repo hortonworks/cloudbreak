@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -118,7 +117,6 @@ public class AwsPlatformParameters implements PlatformParameters {
     }
 
     private enum AwsRegion {
-        GovCloud("us-gov-west-1", new ArrayList<AvailabilityZone>()),
         US_EAST_1("us-east-1", Arrays.asList(availabilityZone("us-east-1a"), availabilityZone("us-east-1b"),
                 availabilityZone("us-east-1d"), availabilityZone("us-east-1e"))),
         US_WEST_1("us-west-1", Arrays.asList(availabilityZone("us-west-1a"), availabilityZone("us-west-1b"))),
@@ -128,8 +126,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         AP_SOUTHEAST_1("ap-southeast-1", Arrays.asList(availabilityZone("ap-southeast-1a"), availabilityZone("ap-southeast-1b"))),
         AP_SOUTHEAST_2("ap-southeast-2", Arrays.asList(availabilityZone("ap-southeast-2a"), availabilityZone("ap-southeast-2b"))),
         AP_NORTHEAST_1("ap-northeast-1", Arrays.asList(availabilityZone("ap-northeast-1a"), availabilityZone("ap-northeast-1c"))),
-        SA_EAST_1("sa-east-1", Arrays.asList(availabilityZone("sa-east-1a"), availabilityZone("sa-east-1b"), availabilityZone("sa-east-1c"))),
-        CN_NORTH_1("cn-north-1", new ArrayList<AvailabilityZone>());
+        SA_EAST_1("sa-east-1", Arrays.asList(availabilityZone("sa-east-1a"), availabilityZone("sa-east-1b"), availabilityZone("sa-east-1c")));
 
         private final String value;
         private final List<AvailabilityZone> availabilityZones;
