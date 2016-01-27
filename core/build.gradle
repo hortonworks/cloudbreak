@@ -71,6 +71,7 @@ dependencies {
     compile project(':cloud-arm')
 
     runtime project(':orchestrator-swarm')
+    runtime project(':orchestrator-marathon')
     runtime project(':cloud-reactor')
     runtime project(':cloud-openstack')
     runtime project(':cloud-gcp')

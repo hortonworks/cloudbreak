@@ -135,7 +135,7 @@ public class ClusterContainerRunner {
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
 
         String gatewayHostname = "";
-        if (stack.getInstanceGroups() != null) {
+        if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
             InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
             gatewayHostname = gatewayInstance.getDiscoveryName();
         }

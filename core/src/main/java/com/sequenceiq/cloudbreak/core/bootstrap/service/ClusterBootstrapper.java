@@ -123,6 +123,7 @@ public class ClusterBootstrapper {
                     new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodes),
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
+            // TODO: put it in orchestrator api
             Orchestrator orchestrator = new Orchestrator();
             orchestrator.setApiEndpoint(gatewayInstance.getPublicIp() + ":443");
             orchestrator.setType("SWARM");

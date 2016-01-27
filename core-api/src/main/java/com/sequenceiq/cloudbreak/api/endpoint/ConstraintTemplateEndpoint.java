@@ -32,13 +32,13 @@ public interface ConstraintTemplateEndpoint {
     @Path("user/constraints")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
-    IdJson postPrivate(@Valid ConstraintTemplateRequest ConstraintTemplateRequest);
+    IdJson postPrivate(@Valid ConstraintTemplateRequest constraintTemplateRequest);
 
     @POST
     @Path("account/constraints")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
-    IdJson postPublic(ConstraintTemplateRequest ConstraintTemplateRequest);
+    IdJson postPublic(ConstraintTemplateRequest constraintTemplateRequest);
 
     @GET
     @Path("user/constraints")

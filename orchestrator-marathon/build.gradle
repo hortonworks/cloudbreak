@@ -1,0 +1,22 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    baseName = 'orchestrator-marathon'
+}
+
+dependencies {
+    compile project(':orchestrator-api')
+    compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+    //this is required by idea, otherwise in some cases the 2.1.2 version will be added to claspath
+    compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: '2.4.2'
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
+
+    testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
+    testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+}
