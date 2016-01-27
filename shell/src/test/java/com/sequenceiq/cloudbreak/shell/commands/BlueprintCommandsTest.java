@@ -4,6 +4,7 @@ import static org.mockito.BDDMockito.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
 public class BlueprintCommandsTest {
     private static final String BLUEPRINT_ID = "50";
@@ -35,6 +37,9 @@ public class BlueprintCommandsTest {
     @Mock
     private CloudbreakContext mockContext;
 
+    @Mock
+    private ExceptionTransformer exceptionTransformer;
+
     private BlueprintResponse dummyResult;
 
     @Before
@@ -44,6 +49,7 @@ public class BlueprintCommandsTest {
         dummyResult = new BlueprintResponse();
         dummyResult.setId(BLUEPRINT_ID);
         given(cloudbreakClient.blueprintEndpoint()).willReturn(blueprintEndpoint);
+        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
     }
 
     @Test
@@ -85,7 +91,7 @@ public class BlueprintCommandsTest {
         verify(mockContext, times(0)).setHint(Hints.CONFIGURE_INSTANCEGROUP);
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testShowBlueprintById() throws Exception {
         given(blueprintEndpoint.get(Long.valueOf(BLUEPRINT_ID))).willReturn(dummyResult);
         underTest.showBlueprint(BLUEPRINT_ID, null);
@@ -93,7 +99,7 @@ public class BlueprintCommandsTest {
         verify(blueprintEndpoint, times(1)).get(anyLong());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testShowBlueprintByName() throws Exception {
         given(blueprintEndpoint.get(Long.valueOf(BLUEPRINT_ID))).willReturn(dummyResult);
         given(blueprintEndpoint.getPublic(BLUEPRINT_NAME)).willReturn(dummyResult);
@@ -102,7 +108,7 @@ public class BlueprintCommandsTest {
         verify(blueprintEndpoint, times(1)).getPublic(anyString());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testShowBlueprintByIdAndName() throws Exception {
         given(blueprintEndpoint.get(Long.valueOf(BLUEPRINT_ID))).willReturn(dummyResult);
         underTest.showBlueprint(BLUEPRINT_ID, BLUEPRINT_NAME);

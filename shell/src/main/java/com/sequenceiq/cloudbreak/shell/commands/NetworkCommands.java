@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.shell.completion.NetworkId;
 import com.sequenceiq.cloudbreak.shell.completion.NetworkName;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Component
@@ -33,6 +34,8 @@ public class NetworkCommands implements CommandMarker {
     private CloudbreakClient cloudbreakClient;
     @Inject
     private ResponseTransformer responseTransformer;
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
 
     @CliAvailabilityIndicator({ "network list", "network create --AWS", "network create --AZURE", "network create --GCP", "network create --OPENSTACK" })
     public boolean areNetworkCommandsAvailable() {
@@ -49,8 +52,8 @@ public class NetworkCommands implements CommandMarker {
         try {
             Set<NetworkJson> publics = cloudbreakClient.networkEndpoint().getPublics();
             return renderSingleMap(responseTransformer.transformToMap(publics, "id", "name"), "ID", "INFO");
-        } catch (Exception e) {
-            return e.getMessage();
+        } catch (Exception ex) {
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -88,7 +91,7 @@ public class NetworkCommands implements CommandMarker {
             createHintAndAddNetworkToContext(id.getId().toString(), "AWS");
             return String.format(CREATE_SUCCESS_MSG, id.getId());
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -123,7 +126,7 @@ public class NetworkCommands implements CommandMarker {
             createHintAndAddNetworkToContext(id.getId().toString(), "AZURE_RM");
             return String.format(CREATE_SUCCESS_MSG, id.getId());
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -156,7 +159,7 @@ public class NetworkCommands implements CommandMarker {
             createHintAndAddNetworkToContext(id.getId().toString(), "GCP");
             return String.format(CREATE_SUCCESS_MSG, id.getId());
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -191,7 +194,7 @@ public class NetworkCommands implements CommandMarker {
             createHintAndAddNetworkToContext(id.getId().toString(), "OPENSTACK");
             return String.format(CREATE_SUCCESS_MSG, id.getId());
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -216,7 +219,7 @@ public class NetworkCommands implements CommandMarker {
             }
             return msg;
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -238,7 +241,7 @@ public class NetworkCommands implements CommandMarker {
             }
             return "No network specified.";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -258,7 +261,7 @@ public class NetworkCommands implements CommandMarker {
             }
             return "Network could not be found!";
         } catch (Exception ex) {
-            return ex.getMessage();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 

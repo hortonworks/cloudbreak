@@ -30,10 +30,15 @@ import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Component
 public class CredentialCommands implements CommandMarker {
+
+    private static final String FILE_NOT_FOUND = "File not found with ssh key.";
+    private static final String URL_NOT_FOUND = "Url not Available for ssh key.";
+    private static final String P12_FILE_NOT_FOUND = "File not found with service account private key (p12) file.";
 
     private List<Map> maps = new ArrayList<>();
 
@@ -43,6 +48,8 @@ public class CredentialCommands implements CommandMarker {
     private CloudbreakClient cloudbreakClient;
     @Inject
     private ResponseTransformer responseTransformer;
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
 
     @CliAvailabilityIndicator(value = "credential list")
     public boolean isCredentialListCommandAvailable() {
@@ -85,7 +92,7 @@ public class CredentialCommands implements CommandMarker {
             }
             return "No credential specified (select a credential by --id or --name)";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -103,7 +110,7 @@ public class CredentialCommands implements CommandMarker {
             }
             return "No credential specified (select a credential by --id or --name)";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -112,7 +119,7 @@ public class CredentialCommands implements CommandMarker {
         try {
             return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.credentialEndpoint().getPublics(), "id", "name"), "ID", "INFO");
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -136,7 +143,7 @@ public class CredentialCommands implements CommandMarker {
             }
             return "No credential specified (select a credential by --id or --name)";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -185,14 +192,14 @@ public class CredentialCommands implements CommandMarker {
         if (sshKeyPath != null) {
             try {
                 sshKey = IOUtils.toString(new FileReader(new File(sshKeyPath.getPath())));
-            } catch (IOException e) {
-                return "File not found with ssh key.";
+            } catch (IOException ex) {
+                throw exceptionTransformer.transformToRuntimeException(FILE_NOT_FOUND);
             }
         } else if (sshKeyUrl != null) {
             try {
                 sshKey = readUrl(sshKeyUrl);
-            } catch (IOException e) {
-                return "Url not found with ssh key.";
+            } catch (IOException ex) {
+                throw exceptionTransformer.transformToRuntimeException(URL_NOT_FOUND);
             }
         } else {
             sshKey = sshKeyString;
@@ -231,7 +238,7 @@ public class CredentialCommands implements CommandMarker {
             createOrSelectTemplateHint();
             return "Credential created, id: " + idJson.getId().toString();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -252,14 +259,14 @@ public class CredentialCommands implements CommandMarker {
         if (sshKeyPath != null) {
             try {
                 sshKey = IOUtils.toString(new FileReader(new File(sshKeyPath.getPath())));
-            } catch (IOException e) {
-                return "File not found with ssh key.";
+            } catch (IOException ex) {
+                throw exceptionTransformer.transformToRuntimeException(FILE_NOT_FOUND);
             }
         } else if (sshKeyUrl != null) {
             try {
                 sshKey = readUrl(sshKeyUrl);
-            } catch (IOException e) {
-                return "Url not found with ssh key.";
+            } catch (IOException ex) {
+                throw exceptionTransformer.transformToRuntimeException(URL_NOT_FOUND);
             }
         } else {
             sshKey = sshKeyString;
@@ -287,7 +294,7 @@ public class CredentialCommands implements CommandMarker {
             createOrSelectTemplateHint();
             return "Credential created, id: " + id.getId().toString();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -311,14 +318,14 @@ public class CredentialCommands implements CommandMarker {
         if (sshKeyPath != null) {
             try {
                 sshKey = IOUtils.toString(new FileReader(new File(sshKeyPath.getPath())));
-            } catch (IOException e) {
-                return "File not found with ssh key.";
+            } catch (IOException ex) {
+                throw exceptionTransformer.transformToRuntimeException(FILE_NOT_FOUND);
             }
         } else if (sshKeyUrl != null) {
             try {
                 sshKey = readUrl(sshKeyUrl);
-            } catch (IOException e) {
-                return "Url not found with ssh key.";
+            } catch (IOException ex) {
+                throw exceptionTransformer.transformToRuntimeException(URL_NOT_FOUND);
             }
         } else {
             sshKey = sshKeyString;
@@ -328,8 +335,8 @@ public class CredentialCommands implements CommandMarker {
 
         try {
             serviceAccountPrivateKey = Base64.encodeBase64String(Files.readAllBytes(serviceAccountPrivateKeyPath.toPath())).replaceAll("\n", "");
-        } catch (IOException e) {
-            return "File not found with service account private key (p12) file.";
+        } catch (IOException ex) {
+            throw exceptionTransformer.transformToRuntimeException(P12_FILE_NOT_FOUND);
         }
 
         try {
@@ -357,7 +364,7 @@ public class CredentialCommands implements CommandMarker {
             createOrSelectTemplateHint();
             return "Credential created, id: " + id.getId().toString();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -395,14 +402,14 @@ public class CredentialCommands implements CommandMarker {
         if (sshKeyPath != null) {
             try {
                 sshKey = IOUtils.toString(new FileReader(new File(sshKeyPath.getPath())));
-            } catch (IOException e) {
-                return "File not found with ssh key.";
+            } catch (IOException ex) {
+                throw exceptionTransformer.transformToRuntimeException(FILE_NOT_FOUND);
             }
         } else if (sshKeyUrl != null) {
             try {
                 sshKey = readUrl(sshKeyUrl);
-            } catch (IOException e) {
-                return "Url not found with ssh key.";
+            } catch (IOException ex) {
+                throw exceptionTransformer.transformToRuntimeException(URL_NOT_FOUND);
             }
         } else {
             sshKey = sshKeyString;
@@ -433,7 +440,7 @@ public class CredentialCommands implements CommandMarker {
             createOrSelectTemplateHint();
             return "Credential created, id: " + id.getId().toString();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 

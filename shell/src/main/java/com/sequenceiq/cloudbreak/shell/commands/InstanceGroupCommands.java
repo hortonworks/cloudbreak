@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
 @Component
 public class InstanceGroupCommands implements CommandMarker {
@@ -31,6 +32,8 @@ public class InstanceGroupCommands implements CommandMarker {
     private CloudbreakContext context;
     @Inject
     private CloudbreakClient cloudbreakClient;
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
 
     @CliAvailabilityIndicator(value = "instancegroup configure")
     public boolean isCreateInstanceGroupAvailable() {
@@ -84,7 +87,7 @@ public class InstanceGroupCommands implements CommandMarker {
                 return "TemplateId is not a number.";
             }
         } catch (Exception ex) {
-            return ex.getMessage();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 

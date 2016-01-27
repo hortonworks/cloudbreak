@@ -30,9 +30,9 @@ import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakUtil;
-import com.sequenceiq.cloudbreak.shell.util.MessageUtil;
 
 @Component
 public class ClusterCommands implements CommandMarker {
@@ -45,6 +45,8 @@ public class ClusterCommands implements CommandMarker {
     private ResponseTransformer responseTransformer;
     @Inject
     private CloudbreakUtil cloudbreakUtil;
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
 
     @CliAvailabilityIndicator(value = "cluster create")
     public boolean isClusterCreateCommandAvailable() {
@@ -114,14 +116,14 @@ public class ClusterCommands implements CommandMarker {
     }
 
     @CliCommand(value = "cluster show", help = "Shows the cluster by stack id")
-    public Object configCluster() {
+    public String configCluster() {
         try {
             ClusterResponse clusterResponse = cloudbreakClient.clusterEndpoint().get(Long.valueOf(context.getStackId()));
             return renderSingleMap(responseTransformer.transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
         } catch (IndexOutOfBoundsException ex) {
-            return "There was no cluster for this account.";
+            throw exceptionTransformer.transformToRuntimeException("There was no cluster for this account.");
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -142,7 +144,7 @@ public class ClusterCommands implements CommandMarker {
             cloudbreakClient.clusterEndpoint().put(Long.valueOf(context.getStackId()), updateClusterJson);
             return context.getStackId();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -164,7 +166,7 @@ public class ClusterCommands implements CommandMarker {
             cloudbreakClient.clusterEndpoint().put(Long.valueOf(context.getStackId()), updateClusterJson);
             return context.getStackId();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -235,7 +237,7 @@ public class ClusterCommands implements CommandMarker {
             return wait ? cloudbreakUtil.waitAndCheckClusterStatus(Long.valueOf(context.getStackId()), Status.AVAILABLE.name())
                     : "Cluster creation started";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -247,7 +249,7 @@ public class ClusterCommands implements CommandMarker {
             cloudbreakClient.clusterEndpoint().put(Long.valueOf(context.getStackId()), updateClusterJson);
             return "Cluster is stopping";
         } catch (Exception ex) {
-            return MessageUtil.getMessage(ex);
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -259,7 +261,7 @@ public class ClusterCommands implements CommandMarker {
             cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
             return "Cluster is starting";
         } catch (Exception ex) {
-            return MessageUtil.getMessage(ex);
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 }

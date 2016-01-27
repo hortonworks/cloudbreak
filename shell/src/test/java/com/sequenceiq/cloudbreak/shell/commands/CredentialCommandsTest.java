@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.shell.commands;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.anyString;
 
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
 public class CredentialCommandsTest {
 
@@ -40,6 +42,9 @@ public class CredentialCommandsTest {
     @Mock
     private CredentialEndpoint credentialEndpoint;
 
+    @Mock
+    private ExceptionTransformer exceptionTransformer;
+
     private CredentialResponse dummyResult;
 
     @Before
@@ -49,6 +54,7 @@ public class CredentialCommandsTest {
         dummyResult = new CredentialResponse();
         dummyResult.setId(Long.valueOf(DUMMY_ID));
         given(cloudbreakClient.credentialEndpoint()).willReturn(credentialEndpoint);
+        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
     }
 
     @Test
@@ -65,7 +71,7 @@ public class CredentialCommandsTest {
         verify(context, times(1)).setCredential(anyString());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testSelectCredentialByNameNotFound() throws Exception {
         given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(null);
         underTest.selectCredential(null, DUMMY_NAME);
@@ -78,14 +84,14 @@ public class CredentialCommandsTest {
         verify(context, times(0)).setCredential(anyString());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testShowCredentialById() throws Exception {
         given(credentialEndpoint.get(Long.valueOf(DUMMY_ID))).willReturn(dummyResult);
         underTest.showCredential(DUMMY_ID, null);
         verify(credentialEndpoint, times(1)).get(anyLong());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testShowCredentialByName() throws Exception {
         given(credentialEndpoint.get(Long.valueOf(DUMMY_ID))).willReturn(dummyResult);
         given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(dummyResult);

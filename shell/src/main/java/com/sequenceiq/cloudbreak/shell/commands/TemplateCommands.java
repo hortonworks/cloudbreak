@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.shell.completion.GcpInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.GcpVolumeType;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Component
@@ -44,6 +45,8 @@ public class TemplateCommands implements CommandMarker {
     private CloudbreakClient cloudbreakClient;
     @Inject
     private ResponseTransformer responseTransformer;
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
 
     @CliAvailabilityIndicator(value = "template list")
     public boolean isTemplateListCommandAvailable() {
@@ -70,8 +73,8 @@ public class TemplateCommands implements CommandMarker {
         try {
             Set<TemplateResponse> publics = cloudbreakClient.templateEndpoint().getPublics();
             return renderSingleMap(responseTransformer.transformToMap(publics, "id", "name"), "ID", "INFO");
-        } catch (Exception e) {
-            return e.getMessage();
+        } catch (Exception ex) {
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -109,7 +112,7 @@ public class TemplateCommands implements CommandMarker {
             createOrSelectBlueprintHint();
             return "Template created, id: " + id.getId().toString();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -158,7 +161,7 @@ public class TemplateCommands implements CommandMarker {
             createOrSelectBlueprintHint();
             return "Template created, id: " + id.getId();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -201,7 +204,7 @@ public class TemplateCommands implements CommandMarker {
             createOrSelectBlueprintHint();
             return "Template created, id: " + id.getId().toString();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -241,7 +244,7 @@ public class TemplateCommands implements CommandMarker {
             createOrSelectBlueprintHint();
             return "Template created, id: " + id.getId().toString();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -261,7 +264,7 @@ public class TemplateCommands implements CommandMarker {
             }
             return "No template specified.";
         } catch (Exception ex) {
-            return ex.getMessage();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
