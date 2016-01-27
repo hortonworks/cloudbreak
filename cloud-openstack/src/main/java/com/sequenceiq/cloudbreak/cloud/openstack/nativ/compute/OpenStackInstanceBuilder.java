@@ -9,12 +9,16 @@ import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.OS4JException;
 import org.openstack4j.model.compute.Action;
 import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.compute.BDMDestType;
+import org.openstack4j.model.compute.BDMSourceType;
 import org.openstack4j.model.compute.BlockDeviceMappingCreate;
 import org.openstack4j.model.compute.Flavor;
 import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.compute.ServerCreate;
 import org.openstack4j.model.compute.builder.BlockDeviceMappingBuilder;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -38,6 +42,9 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Service
 public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBuilder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackInstanceBuilder.class);
+
+
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource) throws Exception {
@@ -59,19 +66,19 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
                     .userData(new String(Base64.encodeBase64(image.getUserData(group.getType()).getBytes())));
             BlockDeviceMappingBuilder blockDeviceMappingBuilder = Builders.blockDeviceMapping()
                     .uuid(imageId)
-                    .sourceType("image")
+                    .sourceType(BDMSourceType.IMAGE)
                     .deviceName("/dev/vda")
                     .bootIndex(0)
                     .deleteOnTermination(true)
-                    .destinationType("local");
+                    .destinationType(BDMDestType.LOCAL);
             serverCreateBuilder = serverCreateBuilder.blockDevice(blockDeviceMappingBuilder.build());
             for (CloudResource computeResource : context.getComputeResources(privateId)) {
                 if (computeResource.getType() == ResourceType.OPENSTACK_ATTACHED_DISK) {
                     BlockDeviceMappingCreate blockDeviceMappingCreate = Builders.blockDeviceMapping()
                             .uuid(computeResource.getReference())
                             .deviceName(computeResource.getStringParameter(OpenStackConstants.VOLUME_MOUNT_POINT))
-                            .sourceType("volume")
-                            .destinationType("volume")
+                            .sourceType(BDMSourceType.VOLUME)
+                            .destinationType(BDMDestType.VOLUME)
                             .build();
                     serverCreateBuilder.blockDevice(blockDeviceMappingCreate);
                 }
@@ -81,6 +88,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             return Collections.singletonList(createPersistedResource(resource, server.getId(),
                     Collections.<String, Object>singletonMap(OpenStackConstants.SERVER, server)));
         } catch (OS4JException ex) {
+            LOGGER.error("Failed to create OpenStack instance with privateId: {}", privateId, ex);
             throw new OpenStackResourceException("Instance creation failed", resourceType(), resource.getName(), ex);
         }
     }
