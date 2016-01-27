@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
+import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -31,6 +32,9 @@ public class TemplateController implements TemplateEndpoint {
     private AuthenticatedUserService authenticatedUserService;
 
     @Autowired
+    private TemplateValidator templateValidator;
+
+    @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
@@ -38,6 +42,7 @@ public class TemplateController implements TemplateEndpoint {
     public IdJson postPrivate(TemplateRequest templateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
+        templateValidator.validateTemplateRequest(templateRequest);
         return createTemplate(user, templateRequest, false);
     }
 
@@ -45,6 +50,7 @@ public class TemplateController implements TemplateEndpoint {
     public IdJson postPublic(TemplateRequest templateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
+        templateValidator.validateTemplateRequest(templateRequest);
         return createTemplate(user, templateRequest, true);
     }
 
