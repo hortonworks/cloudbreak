@@ -47,6 +47,10 @@ import com.sequenceiq.cloudbreak.api.model.Status;
                 query = "SELECT c FROM Cluster c "
                         + "WHERE c.blueprint.id= :id"),
         @NamedQuery(
+                name = "Cluster.findAllClustersBySssdConfig",
+                query = "SELECT c FROM Cluster c "
+                        + "WHERE c.sssdConfig.id= :id"),
+        @NamedQuery(
                 name = "Cluster.findOneWithLists",
                 query = "SELECT c FROM Cluster c "
                         + "LEFT JOIN FETCH c.hostGroups "
@@ -103,6 +107,11 @@ public class Cluster implements ProvisionEntity {
     private String kerberosMasterKey;
     private String kerberosAdmin;
     private String kerberosPassword;
+
+    private Boolean ldapRequired;
+
+    @ManyToOne
+    private SssdConfig sssdConfig;
 
     private Boolean emailNeeded;
 
@@ -264,6 +273,22 @@ public class Cluster implements ProvisionEntity {
 
     public void setKerberosPassword(String kerberosPassword) {
         this.kerberosPassword = kerberosPassword;
+    }
+
+    public Boolean isLdapRequired() {
+        return ldapRequired == null ? false : ldapRequired;
+    }
+
+    public void setLdapRequired(Boolean ldapRequired) {
+        this.ldapRequired = ldapRequired;
+    }
+
+    public SssdConfig getSssdConfig() {
+        return sssdConfig;
+    }
+
+    public void setSssdConfig(SssdConfig sssdConfig) {
+        this.sssdConfig = sssdConfig;
     }
 
     public AmbariStackDetails getAmbariStackDetails() {

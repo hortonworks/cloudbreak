@@ -188,6 +188,8 @@ public class ClusterCommands implements CommandMarker {
             @CliOption(key = "kerberosMasterKey", mandatory = false, specifiedDefaultValue = "key", help = "Kerberos mater key") String kerberosMasterKey,
             @CliOption(key = "kerberosAdmin", mandatory = false, specifiedDefaultValue = "admin", help = "Kerberos admin name") String kerberosAdmin,
             @CliOption(key = "kerberosPassword", mandatory = false, specifiedDefaultValue = "admin", help = "Kerberos admin password") String kerberosPassword,
+            @CliOption(key = "ldapRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
+                    help = "Start and configure LDAP authentication support for Ambari hosts") Boolean ldapRequired,
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             Set<HostGroupJson> hostGroupList = new HashSet<>();
@@ -221,6 +223,10 @@ public class ClusterCommands implements CommandMarker {
             clusterRequest.setKerberosAdmin(kerberosAdmin);
             clusterRequest.setKerberosMasterKey(kerberosMasterKey);
             clusterRequest.setKerberosPassword(kerberosPassword);
+            clusterRequest.setLdapRequired(ldapRequired);
+            if (context.getSssdConfigId() != null) {
+                clusterRequest.setSssdConfigId(Long.valueOf(context.getSssdConfigId()));
+            }
             clusterRequest.setValidateBlueprint(false);
 
             AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();

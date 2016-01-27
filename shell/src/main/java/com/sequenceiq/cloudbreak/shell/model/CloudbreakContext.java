@@ -321,6 +321,23 @@ public class CloudbreakContext {
         return networksByProvider;
     }
 
+    public boolean isSssdConfigAccessible() {
+        return isPropertyAvailable(PropertyKey.SSSDCONFIG_ACCESSIBLE);
+    }
+
+    public void setSssdConfigAccessible() {
+        addProperty(PropertyKey.SSSDCONFIG_ACCESSIBLE, ACCESSIBLE);
+    }
+
+    public void addSssdConfig(String id) throws Exception {
+        addProperty(PropertyKey.SSSDCONFIG_ID, id);
+        setSssdConfigAccessible();
+    }
+
+    public String getSssdConfigId() {
+        return getLastPropertyValue(PropertyKey.SSSDCONFIG_ID);
+    }
+
     public void putNetwork(String id, String provider) {
         networksByProvider.put(id, provider);
     }
@@ -457,6 +474,6 @@ public class CloudbreakContext {
 
     private enum PropertyKey {
         CREDENTIAL_ID, BLUEPRINT_ID, RECIPE_ID, TEMPLATE_ID, STACK_ID, STACK_NAME,
-        CREDENTIAL_ACCESSIBLE, BLUEPRINT_ACCESSIBLE, TEMPLATE_ACCESSIBLE, STACK_ACCESSIBLE, RECIPE_ACCESSIBLE
+        CREDENTIAL_ACCESSIBLE, BLUEPRINT_ACCESSIBLE, TEMPLATE_ACCESSIBLE, STACK_ACCESSIBLE, RECIPE_ACCESSIBLE, SSSDCONFIG_ACCESSIBLE, SSSDCONFIG_ID
     }
 }

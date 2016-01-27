@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Cluster> {
@@ -146,7 +147,8 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     public Cluster createSource() {
         Stack stack = TestUtil.stack();
         Blueprint blueprint = TestUtil.blueprint();
-        return TestUtil.cluster(blueprint, stack, 1L);
+        SssdConfig config = TestUtil.sssdConfigs(1).iterator().next();
+        return TestUtil.cluster(blueprint, config, stack, 1L);
     }
 
     private void mockAll() throws IOException {

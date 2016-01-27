@@ -26,6 +26,7 @@ import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.TopologyRecord;
@@ -223,6 +225,10 @@ public class AmbariClusterConnector {
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
+            if (cluster.getSssdConfig() != null) {
+                executeSssdRecipe(stack, null);
+            }
+
             if (fs != null) {
                 addFsRecipes(blueprintText, fs, hostGroups);
             }
@@ -301,6 +307,9 @@ public class AmbariClusterConnector {
         Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
         PollingResult pollingResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
         if (isSuccess(pollingResult)) {
+            if (cluster.getSssdConfig() != null) {
+                executeSssdRecipe(stack, new HashSet<>(hosts));
+            }
             final boolean recipesFound = recipesFound(hostGroupAsSet);
             if (!recipesFound || prepareAndExecuteRecipes(true, stack, hostGroup, hostMetadata)) {
                 pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment),
@@ -315,6 +324,13 @@ public class AmbariClusterConnector {
         }
         updateFailedHostMetaData(successHosts, hostMetadata);
         return hostMetadata;
+    }
+
+    private void executeSssdRecipe(Stack stack, Set<String> hosts) throws CloudbreakSecuritySetupException {
+        SssdConfig config = stack.getCluster().getSssdConfig();
+        List<String> payload = Arrays.asList(config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
+                config.getBaseSearch());
+        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.SSSD_SETUP, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT, payload, hosts);
     }
 
     private boolean prepareAndExecuteRecipes(boolean preExecute, Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata) {

@@ -7,6 +7,7 @@ public enum APIResourceType {
     CLUSTER,
     CREDENTIAL,
     RECIPE,
+    SSSDCONFIG,
     NETWORK,
     TOPOLOGY,
     SECURITY_GROUP

@@ -59,6 +59,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             clusterResponse.setHoursUp(0);
             clusterResponse.setMinutesUp(0);
         }
+        clusterResponse.setLdapRequired(source.isLdapRequired());
+        if (source.getSssdConfig() != null) {
+            clusterResponse.setSssdConfigId(source.getSssdConfig().getId());
+        }
         AmbariStackDetails ambariStackDetails = source.getAmbariStackDetails();
         if (ambariStackDetails != null) {
             clusterResponse.setAmbariStackDetails(getConversionService().convert(ambariStackDetails, AmbariStackDetailsJson.class));

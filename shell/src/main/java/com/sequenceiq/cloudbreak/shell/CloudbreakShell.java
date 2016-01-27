@@ -171,6 +171,9 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         if (!cloudbreakClient.recipeEndpoint().getPublics().isEmpty()) {
             context.setRecipeAccessible();
         }
+        if (!cloudbreakClient.sssdConfigEndpoint().getPublics().isEmpty()) {
+            context.setSssdConfigAccessible();
+        }
         Set<NetworkJson> publics = cloudbreakClient.networkEndpoint().getPublics();
         for (NetworkJson network : publics) {
             context.putNetwork(network.getId(), network.getCloudPlatform());

@@ -35,6 +35,10 @@ public class ClusterResponse {
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
     private String password;
     private boolean secure;
+    @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED, required = false)
+    private Boolean ldapRequired = false;
+    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID, required = false)
+    private Long sssdConfigId;
     private Set<HostGroupJson> hostGroups;
     private AmbariStackDetailsJson ambariStackDetails;
     @ApiModelProperty(ClusterModelDescription.SERVICE_ENDPOINT_MAP)
@@ -121,6 +125,22 @@ public class ClusterResponse {
 
     public void setSecure(boolean secure) {
         this.secure = secure;
+    }
+
+    public Boolean getLdapRequired() {
+        return ldapRequired;
+    }
+
+    public void setLdapRequired(Boolean ldapRequired) {
+        this.ldapRequired = ldapRequired;
+    }
+
+    public Long getSssdConfigId() {
+        return sssdConfigId;
+    }
+
+    public void setSssdConfigId(Long sssdConfigId) {
+        this.sssdConfigId = sssdConfigId;
     }
 
     public String getAmbariServerIp() {

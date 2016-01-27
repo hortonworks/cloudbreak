@@ -70,6 +70,8 @@ public class ModelDescriptions {
         public static final String EMAIL_NEEDED = "send email about the result of the cluster installation";
         public static final String SERVICE_ENDPOINT_MAP = "most important services in the cluster";
         public static final String CONFIG_STRATEGY = "config recommendation strategy";
+        public static final String LDAP_REQUIRED = "flag for default LDAP support";
+        public static final String SSSDCONFIG_ID = "SSSD config id for the cluster";
     }
 
     public static class AmbariStackDetailsDescription {
@@ -94,6 +96,13 @@ public class ModelDescriptions {
         public static final String TIMEOUT = "recipe timeout in minutes";
         public static final String PLUGINS = "list of consul plugins with execution types";
         public static final String PROPERTIES = "additional plugin properties";
+    }
+
+    public static class SssdConfigModelDescription {
+        public static final String PROVIDER_TYPE = "provider type";
+        public static final String URL = "url of the provider";
+        public static final String SCHEMA = "schema of the database";
+        public static final String BASE_SEARCH = "search base of the database";
     }
 
     public static class InstanceGroupModelDescription {

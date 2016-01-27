@@ -92,6 +92,19 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete recipe by id";
     }
 
+    public static class SssdConfigOpDescription {
+        public static final String POST_PRIVATE = "create SSSD config as private resource";
+        public static final String POST_PUBLIC = "create SSSD config as public resource";
+        public static final String GET_PRIVATE = "retrieve private SSSD configs";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) SSSD configs";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private SSSD config by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) SSSD config by name";
+        public static final String GET_BY_ID = "retrieve SSSD config by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private SSSD config by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private SSSD config by name";
+        public static final String DELETE_BY_ID = "delete SSSD config by id";
+    }
+
     public static class UsagesOpDescription {
         public static final String GET_ALL = "retrieve usages by filter parameters";
         public static final String GET_PUBLIC = "retrieve public and private (owned) usages by filter parameters";

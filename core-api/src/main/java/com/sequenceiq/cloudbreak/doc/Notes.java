@@ -30,6 +30,7 @@ public class Notes {
             + " way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.";
     public static final String RECIPE_NOTES = "Recipes are basically script extensions to a cluster that run on a set of nodes"
             + " before or after the Ambari cluster installation.";
+    public static final String SSSDCONFIG_NOTES = "SSSD configs are defining external user database configuration for Hadoop containers.";
     public static final String USAGE_NOTES = "Cloudbreak gives you an up to date overview of cluster usage based "
             + "on different filtering criteria (start/end date, users, providers, region, etc)";
     public static final String EVENT_NOTES = "Events are used to track stack creation initiated by cloudbreak users. "

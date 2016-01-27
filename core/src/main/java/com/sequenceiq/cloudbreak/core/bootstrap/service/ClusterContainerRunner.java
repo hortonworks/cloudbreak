@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.CONSUL_WATCH;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.HAVEGED;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.KERBEROS;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LDAP;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LOGROTATE;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.REGISTRATOR;
 import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.DOMAIN_REALM;
@@ -22,6 +23,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
@@ -54,7 +56,11 @@ public class ClusterContainerRunner {
     private static final String HOST_VOLUME_PATH = VolumeUtils.getLogVolume("logs");
     private static final String HOST_NETWORK_MODE = "host";
     private static final int AMBARI_PORT = 8080;
+    private static final int LDAP_PORT = 389;
     private static final int REGISTRATOR_RESYNC_SECONDS = 60;
+
+    @Value("${cb.docker.env.ldap}")
+    private String ldapEnv;
 
     @Inject
     private ClusterService clusterService;
@@ -129,6 +135,12 @@ public class ClusterContainerRunner {
                 containerOrchestrator.runContainer(containerConfigService.get(stack, KERBEROS), credential, kerberosServerConstraint,
                         stackDeletionBasedExitCriteriaModel(stack.getId()));
             }
+
+            if (cluster.isLdapRequired()) {
+                ContainerConstraint ldapConstraint = getLdapConstraint(gatewayNode);
+                containerOrchestrator.runContainer(containerConfigService.get(stack, LDAP), credential, ldapConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
+            }
         }
 
         runAmbariAgentContainers(add, candidateAddresses, containerOrchestrator, cloudPlatform, stack, credential);
@@ -190,6 +202,19 @@ public class ClusterContainerRunner {
         return new ContainerConstraint.Builder()
                 .withName(HAVEGED.getName())
                 .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
+                .build();
+    }
+
+    private ContainerConstraint getLdapConstraint(Node gatewayNode) {
+        return new ContainerConstraint.Builder()
+                .withName(LDAP.getName())
+                .networkMode(HOST_NETWORK_MODE)
+                .tcpPortBinding(new TcpPortBinding(LDAP_PORT, "0.0.0.0", LDAP_PORT))
+                .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
+                .addEnv(Arrays.asList(String.format("constraint:node==%s", gatewayNode.getHostname()),
+                        String.format("SERVICE_NAME=%s", LDAP.getName()),
+                        "NAMESERVER_IP=127.0.0.1"))
+                .addEnv(Arrays.asList(ldapEnv.split("\\|")))
                 .build();
     }
 

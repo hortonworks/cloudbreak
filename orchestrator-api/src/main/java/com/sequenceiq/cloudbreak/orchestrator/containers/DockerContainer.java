@@ -10,7 +10,8 @@ public enum DockerContainer {
     MUNCHAUSEN("munchausen"),
     CONSUL_WATCH("consul-watch"),
     LOGROTATE("logrotate"),
-    HAVEGED("haveged");
+    HAVEGED("haveged"),
+    LDAP("ldap");
 
     private final String name;
 
