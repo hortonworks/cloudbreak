@@ -42,9 +42,9 @@ import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakUtil;
-import com.sequenceiq.cloudbreak.shell.util.MessageUtil;
 
 @Component
 public class StackCommands implements CommandMarker {
@@ -59,6 +59,8 @@ public class StackCommands implements CommandMarker {
     private CloudbreakUtil cloudbreakUtil;
     @Inject
     private ObjectMapper objectMapper;
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
 
     @CliAvailabilityIndicator(value = "stack list")
     public boolean isStackListCommandAvailable() {
@@ -110,7 +112,7 @@ public class StackCommands implements CommandMarker {
             cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
             return context.getStackId();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -131,7 +133,7 @@ public class StackCommands implements CommandMarker {
             cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
             return context.getStackId();
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -205,10 +207,10 @@ public class StackCommands implements CommandMarker {
             context.addStack(id.getId().toString(), name);
             context.setHint(Hints.CREATE_CLUSTER);
             return wait ? cloudbreakUtil.waitAndCheckStackStatus(id.getId(), Status.AVAILABLE.name()) : "Stack created, id: " + id.getId();
-        } catch (ValidationException e) {
-            return e.getMessage();
+        } catch (ValidationException ex) {
+            throw exceptionTransformer.transformToRuntimeException(ex);
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -276,7 +278,7 @@ public class StackCommands implements CommandMarker {
             }
             return "No stack specified. (select by using --id or --name)";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -309,7 +311,7 @@ public class StackCommands implements CommandMarker {
             }
             return "Stack not specified. (select by using --id or --name)";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -318,7 +320,7 @@ public class StackCommands implements CommandMarker {
         try {
             return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.stackEndpoint().getPublics(), "id", "name"), "ID", "INFO");
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -330,7 +332,7 @@ public class StackCommands implements CommandMarker {
             cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
             return "Stack is stopping";
         } catch (Exception ex) {
-            return MessageUtil.getMessage(ex);
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -342,7 +344,7 @@ public class StackCommands implements CommandMarker {
             cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
             return "Stack is starting";
         } catch (Exception ex) {
-            return MessageUtil.getMessage(ex);
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -358,7 +360,7 @@ public class StackCommands implements CommandMarker {
             }
             return "No stack specified.";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -382,7 +384,7 @@ public class StackCommands implements CommandMarker {
             }
             return "No stack specified.";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupName;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Component
@@ -37,6 +38,8 @@ public class SecurityGroupCommands implements CommandMarker {
     private CloudbreakClient cloudbreakClient;
     @Inject
     private ResponseTransformer responseTransformer;
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
 
     @CliAvailabilityIndicator({ "securitygroup create", "securitygroup list" })
     public boolean areSecurityGroupCommandsAvailable() {
@@ -102,7 +105,7 @@ public class SecurityGroupCommands implements CommandMarker {
             setHint();
             return String.format(CREATE_SUCCESS_MSG, id);
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -116,8 +119,8 @@ public class SecurityGroupCommands implements CommandMarker {
             }
             context.setSecurityGroups(updatedGroups);
             return renderSingleMap(updatedGroups, "ID", "NAME");
-        } catch (Exception e) {
-            return e.getMessage();
+        } catch (Exception ex) {
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -165,7 +168,7 @@ public class SecurityGroupCommands implements CommandMarker {
             }
             return "Security group could not be found!";
         } catch (Exception ex) {
-            return ex.getMessage();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -187,7 +190,7 @@ public class SecurityGroupCommands implements CommandMarker {
             }
             return "No security group specified.";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 

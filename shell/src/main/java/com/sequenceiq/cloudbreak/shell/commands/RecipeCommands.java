@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Component
@@ -40,6 +41,8 @@ public class RecipeCommands implements CommandMarker {
     private ResponseTransformer responseTransformer;
     @Inject
     private ObjectMapper mapper;
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
 
     @CliAvailabilityIndicator(value = "recipe list")
     public boolean isRecipeListCommandAvailable() {
@@ -71,7 +74,7 @@ public class RecipeCommands implements CommandMarker {
         try {
             return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.recipeEndpoint().getPublics(), "id", "name"), "ID", "INFO");
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -92,7 +95,7 @@ public class RecipeCommands implements CommandMarker {
             }
             return String.format("Recipe '%s' has been added with id: %s", recipeRequest.getName(), id.getId());
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -119,7 +122,7 @@ public class RecipeCommands implements CommandMarker {
                     + renderSingleMap(recipeMap.getProperties(), "CONSUL-KEY", "VALUE") + "\n\n"
                     + renderObjectMap(recipeMap.getPlugins(), "PLUGIN", "EXECUTION_TYPE") + "\n\n";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -137,7 +140,7 @@ public class RecipeCommands implements CommandMarker {
             }
             return "Recipe not specified (select recipe by --id or --name)";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -184,7 +187,7 @@ public class RecipeCommands implements CommandMarker {
             }
             return String.format("Recipe '%s' has been stored with id: %s", name, id.getId());
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 

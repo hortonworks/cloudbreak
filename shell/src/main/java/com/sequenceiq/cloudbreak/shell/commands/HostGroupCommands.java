@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
 @Component
 public class HostGroupCommands implements CommandMarker {
@@ -30,6 +31,8 @@ public class HostGroupCommands implements CommandMarker {
     private CloudbreakContext context;
     @Inject
     private CloudbreakClient cloudbreakClient;
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
 
     @CliAvailabilityIndicator(value = "hostgroup configure")
     public boolean isCreateHostGroupAvailable() {
@@ -59,7 +62,7 @@ public class HostGroupCommands implements CommandMarker {
             context.putHostGroup(hostGroupMapEntry);
             return renderObjectMapValueMap(context.getHostGroups(), "hostgroup", "instanceGroupName", "recipeIds");
         } catch (Exception ex) {
-            return ex.getMessage();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 

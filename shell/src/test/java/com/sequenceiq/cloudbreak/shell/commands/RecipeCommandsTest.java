@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
 public class RecipeCommandsTest {
     private static final String RECIPE_ID = "50";
@@ -43,6 +44,9 @@ public class RecipeCommandsTest {
     @Mock
     private ObjectMapper jsonMapper;
 
+    @Mock
+    private ExceptionTransformer exceptionTransformer;
+
     private RecipeResponse dummyResult;
 
     @Before
@@ -52,16 +56,17 @@ public class RecipeCommandsTest {
         dummyResult = new RecipeResponse();
         dummyResult.setId(Long.valueOf(RECIPE_ID));
         given(cloudbreakClient.recipeEndpoint()).willReturn(recipeEndpoint);
+        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testShowRecipeById() throws Exception {
         given(recipeEndpoint.getPublic(RECIPE_ID)).willReturn(dummyResult);
         underTest.showRecipe(RECIPE_ID, null);
         verify(recipeEndpoint, times(1)).get(anyLong());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testShowRecipeByName() throws Exception {
         given(recipeEndpoint.getPublic(RECIPE_NAME)).willReturn(dummyResult);
         given(recipeEndpoint.get(Long.valueOf(RECIPE_ID))).willReturn(dummyResult);
@@ -105,13 +110,13 @@ public class RecipeCommandsTest {
         verify(recipeEndpoint, times(0)).delete(anyLong());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testStoreRecipePreScriptExists() throws Exception {
         underTest.storeRecipe("name", null, PluginExecutionType.ALL_NODES, new File(getClass().getResource("/store-recipe-test").getFile()), null, null, null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testStoreRecipePostScriptExists() throws Exception {
         underTest.storeRecipe("name", null, PluginExecutionType.ALL_NODES, null, new File(getClass().getResource("/store-recipe-test").getFile()), null, null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));

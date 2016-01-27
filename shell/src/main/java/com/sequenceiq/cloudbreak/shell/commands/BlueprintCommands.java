@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Component
@@ -42,6 +43,8 @@ public class BlueprintCommands implements CommandMarker {
     private ResponseTransformer responseTransformer;
     @Inject
     private ObjectMapper objectMapper;
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
 
     @CliAvailabilityIndicator(value = "blueprint list")
     public boolean isBlueprintListCommandAvailable() {
@@ -78,8 +81,8 @@ public class BlueprintCommands implements CommandMarker {
         String message = "Default blueprints added";
         try {
             cloudbreakClient.blueprintEndpoint().getPublics();
-        } catch (Exception e) {
-            message = "Failed to add the default blueprints: " + e.getMessage();
+        } catch (Exception ex) {
+            throw exceptionTransformer.transformToRuntimeException("Failed to add the default blueprints: " + ex.getMessage());
         }
         return message;
     }
@@ -99,7 +102,7 @@ public class BlueprintCommands implements CommandMarker {
                 return "No blueprint specified (select a blueprint by --id or --name)";
             }
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -109,7 +112,7 @@ public class BlueprintCommands implements CommandMarker {
             Set<BlueprintResponse> publics = cloudbreakClient.blueprintEndpoint().getPublics();
             return renderSingleMap(responseTransformer.transformToMap(publics, "id", "blueprintName"), "ID", "INFO");
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -126,13 +129,11 @@ public class BlueprintCommands implements CommandMarker {
             } else {
                 return "No blueprints specified.";
             }
-
             return renderSingleMap(responseTransformer.transformObjectToStringMap(blueprintResponse, "ambariBlueprint"), "FIELD", "INFO")
                     + "\n\n" + renderMultiValueMap(getComponentMap(blueprintResponse.getAmbariBlueprint()), "HOSTGROUP", "COMPONENT");
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
-
     }
 
     @CliCommand(value = "blueprint select", help = "Select the blueprint by its id or name")
@@ -156,7 +157,7 @@ public class BlueprintCommands implements CommandMarker {
             }
             return "No blueprint specified (select a blueprint by --id or --name)";
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
@@ -194,7 +195,7 @@ public class BlueprintCommands implements CommandMarker {
             }
             return message;
         } catch (Exception ex) {
-            return ex.toString();
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
 
