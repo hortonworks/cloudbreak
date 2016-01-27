@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import java.util.Map;
+
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -16,17 +16,14 @@ public class ContainerOrchestratorResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContainerOrchestratorResolver.class);
 
-    @Value("${cb.container.orchestrator:}")
-    private String containerOrchestratorName;
-
     @Resource
     private Map<String, ContainerOrchestrator> containerOrchestrators;
 
-    public ContainerOrchestrator get() throws CloudbreakException {
-        ContainerOrchestrator co = containerOrchestrators.get(containerOrchestratorName);
+    public ContainerOrchestrator get(String name) throws CloudbreakException {
+        ContainerOrchestrator co = containerOrchestrators.get(name);
         if (co == null) {
-            LOGGER.error("ContainerOrchestrator not found: {}, supported ContainerOrchestrators: {}", containerOrchestratorName, containerOrchestrators);
-            throw new CloudbreakException("ContainerOrchestrator not found: " + containerOrchestratorName);
+            LOGGER.error("ContainerOrchestrator not found: {}, supported ContainerOrchestrators: {}", name, containerOrchestrators);
+            throw new CloudbreakException("ContainerOrchestrator not found: " + name);
         }
         return co;
     }

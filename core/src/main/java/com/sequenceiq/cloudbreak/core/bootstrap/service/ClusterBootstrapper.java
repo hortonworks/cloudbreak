@@ -94,7 +94,7 @@ public class ClusterBootstrapper {
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
-            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
+            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get("SWARM");
             bootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     bootstrapApiCheckerTask,
                     new BootstrapApiContext(stack, gatewayConfig, containerOrchestrator),
@@ -124,7 +124,7 @@ public class ClusterBootstrapper {
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
             Orchestrator orchestrator = new Orchestrator();
-            orchestrator.setApiEndpoint(gatewayInstance.getPublicIp() + ":3376");
+            orchestrator.setApiEndpoint(gatewayInstance.getPublicIp() + ":443");
             orchestrator.setType("SWARM");
             Map<String, String> attributes = new HashMap<>();
             attributes.put("certificateDir", gatewayConfig.getCertificateDir());
@@ -156,7 +156,7 @@ public class ClusterBootstrapper {
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
-            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
+            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get("SWARM");
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             for (int i = 0; i < nodeMap.size(); i++) {
                 containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i), CONSUL_LOG_LOCATION,

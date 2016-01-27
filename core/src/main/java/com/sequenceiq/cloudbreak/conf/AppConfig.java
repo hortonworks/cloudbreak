@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClient;
 import com.sequenceiq.cloudbreak.client.config.ConfigKey;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
@@ -82,6 +81,9 @@ public class AppConfig implements ResourceLoaderAware {
     private boolean certificateValidation;
 
     @Inject
+    private List<ContainerOrchestrator> containerOrchestrators;
+
+    @Inject
     private List<FileSystemConfigurator> fileSystemConfigurators;
 
     @Inject
@@ -118,26 +120,12 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    public Map<String, ContainerOrchestrator> containerOrchestrators() throws CloudbreakException {
+    public Map<String, ContainerOrchestrator> containerOrchestrators() {
         Map<String, ContainerOrchestrator> map = new HashMap<>();
-        for (String className : orchestrators) {
-            try {
-                Class<?> coClass = AppConfig.class.getClassLoader().loadClass(className);
-                if (ContainerOrchestrator.class.isAssignableFrom(coClass)) {
-                    ContainerOrchestrator co = (ContainerOrchestrator) coClass.newInstance();
-                    co.init(simpleParalellContainerRunnerExecutor(), stackDeletionBasedExitCriteria());
-                    map.put(co.name(), co);
-                }
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                throw new CloudbreakException("Invalid ContainerOrchestrator definition: " + className, e);
-            }
+        for (ContainerOrchestrator containerOrchestrator : containerOrchestrators) {
+            containerOrchestrator.init(simpleParalellContainerRunnerExecutor(), stackDeletionBasedExitCriteria());
+            map.put(containerOrchestrator.name(), containerOrchestrator);
         }
-
-        if (map.isEmpty()) {
-            LOGGER.error("No any ContainerOrchestrator has been loaded. Following ContainerOrchestrators were tried {}", orchestrators);
-            throw new CloudbreakException("No any ContainerOrchestrator has been loaded");
-        }
-
         return map;
     }
 

@@ -19,10 +19,9 @@ public class ContainerConstraint {
     private final List<String> env;
     private final String networkMode;
     private final TcpPortBinding tcpPortBinding;
-    private final Map<String, String> privateIpsByHostname;
-    private final ContainerName containerName;
+    private final List<String> hosts;
+    private final String name;
     private final Map<String, String> links;
-
 
     public ContainerConstraint(ContainerConstraint.Builder builder) {
         this.cmd = builder.cmd;
@@ -35,8 +34,8 @@ public class ContainerConstraint {
         this.env = builder.env;
         this.networkMode = builder.networkMode;
         this.tcpPortBinding = builder.tcpPortBinding;
-        this.privateIpsByHostname = builder.privateIpsByHostname;
-        this.containerName = builder.containerName;
+        this.hosts = builder.hosts;
+        this.name = builder.name;
         this.links = builder.links;
     }
 
@@ -80,12 +79,12 @@ public class ContainerConstraint {
         return tcpPortBinding;
     }
 
-    public Map<String, String> getPrivateIpsByHostname() {
-        return privateIpsByHostname;
+    public List<String> getHosts() {
+        return hosts;
     }
 
-    public ContainerName getContainerName() {
-        return containerName;
+    public String getName() {
+        return name;
     }
 
     public Map<String, String> getLinks() {
@@ -104,8 +103,8 @@ public class ContainerConstraint {
         private List<String> env = new ArrayList<>();
         private String networkMode;
         private TcpPortBinding tcpPortBinding;
-        private Map<String, String> privateIpsByHostname = new HashMap<>();
-        private ContainerName containerName;
+        private List<String> hosts = new ArrayList<>();
+        private String name;
         private Map<String, String> links = new HashMap<>();
 
         public Builder containerConstraint(ContainerConstraint containerConstraint) {
@@ -119,8 +118,8 @@ public class ContainerConstraint {
             this.env = containerConstraint.getEnv();
             this.networkMode = containerConstraint.getNetworkMode();
             this.tcpPortBinding = containerConstraint.getTcpPortBinding();
-            this.privateIpsByHostname = containerConstraint.getPrivateIpsByHostname();
-            this.containerName = containerConstraint.getContainerName();
+            this.hosts = containerConstraint.getHosts();
+            this.name = containerConstraint.getName();
             this.links = containerConstraint.getLinks();
             return this;
         }
@@ -175,18 +174,13 @@ public class ContainerConstraint {
             return this;
         }
 
-        public Builder addPrivateIpsByHostname(Map<String, String> privateIpsByHostname) {
-            this.privateIpsByHostname.putAll(privateIpsByHostname);
-            return this;
-        }
-
-        public Builder withNamePrefix(String namePrefix) {
-            this.containerName = new ContainerName(null, namePrefix);
+        public Builder addHosts(List<String> hosts) {
+            this.hosts.addAll(hosts);
             return this;
         }
 
         public Builder withName(String name) {
-            this.containerName = new ContainerName(name, null);
+            this.name = name;
             return this;
         }
 

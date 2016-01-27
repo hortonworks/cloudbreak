@@ -95,7 +95,7 @@ public class ClusterBootstrapperTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new MockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -122,7 +122,7 @@ public class ClusterBootstrapperTest {
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new MockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -150,7 +150,7 @@ public class ClusterBootstrapperTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new CancelledMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new CancelledMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -170,7 +170,7 @@ public class ClusterBootstrapperTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new FailedMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new FailedMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -190,7 +190,7 @@ public class ClusterBootstrapperTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new TwoLengthMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new TwoLengthMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -218,7 +218,7 @@ public class ClusterBootstrapperTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new MockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -244,7 +244,7 @@ public class ClusterBootstrapperTest {
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new TwoLengthMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new TwoLengthMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -271,7 +271,7 @@ public class ClusterBootstrapperTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new MockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -297,7 +297,7 @@ public class ClusterBootstrapperTest {
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new CancelledNewNodesMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new CancelledNewNodesMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -318,7 +318,7 @@ public class ClusterBootstrapperTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new FailedNewNodesMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new FailedNewNodesMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),

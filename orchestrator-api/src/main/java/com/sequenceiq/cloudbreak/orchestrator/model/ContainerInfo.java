@@ -4,13 +4,13 @@ public class ContainerInfo {
 
     private String id;
     private String name;
-    private String ipAddres;
+    private String host;
     private String image;
 
-    public ContainerInfo(String id, String name, String ipAddres, String image) {
+    public ContainerInfo(String id, String name, String host, String image) {
         this.id = id;
         this.name = name;
-        this.ipAddres = ipAddres;
+        this.host = host;
         this.image = image;
     }
 
@@ -22,8 +22,8 @@ public class ContainerInfo {
         return name;
     }
 
-    public String getIpAddres() {
-        return ipAddres;
+    public String getHost() {
+        return host;
     }
 
     public String getImage() {
