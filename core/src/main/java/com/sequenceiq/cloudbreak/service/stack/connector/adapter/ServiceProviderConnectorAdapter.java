@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -34,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
@@ -57,7 +55,6 @@ import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceCo
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -95,31 +92,6 @@ public class ServiceProviderConnectorAdapter {
     private CloudbreakMessagesService cloudbreakMessagesService;
     @Inject
     private InstanceMetadataService instanceMetadataService;
-
-    public Set<Resource> buildStack(Stack stack) {
-        LOGGER.info("Assembling launch request for stack: {}", stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
-        instanceMetadataService.saveInstanceRequests(stack, cloudStack.getGroups());
-        FailurePolicy policy = Optional.fromNullable(stack.getFailurePolicy()).or(new FailurePolicy());
-        LaunchStackRequest launchRequest = new LaunchStackRequest(cloudContext, cloudCredential, cloudStack, policy.getAdjustmentType(), policy.getThreshold());
-        LOGGER.info("Triggering event: {}", launchRequest);
-        eventBus.notify(launchRequest.selector(), Event.wrap(launchRequest));
-        try {
-            LaunchStackResult res = launchRequest.await();
-            LOGGER.info("Result: {}", res);
-            validateResourceResults(cloudContext, res);
-            List<CloudResourceStatus> results = res.getResults();
-            updateNodeCount(stack.getId(), cloudStack.getGroups(), results, true);
-            return transformResults(results, stack);
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while launching stack", e);
-            throw new OperationException("Unexpected exception occurred during build stack: " + e.getMessage());
-        }
-    }
 
     public void startAll(Stack stack) {
         LOGGER.info("Assembling start request for stack: {}", stack);
