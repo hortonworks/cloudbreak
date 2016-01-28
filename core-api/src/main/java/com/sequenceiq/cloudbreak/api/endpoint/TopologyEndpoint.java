@@ -37,6 +37,12 @@ public interface TopologyEndpoint {
     @ApiOperation(value = TopologyOpDesctiption.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES)
     Set<TopologyResponse> getPublics();
 
+    @GET
+    @Path(value = "account/topologies/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = TopologyOpDesctiption.GET_BY_ID, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES)
+    TopologyResponse get(@PathParam(value = "id") Long id);
+
     @POST
     @Path(value = "account/topologies")
     @Produces(MediaType.APPLICATION_JSON)

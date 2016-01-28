@@ -47,11 +47,11 @@ public class TopologyService {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public Topology get(Long id) {
-        Topology template = topologyRepository.findOne(id);
-        if (template == null) {
+        Topology topology = topologyRepository.findOne(id);
+        if (topology == null) {
             throw new NotFoundException(String.format(TOPOLOGY_NOT_FOUND_MSG, id));
         } else {
-            return template;
+            return topology;
         }
     }
 

@@ -26,8 +26,10 @@ public class JsonToTopologyConverter extends AbstractConversionServiceAwareConve
 
     private List<TopologyRecord> convertNodes(Map<String, String> nodes) {
         List<TopologyRecord> result = Lists.newArrayList();
-        for (Map.Entry<String, String> node : nodes.entrySet()) {
-            result.add(new TopologyRecord(node.getKey(), node.getValue()));
+        if (nodes != null) {
+            for (Map.Entry<String, String> node : nodes.entrySet()) {
+                result.add(new TopologyRecord(node.getKey(), node.getValue()));
+            }
         }
         return result;
     }

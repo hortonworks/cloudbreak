@@ -67,4 +67,12 @@ public class TopologyController implements TopologyEndpoint {
         MDCBuilder.buildUserMdcContext(user);
         topologyService.delete(id, user);
     }
+
+    @Override
+    public TopologyResponse get(Long id) {
+        CbUser user = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(user);
+        Topology topology = topologyService.get(id);
+        return convert(topology);
+    }
 }

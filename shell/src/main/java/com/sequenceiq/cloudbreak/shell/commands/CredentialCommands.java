@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.shell.commands;
 
 import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderSingleMap;
+import static com.sequenceiq.cloudbreak.shell.util.TopologyUtil.checkTopologyForResource;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -164,7 +165,8 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key file") String sshKeyUrl,
             @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount
+            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
+            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the credential belongs to") Long topologyId
     ) {
         if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
             return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString";
@@ -206,10 +208,11 @@ public class CredentialCommands implements CommandMarker {
         }
 
         try {
+            String cloudPlatform = "OPENSTACK";
             CredentialRequest credentialRequest = new CredentialRequest();
             credentialRequest.setName(name);
             credentialRequest.setDescription(description);
-            credentialRequest.setCloudPlatform("OPENSTACK");
+            credentialRequest.setCloudPlatform(cloudPlatform);
             credentialRequest.setPublicKey(sshKey);
 
             Map<String, Object> parameters = new HashMap<>();
@@ -226,6 +229,10 @@ public class CredentialCommands implements CommandMarker {
             parameters.put("projectName", projectName);
 
             credentialRequest.setParameters(parameters);
+            if (topologyId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            }
+            credentialRequest.setTopologyId(topologyId);
 
             IdJson idJson;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -250,7 +257,8 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key file") String sshKeyUrl,
             @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the template") String description
+            @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
+            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the credential belongs to") Long topologyId
     ) {
         if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
             return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString";
@@ -272,16 +280,21 @@ public class CredentialCommands implements CommandMarker {
             sshKey = sshKeyString;
         }
         try {
+            String cloudPlatform = "AWS";
             CredentialRequest credentialRequest = new CredentialRequest();
             credentialRequest.setName(name);
             credentialRequest.setDescription(description);
-            credentialRequest.setCloudPlatform("AWS");
+            credentialRequest.setCloudPlatform(cloudPlatform);
             credentialRequest.setPublicKey(sshKey);
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("roleArn", roleArn);
 
             credentialRequest.setParameters(parameters);
+            if (topologyId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            }
+            credentialRequest.setTopologyId(topologyId);
 
             IdJson id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -309,7 +322,8 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key url") String sshKeyUrl,
             @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description
+            @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description,
+            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the credential belongs to") Long topologyId
     ) {
         if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
             return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString";
@@ -340,11 +354,16 @@ public class CredentialCommands implements CommandMarker {
         }
 
         try {
+            String cloudPlatform = "GCP";
             CredentialRequest credentialRequest = new CredentialRequest();
             credentialRequest.setName(name);
             credentialRequest.setDescription(description);
-            credentialRequest.setCloudPlatform("GCP");
+            credentialRequest.setCloudPlatform(cloudPlatform);
             credentialRequest.setPublicKey(sshKey);
+            if (topologyId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            }
+            credentialRequest.setTopologyId(topologyId);
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("projectId", projectId);
@@ -393,7 +412,8 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "sshKeyUrl of the template") String sshKeyUrl,
             @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description
+            @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description,
+            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the credential belongs to") Long topologyId
     ) {
         if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
             return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString";
@@ -415,10 +435,11 @@ public class CredentialCommands implements CommandMarker {
             sshKey = sshKeyString;
         }
         try {
+            String cloudPlatform = "AZURE_RM";
             CredentialRequest credentialRequest = new CredentialRequest();
             credentialRequest.setName(name);
             credentialRequest.setDescription(description);
-            credentialRequest.setCloudPlatform("AZURE_RM");
+            credentialRequest.setCloudPlatform(cloudPlatform);
             credentialRequest.setPublicKey(sshKey);
 
             Map<String, Object> parameters = new HashMap<>();
@@ -428,6 +449,10 @@ public class CredentialCommands implements CommandMarker {
             parameters.put("accessKey", appId);
 
             credentialRequest.setParameters(parameters);
+            if (topologyId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            }
+            credentialRequest.setTopologyId(topologyId);
 
             IdJson id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;

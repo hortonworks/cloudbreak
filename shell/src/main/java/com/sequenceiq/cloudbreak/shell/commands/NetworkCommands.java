@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.shell.commands;
 
 import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderSingleMap;
+import static com.sequenceiq.cloudbreak.shell.util.TopologyUtil.checkTopologyForResource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,14 +66,16 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "internetGatewayID", mandatory = false,
                     help = "The ID of the internet gateway that is attached to the VPC (configured via 'vpcID' option)") String internetGatewayId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
     ) {
         try {
+            String cloudPlatform = "AWS";
             NetworkJson networkJson = new NetworkJson();
             networkJson.setName(name);
             networkJson.setDescription(description);
             networkJson.setPublicInAccount(publicInAccount == null ? false : publicInAccount);
-            networkJson.setCloudPlatform("AWS");
+            networkJson.setCloudPlatform(cloudPlatform);
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("vpcId", vpcId);
@@ -80,6 +83,10 @@ public class NetworkCommands implements CommandMarker {
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
+            if (topologyId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            }
+            networkJson.setTopologyId(topologyId);
 
             IdJson id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -88,7 +95,7 @@ public class NetworkCommands implements CommandMarker {
             } else {
                 id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
-            createHintAndAddNetworkToContext(id.getId().toString(), "AWS");
+            createHintAndAddNetworkToContext(id.getId().toString(), cloudPlatform);
             return String.format(CREATE_SUCCESS_MSG, id.getId());
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -101,20 +108,26 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "addressPrefix", mandatory = true, help = "The address prefix of the Azure virtual network in CIDR format") String addressPrefix,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
     ) {
         try {
+            String cloudPlatform = "AZURE_RM";
             NetworkJson networkJson = new NetworkJson();
             networkJson.setName(name);
             networkJson.setDescription(description);
             networkJson.setPublicInAccount(publicInAccount == null ? false : publicInAccount);
-            networkJson.setCloudPlatform("AZURE_RM");
+            networkJson.setCloudPlatform(cloudPlatform);
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("addressPrefix", addressPrefix);
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
+            if (topologyId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            }
+            networkJson.setTopologyId(topologyId);
 
             IdJson id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -123,7 +136,7 @@ public class NetworkCommands implements CommandMarker {
             } else {
                 id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
-            createHintAndAddNetworkToContext(id.getId().toString(), "AZURE_RM");
+            createHintAndAddNetworkToContext(id.getId().toString(), cloudPlatform);
             return String.format(CREATE_SUCCESS_MSG, id.getId());
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -135,19 +148,25 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
     ) {
         try {
+            String cloudPlatform = "GCP";
             NetworkJson networkJson = new NetworkJson();
             networkJson.setName(name);
             networkJson.setDescription(description);
             networkJson.setPublicInAccount(publicInAccount == null ? false : publicInAccount);
-            networkJson.setCloudPlatform("GCP");
+            networkJson.setCloudPlatform(cloudPlatform);
 
             Map<String, Object> parameters = new HashMap<>();
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
+            if (topologyId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            }
+            networkJson.setTopologyId(topologyId);
 
             IdJson id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -156,7 +175,7 @@ public class NetworkCommands implements CommandMarker {
             } else {
                 id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
-            createHintAndAddNetworkToContext(id.getId().toString(), "GCP");
+            createHintAndAddNetworkToContext(id.getId().toString(), cloudPlatform);
             return String.format(CREATE_SUCCESS_MSG, id.getId());
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -169,20 +188,26 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
             @CliOption(key = "publicNetID", mandatory = true, help = "ID of the available and desired OpenStack public network") String publicNetID,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
     ) {
         try {
+            String cloudPlatform = "OPENSTACK";
             NetworkJson networkJson = new NetworkJson();
             networkJson.setName(name);
             networkJson.setDescription(description);
             networkJson.setPublicInAccount(publicInAccount == null ? false : publicInAccount);
-            networkJson.setCloudPlatform("OPENSTACK");
+            networkJson.setCloudPlatform(cloudPlatform);
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("publicNetId", publicNetID);
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
+            if (topologyId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            }
+            networkJson.setTopologyId(topologyId);
 
             IdJson id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -191,7 +216,7 @@ public class NetworkCommands implements CommandMarker {
             } else {
                 id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
-            createHintAndAddNetworkToContext(id.getId().toString(), "OPENSTACK");
+            createHintAndAddNetworkToContext(id.getId().toString(), cloudPlatform);
             return String.format(CREATE_SUCCESS_MSG, id.getId());
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
