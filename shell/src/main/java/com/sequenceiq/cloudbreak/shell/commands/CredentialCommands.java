@@ -423,9 +423,9 @@ public class CredentialCommands implements CommandMarker {
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("subscriptionId", subscriptionId);
-            parameters.put("secretKey", appId);
+            parameters.put("secretKey", password);
             parameters.put("tenantId", tenantId);
-            parameters.put("accessKey", password);
+            parameters.put("accessKey", appId);
 
             credentialRequest.setParameters(parameters);
 
