@@ -1,9 +1,15 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import mesosphere.marathon.client.Marathon;
+import mesosphere.marathon.client.MarathonClient;
+import mesosphere.marathon.client.model.v2.App;
+import mesosphere.marathon.client.utils.MarathonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,7 +32,28 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     @Override
     public List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-        return null;
+        List<ContainerInfo> result = new ArrayList<>();
+        Marathon client = MarathonClient.getInstance(cred.getApiEndpoint());
+
+        App app = new App();
+        app.setId(constraint.getName());
+        app.setCpus(constraint.getCpu());
+        app.setMem(constraint.getMem());
+        app.setInstances(constraint.getInstances());
+        for (Integer port : constraint.getPorts()) {
+            app.addPort(port);
+        }
+
+        try {
+            app = client.createApp(app);
+        } catch (MarathonException e) {
+            String msg = String.format("Marathon container creation failed. From image: '%s', with name: '%s'!", config.getName(), constraint.getName());
+            LOGGER.error(msg, e);
+            throw new CloudbreakOrchestratorFailedException(msg, e);
+        }
+
+        //collect container info from mesos api
+        return result;
     }
 
     @Override

@@ -123,14 +123,14 @@ public class AppConfig implements ResourceLoaderAware {
     public Map<String, ContainerOrchestrator> containerOrchestrators() {
         Map<String, ContainerOrchestrator> map = new HashMap<>();
         for (ContainerOrchestrator containerOrchestrator : containerOrchestrators) {
-            containerOrchestrator.init(simpleParalellContainerRunnerExecutor(), stackDeletionBasedExitCriteria());
+            containerOrchestrator.init(simpleParallelContainerRunnerExecutor(), stackDeletionBasedExitCriteria());
             map.put(containerOrchestrator.name(), containerOrchestrator);
         }
         return map;
     }
 
     @Bean
-    public ParallelContainerRunner simpleParalellContainerRunnerExecutor() {
+    public ParallelContainerRunner simpleParallelContainerRunnerExecutor() {
         return new ExecutorBasedParallelContainerRunner(containerBootstrapBuilderExecutor());
     }
 

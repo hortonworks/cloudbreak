@@ -1,7 +1,5 @@
 -- // orchestrator domain added
 -- Migration SQL that makes the change goes here.
--- // create_filesystem
--- Migration SQL that makes the change goes here.
 
 CREATE TABLE IF NOT EXISTS orchestrator
 (

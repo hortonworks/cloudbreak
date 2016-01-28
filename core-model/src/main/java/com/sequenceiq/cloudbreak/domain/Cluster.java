@@ -122,6 +122,10 @@ public class Cluster implements ProvisionEntity {
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostGroup> hostGroups = new HashSet<>();
 
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Container> containers = new HashSet<>();
+
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private AmbariStackDetails ambariStackDetails;
 
@@ -241,6 +245,14 @@ public class Cluster implements ProvisionEntity {
 
     public void setHostGroups(Set<HostGroup> hostGroups) {
         this.hostGroups = hostGroups;
+    }
+
+    public Set<Container> getContainers() {
+        return containers;
+    }
+
+    public void setContainers(Set<Container> containers) {
+        this.containers = containers;
     }
 
     public boolean isCreateFailed() {
