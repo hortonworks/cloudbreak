@@ -135,20 +135,16 @@ public class CloudbreakContext {
     }
 
     public void addBlueprint(String id) throws Exception {
-        Set<BlueprintResponse> publics = cloudbreakClient.blueprintEndpoint().getPublics();
+        BlueprintResponse bp = cloudbreakClient.blueprintEndpoint().get(Long.valueOf(id));
         this.instanceGroups = new HashMap<>();
         this.hostGroups = new HashMap<>();
 
-        for (BlueprintResponse aPublic : publics) {
-            JsonNode hostGroups = mapper.readTree(aPublic.getAmbariBlueprint().getBytes()).get("host_groups");
-            for (JsonNode hostGroup : hostGroups) {
-                //JsonNode componentsNodes = hostGroup.get("components");
-                //for (JsonNode componentsNode : componentsNodes) {
-                    activeHostGroups.add(hostGroup.get("name").asText());
-                    activeInstanceGroups.add(hostGroup.get("name").asText());
-                //}
-            }
+        JsonNode hostGroups = mapper.readTree(bp.getAmbariBlueprint().getBytes()).get("host_groups");
+        for (JsonNode hostGroup : hostGroups) {
+            activeHostGroups.add(hostGroup.get("name").asText());
+            activeInstanceGroups.add(hostGroup.get("name").asText());
         }
+
         this.activeInstanceGroups.add("cbgateway");
         addProperty(PropertyKey.BLUEPRINT_ID, id);
         setBlueprintAccessible();
