@@ -211,9 +211,12 @@ public class ClusterCommands implements CommandMarker {
 
             FileSystemRequest fileSystemRequest = new FileSystemRequest();
             fileSystemRequest.setName(context.getStackName());
-            fileSystemRequest.setDefaultFs(context.getDefaultFileSystem());
+            fileSystemRequest.setDefaultFs(context.getDefaultFileSystem() == null ? true : context.getDefaultFileSystem());
             fileSystemRequest.setType(context.getFileSystemType());
 
+            if (context.getDefaultFileSystem() == null && context.getFileSystemType() == null) {
+                fileSystemRequest = null;
+            }
             clusterRequest.setFileSystem(fileSystemRequest);
             clusterRequest.setKerberosAdmin(kerberosAdmin);
             clusterRequest.setKerberosMasterKey(kerberosMasterKey);
@@ -229,6 +232,11 @@ public class ClusterCommands implements CommandMarker {
             ambariStackDetailsJson.setUtilsRepoId(utilsRepoId);
             ambariStackDetailsJson.setVerify(verify);
             ambariStackDetailsJson.setVersion(version);
+
+            if (os == null && stack == null && stackBaseURL == null && stackRepoId == null && utilsBaseURL == null
+                    && utilsRepoId == null && verify == null && version == null) {
+                ambariStackDetailsJson = null;
+            }
             clusterRequest.setAmbariStackDetails(ambariStackDetailsJson);
 
             cloudbreakClient.clusterEndpoint().post(Long.valueOf(context.getStackId()), clusterRequest);
