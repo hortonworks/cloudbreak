@@ -22,11 +22,15 @@ public class SshCheckerTask extends StackBasedStatusCheckerTask<SshCheckerTaskCo
         boolean ret = false;
         try {
             ssh.addHostKeyVerifier(sshCheckerTaskContext.getHostKeyVerifier());
+            String user = sshCheckerTaskContext.getUser();
             ssh.connect(sshCheckerTaskContext.getPublicIp(), TlsSetupService.SSH_PORT);
             if (sshCheckerTaskContext.getStack().getCredential().passwordAuthenticationRequired()) {
-                ssh.authPassword(sshCheckerTaskContext.getUser(), sshCheckerTaskContext.getStack().getCredential().getLoginPassword());
+                LOGGER.info("Connecting with ssh to: {}, user: {} with password", sshCheckerTaskContext.getPublicIp(), user);
+                ssh.authPassword(user, sshCheckerTaskContext.getStack().getCredential().getLoginPassword());
             } else {
-                ssh.authPublickey(sshCheckerTaskContext.getUser(), sshCheckerTaskContext.getSshPrivateFileLocation());
+                LOGGER.info("Connecting with ssh to: {}, user: {}, privatekey: {}", sshCheckerTaskContext.getPublicIp(), user, sshCheckerTaskContext
+                        .getSshPrivateFileLocation());
+                ssh.authPublickey(user, sshCheckerTaskContext.getSshPrivateFileLocation());
             }
             ret = true;
         } catch (Exception e) {
