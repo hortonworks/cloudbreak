@@ -1,0 +1,57 @@
+name: AzureRM_simple_smoketest_cred
+parameters:
+  cloudProvider: AZURE_RM
+  blueprintName: hdp-small-default
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  # integratontest.azurermcredential params must be set in application.yml
+  - name: azure_rm_credential_test
+    parameters:
+      credentialName: itsazurermcredandsmokecred
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureRmCredentialCreationTest
+
+  - name: create gateway template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-gateway
+      azureVmType: Standard_D3
+      azureVolumeCount: 1
+      azureVolumeSize: 50
+      templateAdditions: "cbgateway,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create master template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-master
+      azureVmType: Standard_D4
+      azureVolumeCount: 2
+      azureVolumeSize: 100
+      templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create slave template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-slave
+      azureVmType: Standard_D11
+      azureVolumeCount: 3
+      azureVolumeSize: 200
+      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-azurerm-credandsmoke-stack
+      region: North Europe
+      clusterName: it-azurerm-credandsmoke-cluster
+      sleepTime: 60000
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
