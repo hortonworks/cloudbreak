@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 
 
@@ -29,8 +28,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "clusterName", "ambariUser", "ambariPassword", "emailNeeded",
-            "enableSecurity", "kerberosMasterKey", "kerberosAdmin", "kerberosPassword",
+    @Parameters({ "clusterName", "ambariUser", "ambariPassword", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin", "kerberosPassword",
             "runRecipesOnHosts" })
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("admin") String ambariUser,
             @Optional("admin123!@#") String ambariPassword, @Optional("false") boolean emailNeeded,
@@ -60,13 +58,11 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         clusterRequest.setHostGroups(hostGroupJsons1);
 
 
-        ClusterEndpoint clusterEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).clusterEndpoint();
+        ClusterEndpoint clusterEndpoint = getCloudbreakClient().clusterEndpoint();
         clusterEndpoint.post(Long.valueOf(stackId), clusterRequest);
         // THEN
-        CloudbreakUtil.waitAndCheckStackStatus(itContext, stackIdStr, "AVAILABLE");
-        CloudbreakUtil.checkClusterAvailability(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint(),
-                stackIdStr, ambariUser, ambariPassword);
+        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
+        CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), stackIdStr, ambariUser, ambariPassword);
     }
 
     private Set<HostGroupJson> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts) {
