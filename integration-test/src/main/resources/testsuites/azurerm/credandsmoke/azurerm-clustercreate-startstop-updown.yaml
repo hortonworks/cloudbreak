@@ -1,0 +1,93 @@
+name: AzureRM_full_smoketest_cred
+parameters:
+  cloudProvider: AZURE_RM
+  blueprintName: hdp-small-default
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  # integratontest.azurermcredential params must be set in application.yml
+  - name: azure_rm_credential_test
+    parameters:
+      credentialName: itsazurermcredandsmokecredssud
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureRmCredentialCreationTest
+
+  - name: create security group
+    parameters:
+      name: it-azurerm-credandsmoke-restricted-ambari-ssud
+    classes:
+      - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
+
+  - name: create gateway template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-gateway-ssud
+      azureVmType: Standard_D3
+      azureVolumeCount: 1
+      azureVolumeSize: 50
+      templateAdditions: "cbgateway,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create master template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-master-ssud
+      azureVmType: Standard_D4
+      azureVolumeCount: 2
+      azureVolumeSize: 100
+      templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create slave template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-slave-ssud
+      azureVmType: Standard_D11
+      azureVolumeCount: 3
+      azureVolumeSize: 200
+      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-azurerm-credandsmoke-stack-ssud
+      region: North Europe
+      clusterName: it-azurerm-credandsmoke-cluster-ssud
+      sleepTime: 60000
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: stop cluster
+    parameters:
+      newStatus: STOPPED
+      sleepTime: 60000
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: start cluster
+    parameters:
+      newStatus: STARTED
+      sleepTime: 60000
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: upscale
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: 3
+      sleepTime: 60000
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
+
+  - name: downscale
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: -2
+      sleepTime: 60000
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest

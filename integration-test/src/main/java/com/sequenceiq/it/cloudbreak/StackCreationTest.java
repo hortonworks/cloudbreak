@@ -67,7 +67,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         // THEN
         Assert.assertNotNull(stackId);
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);
-        CloudbreakUtil.waitAndCheckStackStatus(itContext, stackId, "AVAILABLE");
+        CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId);
     }
 }

@@ -49,8 +49,8 @@ public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrati
         map.put("userName", userName);
         map.put("password", password);
         map.put("endpoint", endpoint);
-        map.put("keystoneAuthScope", "cb-keystone-v2");
         map.put("keystoneVersion", "cb-keystone-v2");
+        map.put("selector", "cb-keystone-v2");
 
         credentialRequest.setParameters(map);
         credentialRequest.setCloudPlatform("OPENSTACK");

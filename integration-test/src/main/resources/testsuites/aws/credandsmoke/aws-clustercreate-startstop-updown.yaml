@@ -1,0 +1,91 @@
+name: Aws_full_smoketest_cred
+parameters:
+  cloudProvider: AWS
+  blueprintName: hdp-small-default
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  # integratontest.awscredential params must be set in application.yml
+  - name: aws_credential_test
+    parameters:
+      credentialName: its-aws-credandsmoke-cred-ssud
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsCredentialCreationTest
+
+  - name: create security group
+    parameters:
+      name: it-aws-credandsmoke-restricted-ambari-ssud
+    classes:
+      - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
+
+  - name: create gateway template
+    parameters:
+      awsTemplateName: it-aws-credandsmoke-gateway-ssud
+      awsInstanceType: m3.large
+      awsVolumeType: standard
+      awsVolumeCount: 1
+      awsVolumeSize: 30
+      templateAdditions: "cbgateway,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
+
+  - name: create master template
+    parameters:
+      awsTemplateName: it-aws-credandsmoke-master-ssud
+      awsInstanceType: c3.xlarge
+      awsVolumeType: gp2
+      awsVolumeCount: 2
+      awsVolumeSize: 100
+      templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
+
+  - name: create slave template
+    parameters:
+      awsTemplateName: it-aws-credandsmoke-slave-ssud
+      awsInstanceType: r3.large
+      awsVolumeType: gp2
+      awsVolumeCount: 3
+      awsVolumeSize: 200
+      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+    classes:
+      - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-aws-credandsmoke-stack-ssud
+      region: eu-west-1
+      clusterName: it-aws-credandsmoke-cluster-ssud
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: stop cluster
+    parameters:
+      newStatus: STOPPED
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: start cluster
+    parameters:
+      newStatus: STARTED
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: upscale
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: 3
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
+
+  - name: downscale
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: -2
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest

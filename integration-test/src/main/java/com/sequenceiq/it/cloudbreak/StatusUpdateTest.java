@@ -33,21 +33,21 @@ public class StatusUpdateTest extends AbstractCloudbreakIntegrationTest {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.valueOf(newStatus));
             getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
-            CloudbreakUtil.waitAndCheckClusterStatus(getItContext(), stackId, STOPPED);
+            CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, STOPPED);
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.valueOf(newStatus));
             getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
             getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
-            CloudbreakUtil.waitAndCheckStackStatus(getItContext(), stackId, STOPPED);
+            CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, STOPPED);
         } else {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.valueOf(newStatus));
             getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
-            CloudbreakUtil.waitAndCheckStackStatus(getItContext(), stackId, "AVAILABLE");
+            CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.valueOf(newStatus));
             getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
-            CloudbreakUtil.waitAndCheckClusterStatus(getItContext(), stackId, "AVAILABLE");
+            CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         }
         // THEN
         if (newStatus.equals(STARTED)) {

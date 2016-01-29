@@ -24,11 +24,9 @@ import org.testng.annotations.Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
@@ -37,20 +35,19 @@ import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextTests {
-    private static final int DELETE_SLEEP = 30000;
     private static final int WITH_TYPE_LENGTH = 4;
     private static final Logger LOG = LoggerFactory.getLogger(CloudbreakTestSuiteInitializer.class);
 
     @Value("${integrationtest.cloudbreak.server}")
     private String defaultCloudbreakServer;
-    @Value("${integrationtest.cleanup.retryCount}")
-    private int cleanUpRetryCount;
+    @Value("${integrationtest.testsuite.cleanUpOnFailure}")
+    private boolean cleanUpOnFailure;
     @Value("${integrationtest.defaultBlueprintName}")
     private String defaultBlueprintName;
     @Value("${integrationtest.testsuite.skipRemainingTestsAfterOneFailed}")
     private boolean skipRemainingSuiteTestsAfterOneFailed;
-    @Value("${integrationtest.testsuite.cleanUpOnFailure}")
-    private boolean cleanUpOnFailure;
+    @Value("${integrationtest.cleanup.cleanupBeforeStart}")
+    private boolean cleanUpBeforeStart;
 
     @Inject
     private ITProps itProps;
@@ -58,6 +55,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private TemplateAdditionHelper templateAdditionHelper;
     @Inject
     private SuiteContext suiteContext;
+    @Inject
+    private CleanupService cleanUpService;
     private IntegrationTestContext itContext;
 
     @BeforeSuite(dependsOnGroups = "suiteInit")
@@ -85,6 +84,9 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         CloudbreakClient cloudbreakClient = new CloudbreakClient.CloudbreakClientBuilder(cloudbreakServer, identity, "cloudbreak_shell")
                 .withCertificateValidation(false).withDebug(true).withCredential(user, password).build();
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
+        if (cleanUpBeforeStart) {
+            cleanUpService.deleteTestStacksAndResources(cloudbreakClient);
+        }
         putBlueprintToContextIfExist(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).blueprintEndpoint(), blueprintName);
         putNetworkToContext(
@@ -199,28 +201,15 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Parameters("cleanUp")
     public void cleanUp(@Optional("true") boolean cleanUp) throws Exception {
         if (isCleanUpNeeded(cleanUp)) {
-            StackEndpoint client = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
+            CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
             String stackId = itContext.getCleanUpParameter(CloudbreakITContextConstants.STACK_ID);
-            for (int i = 0; i < cleanUpRetryCount; i++) {
-                if (deleteStack(client, stackId)) {
-                    WaitResult waitResult = CloudbreakUtil.waitForStackStatus(itContext, stackId, "DELETE_COMPLETED");
-                    if (waitResult == WaitResult.SUCCESSFUL) {
-                        break;
-                    }
-                    try {
-                        Thread.sleep(DELETE_SLEEP);
-                    } catch (InterruptedException e) {
-                        LOG.warn("interrupted ex", e);
-                    }
-                }
-            }
+            cleanUpService.deleteStackAndWait(cloudbreakClient, stackId);
             List<InstanceGroup> instanceGroups = itContext.getCleanUpParameter(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
             if (instanceGroups != null && !instanceGroups.isEmpty()) {
                 Set<String> deletedTemplates = new HashSet<>();
                 for (InstanceGroup ig : instanceGroups) {
                     if (!deletedTemplates.contains(ig.getTemplateId())) {
-                        deleteTemplate(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).templateEndpoint(),
-                                ig.getTemplateId());
+                        cleanUpService.deleteTemplate(cloudbreakClient, ig.getTemplateId());
                         deletedTemplates.add(ig.getTemplateId());
                     }
                 }
@@ -228,80 +217,14 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             Set<Long> recipeIds = itContext.getContextParam(CloudbreakITContextConstants.RECIPE_ID, Set.class);
             if (recipeIds != null) {
                 for (Long recipeId : recipeIds) {
-                    deleteRecipe(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).recipeEndpoint(), recipeId);
+                    cleanUpService.deleteRecipe(cloudbreakClient, recipeId);
                 }
             }
-            deleteCredential(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialEndpoint(),
-                    itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
-            deleteBlueprint(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).blueprintEndpoint(),
-                    itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
-            deleteNetwork(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).networkEndpoint(),
-                    itContext.getCleanUpParameter(CloudbreakITContextConstants.NETWORK_ID));
-            deleteSecurityGroup(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).securityGroupEndpoint(),
-                    itContext.getCleanUpParameter(CloudbreakITContextConstants.SECURITY_GROUP_ID));
+            cleanUpService.deleteCredential(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID));
+            cleanUpService.deleteBlueprint(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID));
+            cleanUpService.deleteNetwork(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.NETWORK_ID));
+            cleanUpService.deleteSecurityGroup(cloudbreakClient, itContext.getCleanUpParameter(CloudbreakITContextConstants.SECURITY_GROUP_ID));
         }
-    }
-
-    private boolean deleteCredential(CredentialEndpoint credentialEndpoint, String credentialId) throws Exception {
-        boolean result = false;
-        if (credentialId != null) {
-            credentialEndpoint.delete(Long.valueOf(credentialId));
-            result = true;
-        }
-        return result;
-    }
-
-    private boolean deleteTemplate(TemplateEndpoint templateEndpoint, String templateId) throws Exception {
-        boolean result = false;
-        if (templateId != null) {
-            templateEndpoint.delete(Long.valueOf(templateId));
-            result = true;
-        }
-        return result;
-    }
-
-    private boolean deleteNetwork(NetworkEndpoint networkEndpoint, String networkId) throws Exception {
-        boolean result = false;
-        if (networkId != null) {
-            networkEndpoint.delete(Long.valueOf(networkId));
-            result = true;
-        }
-        return result;
-    }
-
-    private boolean deleteSecurityGroup(SecurityGroupEndpoint securityGroupEndpoint, String securityGroupId) throws Exception {
-        boolean result = false;
-        if (securityGroupId != null) {
-            SecurityGroupJson securityGroupJson = securityGroupEndpoint.get(Long.valueOf(securityGroupId));
-            if (!securityGroupJson.getName().equals(itProps.getDefaultSecurityGroup())) {
-                securityGroupEndpoint.delete(Long.valueOf(securityGroupId));
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    private boolean deleteBlueprint(BlueprintEndpoint blueprintEndpoint, String blueprintId) throws Exception {
-        boolean result = false;
-        if (blueprintId != null) {
-            blueprintEndpoint.delete(Long.valueOf(blueprintId));
-            result = true;
-        }
-        return result;
-    }
-
-    private boolean deleteStack(StackEndpoint client, String stackId) throws Exception {
-        boolean result = false;
-        if (stackId != null) {
-            client.delete(Long.valueOf(stackId), false);
-            result = true;
-        }
-        return result;
-    }
-
-    private boolean deleteRecipe(RecipeEndpoint recipeEndpoint, Long recipeId) throws Exception {
-        recipeEndpoint.delete(recipeId);
-        return true;
     }
 
     private boolean isCleanUpNeeded(boolean cleanUp) {

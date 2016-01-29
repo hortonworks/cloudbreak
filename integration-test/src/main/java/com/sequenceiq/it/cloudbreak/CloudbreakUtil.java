@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.it.IntegrationTestContext;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -27,20 +26,20 @@ public class CloudbreakUtil {
     private CloudbreakUtil() {
     }
 
-    public static void waitAndCheckStackStatus(IntegrationTestContext itContext, String stackId, String desiredStatus) throws Exception {
-        waitAndCheckStatus(itContext, stackId, desiredStatus, "status");
+    public static void waitAndCheckStackStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) throws Exception {
+        waitAndCheckStatus(cloudbreakClient, stackId, desiredStatus, "status");
     }
 
-    public static void waitAndCheckClusterStatus(IntegrationTestContext itContext, String stackId, String desiredStatus) throws Exception {
-        waitAndCheckStatus(itContext, stackId, desiredStatus, "clusterStatus");
+    public static void waitAndCheckClusterStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) throws Exception {
+        waitAndCheckStatus(cloudbreakClient, stackId, desiredStatus, "clusterStatus");
     }
 
-    public static WaitResult waitForStackStatus(IntegrationTestContext itContext, String stackId, String desiredStatus) throws Exception {
-        return waitForStatus(itContext, stackId, desiredStatus, "status");
+    public static WaitResult waitForStackStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) throws Exception {
+        return waitForStatus(cloudbreakClient, stackId, desiredStatus, "status");
     }
 
-    public static WaitResult waitForClusterStatus(IntegrationTestContext itContext, String stackId, String desiredStatus) throws Exception {
-        return waitForStatus(itContext, stackId, desiredStatus, "clusterStatus");
+    public static WaitResult waitForClusterStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) throws Exception {
+        return waitForStatus(cloudbreakClient, stackId, desiredStatus, "clusterStatus");
     }
 
     public static void checkClusterAvailability(StackEndpoint stackEndpoint, String stackId, String ambariUser, String ambariPassowrd) throws Exception {
@@ -81,9 +80,9 @@ public class CloudbreakUtil {
         }
     }
 
-    private static void waitAndCheckStatus(IntegrationTestContext itContext, String stackId, String desiredStatus, String statusPath) throws Exception {
+    private static void waitAndCheckStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus, String statusPath) throws Exception {
         for (int i = 0; i < 3; i++) {
-            WaitResult waitResult = waitForStatus(itContext, stackId, desiredStatus, statusPath);
+            WaitResult waitResult = waitForStatus(cloudbreakClient, stackId, desiredStatus, statusPath);
             if (waitResult == WaitResult.FAILED) {
                 Assert.fail("The stack has failed");
             }
@@ -93,14 +92,14 @@ public class CloudbreakUtil {
         }
     }
 
-    private static WaitResult  waitForStatus(IntegrationTestContext itContext, String stackId, String desiredStatus, String statusPath) throws Exception {
+    private static WaitResult  waitForStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus, String statusPath) throws Exception {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         String stackStatus = null;
         int retryCount = 0;
         do {
             LOGGER.info("Waiting for stack status {}, stack id: {}, current status {} ...", desiredStatus, stackId, stackStatus);
             sleep();
-            StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
+            StackEndpoint stackEndpoint = cloudbreakClient.stackEndpoint();
             try {
                 Map<String, Object> statusResult = stackEndpoint.status(Long.valueOf(stackId));
                 stackStatus = (String) statusResult.get(statusPath);

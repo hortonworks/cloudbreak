@@ -47,13 +47,14 @@ integrationtest:
     azurermcredential:
         name:
         secretKey:
-        accesKey:
+        accessKey:
         subscriptionId:
         tenantId:
         publicKeyFile:
 
     cleanup:
         retryCount: 3
+        cleanupBeforeStart: false
 
     defaultBlueprintName: multi-node-hdfs-yarn
 
