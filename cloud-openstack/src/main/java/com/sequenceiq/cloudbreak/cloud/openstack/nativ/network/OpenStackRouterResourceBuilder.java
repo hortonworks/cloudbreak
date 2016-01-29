@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.network;
 
+import javax.inject.Inject;
+
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.OS4JException;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
@@ -22,33 +25,43 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkResourceBuilder {
+
+    @Inject
+    private OpenStackUtils utils;
+
     @Override
     public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource)
             throws Exception {
         try {
             OSClient osClient = createOSClient(auth);
             NeutronNetworkView networkView = new NeutronNetworkView(network);
-            Router router = Builders.router()
-                    .name(resource.getName())
-                    .adminStateUp(true)
-                    .tenantId(context.getStringParameter(OpenStackConstants.TENANT_ID))
-                    .externalGateway(networkView.getPublicNetId()).build();
-            router = osClient.networking().router().create(router);
-            osClient.networking().router().attachInterface(router.getId(), AttachInterfaceType.SUBNET, context.getStringParameter(OpenStackConstants.SUBNET_ID));
-            return createPersistedResource(resource, router.getId());
+            String routerId = utils.getCustomRouterId(network);
+            if (!utils.isExistingNetwork(network)) {
+                Router router = Builders.router()
+                        .name(resource.getName())
+                        .adminStateUp(true)
+                        .tenantId(context.getStringParameter(OpenStackConstants.TENANT_ID))
+                        .externalGateway(networkView.getPublicNetId()).build();
+                routerId = osClient.networking().router().create(router).getId();
+            }
+            osClient.networking().router().attachInterface(routerId, AttachInterfaceType.SUBNET, context.getStringParameter(OpenStackConstants.SUBNET_ID));
+            return createPersistedResource(resource, routerId);
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Router creation failed", resourceType(), resource.getName(), ex);
         }
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         try {
             OSClient osClient = createOSClient(auth);
             String subnetId = context.getStringParameter(OpenStackConstants.SUBNET_ID);
             osClient.networking().router().detachInterface(resource.getReference(), subnetId, null);
-            ActionResponse response = osClient.networking().router().delete(resource.getReference());
-            return checkDeleteResponse(response, resourceType(), auth, resource, "Router deletion failed");
+            if (!utils.isExistingNetwork(network)) {
+                ActionResponse response = osClient.networking().router().delete(resource.getReference());
+                return checkDeleteResponse(response, resourceType(), auth, resource, "Router deletion failed");
+            }
+            return null;
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Router deletion failed", resourceType(), resource.getName(), ex);
         }

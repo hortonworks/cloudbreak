@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.network;
 
+import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.NETWORK_ID;
+
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
@@ -17,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -25,31 +30,40 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkResourceBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackNetworkResourceBuilder.class);
 
+    @Inject
+    private OpenStackUtils utils;
+
     @Override
     public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource buildableResource)
             throws Exception {
         OSClient osClient = createOSClient(auth);
         try {
-            org.openstack4j.model.network.Network osNetwork = Builders.network()
-                    .name(buildableResource.getName())
-                    .tenantId(context.getStringParameter(OpenStackConstants.TENANT_ID))
-                    .adminStateUp(true)
-                    .build();
-            osNetwork = osClient.networking().network().create(osNetwork);
-            context.putParameter(OpenStackConstants.NETWORK_ID, osNetwork.getId());
-            return createPersistedResource(buildableResource, osNetwork.getId());
+            String networkId = utils.isExistingNetwork(network) ? utils.getCustomNetworkId(network) : context.getParameter(NETWORK_ID, String.class);
+            if (!utils.isExistingNetwork(network)) {
+                org.openstack4j.model.network.Network osNetwork = Builders.network()
+                        .name(buildableResource.getName())
+                        .tenantId(context.getStringParameter(OpenStackConstants.TENANT_ID))
+                        .adminStateUp(true)
+                        .build();
+                networkId = osClient.networking().network().create(osNetwork).getId();
+            }
+            context.putParameter(OpenStackConstants.NETWORK_ID, networkId);
+            return createPersistedResource(buildableResource, networkId);
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Network creation failed", resourceType(), buildableResource.getName(), ex);
         }
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         try {
             OSClient osClient = createOSClient(auth);
             deAllocateFloatingIps(context, osClient);
-            ActionResponse response = osClient.networking().network().delete(resource.getReference());
-            return checkDeleteResponse(response, resourceType(), auth, resource, "Network deletion failed");
+            if (!utils.isExistingNetwork(network)) {
+                ActionResponse response = osClient.networking().network().delete(resource.getReference());
+                return checkDeleteResponse(response, resourceType(), auth, resource, "Network deletion failed");
+            }
+            return null;
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Network deletion failed", resourceType(), resource.getName(), ex);
         }

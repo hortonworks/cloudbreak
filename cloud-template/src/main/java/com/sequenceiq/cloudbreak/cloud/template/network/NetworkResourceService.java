@@ -63,7 +63,7 @@ public class NetworkResourceService {
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context,
-            AuthenticatedContext auth, List<CloudResource> resources, boolean cancellable) throws Exception {
+            AuthenticatedContext auth, List<CloudResource> resources, Network network, boolean cancellable) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
         List<NetworkResourceBuilder> builderChain = resourceBuilders.network(cloudContext.getPlatform());
@@ -72,7 +72,7 @@ public class NetworkResourceService {
             List<CloudResource> specificResources = getResources(resources, builder.resourceType());
             for (CloudResource resource : specificResources) {
                 if (resource.getStatus() == CommonStatus.CREATED) {
-                    CloudResource deletedResource = builder.delete(context, auth, resource);
+                    CloudResource deletedResource = builder.delete(context, auth, resource, network);
                     if (deletedResource != null) {
                         PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
                                 builder, auth, asList(deletedResource), context, cancellable);

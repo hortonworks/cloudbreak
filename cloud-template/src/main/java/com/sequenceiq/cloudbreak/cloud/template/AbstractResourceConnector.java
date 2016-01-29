@@ -75,7 +75,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         List<CloudResourceStatus> computeStatuses = computeResourceService.deleteResources(context, auth, cloudResources, false);
 
         //network
-        List<CloudResourceStatus> networkStatuses = networkResourceService.deleteResources(context, auth, cloudResources, false);
+        List<CloudResourceStatus> networkStatuses = networkResourceService.deleteResources(context, auth, cloudResources, stack.getNetwork(), false);
 
         computeStatuses.addAll(networkStatuses);
         return computeStatuses;

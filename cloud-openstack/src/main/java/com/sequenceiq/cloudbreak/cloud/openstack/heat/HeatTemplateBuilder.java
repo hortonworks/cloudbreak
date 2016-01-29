@@ -61,7 +61,7 @@ public class HeatTemplateBuilder {
         }
     }
 
-    public Map<String, String> buildParameters(AuthenticatedContext auth, Network network, Image image) {
+    public Map<String, String> buildParameters(AuthenticatedContext auth, Network network, Image image, boolean existingNetwork) {
         KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
         NeutronNetworkView neutronView = new NeutronNetworkView(network);
         Map<String, String> parameters = new HashMap<>();
@@ -69,8 +69,10 @@ public class HeatTemplateBuilder {
         parameters.put("image_id", image.getImageName());
         parameters.put("key_name", osCredential.getKeyPairName());
         parameters.put("app_net_cidr", neutronView.getSubnetCIDR());
-        parameters.put("app_net_id", network.getStringParameter(OpenStackResourceConnector.NETWORK_ID));
-        parameters.put("router_id", network.getStringParameter(OpenStackResourceConnector.ROUTER_ID));
+        if (existingNetwork) {
+            parameters.put("app_net_id", openStackUtil.getCustomNetworkId(network));
+            parameters.put("router_id", openStackUtil.getCustomRouterId(network));
+        }
         return parameters;
     }
 
