@@ -28,6 +28,7 @@ public class OperationDescriptions {
     }
 
     public static class TopologyOpDesctiption {
+        public static final String GET_BY_ID = "retrieve topology by id";
         public static final String GET_PUBLIC = "retrieve topoligies";
         public static final String POST_PUBLIC = "create topology as public resource";
         public static final String DELETE_BY_ID = "delete topology by id";

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.TopologyEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.UserEndpoint;
 import com.sequenceiq.cloudbreak.client.config.ConfigKey;
@@ -58,6 +59,7 @@ public class CloudbreakClient {
 
     private CredentialEndpoint credentialEndpoint;
     private TemplateEndpoint templateEndpoint;
+    private TopologyEndpoint topologyEndpoint;
     private UsageEndpoint usageEndpoint;
     private UserEndpoint userEndpoint;
     private EventEndpoint eventEndpoint;
@@ -121,6 +123,7 @@ public class CloudbreakClient {
         this.t = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);
         this.credentialEndpoint = newResource(CredentialEndpoint.class, headers);
         this.templateEndpoint = newResource(TemplateEndpoint.class, headers);
+        this.topologyEndpoint = newResource(TopologyEndpoint.class, headers);
         this.usageEndpoint = newResource(UsageEndpoint.class, headers);
         this.eventEndpoint = newResource(EventEndpoint.class, headers);
         this.securityGroupEndpoint = newResource(SecurityGroupEndpoint.class, headers);
@@ -148,6 +151,11 @@ public class CloudbreakClient {
     public TemplateEndpoint templateEndpoint() {
         refresh();
         return templateEndpoint;
+    }
+
+    public TopologyEndpoint topologyEndpoint() {
+        refresh();
+        return topologyEndpoint;
     }
 
     public UsageEndpoint usageEndpoint() {
