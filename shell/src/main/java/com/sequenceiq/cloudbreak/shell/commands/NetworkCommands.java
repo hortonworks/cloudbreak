@@ -187,6 +187,8 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
             @CliOption(key = "publicNetID", mandatory = true, help = "ID of the available and desired OpenStack public network") String publicNetID,
+            @CliOption(key = "networkId", mandatory = false, help = "ID of the custom network to use") String networkId,
+            @CliOption(key = "routerId", mandatory = false, help = "ID of the custom router to use") String routerId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
             @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
@@ -201,6 +203,10 @@ public class NetworkCommands implements CommandMarker {
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("publicNetId", publicNetID);
+            if (networkId != null && routerId != null) {
+                parameters.put("networkId", networkId);
+                parameters.put("routerId", routerId);
+            }
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);

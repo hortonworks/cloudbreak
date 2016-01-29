@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
+import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.ROUTER_ID;
+
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +16,7 @@ import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.HeatStackStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -59,6 +63,18 @@ public class OpenStackUtils {
 
     public String adjustStackNameLength(String stackName) {
         return new String(Splitter.fixedLength(maxResourceNameLength).splitToList(stackName).get(0));
+    }
+
+    public boolean isExistingNetwork(Network network) {
+        return getCustomNetworkId(network) != null && getCustomRouterId(network) != null;
+    }
+
+    public String getCustomNetworkId(Network network) {
+        return network.getStringParameter(NETWORK_ID);
+    }
+
+    public String getCustomRouterId(Network network) {
+        return network.getStringParameter(ROUTER_ID);
     }
 
 }

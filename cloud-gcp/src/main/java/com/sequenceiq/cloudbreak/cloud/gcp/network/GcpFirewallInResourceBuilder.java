@@ -83,7 +83,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
     }
 
     @Override
-    public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         try {
             Operation operation = context.getCompute().firewalls().delete(context.getProjectId(), resource.getName()).execute();
             return createOperationAwareCloudResource(resource, operation);

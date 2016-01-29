@@ -48,8 +48,9 @@ public class OpenStackResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
         String stackName = authenticatedContext.getCloudContext().getName();
-        String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
-        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext, stack.getNetwork(), stack.getImage());
+        boolean existingNetwork = isExistingNetwork(stack);
+        String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage(), existingNetwork);
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork);
 
         OSClient client = openStackClient.createOSClient(authenticatedContext);
 
@@ -119,8 +120,9 @@ public class OpenStackResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         String stackName = authenticatedContext.getCloudContext().getName();
-        String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
-        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext, stack.getNetwork(), stack.getImage());
+        boolean existingNetwork = isExistingNetwork(stack);
+        String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage(), existingNetwork);
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
     }
 
@@ -128,21 +130,23 @@ public class OpenStackResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack cloudStack, List<CloudResource> resources, List<CloudInstance> vms) {
         CloudStack stack = removeDeleteRequestedInstances(cloudStack);
         String stackName = auth.getCloudContext().getName();
-        String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
-        Map<String, String> parameters = heatTemplateBuilder.buildParameters(auth, stack.getNetwork(), stack.getImage());
+        boolean existingNetwork = isExistingNetwork(stack);
+        String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage(), existingNetwork);
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(auth, stack.getNetwork(), stack.getImage(), existingNetwork);
         return updateHeatStack(auth, resources, heatTemplate, parameters);
     }
 
     @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         String stackName = authenticatedContext.getCloudContext().getName();
-        String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage());
-        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext, stack.getNetwork(), stack.getImage());
+        boolean existingNetwork = isExistingNetwork(stack);
+        String heatTemplate = heatTemplateBuilder.build(stackName, stack.getGroups(), stack.getSecurity(), stack.getImage(), existingNetwork);
+        Map<String, String> parameters = heatTemplateBuilder.buildParameters(authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
     }
 
-    private List<CloudResourceStatus> updateHeatStack(AuthenticatedContext authenticatedContext, List<CloudResource> resources, String heatTemplate, Map<String,
-            String> parameters) {
+    private List<CloudResourceStatus> updateHeatStack(AuthenticatedContext authenticatedContext, List<CloudResource> resources, String heatTemplate,
+            Map<String, String> parameters) {
         CloudResource resource = utils.getHeatResource(resources);
         String stackName = authenticatedContext.getCloudContext().getName();
         String heatStackId = resource.getName();
@@ -167,6 +171,10 @@ public class OpenStackResourceConnector implements ResourceConnector {
             groups.add(new Group(group.getName(), group.getType(), instances));
         }
         return new CloudStack(groups, stack.getNetwork(), stack.getSecurity(), stack.getImage(), stack.getParameters());
+    }
+
+    private boolean isExistingNetwork(CloudStack stack) {
+        return utils.isExistingNetwork(stack.getNetwork());
     }
 
 }

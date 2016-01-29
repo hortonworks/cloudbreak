@@ -42,7 +42,7 @@ public class OpenStackSubnetResourceBuilder extends AbstractOpenStackNetworkReso
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         try {
             OSClient osClient = createOSClient(auth);
             ActionResponse response = osClient.networking().subnet().delete(resource.getReference());

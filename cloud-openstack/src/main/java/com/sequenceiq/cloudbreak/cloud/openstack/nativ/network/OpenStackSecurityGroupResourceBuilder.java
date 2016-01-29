@@ -51,7 +51,7 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackNetw
     }
 
     @Override
-    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         try {
             OSClient osClient = createOSClient(auth);
             ActionResponse response = osClient.compute().securityGroups().delete(resource.getReference());

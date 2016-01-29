@@ -48,7 +48,7 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
     }
 
     @Override
-    public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
+    public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         Compute compute = context.getCompute();
         String projectId = context.getProjectId();
         try {

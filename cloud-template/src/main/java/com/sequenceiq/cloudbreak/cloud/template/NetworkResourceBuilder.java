@@ -49,6 +49,9 @@ public interface NetworkResourceBuilder<C extends ResourceBuilderContext> extend
     /**
      * This method will be called after the {@link #create(ResourceBuilderContext, AuthenticatedContext)} method with the constructed
      * cloud resources. It's purpose to actually create these resources on the cloud provider side.
+     * <p/>
+     * There are some cases where you don't want to create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
+     * that case return the cloud resource with the existing resource id.
      *
      * @param context  Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
      * @param auth     Authenticated context is provided to be able to send the requests to the cloud provider.
@@ -71,16 +74,20 @@ public interface NetworkResourceBuilder<C extends ResourceBuilderContext> extend
     /**
      * Responsible to delete the provided cloud resource by {@link #create(ResourceBuilderContext, AuthenticatedContext)} from the
      * cloud provider.
+     * <p/>
+     * There are some cases where you didn't create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
+     * that case return <b>null</b>.
      *
      * @param context  Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
      * @param auth     Authenticated context is provided to be able to send the requests to the cloud provider.
      * @param resource Resource created earlier by the {@link #create(ResourceBuilderContext, AuthenticatedContext)}.
+     * @param network  Network object which has to be deleted
      * @return Returns the deleted cloud resource which can be extended with extra information since the object itself is a dynamic model. These objects
      * will be passed along with the extra information if it's provided so later it can be used to track the status of the deployment.
      * @throws Exception Exception can be thrown if the resource delete request fails. It will result in stack failure since these resources are not
      *                   replaceable.
      */
-    CloudResource delete(C context, AuthenticatedContext auth, CloudResource resource) throws Exception;
+    CloudResource delete(C context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception;
 
     /**
      * Defines the type of the resource builder.

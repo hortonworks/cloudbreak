@@ -18,21 +18,36 @@ parameters:
   public_net_id:
     type: string
     description: The ID of the public network. You will need to replace it with your DevStack public network ID
+  <#if existingNetwork>
+  app_net_id:
+    type: string
+    description: ID of the custom network
+  router_id:
+    type: string
+    description: ID of the custom router which belongs to the custom network
+  </#if>
 
 resources:
 
+  <#if !existingNetwork>
   app_network:
       type: OS::Neutron::Net
       properties:
         admin_state_up: true
         name: app_network
+  </#if>
 
   app_subnet:
       type: OS::Neutron::Subnet
       properties:
+        <#if existingNetwork>
+        network_id: { get_param: app_net_id }
+        <#else>
         network_id: { get_resource: app_network }
+        </#if>
         cidr: { get_param: app_net_cidr } 
 
+  <#if !existingNetwork>
   router:
       type: OS::Neutron::Router
 
@@ -41,13 +56,18 @@ resources:
       properties:
         router_id: { get_resource: router }
         network_id: { get_param: public_net_id }
+  </#if>
 
   router_interface:
       type: OS::Neutron::RouterInterface
       properties:
+        <#if existingNetwork>
+        router_id: { get_param: router_id }
+        <#else>
         router_id: { get_resource: router }
+        </#if>
         subnet_id: { get_resource: app_subnet }
-        
+
   gw_user_data_config:
       type: OS::Heat::SoftwareConfig
       properties:
@@ -88,7 +108,11 @@ ${core_user_data}
   ambari_app_port_${agent.instanceId}:
       type: OS::Neutron::Port
       properties:
+        <#if existingNetwork>
+        network_id: { get_param: app_net_id }
+        <#else>
         network_id: { get_resource: app_network }
+        </#if>
         replacement_policy: AUTO
         fixed_ips:
           - subnet_id: { get_resource: app_subnet }
