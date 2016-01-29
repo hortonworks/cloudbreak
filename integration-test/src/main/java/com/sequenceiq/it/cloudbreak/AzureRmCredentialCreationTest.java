@@ -20,7 +20,7 @@ public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegration
     private String defaultSubscriptionId;
     @Value("${integrationtest.azurermcredential.secretKey}")
     private String defaultSecretKey;
-    @Value("${integrationtest.azurermcredential.accesKey}")
+    @Value("${integrationtest.azurermcredential.accessKey}")
     private String defaultAccesKey;
     @Value("${integrationtest.azurermcredential.tenantId}")
     private String defaultTenantId;
@@ -28,16 +28,16 @@ public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegration
     private String defaultPublicKeyFile;
 
     @Test
-    @Parameters({ "credentialName", "subscriptionId", "secretKey", "accesKey", "tenantId", "publicKeyFile" })
+    @Parameters({ "credentialName", "subscriptionId", "secretKey", "accessKey", "tenantId", "publicKeyFile" })
     public void testAzureRMCredentialCreation(@Optional("itazurermcreden") String credentialName, @Optional("") String subscriptionId,
-            @Optional("") String secretKey, @Optional("") String accesKey, @Optional("") String tenantId,
+            @Optional("") String secretKey, @Optional("") String accessKey, @Optional("") String tenantId,
             @Optional("") String publicKeyFile) throws Exception {
         // GIVEN
         credentialName = StringUtils.hasLength(credentialName) ? credentialName : defaultName;
         subscriptionId = StringUtils.hasLength(subscriptionId) ? subscriptionId : defaultSubscriptionId;
         secretKey = StringUtils.hasLength(secretKey) ? secretKey : defaultSecretKey;
         tenantId = StringUtils.hasLength(tenantId) ? tenantId : defaultTenantId;
-        accesKey = StringUtils.hasLength(accesKey) ? accesKey : defaultAccesKey;
+        accessKey = StringUtils.hasLength(accessKey) ? accessKey : defaultAccesKey;
 
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
@@ -50,7 +50,7 @@ public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegration
         Map<String, Object> map = new HashMap<>();
         map.put("subscriptionId", subscriptionId);
         map.put("tenantId", tenantId);
-        map.put("accesKey", accesKey);
+        map.put("accessKey", accessKey);
         map.put("secretKey", secretKey);
         credentialRequest.setParameters(map);
         credentialRequest.setCloudPlatform("AZURE_RM");
