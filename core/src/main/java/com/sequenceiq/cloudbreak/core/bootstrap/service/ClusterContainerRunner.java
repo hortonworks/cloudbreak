@@ -12,8 +12,6 @@ import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.
 import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.DOMAIN_REALM;
 import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.REALM;
 
-import javax.inject.Inject;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +19,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -45,7 +47,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterContainerRunner {
@@ -53,6 +54,7 @@ public class ClusterContainerRunner {
     private static final String HOST_VOLUME_PATH = VolumeUtils.getLogVolume("logs");
     private static final String HOST_NETWORK_MODE = "host";
     private static final int AMBARI_PORT = 8080;
+    private static final int REGISTRATOR_RESYNC_SECONDS = 60;
 
     @Inject
     private ClusterService clusterService;
@@ -156,7 +158,8 @@ public class ClusterContainerRunner {
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of("/var/run/docker.sock", "/tmp/docker.sock"))
                 .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
-                .cmd(new String[]{String.format("consul://%s:8500", gatewayNode.getPrivateIp())})
+                .cmd(new String[]{"-ip", gatewayNode.getPrivateIp(), "-resync",
+                        Integer.toString(REGISTRATOR_RESYNC_SECONDS), String.format("consul://%s:8500", gatewayNode.getPrivateIp())})
                 .build();
     }
 
@@ -210,7 +213,7 @@ public class ClusterContainerRunner {
     }
 
     private void runAmbariAgentContainers(Boolean add, Set<String> candidateAddresses, ContainerOrchestrator orchestrator, String cloudPlatform, Stack stack,
-                                                OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+            OrchestrationCredential cred) throws CloudbreakOrchestratorException {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             int volumeCount = instanceGroup.getTemplate().getVolumeCount();
             Map<String, String> dataVolumeBinds = getDataVolumeBinds(volumeCount);
@@ -277,7 +280,7 @@ public class ClusterContainerRunner {
     }
 
     private Map<String, String> getPrivateIpsByHostname(Boolean add, Set<String> candidateAddresses, OrchestrationCredential credential,
-                                                        InstanceGroup instanceGroup) {
+            InstanceGroup instanceGroup) {
         Map<String, String> privateIpsByHostname = new HashMap<>();
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             String privateIp = instanceMetaData.getPrivateIp();
