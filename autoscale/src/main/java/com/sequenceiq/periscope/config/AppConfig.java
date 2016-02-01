@@ -1,15 +1,10 @@
 package com.sequenceiq.periscope.config;
 
 import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.concurrent.Executor;
 
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import javax.ws.rs.client.Client;
+
 import org.quartz.simpl.SimpleJobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +13,16 @@ import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
+
+import com.sequenceiq.cloudbreak.client.IdentityClient;
+import com.sequenceiq.cloudbreak.client.RestClient;
+import com.sequenceiq.cloudbreak.client.config.ConfigKey;
 
 import freemarker.template.TemplateException;
 
@@ -43,6 +39,14 @@ public class AppConfig implements AsyncConfigurer {
     private int maxPoolSize;
     @Value("${periscope.threadpool.queue.size:1000}")
     private int queueCapacity;
+    @Value("${periscope.client.id}")
+    private String clientId;
+    @Value("${periscope.identity.server.url}")
+    private String identityServerUrl;
+    @Value("${rest.debug:false}")
+    private boolean restDebug;
+    @Value("${cert.validation:true}")
+    private boolean certificateValidation;
 
     @Bean
     public ThreadPoolExecutorFactoryBean getThreadPoolExecutorFactoryBean() {
@@ -63,19 +67,13 @@ public class AppConfig implements AsyncConfigurer {
     }
 
     @Bean
-    public RestOperations createRestTemplate() throws Exception {
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-        SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
-        sslContextBuilder.loadTrustMaterial(null, new TrustStrategy() {
-            @Override
-            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                return true;
-            }
-        });
-        SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build());
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
-        requestFactory.setHttpClient(httpClient);
-        return new RestTemplate(requestFactory);
+    public IdentityClient identityClient() {
+        return new IdentityClient(identityServerUrl, clientId, new ConfigKey(certificateValidation, restDebug));
+    }
+
+    @Bean
+    public Client restClient() {
+        return RestClient.get(new ConfigKey(certificateValidation, restDebug));
     }
 
     @Bean

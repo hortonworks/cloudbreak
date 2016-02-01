@@ -2,19 +2,14 @@ package com.sequenceiq.cloudbreak.conf;
 
 import java.io.IOException;
 import java.security.Security;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.ws.rs.client.Client;
 
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.ssl.TrustStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,19 +22,19 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.client.IdentityClient;
+import com.sequenceiq.cloudbreak.client.RestClient;
+import com.sequenceiq.cloudbreak.client.config.ConfigKey;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteria;
-import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -50,7 +45,6 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 public class AppConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
-    private static final int TIMEOUT = 5_000;
 
     @Value("#{'${cb.supported.container.orchestrators:}'.split(',')}")
     private List<String> orchestrators;
@@ -72,6 +66,18 @@ public class AppConfig {
 
     @Value("${cb.container.threadpool.capacity.size:}")
     private int containerteQueueCapacity;
+
+    @Value("${cb.client.id}")
+    private String clientId;
+
+    @Value("${cb.identity.server.url}")
+    private String identityServerUrl;
+
+    @Value("${rest.debug:false}")
+    private boolean restDebug;
+
+    @Value("${cert.validation:true}")
+    private boolean certificateValidation;
 
     @Inject
     private List<FileSystemConfigurator> fileSystemConfigurators;
@@ -171,29 +177,13 @@ public class AppConfig {
     }
 
     @Bean
-    public RestOperations restTemplate() {
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        factory.setConnectTimeout(TIMEOUT);
-
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setRequestFactory(factory);
-        return restTemplate;
+    public IdentityClient identityClient() {
+        return new IdentityClient(identityServerUrl, clientId, new ConfigKey(certificateValidation, restDebug));
     }
 
-    @Bean(name = "autoSSLAcceptorRestTemplate")
-    public RestOperations autoSSLAcceptorRestTemplate() throws Exception {
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-        org.apache.http.ssl.SSLContextBuilder sslContextBuilder = new org.apache.http.ssl.SSLContextBuilder();
-        sslContextBuilder.loadTrustMaterial(null, new TrustStrategy() {
-            @Override
-            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                return true;
-            }
-        });
-        SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build());
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
-        requestFactory.setHttpClient(httpClient);
-        return new RestTemplate(requestFactory);
+    @Bean
+    public Client restClient() {
+        return RestClient.get(new ConfigKey(certificateValidation, restDebug));
     }
 
     @Bean

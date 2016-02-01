@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -27,8 +27,7 @@ public class AppMasterFilter implements HostFilter {
     private static final String APP_NODE = "app";
 
     @Inject
-    @Qualifier("restTemplate")
-    private RestOperations restTemplate;
+    private Client restClient;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -36,9 +35,8 @@ public class AppMasterFilter implements HostFilter {
         List<HostMetadata> result = new ArrayList<>(hosts);
         try {
             String resourceManagerAddress = config.get(ConfigParam.YARN_RM_WEB_ADDRESS.key());
-            String appResponse = restTemplate.exchange(
-                    String.format("http://%s", resourceManagerAddress + HostFilterService.RM_WS_PATH + "/apps?state=RUNNING"),
-                    HttpMethod.GET, null, String.class).getBody();
+            WebTarget target = restClient.target("http://" + resourceManagerAddress + HostFilterService.RM_WS_PATH).path("apps").queryParam("state", "RUNNING");
+            String appResponse = target.request(MediaType.APPLICATION_JSON).get(String.class);
             JsonNode jsonNode = JsonUtil.readTree(appResponse);
             JsonNode apps = jsonNode.get(APPS_NODE);
             if (apps != null && apps.has(APP_NODE)) {

@@ -42,8 +42,8 @@ public class ShellConfiguration {
     @Value("${sequenceiq.password:}")
     private String password;
 
-    @Value("${shell.debug:false}")
-    private boolean debug;
+    @Value("${rest.debug:false}")
+    private boolean restDebug;
 
     @Value("${cert.validation:true}")
     private boolean certificateValidation;
@@ -60,7 +60,7 @@ public class ShellConfiguration {
     public CloudbreakClient cloudbreakClient() {
         try {
             return new CloudbreakClientBuilder(cloudbreakAddress, identityServerAddress, CLIENT_ID).withCredential(user, password).
-                    withDebug(debug).withCertificateValidation(certificateValidation).build();
+                    withDebug(restDebug).withCertificateValidation(certificateValidation).build();
         } catch (SSLConnectionException e) {
             System.out.println(String.format("%s Try to start the shell with --cert.validation=false parameter.", e.getMessage()));
             System.exit(1);
