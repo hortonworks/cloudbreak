@@ -18,30 +18,6 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group" ng-if="credential.parameters.keystoneVersion == 'v2'">
-        <label class="col-sm-3 control-label" for="openstacktenantName">{{msg.credential_openstack_form_tenant_label}}</label>
-
-        <div class="col-sm-9">
-            <p id="openstacktenantName" class="form-control-static">{{credential.parameters.tenantName}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <div class="form-group" ng-if="credential.parameters.keystoneVersion == 'v3'">
-        <label class="col-sm-3 control-label" for="openstackprojectName">{{msg.credential_openstack_form_project_label}}</label>
-
-        <div class="col-sm-9">
-            <p id="openstackprojectName" class="form-control-static">{{credential.parameters.projectName}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="openstackendpoint">{{msg.credential_openstack_form_endpoint_label}}</label>
-
-        <div class="col-sm-9">
-            <p id="openstackendpoint" class="form-control-static">{{credential.parameters.endpoint}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
     <div class="form-group" ng-show="credential.topologyId">
         <label class="col-sm-3 control-label" for="credential-topology">{{msg.credential_form_topology_label}}</label>
 
@@ -50,5 +26,12 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+    <div class="form-group" ng-repeat="(key, value) in getCredentialParameters(credential)">
+        <label class="col-sm-3 control-label" for="openstackendpoint">{{getParameterLabel(key)}}</label>
 
+        <div class="col-sm-9">
+            <p id="openstackendpoint" class="form-control-static">{{$root.displayNames.getPropertyName(value)}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
 </form>

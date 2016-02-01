@@ -28,5 +28,12 @@
             "standard": "Magnetic",
             "gp2": "General Purpose (SSD)"
         }
+    },
+    "properties" : {
+        "cb-keystone-v2": "v2",
+        "cb-keystone-v3": "v3",
+        "cb-keystone-v3-project-scope": "Project",
+        "cb-keystone-v3-default-scope": "Default",
+        "cb-keystone-v3-domain-scope": "Domain"
     }
 }
