@@ -1,5 +1,5 @@
 <div class="form-group" ng-class="{ 'has-error': openstackCredentialForm.openstack_keystone_version.$dirty && openstackCredentialForm.openstack_keystone_version.$invalid }">
-    <label class="col-sm-3 control-label" for="openstack_keystone_version">{{msg.keystone_version_label}}</label>
+    <label class="col-sm-3 control-label" for="openstack_keystone_version">{{msg.credential_openstack_form_keystoneVersion_label}}</label>
 
     <div class="col-sm-9">
         <select name="keystoneVersion" id="keystoneVersion" ng-model="credentialOpenstack.parameters.keystoneVersion" ng-dropdown required ng-init="credentialOpenstack.parameters.keystoneVersion='cb-keystone-v2'">
@@ -15,7 +15,7 @@
 </div>
 
 <div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3'" ng-class="{ 'has-error': openstackCredentialForm.openstack_keystone_scope.$dirty && openstackCredentialForm.openstack_keystone_scope.$invalid }">
-    <label class="col-sm-3 control-label" for="openstack_keystone_scope">{{msg.keystone_scope_label}}</label>
+    <label class="col-sm-3 control-label" for="openstack_keystone_scope">{{msg.credential_openstack_form_keystoneAuthScope_label}}</label>
 
     <div class="col-sm-9">
         <select name="keystoneAuthScope" id="keystoneAuthScope" ng-model="credentialOpenstack.parameters.keystoneAuthScope" ng-dropdown required ng-init="credentialOpenstack.parameters.keystoneAuthScope='cb-keystone-v3-default-scope'">
@@ -59,7 +59,7 @@
 
 <!-- .form-group -->
 <div class="form-group" ng-class="{ 'has-error': openstackCredentialForm.ouser.$dirty && openstackCredentialForm.ouser.$invalid }">
-    <label class="col-sm-3 control-label" for="ouser">{{msg.credential_openstack_form_user_label}}</label>
+    <label class="col-sm-3 control-label" for="ouser">{{msg.credential_openstack_form_userName_label}}</label>
 
     <div class="col-sm-9">
         <input type="text" class="form-control" name="ouser" ng-model="credentialOpenstack.parameters.userName" required id="ouser" placeholder="{{msg.credential_openstack_user_placeholder}}">
@@ -85,7 +85,7 @@
 
 <!-- .form-group -->
 <div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3'" ng-class="{ 'has-error': openstackCredentialForm.ouserDomain.$dirty && openstackCredentialForm.ouserDomain.$invalid }">
-    <label class="col-sm-3 control-label" for="ouserDomain">{{msg.credential_openstack_form_user_domain_label}}</label>
+    <label class="col-sm-3 control-label" for="ouserDomain">{{msg.credential_openstack_form_userDomain_label}}</label>
 
     <div class="col-sm-9">
         <input type="text" class="form-control" name="ouserDomain" ng-model="credentialOpenstack.parameters.userDomain" required id="ouserDomain" placeholder="{{msg.credential_openstack_user_domain_placeholder}}">
@@ -98,7 +98,7 @@
 
 <!-- .form-group -->
 <div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v2'" ng-class="{ 'has-error': openstackCredentialForm.otenantName.$dirty && openstackCredentialForm.otenantName.$invalid }">
-    <label class="col-sm-3 control-label" for="otenantName">{{msg.credential_openstack_form_tenant_label}}</label>
+    <label class="col-sm-3 control-label" for="otenantName">{{msg.credential_openstack_form_tenantName_label}}</label>
 
     <div class="col-sm-9">
         <input type="text" class="form-control" name="otenantName" ng-model="credentialOpenstack.parameters.tenantName" required id="otenantName" placeholder="{{msg.credential_openstack_form_tenant_placeholder}}">
@@ -111,7 +111,7 @@
 
 <!-- .form-group -->
 <div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3' && credentialOpenstack.parameters.keystoneAuthScope == 'cb-keystone-v3-domain-scope'" ng-class="{ 'has-error': openstackCredentialForm.odomainName.$dirty && openstackCredentialForm.odomainName.$invalid }">
-    <label class="col-sm-3 control-label" for="odomainName">{{msg.credential_openstack_form_domain_label}}</label>
+    <label class="col-sm-3 control-label" for="odomainName">{{msg.credential_openstack_form_domainName_label}}</label>
 
     <div class="col-sm-9">
         <input type="text" class="form-control" name="odomainName" ng-model="credentialOpenstack.parameters.domainName" required id="odomainName" placeholder="{{msg.credential_openstack_form_domain_placeholder}}">
@@ -124,7 +124,7 @@
 
 <!-- .form-group -->
 <div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3' && credentialOpenstack.parameters.keystoneAuthScope == 'cb-keystone-v3-project-scope'" ng-class="{ 'has-error': openstackCredentialForm.oprojectName.$dirty && openstackCredentialForm.oprojectName.$invalid }">
-    <label class="col-sm-3 control-label" for="oprojectName">{{msg.credential_openstack_form_project_label}}</label>
+    <label class="col-sm-3 control-label" for="oprojectName">{{msg.credential_openstack_form_projectName_label}}</label>
 
     <div class="col-sm-9">
         <input type="text" class="form-control" name="oprojectName" ng-model="credentialOpenstack.parameters.projectName" required id="oprojectName" placeholder="{{msg.credential_openstack_form_project_placeholder}}">
@@ -137,7 +137,7 @@
 
 <!-- .form-group -->
 <div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3' && credentialOpenstack.parameters.keystoneAuthScope == 'cb-keystone-v3-project-scope'" ng-class="{ 'has-error': openstackCredentialForm.oprojectDomainName.$dirty && openstackCredentialForm.oprojectDomainName.$invalid }">
-    <label class="col-sm-3 control-label" for="oprojectDomainName">{{msg.credential_openstack_form_project_domain_label}}</label>
+    <label class="col-sm-3 control-label" for="oprojectDomainName">{{msg.credential_openstack_form_projectDomainName_label}}</label>
 
     <div class="col-sm-9">
         <input type="text" class="form-control" name="oprojectDomainName" ng-model="credentialOpenstack.parameters.projectDomainName" required id="oprojectDomainName" placeholder="{{msg.credential_openstack_form_project_domain_placeholder}}">

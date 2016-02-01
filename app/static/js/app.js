@@ -62,6 +62,13 @@ var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'block
             Config.prototype.getDisk = function(provider, nameId) {
                 return this.getValue(this.disk, provider, nameId);
             };
+            Config.prototype.getPropertyName = function(nameId) {
+                var names = this.properties
+                if (nameId !== undefined && names[nameId] !== undefined) {
+                    return names[nameId];
+                }
+                return nameId;
+            };
             cloudbreakApp.constant("displayNames", new Config(response.data));
         }, function(errorResponse) {
             cloudbreakApp.constant("displayNames", null);

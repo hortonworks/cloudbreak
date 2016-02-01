@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("credentialController-logger");
 
-angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', '$filter', '$base64', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'GlobalCredentialCertificate',
-    function($scope, $rootScope, $filter, $base64, UserCredential, AccountCredential, GlobalCredential, GlobalCredentialCertificate) {
+angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', '$filter', '$base64', '$interpolate', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'GlobalCredentialCertificate',
+    function($scope, $rootScope, $filter, $base64, $interpolate, UserCredential, AccountCredential, GlobalCredential, GlobalCredentialCertificate) {
         $rootScope.credentials = AccountCredential.query();
         $scope.credentialInCreation = false;
         $scope.credentialAws = {};
@@ -245,6 +245,19 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.showErrorMessageAlert = function() {
             $scope.showAlert = true;
             $scope.alertMessage = $scope.statusMessage;
+        }
+
+        $scope.getCredentialParameters = function(credential) {
+            if (credential) {
+                var props = angular.copy(credential.parameters)
+                delete props.password
+                delete props.selector
+                return props
+            }
+        }
+
+        $scope.getParameterLabel = function(key) {
+            return $rootScope.msg[$interpolate("credential_openstack_form_{{key}}_label")({key: key})]
         }
 
         function collapseCreateCredentialFormPanel() {
