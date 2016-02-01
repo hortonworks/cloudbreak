@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.TopologyRequest;
 import com.sequenceiq.cloudbreak.api.model.TopologyResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
@@ -152,6 +153,7 @@ public class TopologyCommands implements CommandMarker {
             req.setDescription(description);
             req.setNodes(mapping);
             IdJson id = cloudbreakClient.topologyEndpoint().postPublic(req);
+            context.setHint(Hints.CREATE_CREDENTIAL_WITH_TOPOLOGY);
             return String.format(CREATE_SUCCESS_MSG, id.getId());
         } catch (Exception e) {
             throw exceptionTransformer.transformToRuntimeException(e);
