@@ -24,12 +24,18 @@ public class CleanupService {
     private static final Logger LOG = LoggerFactory.getLogger(CleanupService.class);
     private static final int DELETE_SLEEP = 30000;
 
+    private boolean cleanedUp;
+
     @Value("${integrationtest.cleanup.retryCount}")
     private int cleanUpRetryCount;
     @Inject
     private ITProps itProps;
 
     public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient) throws Exception {
+        if (cleanedUp) {
+            return;
+        }
+        cleanedUp = true;
         Set<StackResponse> stacks = cloudbreakClient.stackEndpoint().getPrivates();
         for (StackResponse stack : stacks) {
             if (stack.getName().startsWith("it-")) {
