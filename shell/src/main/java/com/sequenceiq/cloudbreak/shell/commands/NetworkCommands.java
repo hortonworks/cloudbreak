@@ -66,6 +66,7 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "internetGatewayID", mandatory = false,
                     help = "The ID of the internet gateway that is attached to the VPC (configured via 'vpcID' option)") String internetGatewayId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "subnetId", mandatory = false, help = "The ID of the subnet which belongs to the custom VPC") String subnetId,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
             @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
     ) {
@@ -78,9 +79,13 @@ public class NetworkCommands implements CommandMarker {
             networkJson.setCloudPlatform(cloudPlatform);
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put("vpcId", vpcId);
-            parameters.put("internetGatewayId", internetGatewayId);
-
+            if (vpcId != null && internetGatewayId != null) {
+                parameters.put("vpcId", vpcId);
+                parameters.put("internetGatewayId", internetGatewayId);
+                if (subnetId != null) {
+                    parameters.put("subnetId", subnetId);
+                }
+            }
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
             if (topologyId != null) {

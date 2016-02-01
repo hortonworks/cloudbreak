@@ -22,6 +22,7 @@
       "AllowedPattern" : "vpc-[a-z0-9]{8}"
     },
 
+    <#if !existingSubnet>
     "SubnetCIDR" : {
       "Description" : "IP address range in the securityRule specified as CIDR notation",
       "Type" : "String",
@@ -29,6 +30,16 @@
       "MaxLength": "18",
       "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
     },
+
+    <#else>
+    "SubnetId" : {
+      "Description" : "Id of the Subnet within the existing VPC where to deploy the cluster",
+      "Type" : "String",
+      "MinLength": "15",
+      "MaxLength": "15",
+      "AllowedPattern" : "subnet-[a-z0-9]{8}"
+    },
+    </#if>
 
     "InternetGatewayId" : {
       "Description" : "Id of the internet gateway used by the VPC",
@@ -125,6 +136,7 @@
     },
     </#if>
 
+    <#if !existingSubnet>
     "PublicSubnet" : {
       "Type" : "AWS::EC2::Subnet",
       "Properties" : {
@@ -144,6 +156,7 @@
         ]
       }
     },
+    </#if>
 
     <#if !existingVPC>
     "InternetGateway" : {
@@ -165,7 +178,7 @@
     },
     </#if>
 
-	
+	<#if !existingSubnet>
     "PublicRouteTable" : {
       "Type" : "AWS::EC2::RouteTable",
       "Properties" : {
@@ -206,13 +219,21 @@
         "RouteTableId" : { "Ref" : "PublicRouteTable" }
       }
     },
+    </#if>
+
     <#list instanceGroups as group>
 	"AmbariNodes${group.groupName?replace('_', '')}" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
+      <#if !existingSubnet>
       "DependsOn" : "PublicSubnet",
+      </#if>
       "Properties" : {
+        <#if !existingSubnet>
         "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
         "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
+        <#else>
+        "VPCZoneIdentifier" : [{ "Ref" : "SubnetId" }],
+        </#if>
         "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}" },
         "MinSize" : 1,
         "MaxSize" : ${group.instanceCount},
@@ -298,7 +319,11 @@
   "Outputs" : {
   
 	"Subnet" : {
+	  <#if !existingSubnet>
 	  "Value" : { "Ref" : "PublicSubnet" }
+	  <#else>
+	  "Value" : { "Ref" : "SubnetId" }
+	  </#if>
     },
     "SecurityGroup" : {
       "Value" : { "Ref" : "ClusterNodeSecurityGroup" }

@@ -2,13 +2,15 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
 
-import javax.inject.Inject;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
@@ -17,16 +19,16 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import org.springframework.stereotype.Service;
 
 @Service("CloudFormationTemplateBuilder")
 public class CloudFormationTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String build(AuthenticatedContext ac, CloudStack stack, String snapshotId, boolean existingVPC, String templatePath) {
+    public String build(AuthenticatedContext ac, CloudStack stack, String snapshotId, boolean existingVPC, String existingSubnetCidr, String templatePath) {
         Map<String, Object> model = new HashMap<>();
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
         for (Group group : stack.getGroups()) {
@@ -45,11 +47,11 @@ public class CloudFormationTemplateBuilder {
                     )
             );
         }
-
         model.put("instanceGroups", awsGroupViews);
         model.put("existingVPC", existingVPC);
+        model.put("existingSubnet", existingSubnetCidr != null);
         model.put("securityRules", stack.getSecurity());
-        model.put("cbSubnet", stack.getNetwork().getSubnet().getCidr());
+        model.put("cbSubnet", existingSubnetCidr == null ? stack.getNetwork().getSubnet().getCidr() : existingSubnetCidr);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(stack));
         model.put("availabilitySetNeeded", ac.getCloudContext().getLocation().getAvailabilityZone().value() == null ? false : true);
         if (snapshotId != null) {
