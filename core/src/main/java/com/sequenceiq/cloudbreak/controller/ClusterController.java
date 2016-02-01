@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -120,8 +121,14 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     @Override
+    public void delete(@PathParam(value = "id") Long stackId) throws Exception {
+        Stack stack = stackService.get(stackId);
+        MDCBuilder.buildMdcContext(stack);
+//        clusterService.delete();
+    }
+
+    @Override
     public Response put(Long stackId, UpdateClusterJson updateJson) throws CloudbreakSecuritySetupException {
-        CbUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordJson userNamePasswordJson = updateJson.getUserNamePasswordJson();
