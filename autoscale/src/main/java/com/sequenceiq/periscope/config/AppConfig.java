@@ -1,15 +1,21 @@
 package com.sequenceiq.periscope.config;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Executor;
 
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.client.ClientBuilder;
+
+import org.glassfish.jersey.client.ClientProperties;
 import org.quartz.simpl.SimpleJobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +24,12 @@ import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
 
 import freemarker.template.TemplateException;
 
@@ -36,6 +39,7 @@ import freemarker.template.TemplateException;
 public class AppConfig implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
+    private static final int TIMEOUT = 5_000;
 
     @Value("${periscope.threadpool.core.size:50}")
     private int corePoolSize;
@@ -63,19 +67,38 @@ public class AppConfig implements AsyncConfigurer {
     }
 
     @Bean
-    public RestOperations createRestTemplate() throws Exception {
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-        SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
-        sslContextBuilder.loadTrustMaterial(null, new TrustStrategy() {
+    public ClientBuilder jerseyClientBuilder() throws NoSuchAlgorithmException, KeyManagementException {
+        TrustManager[] certs = new TrustManager[] {
+            new X509TrustManager() {
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                @Override
+                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+            }
+        };
+
+        SSLContext ctx = SSLContext.getInstance("SSL");
+        ctx.init(null, certs, new SecureRandom());
+
+        HostnameVerifier hostnameVerifier = new HostnameVerifier() {
             @Override
-            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            public boolean verify(String hostname, SSLSession session) {
                 return true;
             }
-        });
-        SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build());
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
-        requestFactory.setHttpClient(httpClient);
-        return new RestTemplate(requestFactory);
+        };
+
+        ClientBuilder builder = ClientBuilder.newBuilder().sslContext(ctx).hostnameVerifier(hostnameVerifier)
+                .property(ClientProperties.CONNECT_TIMEOUT, TIMEOUT).property(ClientProperties.READ_TIMEOUT, TIMEOUT);
+
+        return builder;
     }
 
     @Bean
