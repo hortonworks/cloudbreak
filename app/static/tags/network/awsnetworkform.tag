@@ -61,6 +61,18 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+
+    <div class="form-group" ng-class="{ 'has-error': awsNetworkForm.aws_networkSubnetId.$dirty && awsNetworkForm.aws_networkSubnetId.$invalid }">
+        <label class="col-sm-3 col-sm-offset-2 control-label" for="aws_networkSubnetId">{{msg.network_aws_form_subnet_id_label_optional}}</label>
+
+        <div class="col-sm-7">
+            <input type="text" class="form-control" name="aws_networkSubnetId" ng-model="network.parameters.subnetId" ng-maxlength="30" id="aws_networkSubnetId" placeholder="{{msg.network_aws_form_subnet_id_placeholder}}" ng-pattern="/subnet-[a-zA-Z0-9]{8}/">
+            <div class="help-block" ng-show="awsNetworkForm.aws_networkSubnetId.$dirty && awsNetworkForm.aws_networkSubnetId.$invalid">
+                <i class="fa fa-warning"></i> {{msg.network_subnetid_invalid}}
+            </div>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
 </div>
 
 <div class="form-group">
@@ -83,7 +95,7 @@
 
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">
-        <a id="createAwsTemplate" ng-disabled="awsNetworkForm.$invalid || !((awsNetworkForm.aws_networkVPCId.$viewValue.length>0 && awsNetworkForm.aws_networkIGWID.$viewValue.length>0) || (!network.parameters.vpcId && !network.parameters.internetGatewayId))" class="btn btn-success btn-block" ng-click="createAwsNetwork()" role="button"><i class="fa fa-plus fa-fw"></i>
+        <a id="createAwsTemplate" ng-disabled="awsNetworkForm.$invalid || !((awsNetworkForm.aws_networkVPCId.$viewValue.length>0 && awsNetworkForm.aws_networkIGWID.$viewValue.length>0) || (!network.parameters.vpcId && !network.parameters.internetGatewayId && !network.parameters.subnetId))" class="btn btn-success btn-block" ng-click="createAwsNetwork()" role="button"><i class="fa fa-plus fa-fw"></i>
                 {{msg.network_form_create}}</a>
     </div>
 </div>
