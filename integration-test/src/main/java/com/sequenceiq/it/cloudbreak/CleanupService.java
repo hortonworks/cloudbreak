@@ -29,7 +29,7 @@ public class CleanupService {
     @Inject
     private ITProps itProps;
 
-    public void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient) throws Exception {
+    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient) throws Exception {
         Set<StackResponse> stacks = cloudbreakClient.stackEndpoint().getPrivates();
         for (StackResponse stack : stacks) {
             if (stack.getName().startsWith("it-")) {
