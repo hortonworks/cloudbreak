@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.NETWORK_ID;
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.ROUTER_ID;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,7 @@ public class OpenStackUtils {
     }
 
     public boolean isExistingNetwork(Network network) {
-        return getCustomNetworkId(network) != null && getCustomRouterId(network) != null;
+        return isNoneEmpty(getCustomNetworkId(network)) && isNoneEmpty(getCustomRouterId(network));
     }
 
     public String getCustomNetworkId(Network network) {

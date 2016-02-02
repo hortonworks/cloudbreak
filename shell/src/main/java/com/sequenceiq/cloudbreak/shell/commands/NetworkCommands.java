@@ -152,6 +152,7 @@ public class NetworkCommands implements CommandMarker {
     public String createGcpNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
+            @CliOption(key = "networkId", mandatory = false, help = "Id of a custom network") String networkId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
             @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
@@ -165,6 +166,9 @@ public class NetworkCommands implements CommandMarker {
             networkJson.setCloudPlatform(cloudPlatform);
 
             Map<String, Object> parameters = new HashMap<>();
+            if (networkId != null) {
+                parameters.put("networkId", networkId);
+            }
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);

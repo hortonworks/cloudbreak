@@ -58,7 +58,7 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
             LOGGER.info("Check {} resource: {}", type, resource);
             try {
                 Operation operation = check(context, resource);
-                boolean finished = GcpStackUtil.analyzeOperation(operation);
+                boolean finished = operation == null || GcpStackUtil.analyzeOperation(operation);
                 ResourceStatus successStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;
                 result.add(new CloudResourceStatus(resource, finished ? successStatus : ResourceStatus.IN_PROGRESS));
                 if (finished) {
@@ -79,6 +79,9 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
 
     protected Operation check(GcpContext context, DynamicModel resource) throws IOException {
         String operation = resource.getStringParameter(OPERATION_ID);
+        if (operation == null) {
+            return null;
+        }
         try {
             Operation execute = GcpStackUtil.globalOperations(context.getCompute(), context.getProjectId(), operation).execute();
             checkError(execute);
