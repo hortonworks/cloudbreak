@@ -1,2 +1,2 @@
 gcp:
-  default: sequenceiqimage/cb-centos71-amb221-2016-01-28.tar.gz
+  default: sequenceiqimage/cloudbreak-2016-02-01.tar.gz
