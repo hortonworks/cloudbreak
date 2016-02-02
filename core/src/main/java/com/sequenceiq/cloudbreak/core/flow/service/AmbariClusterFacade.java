@@ -16,6 +16,7 @@ import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,8 +24,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -40,6 +44,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -117,6 +122,9 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Inject
     private InstanceMetadataService instanceMetadataService;
+
+    @Value("${cb.docker.container.ambari.server:}")
+    private String ambariServerImage;
 
     private enum Msg {
 
@@ -310,16 +318,28 @@ public class AmbariClusterFacade implements ClusterFacade {
             MDCBuilder.buildMdcContext(cluster);
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Running cluster containers.");
             fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RUN_CONTAINERS, UPDATE_IN_PROGRESS.name());
-            containerRunner.runClusterContainers(actualContext);
-            Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
-            newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
-            newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
-            instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
-            InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            List<Container> containers = containerRunner.runClusterContainers(actualContext);
+            String ambariServerAddress = null;
+            if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
+                Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
+                newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
+                newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
+                instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
+                InstanceGroup gateway = stack.getGatewayInstanceGroup();
+                InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+                ambariServerAddress = gatewayInstance.getPublicIp();
+            } else {
+                ambariServerAddress = FluentIterable.from(containers).firstMatch(new Predicate<Container>() {
+                    @Override
+                    public boolean apply(Container input) {
+                        return ambariServerImage.equals(input.getImage());
+                    }
+                }).get().getHost();
+            }
+
             context = new ProvisioningContext.Builder()
                     .setDefaultParams(stack.getId(), actualContext.getCloudPlatform())
-                    .setAmbariIp(gatewayInstance.getPublicIp())
+                    .setAmbariIp(ambariServerAddress)
                     .build();
         } else {
             LOGGER.info("The stack has started but there were no cluster request, yet. Won't install cluster now.");
