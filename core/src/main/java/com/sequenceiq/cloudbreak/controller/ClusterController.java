@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -73,13 +73,17 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public Response post(Long stackId, ClusterRequest request) {
-       CbUser user = authenticatedUserService.getCbUser();
+        CbUser user = authenticatedUserService.getCbUser();
         if (request.getEnableSecurity()
                 && (request.getKerberosMasterKey() == null || request.getKerberosAdmin() == null || request.getKerberosPassword() == null)) {
             return Response.status(Response.Status.ACCEPTED).build();
         }
         MDCBuilder.buildUserMdcContext(user);
-        fileSystemValidator.validateFileSystem(stackService.getById(stackId).cloudPlatform(), request.getFileSystem());
+        Stack stack = stackService.getById(stackId);
+        if (!stack.isAvailable() && CloudConstants.BYOS.equals(stack.cloudPlatform())) {
+            throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
+        }
+        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), request.getFileSystem());
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stackId, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
                 request.getSssdConfigId());
@@ -121,10 +125,11 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     @Override
-    public void delete(@PathParam(value = "id") Long stackId) throws Exception {
+    public void delete(Long stackId) throws Exception {
+        CbUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
-//        clusterService.delete();
+        clusterService.delete(user, stackId);
     }
 
     @Override

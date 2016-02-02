@@ -5,17 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import mesosphere.marathon.client.Marathon;
-import mesosphere.marathon.client.MarathonClient;
-import mesosphere.marathon.client.model.v2.App;
-import mesosphere.marathon.client.utils.MarathonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
@@ -23,6 +19,11 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+
+import mesosphere.marathon.client.Marathon;
+import mesosphere.marathon.client.MarathonClient;
+import mesosphere.marathon.client.model.v2.App;
+import mesosphere.marathon.client.utils.MarathonException;
 
 @Component
 public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
@@ -67,7 +68,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void deleteContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+    public void deleteContainer(List<String> ids, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
 
     }
 

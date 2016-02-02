@@ -1,16 +1,18 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import com.google.common.collect.ImmutableMap;
+
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.MarathonClient;
 import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.Container;
 import mesosphere.marathon.client.model.v2.Docker;
 import mesosphere.marathon.client.utils.MarathonException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MarathonContainerOrchestratorTest {
@@ -55,10 +57,10 @@ public class MarathonContainerOrchestratorTest {
     @Test
     public void testCreateAmbariServerContainer() {
 
-        String dbHost = "mesos-slave1";
+        String dbHost = "mesos-slave2";
 
         App server = new App();
-        server.setId("ambari-server");
+        server.setId("ambari-server3");
         server.setCpus(1.5);
         server.setMem(4096.0);
         server.setInstances(1);

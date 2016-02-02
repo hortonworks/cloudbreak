@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow2.AbstarctAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-public abstract class AbstractStackCreationAction<P> extends AbstarctAction<StackCreationState, StackCreationEvent, StackContext, P> {
+public abstract class AbstractStackCreationAction<P> extends AbstractAction<StackCreationState, StackCreationEvent, StackContext, P> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackCreationAction.class);
 
     @Inject

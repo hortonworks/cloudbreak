@@ -21,7 +21,7 @@ public interface ContainerOrchestrator extends ContainerOrchestrationBootstrap {
 
     void stopContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException;
 
-    void deleteContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException;
+    void deleteContainer(List<String> ids, OrchestrationCredential cred) throws CloudbreakOrchestratorException;
 
     boolean areAllNodesAvailable(GatewayConfig gatewayConfig, Set<Node> nodes);
 

@@ -144,7 +144,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void deleteContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+    public void deleteContainer(List<String> ids, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
 
     }
 

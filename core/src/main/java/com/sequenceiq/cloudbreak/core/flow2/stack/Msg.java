@@ -35,7 +35,9 @@ public enum Msg {
     STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE("stack.infrastructure.create.rollback"),
     STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE("stack.sync.instance.status.couldnt.determine"),
     FLOW_STACK_PROVISIONED("flow.stack.provisioned"),
-    FLOW_STACK_METADATA_COLLECTED("stack.metadata.collected");
+    FLOW_STACK_METADATA_COLLECTED("stack.metadata.collected"),
+    CLUSTER_DELETE_COMPLETED("ambari.cluster.delete.completed"),
+    CLUSTER_EMAIL_SENT("ambari.cluster.notification.email");
 
     private String code;
 

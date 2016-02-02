@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -56,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
@@ -187,6 +189,20 @@ public class AmbariClusterService implements ClusterService {
             flowManager.triggerClusterInstall(new ProvisionRequest(platform(stack.cloudPlatform()), stack.getId()));
         }
         return cluster;
+    }
+
+    @Override
+    public void delete(CbUser user, Long stackId) {
+        Stack stack = stackService.get(stackId);
+        LOGGER.info("Cluster delete requested.");
+        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            throw new BadRequestException("Clusters can only be deleted by account admins or owners.");
+        }
+        if (Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())){
+            throw new BadRequestException("Clusters is already deleted.");
+        }
+        ClusterDeleteRequest clusterDeleteRequest = new ClusterDeleteRequest(stackId, platform(stack.cloudPlatform()), stack.getCluster().getId());
+        flowManager.triggerClusterTermination(clusterDeleteRequest);
     }
 
     @Override
@@ -670,6 +686,15 @@ public class AmbariClusterService implements ClusterService {
     public ClusterResponse getClusterResponse(ClusterResponse response, String clusterJson) {
         response.setCluster(jsonHelper.createJsonFromString(clusterJson));
         return response;
+    }
+
+    @Override
+    public Cluster getById(Long id) {
+        Cluster cluster = clusterRepository.findOne(id);
+        if (cluster == null) {
+            throw new NotFoundException(String.format("Cluster '%s' not found", id));
+        }
+        return cluster;
     }
 
 }

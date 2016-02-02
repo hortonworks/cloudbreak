@@ -19,6 +19,8 @@ public interface ClusterService {
 
     Cluster create(CbUser user, Long stackId, Cluster clusterRequest);
 
+    void delete(CbUser user, Long stackId);
+
     Cluster retrieveClusterByStackId(Long stackId);
 
     ClusterResponse retrieveClusterForCurrentUser(Long stackId);
@@ -46,4 +48,6 @@ public interface ClusterService {
     Cluster updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson);
 
     ClusterResponse getClusterResponse(ClusterResponse response, String clusterJson);
+
+    Cluster getById(Long clusterId);
 }
