@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,13 +20,16 @@ public class JsonToOrchestratorConverter extends AbstractConversionServiceAwareC
         Orchestrator orchestrator = new Orchestrator();
         orchestrator.setApiEndpoint(source.getApiEndpoint());
         orchestrator.setType(source.getType());
+        Map<String, Object> params = new HashMap<>();
         if (source.getParameters() != null && !source.getParameters().isEmpty()) {
-            try {
-                orchestrator.setAttributes(new Json(source.getParameters()));
-            } catch (JsonProcessingException e) {
-                throw new BadRequestException("Invalid parameters", e);
-            }
+            params = source.getParameters();
         }
+        try {
+            orchestrator.setAttributes(new Json(params));
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException("Invalid parameters", e);
+        }
+
         return orchestrator;
     }
 }

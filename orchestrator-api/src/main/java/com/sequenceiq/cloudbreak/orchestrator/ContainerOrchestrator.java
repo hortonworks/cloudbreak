@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public interface ContainerOrchestrator extends ContainerOrchestrationBootstrap {
 
+    void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException;
+
     List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 

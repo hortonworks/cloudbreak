@@ -45,6 +45,11 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
+    public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+        return;
+    }
+
+    @Override
     public List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint,
                                             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         return null;

@@ -45,6 +45,16 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
 
     @Override
+    public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+        Marathon client = MarathonClient.getInstance(cred.getApiEndpoint());
+        try {
+            client.getServerInfo();
+        } catch (Exception e) {
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint,
                                             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try {
