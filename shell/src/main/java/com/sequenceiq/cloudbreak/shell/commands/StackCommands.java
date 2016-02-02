@@ -297,17 +297,35 @@ public class StackCommands implements CommandMarker {
     @CliCommand(value = "stack terminate", help = "Terminate the stack by its id")
     public String terminateStack(
             @CliOption(key = "id", mandatory = false, help = "Id of the stack") String id,
-            @CliOption(key = "name", mandatory = false, help = "Name of the stack") String name) {
+            @CliOption(key = "name", mandatory = false, help = "Name of the stack") String name,
+            @CliOption(key = "wait", mandatory = false, help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
         try {
+            wait = wait == null ? false : wait;
             if (id != null) {
                 cloudbreakClient.stackEndpoint().delete(Long.valueOf(id), false);
                 context.setHint(Hints.CREATE_CLUSTER);
                 context.removeStack(id);
-                return "Stack terminated with id: " + id;
+                if (wait) {
+                    String waitResponse = cloudbreakUtil.waitAndCheckStackStatus(Long.valueOf(id), Status.DELETE_COMPLETED.name());
+                    if ("FAILED".equals(waitResponse)) {
+                        throw exceptionTransformer.transformToRuntimeException("Stack terminated failed on stack with id: " + id);
+                    }
+                } else {
+                    return "Stack terminated with name: " + name;
+                }
             } else if (name != null) {
+                StackResponse response = cloudbreakClient.stackEndpoint().getPublic(name);
                 cloudbreakClient.stackEndpoint().deletePublic(name, false);
                 context.setHint(Hints.CREATE_CLUSTER);
-                return "Stack terminated with name: " + name;
+
+                if (wait) {
+                    String waitResponse = cloudbreakUtil.waitAndCheckStackStatus(response.getId(), Status.DELETE_COMPLETED.name());
+                    if ("FAILED".equals(waitResponse)) {
+                        throw exceptionTransformer.transformToRuntimeException("Stack terminated failed on stack with id: " + response.getId());
+                    }
+                } else {
+                    return "Stack terminated with name: " + name;
+                }
             }
             return "Stack not specified. (select by using --id or --name)";
         } catch (Exception ex) {
