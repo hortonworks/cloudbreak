@@ -12,6 +12,8 @@ import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.REGISTRATOR;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.SHIPYARD;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.SHIPYARD_DB;
+import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.DOMAIN_REALM;
+import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.REALM;
 
 import javax.inject.Inject;
 
@@ -41,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
@@ -52,6 +55,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
@@ -226,7 +230,7 @@ public class ClusterContainerRunner {
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of("/data/ambari-server/pgsql/data", "/var/lib/postgresql/data",
                         HOST_VOLUME_PATH + "/consul-watch", HOST_VOLUME_PATH + "/consul-watch"))
-                .addEnv(Arrays.asList(String.format("POSTGRES_PASSWORD=%s", "bigdata"), String.format("POSTGRES_USER=%s", "ambari")));
+                .addEnv(ImmutableMap.of("POSTGRES_PASSWORD", "bigdata", "POSTGRES_USER", "ambari"));
         if (gatewayHostname != null) {
             constraintBuilder.addHosts(ImmutableList.of(gatewayHostname));
         }
@@ -240,7 +244,7 @@ public class ClusterContainerRunner {
                 .networkMode(HOST_NETWORK_MODE)
                 .tcpPortBinding(new TcpPortBinding(AMBARI_PORT, "0.0.0.0", AMBARI_PORT))
                 .addVolumeBindings(ImmutableMap.of(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
-                .addEnv(Arrays.asList("SERVICE_NAME=ambari-8080"))
+                .addEnv(ImmutableMap.of("SERVICE_NAME", "ambari-8080"))
                 .cmd(new String[]{String.format("systemd.setenv=POSTGRES_DB=%s systemd.setenv=CLOUD_PLATFORM=%s", dbHostname, cloudPlatform)});
         if (gatewayHostname != null) {
             constraintBuilder.addHosts(ImmutableList.of(gatewayHostname));
@@ -257,16 +261,25 @@ public class ClusterContainerRunner {
     }
 
     private ContainerConstraint getLdapConstraint(String gatewayHostname) {
+        Map<String, String> env = new HashMap<>();
+        env.put("SERVICE_NAME", LDAP.getName());
+        env.put("NAMESERVER_IP", "127.0.0.1");
+        for (String ldapEnv : ldapEnvs) {
+            String[] envValue = ldapEnv.split("=");
+            if (envValue.length == 2) {
+                env.put(envValue[0], envValue[1]);
+            } else {
+                throw new RuntimeException(String.format("Could not be parse LDAP parameter from value: '%s'!", envValue));
+            }
+        }
+
         return new ContainerConstraint.Builder()
                 .withName(LDAP.getName())
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
                 .tcpPortBinding(new TcpPortBinding(LDAP_PORT, "0.0.0.0", LDAP_PORT))
                 .addHosts(ImmutableList.of(gatewayHostname))
-                .addEnv(Arrays.asList(String.format("constraint:node==%s", gatewayHostname),
-                        String.format("SERVICE_NAME=%s", LDAP.getName()),
-                        "NAMESERVER_IP=127.0.0.1"))
-                .addEnv(ldapEnvs)
+                .addEnv(env)
                 .build();
     }
 
@@ -274,19 +287,22 @@ public class ClusterContainerRunner {
         KerberosConfiguration kerberosConf = new KerberosConfiguration(cluster.getKerberosMasterKey(), cluster.getKerberosAdmin(),
                 cluster.getKerberosPassword());
 
+        Map<String, String> env = new HashMap<>();
+        env.put("SERVICE_NAME", KERBEROS.getName());
+        env.put("NAMESERVER_IP", "127.0.0.1");
+        env.put("REALM", REALM);
+        env.put("DOMAIN_REALM", DOMAIN_REALM);
+        env.put("KERB_MASTER_KEY", kerberosConf.getMasterKey());
+        env.put("KERB_ADMIN_USER", kerberosConf.getUser());
+        env.put("KERB_ADMIN_PASS", kerberosConf.getPassword());
+
         return new ContainerConstraint.Builder()
                 .withName(KERBEROS.getName())
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
                 .addHosts(ImmutableList.of(gatewayHostname))
-                .addEnv(Arrays.asList(String.format("SERVICE_NAME=%s", KERBEROS.getName()),
-                        "NAMESERVER_IP=127.0.0.1",
-                        String.format("REALM=%s", KerberosConfiguration.REALM),
-                        String.format("DOMAIN_REALM=%s", KerberosConfiguration.DOMAIN_REALM),
-                        String.format("KERB_MASTER_KEY=%s", kerberosConf.getMasterKey()),
-                        String.format("KERB_ADMIN_USER=%s", kerberosConf.getUser()),
-                        String.format("KERB_ADMIN_PASS=%s", kerberosConf.getPassword())))
+                .addEnv(env)
                 .build();
     }
 
@@ -296,7 +312,7 @@ public class ClusterContainerRunner {
                 .instances(1)
                 .tcpPortBinding(new TcpPortBinding(SHIPYARD_CONTAINER_PORT, "0.0.0.0", SHIPYARD_EXPOSED_PORT))
                 .addHosts(ImmutableList.of(gatewayHostname))
-                .addEnv(Arrays.asList(String.format("SERVICE_NAME=%s", SHIPYARD.getName())))
+                .addEnv(ImmutableMap.of("SERVICE_NAME", SHIPYARD.getName()))
                 .addLink("swarm-manager", "swarm")
                 .addLink(SHIPYARD_DB.getName(), "rethinkdb")
                 .cmd(new String[]{"server", "-d", "tcp://swarm:3376"})
@@ -309,7 +325,7 @@ public class ClusterContainerRunner {
                 .instances(1)
                 .tcpPortBinding(new TcpPortBinding(SHIPYARD_DB_CONTAINER_PORT, "0.0.0.0", SHIPYARD_DB_EXPOSED_PORT))
                 .addHosts(ImmutableList.of(gatewayHostname))
-                .addEnv(Arrays.asList(String.format("SERVICE_NAME=%s", SHIPYARD_DB.getName())))
+                .addEnv(ImmutableMap.of("SERVICE_NAME", SHIPYARD_DB.getName()))
                 .build();
     }
 
@@ -356,6 +372,7 @@ public class ClusterContainerRunner {
             builder.cpus(hgConstraint.getConstraintTemplate().getCpu());
             builder.memory(hgConstraint.getConstraintTemplate().getMemory());
             builder.instances(hgConstraint.getHostCount());
+            builder.withDiskSize(hgConstraint.getConstraintTemplate().getDisk());
         }
 
         return builder.build();
@@ -364,7 +381,7 @@ public class ClusterContainerRunner {
     private ContainerConstraint getConsulWatchConstraint(List<String> hosts) {
         return new ContainerConstraint.Builder()
                 .withName(CONSUL_WATCH.getName())
-                .addEnv(ImmutableList.of("CONSUL_HOST=127.0.0.1"))
+                .addEnv(ImmutableMap.of("CONSUL_HOST", "127.0.0.1"))
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of("/var/run/docker.sock", "/var/run/docker.sock"))
                 .addHosts(hosts)

@@ -1,21 +1,24 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import com.google.common.collect.ImmutableMap;
-
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.MarathonClient;
 import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.Container;
 import mesosphere.marathon.client.model.v2.Docker;
 import mesosphere.marathon.client.utils.MarathonException;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
+@Ignore
 public class MarathonContainerOrchestratorTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MarathonContainerOrchestratorTest.class);
 
     private Marathon client;
 
@@ -45,13 +48,10 @@ public class MarathonContainerOrchestratorTest {
 
         try {
             ambariDb = client.createApp(ambariDb);
-            System.out.println(ambariDb);
+            LOGGER.info(ambariDb.toString());
         } catch (MarathonException e) {
-            e.printStackTrace();
+            LOGGER.error("App could not be created on Marathon: ", e);
         }
-        //this is an ampty collection so the task info needs to be got manually
-//        List<Task> tasks = new ArrayList<>(ambariDb.getTasks());
-//        String host = tasks.get(0).getHost();
     }
 
     @Test
@@ -75,15 +75,14 @@ public class MarathonContainerOrchestratorTest {
         serverDocker.setNetwork("HOST");
         serverContainer.setDocker(serverDocker);
 
-//        server.(ImmutableMap.of("systemd.setenv", String.format("POSTGRES_DB=%s", host)));
         server.setCmd(String.format("/usr/sbin/init systemd.setenv=POSTGRES_DB=%s", dbHost));
         server.setContainer(serverContainer);
 
         try {
             server = client.createApp(server);
-            System.out.println(server);
+            LOGGER.info(server.toString());
         } catch (MarathonException e) {
-            e.printStackTrace();
+            LOGGER.error("App could not be created on Marathon: ", e);
         }
     }
 
@@ -107,15 +106,14 @@ public class MarathonContainerOrchestratorTest {
         agentDocker.setNetwork("HOST");
         agentContainer.setDocker(agentDocker);
 
-//        server.(ImmutableMap.of("systemd.setenv", String.format("POSTGRES_DB=%s", host)));
         agents.setCmd(String.format("/usr/sbin/init systemd.setenv=AMBARI_SERVER_ADDR=%s systemd.setenv=USE_CONSUL_DNS=false", serverHost));
         agents.setContainer(agentContainer);
 
         try {
             agents = client.createApp(agents);
-            System.out.println(agents);
+            LOGGER.info(agents.toString());
         } catch (MarathonException e) {
-            e.printStackTrace();
+            LOGGER.error("App could not be created on Marathon: ", e);
         }
     }
 }

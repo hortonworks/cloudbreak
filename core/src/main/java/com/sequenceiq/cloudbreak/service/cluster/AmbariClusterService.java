@@ -170,7 +170,7 @@ public class AmbariClusterService implements ClusterService {
         if (clusterRepository.findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
         }
-        for (HostGroup hostGroup : cluster.getHostGroups()){
+        for (HostGroup hostGroup : cluster.getHostGroups()) {
             constraintRepository.save(hostGroup.getConstraint());
         }
         if (cluster.getFileSystem() != null) {
@@ -584,7 +584,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication,
-            int adjustment, List<HostMetadata> filteredHostList) {
+                                                            int adjustment, List<HostMetadata> filteredHostList) {
         int removeCount = Math.abs(adjustment);
         Map<String, Map<Long, Long>> dfsSpace = client.getDFSSpace();
         Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);

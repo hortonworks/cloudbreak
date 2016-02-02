@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 
 @Entity
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"account", "name"}),
+        @UniqueConstraint(columnNames = { "account", "name" }),
 })
 @NamedQueries({
         @NamedQuery(
