@@ -72,7 +72,8 @@ public class CredentialCommands implements CommandMarker {
         return context.isCredentialAccessible();
     }
 
-    @CliAvailabilityIndicator({ "credential create --GCP", "credential create --EC2", "credential create --AZURE", "credential create --OPENSTACK" })
+    @CliAvailabilityIndicator({ "credential create --GCP", "credential create --EC2", "credential create --AWS", "credential create --AZURE",
+            "credential create --OPENSTACK" })
     public boolean isCredentialEc2CreateCommandAvailable() {
         return true;
     }
@@ -249,7 +250,8 @@ public class CredentialCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "credential create --EC2", help = "Create a new EC2 credential")
+    @CliCommand(value = { "credential create --EC2", "credential create --AWS" },
+            help = "Create a new AWS credential ('credential create --EC2' is deprecated will be removed soon)")
     public String createEc2Credential(
             @CliOption(key = "name", mandatory = true, help = "Name of the credential") String name,
             @CliOption(key = "roleArn", mandatory = true, help = "roleArn of the credential") String roleArn,

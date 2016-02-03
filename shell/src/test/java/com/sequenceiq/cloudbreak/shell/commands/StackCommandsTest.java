@@ -89,7 +89,7 @@ public class StackCommandsTest {
     @Test
     public void testTerminateStackById() throws Exception {
         doNothing().when(stackEndpoint).delete(Long.valueOf(STACK_ID), false);
-        underTest.terminateStack(STACK_ID, null);
+        underTest.terminateStack(STACK_ID, null, false);
         verify(mockContext, times(1)).removeStack(anyString());
         verify(stackEndpoint, times(0)).get(anyLong());
     }
@@ -98,22 +98,23 @@ public class StackCommandsTest {
     public void testTerminateStackByName() throws Exception {
         given(stackEndpoint.getPublic(STACK_NAME)).willReturn(dummyResult);
         doNothing().when(stackEndpoint).delete(Long.valueOf(STACK_ID), false);
-        underTest.terminateStack(null, STACK_NAME);
+        underTest.terminateStack(null, STACK_NAME, false);
         verify(mockContext, times(0)).removeStack(anyString());
-        verify(stackEndpoint, times(0)).getPublic(anyString());
+        verify(stackEndpoint, times(1)).getPublic(anyString());
+        verify(stackEndpoint, times(0)).get(anyLong());
     }
 
     @Test
     public void testTerminateStackByIdAndName() throws Exception {
         doNothing().when(stackEndpoint).delete(Long.valueOf(STACK_ID), false);
-        underTest.terminateStack(STACK_ID, STACK_NAME);
+        underTest.terminateStack(STACK_ID, STACK_NAME, false);
         verify(mockContext, times(1)).removeStack(anyString());
         verify(stackEndpoint, times(0)).getPublic(anyString());
     }
 
     @Test
     public void testTerminateWithoutStackIdAndName() throws Exception {
-        underTest.terminateStack(null, null);
+        underTest.terminateStack(null, null, false);
         verify(mockContext, times(0)).removeStack(anyString());
     }
 }
