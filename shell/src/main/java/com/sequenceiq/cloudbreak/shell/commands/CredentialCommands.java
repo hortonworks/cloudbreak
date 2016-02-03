@@ -250,7 +250,23 @@ public class CredentialCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = { "credential create --EC2", "credential create --AWS" },
+    @CliCommand(value = { "credential create --AWS" },
+            help = "Create a new AWS credential")
+    public String createAwsCredential(
+            @CliOption(key = "name", mandatory = true, help = "Name of the credential") String name,
+            @CliOption(key = "roleArn", mandatory = true, help = "roleArn of the credential") String roleArn,
+            @CliOption(key = "sshKeyPath", mandatory = false, help = "path of a public SSH key file") File sshKeyPath,
+            @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key file") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
+            @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
+            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the credential belongs to") Long topologyId
+    ) {
+        return createEc2Credential(name, roleArn, sshKeyPath, sshKeyUrl, sshKeyString, publicInAccount, description, topologyId);
+    }
+
+
+    @CliCommand(value = { "credential create --EC2" },
             help = "Create a new AWS credential ('credential create --EC2' is deprecated will be removed soon)")
     public String createEc2Credential(
             @CliOption(key = "name", mandatory = true, help = "Name of the credential") String name,
@@ -312,6 +328,8 @@ public class CredentialCommands implements CommandMarker {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
+
+
 
     @CliCommand(value = "credential create --GCP", help = "Create a new Gcp credential")
     public String createGcpCredential(
