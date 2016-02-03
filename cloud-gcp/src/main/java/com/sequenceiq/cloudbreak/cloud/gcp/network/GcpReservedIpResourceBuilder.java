@@ -20,7 +20,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpNetworkBuilder {
     private static final int ORDER = 3;
 
     @Override
-    public CloudResource create(GcpContext context, AuthenticatedContext auth) {
+    public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }

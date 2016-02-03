@@ -39,15 +39,19 @@ public interface NetworkResourceBuilder<C extends ResourceBuilderContext> extend
      * will be provided to the {@link #build(ResourceBuilderContext, AuthenticatedContext, Network, Security, CloudResource)} method to actually create these
      * resources on the cloud provider. In case the resource creation fails the whole deployment fails, because the network type resources are not
      * replaceable. In that case the only option is to remove the stack.
+     * <p/>
+     * There are some cases where you don't want to create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
+     * that case return the cloud resource with the existing resource id.
      *
      * @param context Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
      * @param auth    Authenticated context is provided to be able to send the requests to the cloud provider.
+     * @param network Network object provided which contains all the necessary information to create the proper network and subnet or the existing ones id.
      * @return Returns the buildable cloud resources.
      */
-    CloudResource create(C context, AuthenticatedContext auth);
+    CloudResource create(C context, AuthenticatedContext auth, Network network);
 
     /**
-     * This method will be called after the {@link #create(ResourceBuilderContext, AuthenticatedContext)} method with the constructed
+     * This method will be called after the {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)} method with the constructed
      * cloud resources. It's purpose to actually create these resources on the cloud provider side.
      * <p/>
      * There are some cases where you don't want to create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
@@ -55,10 +59,10 @@ public interface NetworkResourceBuilder<C extends ResourceBuilderContext> extend
      *
      * @param context  Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
      * @param auth     Authenticated context is provided to be able to send the requests to the cloud provider.
-     * @param network  Network object provided which contains all the necessary information to create the proper network and subnet.
+     * @param network  Network object provided which contains all the necessary information to create the proper network and subnet or the existing ones id.
      * @param security Security object represents the information to create the security rules and limit the accessibility of the cluster. Custom security
      *                 rules can be created and used. It's form is provided in protocol, port sequence and cidr range (0.0.0.0/0).
-     * @param resource Resource created earlier by the {@link #create(ResourceBuilderContext, AuthenticatedContext)}.
+     * @param resource Resource created earlier by the {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)}.
      * @return Returns the created cloud resource which can be extended with extra information since the object itself is a dynamic model. These objects
      * will be passed along with the extra information if it's provided so later it can be used to track the status of the deployment.
      * @throws Exception Exception can be thrown if the resource create request fails. It will result in stack failure since these resources are not
@@ -72,7 +76,7 @@ public interface NetworkResourceBuilder<C extends ResourceBuilderContext> extend
     CloudResourceStatus update(C context, AuthenticatedContext auth, Network network, Security security, CloudResource resource) throws Exception;
 
     /**
-     * Responsible to delete the provided cloud resource by {@link #create(ResourceBuilderContext, AuthenticatedContext)} from the
+     * Responsible to delete the provided cloud resource by {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)} from the
      * cloud provider.
      * <p/>
      * There are some cases where you didn't create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
@@ -80,7 +84,7 @@ public interface NetworkResourceBuilder<C extends ResourceBuilderContext> extend
      *
      * @param context  Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
      * @param auth     Authenticated context is provided to be able to send the requests to the cloud provider.
-     * @param resource Resource created earlier by the {@link #create(ResourceBuilderContext, AuthenticatedContext)}.
+     * @param resource Resource created earlier by the {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)}.
      * @param network  Network object which has to be deleted
      * @return Returns the deleted cloud resource which can be extended with extra information since the object itself is a dynamic model. These objects
      * will be passed along with the extra information if it's provided so later it can be used to track the status of the deployment.

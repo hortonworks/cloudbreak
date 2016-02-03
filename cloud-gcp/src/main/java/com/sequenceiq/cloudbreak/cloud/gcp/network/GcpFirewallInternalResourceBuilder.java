@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingNetwork;
+
 import java.util.Arrays;
 
 import org.springframework.stereotype.Service;
@@ -11,6 +14,7 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
@@ -20,7 +24,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
-    public CloudResource create(GcpContext context, AuthenticatedContext auth) {
+    public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }
@@ -42,9 +46,16 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
         allowed3.setIPProtocol("udp");
         allowed3.setPorts(Arrays.asList("1-65535"));
 
+        firewall.setTargetTags(Arrays.asList(GcpStackUtil.getClusterTag(auth.getCloudContext())));
         firewall.setAllowed(Arrays.asList(allowed1, allowed2, allowed3));
         firewall.setName(buildableResource.getName());
-        firewall.setSourceRanges(Arrays.asList(network.getSubnet().getCidr()));
+        if (isExistingNetwork(network)) {
+            Compute.Networks.Get networkRequest = context.getCompute().networks().get(projectId, getCustomNetworkId(network));
+            com.google.api.services.compute.model.Network existingNetwork = networkRequest.execute();
+            firewall.setSourceRanges(Arrays.asList(existingNetwork.getIPv4Range()));
+        } else {
+            firewall.setSourceRanges(Arrays.asList(network.getSubnet().getCidr()));
+        }
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId,
                 context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
 

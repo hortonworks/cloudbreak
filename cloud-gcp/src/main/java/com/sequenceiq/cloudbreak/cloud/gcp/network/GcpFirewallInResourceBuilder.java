@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -28,7 +30,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
-    public CloudResource create(GcpContext context, AuthenticatedContext auth) {
+    public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }
@@ -48,6 +50,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
 
         allowedRules.addAll(createRule(security));
 
+        firewall.setTargetTags(Arrays.asList(GcpStackUtil.getClusterTag(auth.getCloudContext())));
         firewall.setAllowed(allowedRules);
         firewall.setName(buildableResource.getName());
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",

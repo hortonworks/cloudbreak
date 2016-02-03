@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.util;
 
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -24,9 +26,11 @@ import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 public final class GcpStackUtil {
@@ -41,6 +45,7 @@ public final class GcpStackUtil {
     private static final String SERVICE_ACCOUNT = "serviceAccountId";
     private static final String PRIVATE_KEY = "serviceAccountPrivateKey";
     private static final String PROJECT_ID = "projectId";
+    private static final String NETWORK_ID = "networkId";
 
     private GcpStackUtil() {
     }
@@ -180,6 +185,18 @@ public final class GcpStackUtil {
             LOGGER.warn("Cannot determine the private id of GCP instance, name: " + resourceName, e);
             return null;
         }
+    }
+
+    public static boolean isExistingNetwork(Network network) {
+        return isNoneEmpty(getCustomNetworkId(network));
+    }
+
+    public static String getCustomNetworkId(Network network) {
+        return network.getStringParameter(NETWORK_ID);
+    }
+
+    public static String getClusterTag(CloudContext cloudContext) {
+        return cloudContext.getName() + cloudContext.getId();
     }
 
     private static String[] createParts(String splittable) {

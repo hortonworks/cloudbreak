@@ -21,6 +21,7 @@ import com.google.api.services.compute.model.Metadata;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Tags;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
@@ -36,7 +37,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component
@@ -58,9 +58,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             List<CloudResource> buildableResource) throws Exception {
         InstanceTemplate template = group.getInstances().get(0).getTemplate();
         String projectId = context.getProjectId();
-        //CloudRegion region = CloudRegion.valueOf(context.getRegion());
         Location location = context.getLocation();
-
 
         Compute compute = context.getCompute();
 
@@ -76,9 +74,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         instance.setCanIpForward(Boolean.TRUE);
         instance.setNetworkInterfaces(getNetworkInterface(context.getNetworkResources(), location.getRegion(), group, compute, projectId));
         instance.setDisks(listOfDisks);
+
         Tags tags = new Tags();
-        tags.setItems(asList(group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "")));
+        List<String> tagList = new ArrayList<>();
+        tagList.add(group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", ""));
+        tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
+        tags.setItems(tagList);
         instance.setTags(tags);
+
         Metadata metadata = new Metadata();
         metadata.setItems(new ArrayList<Metadata.Items>());
 
@@ -126,7 +129,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         try {
             LOGGER.info("Checking instance: {}", cloudInstance);
             Operation operation = check(context, cloudInstance);
-            boolean finished = GcpStackUtil.analyzeOperation(operation);
+            boolean finished = operation == null || GcpStackUtil.analyzeOperation(operation);
             InstanceStatus status = finished ? context.isBuild() ? InstanceStatus.STARTED : InstanceStatus.STOPPED : InstanceStatus.IN_PROGRESS;
             LOGGER.info("Instance: {} status: {}", instances, status);
             return asList(new CloudVmInstanceStatus(cloudInstance, status));

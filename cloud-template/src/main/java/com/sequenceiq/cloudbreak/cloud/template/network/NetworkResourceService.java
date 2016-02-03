@@ -51,7 +51,7 @@ public class NetworkResourceService {
             if (pollGroup != null && CANCELLED.equals(pollGroup)) {
                 break;
             }
-            CloudResource buildableResource = builder.create(context, auth);
+            CloudResource buildableResource = builder.create(context, auth, network);
             createResource(auth, buildableResource);
             CloudResource resource = builder.build(context, auth, network, security, buildableResource);
             updateResource(auth, resource);
