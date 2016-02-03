@@ -20,7 +20,6 @@ public class TopologyToJsonConverter extends AbstractConversionServiceAwareConve
         json.setName(source.getName());
         json.setDescription(source.getDescription());
         json.setCloudPlatform(source.getCloudPlatform());
-        json.setEndpoint(source.getEndpoint());
         json.setNodes(convertNodes(source.getRecords()));
         return json;
     }
