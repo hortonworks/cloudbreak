@@ -205,7 +205,9 @@ public class StackController implements StackEndpoint {
                 stackRequest.getSecurityGroupId());
         stack.setPublicInAccount(publicInAccount);
         validateAccountPreferences(stack, user);
-        stackService.validateOrchestrator(stack.getOrchestrator());
+        if (stack.getOrchestrator() != null) {
+            stackService.validateOrchestrator(stack.getOrchestrator());
+        }
         stack = stackService.create(user, stack);
         return new IdJson(stack.getId());
     }

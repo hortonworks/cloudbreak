@@ -90,7 +90,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenEverythingWorksNormally() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
@@ -118,7 +118,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenTimeOutComesInClusterAvailabilityPoller() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
@@ -145,7 +145,7 @@ public class ClusterBootstrapperTest {
     @Test(expected = CancellationException.class)
     public void bootstrapClusterWhenOrchestratorDropCancelledException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
@@ -165,7 +165,7 @@ public class ClusterBootstrapperTest {
     @Test(expected = CloudbreakException.class)
     public void bootstrapClusterWhenOrchestratorDropFailedException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
@@ -185,7 +185,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenEverythingWorksNormallyWithMoreBootstrapSegment() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))

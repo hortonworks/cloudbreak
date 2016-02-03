@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariConfigurationService;
-import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 @Service
 public class HostFilterService {
@@ -44,7 +44,7 @@ public class HostFilterService {
         List<HostMetadata> filteredList = new ArrayList<>(hosts);
         try {
             Cluster cluster = stack.getCluster();
-            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             Map<String, String> config = configurationService.getConfiguration(ambariClient, hostGroup);
             for (HostFilter hostFilter : hostFilters) {

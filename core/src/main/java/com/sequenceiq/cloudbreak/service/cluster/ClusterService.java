@@ -1,19 +1,22 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 public interface ClusterService {
 
@@ -25,7 +28,9 @@ public interface ClusterService {
 
     ClusterResponse retrieveClusterForCurrentUser(Long stackId);
 
-    Cluster updateAmbariIp(Long clusterId, String ambariIp);
+    Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig);
+
+    void updateHostMetadata(Long clusterId, Map<String, List<String>> hostsPerHostGroup);
 
     String getClusterJson(String ambariIp, Long stackId);
 

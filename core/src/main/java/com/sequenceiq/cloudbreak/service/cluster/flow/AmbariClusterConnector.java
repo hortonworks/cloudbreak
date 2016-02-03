@@ -24,6 +24,10 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAUL
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 
+import javax.annotation.Nullable;
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,14 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.annotation.Resource;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -93,12 +89,14 @@ import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-
 import groovyx.net.http.HttpResponseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AmbariClusterConnector {
@@ -114,6 +112,7 @@ public class AmbariClusterConnector {
     private static final String UPSCALE_REQUEST_CONTEXT = "Logical Request: Scale Cluster";
     private static final String UPSCALE_REQUEST_STATUS = "IN_PROGRESS";
     private static final String SSSD_CONFIG = "sssd-config-";
+    private static final String SWARM = "SWARM";
 
     @Inject
     private StackRepository stackRepository;
@@ -212,25 +211,15 @@ public class AmbariClusterConnector {
 
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, defaultConfigProvider.getDefaultConfigs(), false);
 
-            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+            HttpClientConfig ambariClientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
+            AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariClientConfig);
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, blueprintText);
-            // TODO: nodeCount will simply come from hg->hosts associations
-            int nodeCount = stack.getFullNodeCountWithoutDecommissionedNodes() - stack.getGateWayNodeCount();
-
             Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
-            // TODO:
-            // in the previous step, we only started a few agents where marathon was able to start them, but hostgroups were not part of it
-            // we don't know which hostgroup was meant for which ambari agent, we don't know how to associate hgs with host
-            // - we need that info from the previous step, so an input like (hg->hosts is needed from the previous step)
-            // it's easy to set it up there -> start some containers for a hg, get the ip addresses and put it in the map (it's ok for swarm as well)
-            // this way we won't have to rely on instance group information (finding alive hosts, we will know exactly where the agent was started)
             Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
-            // host metadata needs to be saved in the previous step as well
-            hostGroups = saveHostMetadata(cluster, hostGroupMappings);
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
+            int nodeCount = hostsInCluster.size();
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
@@ -238,11 +227,12 @@ public class AmbariClusterConnector {
                 executeSssdRecipe(stack, null);
             }
 
-            // TODO: do not run it at all, if recipes are not supported
-            if (fs != null) {
-                addFsRecipes(blueprintText, fs, hostGroups);
+            if (SWARM.equals(cluster.getStack().getOrchestrator().getType())) {
+                if (fs != null) {
+                    addFsRecipes(blueprintText, fs, hostGroups);
+                }
+                addHDFSRecipe(cluster, blueprintText, hostGroups);
             }
-            addHDFSRecipe(cluster, blueprintText, hostGroups);
 
             final boolean recipesFound = recipesFound(hostGroups);
             if (recipesFound) {
@@ -303,7 +293,7 @@ public class AmbariClusterConnector {
         Set<String> successHosts = Collections.emptySet();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         int nodeCount = stack.getFullNodeCountWithoutDecommissionedAndUnRegisteredNodes() - stack.getGateWayNodeCount()
                 + hostGroupAdjustment.getScalingAdjustment();
@@ -345,8 +335,8 @@ public class AmbariClusterConnector {
             keyValues.put(configName, config.getConfiguration());
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
-            pluginManager.prepareKeyValues(clientConfig, keyValues);
+            HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+            pluginManager.prepareKeyValues(httpClientConfig, keyValues);
             payload = Arrays.asList(configName);
         } else {
             payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
@@ -382,7 +372,7 @@ public class AmbariClusterConnector {
 
     public AmbariClient getAmbariClientByStack(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         return ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(),
                 cluster.getPassword());
     }
@@ -417,7 +407,7 @@ public class AmbariClusterConnector {
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         String oldUserName = cluster.getUserName();
         String oldPassword = cluster.getPassword();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         if (newUserName.equals(oldUserName)) {
             if (!newPassword.equals(oldPassword)) {
@@ -441,7 +431,7 @@ public class AmbariClusterConnector {
         LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroupName);
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP.code(), asList(adjustment, hostGroupName)), hostGroupName);
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
         PollingResult pollingResult = startServiceIfNeeded(stack, ambariClient, blueprintName);
@@ -474,7 +464,7 @@ public class AmbariClusterConnector {
 
     public void stopCluster(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         try {
             if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
@@ -488,7 +478,7 @@ public class AmbariClusterConnector {
 
     public void startCluster(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         waitForAmbariToStart(stack);
         startAmbariAgents(stack);
@@ -499,7 +489,7 @@ public class AmbariClusterConnector {
         boolean result = false;
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
-            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             AmbariClientPollerObject ambariClientPollerObject = new AmbariClientPollerObject(stack, ambariClient);
             try {
@@ -513,7 +503,7 @@ public class AmbariClusterConnector {
 
     public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
         boolean hostDeleted = false;
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getCluster());
         Set<String> components = getHadoopComponents(ambariClient, data.getHostGroup().getName(), stack.getCluster().getBlueprint().getBlueprintName());
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
@@ -800,7 +790,7 @@ public class AmbariClusterConnector {
     private void waitForAmbariToStart(Stack stack) throws CloudbreakException {
         LOGGER.info("Checking if Ambari Server is available.");
         Cluster cluster = stack.getCluster();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         PollingResult ambariHealthCheckResult = ambariHealthChecker.pollWithTimeout(
                 ambariHealthCheckerTask,
                 new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword())),
@@ -867,23 +857,6 @@ public class AmbariClusterConnector {
         return stopped;
     }
 
-    private Set<HostGroup> saveHostMetadata(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings) {
-        Set<HostGroup> hostGroups = new HashSet<>();
-        for (Entry<String, List<Map<String, String>>> hostGroupMapping : hostGroupMappings.entrySet()) {
-            Set<HostMetadata> hostMetadata = new HashSet<>();
-            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupMapping.getKey());
-            for (Map<String, String> hostNameMap : hostGroupMapping.getValue()) {
-                HostMetadata hostMetadataEntry = new HostMetadata();
-                hostMetadataEntry.setHostName(hostNameMap.get(FQDN));
-                hostMetadataEntry.setHostGroup(hostGroup);
-                hostMetadata.add(hostMetadataEntry);
-            }
-            hostGroup.setHostMetadata(hostMetadata);
-            hostGroups.add(hostGroupRepository.save(hostGroup));
-        }
-        return hostGroups;
-    }
-
     private Set<HostMetadata> addHostMetadata(Cluster cluster, List<String> hosts, HostGroupAdjustmentJson hostGroupAdjustment) {
         Set<HostMetadata> hostMetadata = new HashSet<>();
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
@@ -933,8 +906,11 @@ public class AmbariClusterConnector {
             Map<String, Map<String, String>> globalConfig = hadoopConfigurationService.getGlobalConfiguration(cluster);
             blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, globalConfig);
             if (cluster.isSecure()) {
-                InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
-                String gatewayHost = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId()).get(0);
+                String gatewayHost = cluster.getAmbariIp();
+                if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
+                    InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
+                    gatewayHost = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId()).get(0);
+                }
                 blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);
             }
             LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.readTree(blueprintText).toString());
@@ -962,19 +938,28 @@ public class AmbariClusterConnector {
         Map<String, List<Map<String, String>>> hostGroupMappings = new HashMap<>();
         LOGGER.info("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (HostGroup hostGroup : hostGroups) {
-            List<Map<String, String>> instanceMetaMapping = new ArrayList<>();
-            Map<String, String> topologyMapping = getTopologyMapping(hostGroup);
-            List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(hostGroup.getConstraint().getInstanceGroup().getId());
-            for (InstanceMetaData meta : metas) {
-                Map instanceMeta = new HashMap();
-                instanceMeta.put(FQDN, meta.getDiscoveryFQDN());
-                if (meta.getHypervisor() != null) {
-                    instanceMeta.put("hypervisor", meta.getHypervisor());
-                    instanceMeta.put("rack", topologyMapping.get(meta.getHypervisor()));
+            List<Map<String, String>> hostInfoForHostGroup = new ArrayList<>();
+            if (hostGroup.getConstraint().getInstanceGroup() != null) {
+                Map<String, String> topologyMapping = getTopologyMapping(hostGroup);
+                List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(hostGroup.getConstraint().getInstanceGroup().getId());
+                for (InstanceMetaData meta : metas) {
+                    Map<String, String> hostInfo = new HashMap<>();
+                    hostInfo.put(FQDN, meta.getDiscoveryFQDN());
+                    if (meta.getHypervisor() != null) {
+                        hostInfo.put("hypervisor", meta.getHypervisor());
+                        hostInfo.put("rack", topologyMapping.get(meta.getHypervisor()));
+                    }
+                    hostInfoForHostGroup.add(hostInfo);
                 }
-                instanceMetaMapping.add(instanceMeta);
+            } else {
+                for (HostMetadata hostMetadata : hostGroup.getHostMetadata()) {
+                    Map<String, String> hostInfo = new HashMap<>();
+                    hostInfo.put(FQDN, hostMetadata.getHostName());
+                    hostInfoForHostGroup.add(hostInfo);
+                }
             }
-            hostGroupMappings.put(hostGroup.getName(), instanceMetaMapping);
+
+            hostGroupMappings.put(hostGroup.getName(), hostInfoForHostGroup);
         }
         LOGGER.info("Computed host-hostGroup associations: {}", hostGroupMappings);
         return hostGroupMappings;

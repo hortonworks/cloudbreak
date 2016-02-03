@@ -176,7 +176,7 @@ public class StackScalingService {
 
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
         ConsulClient client = ConsulUtils.createClient(clientConfig);
 
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {

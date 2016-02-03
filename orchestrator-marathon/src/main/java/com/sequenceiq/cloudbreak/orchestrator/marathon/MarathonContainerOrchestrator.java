@@ -46,6 +46,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final String DOCKER_CONTAINER_TYPE = "DOCKER";
     private static final String SPACE = " ";
     private static final Integer STATUS_NOT_FOUND = 404;
+    public static final int LENGTH_OF_RANDOM_SUFFIX_CHARS = 4;
 
 
     @Override
@@ -63,7 +64,9 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
                                             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
         String image = config.getName() + ":" + config.getVersion();
-        String name = constraint.getName().replace("_", "-") + "-" + new Date().getTime();
+        String timeStamp = String.valueOf(new Date().getTime());
+        String randomSuffix = timeStamp.substring(timeStamp.length() - LENGTH_OF_RANDOM_SUFFIX_CHARS);
+        String name = constraint.getName().replace("_", "-") + "-" + randomSuffix;
 
         try {
             List<ContainerInfo> result = new ArrayList<>();
@@ -82,6 +85,8 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             }
             return result;
         } catch (Exception ex) {
+            //To provide that the failed Marathon app and its deployment are not deleted from Marathon
+            deleteContainer(Arrays.asList(name), cred);
             String msg = String.format("Failed to create marathon app from image: '%s', with name: '%s'.", image, name);
             throw new CloudbreakOrchestratorFailedException(msg, ex);
         }

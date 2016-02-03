@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
@@ -192,9 +192,9 @@ public class TlsSecurityService {
         return new GatewayConfig(publicIp, privateIp, prepareCertDir(stackId));
     }
 
-    public TLSClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
+    public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
         prepareCertDir(stackId);
-        return new TLSClientConfig(apiAddress, prepareCertDir(stackId));
+        return new HttpClientConfig(apiAddress, prepareCertDir(stackId));
     }
 
     public String readClientKey(Long stackId) throws CloudbreakSecuritySetupException {
