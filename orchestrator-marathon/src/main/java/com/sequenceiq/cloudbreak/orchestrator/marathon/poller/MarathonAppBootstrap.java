@@ -1,14 +1,11 @@
-package com.sequenceiq.cloudbreak.orchestrator.marathon;
+package com.sequenceiq.cloudbreak.orchestrator.marathon.poller;
 
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.model.v2.App;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MarathonAppBootstrap implements ContainerBootstrap {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MarathonAppBootstrap.class);
 
     private final Marathon client;
     private final App app;
