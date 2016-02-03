@@ -23,10 +23,10 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ALPINE 3.1
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
-    env-import DOCKER_TAG_CLOUDBREAK 1.2.0-dev.275
+    env-import DOCKER_TAG_CLOUDBREAK 1.2.0-dev.278
     env-import DOCKER_TAG_CBDB 1.1.0-rc.28
     env-import DOCKER_TAG_POSTGRES 9.4.1
-    env-import DOCKER_TAG_PERISCOPE 1.2.0-dev.275
+    env-import DOCKER_TAG_PERISCOPE 1.2.0-dev.278
     env-import DOCKER_TAG_PCDB 1.0.0-rc.3
     env-import DOCKER_TAG_UAA 2.7.1
     env-import DOCKER_TAG_UAADB v2.7.1
@@ -34,7 +34,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_SULTANS 1.2.0-dev.8
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
-    env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.2.0-dev.275
+    env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.2.0-dev.278
 
     env-import CB_DOCKER_CONTAINER_AMBARI ""
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
