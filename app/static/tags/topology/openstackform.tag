@@ -23,17 +23,6 @@
     <!-- .col-sm-9 -->
 </div>
 
-<div class="form-group" ng-class="{ 'has-error' : openstackTopologyForm.openstack_tendpoint.$dirty && openstackTopologyForm.openstack_tendpoint.$invalid }">
-    <label class="col-sm-3 control-label" for="openstack_tendpoint">{{msg.topology_endpoint_label}}</label>
-
-    <div class="col-sm-9">
-        <input type="text" name="openstack_tendpoint" class="form-control" ng-model="topologyTemp.endpoint" id="openstack_tendpoint" placeholder="endpoint">
-        <div class="help-block" ng-show="openstackTopologyForm.openstack_tendpoint.$dirty && openstackTopologyForm.openstack_tendpoint.$invalid"><i class="fa fa-warning"></i>{{msg.topology_endpoint_invalid}}
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-</div>
-
 <div ng-show="!modify" class="form-group" ng-class="{ 'has-error': !fileReadAvailable }">
     <label class="col-sm-3 control-label" for="mappingFile">{{msg.topology_upload_mapping}}</label>
     <div class="col-sm-9">

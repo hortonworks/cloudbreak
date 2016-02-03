@@ -16,14 +16,6 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="openstackinstanceType">{{msg.topology_endpoint_label}}</label>
-
-        <div class="col-sm-9">
-            <p id="openstackinstanceType" class="form-control-static">{{topology.endpoint}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
     <label class="col-sm-3 control-label" for="emailuser">{{msg.topology_mapping_label}}</label>
     <div class="col-sm-4">
         <table class="table table-bordered table-striped responsive-utilities">
