@@ -43,7 +43,6 @@ public class Topology {
     private String owner;
 
     private boolean deleted;
-    private String endpoint;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<TopologyRecord> records = new ArrayList<>();
@@ -78,14 +77,6 @@ public class Topology {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
-    }
-
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
     }
 
     public List<TopologyRecord> getRecords() {
