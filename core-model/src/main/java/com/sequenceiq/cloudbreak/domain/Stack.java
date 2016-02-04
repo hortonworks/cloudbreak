@@ -78,11 +78,9 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
                         + "WHERE s.id= :id"),
         @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
-                query = "SELECT c FROM Stack c inner join c.instanceGroups tg "
-                        + "LEFT JOIN FETCH c.resources "
+                query = "SELECT distinct c FROM Stack c "
                         + "LEFT JOIN FETCH c.instanceGroups ig "
-                        + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE tg.template.id= :id"),
+                        + "WHERE ig.template.id= :id"),
         @NamedQuery(
                 name = "Stack.findStackForCluster",
                 query = "SELECT c FROM Stack c "
@@ -209,6 +207,11 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
                 name = "Stack.findByStatuses",
                 query = "SELECT s FROM Stack s "
                         + "WHERE s.status IN :statuses"
+        ),
+        @NamedQuery(
+                name = "Stack.findStacksWithoutEvents",
+                query = "SELECT s.id FROM Stack s "
+                        + "WHERE s.id NOT IN (SELECT DISTINCT e.stackId FROM CloudbreakEvent e)"
         )
 })
 public class Stack implements ProvisionEntity {

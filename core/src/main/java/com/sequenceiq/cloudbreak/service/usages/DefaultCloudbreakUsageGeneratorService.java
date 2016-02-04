@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
+import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
@@ -53,6 +55,9 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     @Inject
     private FileSystemRepository fileSystemRepository;
 
+    @Inject
+    private OrchestratorRepository orchestratorRepository;
+
     @Override
     @Scheduled(cron = "0 01 0 * * *")
     public void generate() {
@@ -60,7 +65,10 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         Iterable<CloudbreakEvent> cloudbreakEvents = getCloudbreakEvents();
         Map<Long, List<CloudbreakEvent>> stackEvents = groupCloudbreakEventsByStack(cloudbreakEvents);
         generateDailyUsageForStacks(usageList, stackEvents);
-        deleteTerminatedStacks(stackEvents.keySet());
+        Set<Long> stackIds = new HashSet<>();
+        stackIds.addAll(stackEvents.keySet());
+        stackIds.addAll(stackRepository.findStacksWithoutEvents());
+        deleteTerminatedStacks(stackIds);
         usageRepository.save(usageList);
     }
 
@@ -118,10 +126,17 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
                 if (stack.getCluster() != null && stack.getCluster().getFileSystem() != null) {
                     fsId = stack.getCluster().getFileSystem().getId();
                 }
+                Long orchestratorId = null;
+                if (stack.getOrchestrator() != null) {
+                    orchestratorId = stack.getOrchestrator().getId();
+                }
                 stackRepository.delete(stack);
                 deleteTemplatesOfStack(stack);
                 if (fsId != null) {
                     fileSystemRepository.delete(fsId);
+                }
+                if (orchestratorId != null) {
+                    orchestratorRepository.delete(orchestratorId);
                 }
                 eventRepository.delete(eventRepository.findCloudbreakEventsForStack(stackId));
             }
