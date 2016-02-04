@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,9 +51,9 @@ public class CloudFormationTemplateBuilder {
         }
         model.put("instanceGroups", awsGroupViews);
         model.put("existingVPC", existingVPC);
-        model.put("existingSubnet", existingSubnetCidr != null);
+        model.put("existingSubnet", isNoneEmpty(existingSubnetCidr));
         model.put("securityRules", stack.getSecurity());
-        model.put("cbSubnet", existingSubnetCidr == null ? stack.getNetwork().getSubnet().getCidr() : existingSubnetCidr);
+        model.put("cbSubnet", isBlank(existingSubnetCidr) ? stack.getNetwork().getSubnet().getCidr() : existingSubnetCidr);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(stack));
         model.put("availabilitySetNeeded", ac.getCloudContext().getLocation().getAvailabilityZone().value() == null ? false : true);
         if (snapshotId != null) {

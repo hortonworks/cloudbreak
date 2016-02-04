@@ -42,7 +42,11 @@ public class OpenStackClient {
         return new KeystoneCredentialView(authenticatedContext);
     }
 
-    public Access createAccess(AuthenticatedContext authenticatedContext) {
+    private OSClient createOSClient(Access access) {
+        return OSFactory.clientFromAccess(access);
+    }
+
+    private Access createAccess(AuthenticatedContext authenticatedContext) {
         KeystoneCredentialView osCredential = createKeystoneCredential(authenticatedContext);
         if (osCredential.getVersion().equals(KeystoneCredentialView.CB_KEYSTONE_V2)) {
             return OSFactory.builder().endpoint(osCredential.getEndpoint())
@@ -69,10 +73,6 @@ public class OpenStackClient {
         } else {
             throw new CloudConnectorException("Unsupported keystone version");
         }
-    }
-
-    public OSClient createOSClient(Access access) {
-        return OSFactory.clientFromAccess(access);
     }
 
 }
