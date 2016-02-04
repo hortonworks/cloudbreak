@@ -17,12 +17,12 @@ public class TopologyUtil {
                     if (t.getCloudPlatform().equals(platform)) {
                         return;
                     } else {
-                        throw new RuntimeException("The selected topology belongs to a different cloudplatform.");
+                        throw new RuntimeException("The selected platform belongs to a different cloudplatform.");
                     }
                 }
             }
             if (!found) {
-                throw new RuntimeException("Not found topology with id: " + topologyId);
+                throw new RuntimeException("Not found platform with id: " + topologyId);
             }
         }
     }
