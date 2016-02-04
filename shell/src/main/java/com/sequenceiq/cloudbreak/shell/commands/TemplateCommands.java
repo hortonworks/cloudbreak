@@ -73,7 +73,7 @@ public class TemplateCommands implements CommandMarker {
     public String listTemplates() {
         try {
             Set<TemplateResponse> publics = cloudbreakClient.templateEndpoint().getPublics();
-            return renderSingleMap(responseTransformer.transformToMap(publics, "id", "name"), "ID", "INFO");
+            return renderSingleMap(responseTransformer.transformToMap(publics, "id", "name"), true, "ID", "INFO");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

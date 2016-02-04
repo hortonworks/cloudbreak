@@ -119,7 +119,7 @@ public class CredentialCommands implements CommandMarker {
     @CliCommand(value = "credential list", help = "Shows all of your credentials")
     public String listCredentials() {
         try {
-            return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.credentialEndpoint().getPublics(), "id", "name"), "ID", "INFO");
+            return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.credentialEndpoint().getPublics(), "id", "name"), true, "ID", "INFO");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

@@ -5,6 +5,8 @@ import static java.util.Collections.singletonList;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +34,20 @@ public final class TableRenderer {
      * @return the formatted table
      */
     public static String renderSingleMap(Map<String, String> rows, String... headers) {
-        return renderMultiValueMap(convert(rows), headers);
+        return renderSingleMap(rows, false, headers);
+    }
+
+    /**
+     * Renders a 2 columns wide table with the given headers and rows. If headers are provided it should match with the
+     * number of columns.
+     *
+     * @param rows                  rows of the table
+     * @param sortByFirstColumn     sortByFirstColumn rows by the first column
+     * @param headers               headers of the table
+     * @return the formatted table
+     */
+    public static String renderSingleMap(Map<String, String> rows, boolean sortByFirstColumn, String... headers) {
+        return renderMultiValueMap(convert(rows), sortByFirstColumn, headers);
     }
 
     public static <E extends Object> String renderObjectMap(Map<String, E> rows, String... headers) {
@@ -48,13 +63,53 @@ public final class TableRenderer {
      * @return formatted table
      */
     public static String renderMultiValueMap(Map<String, List<String>> rows, String... headers) {
+        return renderMultiValueMap(rows, false, headers);
+    }
+
+    /**
+     * Renders a 2 columns wide table with the given headers and rows. If headers are provided it should match with the
+     * number of columns.
+     *
+     * @param rows                  rows of the table, each value will be added as a new row with the same key
+     * @param sortByFirstColumn     sortByFirstColumn rows by the first column
+     * @param headers               headers of the table
+     * @return formatted table
+     */
+    public static String renderMultiValueMap(Map<String, List<String>> rows, boolean sortByFirstColumn, String... headers) {
         Table table = createTable(headers);
         if (rows != null) {
-            for (String key : rows.keySet()) {
-                List<String> values = rows.get(key);
-                if (values != null) {
-                    for (String value : values) {
-                        table.addRow(key, value);
+            List<Map.Entry<String, List<String>>> entries = new ArrayList<>(rows.entrySet());
+            if (sortByFirstColumn) {
+                Collections.sort(entries, new Comparator<Map.Entry<String, List<String>>>() {
+                    @Override
+                    public int compare(Map.Entry<String, List<String>> a, Map.Entry<String, List<String>> b) {
+                        if (isEmpty(a) || isEmpty(b)) {
+                            return compareKeys(a, b);
+                        }
+                        int comp = a.getValue().get(0).compareToIgnoreCase(b.getValue().get(0));
+                        return comp == 0 ? compareKeys(a, b) : comp;
+                    }
+
+                    private int compareKeys(Map.Entry<String, List<String>> a, Map.Entry<String, List<String>> b) {
+                        return a.getKey().compareToIgnoreCase(b.getKey());
+                    }
+
+                    private boolean isEmpty(Map.Entry<String, List<String>> input) {
+                        return input.getValue() == null || input.getValue().isEmpty() || input.getValue().get(0) == null;
+                    }
+                });
+            } else {
+                Collections.sort(entries, new Comparator<Map.Entry<String, List<String>>>() {
+                    @Override
+                    public int compare(Map.Entry<String, List<String>> a, Map.Entry<String, List<String>> b) {
+                        return a.getKey().compareToIgnoreCase(b.getKey());
+                    }
+                });
+            }
+            for (Map.Entry<String, List<String>> entry : entries) {
+                if (entry.getValue() != null) {
+                    for (String value : entry.getValue()) {
+                        table.addRow(entry.getKey(), value);
                     }
                 }
             }

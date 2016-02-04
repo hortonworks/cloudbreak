@@ -165,7 +165,7 @@ public class TopologyCommands implements CommandMarker {
     public String listTopology() {
         try {
             Set<TopologyResponse> publics = cloudbreakClient.topologyEndpoint().getPublics();
-            return renderSingleMap(responseTransformer.transformToMap(publics, "id", "name"), "ID", "INFO");
+            return renderSingleMap(responseTransformer.transformToMap(publics, "id", "name"), true, "ID", "INFO");
         } catch (Exception e) {
             throw exceptionTransformer.transformToRuntimeException(e);
         }

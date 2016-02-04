@@ -336,7 +336,7 @@ public class StackCommands implements CommandMarker {
     @CliCommand(value = "stack list", help = "Shows all of your stack")
     public String listStacks() {
         try {
-            return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.stackEndpoint().getPublics(), "id", "name"), "ID", "INFO");
+            return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.stackEndpoint().getPublics(), "id", "name"), true, "ID", "INFO");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

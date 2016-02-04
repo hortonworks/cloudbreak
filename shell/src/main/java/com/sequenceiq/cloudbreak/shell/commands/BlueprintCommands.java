@@ -110,7 +110,7 @@ public class BlueprintCommands implements CommandMarker {
     public String listBlueprints() {
         try {
             Set<BlueprintResponse> publics = cloudbreakClient.blueprintEndpoint().getPublics();
-            return renderSingleMap(responseTransformer.transformToMap(publics, "id", "blueprintName"), "ID", "INFO");
+            return renderSingleMap(responseTransformer.transformToMap(publics, "id", "blueprintName"), true, "ID", "INFO");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

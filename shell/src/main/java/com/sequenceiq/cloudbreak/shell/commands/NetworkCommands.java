@@ -52,7 +52,7 @@ public class NetworkCommands implements CommandMarker {
     public String listNetworks() {
         try {
             Set<NetworkJson> publics = cloudbreakClient.networkEndpoint().getPublics();
-            return renderSingleMap(responseTransformer.transformToMap(publics, "id", "name"), "ID", "INFO");
+            return renderSingleMap(responseTransformer.transformToMap(publics, "id", "name"), true, "ID", "INFO");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
