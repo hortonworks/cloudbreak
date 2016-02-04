@@ -26,10 +26,25 @@
           "type" : "string",
           "defaultValue" : "${admin_user_name}"
         },
+        <#if existingVPC>
+        "resourceGroupName" : {
+          "type": "string",
+          "defaultValue" : "${resourceGroupName}"
+        },
+        "existingVNETName" : {
+          "type": "string",
+          "defaultValue" : "${existingVNETName}"
+        },
+        "existingSubnetName" : {
+          "type": "string",
+          "defaultValue" : "${existingSubnetName}"
+        },
+        <#else>
         "virtualNetworkNamePrefix" : {
             "type": "string",
             "defaultValue" : "${stackname}"
         },
+        </#if>
         "vmNamePrefix" :{
             "type": "string",
             "defaultValue" : "${stackname}"
@@ -81,8 +96,13 @@
       "userImageName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userImageStorageContainerName'),'/',parameters('userImageVhdName'))]",
       "osDiskVhdName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'osDisk')]",
       "dataDiskVhdName" : "[concat('https://',parameters('userAttachedDiskStorageAccountName'),'.blob.core.windows.net/',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk')]",
+      <#if existingVPC>
+      "vnetID": "[resourceId(parameters('resourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('existingVNETName'))]",
+      "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('existingSubnetName'))]",
+      <#else>
       "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkNamePrefix'))]",
       "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
+      </#if>
       "staticIpRef": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('gatewaystaticipname'))]",
       "ilbBackendAddressPoolName": "${stackname}bapn",
       "secGroupName": "${stackname}secgname",
@@ -92,6 +112,7 @@
       "sshKeyPath" : "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]"
   	},
     "resources": [
+        <#if !existingVPC>
         {
               "apiVersion": "2015-05-01-preview",
               "type": "Microsoft.Network/virtualNetworks",
@@ -119,6 +140,7 @@
                   ]
               }
           },
+          </#if>
           {
             "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkSecurityGroups",
@@ -231,12 +253,14 @@
                 "location": "[parameters('region')]",
                 "dependsOn": [
                     <#if instanceGroup == "CORE">
-                    "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
+                    "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
                     </#if>
                     <#if instanceGroup == "GATEWAY">
-                    "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]",
+                    "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
                     </#if>
-                    "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkNamePrefix'))]"
+                    <#if !existingVPC>
+                    ,"[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkNamePrefix'))]"
+                    </#if>
                 ],
                 "properties": {
                     "ipConfigurations": [

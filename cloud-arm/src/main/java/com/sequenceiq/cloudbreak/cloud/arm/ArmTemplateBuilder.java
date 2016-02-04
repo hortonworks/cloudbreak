@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmGroupView;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmSecurityView;
@@ -23,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -52,6 +52,7 @@ public class ArmTemplateBuilder {
             String imageName = cloudStack.getImage().getImageName();
             imageName = imageName.replace("https://", "");
             String[] split = imageName.split("/");
+            Network network = cloudStack.getNetwork();
             ArmCredentialView armCredentialView = new ArmCredentialView(cloudCredential);
             Map<String, Object> model = new HashMap<>();
             if (armUtils.isPersistentStorage()) {
@@ -71,13 +72,17 @@ public class ArmTemplateBuilder {
             model.put("stackname", stackName);
             model.put("ssh_key", armCredentialView.getPublicKey());
             model.put("region", cloudContext.getLocation().getRegion().value());
-            model.put("subnet1Prefix", cloudStack.getNetwork().getSubnet().getCidr());
+            model.put("subnet1Prefix", network.getSubnet().getCidr());
             model.put("groups", new ArmGroupView(cloudStack.getGroups()).getGroups());
             model.put("securities", new ArmSecurityView(cloudStack.getSecurity()));
             model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.CORE)));
             model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.GATEWAY)));
             model.put("disablePasswordAuthentication", !armCredentialView.passwordAuthenticationRequired());
             model.put("adminPassword", armCredentialView.getPassword());
+            model.put("existingVPC", armUtils.isExistingNetwork(network));
+            model.put("resourceGroupName", armUtils.getCustomResourceGroupName(network));
+            model.put("existingVNETName", armUtils.getCustomNetworkId(network));
+            model.put("existingSubnetName", armUtils.getCustomSubnetId(network));
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8"), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
