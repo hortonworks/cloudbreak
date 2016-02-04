@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.network;
 
+import javax.inject.Inject;
+
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.compute.ComputeSecurityGroupService;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -23,6 +26,9 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackNetworkResourceBuilder {
     private static final int MAX_PORT = 65535;
     private static final int MIN_PORT = 1;
+
+    @Inject
+    private OpenStackUtils utils;
 
     @Override
     public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource)
@@ -40,8 +46,9 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackNetw
                     securityGroupService.createRule(createRule(securityGroupId, osProtocol, cidr, port, port));
                 }
             }
-            securityGroupService.createRule(createRule(securityGroupId, IPProtocol.TCP, network.getSubnet().getCidr(), MIN_PORT, MAX_PORT));
-            securityGroupService.createRule(createRule(securityGroupId, IPProtocol.UDP, network.getSubnet().getCidr(), MIN_PORT, MAX_PORT));
+            String subnetCidr = utils.isExistingSubnet(network) ? utils.getExistingSubnetCidr(auth, network) : network.getSubnet().getCidr();
+            securityGroupService.createRule(createRule(securityGroupId, IPProtocol.TCP, subnetCidr, MIN_PORT, MAX_PORT));
+            securityGroupService.createRule(createRule(securityGroupId, IPProtocol.UDP, subnetCidr, MIN_PORT, MAX_PORT));
             securityGroupService.createRule(createRule(securityGroupId, IPProtocol.ICMP, "0.0.0.0/0"));
             context.putParameter(OpenStackConstants.SECURITYGROUP_ID, securityGroupId);
             return createPersistedResource(resource, securityGroup.getId());

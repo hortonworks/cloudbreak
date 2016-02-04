@@ -100,7 +100,10 @@ public class OpenStackUtils {
             String subnetId = getCustomSubnetId(network);
             OSClient osClient = openStackClient.createOSClient(authenticatedContext);
             Subnet subnet = osClient.networking().subnet().get(subnetId);
-            return subnet == null ? null : subnet.getCidr();
+            if (subnet == null) {
+                throw new CloudConnectorException("The specified subnet does not exist: " + subnetId);
+            }
+            return subnet.getCidr();
         }
         return null;
     }

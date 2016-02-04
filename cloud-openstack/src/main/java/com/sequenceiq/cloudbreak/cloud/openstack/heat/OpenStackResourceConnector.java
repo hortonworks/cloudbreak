@@ -192,14 +192,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
 
     private String getExistingSubnetCidr(AuthenticatedContext authenticatedContext, CloudStack stack) {
         Network network = stack.getNetwork();
-        if (utils.isExistingSubnet(network)) {
-            String subnetCidr = utils.getExistingSubnetCidr(authenticatedContext, network);
-            if (subnetCidr == null) {
-                throw new CloudConnectorException("The specified subnet does not exist: " + utils.getCustomSubnetId(network));
-            }
-            return subnetCidr;
-        }
-        return null;
+        return utils.isExistingSubnet(network) ? utils.getExistingSubnetCidr(authenticatedContext, network) : null;
     }
 
 }
