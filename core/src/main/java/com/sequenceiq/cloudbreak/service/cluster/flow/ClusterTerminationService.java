@@ -51,6 +51,7 @@ public class ClusterTerminationService {
         String terminatedName = cluster.getName() + DELIMITER + new Date().getTime();
         cluster.setName(terminatedName);
         cluster.setBlueprint(null);
+        cluster.setStack(null);
         clusterRepository.save(cluster);
         for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(cluster.getId())) {
             hostGroup.getRecipes().clear();
