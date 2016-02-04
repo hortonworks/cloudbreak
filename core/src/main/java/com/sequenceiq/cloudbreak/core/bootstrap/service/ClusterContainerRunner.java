@@ -150,7 +150,7 @@ public class ClusterContainerRunner {
         String gatewayHostname = "";
         if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
             InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-            gatewayHostname = gatewayInstance.getDiscoveryName();
+            gatewayHostname = gatewayInstance.getDiscoveryFQDN();
         }
 
         Map<String, List<ContainerInfo>> containers = new HashMap<>();
@@ -412,7 +412,7 @@ public class ClusterContainerRunner {
         List<String> hosts = new ArrayList<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             if (!add || candidateAddresses.contains(instanceMetaData.getPrivateIp())) {
-                hosts.add(instanceMetaData.getDiscoveryName());
+                hosts.add(instanceMetaData.getDiscoveryFQDN());
             }
         }
         return hosts;
@@ -423,7 +423,7 @@ public class ClusterContainerRunner {
         for (InstanceMetaData instanceMetaData : instanceMetaDataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId())) {
             String privateIp = instanceMetaData.getPrivateIp();
             if (!add || candidateAddresses.contains(privateIp)) {
-                hosts.add(instanceMetaData.getDiscoveryName());
+                hosts.add(instanceMetaData.getDiscoveryFQDN());
             }
         }
         return hosts;

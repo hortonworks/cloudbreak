@@ -122,14 +122,15 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         try {
             List<Future<Boolean>> futures = new ArrayList<>();
             int i = 0;
-            for (String host : constraint.getHosts()) {
+            for (String fqdn : constraint.getHosts()) {
+                String nodeName = fqdn.split("\\.")[0];
                 DockerClient dockerApiClient = swarmClient(cred);
                 String name = String.format("%s-%s", constraint.getName(), String.valueOf(new Date().getTime()) + i++);
-                CreateContainerCmd createCmd = decorateCreateContainerCmd(image, constraint, host, dockerApiClient, name);
-                ContainerBootstrap bootstrap = new SwarmContainerBootstrap(dockerApiClient, host, createCmd);
+                CreateContainerCmd createCmd = decorateCreateContainerCmd(image, constraint, nodeName, dockerApiClient, name);
+                ContainerBootstrap bootstrap = new SwarmContainerBootstrap(dockerApiClient, nodeName, createCmd);
                 Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
-                containerInfos.add(new ContainerInfo(name, name, host, image));
+                containerInfos.add(new ContainerInfo(name, name, fqdn, image));
             }
             for (Future<Boolean> future : futures) {
                 future.get();
