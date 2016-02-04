@@ -63,7 +63,9 @@ public class TerminateClusterHandler implements AmbariClusterEventHandler<Termin
             }).toList();
             containerOrchestrator.deleteContainer(containerIds, credential);
         } catch (CloudbreakException | CloudbreakOrchestratorException e) {
-            //TODO
+            LOGGER.error("Failed to delete cluster containers: {}", e);
+            TerminateClusterResult result = new TerminateClusterResult("Cluster termination failed.", e, request);
+            eventBus.notify(result.selector(), new Event(terminateClusterRequestEvent.getHeaders(), result));
         }
 
         TerminateClusterResult result = new TerminateClusterResult(request);

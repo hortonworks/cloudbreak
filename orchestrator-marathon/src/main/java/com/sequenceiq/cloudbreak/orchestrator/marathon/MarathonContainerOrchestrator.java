@@ -9,6 +9,11 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.orchestrator.ContainerBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
@@ -24,6 +29,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.MarathonClient;
 import mesosphere.marathon.client.model.v2.App;
@@ -31,10 +37,6 @@ import mesosphere.marathon.client.model.v2.Container;
 import mesosphere.marathon.client.model.v2.Docker;
 import mesosphere.marathon.client.model.v2.Task;
 import mesosphere.marathon.client.utils.MarathonException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
 
 @Component
 public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
@@ -61,7 +63,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint,
-                                            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
         String image = config.getName() + ":" + config.getVersion();
         String timeStamp = String.valueOf(new Date().getTime());
@@ -148,13 +150,13 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, String consulLogLocation,
-                          ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
     }
 
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, String consulLogLocation,
-                                  ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
     }
 

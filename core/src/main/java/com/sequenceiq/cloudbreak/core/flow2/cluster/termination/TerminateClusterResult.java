@@ -8,4 +8,8 @@ public class TerminateClusterResult extends AmbariClusterResult<TerminateCluster
         super(request);
     }
 
+    public TerminateClusterResult(String statusReason, Exception errorDetails, TerminateClusterRequest request) {
+        super(statusReason, errorDetails, request);
+    }
+
 }
