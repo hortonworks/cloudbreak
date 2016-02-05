@@ -125,7 +125,7 @@
                                         <tr ng-repeat="(platform, variants) in $root.params.platformVariants">
                                             <th scope="row">{{platform}}</th>
                                             <td class="is-visible">
-                                                <input type="checkbox" name="bpch1" id="bpch1" ng-checked="isChecked(platform)" ng-disabled="$root.params.platforms.length == 1 && isChecked(platform)" ng-click="changePlatformVisibility(platform)">
+                                                <input type="checkbox" name="bpch1" id="bpch1" ng-checked="isChecked(platform)" ng-disabled="!user.admin || ($root.params.platforms.length == 1 && isChecked(platform))" ng-click="changePlatformVisibility(platform)">
                                             </td>
                                         </tr>
                                     </tbody>
