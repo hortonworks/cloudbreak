@@ -343,6 +343,10 @@ public class StackService {
     }
 
     private void sync(Stack stack, StatusRequest statusRequest) {
+        if ("BYOS".equals(stack.cloudPlatform())) {
+            LOGGER.warn("'Bring your own stack' type of infrastructure cannot be synchronized.");
+            return;
+        }
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             flowManager.triggerStackSync(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
         } else {

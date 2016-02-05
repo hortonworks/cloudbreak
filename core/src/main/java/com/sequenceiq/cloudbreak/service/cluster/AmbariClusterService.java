@@ -425,21 +425,18 @@ public class AmbariClusterService implements ClusterService {
     @Transactional(Transactional.TxType.NEVER)
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.findLazy(stackId);
-        if (stack.getCluster() == null) {
+        Cluster cluster = stack.getCluster();
+        if (cluster == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
         }
-        try {
-            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, stack.getCluster().getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getCluster().getUserName(), stack.getCluster().getPassword());
-            Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
-            Map<String, String> hostStatuses = ambariClient.getHostStatuses();
-            for (HostMetadata host : hosts) {
-                updateHostMetadataByHostState(stack, host.getHostName(), hostStatuses);
-            }
-        } catch (CloudbreakSecuritySetupException e) {
-            throw new CloudbreakServiceException(e);
+        HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getCluster().getUserName(), stack.getCluster().getPassword());
+        Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
+        Map<String, String> hostStatuses = ambariClient.getHostStatuses();
+        for (HostMetadata host : hosts) {
+            updateHostMetadataByHostState(stack, host.getHostName(), hostStatuses);
         }
-        return stack.getCluster();
+        return cluster;
     }
 
     @Override
