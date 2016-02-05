@@ -166,15 +166,14 @@ public class BlueprintValidator {
     }
 
     private void validateComponentCardinality(StackServiceComponentDescriptor componentDescriptor, HostGroup hostGroup) {
-        //TODO
-//        int nodeCount = hostGroup.getInstanceGroup().getNodeCount();
-//        int minCardinality = componentDescriptor.getMinCardinality();
-//        int maxCardinality = componentDescriptor.getMaxCardinality();
-//        if (componentDescriptor.isMaster() && !isNodeCountCorrect(nodeCount, minCardinality, maxCardinality)) {
-//            throw new BadRequestException(String.format(
-//                    "The nodecount '%d' for hostgroup '%s' cannot be less than '%d' or more than '%d' because of '%s' component", nodeCount,
-//                    hostGroup.getName(), minCardinality, maxCardinality, componentDescriptor.getName()));
-//        }
+        int nodeCount = hostGroup.getConstraint().getHostCount();
+        int minCardinality = componentDescriptor.getMinCardinality();
+        int maxCardinality = componentDescriptor.getMaxCardinality();
+        if (componentDescriptor.isMaster() && !isNodeCountCorrect(nodeCount, minCardinality, maxCardinality)) {
+            throw new BadRequestException(String.format(
+                    "The node count '%d' for hostgroup '%s' cannot be less than '%d' or more than '%d' because of '%s' component", nodeCount,
+                    hostGroup.getName(), minCardinality, maxCardinality, componentDescriptor.getName()));
+        }
     }
 
     private void validateBlueprintServiceComponents(Map<String, BlueprintServiceComponent> blueprintServiceComponentMap) {
@@ -202,9 +201,8 @@ public class BlueprintValidator {
         String componentName = componentDescriptor.getName();
         BlueprintServiceComponent blueprintServiceComponent = blueprintServiceComponentMap.get(componentName);
         if (blueprintServiceComponent == null) {
-            //TODO
-//            blueprintServiceComponent = new BlueprintServiceComponent(componentName, hostGroup.getName(), hostGroup.getInstanceGroup().getNodeCount());
-//            blueprintServiceComponentMap.put(componentName, blueprintServiceComponent);
+            blueprintServiceComponent = new BlueprintServiceComponent(componentName, hostGroup.getName(), hostGroup.getConstraint().getHostCount());
+            blueprintServiceComponentMap.put(componentName, blueprintServiceComponent);
         } else {
             blueprintServiceComponent.update(hostGroup);
         }

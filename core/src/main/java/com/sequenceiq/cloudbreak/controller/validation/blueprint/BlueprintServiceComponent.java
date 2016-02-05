@@ -17,8 +17,7 @@ class BlueprintServiceComponent {
     }
 
     public void update(HostGroup hostGroup) {
-        //TODO
-        //nodeCount += hostGroup.getInstanceGroup().getNodeCount();
+        nodeCount += hostGroup.getConstraint().getHostCount();
         hostgroups.add(hostGroup.getName());
     }
 
