@@ -62,7 +62,6 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
@@ -126,9 +125,6 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private BlueprintValidator blueprintValidator;
-
-    @Inject
-    private TlsSecurityService tlsSecurityService;
 
     @Inject
     private CloudbreakEventService eventService;
@@ -249,11 +245,11 @@ public class AmbariClusterService implements ClusterService {
     public String getClusterJson(String ambariIp, Long stackId) {
         Stack stack = stackService.get(stackId);
         if (stack.getAmbariIp() == null) {
-            throw new NotFoundException(String.format("Ambari server could not be available for the stack.[id: %s]", stackId));
+            throw new NotFoundException(String.format("Ambari server is not available for the stack.[id: %s]", stackId));
         }
         Cluster cluster = stack.getCluster();
         try {
-            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
+            HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
@@ -267,8 +263,6 @@ public class AmbariClusterService implements ClusterService {
                 String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
                 throw new CloudbreakServiceException("Could not get Cluster from Ambari as JSON: " + errorMessage, e);
             }
-        } catch (CloudbreakSecuritySetupException e) {
-            throw new CloudbreakServiceException(e);
         }
     }
 
@@ -504,7 +498,7 @@ public class AmbariClusterService implements ClusterService {
             throws CloudbreakSecuritySetupException {
         List<HostMetadata> downScaleCandidates = new ArrayList<>();
         if (decommissionRequest) {
-            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+            HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), adjustmentJson.getHostGroup());
@@ -534,7 +528,7 @@ public class AmbariClusterService implements ClusterService {
 
     private void validateComponentsCategory(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         String hostGroup = hostGroupAdjustment.getHostGroup();
         Blueprint blueprint = cluster.getBlueprint();
