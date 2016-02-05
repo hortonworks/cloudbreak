@@ -351,7 +351,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         kerberosPassword: cluster.kerberosPassword || null,
                         validateBlueprint: cluster.validateBlueprint,
                         fileSystem: cluster.fileSystem || null,
-                        ambariStackDetails: cluster.ambariStackDetails === 'undefined' ? null : cluster.ambariStackDetails
+                        ambariStackDetails: cluster.ambariStackDetails === 'undefined' ? null : cluster.ambariStackDetails,
+                        configStrategy: cluster.configStrategy
                     }
                     successHandler(cluster);
                     Cluster.save({

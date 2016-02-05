@@ -6,6 +6,13 @@
     </div>
 </div>
 <div class="form-group" ng-show="showAdvancedOptionForm">
+    <label class="col-sm-3 control-label" for="selectConfigStrategy">{{msg.cluster_form_config_strategy_label}}</label>
+    <div class="col-sm-8">
+        <select class="form-control" id="selectConfigStrategy" ng-model="cluster.configStrategy" ng-options="v for v in configStrategies" required>
+        </select>
+    </div>
+</div>
+<div class="form-group" ng-show="showAdvancedOptionForm">
     <label class="col-sm-3 control-label" for="cluster_validateBlueprint">{{msg.cluster_form_blueprint_validate_label}}</label>
     <div class="col-sm-8">
         <input type="checkbox" name="cluster_validateBlueprint" id="cluster_validateBlueprint" ng-model="cluster.validateBlueprint">
