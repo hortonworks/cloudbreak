@@ -1,4 +1,4 @@
-<div class="form-group" ng-class="{ 'has-error': TemplateForm.openstack_tclusterName.$dirty && openstackTemplateForm.openstack_tclusterName.$invalid }">
+<div class="form-group" ng-class="{ 'has-error': openstackTemplateForm.openstack_tclusterName.$dirty && openstackTemplateForm.openstack_tclusterName.$invalid }">
     <label class="col-sm-3 control-label" for="openstack_tclusterName">{{msg.name_label}}</label>
 
     <div class="col-sm-9">
