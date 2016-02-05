@@ -64,7 +64,8 @@ public class TemplateCommands implements CommandMarker {
         return true;
     }
 
-    @CliAvailabilityIndicator({ "template create --GCP", "template create --EC2", "template create --AZURE", "template create --OPENSTACK" })
+    @CliAvailabilityIndicator({ "template create --GCP", "template create --EC2", "template create --AWS",
+            "template create --AZURE", "template create --OPENSTACK" })
     public boolean isTemplateEc2CreateCommandAvailable() {
         return true;
     }
@@ -123,7 +124,26 @@ public class TemplateCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "template create --EC2", help = "Create a new EC2 template")
+
+    @CliCommand(value = "template create --AWS", help = "Create a new AWS template")
+    public String createAwsTemplate(
+            @CliOption(key = "name", mandatory = true, help = "Name of the template") String name,
+            @CliOption(key = "instanceType", mandatory = true, help = "instanceType of the template") AwsInstanceType instanceType,
+            @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
+            @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
+            @CliOption(key = "volumeType", mandatory = false, help = "volumeType of the template") AwsVolumeType volumeType,
+            @CliOption(key = "encrypted", mandatory = false, help = "use encrypted disks") Boolean encrypted,
+            @CliOption(key = "spotPrice", mandatory = false, help = "spotPrice of the template") Double spotPrice,
+            @CliOption(key = "sshLocation", mandatory = false, specifiedDefaultValue = "0.0.0.0/0", help = "sshLocation of the template") String sshLocation,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
+            @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
+            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the template belongs to") Long topologyId
+    ) {
+        return createEc2Template(name, instanceType, volumeCount, volumeSize, volumeType, encrypted,
+                spotPrice, sshLocation, publicInAccount, description, topologyId);
+    }
+
+    @CliCommand(value = "template create --EC2", help = "Create a new AWS template")
     public String createEc2Template(
             @CliOption(key = "name", mandatory = true, help = "Name of the template") String name,
             @CliOption(key = "instanceType", mandatory = true, help = "instanceType of the template") AwsInstanceType instanceType,

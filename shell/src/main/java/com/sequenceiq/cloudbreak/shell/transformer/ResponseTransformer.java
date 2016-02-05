@@ -50,7 +50,8 @@ public class ResponseTransformer<C extends Collection> {
                         try {
                             Map<Object, Object> o1 = (Map<Object, Object>) field.get(o);
                             for (Map.Entry<Object, Object> objectObjectEntry : o1.entrySet()) {
-                                result.put(field.getName() + "." + objectObjectEntry.getKey(), objectObjectEntry.getValue().toString());
+                                result.put(field.getName() + "." + objectObjectEntry.getKey(),
+                                        objectObjectEntry.getValue() == null ? "" : objectObjectEntry.getValue().toString());
                             }
                         } catch (IllegalAccessException e) {
                             result.put(field.getName(), "undefined");
