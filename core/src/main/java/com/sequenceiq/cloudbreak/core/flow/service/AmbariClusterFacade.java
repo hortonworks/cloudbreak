@@ -14,6 +14,8 @@ import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
+import javax.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -21,13 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -60,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -70,6 +66,11 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
+import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
@@ -126,6 +127,10 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Inject
     private InstanceMetadataService instanceMetadataService;
 
+    @Inject
+    private ClusterTerminationService clusterTerminationService;
+
+    //TODO: remove this and use image from the related stack, because upscale could produce bad things with a different image version
     @Value("${cb.docker.container.ambari.server:}")
     private String ambariServerImage;
 
@@ -369,6 +374,11 @@ public class AmbariClusterFacade implements ClusterFacade {
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         MDCBuilder.buildMdcContext(cluster);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RESET, UPDATE_IN_PROGRESS.name());
+
+        if (cluster.getContainers().isEmpty()) {
+            containerRunner.runClusterContainers(actualContext);
+        }
+
         ambariClusterConnector.resetAmbariCluster(stack.getId());
         context = new ProvisioningContext.Builder()
                 .withProvisioningContext(actualContext)
@@ -451,6 +461,12 @@ public class AmbariClusterFacade implements ClusterFacade {
         clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, actualContext.getErrorReason());
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), actualContext.getErrorReason());
+        try {
+            clusterTerminationService.deleteClusterContainers(cluster.getId());
+        } catch (TerminationFailedException ex) {
+            LOGGER.error("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
+        }
+
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
             fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());

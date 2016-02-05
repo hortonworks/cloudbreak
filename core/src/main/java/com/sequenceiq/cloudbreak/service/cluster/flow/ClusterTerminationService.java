@@ -3,22 +3,35 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import static com.sequenceiq.cloudbreak.util.JsonUtil.readValue;
 import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
 
+import javax.annotation.Nullable;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
+import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
@@ -45,6 +58,39 @@ public class ClusterTerminationService {
 
     @Inject
     private ConstraintRepository constraintRepository;
+
+    @Inject
+    private ContainerRepository containerRepository;
+
+    @Inject
+    private ContainerOrchestratorResolver orchestratorResolver;
+
+    public void deleteClusterContainers(Long clusterId) {
+        Cluster cluster = clusterRepository.findById(clusterId);
+        try {
+            if (cluster != null) {
+                Orchestrator orchestrator = cluster.getStack().getOrchestrator();
+                OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap());
+                ContainerOrchestrator containerOrchestrator = orchestratorResolver.get(orchestrator.getType());
+                Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
+                List<String> containerIds = FluentIterable.from(containers).transform(new Function<Container, String>() {
+                    @Nullable
+                    @Override
+                    public String apply(Container input) {
+                        return input.getContainerId();
+                    }
+                }).toList();
+                containerOrchestrator.deleteContainer(containerIds, credential);
+                containerRepository.delete(containers);
+            } else {
+                String msg = String.format("Failed to delete containers of cluster (id:'%s',name:'%s'), the cluster is not associated to stack.",
+                        clusterId, cluster.getName());
+                throw new TerminationFailedException(msg);
+            }
+        } catch (CloudbreakException | CloudbreakOrchestratorException e) {
+            throw new TerminationFailedException(String.format("Failed to delete containers of cluster (id:'%s',name:'%s').", clusterId, cluster.getName()), e);
+        }
+    }
 
     public void finalizeClusterTermination(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);

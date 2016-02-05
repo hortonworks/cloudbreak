@@ -2,13 +2,10 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import static reactor.bus.selector.Selectors.$;
 
-import java.util.Map;
-
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.stereotype.Component;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.core.flow.handlers.AddClusterContainersHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AddInstancesHandler;
@@ -16,6 +13,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapClusterHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapNewNodesHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterContainersHandler;
+import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCredentialChangeHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterInstallHandler;
@@ -41,7 +39,8 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopRequestedHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpscaleMetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpscaleStackSyncHandler;
-
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Component;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 import reactor.fn.Consumer;
@@ -104,6 +103,7 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
         reactor.on($(FlowPhases.CLUSTER_SYNC.name()), getHandlerForClass(ClusterSyncHandler.class));
         reactor.on($(FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name()), getHandlerForClass(ClusterCredentialChangeHandler.class));
+        reactor.on($(FlowPhases.CLUSTER_CREATION_FAILED.name()), getHandlerForClass(ClusterCreationFailureHandler.class));
     }
 
     private void registerAuthenticationClusterChangeFlows() {
@@ -124,10 +124,10 @@ public class FlowInitializer implements InitializingBean {
                 .createTransition(FlowPhases.CONSUL_METADATA_SETUP.name(), FlowPhases.RUN_CLUSTER_CONTAINERS.name(), FlowPhases.STACK_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(ClusterContainersHandler.class, TransitionFactory
-                .createTransition(FlowPhases.RUN_CLUSTER_CONTAINERS.name(), FlowPhases.AMBARI_START.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.RUN_CLUSTER_CONTAINERS.name(), FlowPhases.AMBARI_START.name(), FlowPhases.CLUSTER_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(AmbariStartHandler.class, TransitionFactory
-                .createTransition(FlowPhases.AMBARI_START.name(), FlowPhases.CLUSTER_INSTALL.name(), FlowPhases.STACK_CREATION_FAILED.name()));
+                .createTransition(FlowPhases.AMBARI_START.name(), FlowPhases.CLUSTER_INSTALL.name(), FlowPhases.CLUSTER_CREATION_FAILED.name()));
 
         transitionKeyService.registerTransition(StackCreationFailureHandler.class, TransitionFactory
                 .createTransition(FlowPhases.STACK_CREATION_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
