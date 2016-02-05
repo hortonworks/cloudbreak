@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -23,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -37,6 +40,9 @@ public class ArmUtils {
     private static final int RADIX = 16;
     private static final int MAX_LENGTH_OF_NAME_SLICE = 8;
     private static final int MAX_LENGTH_OF_RESOURCE_NAME = 24;
+    private static final String RG_NAME = "resourceGroupName";
+    private static final String SUBNET_ID = "subnetId";
+    private static final String NETWORK_ID = "networkId";
 
     @Value("${cb.max.openstack.resource.name.length:}")
     private int maxResourceNameLength;
@@ -149,5 +155,20 @@ public class ArmUtils {
         return getStackName(cloudContext);
     }
 
+    public boolean isExistingNetwork(Network network) {
+        return isNoneEmpty(getCustomNetworkId(network)) && isNoneEmpty(getCustomResourceGroupName(network)) && isNoneEmpty(getCustomSubnetId(network));
+    }
+
+    public String getCustomNetworkId(Network network) {
+        return network.getStringParameter(NETWORK_ID);
+    }
+
+    public String getCustomResourceGroupName(Network network) {
+        return network.getStringParameter(RG_NAME);
+    }
+
+    public String getCustomSubnetId(Network network) {
+        return network.getStringParameter(SUBNET_ID);
+    }
 
 }

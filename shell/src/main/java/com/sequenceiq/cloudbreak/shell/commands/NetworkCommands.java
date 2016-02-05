@@ -112,6 +112,10 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "addressPrefix", mandatory = true, help = "The address prefix of the Azure virtual network in CIDR format") String addressPrefix,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
+            @CliOption(key = "resourceGroupName", mandatory = true,
+                    help = "Name of the custom resource group in case of existing virtual network and subnet") String rgName,
+            @CliOption(key = "networkId", mandatory = true, help = "Name of the custom network within the custom resource group") String networkId,
+            @CliOption(key = "subnetId", mandatory = true, help = "Name of the custom subnet within the custom resource group") String subnetId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
             @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
@@ -126,6 +130,11 @@ public class NetworkCommands implements CommandMarker {
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("addressPrefix", addressPrefix);
+            if (rgName != null && networkId != null && subnetId != null) {
+                parameters.put("resourceGroupName", rgName);
+                parameters.put("networkId", networkId);
+                parameters.put("subnetId", subnetId);
+            }
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
