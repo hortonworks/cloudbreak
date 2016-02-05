@@ -134,6 +134,9 @@ public class FlowInitializer implements InitializingBean {
 
         transitionKeyService.registerTransition(ClusterInstallHandler.class, TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_INSTALL.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
+
+        transitionKeyService.registerTransition(ClusterCreationFailureHandler.class, TransitionFactory
+                .createTransition(FlowPhases.CLUSTER_CREATION_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerStartFlows() {
