@@ -42,7 +42,7 @@
         <label class="col-sm-3 col-sm-offset-2 control-label" for="gcp_networkVPCId">{{msg.network_gcp_form_network_id_label}}</label>
 
         <div class="col-sm-7">
-            <input type="text" class="form-control" name="gcp_networkVPCId" ng-model="network.parameters.networkId" id="gcp_networkVPCId" ng-pattern="/^[-a-zA-Z0-9]*$/">
+            <input type="text" class="form-control" name="gcp_networkVPCId" ng-model="network.parameters.networkId" id="gcp_networkVPCId" placeholder="{{msg.network_gcp_form_custom_network_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/">
             <div class="help-block" ng-show="gcpNetworkForm.gcp_networkVPCId.$dirty && gcpNetworkForm.gcp_networkVPCId.$invalid">
                 <i class="fa fa-warning"></i> {{msg.network_identifier_invalid}}
             </div>
