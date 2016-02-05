@@ -47,6 +47,7 @@ public final class NetworkUtils {
 
     static {
         ports.add(new Port(SSH, "22", "tcp"));
+        ports.add(new Port(SSH, "2022", "tcp"));
         ports.add(new Port(GATEWAY, "443", "tcp"));
         ports.add(new Port(AMBARI, "8080", "tcp"));
         ports.add(new Port(CONSUL, "8500", "tcp"));

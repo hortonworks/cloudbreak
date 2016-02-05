@@ -72,7 +72,7 @@ public class RecipeCommands implements CommandMarker {
     @CliCommand(value = "recipe list", help = "Shows the currently available recipes")
     public String listRecipes() {
         try {
-            return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.recipeEndpoint().getPublics(), "id", "name"), "ID", "INFO");
+            return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.recipeEndpoint().getPublics(), "id", "name"), true, "ID", "INFO");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

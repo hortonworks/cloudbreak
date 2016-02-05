@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -66,6 +67,9 @@ public class ClusterController implements ClusterEndpoint {
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
 
+    @Autowired
+    private SssdConfigService sssdConfigService;
+
     @Override
     public Response post(Long stackId, ClusterRequest request) {
         CbUser user = authenticatedUserService.getCbUser();
@@ -76,7 +80,11 @@ public class ClusterController implements ClusterEndpoint {
         MDCBuilder.buildUserMdcContext(user);
         fileSystemValidator.validateFileSystem(stackService.getById(stackId).cloudPlatform(), request.getFileSystem());
         Cluster cluster = conversionService.convert(request, Cluster.class);
-        cluster = clusterDecorator.decorate(cluster, stackId, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint());
+        if (cluster.isLdapRequired()) {
+            cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
+        }
+        cluster = clusterDecorator.decorate(cluster, stackId, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
+                request.getSssdConfigId());
         clusterService.create(user, stackId, cluster);
         return Response.status(Response.Status.ACCEPTED).build();
     }

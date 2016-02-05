@@ -50,7 +50,7 @@ public class MDCBuilderTest {
 
     @Test
     public void buildUserMdcContextWithUser() {
-        MDCBuilder.buildUserMdcContext(TestUtil.cbUser());
+        MDCBuilder.buildUserMdcContext(TestUtil.cbAdminUser());
         assertEquals("userid", MDC.get(LoggerContextKey.OWNER_ID.toString()));
     }
 

@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
+import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -44,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
+import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 
@@ -87,8 +90,12 @@ public class TestUtil {
         }
     }
 
-    public static CbUser cbUser() {
+    public static CbUser cbAdminUser() {
         return new CbUser("userid", "testuser", "testaccount", Arrays.asList(CbUserRole.ADMIN, CbUserRole.USER), "givenname", "familyname", new Date());
+    }
+
+    public static CbUser cbUser() {
+        return new CbUser("userid", "testuser", "testaccount", Arrays.asList(CbUserRole.USER), "givenname", "familyname", new Date());
     }
 
     public static Credential awsCredential() {
@@ -299,6 +306,10 @@ public class TestUtil {
     }
 
     public static Cluster cluster(Blueprint blueprint, Stack stack, Long id) {
+        return cluster(blueprint, null, stack, id);
+    }
+
+    public static Cluster cluster(Blueprint blueprint, SssdConfig sssdConfig, Stack stack, Long id) {
         Cluster cluster = new Cluster();
         cluster.setAmbariIp("50.51.52.100");
         cluster.setStack(stack);
@@ -311,6 +322,7 @@ public class TestUtil {
         cluster.setStatusReason("statusReason");
         cluster.setUserName("admin");
         cluster.setPassword("admin");
+        cluster.setSssdConfig(sssdConfig);
         AmbariStackDetails ambariStackDetails = new AmbariStackDetails();
         cluster.setAmbariStackDetails(ambariStackDetails);
         cluster.setHostGroups(hostGroups(cluster));
@@ -362,6 +374,23 @@ public class TestUtil {
             recipes.add(recipe);
         }
         return recipes;
+    }
+
+    public static Set<SssdConfig> sssdConfigs(int count) {
+        Set<SssdConfig> configs = new HashSet<>();
+        for (int i = 0; i < count; i++) {
+            SssdConfig config = new SssdConfig();
+            config.setId((long) i);
+            config.setName("config-" + (i + 1));
+            config.setDescription("description");
+            config.setProviderType(SssdProviderType.LDAP);
+            config.setUrl("ldap://domain");
+            config.setSchema(SssdSchemaType.RFC2307);
+            config.setBaseSearch("dc=domain");
+            config.setPublicInAccount(true);
+            configs.add(config);
+        }
+        return configs;
     }
 
     public static Blueprint blueprint() {

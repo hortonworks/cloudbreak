@@ -9,5 +9,6 @@
   "kerberosMasterKey": "masterkey",
   "kerberosAdmin" : "admin",
   "kerberosPassword" : "passw",
+  "ldapRequired" : false,
   "validateBlueprint" : true
 }

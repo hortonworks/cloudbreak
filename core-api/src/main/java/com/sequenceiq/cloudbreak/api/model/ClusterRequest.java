@@ -49,6 +49,10 @@ public class ClusterRequest {
     private String kerberosAdmin;
     @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
     private String kerberosPassword;
+    @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED, required = false)
+    private Boolean ldapRequired = false;
+    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID, required = false)
+    private Long sssdConfigId;
     private Boolean validateBlueprint = true;
     @Valid
     private AmbariStackDetailsJson ambariStackDetails;
@@ -127,6 +131,22 @@ public class ClusterRequest {
 
     public void setKerberosPassword(String kerberosPassword) {
         this.kerberosPassword = kerberosPassword;
+    }
+
+    public Boolean getLdapRequired() {
+        return ldapRequired;
+    }
+
+    public void setLdapRequired(Boolean ldapRequired) {
+        this.ldapRequired = ldapRequired;
+    }
+
+    public Long getSssdConfigId() {
+        return sssdConfigId;
+    }
+
+    public void setSssdConfigId(Long sssdConfigId) {
+        this.sssdConfigId = sssdConfigId;
     }
 
     public boolean getValidateBlueprint() {

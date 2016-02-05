@@ -51,6 +51,9 @@ public class ContainerConfigService {
     @Value("${cb.docker.container.haveged:}")
     private String havegedImageName;
 
+    @Value("${cb.docker.container.ldap:}")
+    private String ldapImageName;
+
     @Inject
     private ComponentRepository componentRepository;
 
@@ -99,6 +102,9 @@ public class ContainerConfigService {
                     break;
                 case HAVEGED:
                     config = new GenericConfig.Builder(havegedImageName).build();
+                    break;
+                case LDAP:
+                    config = new GenericConfig.Builder(ldapImageName).build();
                     break;
                 default:
                     throw new CloudbreakServiceException(String.format("No configuration exist for %s", dc));

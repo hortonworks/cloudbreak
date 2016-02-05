@@ -39,8 +39,8 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
         // WHEN
         Cluster result = underTest.convert(getRequest("stack/cluster.json"));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted",
-                "creationFinished", "upSince", "statusReason", "ambariIp", "ambariStackDetails", "fileSystem"));
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+                "ambariStackDetails", "fileSystem", "sssdConfig"));
     }
 
     @Test
@@ -50,8 +50,8 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
         // WHEN
         Cluster result = underTest.convert(getRequest("stack/cluster-with-ambari-stack-details.json"));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted",
-                "creationFinished", "upSince", "statusReason", "ambariIp", "fileSystem"));
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+                "fileSystem", "sssdConfig"));
     }
 
     @Test
@@ -61,8 +61,8 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
         // WHEN
         Cluster result = underTest.convert(getRequest("stack/cluster-with-file-system.json"));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted",
-                "creationFinished", "upSince", "statusReason", "ambariIp", "ambariStackDetails"));
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+                "ambariStackDetails", "sssdConfig"));
     }
 
     @Override

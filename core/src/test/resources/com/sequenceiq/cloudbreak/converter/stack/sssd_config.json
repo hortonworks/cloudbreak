@@ -1,0 +1,8 @@
+{
+  "name" : "config-01",
+  "description" : "my first config",
+  "providerType" : "LDAP",
+  "url" : "ldap://domain",
+  "schema" : "RFC2307",
+  "baseSearch" : "dc=domain"
+}

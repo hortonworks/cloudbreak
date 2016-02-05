@@ -118,7 +118,7 @@ public class SecurityGroupCommands implements CommandMarker {
                 updatedGroups.put(aPublic.getId().toString(), aPublic.getName());
             }
             context.setSecurityGroups(updatedGroups);
-            return renderSingleMap(updatedGroups, "ID", "NAME");
+            return renderSingleMap(updatedGroups, true, "ID", "NAME");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

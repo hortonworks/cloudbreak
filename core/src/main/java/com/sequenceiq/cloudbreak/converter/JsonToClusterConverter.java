@@ -27,6 +27,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setKerberosMasterKey(source.getKerberosMasterKey());
         cluster.setKerberosAdmin(source.getKerberosAdmin());
         cluster.setKerberosPassword(source.getKerberosPassword());
+        cluster.setLdapRequired(source.getLdapRequired());
         cluster.setConfigStrategy(source.getConfigStrategy());
         AmbariStackDetailsJson ambariStackDetails = source.getAmbariStackDetails();
         if (ambariStackDetails != null) {
