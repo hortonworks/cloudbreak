@@ -31,6 +31,47 @@
     </div>
     <!-- .col-sm-9 -->
 </div>
+
+<div class="form-group">
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azure_networkRGId">{{msg.network_azure_form_custom_vpc_label}}</label>
+        <div class="col-sm-9" />
+    </div>
+    <div class="form-group" ng-class="{ 'has-error': azureNetworkForm.azure_networkRGId.$dirty && azureNetworkForm.azure_networkRGId.$invalid }">
+        <label class="col-sm-3 col-sm-offset-2 control-label" for="azure_networkRGId">{{msg.network_azure_form_resource_group_id_label}}</label>
+
+        <div class="col-sm-7">
+            <input type="text" class="form-control" name="azure_networkRGId" ng-model="network.parameters.resourceGroupName" id="azure_networkRGId" placeholder="{{msg.network_azure_form_resource_group_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/">
+            <div class="help-block" ng-show="azureNetworkForm.azure_networkRGId.$dirty && azureNetworkForm.azure_networkRGId.$invalid">
+                <i class="fa fa-warning"></i> {{msg.network_resource_group_invalid}}
+            </div>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group" ng-class="{ 'has-error': azureNetworkForm.azure_networkVPCId.$dirty && azureNetworkForm.azure_networkVPCId.$invalid }">
+        <label class="col-sm-3 col-sm-offset-2 control-label" for="azure_networkVPCId">{{msg.network_azure_form_network_id_label}}</label>
+
+        <div class="col-sm-7">
+            <input type="text" class="form-control" name="azure_networkVPCId" ng-model="network.parameters.networkId" id="azure_networkVPCId" placeholder="{{msg.network_azure_form_network_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/">
+            <div class="help-block" ng-show="azureNetworkForm.azure_networkVPCId.$dirty && azureNetworkForm.azure_networkVPCId.$invalid">
+                <i class="fa fa-warning"></i> {{msg.network_identifier_invalid}}
+            </div>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group" ng-class="{ 'has-error': azureNetworkForm.azure_networkSubnetId.$dirty && azureNetworkForm.azure_networkSubnetId.$invalid }">
+        <label class="col-sm-3 col-sm-offset-2 control-label" for="azure_networkSubnetId">{{msg.network_azure_form_subnet_id_label}}</label>
+
+        <div class="col-sm-7">
+            <input type="text" class="form-control" name="azure_networkSubnetId" ng-model="network.parameters.subnetId" id="azure_networkSubnetId" placeholder="{{msg.network_azure_form_subnet_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/">
+            <div class="help-block" ng-show="azureNetworkForm.azure_networkSubnetId.$dirty && azureNetworkForm.azure_networkSubnetId.$invalid">
+                <i class="fa fa-warning"></i> {{msg.network_subnetid2_invalid}}
+            </div>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+</div>
+
 <div class="form-group">
     <label class="col-sm-3 control-label" for="azure_network_public">{{msg.public_in_account_label}}</label>
     <div class="col-sm-9">
@@ -49,7 +90,7 @@
 </div>
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">
-        <a id="createAwsTemplate" ng-disabled="azureNetworkForm.$invalid" class="btn btn-success btn-block" ng-click="createAzureNetwork()" role="button"><i class="fa fa-plus fa-fw"></i>
+        <a id="createAwsTemplate" ng-disabled="azureNetworkForm.$invalid || !((azureNetworkForm.azure_networkSubnetId.$viewValue.length>0 && azureNetworkForm.azure_networkVPCId.$viewValue.length>0 && azureNetworkForm.azure_networkRGId.$viewValue.length>0) || (!network.parameters.resourceGroupName && !network.parameters.networkId && !network.parameters.subnetId))" class="btn btn-success btn-block" ng-click="createAzureNetwork()" role="button"><i class="fa fa-plus fa-fw"></i>
                 {{msg.network_form_create}}</a>
     </div>
 </div>
