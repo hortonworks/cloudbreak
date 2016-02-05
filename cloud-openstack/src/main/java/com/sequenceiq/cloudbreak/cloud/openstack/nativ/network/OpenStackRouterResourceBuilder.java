@@ -44,7 +44,9 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
                         .externalGateway(networkView.getPublicNetId()).build();
                 routerId = osClient.networking().router().create(router).getId();
             }
-            osClient.networking().router().attachInterface(routerId, AttachInterfaceType.SUBNET, context.getStringParameter(OpenStackConstants.SUBNET_ID));
+            if (!utils.isExistingSubnet(network)) {
+                osClient.networking().router().attachInterface(routerId, AttachInterfaceType.SUBNET, context.getStringParameter(OpenStackConstants.SUBNET_ID));
+            }
             return createPersistedResource(resource, routerId);
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Router creation failed", resourceType(), resource.getName(), ex);
@@ -56,7 +58,9 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
         try {
             OSClient osClient = createOSClient(auth);
             String subnetId = context.getStringParameter(OpenStackConstants.SUBNET_ID);
-            osClient.networking().router().detachInterface(resource.getReference(), subnetId, null);
+            if (!utils.isExistingSubnet(network)) {
+                osClient.networking().router().detachInterface(resource.getReference(), subnetId, null);
+            }
             if (!utils.isExistingNetwork(network)) {
                 ActionResponse response = osClient.networking().router().delete(resource.getReference());
                 return checkDeleteResponse(response, resourceType(), auth, resource, "Router deletion failed");

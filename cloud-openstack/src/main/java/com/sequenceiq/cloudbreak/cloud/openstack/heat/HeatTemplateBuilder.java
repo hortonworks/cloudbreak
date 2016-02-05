@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -43,7 +45,7 @@ public class HeatTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String build(String stackName, List<Group> groups, Security security, Image instanceUserData, boolean existingNetwork) {
+    public String build(String stackName, List<Group> groups, Security security, Image instanceUserData, boolean existingNetwork, boolean existingSubnet) {
         try {
             List<NovaInstanceView> novaInstances = new OpenStackGroupView(groups).getFlatNovaView();
             Map<String, Object> model = new HashMap<>();
@@ -53,6 +55,7 @@ public class HeatTemplateBuilder {
             model.put("gateway_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.GATEWAY)));
             model.put("rules", security.getRules());
             model.put("existingNetwork", existingNetwork);
+            model.put("existingSubnet", existingSubnet);
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
             LOGGER.debug("Generated Heat template: {}", generatedTemplate);
             return generatedTemplate;
@@ -61,18 +64,21 @@ public class HeatTemplateBuilder {
         }
     }
 
-    public Map<String, String> buildParameters(AuthenticatedContext auth, Network network, Image image, boolean existingNetwork) {
+    public Map<String, String> buildParameters(AuthenticatedContext auth, Network network, Image image, boolean existingNetwork, String existingSubnetCidr) {
         KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
         NeutronNetworkView neutronView = new NeutronNetworkView(network);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("public_net_id", neutronView.getPublicNetId());
         parameters.put("image_id", image.getImageName());
         parameters.put("key_name", osCredential.getKeyPairName());
-        parameters.put("app_net_cidr", neutronView.getSubnetCIDR());
         if (existingNetwork) {
             parameters.put("app_net_id", openStackUtil.getCustomNetworkId(network));
             parameters.put("router_id", openStackUtil.getCustomRouterId(network));
+            if (isNoneEmpty(existingSubnetCidr)) {
+                parameters.put("subnet_id", openStackUtil.getCustomSubnetId(network));
+            }
         }
+        parameters.put("app_net_cidr", isBlank(existingSubnetCidr) ? neutronView.getSubnetCIDR() : existingSubnetCidr);
         return parameters;
     }
 

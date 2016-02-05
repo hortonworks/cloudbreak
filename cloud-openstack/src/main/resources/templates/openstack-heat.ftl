@@ -25,6 +25,11 @@ parameters:
   router_id:
     type: string
     description: ID of the custom router which belongs to the custom network
+  <#if existingSubnet>
+  subnet_id:
+    type: string
+    description: ID of the custom subnet which belongs to the custom network
+  </#if>
   </#if>
 
 resources:
@@ -37,6 +42,7 @@ resources:
         name: app_network
   </#if>
 
+  <#if !existingSubnet>
   app_subnet:
       type: OS::Neutron::Subnet
       properties:
@@ -45,7 +51,8 @@ resources:
         <#else>
         network_id: { get_resource: app_network }
         </#if>
-        cidr: { get_param: app_net_cidr } 
+        cidr: { get_param: app_net_cidr }
+  </#if>
 
   <#if !existingNetwork>
   router:
@@ -58,6 +65,7 @@ resources:
         network_id: { get_param: public_net_id }
   </#if>
 
+  <#if !existingSubnet>
   router_interface:
       type: OS::Neutron::RouterInterface
       properties:
@@ -67,6 +75,7 @@ resources:
         router_id: { get_resource: router }
         </#if>
         subnet_id: { get_resource: app_subnet }
+  </#if>
 
   gw_user_data_config:
       type: OS::Heat::SoftwareConfig
@@ -115,7 +124,11 @@ ${core_user_data}
         </#if>
         replacement_policy: AUTO
         fixed_ips:
+        <#if existingSubnet>
+          - subnet_id: { get_param: subnet_id }
+        <#else>
           - subnet_id: { get_resource: app_subnet }
+        </#if>
         security_groups: [ { get_resource: server_security_group } ]
         
 <#list agent.volumes as volume>
