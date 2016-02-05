@@ -48,6 +48,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             "STOP_FAILED": "fa-play"
         }
 
+        $scope.configStrategies = [
+             "NEVER_APPLY",
+             "ONLY_STACK_DEFAULTS_APPLY",
+             "ALWAYS_APPLY"
+        ]
+
         $rootScope.activeCluster = {};
 
         $scope.detailsShow = true;
@@ -837,7 +843,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 parameters: {},
                 failurePolicy: {
                     adjustmentType: "BEST_EFFORT",
-                }
+                },
+                configStrategy: $scope.configStrategies[1]
 
             };
             setFileSystem();
