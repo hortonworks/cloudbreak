@@ -68,7 +68,7 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "subnetId", mandatory = false, help = "The ID of the subnet which belongs to the custom VPC") String subnetId,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
     ) {
         try {
             String cloudPlatform = "AWS";
@@ -88,10 +88,10 @@ public class NetworkCommands implements CommandMarker {
             }
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
-            if (topologyId != null) {
-                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            if (platformId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), platformId, cloudPlatform);
             }
-            networkJson.setTopologyId(topologyId);
+            networkJson.setTopologyId(platformId);
 
             IdJson id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -118,7 +118,7 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "subnetId", mandatory = false, help = "Name of the custom subnet within the custom resource group") String subnetId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
     ) {
         try {
             String cloudPlatform = "AZURE_RM";
@@ -138,10 +138,10 @@ public class NetworkCommands implements CommandMarker {
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
-            if (topologyId != null) {
-                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            if (platformId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), platformId, cloudPlatform);
             }
-            networkJson.setTopologyId(topologyId);
+            networkJson.setTopologyId(platformId);
 
             IdJson id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -164,7 +164,7 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "networkId", mandatory = false, help = "Id of a custom network") String networkId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
     ) {
         try {
             String cloudPlatform = "GCP";
@@ -181,10 +181,10 @@ public class NetworkCommands implements CommandMarker {
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
-            if (topologyId != null) {
-                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            if (platformId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), platformId, cloudPlatform);
             }
-            networkJson.setTopologyId(topologyId);
+            networkJson.setTopologyId(platformId);
 
             IdJson id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -210,7 +210,7 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "subnetId", mandatory = false, help = "ID of the custom subnet to use") String subnetId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the network belongs to") Long topologyId
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
     ) {
         try {
             String cloudPlatform = "OPENSTACK";
@@ -232,10 +232,10 @@ public class NetworkCommands implements CommandMarker {
 
             networkJson.setParameters(parameters);
             networkJson.setSubnetCIDR(subnet);
-            if (topologyId != null) {
-                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            if (platformId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), platformId, cloudPlatform);
             }
-            networkJson.setTopologyId(topologyId);
+            networkJson.setTopologyId(platformId);
 
             IdJson id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;

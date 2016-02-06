@@ -88,7 +88,7 @@ public class TemplateCommands implements CommandMarker {
             @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
-            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the template belongs to") Long topologyId
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the template belongs to") Long platformId
     ) {
         try {
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -107,10 +107,10 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setInstanceType(instanceType);
             templateRequest.setVolumeCount(volumeCount);
             templateRequest.setVolumeSize(volumeSize);
-            if (topologyId != null) {
-                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            if (platformId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), platformId, cloudPlatform);
             }
-            templateRequest.setTopologyId(topologyId);
+            templateRequest.setTopologyId(platformId);
 
             if (publicInAccount) {
                 id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
@@ -155,7 +155,7 @@ public class TemplateCommands implements CommandMarker {
             @CliOption(key = "sshLocation", mandatory = false, specifiedDefaultValue = "0.0.0.0/0", help = "sshLocation of the template") String sshLocation,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
-            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the template belongs to") Long topologyId
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the template belongs to") Long platformId
     ) {
         try {
             String cloudPlatform = "AWS";
@@ -175,10 +175,10 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setVolumeCount(volumeCount);
             templateRequest.setVolumeSize(volumeSize);
             templateRequest.setVolumeType(volumeType == null ? "gp2" : volumeType.getName());
-            if (topologyId != null) {
-                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            if (platformId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), platformId, cloudPlatform);
             }
-            templateRequest.setTopologyId(topologyId);
+            templateRequest.setTopologyId(platformId);
 
             Map<String, Object> params = new HashMap<>();
             params.put("sshLocation", sshLocation == null ? "0.0.0.0/0" : sshLocation);
@@ -211,7 +211,7 @@ public class TemplateCommands implements CommandMarker {
             @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
-            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the template belongs to") Long topologyId
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the template belongs to") Long platformId
     ) {
         publicInAccount = publicInAccount == null ? false : publicInAccount;
         if (volumeCount < VOLUME_COUNT_MIN || volumeCount > VOLUME_COUNT_MAX) {
@@ -230,10 +230,10 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setInstanceType(vmType.getName());
             templateRequest.setVolumeCount(volumeCount);
             templateRequest.setVolumeSize(volumeSize);
-            if (topologyId != null) {
-                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            if (platformId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), platformId, cloudPlatform);
             }
-            templateRequest.setTopologyId(topologyId);
+            templateRequest.setTopologyId(platformId);
 
             if (publicInAccount) {
                 id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
@@ -256,7 +256,7 @@ public class TemplateCommands implements CommandMarker {
             @CliOption(key = "volumeType", mandatory = false, help = "volumeType of the template") GcpVolumeType volumeType,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
-            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the template belongs to") Long topologyId
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the template belongs to") Long platformId
     ) {
         publicInAccount = publicInAccount == null ? false : publicInAccount;
         if (volumeCount < VOLUME_COUNT_MIN || volumeCount > VOLUME_COUNT_MAX) {
@@ -276,10 +276,10 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setVolumeCount(volumeCount);
             templateRequest.setVolumeSize(volumeSize);
             templateRequest.setVolumeType(volumeType == null ? "pd-standard" : volumeType.getName());
-            if (topologyId != null) {
-                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), topologyId, cloudPlatform);
+            if (platformId != null) {
+                checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), platformId, cloudPlatform);
             }
-            templateRequest.setTopologyId(topologyId);
+            templateRequest.setTopologyId(platformId);
 
             if (publicInAccount) {
                 id = cloudbreakClient.templateEndpoint().postPublic(templateRequest);
