@@ -140,6 +140,7 @@
                   ]
               }
           },
+          </#if>
           {
             "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkSecurityGroups",
@@ -178,7 +179,6 @@
                 ]
             }
           },
-          </#if>
           <#list groups?keys as instanceGroup>
           <#list groups[instanceGroup] as instance>
               <#if instanceGroup == "GATEWAY">
