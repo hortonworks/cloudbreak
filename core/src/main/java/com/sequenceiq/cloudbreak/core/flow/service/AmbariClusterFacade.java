@@ -69,7 +69,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -130,12 +129,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Inject
     private ClusterTerminationService clusterTerminationService;
 
-    //TODO: remove this and use image from the related stack, because upscale could produce bad things with a different image version
-    @Value("${cb.docker.container.ambari.server:}")
-    private String ambariServerImage;
-
     private enum Msg {
-
         AMBARI_CLUSTER_BUILDING("ambari.cluster.building"),
         AMBARI_CLUSTER_BUILT("ambari.cluster.built"),
         AMBARI_CLUSTER_NOTIFICATION_EMAIL("ambari.cluster.notification.email"),
@@ -503,7 +497,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             String ambariServerAddress = FluentIterable.from(containers).firstMatch(new Predicate<Container>() {
                 @Override
                 public boolean apply(Container input) {
-                    return ambariServerImage.equals(input.getImage());
+                    return input.getImage().contains(AMBARI_SERVER.getName());
                 }
             }).get().getHost();
             ambariClientConfig = new HttpClientConfig(ambariServerAddress);
