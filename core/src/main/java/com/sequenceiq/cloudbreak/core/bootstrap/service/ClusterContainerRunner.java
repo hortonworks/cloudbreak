@@ -212,7 +212,7 @@ public class ClusterContainerRunner {
                         stackDeletionBasedExitCriteriaModel(stack.getId()));
             }
             return saveContainers(containers, cluster);
-        } catch(CloudbreakOrchestratorException ex) {
+        } catch (CloudbreakOrchestratorException ex) {
             if (!containers.isEmpty()) {
                 saveContainers(containers, cluster);
             }
@@ -365,9 +365,7 @@ public class ClusterContainerRunner {
                     "/usr/sbin/init systemd.setenv=AMBARI_SERVER_ADDR=%s systemd.setenv=CLOUD_PLATFORM=%s", ambariServerHost, cloudPlatform)});
         }
 
-        if (hgConstraint.getConstraintTemplate() != null)
-
-        {
+        if (hgConstraint.getConstraintTemplate() != null) {
             builder.cpus(hgConstraint.getConstraintTemplate().getCpu());
             builder.memory(hgConstraint.getConstraintTemplate().getMemory());
             builder.instances(hgConstraint.getHostCount());

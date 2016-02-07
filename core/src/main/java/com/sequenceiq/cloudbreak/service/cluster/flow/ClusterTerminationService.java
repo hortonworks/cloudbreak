@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
@@ -73,14 +74,14 @@ public class ClusterTerminationService {
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap());
                 ContainerOrchestrator containerOrchestrator = orchestratorResolver.get(orchestrator.getType());
                 Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
-                List<String> containerIds = FluentIterable.from(containers).transform(new Function<Container, String>() {
+                List<ContainerInfo> containerInfo = FluentIterable.from(containers).transform(new Function<Container, ContainerInfo>() {
                     @Nullable
                     @Override
-                    public String apply(Container input) {
-                        return input.getContainerId();
+                    public ContainerInfo apply(Container input) {
+                        return new ContainerInfo(input.getContainerId(), input.getName(), input.getHost(), input.getImage());
                     }
                 }).toList();
-                containerOrchestrator.deleteContainer(containerIds, credential);
+                containerOrchestrator.deleteContainer(containerInfo, credential);
                 containerRepository.delete(containers);
             } else {
                 String msg = String.format("Failed to delete containers of cluster (id:'%s',name:'%s'), the cluster is not associated to stack.",

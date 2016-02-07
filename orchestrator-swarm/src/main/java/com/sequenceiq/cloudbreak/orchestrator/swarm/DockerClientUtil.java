@@ -43,6 +43,19 @@ public class DockerClientUtil {
         }
     }
 
+    public static void remove(DockerClient client, String name, String node) throws CloudbreakOrchestratorFailedException {
+        try {
+            InspectContainerResponse inspectResponse = inspect(client, name);
+            if (inspectResponse != null && inspectResponse.getId() != null && isContainerRunning(inspectResponse)) {
+                LOGGER.warn("Container {} is still running on node: {}! Trying to remove it again.", name, node);
+                remove(client, inspectResponse, name, node);
+            }
+            throw new CloudbreakOrchestratorFailedException(String.format("Container {} is still running on node: {}!", name, node));
+        } catch (NotFoundException ex) {
+            LOGGER.info("Container '{}' has already been deleted from node '{}'.", name, node);
+        }
+    }
+
     private static void start(DockerClient client, String name) {
         long start = System.currentTimeMillis();
         client.startContainerCmd(name).exec();
