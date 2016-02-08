@@ -27,6 +27,6 @@ public class ClusterResetHandler extends AbstractFlowHandler<ProvisioningContext
     protected Object handleErrorFlow(Throwable throwable, ProvisioningContext data) throws Exception {
         LOGGER.info("handleErrorFlow() for phase: {}", getClass());
         data.setErrorReason(throwable.getMessage());
-        return getFlowFacade().handleClusterCreationFailure((FlowContext) data);
+        return getFlowFacade().handleClusterInstallationFailure((FlowContext) data);
     }
 }

@@ -392,11 +392,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         MDCBuilder.buildMdcContext(cluster);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RESET, UPDATE_IN_PROGRESS.name());
-
-        if (cluster.getContainers().isEmpty()) {
-            containerRunner.runClusterContainers(actualContext);
-        }
-
         ambariClusterConnector.resetAmbariCluster(stack.getId());
         context = new ProvisioningContext.Builder()
                 .withProvisioningContext(actualContext)
@@ -472,24 +467,19 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Override
     public FlowContext handleClusterCreationFailure(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(cluster);
-        clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, actualContext.getErrorReason());
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), actualContext.getErrorReason());
-        try {
-            clusterTerminationService.deleteClusterContainers(cluster.getId());
-        } catch (TerminationFailedException ex) {
-            LOGGER.error("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
-        }
+        return handleClusterCreationFailure(context, true);
+    }
 
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
-            fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
+    @Override
+    public FlowContext handleClusterInstallationFailure(FlowContext context) throws CloudbreakException {
+        Stack stack = stackService.getById(context.getStackId());
+        FlowContext flowContext;
+        if ("MARATHON".equals(stack.getOrchestrator().getType())) {
+            flowContext = handleClusterCreationFailure(context, true);
+        } else {
+            flowContext = handleClusterCreationFailure(context, false);
         }
-        return actualContext;
+        return flowContext;
     }
 
     @Override
@@ -505,6 +495,30 @@ public class AmbariClusterFacade implements ClusterFacade {
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALING_FAILED, AVAILABLE.name(), scalingAdjustment > 0 ? "added" : "removed",
                 actualContext.getErrorReason());
         return context;
+    }
+
+    private FlowContext handleClusterCreationFailure(FlowContext context, boolean deleteClusterContainers) throws CloudbreakException {
+        ProvisioningContext actualContext = (ProvisioningContext) context;
+        Stack stack = stackService.getById(actualContext.getStackId());
+        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
+        MDCBuilder.buildMdcContext(cluster);
+        clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, actualContext.getErrorReason());
+        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
+        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), actualContext.getErrorReason());
+
+        if (deleteClusterContainers) {
+            try {
+                clusterTerminationService.deleteClusterContainers(cluster.getId());
+            } catch (TerminationFailedException ex) {
+                LOGGER.error("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
+            }
+        }
+
+        if (cluster.getEmailNeeded()) {
+            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
+            fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
+        }
+        return actualContext;
     }
 
     private HttpClientConfig buildAmbariClientConfig(Stack stack, List<Container> containers) throws CloudbreakSecuritySetupException {
