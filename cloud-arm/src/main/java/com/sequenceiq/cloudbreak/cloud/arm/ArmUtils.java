@@ -43,8 +43,14 @@ public class ArmUtils {
     private static final String RG_NAME = "resourceGroupName";
     private static final String SUBNET_ID = "subnetId";
     private static final String NETWORK_ID = "networkId";
+    private static final int PORT_22 = 22;
+    private static final int PORT_443 = 443;
+    private static final int PORT_RANGE_NUM = 2;
+    private static final int RG_PART = 4;
+    private static final int ID_SEGMENTS = 9;
+    private static final int SEC_GROUP_PART = 8;
 
-    @Value("${cb.max.openstack.resource.name.length:}")
+    @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
 
     @Value("${cb.arm.persistent.storage:}")
@@ -169,6 +175,72 @@ public class ArmUtils {
 
     public String getCustomSubnetId(Network network) {
         return network.getStringParameter(SUBNET_ID);
+    }
+
+    public void validateSubnetRules(AzureRMClient client, Network network) {
+        if (isExistingNetwork(network)) {
+            String resourceGroupName = getCustomResourceGroupName(network);
+            String networkId = getCustomNetworkId(network);
+            String subnetId = getCustomSubnetId(network);
+            Map subnetProperties = client.getSubnetProperties(resourceGroupName, networkId, subnetId);
+            Map networkSecurityGroup = (Map) subnetProperties.get("networkSecurityGroup");
+            if (networkSecurityGroup != null) {
+                validateSecurityGroup(client, networkSecurityGroup);
+            }
+        }
+    }
+
+    private void validateSecurityGroup(AzureRMClient client, Map networkSecurityGroup) {
+        String securityGroupId = (String) networkSecurityGroup.get("id");
+        String[] parts = securityGroupId.split("/");
+        if (parts.length != ID_SEGMENTS) {
+            LOGGER.info("Cannot get the security group's properties, id: {}", securityGroupId);
+            return;
+        }
+        Map securityGroupProperties = client.getSecurityGroupProperties(parts[RG_PART], parts[SEC_GROUP_PART]);
+        LOGGER.info("Retrieved security group properties: {}", securityGroupProperties);
+        List securityRules = (List) securityGroupProperties.get("securityRules");
+        boolean port22Found = false;
+        boolean port443Found = false;
+        for (Object securityRule : securityRules) {
+            Map rule = (Map) securityRule;
+            Map properties = (Map) rule.get("properties");
+            if (isValidInboundRule(properties)) {
+                String destinationPortRange = (String) properties.get("destinationPortRange");
+                if ("*".equals(destinationPortRange)) {
+                    return;
+                }
+                String[] range = destinationPortRange.split("-");
+                port443Found = port443Found ? port443Found : isPortFound(PORT_443, range);
+                port22Found = port22Found ? port22Found : isPortFound(PORT_22, range);
+                if (port22Found && port443Found) {
+                    return;
+                }
+            }
+        }
+        throw new CloudConnectorException("The specified subnet's security group does not allow traffic for port 22 and/or 443");
+    }
+
+    private boolean isValidInboundRule(Map properties) {
+        String protocol = properties.get("protocol").toString().toLowerCase();
+        return "inbound".equals(properties.get("direction").toString().toLowerCase())
+                && ("tcp".equals(protocol) || "*".equals(protocol))
+                && "allow".equals(properties.get("access").toString().toLowerCase());
+    }
+
+    private boolean isPortFound(int port, String[] destinationPortRange) {
+        if (destinationPortRange.length == PORT_RANGE_NUM) {
+            return isPortInRange(port, destinationPortRange);
+        }
+        return isPortMatch(port, destinationPortRange[0]);
+    }
+
+    private boolean isPortInRange(int port, String[] range) {
+        return Integer.parseInt(range[0]) <= port && Integer.parseInt(range[1]) >= port;
+    }
+
+    private boolean isPortMatch(int port, String destinationPortRange) {
+        return port == Integer.parseInt(destinationPortRange);
     }
 
 }

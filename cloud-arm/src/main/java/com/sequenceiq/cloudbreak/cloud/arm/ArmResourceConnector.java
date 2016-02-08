@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
+import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.arm.context.NetworkInterfaceCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.ResourceGroupCheckerContext;
@@ -30,7 +31,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 import groovyx.net.http.HttpResponseException;
@@ -57,10 +57,10 @@ public class ArmResourceConnector implements ResourceConnector {
         String resourceGroupName = armUtils.getResourceGroupName(authenticatedContext.getCloudContext());
         String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), authenticatedContext.getCloudContext(), stack);
         String parameters = armTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
-
-        AzureRMClient access = armClient.createAccess(authenticatedContext.getCloudCredential());
+        AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
+        armUtils.validateSubnetRules(client, stack.getNetwork());
         try {
-            access.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+            client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
         } catch (HttpResponseException e) {
             throw new CloudConnectorException(String.format("Error occurred when creating stack: %s", e.getResponse().getData().toString()));
         } catch (Exception e) {

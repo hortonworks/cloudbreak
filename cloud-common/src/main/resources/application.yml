@@ -80,7 +80,7 @@ cb:
     api.debug: false
   
   max:
-    azure.resource.name.length: 50
+    azure.resource.name.length: 120
     gcp.resource.name.length: 63
     aws.resource.name.length: 50
     openstack.resource.name.length: 120
