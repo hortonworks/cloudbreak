@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
-import com.sequenceiq.cloudbreak.shell.util.CloudbreakUtil;
+import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 
 @Component
 public class ClusterCommands implements CommandMarker {
@@ -44,7 +44,7 @@ public class ClusterCommands implements CommandMarker {
     @Inject
     private ResponseTransformer responseTransformer;
     @Inject
-    private CloudbreakUtil cloudbreakUtil;
+    private CloudbreakShellUtil cloudbreakShellUtil;
     @Inject
     private ExceptionTransformer exceptionTransformer;
 
@@ -248,8 +248,16 @@ public class ClusterCommands implements CommandMarker {
             cloudbreakClient.clusterEndpoint().post(Long.valueOf(context.getStackId()), clusterRequest);
             context.setHint(Hints.NONE);
             context.resetFileSystemConfiguration();
-            return wait ? cloudbreakUtil.waitAndCheckClusterStatus(Long.valueOf(context.getStackId()), Status.AVAILABLE.name())
-                    : "Cluster creation started";
+            if (wait) {
+                CloudbreakShellUtil.WaitResult waitResult =
+                        cloudbreakShellUtil.waitAndCheckClusterStatus(Long.valueOf(context.getStackId()), Status.AVAILABLE.name());
+                if (CloudbreakShellUtil.WaitResult.FAILED.equals(waitResult)) {
+                    throw exceptionTransformer.transformToRuntimeException("Cluster creation failed on stack with id: " + context.getStackId());
+                } else {
+                    return "Cluster creation finished";
+                }
+            }
+            return "Cluster creation started";
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

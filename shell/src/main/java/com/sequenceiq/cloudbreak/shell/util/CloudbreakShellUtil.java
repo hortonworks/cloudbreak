@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 
 @Component
-public class CloudbreakUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUtil.class);
+public class CloudbreakShellUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakShellUtil.class);
     private static final int MAX_RETRY = 360;
     private static final int POLLING_INTERVAL = 10000;
     private static final int MAX_ATTEMPT = 3;
@@ -21,22 +21,22 @@ public class CloudbreakUtil {
     @Inject
     private CloudbreakClient cloudbreakClient;
 
-    public String waitAndCheckStackStatus(Long stackId, String desiredStatus) throws Exception {
+    public WaitResult waitAndCheckStackStatus(Long stackId, String desiredStatus) throws Exception {
         return waitAndCheckStatus(stackId, desiredStatus, "status");
     }
 
-    public String waitAndCheckClusterStatus(Long stackId, String desiredStatus) throws Exception {
+    public WaitResult waitAndCheckClusterStatus(Long stackId, String desiredStatus) throws Exception {
         return waitAndCheckStatus(stackId, desiredStatus, "clusterStatus");
     }
 
-    private String waitAndCheckStatus(Long stackId, String desiredStatus, String statusPath) throws Exception {
+    private WaitResult waitAndCheckStatus(Long stackId, String desiredStatus, String statusPath) throws Exception {
         for (int i = 0; i < MAX_ATTEMPT; i++) {
             WaitResult waitResult = waitForStatus(stackId, desiredStatus, statusPath);
             if (waitResult.equals(WaitResult.FAILED) || waitResult.equals(WaitResult.TIMEOUT)) {
-                return "FAILED";
+                return WaitResult.FAILED;
             }
         }
-        return "FINISHED";
+        return WaitResult.SUCCESSFUL;
     }
 
     private WaitResult waitForStatus(Long stackId, String desiredStatus, String statusPath) throws Exception {
@@ -72,7 +72,7 @@ public class CloudbreakUtil {
         }
     }
 
-    private enum WaitResult {
+    public enum WaitResult {
         SUCCESSFUL,
         FAILED,
         TIMEOUT

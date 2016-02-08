@@ -320,10 +320,10 @@ public class TemplateCommands implements CommandMarker {
         try {
             if (id != null) {
                 cloudbreakClient.templateEndpoint().delete(Long.valueOf(id));
-                return String.format("Template has been selected, id: %s", id);
+                return String.format("Template has been deleted, id: %s", id);
             } else if (name != null) {
                 cloudbreakClient.templateEndpoint().deletePublic(name);
-                return String.format("Tempalte has been selected, name: %s", name);
+                return String.format("Template has been ClusterCommands, name: %s", name);
             }
             return "No template specified.";
         } catch (Exception ex) {

@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
-import com.sequenceiq.cloudbreak.shell.util.CloudbreakUtil;
+import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 
 @Component
 public class StackCommands implements CommandMarker {
@@ -56,7 +56,7 @@ public class StackCommands implements CommandMarker {
     @Inject
     private ResponseTransformer responseTransformer;
     @Inject
-    private CloudbreakUtil cloudbreakUtil;
+    private CloudbreakShellUtil cloudbreakUtil;
     @Inject
     private ObjectMapper objectMapper;
     @Inject
@@ -206,7 +206,16 @@ public class StackCommands implements CommandMarker {
             }
             context.addStack(id.getId().toString(), name);
             context.setHint(Hints.CREATE_CLUSTER);
-            return wait ? cloudbreakUtil.waitAndCheckStackStatus(id.getId(), Status.AVAILABLE.name()) : "Stack created, id: " + id.getId();
+
+            if (wait) {
+                CloudbreakShellUtil.WaitResult waitResult = cloudbreakUtil.waitAndCheckStackStatus(id.getId(), Status.AVAILABLE.name());
+                if (CloudbreakShellUtil.WaitResult.FAILED.equals(waitResult)) {
+                    throw exceptionTransformer.transformToRuntimeException("Stack creation failed with name:" + name);
+                } else {
+                    return "Stack creation finished with name: " + name;
+                }
+            }
+            return "Stack creation started with name: " + name;
         } catch (ValidationException ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         } catch (Exception ex) {
@@ -306,12 +315,14 @@ public class StackCommands implements CommandMarker {
                 context.setHint(Hints.CREATE_CLUSTER);
                 context.removeStack(id);
                 if (wait) {
-                    String waitResponse = cloudbreakUtil.waitAndCheckStackStatus(Long.valueOf(id), Status.DELETE_COMPLETED.name());
-                    if ("FAILED".equals(waitResponse)) {
+                    CloudbreakShellUtil.WaitResult waitResult = cloudbreakUtil.waitAndCheckStackStatus(Long.valueOf(id), Status.DELETE_COMPLETED.name());
+                    if (CloudbreakShellUtil.WaitResult.FAILED.equals(waitResult)) {
                         throw exceptionTransformer.transformToRuntimeException("Stack terminated failed on stack with id: " + id);
+                    } else {
+                        return "Stack terminated with id: " + id;
                     }
                 } else {
-                    return "Stack terminated with name: " + name;
+                    return "Stack termination started with id: " + id;
                 }
             } else if (name != null) {
                 StackResponse response = cloudbreakClient.stackEndpoint().getPublic(name);
@@ -319,12 +330,14 @@ public class StackCommands implements CommandMarker {
                 context.setHint(Hints.CREATE_CLUSTER);
 
                 if (wait) {
-                    String waitResponse = cloudbreakUtil.waitAndCheckStackStatus(response.getId(), Status.DELETE_COMPLETED.name());
-                    if ("FAILED".equals(waitResponse)) {
+                    CloudbreakShellUtil.WaitResult waitResult = cloudbreakUtil.waitAndCheckStackStatus(response.getId(), Status.DELETE_COMPLETED.name());
+                    if (CloudbreakShellUtil.WaitResult.FAILED.equals(waitResult)) {
                         throw exceptionTransformer.transformToRuntimeException("Stack terminated failed on stack with id: " + response.getId());
+                    } else {
+                        return "Stack terminated with name: " + name;
                     }
                 } else {
-                    return "Stack terminated with name: " + name;
+                    return "Stack termination started with name: " + name;
                 }
             }
             return "Stack not specified. (select by using --id or --name)";
