@@ -13,7 +13,6 @@ import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -50,8 +49,10 @@ import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -226,6 +227,14 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    public void updateHostCountWithAdjustment(Long clusterId, String hostGroupName, Integer adjustment) {
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
+        Constraint constraint = hostGroup.getConstraint();
+        constraint.setHostCount(constraint.getHostCount() + adjustment);
+        constraintRepository.save(constraint);
+    }
+
+    @Override
     public void updateHostMetadata(Long clusterId, Map<String, List<String>> hostsPerHostGroup) {
         for (Map.Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
             HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupEntry.getKey());
@@ -234,6 +243,7 @@ public class AmbariClusterService implements ClusterService {
                     HostMetadata hostMetadataEntry = new HostMetadata();
                     hostMetadataEntry.setHostName(hostName);
                     hostMetadataEntry.setHostGroup(hostGroup);
+                    hostMetadataEntry.setHostMetadataState(HostMetadataState.CONTAINER_RUNNING);
                     hostGroup.getHostMetadata().add(hostMetadataEntry);
                 }
                 hostGroupRepository.save(hostGroup);
@@ -276,7 +286,7 @@ public class AmbariClusterService implements ClusterService {
         boolean decommissionRequest = validateRequest(stack, hostGroupAdjustment);
         UpdateAmbariHostsRequest updateRequest;
         if (decommissionRequest) {
-            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, new HashSet<String>(),
+            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment,
                     collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest),
                     decommissionRequest, platform(stack.cloudPlatform()),
                     hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER);
@@ -284,7 +294,7 @@ public class AmbariClusterService implements ClusterService {
             flowManager.triggerClusterDownscale(updateRequest);
         } else {
             updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment,
-                    collectUpscaleCandidates(hostGroupAdjustment, cluster), new ArrayList<HostMetadata>(),
+                    new ArrayList<HostMetadata>(),
                     decommissionRequest, platform(stack.cloudPlatform()),
                     ScalingType.UPSCALE_ONLY_CLUSTER);
             flowManager.triggerClusterUpscale(updateRequest);
@@ -468,8 +478,8 @@ public class AmbariClusterService implements ClusterService {
         if (scalingAdjustment == 0) {
             throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
         }
-        if (!downScale) {
-            validateUnusedHosts(hostGroup, scalingAdjustment);
+        if (!downScale && hostGroup.getConstraint().getInstanceGroup() != null) {
+            validateUnusedHosts(hostGroup.getConstraint().getInstanceGroup(), scalingAdjustment);
         } else {
             validateRegisteredHosts(stack, hostGroupAdjustment);
             validateComponentsCategory(stack, hostGroupAdjustment);
@@ -478,20 +488,6 @@ public class AmbariClusterService implements ClusterService {
             }
         }
         return downScale;
-    }
-
-    private Set<String> collectUpscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Cluster cluster) {
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), adjustmentJson.getHostGroup());
-        // TODO: why instancegroups?
-        Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetadataRepository.findUnusedHostsInInstanceGroup(hostGroup.getConstraint().getInstanceGroup().getId());
-        Set<String> instanceIds = new HashSet<>();
-        for (InstanceMetaData instanceMetaData : unusedHostsInInstanceGroup) {
-            instanceIds.add(instanceMetaData.getPrivateIp());
-            if (instanceIds.size() >= adjustmentJson.getScalingAdjustment()) {
-                break;
-            }
-        }
-        return instanceIds;
     }
 
     private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster, boolean decommissionRequest)
@@ -547,13 +543,12 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
-    private void validateUnusedHosts(HostGroup hostGroup, int scalingAdjustment) {
-        // TODO: why instancegroups?
-        Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetadataRepository.findUnusedHostsInInstanceGroup(hostGroup.getConstraint().getInstanceGroup().getId());
+    private void validateUnusedHosts(InstanceGroup instanceGroup, int scalingAdjustment) {
+        Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetadataRepository.findUnusedHostsInInstanceGroup(instanceGroup.getId());
         if (unusedHostsInInstanceGroup.size() < scalingAdjustment) {
             throw new BadRequestException(String.format(
                     "There are %s unregistered instances in instance group '%s'. %s more instances needed to complete this request.",
-                    unusedHostsInInstanceGroup.size(), hostGroup.getConstraint().getInstanceGroup().getGroupName(), scalingAdjustment - unusedHostsInInstanceGroup.size()));
+                    unusedHostsInInstanceGroup.size(), instanceGroup.getGroupName(), scalingAdjustment - unusedHostsInInstanceGroup.size()));
         }
     }
 

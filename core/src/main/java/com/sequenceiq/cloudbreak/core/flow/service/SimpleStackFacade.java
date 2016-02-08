@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -264,16 +265,13 @@ public class SimpleStackFacade implements StackFacade {
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setScalingAdjustment(actualContext.getScalingAdjustment());
             if (cluster != null) {
-                //TODO: no good - build hostgroup adjustment only if valid
-                //TODO: put hostgroupadjustment in the API as well -> different from instancegroupadjustment
-                //TODO: no need to specify with a flag if cluster upscale is needed, rather if the hostgroupadjustment is in the json then do it
-//                HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), actualContext.getInstanceGroup());
-//                hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
+                HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), actualContext.getInstanceGroup());
+                hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             }
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack upscale has been finished successfully.");
             fireEventAndLog(stack.getId(), actualContext, Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
-            context = new ClusterScalingContext(stack.getId(), actualContext.getCloudPlatform(),
-                    hostGroupAdjustmentJson, actualContext.getUpscaleCandidateAddresses(), new ArrayList<HostMetadata>(), actualContext.getScalingType());
+            context = new ClusterScalingContext(stack.getId(), actualContext.getCloudPlatform(), hostGroupAdjustmentJson, new ArrayList<HostMetadata>(),
+                    actualContext.getScalingType());
         } catch (Exception e) {
             LOGGER.error("Exception during the extend consul metadata phase: {}", e.getMessage());
             throw new CloudbreakException(e);

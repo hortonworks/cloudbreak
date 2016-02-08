@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.GATEWAY;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -88,19 +89,17 @@ public class BlueprintValidator {
             JsonNode hostGroupsNode = getHostGroupNode(blueprint);
             Map<String, HostGroup> hostGroupMap = createHostGroupMap(Collections.singleton(hostGroup));
             for (JsonNode hostGroupNode : hostGroupsNode) {
-                //TODO
-//                if (hostGroup.getName().equals(hostGroupNode.get("name").asText())) {
-//                    InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
-//                    instanceGroup.setNodeCount(instanceGroup.getNodeCount() + adjustment);
-//                    try {
-//                        validateHostGroup(hostGroupNode, hostGroupMap, new HashMap<String, BlueprintServiceComponent>());
-//                    } catch (BadRequestException be) {
-//                        throw be;
-//                    } finally {
-//                        instanceGroup.setNodeCount(instanceGroup.getNodeCount() - adjustment);
-//                    }
-//                    break;
-//                }
+                if (hostGroup.getName().equals(hostGroupNode.get("name").asText())) {
+                    hostGroup.getConstraint().setHostCount(hostGroup.getConstraint().getHostCount() + adjustment);
+                    try {
+                        validateHostGroup(hostGroupNode, hostGroupMap, new HashMap<String, BlueprintServiceComponent>());
+                    } catch (BadRequestException be) {
+                        throw be;
+                    } finally {
+                        hostGroup.getConstraint().setHostCount(hostGroup.getConstraint().getHostCount() - adjustment);
+                    }
+                    break;
+                }
             }
         } catch (IOException e) {
             throw new BadRequestException(String.format("Blueprint [%s] can not be parsed from JSON.", blueprint.getId()));

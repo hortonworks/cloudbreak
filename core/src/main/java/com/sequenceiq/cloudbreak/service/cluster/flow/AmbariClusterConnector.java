@@ -286,34 +286,37 @@ public class AmbariClusterConnector {
         }
     }
 
-    public Set<HostMetadata> installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException {
+    public Set<HostMetadata> installAmbariNode(Long stackId, Set<HostMetadata> hostMetadata, String hostGroupName) throws CloudbreakSecuritySetupException {
         Set<String> successHosts = Collections.emptySet();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
-        int nodeCount = stack.getFullNodeCountWithoutDecommissionedAndUnRegisteredNodes() - stack.getGateWayNodeCount()
-                + hostGroupAdjustment.getScalingAdjustment();
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupAdjustment.getHostGroup());
-        List<String> hosts = findFreeHosts(stack.getId(), hostGroup, hostGroupAdjustment.getScalingAdjustment());
+        Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
         Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
         if (cluster.getFileSystem() != null) {
             addFsRecipes(cluster.getBlueprint().getBlueprintText(), cluster.getFileSystem(), hostGroupAsSet);
         }
-        Set<HostMetadata> hostMetadata = addHostMetadata(cluster, hosts, hostGroupAdjustment);
-        Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
-        PollingResult pollingResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
+        PollingResult pollingResult = waitForHosts(stack, ambariClient, hostsInCluster.size(), hostsInCluster);
         if (isSuccess(pollingResult)) {
             if (cluster.getSssdConfig() != null) {
                 executeSssdRecipe(stack, new HashSet<>(hosts));
             }
             final boolean recipesFound = recipesFound(hostGroupAsSet);
             if (!recipesFound || prepareAndExecuteRecipes(true, stack, hostGroup, hostMetadata)) {
-                pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment),
+                List<String> upscaleHostNames = FluentIterable.from(hostMetadata).transform(new Function<HostMetadata, String>() {
+                    @Nullable
+                    @Override
+                    public String apply(HostMetadata input) {
+                        return input.getHostName();
+                    }
+                }).toList();
+                pollingResult = waitForAmbariOperations(stack, ambariClient, installServices(upscaleHostNames, stack, ambariClient, hostGroupName),
                         INSTALL_AMBARI_PROGRESS_STATE);
                 if (isSuccess(pollingResult)) {
-                    successHosts = new HashSet<>(hosts);
-                    if (!prepareAndExecuteRecipes(false, stack, hostGroup, hostMetadata)) {
+                    successHosts = new HashSet<>(upscaleHostNames);
+                    if (recipesFound && !prepareAndExecuteRecipes(false, stack, hostGroup, hostMetadata)) {
                         eventService.fireCloudbreakEvent(stackId, UPDATE_FAILED.name(), "Post recipe installation failed.");
                     }
                 }
@@ -666,6 +669,12 @@ public class AmbariClusterConnector {
             }
         }
         instanceMetadataRepository.save(updatedInstances);
+        List<HostMetadata> hostMetadata = new ArrayList<>();
+        for (HostMetadata host : hostMetadataRepository.findHostsInCluster(cluster.getId())) {
+            host.setHostMetadataState(HostMetadataState.HEALTHY);
+            hostMetadata.add(host);
+        }
+        hostMetadataRepository.save(hostMetadata);
         return cluster;
 
     }
@@ -998,12 +1007,11 @@ public class AmbariClusterConnector {
         return getHostNames(instances);
     }
 
-    private Map<String, Integer> installServices(List<String> hosts, Stack stack, AmbariClient ambariClient, HostGroupAdjustmentJson hostGroup) {
+    private Map<String, Integer> installServices(List<String> hosts, Stack stack, AmbariClient ambariClient, String hostGroup) {
         try {
             Cluster cluster = stack.getCluster();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
-            String hGroupName = hostGroup.getHostGroup();
-            ambariClient.addHostsWithBlueprint(blueprintName, hGroupName, hosts);
+            ambariClient.addHostsWithBlueprint(blueprintName, hostGroup, hosts);
             ambariOperationService.waitForOperations(stack, ambariClient, UPSCALE_REQUEST_CONTEXT, UPSCALE_REQUEST_STATUS, START_OPERATION_STATE);
             return singletonMap("UPSCALE_REQUEST", ambariClient.getRequestIdWithContext(UPSCALE_REQUEST_CONTEXT, UPSCALE_REQUEST_STATUS));
         } catch (HttpResponseException e) {

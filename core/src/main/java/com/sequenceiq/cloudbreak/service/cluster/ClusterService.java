@@ -30,6 +30,8 @@ public interface ClusterService {
 
     Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig);
 
+    void updateHostCountWithAdjustment(Long clusterId, String hostGroupName, Integer adjustment);
+
     void updateHostMetadata(Long clusterId, Map<String, List<String>> hostsPerHostGroup);
 
     String getClusterJson(String ambariIp, Long stackId);

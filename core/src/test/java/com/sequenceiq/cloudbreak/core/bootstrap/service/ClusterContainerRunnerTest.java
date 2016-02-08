@@ -83,7 +83,7 @@ public class ClusterContainerRunnerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson, getPrivateIps(stack),
+        ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson,
                 new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new FailedMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -99,7 +99,7 @@ public class ClusterContainerRunnerTest {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson, getPrivateIps(stack),
+        ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson,
                 new ArrayList<HostMetadata>(), ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);

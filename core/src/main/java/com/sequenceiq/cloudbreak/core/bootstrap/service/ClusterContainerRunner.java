@@ -18,12 +18,13 @@ import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfigurat
 import javax.inject.Inject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
 import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
+import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -100,12 +102,15 @@ public class ClusterContainerRunner {
     private ContainerService containerService;
 
     @Inject
+    private ContainerRepository containerRepository;
+
+    @Inject
     private ConversionService conversionService;
 
     public Map<String, List<Container>> runClusterContainers(ProvisioningContext context) throws CloudbreakException {
         try {
             Stack stack = stackRepository.findOneWithLists(context.getStackId());
-            return initializeClusterContainers(stack, cloudPlatform(context), false, Collections.<String>emptySet());
+            return initializeClusterContainers(stack, cloudPlatform(context), null, null);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -113,10 +118,14 @@ public class ClusterContainerRunner {
         }
     }
 
-    public void addClusterContainers(ClusterScalingContext context) throws CloudbreakException {
+    public Map<String, List<Container>> addClusterContainers(ClusterScalingContext context) throws CloudbreakException {
         try {
             Stack stack = stackRepository.findOneWithLists(context.getStackId());
-            initializeClusterContainers(stack, cloudPlatform(context), true, context.getUpscaleCandidateAddresses());
+            return initializeClusterContainers(
+                    stack,
+                    cloudPlatform(context),
+                    context.getHostGroupAdjustment().getHostGroup(),
+                    context.getHostGroupAdjustment().getScalingAdjustment());
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -132,8 +141,10 @@ public class ClusterContainerRunner {
         return cloudPlatform;
     }
 
-    private Map<String, List<Container>> initializeClusterContainers(Stack stack, String cloudPlatform, Boolean add, Set<String> candidateAddresses)
+    private Map<String, List<Container>> initializeClusterContainers(Stack stack, String cloudPlatform, String hostGroupName, Integer adjustment)
             throws CloudbreakException, CloudbreakOrchestratorException {
+
+        boolean isUpscale = hostGroupName != null;
 
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap());
@@ -147,10 +158,9 @@ public class ClusterContainerRunner {
             gatewayHostname = gatewayInstance.getDiscoveryFQDN();
         }
 
-        // TODO: get ambari address if upscale
-        String ambariServerHost = "";
+        String ambariServerHost;
         try {
-            if (!add) {
+            if (!isUpscale) {
                 if ("SWARM".equals(orchestrator.getType())) {
                     ContainerConstraint registratorConstraint = getRegistratorConstraint(gatewayHostname, cluster.getName());
                     containers.put(REGISTRATOR.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, REGISTRATOR), credential, registratorConstraint,
@@ -177,16 +187,33 @@ public class ClusterContainerRunner {
                     containers.put(KERBEROS.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, KERBEROS), credential, kerberosServerConstraint,
                             stackDeletionBasedExitCriteriaModel(stack.getId())));
                 }
-            }
 
-            for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(stack.getCluster().getId())) {
-                ContainerConstraint ambariAgentConstraint = getAmbariAgentConstraint(ambariServerHost, cloudPlatform, hostGroup, add, candidateAddresses);
+                for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(stack.getCluster().getId())) {
+                    ContainerConstraint ambariAgentConstraint = getAmbariAgentConstraint(ambariServerHost, cloudPlatform, hostGroup, null);
+                    containers.put(hostGroup.getName(), containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
+                            ambariAgentConstraint, stackDeletionBasedExitCriteriaModel(stack.getId())));
+                }
+            } else {
+                Set<Container> existingContainers = containerRepository.findContainersInCluster(cluster.getId());
+                ambariServerHost = FluentIterable.from(existingContainers).firstMatch(new Predicate<Container>() {
+                    @Override
+                    public boolean apply(Container input) {
+                        return input.getImage().contains(AMBARI_SERVER.getName());
+                    }
+                }).get().getHost();
+                HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
+                ContainerConstraint ambariAgentConstraint = getAmbariAgentConstraint(ambariServerHost, cloudPlatform, hostGroup, adjustment);
                 containers.put(hostGroup.getName(), containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
                         ambariAgentConstraint, stackDeletionBasedExitCriteriaModel(stack.getId())));
             }
 
             if ("SWARM".equals(orchestrator.getType())) {
-                List<String> hosts = getHosts(add, stack, candidateAddresses);
+                List<String> hosts;
+                if (isUpscale) {
+                    hosts = collectUpscaleCandidates(cluster.getId(), hostGroupName, adjustment);
+                } else {
+                    hosts = getHosts(stack);
+                }
                 ContainerConstraint consulWatchConstraint = getConsulWatchConstraint(hosts);
                 containers.put(CONSUL_WATCH.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, CONSUL_WATCH), credential, consulWatchConstraint,
                         stackDeletionBasedExitCriteriaModel(stack.getId())));
@@ -347,7 +374,7 @@ public class ClusterContainerRunner {
         return dataVolumeBinds;
     }
 
-    private ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String cloudPlatform, HostGroup hostGroup, Boolean add, Set<String> candidateAddresses) {
+    private ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String cloudPlatform, HostGroup hostGroup, Integer adjustment) {
         Constraint hgConstraint = hostGroup.getConstraint();
         ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
                 .withName(createContainerInstanceName(hostGroup, AMBARI_AGENT.getName()))
@@ -360,7 +387,12 @@ public class ClusterContainerRunner {
             dataVolumeBinds.putAll(volumeBinds);
 
             builder.addVolumeBindings(dataVolumeBinds);
-            builder.addHosts(getHosts(add, candidateAddresses, instanceGroup));
+            if (adjustment != null) {
+                List<String> candidates = collectUpscaleCandidates(hostGroup.getCluster().getId(), hostGroup.getName(), adjustment);
+                builder.addHosts(getHosts(candidates, instanceGroup));
+            } else {
+                builder.addHosts(getHosts(null, instanceGroup));
+            }
             builder.cmd(new String[]{String.format(
                     "/usr/sbin/init systemd.setenv=AMBARI_SERVER_ADDR=%s systemd.setenv=CLOUD_PLATFORM=%s", ambariServerHost, cloudPlatform)});
         }
@@ -368,7 +400,11 @@ public class ClusterContainerRunner {
         if (hgConstraint.getConstraintTemplate() != null) {
             builder.cpus(hgConstraint.getConstraintTemplate().getCpu());
             builder.memory(hgConstraint.getConstraintTemplate().getMemory());
-            builder.instances(hgConstraint.getHostCount());
+            if (adjustment != null) {
+                builder.instances(adjustment);
+            } else {
+                builder.instances(hgConstraint.getHostCount());
+            }
             builder.withDiskSize(hgConstraint.getConstraintTemplate().getDisk());
             builder.cmd(new String[]{String.format(
                     "/usr/sbin/init systemd.setenv=AMBARI_SERVER_ADDR=%s systemd.setenv=USE_CONSUL_DNS=false", ambariServerHost)});
@@ -396,21 +432,19 @@ public class ClusterContainerRunner {
                 .build();
     }
 
-    private List<String> getHosts(Boolean add, Stack stack, Set<String> candidateAddresses) {
+    private List<String> getHosts(Stack stack) {
         List<String> hosts = new ArrayList<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            if (!add || candidateAddresses.contains(instanceMetaData.getPrivateIp())) {
-                hosts.add(instanceMetaData.getDiscoveryFQDN());
-            }
+            hosts.add(instanceMetaData.getDiscoveryFQDN());
         }
         return hosts;
     }
 
-    private List<String> getHosts(Boolean add, Set<String> candidateAddresses, InstanceGroup instanceGroup) {
+    private List<String> getHosts(List<String> candidateAddresses, InstanceGroup instanceGroup) {
         List<String> hosts = new ArrayList<>();
         for (InstanceMetaData instanceMetaData : instanceMetaDataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId())) {
-            String privateIp = instanceMetaData.getPrivateIp();
-            if (!add || candidateAddresses.contains(privateIp)) {
+            String fqdn = instanceMetaData.getDiscoveryFQDN();
+            if (candidateAddresses == null || candidateAddresses.contains(fqdn)) {
                 hosts.add(instanceMetaData.getDiscoveryFQDN());
             }
         }
@@ -457,6 +491,22 @@ public class ClusterContainerRunner {
             containerService.save(hostGroupContainers);
         }
         return containers;
+    }
+
+    private List<String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
+        if (hostGroup.getConstraint().getInstanceGroup() != null) {
+            Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetaDataRepository.findUnusedHostsInInstanceGroup(hostGroup.getConstraint().getInstanceGroup().getId());
+            List<String> hostNames = new ArrayList<>();
+            for (InstanceMetaData instanceMetaData : unusedHostsInInstanceGroup) {
+                hostNames.add(instanceMetaData.getDiscoveryFQDN());
+                if (hostNames.size() >= adjustment) {
+                    break;
+                }
+            }
+            return hostNames;
+        }
+        return null;
     }
 }
 

@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
@@ -34,6 +36,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class StackController implements StackEndpoint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackController.class);
 
     @Autowired
     private StackService stackService;
@@ -153,15 +157,19 @@ public class StackController implements StackEndpoint {
     public Response put(Long id, UpdateStackJson updateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        if (updateRequest.getStatus() != null) {
-            stackService.updateStatus(id, updateRequest.getStatus());
-            return Response.status(Response.Status.ACCEPTED).build();
+        Stack stack = stackService.getById(id);
+        if ("BYOS".equals(stack.cloudPlatform())) {
+            LOGGER.warn("A 'Bring your own stack' type of infrastructure cannot be modified.");
         } else {
-            Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
-            validateAccountPreferences(id, scalingAdjustment);
-            stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
-            return Response.status(Response.Status.ACCEPTED).build();
+            if (updateRequest.getStatus() != null) {
+                stackService.updateStatus(id, updateRequest.getStatus());
+            } else {
+                Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
+                validateAccountPreferences(id, scalingAdjustment);
+                stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
+            }
         }
+        return Response.status(Response.Status.ACCEPTED).build();
     }
 
     @Override

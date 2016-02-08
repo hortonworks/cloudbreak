@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,14 +18,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.core.flow.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
@@ -91,7 +90,7 @@ public class ReactorFlowManagerTest {
         StackForcedDeleteRequest stackForcedDeleteRequest = new StackForcedDeleteRequest(GCP_PLATFORM, 1L);
         UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(GCP_PLATFORM, 1L, 1, "master", ScalingType.DOWNSCALE_ONLY_CLUSTER);
         RemoveInstanceRequest removeInstanceRequest = new RemoveInstanceRequest(GCP_PLATFORM, 1L, "instanceId");
-        UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(1L, new HostGroupAdjustmentJson(), new HashSet<String>(),
+        UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(1L, new HostGroupAdjustmentJson(),
                 new ArrayList<HostMetadata>(), true, GCP_PLATFORM, ScalingType.DOWNSCALE_ONLY_CLUSTER);
         UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = new UpdateAllowedSubnetsRequest(GCP_PLATFORM, 1L, new ArrayList<SecurityRule>());
         ClusterUserNamePasswordUpdateRequest clusterUserNamePasswordUpdateRequest =

@@ -14,15 +14,20 @@ import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
-import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -67,9 +72,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
@@ -272,8 +274,22 @@ public class AmbariClusterFacade implements ClusterFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
-        containerRunner.addClusterContainers(actualContext);
-        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, actualContext.getUpscaleCandidateAddresses());
+        Map<String, List<Container>> containers = containerRunner.addClusterContainers(actualContext);
+        Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
+        for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
+            List<String> hostNames = new ArrayList<>();
+            for (Container container : containersEntry.getValue()) {
+                hostNames.add(container.getHost());
+            }
+            hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
+        }
+        clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup);
+        Set<String> allHosts = new HashSet<>();
+        for (Map.Entry<String, List<String>> hostsPerHostGroupEntry : hostsPerHostGroup.entrySet()) {
+            allHosts.addAll(hostsPerHostGroupEntry.getValue());
+        }
+        clusterService.updateHostCountWithAdjustment(stack.getCluster().getId(), actualContext.getHostGroupAdjustment().getHostGroup(), allHosts.size());
+        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE, "New containers added to the cluster.");
         return context;
     }
@@ -286,14 +302,22 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
         fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
-        Set<HostMetadata> hostMetaData = ambariClusterConnector.installAmbariNode(stack.getId(), actualContext.getHostGroupAdjustment());
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), actualContext.getHostGroupAdjustment().getHostGroup());
+        Set<HostMetadata> upscaleHosts = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
+        Set<HostMetadata> hostMetaData = ambariClusterConnector.installAmbariNode(stack.getId(), upscaleHosts,
+                actualContext.getHostGroupAdjustment().getHostGroup());
         int failedHosts = 0;
+
         for (HostMetadata hostMeta : hostMetaData) {
-            updateInstanceMetadataAfterScaling(false, hostMeta.getHostName(), stack);
+            if (hostGroup.getConstraint().getInstanceGroup() != null) {
+                updateInstanceMetadataAfterScaling(false, hostMeta.getHostName(), stack);
+            }
+            hostGroupService.updateHostMetaDataStatus(hostMeta.getId(), HostMetadataState.HEALTHY);
             if (hostMeta.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
                 failedHosts++;
             }
         }
+
         boolean success = failedHosts == 0;
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         if (success) {
