@@ -914,8 +914,8 @@ public class AmbariClusterConnector {
                 String gatewayHost = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId()).get(0);
                 blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);
             }
+            LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.readTree(blueprintText).toString());
             ambariClient.addBlueprint(blueprintText);
-            LOGGER.info("Blueprint added to Ambari.");
         } catch (IOException e) {
             if ("Conflict".equals(e.getMessage())) {
                 throw new BadRequestException("Ambari blueprint already exists.", e);
