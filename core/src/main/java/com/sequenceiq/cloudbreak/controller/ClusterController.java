@@ -1,16 +1,9 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.ws.rs.core.Response;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
@@ -35,6 +28,12 @@ import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterController implements ClusterEndpoint {
@@ -181,12 +180,12 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     private void recreateCluster(Long stackId, UpdateClusterJson updateJson) {
+        CbUser user = authenticatedUserService.getCbUser();
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupJson json : updateJson.getHostgroups()) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
-            // TODO:
-            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getConstraint(), json.getRecipeIds(), false);
-            hostGroups.add(hostGroupService.save(hostGroup));
+            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, user, json.getConstraint(), json.getRecipeIds(), false);
+            hostGroups.add(hostGroup);
         }
         AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();
         AmbariStackDetails ambariStackDetails = null;

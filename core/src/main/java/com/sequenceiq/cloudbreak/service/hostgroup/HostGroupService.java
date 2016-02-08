@@ -1,17 +1,16 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
-import java.util.Set;
-
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
-import org.springframework.stereotype.Service;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
@@ -22,6 +21,10 @@ public class HostGroupService {
 
     @Inject
     private HostMetadataRepository hostMetadataRepository;
+
+    public Set<HostGroup> getByCluster(Long clusterId) {
+        return hostGroupRepository.findHostGroupsInCluster(clusterId);
+    }
 
     public HostGroup getByClusterIdAndName(Long clusterId, String hostGroupName) {
         return hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);

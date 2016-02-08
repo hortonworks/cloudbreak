@@ -452,9 +452,9 @@ public class AmbariClusterService implements ClusterService {
         if (blueprint == null) {
             throw new BadRequestException(String.format("Blueprint not exist with '%s' id.", blueprintId));
         }
-        Cluster cluster = stack.getCluster();
+        Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
         if (validateBlueprint) {
-            blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackService.get(stackId).getInstanceGroups());
+            blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackService.getById(stackId).getInstanceGroups());
         }
         cluster.setBlueprint(blueprint);
         cluster.getHostGroups().removeAll(cluster.getHostGroups());
@@ -464,7 +464,14 @@ public class AmbariClusterService implements ClusterService {
         }
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         cluster.setStatus(REQUESTED);
+        cluster.setStack(stack);
         cluster = clusterRepository.save(cluster);
+
+        for (HostGroup hg : hostGroups) {
+            hg.setCluster(cluster);
+            hostGroupRepository.save(hg);
+        }
+
         if (cluster.getContainers().isEmpty()) {
             flowManager.triggerClusterInstall(new ProvisionRequest(platform(stack.cloudPlatform()), stack.getId()));
         } else {
