@@ -34,7 +34,7 @@ cb:
     cf.template.new.path: templates/aws-cf-stack.ftl
   
   blueprint.defaults: hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster
-  template.default: minviable-gcp,minviable-azure,minviable-aws
+  template.defaults: minviable-gcp,minviable-azure,minviable-aws
   
   mail:
     smtp:

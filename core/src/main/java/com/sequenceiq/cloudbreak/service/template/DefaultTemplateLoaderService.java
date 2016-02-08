@@ -56,7 +56,7 @@ public class DefaultTemplateLoaderService {
     private Set<Template> createDefaultTemplates(CbUser user) {
         Set<Template> templates = new HashSet<>();
         for (String templateName : templateArray) {
-            if (templateRepository.findOneByName(templateName, user.getAccount()) == null) {
+            if (!templateName.isEmpty() && templateRepository.findOneByName(templateName, user.getAccount()) == null) {
                 try {
                     JsonNode jsonNode = jsonHelper.createJsonFromString(
                             FileReaderUtils.readFileFromClasspath(String.format("defaults/templates/%s.tmpl", templateName)));
