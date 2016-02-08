@@ -5,18 +5,20 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestOperations;
 
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 
@@ -26,7 +28,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
     private static final int ACCOUNT_PART = 2;
 
     @Autowired
-    private RestOperations restTemplate;
+    private ClientBuilder clientBuilder;
 
     @Autowired
     @Qualifier("identityServerUrl")
@@ -42,38 +44,27 @@ public class RemoteUserDetailsService implements UserDetailsService {
     @Cacheable("userCache")
     @SuppressWarnings("unchecked")
     public PeriscopeUser getDetails(String filterValue, UserFilterField filterField) {
-        HttpHeaders tokenRequestHeaders = new HttpHeaders();
-        tokenRequestHeaders.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
+        Client client = clientBuilder.build();
+        WebTarget target = client.target(identityServerUrl).path("/oauth/token").queryParam("grant_type", "client_credentials");
+        Map<String, String> tokenResponse = target.request(MediaType.APPLICATION_JSON).header("Authorization", getAuthorizationHeader(clientId, clientSecret))
+                .post(Entity.json(null), Map.class);
+        client.close();
 
-        Map<String, String> tokenResponse = restTemplate.exchange(
-                identityServerUrl + "/oauth/token?grant_type=client_credentials",
-                HttpMethod.POST,
-                new HttpEntity<>(tokenRequestHeaders),
-                Map.class).getBody();
-
-        HttpHeaders scimRequestHeaders = new HttpHeaders();
-        scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
-
-        String scimResponse;
-
+        Client scimClient = clientBuilder.build();
+        WebTarget scimTarget = scimClient.target(identityServerUrl).path("Users");
         switch (filterField) {
             case USERNAME:
-                scimResponse = restTemplate.exchange(
-                        identityServerUrl + "/Users/" + "?filter=userName eq \"" + filterValue + "\"",
-                        HttpMethod.GET,
-                        new HttpEntity<>(scimRequestHeaders),
-                        String.class).getBody();
+                scimTarget.queryParam("filter", "userName eq \"" + filterValue + "\"");
                 break;
             case USER_ID:
-                scimResponse = restTemplate.exchange(
-                        identityServerUrl + "/Users/" + filterValue,
-                        HttpMethod.GET,
-                        new HttpEntity<>(scimRequestHeaders),
-                        String.class).getBody();
+                scimTarget.path(filterValue);
                 break;
             default:
                 throw new UserDetailsUnavailableException("User details cannot be retrieved.");
         }
+        String scimResponse = scimTarget.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + tokenResponse.get("access_token"))
+                .get(String.class);
+        scimClient.close();
 
         ObjectMapper mapper = new ObjectMapper();
         try {

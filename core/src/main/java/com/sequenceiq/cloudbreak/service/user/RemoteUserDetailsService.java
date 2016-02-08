@@ -13,20 +13,21 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
@@ -63,8 +64,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
     private String identityServerUrl;
 
     @Inject
-    @Named("restTemplate")
-    private RestOperations restTemplate;
+    private ClientBuilder clientBuilder;
 
     @Inject
     private StackRepository stackRepository;
@@ -84,39 +84,27 @@ public class RemoteUserDetailsService implements UserDetailsService {
     @Override
     @Cacheable(value = "userCache", key = "#filterValue")
     public CbUser getDetails(String filterValue, UserFilterField filterField) {
+        Client client = clientBuilder.build();
+        WebTarget target = client.target(identityServerUrl).path("/oauth/token").queryParam("grant_type", "client_credentials");
+        Map<String, String> tokenResponse = target.request(MediaType.APPLICATION_JSON).header("Authorization", getAuthorizationHeader(clientId, clientSecret))
+                .post(Entity.json(null), Map.class);
+        client.close();
 
-        HttpHeaders tokenRequestHeaders = new HttpHeaders();
-        tokenRequestHeaders.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
-
-        Map<String, String> tokenResponse = restTemplate.exchange(
-                identityServerUrl + "/oauth/token?grant_type=client_credentials",
-                HttpMethod.POST,
-                new HttpEntity<>(tokenRequestHeaders),
-                Map.class).getBody();
-
-        HttpHeaders scimRequestHeaders = new HttpHeaders();
-        scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
-
-        String scimResponse = null;
-
+        Client scimClient = clientBuilder.build();
+        WebTarget scimTarget = scimClient.target(identityServerUrl).path("Users");
         switch (filterField) {
             case USERNAME:
-                scimResponse = restTemplate.exchange(
-                        identityServerUrl + "/Users/" + "?filter=userName eq \"" + filterValue + "\"",
-                        HttpMethod.GET,
-                        new HttpEntity<>(scimRequestHeaders),
-                        String.class).getBody();
+                scimTarget.queryParam("filter", "userName eq \"" + filterValue + "\"");
                 break;
             case USERID:
-                scimResponse = restTemplate.exchange(
-                        identityServerUrl + "/Users/" + filterValue,
-                        HttpMethod.GET,
-                        new HttpEntity<>(scimRequestHeaders),
-                        String.class).getBody();
+                scimTarget.path(filterValue);
                 break;
             default:
                 throw new UserDetailsUnavailableException("User details cannot be retrieved.");
         }
+        String scimResponse = scimTarget.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + tokenResponse.get("access_token"))
+                .get(String.class);
+        scimClient.close();
 
         try {
             JsonNode root = JsonUtil.readTree(scimResponse);
