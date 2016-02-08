@@ -45,7 +45,7 @@ public class BlueprintLoaderService {
         Set<Blueprint> blueprints = new HashSet<>();
         Set<String> blueprintNames = getDefaultBlueprintNames(user);
         for (String blueprintName : blueprintArray) {
-            if (!blueprintNames.contains(blueprintName)) {
+            if (!blueprintName.isEmpty() && !blueprintNames.contains(blueprintName)) {
                 LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintName, user.getUsername());
                 try {
                     BlueprintRequest blueprintJson = new BlueprintRequest();
