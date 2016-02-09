@@ -11,6 +11,13 @@ public enum AwsInstanceType {
     M3Xlarge("m3.xlarge", meta(2, "40 GB SSD")),
     M32xlarge("m3.2xlarge", meta(2, "80 GB SSD")),
 
+    M4Large("m4.large", meta(0, "")),
+    M4Xlarge("m4.xlarge", meta(0, "")),
+    M42xlarge("m4.2xlarge", meta(0, "")),
+    M44xlarge("m4.4xlarge", meta(0, "")),
+
+    T2large("t2.large", meta(0, "")),
+
     I2Xlarge("i2.xlarge", meta(1, "800 GB SSD")),
     I22xlarge("i2.2xlarge", meta(2, "800 GB SSD")),
     I24xlarge("i2.4xlarge", meta(4, "800 GB SSD")),

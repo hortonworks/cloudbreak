@@ -126,6 +126,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         AP_SOUTHEAST_1("ap-southeast-1", Arrays.asList(availabilityZone("ap-southeast-1a"), availabilityZone("ap-southeast-1b"))),
         AP_SOUTHEAST_2("ap-southeast-2", Arrays.asList(availabilityZone("ap-southeast-2a"), availabilityZone("ap-southeast-2b"))),
         AP_NORTHEAST_1("ap-northeast-1", Arrays.asList(availabilityZone("ap-northeast-1a"), availabilityZone("ap-northeast-1c"))),
+        AP_NORTHEAST_2("ap-northeast-2", Arrays.asList(availabilityZone("ap-northeast-2a"), availabilityZone("ap-northeast-2c"))),
         SA_EAST_1("sa-east-1", Arrays.asList(availabilityZone("sa-east-1a"), availabilityZone("sa-east-1b"), availabilityZone("sa-east-1c")));
 
         private final String value;
