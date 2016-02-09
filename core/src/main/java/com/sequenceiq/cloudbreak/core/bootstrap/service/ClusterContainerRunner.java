@@ -110,7 +110,7 @@ public class ClusterContainerRunner {
     public Map<String, List<Container>> runClusterContainers(ProvisioningContext context) throws CloudbreakException {
         try {
             Stack stack = stackRepository.findOneWithLists(context.getStackId());
-            return initializeClusterContainers(stack, cloudPlatform(context), null, null);
+            return initializeClusterContainers(stack, cloudPlatform(context));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -121,7 +121,7 @@ public class ClusterContainerRunner {
     public Map<String, List<Container>> addClusterContainers(ClusterScalingContext context) throws CloudbreakException {
         try {
             Stack stack = stackRepository.findOneWithLists(context.getStackId());
-            return initializeClusterContainers(
+            return addClusterContainers(
                     stack,
                     cloudPlatform(context),
                     context.getHostGroupAdjustment().getHostGroup(),
@@ -141,10 +141,8 @@ public class ClusterContainerRunner {
         return cloudPlatform;
     }
 
-    private Map<String, List<Container>> initializeClusterContainers(Stack stack, String cloudPlatform, String hostGroupName, Integer adjustment)
+    private Map<String, List<Container>> initializeClusterContainers(Stack stack, String cloudPlatform)
             throws CloudbreakException, CloudbreakOrchestratorException {
-
-        boolean isUpscale = hostGroupName != null;
 
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap());
@@ -158,62 +156,106 @@ public class ClusterContainerRunner {
             gatewayHostname = gatewayInstance.getDiscoveryFQDN();
         }
 
-        String ambariServerHost;
         try {
-            if (!isUpscale) {
-                if ("SWARM".equals(orchestrator.getType())) {
-                    ContainerConstraint registratorConstraint = getRegistratorConstraint(gatewayHostname, cluster.getName());
-                    containers.put(REGISTRATOR.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, REGISTRATOR), credential, registratorConstraint,
-                            stackDeletionBasedExitCriteriaModel(stack.getId())));
-                }
+            if ("SWARM".equals(orchestrator.getType())) {
+                ContainerConstraint registratorConstraint = getRegistratorConstraint(gatewayHostname, cluster.getName());
+                containers.put(REGISTRATOR.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, REGISTRATOR), credential, registratorConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId())));
+            }
 
-                ContainerConstraint ambariServerDbConstraint = getAmbariServerDbConstraint(gatewayHostname, cluster.getName());
-                List<ContainerInfo> dbContainer = containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_DB), credential, ambariServerDbConstraint,
+            ContainerConstraint ambariServerDbConstraint = getAmbariServerDbConstraint(gatewayHostname, cluster.getName());
+            List<ContainerInfo> dbContainer = containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_DB), credential, ambariServerDbConstraint,
+                    stackDeletionBasedExitCriteriaModel(stack.getId()));
+            containers.put(AMBARI_DB.name(), dbContainer);
+
+            ContainerConstraint ambariServerConstraint = getAmbariServerConstraint(dbContainer.get(0).getHost(), gatewayHostname, cloudPlatform, cluster.getName());
+            List<ContainerInfo> ambariServerContainer = containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_SERVER),
+                    credential, ambariServerConstraint, stackDeletionBasedExitCriteriaModel(stack.getId()));
+            containers.put(AMBARI_SERVER.name(), ambariServerContainer);
+            String ambariServerHost = ambariServerContainer.get(0).getHost();
+
+            if (cluster.isSecure()) {
+                ContainerConstraint havegedConstraint = getHavegedConstraint(gatewayHostname, cluster.getName());
+                containers.put(HAVEGED.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, HAVEGED), credential, havegedConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId())));
+
+                ContainerConstraint kerberosServerConstraint = getKerberosServerConstraint(cluster, gatewayHostname);
+                containers.put(KERBEROS.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, KERBEROS), credential, kerberosServerConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId())));
+            }
+
+            if (cluster.isLdapRequired()) {
+                ContainerConstraint ldapConstraint = getLdapConstraint(ambariServerHost);
+                containerOrchestrator.runContainer(containerConfigService.get(stack, LDAP), credential, ldapConstraint,
                         stackDeletionBasedExitCriteriaModel(stack.getId()));
-                containers.put(AMBARI_DB.name(), dbContainer);
+            }
 
-                ContainerConstraint ambariServerConstraint = getAmbariServerConstraint(dbContainer.get(0).getHost(), gatewayHostname, cloudPlatform, cluster.getName());
-                List<ContainerInfo> ambariServerContainer = containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_SERVER),
-                        credential, ambariServerConstraint, stackDeletionBasedExitCriteriaModel(stack.getId()));
-                containers.put(AMBARI_SERVER.name(), ambariServerContainer);
-                ambariServerHost = ambariServerContainer.get(0).getHost();
+            if (shipyardEnabled) {
+                ContainerConstraint shipyardDbConstraint = getShipyardDbConstraint(ambariServerHost);
+                containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD_DB), credential, shipyardDbConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
 
-                if (cluster.isSecure()) {
-                    ContainerConstraint havegedConstraint = getHavegedConstraint(gatewayHostname, cluster.getName());
-                    containers.put(HAVEGED.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, HAVEGED), credential, havegedConstraint,
-                            stackDeletionBasedExitCriteriaModel(stack.getId())));
+                ContainerConstraint shipyardConstraint = getShipyardConstraint(cloudPlatform, ambariServerHost);
+                containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD), credential, shipyardConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
+            }
 
-                    ContainerConstraint kerberosServerConstraint = getKerberosServerConstraint(cluster, gatewayHostname);
-                    containers.put(KERBEROS.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, KERBEROS), credential, kerberosServerConstraint,
-                            stackDeletionBasedExitCriteriaModel(stack.getId())));
-                }
-
-                for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(stack.getCluster().getId())) {
-                    ContainerConstraint ambariAgentConstraint = getAmbariAgentConstraint(ambariServerHost, cloudPlatform, hostGroup, null);
-                    containers.put(hostGroup.getName(), containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
-                            ambariAgentConstraint, stackDeletionBasedExitCriteriaModel(stack.getId())));
-                }
-            } else {
-                Set<Container> existingContainers = containerRepository.findContainersInCluster(cluster.getId());
-                ambariServerHost = FluentIterable.from(existingContainers).firstMatch(new Predicate<Container>() {
-                    @Override
-                    public boolean apply(Container input) {
-                        return input.getImage().contains(AMBARI_SERVER.getName());
-                    }
-                }).get().getHost();
-                HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
-                ContainerConstraint ambariAgentConstraint = getAmbariAgentConstraint(ambariServerHost, cloudPlatform, hostGroup, adjustment);
+            for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(stack.getCluster().getId())) {
+                ContainerConstraint ambariAgentConstraint = getAmbariAgentConstraint(ambariServerHost, null, cloudPlatform, hostGroup, null);
                 containers.put(hostGroup.getName(), containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
                         ambariAgentConstraint, stackDeletionBasedExitCriteriaModel(stack.getId())));
             }
 
             if ("SWARM".equals(orchestrator.getType())) {
-                List<String> hosts;
-                if (isUpscale) {
-                    hosts = collectUpscaleCandidates(cluster.getId(), hostGroupName, adjustment);
-                } else {
-                    hosts = getHosts(stack);
+                List<String> hosts = getHosts(stack);
+                ContainerConstraint consulWatchConstraint = getConsulWatchConstraint(hosts);
+                containers.put(CONSUL_WATCH.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, CONSUL_WATCH), credential, consulWatchConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId())));
+
+                ContainerConstraint logrotateConstraint = getLogrotateConstraint(hosts);
+                containers.put(LOGROTATE.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, LOGROTATE), credential, logrotateConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId())));
+            }
+            return saveContainers(containers, cluster);
+        } catch (CloudbreakOrchestratorException ex) {
+            if (!containers.isEmpty()) {
+                saveContainers(containers, cluster);
+            }
+            throw ex;
+        }
+    }
+
+    private Map<String, List<Container>> addClusterContainers(Stack stack, String cloudPlatform, String hostGroupName, Integer adjustment)
+            throws CloudbreakException, CloudbreakOrchestratorException {
+
+        Orchestrator orchestrator = stack.getOrchestrator();
+        OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap());
+        ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
+        Map<String, List<ContainerInfo>> containers = new HashMap<>();
+        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+
+        try {
+            Set<Container> existingContainers = containerRepository.findContainersInCluster(cluster.getId());
+            String ambariServerHost = FluentIterable.from(existingContainers).firstMatch(new Predicate<Container>() {
+                @Override
+                public boolean apply(Container input) {
+                    return input.getImage().contains(AMBARI_SERVER.getName());
                 }
+            }).get().getHost();
+            final HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
+            String ambariAgentApp = FluentIterable.from(existingContainers).firstMatch(new Predicate<Container>() {
+                @Override
+                public boolean apply(Container input) {
+                    return hostGroup.getHostNames().contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName());
+                }
+            }).get().getName();
+            ContainerConstraint ambariAgentConstraint = getAmbariAgentConstraint(ambariServerHost, ambariAgentApp, cloudPlatform, hostGroup, adjustment);
+            containers.put(hostGroup.getName(), containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
+                    ambariAgentConstraint, stackDeletionBasedExitCriteriaModel(stack.getId())));
+            
+            if ("SWARM".equals(orchestrator.getType())) {
+                List<String> hosts = collectUpscaleCandidates(cluster.getId(), hostGroupName, adjustment);
+
                 ContainerConstraint consulWatchConstraint = getConsulWatchConstraint(hosts);
                 containers.put(CONSUL_WATCH.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, CONSUL_WATCH), credential, consulWatchConstraint,
                         stackDeletionBasedExitCriteriaModel(stack.getId())));
@@ -223,21 +265,6 @@ public class ClusterContainerRunner {
                         stackDeletionBasedExitCriteriaModel(stack.getId())));
             }
 
-            if (cluster.isLdapRequired()) {
-                ContainerConstraint ldapConstraint = getLdapConstraint(gatewayHostname);
-                containerOrchestrator.runContainer(containerConfigService.get(stack, LDAP), credential, ldapConstraint,
-                        stackDeletionBasedExitCriteriaModel(stack.getId()));
-            }
-
-            if (shipyardEnabled) {
-                ContainerConstraint shipyardDbConstraint = getShipyardDbConstraint(gatewayHostname);
-                containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD_DB), credential, shipyardDbConstraint,
-                        stackDeletionBasedExitCriteriaModel(stack.getId()));
-
-                ContainerConstraint shipyardConstraint = getShipyardConstraint(cloudPlatform, gatewayHostname);
-                containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD), credential, shipyardConstraint,
-                        stackDeletionBasedExitCriteriaModel(stack.getId()));
-            }
             return saveContainers(containers, cluster);
         } catch (CloudbreakOrchestratorException ex) {
             if (!containers.isEmpty()) {
@@ -374,10 +401,11 @@ public class ClusterContainerRunner {
         return dataVolumeBinds;
     }
 
-    private ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String cloudPlatform, HostGroup hostGroup, Integer adjustment) {
+    private ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String ambariAgentApp, String cloudPlatform, HostGroup hostGroup, Integer adjustment) {
         Constraint hgConstraint = hostGroup.getConstraint();
         ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
                 .withName(createContainerInstanceName(hostGroup, AMBARI_AGENT.getName()))
+                .withAppName(ambariAgentApp)
                 .networkMode(HOST_NETWORK_MODE);
         if (hgConstraint.getInstanceGroup() != null) {
             InstanceGroup instanceGroup = hgConstraint.getInstanceGroup();

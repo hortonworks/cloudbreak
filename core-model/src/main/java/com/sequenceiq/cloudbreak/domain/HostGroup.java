@@ -16,6 +16,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import com.sun.istack.internal.Nullable;
+
 @Entity
 @NamedQueries({
         @NamedQuery(
@@ -114,5 +118,15 @@ public class HostGroup {
 
     public void addRecipe(Recipe recipe) {
         this.recipes.add(recipe);
+    }
+
+    public Set<String> getHostNames() {
+        return FluentIterable.from(hostMetadata).transform(new Function<HostMetadata, String>() {
+            @Nullable
+            @Override
+            public String apply(HostMetadata input) {
+                return input.getHostName();
+            }
+        }).toSet();
     }
 }

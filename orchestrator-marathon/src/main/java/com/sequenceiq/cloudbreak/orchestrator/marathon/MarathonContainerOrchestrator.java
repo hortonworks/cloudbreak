@@ -9,6 +9,11 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerBootstrapRunner;
@@ -26,17 +31,15 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.MarathonClient;
 import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.Container;
 import mesosphere.marathon.client.model.v2.Docker;
+import mesosphere.marathon.client.model.v2.GetAppResponse;
 import mesosphere.marathon.client.model.v2.Task;
 import mesosphere.marathon.client.utils.MarathonException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
 
 @Component
 public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
@@ -63,18 +66,26 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint,
-                                            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
         String image = config.getName() + ":" + config.getVersion();
         String timeStamp = String.valueOf(new Date().getTime());
         String randomSuffix = timeStamp.substring(timeStamp.length() - LENGTH_OF_RANDOM_SUFFIX_CHARS);
         String name = constraint.getName().replace("_", "-") + "-" + randomSuffix;
+        String appName = constraint.getAppName();
 
         try {
             List<ContainerInfo> result = new ArrayList<>();
             Marathon client = MarathonClient.getInstance(cred.getApiEndpoint());
-            App app = createMarathonApp(config, constraint, image, name);
-            app = postAppToMarathon(config, client, app);
+            App app;
+            if (appName == null) {
+                app = createMarathonApp(config, constraint, image, name);
+                app = postAppToMarathon(config, client, app);
+            } else {
+                app = getMarathonApp(client, constraint.getAppName());
+                app.setInstances(app.getTasksRunning() + constraint.getInstances());
+                updateApp(client, createMarathonUpdateApp(app));
+            }
 
             MarathonAppBootstrap bootstrap = new MarathonAppBootstrap(client, app);
             Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel);
@@ -83,7 +94,9 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
             App appResponse = client.getApp(app.getId()).getApp();
             for (Task task : appResponse.getTasks()) {
-                result.add(new ContainerInfo(appResponse.getId(), appResponse.getId(), task.getHost(), image));
+                if (!isTaskFound(app, task)) {
+                    result.add(new ContainerInfo(task.getId(), appResponse.getId(), task.getHost(), image));
+                }
             }
             return result;
         } catch (Exception ex) {
@@ -110,7 +123,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             Marathon client = MarathonClient.getInstance(cred.getApiEndpoint());
             List<Future<Boolean>> futures = new ArrayList<>();
             for (ContainerInfo info : containerInfo) {
-                String appId = info.getId();
+                String appId = info.getName();
                 try {
                     client.deleteApp(appId);
                     MarathonAppDeletion appDeletion = new MarathonAppDeletion(client, appId);
@@ -132,7 +145,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             String appNames = Arrays.toString(FluentIterable.from(containerInfo).transform(new Function<ContainerInfo, String>() {
                 @Override
                 public String apply(ContainerInfo input) {
-                    return input.getId();
+                    return input.getName();
                 }
             }).toArray(String.class));
             String msg = String.format("Failed to delete Marathon app with app ids: '%s'.", appNames);
@@ -157,13 +170,13 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, String consulLogLocation,
-                          ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
     }
 
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, String consulLogLocation,
-                                  ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
     }
 
@@ -212,6 +225,24 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
         return app;
     }
 
+    private App getMarathonApp(Marathon client, String appId) throws CloudbreakOrchestratorFailedException {
+        try {
+            GetAppResponse resp = client.getApp(appId);
+            return resp.getApp();
+        } catch (MarathonException e) {
+            String msg = String.format("Failed to get Marathon app: %s", appId);
+            LOGGER.error(msg, e);
+            throw new CloudbreakOrchestratorFailedException(msg, e);
+        }
+    }
+
+    private App createMarathonUpdateApp(App appResponse) {
+        App app = new App();
+        app.setId(appResponse.getId());
+        app.setInstances(appResponse.getInstances());
+        return app;
+    }
+
     private App postAppToMarathon(ContainerConfig config, Marathon client, App app) throws CloudbreakOrchestratorFailedException {
         try {
             return client.createApp(app);
@@ -220,6 +251,29 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             LOGGER.error(msg, e);
             throw new CloudbreakOrchestratorFailedException(msg, e);
         }
+    }
+
+    private void updateApp(Marathon client, App app) throws CloudbreakOrchestratorFailedException {
+        try {
+            client.updateApp(app.getId(), app);
+        } catch (MarathonException e) {
+            String msg = String.format("Failed to scale Marathon app %s to %s instances!", app.getId(), app.getInstances());
+            LOGGER.error(msg, e);
+            throw new CloudbreakOrchestratorFailedException(msg, e);
+        }
+    }
+
+    private boolean isTaskFound(App app, Task task) {
+        boolean taskFound = false;
+        if (app.getTasks() != null) {
+            for (Task oldTask : app.getTasks()) {
+                if (oldTask.getId().equals(task.getId())) {
+                    taskFound = true;
+                    break;
+                }
+            }
+        }
+        return taskFound;
     }
 
     private Callable<Boolean> runner(ContainerBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
