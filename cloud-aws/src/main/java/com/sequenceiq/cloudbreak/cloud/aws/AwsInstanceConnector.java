@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -24,6 +25,7 @@ import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -37,8 +39,14 @@ public class AwsInstanceConnector implements InstanceConnector {
     @Inject
     private AwsClient awsClient;
 
+    @Value("${cb.aws.hostkey.verify:}")
+    private boolean verifyHostKey;
+
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
+        if (!verifyHostKey) {
+            throw new CloudOperationNotSupportedException("Host key verification is disabled on AWS");
+        }
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(authenticatedContext.getCloudCredential()),
                 authenticatedContext.getCloudContext().getLocation().getRegion().value());
         GetConsoleOutputRequest getConsoleOutputRequest = new GetConsoleOutputRequest().withInstanceId(vm.getInstanceId());
