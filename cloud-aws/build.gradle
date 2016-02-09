@@ -21,7 +21,7 @@ dependencies {
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   compile group: 'commons-io',                    name: 'commons-io',                     version: '2.4'
   compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
-  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.10.11')      { exclude group: 'commons-logging' }
+  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.10.50')      { exclude group: 'commons-logging' }
   compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
 
   testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion

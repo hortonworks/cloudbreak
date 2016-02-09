@@ -82,6 +82,4 @@ public class AwsClient {
             throw new CloudConnectorException("For this operation the 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be set!");
         }
     }
-
-
 }
