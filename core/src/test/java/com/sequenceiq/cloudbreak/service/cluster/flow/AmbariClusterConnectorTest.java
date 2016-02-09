@@ -134,9 +134,9 @@ public class AmbariClusterConnectorTest {
         cluster.setHostGroups(new HashSet<HostGroup>());
         cluster.setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenReturn(tlsClientConfig);
-        when(ambariClient.extendBlueprintGlobalConfiguration(anyString(), anyMap())).thenReturn("");
+        when(ambariClient.extendBlueprintGlobalConfiguration(anyString(), anyMap())).thenReturn(blueprint.getBlueprintText());
         when(hostMetadataRepository.findHostsInCluster(anyLong())).thenReturn(new HashSet<HostMetadata>());
-        when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn("");
+        when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn(blueprint.getBlueprintText());
         when(ambariClient.addBlueprint(anyString())).thenReturn("");
         when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<String, Map<String, Map<String, String>>>());
         when(ambariClientProvider.getAmbariClient(any(TLSClientConfig.class), anyString(), anyString())).thenReturn(ambariClient);
