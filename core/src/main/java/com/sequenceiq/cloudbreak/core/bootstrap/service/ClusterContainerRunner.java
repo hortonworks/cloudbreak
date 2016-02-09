@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,8 +60,8 @@ public class ClusterContainerRunner {
     private static final int LDAP_PORT = 389;
     private static final int REGISTRATOR_RESYNC_SECONDS = 60;
 
-    @Value("${cb.docker.env.ldap}")
-    private String ldapEnv;
+    @Value("#{'${cb.docker.env.ldap}'.split('\\|')}")
+    private List<String> ldapEnvs;
 
     @Inject
     private ClusterService clusterService;
@@ -214,7 +215,7 @@ public class ClusterContainerRunner {
                 .addEnv(Arrays.asList(String.format("constraint:node==%s", gatewayNode.getHostname()),
                         String.format("SERVICE_NAME=%s", LDAP.getName()),
                         "NAMESERVER_IP=127.0.0.1"))
-                .addEnv(Arrays.asList(ldapEnv.split("\\|")))
+                .addEnv(ldapEnvs)
                 .build();
     }
 

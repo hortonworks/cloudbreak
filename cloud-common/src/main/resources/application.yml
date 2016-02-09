@@ -61,7 +61,7 @@ cb:
       haveged: sequenceiq/haveged:1.0
       ldap: sequenceiq/docker-ldap:1.0
     env:
-      ldap: SLAPD_PASSWORD=cloudbreak|SLAPD_BINDUSER=demo|SLAPD_BINDPWD=cloudbreak|SLAPD_BINDGROUP=analysts
+      ldap: SLAPD_PASSWORD=cloudbreak|SLAPD_BINDUSER=ambari-qa|SLAPD_BINDPWD=cloudbreak|SLAPD_BINDGROUP=hadoop
     relocate: true
 
   sssd:
