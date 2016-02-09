@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.io.ByteArrayInputStream;
@@ -79,7 +78,7 @@ public class TlsSetupService {
         }
         SSHClient ssh = new SSHClient();
         String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
-        HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints, platform(stack.cloudPlatform()));
+        HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
         try {
             waitForSsh(stack, publicIp, hostKeyVerifier, user, privateKeyLocation);
             setupTemporarySsh(ssh, publicIp, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());

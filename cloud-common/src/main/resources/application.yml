@@ -30,6 +30,7 @@ cb:
   
   aws:
     spotinstances.enabled: false
+    hostkey.verify: false
     external.id: provision-ambari
     cf.template.new.path: templates/aws-cf-stack.ftl
   
