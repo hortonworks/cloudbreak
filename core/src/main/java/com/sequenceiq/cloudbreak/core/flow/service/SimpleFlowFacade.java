@@ -135,7 +135,7 @@ public class SimpleFlowFacade implements FlowFacade {
     public FlowContext handleClusterInstallationFailure(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Cluster installation failed. Context: {}", context);
         try {
-            context = clusterFacade.handleClusterCreationFailure(context);
+            context = clusterFacade.handleClusterInstallationFailure(context);
             LOGGER.debug("Cluster installation failure handled.");
             return context;
         } catch (Exception e) {
