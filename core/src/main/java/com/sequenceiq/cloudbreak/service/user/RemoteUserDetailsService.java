@@ -8,28 +8,29 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.client.AccessToken;
+import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -52,9 +53,6 @@ public class RemoteUserDetailsService implements UserDetailsService {
     private static final int ROLE_PART = 2;
     private static final String UAA_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-    @Value("${cb.client.id}")
-    private String clientId;
-
     @Value("${cb.client.secret}")
     private String clientSecret;
 
@@ -63,8 +61,10 @@ public class RemoteUserDetailsService implements UserDetailsService {
     private String identityServerUrl;
 
     @Inject
-    @Named("restTemplate")
-    private RestOperations restTemplate;
+    private Client restClient;
+
+    @Inject
+    private IdentityClient identityClient;
 
     @Inject
     private StackRepository stackRepository;
@@ -81,43 +81,29 @@ public class RemoteUserDetailsService implements UserDetailsService {
     @Inject
     private NetworkRepository networkRepository;
 
+    private WebTarget identityWebTarget;
+
+    @PostConstruct
+    public void init() {
+        identityWebTarget = restClient.target(identityServerUrl).path("Users");
+    }
+
     @Override
     @Cacheable(value = "userCache", key = "#filterValue")
     public CbUser getDetails(String filterValue, UserFilterField filterField) {
-
-        HttpHeaders tokenRequestHeaders = new HttpHeaders();
-        tokenRequestHeaders.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
-
-        Map<String, String> tokenResponse = restTemplate.exchange(
-                identityServerUrl + "/oauth/token?grant_type=client_credentials",
-                HttpMethod.POST,
-                new HttpEntity<>(tokenRequestHeaders),
-                Map.class).getBody();
-
-        HttpHeaders scimRequestHeaders = new HttpHeaders();
-        scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
-
-        String scimResponse = null;
-
+        WebTarget target;
         switch (filterField) {
             case USERNAME:
-                scimResponse = restTemplate.exchange(
-                        identityServerUrl + "/Users/" + "?filter=userName eq \"" + filterValue + "\"",
-                        HttpMethod.GET,
-                        new HttpEntity<>(scimRequestHeaders),
-                        String.class).getBody();
+                target = identityWebTarget.queryParam("filter", "userName eq \"" + filterValue + "\"");
                 break;
             case USERID:
-                scimResponse = restTemplate.exchange(
-                        identityServerUrl + "/Users/" + filterValue,
-                        HttpMethod.GET,
-                        new HttpEntity<>(scimRequestHeaders),
-                        String.class).getBody();
+                target = identityWebTarget.path(filterValue);
                 break;
             default:
                 throw new UserDetailsUnavailableException("User details cannot be retrieved.");
         }
-
+        AccessToken accessToken = identityClient.getToken(clientSecret);
+        String scimResponse = target.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + accessToken.getToken()).get(String.class);
         try {
             JsonNode root = JsonUtil.readTree(scimResponse);
             List<CbUserRole> roles = new ArrayList<>();

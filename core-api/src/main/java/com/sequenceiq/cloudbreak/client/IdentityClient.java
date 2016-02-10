@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -29,27 +28,29 @@ public class IdentityClient {
 
     private static final Pattern LOCATION_PATTERN = Pattern.compile(".*access_token=(.*)\\&expires_in=(\\d*)\\&scope=.*");
 
-    private final Client client;
-
     private final String identityServerAddress;
 
     private final String clientId;
 
+    private final WebTarget authorizeWebTarget;
+
+    private final WebTarget tokenWebTarget;
+
     public IdentityClient(String identityServerAddress, String clientId, ConfigKey configKey) {
         this.identityServerAddress = identityServerAddress;
         this.clientId = clientId;
-        this.client = RestClient.get(configKey);
+        WebTarget identityWebTarget = RestClient.get(configKey).target(identityServerAddress);
+        authorizeWebTarget = identityWebTarget.path("/oauth/authorize").queryParam("response_type", "token").queryParam("client_id", clientId);
+        tokenWebTarget = identityWebTarget.path("/oauth/token").queryParam("grant_type", "client_credentials");
         LOGGER.info("IdentityClient has been created. identity: {}, clientId: {}, configKey: {}", identityServerAddress, clientId, configKey);
     }
 
     public AccessToken getToken(String user, String password) {
-        WebTarget t = client.target(identityServerAddress).path("/oauth/authorize").queryParam("response_type", "token").queryParam("client_id", clientId);
         MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
         formData.add("credentials", String.format("{\"username\":\"%s\",\"password\":\"%s\"}", user, password));
-
         try {
-            Response resp = t.request().accept(MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(Entity.form(formData));
-            String token = null;
+            Response resp = authorizeWebTarget.request().accept(MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(Entity.form(formData));
+            String token;
             int exp;
             switch (fromStatusCode(resp.getStatus())) {
                 case FOUND:
@@ -84,10 +85,9 @@ public class IdentityClient {
 
     public AccessToken getToken(String secret) {
         try {
-            WebTarget t = client.target(identityServerAddress).path("/oauth/token").queryParam("grant_type", "client_credentials");
             MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
             headers.add("Authorization", "Basic " + Base64.encodeBase64String((clientId + ":" + secret).getBytes()));
-            return t.request().accept(MediaType.APPLICATION_JSON_TYPE).headers(headers).post(Entity.json(null), AccessToken.class);
+            return tokenWebTarget.request().accept(MediaType.APPLICATION_JSON_TYPE).headers(headers).post(Entity.json(null), AccessToken.class);
         } catch (Exception e) {
             throw new TokenUnavailableException("Error occurred while getting token from identity server", e);
         }

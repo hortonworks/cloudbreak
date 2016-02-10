@@ -39,7 +39,7 @@ public class RestClient {
     private RestClient() {
     }
 
-    static synchronized Client get(ConfigKey configKey) {
+    public static synchronized Client get(ConfigKey configKey) {
         Client client = clients.get(configKey);
         if (client == null) {
             client = constructClient(configKey);

@@ -3,7 +3,11 @@ package com.sequenceiq.periscope.service.security;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
-import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -11,13 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestOperations;
 
+import com.sequenceiq.cloudbreak.client.AccessToken;
+import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 
 @Service
@@ -26,55 +28,42 @@ public class RemoteUserDetailsService implements UserDetailsService {
     private static final int ACCOUNT_PART = 2;
 
     @Autowired
-    private RestOperations restTemplate;
+    private Client restClient;
+
+    @Autowired
+    private IdentityClient identityClient;
 
     @Autowired
     @Qualifier("identityServerUrl")
     private String identityServerUrl;
 
-    @Value("${periscope.client.id}")
-    private String clientId;
-
     @Value("${periscope.client.secret}")
     private String clientSecret;
+
+    private WebTarget identityWebTarget;
+
+    @PostConstruct
+    public void init() {
+        identityWebTarget = restClient.target(identityServerUrl).path("Users");
+    }
 
     @Override
     @Cacheable("userCache")
     @SuppressWarnings("unchecked")
     public PeriscopeUser getDetails(String filterValue, UserFilterField filterField) {
-        HttpHeaders tokenRequestHeaders = new HttpHeaders();
-        tokenRequestHeaders.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
-
-        Map<String, String> tokenResponse = restTemplate.exchange(
-                identityServerUrl + "/oauth/token?grant_type=client_credentials",
-                HttpMethod.POST,
-                new HttpEntity<>(tokenRequestHeaders),
-                Map.class).getBody();
-
-        HttpHeaders scimRequestHeaders = new HttpHeaders();
-        scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
-
-        String scimResponse;
-
+        WebTarget target;
         switch (filterField) {
             case USERNAME:
-                scimResponse = restTemplate.exchange(
-                        identityServerUrl + "/Users/" + "?filter=userName eq \"" + filterValue + "\"",
-                        HttpMethod.GET,
-                        new HttpEntity<>(scimRequestHeaders),
-                        String.class).getBody();
+                target = identityWebTarget.queryParam("filter", "userName eq \"" + filterValue + "\"");
                 break;
             case USER_ID:
-                scimResponse = restTemplate.exchange(
-                        identityServerUrl + "/Users/" + filterValue,
-                        HttpMethod.GET,
-                        new HttpEntity<>(scimRequestHeaders),
-                        String.class).getBody();
+                target = identityWebTarget.path(filterValue);
                 break;
             default:
                 throw new UserDetailsUnavailableException("User details cannot be retrieved.");
         }
-
+        AccessToken accessToken = identityClient.getToken(clientSecret);
+        String scimResponse = target.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + accessToken.getToken()).get(String.class);
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode root = mapper.readTree(scimResponse);
