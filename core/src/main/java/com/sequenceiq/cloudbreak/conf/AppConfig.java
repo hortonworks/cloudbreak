@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -42,9 +45,11 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfi
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration
-public class AppConfig {
+public class AppConfig implements ResourceLoaderAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
+    private static final int TIMEOUT = 5_000;
+    private static final String ETC_DIR = "/etc/cloudbreak";
 
     @Value("#{'${cb.supported.container.orchestrators:}'.split(',')}")
     private List<String> orchestrators;
@@ -85,16 +90,19 @@ public class AppConfig {
     @Inject
     private ConfigurableEnvironment environment;
 
+    private ResourceLoader resourceLoader;
+
     @PostConstruct
     public void init() throws IOException {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
         ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
-        Resource [] mappingLocations = patternResolver.getResources("classpath*:*-images.yml");
         YamlPropertySourceLoader load = new YamlPropertySourceLoader();
-        for (Resource resource : mappingLocations) {
-            String filename = resource.getFilename();
-            environment.getPropertySources().addLast(load.load(filename, new ClassPathResource(filename), null));
+        for (Resource resource : patternResolver.getResources("classpath*:*-images.yml")) {
+            environment.getPropertySources().addLast(load.load(resource.getFilename(), resource, null));
+        }
+        for (Resource resource : loadEtcResources()) {
+            environment.getPropertySources().addFirst(load.load(resource.getFilename(), resource, null));
         }
     }
 
@@ -204,5 +212,28 @@ public class AppConfig {
         maxCardinalityReps.put("ALL", Integer.MAX_VALUE);
         String stackServiceComponentsJson = FileReaderUtils.readFileFromClasspath("hdp/hdp-services.json");
         return new StackServiceComponentDescriptorMapFactory(stackServiceComponentsJson, minCardinalityReps, maxCardinalityReps);
+    }
+
+    private List<Resource> loadEtcResources() {
+        File folder = new File(ETC_DIR);
+        File[] listOfFiles = folder.listFiles();
+        List<Resource> resources = new ArrayList<>();
+        if (listOfFiles != null) {
+            for (File file : listOfFiles) {
+                try {
+                    if (file.isFile() && file.getName().endsWith("yml") || file.getName().endsWith("yaml")) {
+                        resources.add(resourceLoader.getResource("file:" + file.getAbsolutePath()));
+                    }
+                } catch (Exception e) {
+                    LOGGER.warn("Cannot load file into property source: {}", file.getAbsolutePath());
+                }
+            }
+        }
+        return resources;
+    }
+
+    @Override
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
     }
 }
