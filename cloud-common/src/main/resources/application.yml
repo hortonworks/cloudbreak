@@ -60,8 +60,11 @@ cb:
       munchausen: sequenceiq/munchausen:0.5.5
       haveged: sequenceiq/haveged:1.0
       ldap: sequenceiq/docker-ldap:1.0
+      shipyard: shipyard/shipyard:v3.0.0
+      shipyard.db: rethinkdb:2.2.4
     env:
       ldap: SLAPD_PASSWORD=cloudbreak|SLAPD_BINDUSER=ambari-qa|SLAPD_BINDPWD=cloudbreak|SLAPD_BINDGROUP=hadoop
+      shipyard.enabled: true
     relocate: true
 
   sssd:

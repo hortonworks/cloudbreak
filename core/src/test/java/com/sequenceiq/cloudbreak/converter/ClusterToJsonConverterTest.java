@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
@@ -76,7 +77,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         underTest = new ClusterToJsonConverter();
         MockitoAnnotations.initMocks(this);
         stackServiceComponentDescriptor = createStackServiceComponentDescriptor();
-
+        ReflectionTestUtils.setField(underTest, "shipyardEnabled", true);
     }
 
     @Test

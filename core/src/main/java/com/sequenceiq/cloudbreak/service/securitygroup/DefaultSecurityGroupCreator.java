@@ -51,10 +51,11 @@ public class DefaultSecurityGroupCreator {
         securityGroups.add(securityGroupService.create(user, onlySshAndSsl));
 
         //create default security group which opens all of the known services' ports
-        String allPortsOpenDesc = "Open ports: 22 (SSH) 2022 (SSH) 443 (HTTPS) 8080 (Ambari) 8500 (Consul) 50070 (NN) 8088 (RM Web) 8030 (RM Scheduler)"
-                + "8050 (RM IPC) 19888 (Job history server) 60000 (HBase master) 60010 (HBase master web) 16020 (HBase RS) 60030 (HBase RS info) 15000 (Falcon)"
-                + "8744 (Storm) 9083 (Hive metastore) 10000 (Hive server) 10001 (Hive server HTTP) 9999 (Accumulo master) 9997 (Accumulo Tserver) 21000 (Atlas)"
-                + "8443 (KNOX) 11000 (Oozie) 18080 (Spark HS) 8042 (NM Web) 9996 (Zeppelin WebSocket) 9995 (Zeppelin UI) 3080 (Kibana) 9200 (Elasticsearch)";
+        String allPortsOpenDesc = "Open ports: 22 (SSH) 2022 (SSH) 443 (HTTPS) 8080 (Ambari) 8500 (Consul) 50070 (NN) 8088 (RM Web) 8030 (RM Scheduler) "
+                + "8050 (RM IPC) 19888 (Job history server) 60000 (HBase master) 60010 (HBase master web) 16020 (HBase RS) 60030 (HBase RS info) "
+                + "15000 (Falcon) 8744 (Storm) 9083 (Hive metastore) 10000 (Hive server) 10001 (Hive server HTTP) 9999 (Accumulo master) "
+                + "9997 (Accumulo Tserver) 21000 (Atlas) 8443 (KNOX) 11000 (Oozie) 18080 (Spark HS) 8042 (NM Web) 9996 (Zeppelin WebSocket) "
+                + "9995 (Zeppelin UI) 3080 (Kibana) 9200 (Elasticsearch) 7070 (Shipyard)";
         SecurityGroup allServicesPort = createSecurityGroup(user, "all-services-port", allPortsOpenDesc);
         SecurityRule allPortsRule = createSecurityRule(concatenateAllPortsKnownByCloudbreak(), allServicesPort);
         allServicesPort.setSecurityRules(new HashSet<>(Arrays.asList(allPortsRule)));

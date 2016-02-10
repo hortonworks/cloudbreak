@@ -20,7 +20,8 @@ public class ContainerConstraint {
     private final String networkMode;
     private final TcpPortBinding tcpPortBinding;
     private final Map<String, String> privateIpsByHostname;
-    private final String name;
+    private final ContainerName containerName;
+    private final Map<String, String> links;
 
 
     public ContainerConstraint(ContainerConstraint.Builder builder) {
@@ -35,7 +36,8 @@ public class ContainerConstraint {
         this.networkMode = builder.networkMode;
         this.tcpPortBinding = builder.tcpPortBinding;
         this.privateIpsByHostname = builder.privateIpsByHostname;
-        this.name = builder.name;
+        this.containerName = builder.containerName;
+        this.links = builder.links;
     }
 
     public String[] getCmd() {
@@ -82,8 +84,12 @@ public class ContainerConstraint {
         return privateIpsByHostname;
     }
 
-    public String getName() {
-        return name;
+    public ContainerName getContainerName() {
+        return containerName;
+    }
+
+    public Map<String, String> getLinks() {
+        return links;
     }
 
     public static class Builder {
@@ -99,7 +105,8 @@ public class ContainerConstraint {
         private String networkMode;
         private TcpPortBinding tcpPortBinding;
         private Map<String, String> privateIpsByHostname = new HashMap<>();
-        private String name;
+        private ContainerName containerName;
+        private Map<String, String> links = new HashMap<>();
 
         public Builder containerConstraint(ContainerConstraint containerConstraint) {
             this.cmd = containerConstraint.getCmd();
@@ -113,7 +120,8 @@ public class ContainerConstraint {
             this.networkMode = containerConstraint.getNetworkMode();
             this.tcpPortBinding = containerConstraint.getTcpPortBinding();
             this.privateIpsByHostname = containerConstraint.getPrivateIpsByHostname();
-            this.name = containerConstraint.getName();
+            this.containerName = containerConstraint.getContainerName();
+            this.links = containerConstraint.getLinks();
             return this;
         }
 
@@ -172,8 +180,18 @@ public class ContainerConstraint {
             return this;
         }
 
+        public Builder withNamePrefix(String namePrefix) {
+            this.containerName = new ContainerName(null, namePrefix);
+            return this;
+        }
+
         public Builder withName(String name) {
-            this.name = name;
+            this.containerName = new ContainerName(name, null);
+            return this;
+        }
+
+        public Builder addLink(String hostContainerLink, String link) {
+            this.links.put(hostContainerLink, link);
             return this;
         }
 

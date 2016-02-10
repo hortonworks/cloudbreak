@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SwarmContainerBootstrap implements ContainerBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(SwarmContainerBootstrap.class);

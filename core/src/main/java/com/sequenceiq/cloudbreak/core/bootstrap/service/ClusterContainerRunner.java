@@ -10,6 +10,8 @@ import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LDAP;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LOGROTATE;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.REGISTRATOR;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.SHIPYARD;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.SHIPYARD_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.DOMAIN_REALM;
 import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.REALM;
 
@@ -57,11 +59,18 @@ public class ClusterContainerRunner {
     private static final String HOST_VOLUME_PATH = VolumeUtils.getLogVolume("logs");
     private static final String HOST_NETWORK_MODE = "host";
     private static final int AMBARI_PORT = 8080;
+    private static final int SHIPYARD_CONTAINER_PORT = 8080;
+    private static final int SHIPYARD_EXPOSED_PORT = 7070;
+    private static final int SHIPYARD_DB_CONTAINER_PORT = 8080;
+    private static final int SHIPYARD_DB_EXPOSED_PORT = 7071;
     private static final int LDAP_PORT = 389;
     private static final int REGISTRATOR_RESYNC_SECONDS = 60;
 
     @Value("#{'${cb.docker.env.ldap}'.split('\\|')}")
     private List<String> ldapEnvs;
+
+    @Value("${cb.docker.env.shipyard.enabled:}")
+    private Boolean shipyardEnabled;
 
     @Inject
     private ClusterService clusterService;
@@ -142,6 +151,16 @@ public class ClusterContainerRunner {
                 containerOrchestrator.runContainer(containerConfigService.get(stack, LDAP), credential, ldapConstraint,
                         stackDeletionBasedExitCriteriaModel(stack.getId()));
             }
+
+            if (shipyardEnabled) {
+                ContainerConstraint shipyardDbConstraint = getShipyardDbConstraint(gatewayNode);
+                containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD_DB), credential, shipyardDbConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
+
+                ContainerConstraint shipyardConstraint = getShipyardConstraint(cloudPlatform, gatewayNode);
+                containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD), credential, shipyardConstraint,
+                        stackDeletionBasedExitCriteriaModel(stack.getId()));
+            }
         }
 
         runAmbariAgentContainers(add, candidateAddresses, containerOrchestrator, cloudPlatform, stack, credential);
@@ -201,14 +220,14 @@ public class ClusterContainerRunner {
 
     private ContainerConstraint getHavegedConstraint(Node gatewayNode) {
         return new ContainerConstraint.Builder()
-                .withName(HAVEGED.getName())
+                .withNamePrefix(HAVEGED.getName())
                 .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
                 .build();
     }
 
     private ContainerConstraint getLdapConstraint(Node gatewayNode) {
         return new ContainerConstraint.Builder()
-                .withName(LDAP.getName())
+                .withNamePrefix(LDAP.getName())
                 .networkMode(HOST_NETWORK_MODE)
                 .tcpPortBinding(new TcpPortBinding(LDAP_PORT, "0.0.0.0", LDAP_PORT))
                 .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
@@ -223,7 +242,7 @@ public class ClusterContainerRunner {
         KerberosConfiguration kerberosConf = new KerberosConfiguration(cluster.getKerberosMasterKey(), cluster.getKerberosAdmin(),
                 cluster.getKerberosPassword());
         return new ContainerConstraint.Builder()
-                .withName(KERBEROS.getName())
+                .withNamePrefix(KERBEROS.getName())
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
                 .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
@@ -235,6 +254,27 @@ public class ClusterContainerRunner {
                         String.format("KERB_MASTER_KEY=%s", kerberosConf.getMasterKey()),
                         String.format("KERB_ADMIN_USER=%s", kerberosConf.getUser()),
                         String.format("KERB_ADMIN_PASS=%s", kerberosConf.getPassword())))
+                .build();
+    }
+
+    private ContainerConstraint getShipyardConstraint(String cloudPlatform, Node gatewayNode) {
+        return new ContainerConstraint.Builder()
+                .withName(SHIPYARD.getName())
+                .tcpPortBinding(new TcpPortBinding(SHIPYARD_CONTAINER_PORT, "0.0.0.0", SHIPYARD_EXPOSED_PORT))
+                .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
+                .addEnv(Arrays.asList(String.format("SERVICE_NAME=%s", SHIPYARD.getName())))
+                .addLink("swarm-manager", "swarm")
+                .addLink(SHIPYARD_DB.getName(), "rethinkdb")
+                .cmd(new String[]{"server" , "-d", "tcp://swarm:3376"})
+                .build();
+    }
+
+    private ContainerConstraint getShipyardDbConstraint(Node gatewayNode) {
+        return new ContainerConstraint.Builder()
+                .withName(SHIPYARD_DB.getName())
+                .tcpPortBinding(new TcpPortBinding(SHIPYARD_DB_CONTAINER_PORT, "0.0.0.0", SHIPYARD_DB_EXPOSED_PORT))
+                .addPrivateIpsByHostname(ImmutableMap.of(gatewayNode.getHostname(), gatewayNode.getPrivateIp()))
+                .addEnv(Arrays.asList(String.format("SERVICE_NAME=%s", SHIPYARD_DB.getName())))
                 .build();
     }
 
@@ -263,7 +303,7 @@ public class ClusterContainerRunner {
 
     private ContainerConstraint getAmbariAgentConstraint(String cloudPlatform, Map<String, String> dataVolumeBinds, Map<String, String> privateIpsByHostname) {
         return new ContainerConstraint.Builder()
-                .withName(AMBARI_AGENT.getName())
+                .withNamePrefix(AMBARI_AGENT.getName())
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(dataVolumeBinds)
                 .addPrivateIpsByHostname(privateIpsByHostname)
@@ -273,7 +313,7 @@ public class ClusterContainerRunner {
 
     private ContainerConstraint getConsulWatchConstraint(Map<String, String> privateIpsByHostname) {
         return new ContainerConstraint.Builder()
-                .withName(CONSUL_WATCH.getName())
+                .withNamePrefix(CONSUL_WATCH.getName())
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of("/var/run/docker.sock", "/var/run/docker.sock"))
                 .addPrivateIpsByHostname(privateIpsByHostname)
@@ -283,7 +323,7 @@ public class ClusterContainerRunner {
 
     private ContainerConstraint getLogrotateConstraint(Map<String, String> privateIpsByHostname) {
         return new ContainerConstraint.Builder()
-                .withName(LOGROTATE.getName())
+                .withNamePrefix(LOGROTATE.getName())
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of("/var/lib/docker/containers", "/var/lib/docker/containers"))
                 .addPrivateIpsByHostname(privateIpsByHostname)

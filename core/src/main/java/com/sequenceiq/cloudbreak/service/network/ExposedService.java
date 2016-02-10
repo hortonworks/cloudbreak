@@ -31,7 +31,8 @@ public enum ExposedService {
     RANGER("Ranger Admin UI", "RANGER_ADMIN"),
     KIBANA("Kibana", "KIBANA"),
     ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH"),
-    SWARM("Swarm", "SWARM");
+    SWARM("Swarm", "SWARM"),
+    SHIPYARD("Shipyard", "SHIPYARD");
 
     private String serviceName;
     private String portName;
