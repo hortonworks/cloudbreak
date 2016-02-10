@@ -13,8 +13,12 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
+import com.amazonaws.services.ec2.model.DescribeVpnGatewaysRequest;
+import com.amazonaws.services.ec2.model.DescribeVpnGatewaysResult;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
+import com.amazonaws.services.ec2.model.VpcAttachment;
+import com.amazonaws.services.ec2.model.VpnGateway;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -67,17 +71,33 @@ public class AwsSetup implements Setup {
             try {
                 AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                         ac.getCloudContext().getLocation().getRegion().value());
-                DescribeInternetGatewaysRequest describeInternetGatewaysRequest = new DescribeInternetGatewaysRequest();
-                describeInternetGatewaysRequest.withInternetGatewayIds(network.getStringParameter("internetGatewayId"));
-                DescribeInternetGatewaysResult describeInternetGatewaysResult = amazonEC2Client.describeInternetGateways(describeInternetGatewaysRequest);
-                if (describeInternetGatewaysResult.getInternetGateways().size() < 1) {
-                    throw new CloudConnectorException(String.format(IGW_DOES_NOT_EXIST_MSG, network.getStringParameter("internetGatewayId")));
+                if (network.getStringParameter("internetGatewayId").startsWith("vgw")) {
+                    DescribeVpnGatewaysRequest describeVpnGatewaysRequest = new DescribeVpnGatewaysRequest();
+                    describeVpnGatewaysRequest.withVpnGatewayIds(network.getStringParameter("internetGatewayId"));
+                    DescribeVpnGatewaysResult describeVpnGatewaysResult = amazonEC2Client.describeVpnGateways(describeVpnGatewaysRequest);
+                    if (describeVpnGatewaysResult.getVpnGateways().size() < 1) {
+                        throw new CloudConnectorException(String.format(IGW_DOES_NOT_EXIST_MSG, network.getStringParameter("internetGatewayId")));
+                    } else {
+                        VpnGateway vpcGateway = describeVpnGatewaysResult.getVpnGateways().get(0);
+                        VpcAttachment attachment = vpcGateway.getVpcAttachments().get(0);
+                        if (attachment != null && !attachment.getVpcId().equals(network.getStringParameter("vpcId"))) {
+                            throw new CloudConnectorException(String.format(VPC_DOES_NOT_EXIST_MSG,
+                                    network.getStringParameter("internetGatewayId"), network.getStringParameter("vpcId")));
+                        }
+                    }
                 } else {
-                    InternetGateway internetGateway = describeInternetGatewaysResult.getInternetGateways().get(0);
-                    InternetGatewayAttachment attachment = internetGateway.getAttachments().get(0);
-                    if (attachment != null && !attachment.getVpcId().equals(network.getStringParameter("vpcId"))) {
-                        throw new CloudConnectorException(String.format(VPC_DOES_NOT_EXIST_MSG,
-                                network.getStringParameter("internetGatewayId"), network.getStringParameter("vpcId")));
+                    DescribeInternetGatewaysRequest describeInternetGatewaysRequest = new DescribeInternetGatewaysRequest();
+                    describeInternetGatewaysRequest.withInternetGatewayIds(network.getStringParameter("internetGatewayId"));
+                    DescribeInternetGatewaysResult describeInternetGatewaysResult = amazonEC2Client.describeInternetGateways(describeInternetGatewaysRequest);
+                    if (describeInternetGatewaysResult.getInternetGateways().size() < 1) {
+                        throw new CloudConnectorException(String.format(IGW_DOES_NOT_EXIST_MSG, network.getStringParameter("internetGatewayId")));
+                    } else {
+                        InternetGateway internetGateway = describeInternetGatewaysResult.getInternetGateways().get(0);
+                        InternetGatewayAttachment attachment = internetGateway.getAttachments().get(0);
+                        if (attachment != null && !attachment.getVpcId().equals(network.getStringParameter("vpcId"))) {
+                            throw new CloudConnectorException(String.format(VPC_DOES_NOT_EXIST_MSG,
+                                    network.getStringParameter("internetGatewayId"), network.getStringParameter("vpcId")));
+                        }
                     }
                 }
             } catch (AmazonClientException e) {
