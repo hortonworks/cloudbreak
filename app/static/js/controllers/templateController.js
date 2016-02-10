@@ -198,7 +198,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.awsInstanceType = $filter('filter')($rootScope.params.vmTypes.AWS, {
                 value: instanceType
             }, true)[0];
-            if ($scope.awsTemp.parameters.volumeType == 'ephemeral') {
+            if ($scope.awsTemp.volumeType == 'ephemeral') {
                 $scope.awsTemp.parameters.encrypted = false;
             }
         }
@@ -265,7 +265,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             });
             return result;
         }
-        
+
         $scope.unShowErrorMessageAlert = function() {
             $scope.showAlert = false;
             $scope.alertMessage = "";

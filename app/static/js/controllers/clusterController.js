@@ -712,7 +712,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         id: item.templateId
                     });
                     if (actualTemplate.length > 0) {
-                        if (actualTemplate[0].parameters.volumeType === 'ephemeral') {
+                        if (actualTemplate[0].volumeType === 'ephemeral') {
                             isEphemeral = true;
                         }
                     }
