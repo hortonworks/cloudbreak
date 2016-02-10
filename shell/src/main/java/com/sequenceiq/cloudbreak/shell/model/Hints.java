@@ -6,7 +6,7 @@ package com.sequenceiq.cloudbreak.shell.model;
 public enum Hints {
 
     CREATE_CREDENTIAL("Create a new credential with the 'credential create' command"),
-    CREATE_CREDENTIAL_WITH_TOPOLOGY("Create a new credential with the 'credential create' command and set the id of the newly created topology"),
+    CREATE_CREDENTIAL_WITH_TOPOLOGY("Create a new credential with the 'credential create' command and set the id of the newly created platform"),
     SELECT_CREDENTIAL("Create a new credential with the 'credential create' command or select an existing one with 'credential select'"),
     ADD_BLUEPRINT("Add a blueprint with the 'blueprint add' command"),
     SELECT_BLUEPRINT("Add a blueprint with the 'blueprint add' command or select an existing one with 'blueprint select'"),
