@@ -35,7 +35,7 @@
       "Type" : "String",
       "MinLength": "12",
       "MaxLength": "12",
-      "AllowedPattern" : "igw-[a-z0-9]{8}"
+      "AllowedPattern" : "[iv]gw-[a-z0-9]{8}"
     },
     </#if>
 
