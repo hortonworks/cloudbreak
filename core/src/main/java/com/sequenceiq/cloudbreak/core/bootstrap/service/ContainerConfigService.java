@@ -54,6 +54,12 @@ public class ContainerConfigService {
     @Value("${cb.docker.container.ldap:}")
     private String ldapImageName;
 
+    @Value("${cb.docker.container.shipyard:}")
+    private String shipyardImageName;
+
+    @Value("${cb.docker.container.shipyard.db:}")
+    private String rethinkDbImageName;
+
     @Inject
     private ComponentRepository componentRepository;
 
@@ -105,6 +111,12 @@ public class ContainerConfigService {
                     break;
                 case LDAP:
                     config = new GenericConfig.Builder(ldapImageName).build();
+                    break;
+                case SHIPYARD:
+                    config = new GenericConfig.Builder(shipyardImageName).build();
+                    break;
+                case SHIPYARD_DB:
+                    config = new GenericConfig.Builder(rethinkDbImageName).build();
                     break;
                 default:
                     throw new CloudbreakServiceException(String.format("No configuration exist for %s", dc));

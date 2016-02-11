@@ -24,6 +24,7 @@ import static com.sequenceiq.cloudbreak.service.network.ExposedService.OOZIE;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.RESOURCEMANAGER_IPC;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.RESOURCEMANAGER_SCHEDULER;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.RESOURCEMANAGER_WEB;
+import static com.sequenceiq.cloudbreak.service.network.ExposedService.SHIPYARD;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SPARK_HISTORY_SERVER;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SSH;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.STORM;
@@ -78,6 +79,7 @@ public final class NetworkUtils {
         ports.add(new Port(KIBANA, "3080", "tcp"));
         ports.add(new Port(ELASTIC_SEARCH, "9200", "tcp"));
         ports.add(new Port(SWARM, "3376", "tcp"));
+        ports.add(new Port(SHIPYARD, "7070", "tcp"));
     }
 
     private NetworkUtils() {
@@ -123,6 +125,15 @@ public final class NetworkUtils {
     private static Port getPortByPortNumberAndProtocol(String portNumber, String protocol) {
         for (Port port : ports) {
             if (portNumber.equals(port.getPort()) && protocol.equals(port.getProtocol())) {
+                return port;
+            }
+        }
+        return null;
+    }
+
+    public static Port getPortByServiceName(ExposedService exposedService) {
+        for (Port port : ports) {
+            if (port.getExposedService().equals(exposedService)) {
                 return port;
             }
         }

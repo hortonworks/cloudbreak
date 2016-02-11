@@ -11,7 +11,9 @@ public enum DockerContainer {
     CONSUL_WATCH("consul-watch"),
     LOGROTATE("logrotate"),
     HAVEGED("haveged"),
-    LDAP("ldap");
+    LDAP("ldap"),
+    SHIPYARD("shipyard"),
+    SHIPYARD_DB("shipyard_db");
 
     private final String name;
 

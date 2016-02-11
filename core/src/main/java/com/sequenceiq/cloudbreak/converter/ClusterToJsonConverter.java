@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static com.sequenceiq.cloudbreak.service.network.ExposedService.SHIPYARD;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,6 +36,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     private static final int SECONDS_PER_MINUTE = 60;
     private static final int MILLIS_PER_SECOND = 1000;
+
+    @Value("${cb.docker.env.shipyard.enabled:}")
+    private Boolean shipyardEnabled;
 
     @Inject
     private BlueprintValidator blueprintValidator;
@@ -89,6 +95,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         Map<String, String> result = new HashMap<>();
 
         List<Port> ports = NetworkUtils.getPorts(Optional.<Stack>absent());
+        //collectPortsOfAdditionalServices(result, ambariIp);
         try {
             JsonNode hostGroupsNode = blueprintValidator.getHostGroupNode(blueprint);
             for (JsonNode hostGroupNode : hostGroupsNode) {
@@ -107,6 +114,13 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             return result;
         }
         return result;
+    }
+
+    private void collectPortsOfAdditionalServices(Map<String, String> result, String ambariIp) {
+        if (shipyardEnabled) {
+            Port shipyardPort = NetworkUtils.getPortByServiceName(SHIPYARD);
+            result.put(shipyardPort.getName(), String.format("%s:%s%s", ambariIp, shipyardPort.getPort(), shipyardPort.getExposedService().getPostFix()));
+        }
     }
 
     private void collectServicePorts(Map<String, String> result, List<Port> ports, InstanceMetaData next, StackServiceComponentDescriptor componentDescriptor) {
