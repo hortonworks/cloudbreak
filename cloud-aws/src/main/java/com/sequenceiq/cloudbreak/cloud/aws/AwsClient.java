@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.BasicSessionCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -23,8 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 @Component
 public class AwsClient {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsClient.class);
-
     private static final String DEFAULT_REGION_NAME = "us-west-1";
 
     @Inject
@@ -48,24 +45,27 @@ public class AwsClient {
     }
 
     public AmazonEC2Client createAccess(AwsCredentialView awsCredential, String regionName) {
-        BasicSessionCredentials basicSessionCredentials = credentialClient.retrieveCachedSessionCredentials(awsCredential);
-        AmazonEC2Client amazonEC2Client = new AmazonEC2Client(basicSessionCredentials);
-        amazonEC2Client.setRegion(RegionUtils.getRegion(regionName));
-        return amazonEC2Client;
+        AmazonEC2Client client = isRoleAssumeRequired(awsCredential)
+                ? new AmazonEC2Client(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                : new AmazonEC2Client(createAwsCredentials(awsCredential));
+        client.setRegion(RegionUtils.getRegion(regionName));
+        return client;
     }
 
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {
-        BasicSessionCredentials basicSessionCredentials = credentialClient.retrieveCachedSessionCredentials(awsCredential);
-        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
-        amazonCloudFormationClient.setRegion(RegionUtils.getRegion(regionName));
-        return amazonCloudFormationClient;
+        AmazonCloudFormationClient client = isRoleAssumeRequired(awsCredential)
+                ? new AmazonCloudFormationClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                : new AmazonCloudFormationClient(createAwsCredentials(awsCredential));
+        client.setRegion(RegionUtils.getRegion(regionName));
+        return client;
     }
 
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {
-        BasicSessionCredentials basicSessionCredentials = credentialClient.retrieveCachedSessionCredentials(awsCredential);
-        AmazonAutoScalingClient amazonAutoScalingClient = new AmazonAutoScalingClient(basicSessionCredentials);
-        amazonAutoScalingClient.setRegion(RegionUtils.getRegion(regionName));
-        return amazonAutoScalingClient;
+        AmazonAutoScalingClient client = isRoleAssumeRequired(awsCredential)
+                ? new AmazonAutoScalingClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                : new AmazonAutoScalingClient(createAwsCredentials(awsCredential));
+        client.setRegion(RegionUtils.getRegion(regionName));
+        return client;
     }
 
     public String getCbName(String groupName, Long number) {
@@ -77,9 +77,25 @@ public class AwsClient {
                 ac.getCloudContext().getName(), ac.getCloudContext().getId());
     }
 
-    public void checkAwsEnvironmentVariables() {
-        if (isEmpty(System.getenv("AWS_ACCESS_KEY_ID")) || isEmpty(System.getenv("AWS_SECRET_ACCESS_KEY"))) {
-            throw new CloudConnectorException("For this operation the 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be set!");
+    public void checkAwsEnvironmentVariables(CloudCredential credential) {
+        AwsCredentialView awsCredential = new AwsCredentialView(credential);
+        if (isRoleAssumeRequired(awsCredential)) {
+            if (isEmpty(System.getenv("AWS_ACCESS_KEY_ID")) || isEmpty(System.getenv("AWS_SECRET_ACCESS_KEY"))) {
+                throw new CloudConnectorException("For this operation the 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be set!");
+            }
         }
+    }
+
+    private boolean isRoleAssumeRequired(AwsCredentialView awsCredential) {
+        return isNoneEmpty(awsCredential.getRoleArn()) && isEmpty(awsCredential.getAccessKey()) && isEmpty(awsCredential.getSecretKey());
+    }
+
+    private BasicAWSCredentials createAwsCredentials(AwsCredentialView credentialView) {
+        String accessKey = credentialView.getAccessKey();
+        String secretKey = credentialView.getSecretKey();
+        if (isEmpty(accessKey) || isEmpty(secretKey)) {
+            throw new CloudConnectorException("Missing access or secret key from the credential.");
+        }
+        return new BasicAWSCredentials(accessKey, secretKey);
     }
 }
