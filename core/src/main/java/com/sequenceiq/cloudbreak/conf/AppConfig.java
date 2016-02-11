@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.client.Client;
 
 import org.slf4j.Logger;
@@ -75,9 +76,6 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${cb.client.id}")
     private String clientId;
 
-    @Value("${cb.identity.server.url}")
-    private String identityServerUrl;
-
     @Value("${rest.debug:false}")
     private boolean restDebug;
 
@@ -89,6 +87,10 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Inject
     private ConfigurableEnvironment environment;
+
+    @Inject
+    @Named("identityServerUrl")
+    private String identityServerUrl;
 
     private ResourceLoader resourceLoader;
 
