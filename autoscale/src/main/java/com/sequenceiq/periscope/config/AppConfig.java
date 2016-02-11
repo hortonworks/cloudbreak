@@ -3,6 +3,8 @@ package com.sequenceiq.periscope.config;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.client.Client;
 
 import org.quartz.simpl.SimpleJobFactory;
@@ -41,7 +43,8 @@ public class AppConfig implements AsyncConfigurer {
     private int queueCapacity;
     @Value("${periscope.client.id}")
     private String clientId;
-    @Value("${periscope.identity.server.url}")
+    @Inject
+    @Named("identityServerUrl")
     private String identityServerUrl;
     @Value("${rest.debug:false}")
     private boolean restDebug;
