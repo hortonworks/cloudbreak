@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.util.JsonUtil.readValue;
 import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
 
@@ -10,6 +11,8 @@ import javax.transaction.Transactional;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,10 +24,10 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -83,9 +86,10 @@ public class ClusterTerminationService {
                 }).toList();
                 containerOrchestrator.deleteContainer(containerInfo, credential);
                 containerRepository.delete(containers);
+                deleteClusterHostGroupsWithItsMetadata(cluster);
             } else {
-                String msg = String.format("Failed to delete containers of cluster (id:'%s',name:'%s'), the cluster is not associated to stack.",
-                        clusterId, cluster.getName());
+                String msg = String.format("Failed to delete containers of cluster (id:'%s'), because the cluster could not be found in the database.",
+                        clusterId);
                 throw new TerminationFailedException(msg);
             }
         } catch (CloudbreakException | CloudbreakOrchestratorException e) {
@@ -99,23 +103,28 @@ public class ClusterTerminationService {
         cluster.setName(terminatedName);
         cluster.setBlueprint(null);
         cluster.setStack(null);
-        clusterRepository.save(cluster);
-        for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(cluster.getId())) {
-            hostGroup.getRecipes().clear();
-            hostGroup.getHostMetadata().clear();
-            Long constraintId = hostGroup.getConstraint().getId();
-            hostGroup.setConstraint(null);
-            hostGroupRepository.save(hostGroup);
-            constraintRepository.delete(constraintId);
-        }
+        cluster.setStatus(DELETE_COMPLETED);
+        deleteClusterHostGroupsWithItsMetadata(cluster);
         FileSystem fs = cluster.getFileSystem();
         if (fs != null) {
             deleteFileSystemResources(cluster.getStack().getId(), fs);
         }
-        for (HostMetadata metadata : hostMetadataRepository.findHostsInCluster(cluster.getId())) {
-            hostMetadataRepository.delete(metadata.getId());
-        }
+    }
 
+    private void deleteClusterHostGroupsWithItsMetadata(Cluster cluster) {
+        Set<HostGroup> hostGroups = new HashSet<>(cluster.getHostGroups());
+        List<Constraint> constraintsToDelete = new LinkedList<>();
+        for (HostGroup hg : hostGroups) {
+            hg.getRecipes().clear();
+            Constraint constraint = hg.getConstraint();
+            if (constraint != null) {
+                constraintsToDelete.add(constraint);
+            }
+        }
+        hostGroupRepository.delete(hostGroups);
+        constraintRepository.delete(constraintsToDelete);
+        cluster.getHostGroups().clear();
+        clusterRepository.save(cluster);
     }
 
     private Map<String, String> deleteFileSystemResources(Long stackId, FileSystem fileSystem) {
