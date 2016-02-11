@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -29,12 +32,24 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
-        LOGGER.info("Create credential: {}", authenticatedContext.getCloudCredential());
-        CloudCredentialStatus cloudCredentialStatus = verifyIamRoleIsAssumable(authenticatedContext.getCloudCredential());
-        if (cloudCredentialStatus.getStatus().equals(CredentialStatus.FAILED)) {
-            return cloudCredentialStatus;
+        CloudCredential credential = authenticatedContext.getCloudCredential();
+        LOGGER.info("Create credential: {}", credential);
+        AwsCredentialView awsCredential = new AwsCredentialView(credential);
+        String roleArn = awsCredential.getRoleArn();
+        String accessKey = awsCredential.getAccessKey();
+        String secretKey = awsCredential.getSecretKey();
+        if (isNoneEmpty(roleArn) && isNoneEmpty(accessKey) && isNoneEmpty(secretKey)) {
+            String message = "Please only provide the 'role arn' or the 'access' and 'secret key'";
+            return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
         }
-        return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.VERIFIED);
+        if (isNoneEmpty(roleArn)) {
+            return verifyIamRoleIsAssumable(credential);
+        }
+        if (isEmpty(accessKey) || isEmpty(secretKey)) {
+            String message = "Please provide both the 'access' and 'secret key'";
+            return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
+        }
+        return new CloudCredentialStatus(credential, CredentialStatus.VERIFIED);
     }
 
     @Override
