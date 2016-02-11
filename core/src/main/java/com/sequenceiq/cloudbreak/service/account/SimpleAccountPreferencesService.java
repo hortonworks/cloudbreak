@@ -1,18 +1,19 @@
 package com.sequenceiq.cloudbreak.service.account;
 
-import javax.inject.Inject;
-
 import java.util.Collections;
 import java.util.concurrent.locks.Lock;
 
+import javax.inject.Inject;
+
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.google.common.util.concurrent.Striped;
+import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.repository.AccountPreferencesRepository;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.stereotype.Service;
 
 @Service
 public class SimpleAccountPreferencesService implements AccountPreferencesService {
@@ -72,22 +73,16 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     }
 
     @Override
-    @PostAuthorize("hasPermission(returnObject,'read')")
     public AccountPreferences getOneByAccount(CbUser user) {
         String account = user.getAccount();
         Lock lock = locks.get(account);
         lock.lock();
         try {
             AccountPreferences accountPreferences = repository.findByAccount(account);
-
             if (accountPreferences == null) {
                 accountPreferences = createDefaultAccountPreferences(account);
             }
-            if (!user.getRoles().contains(CbUserRole.ADMIN)) {
-                throw new BadRequestException("AccountPreferences are only available for admin users!");
-            } else {
-                return accountPreferences;
-            }
+            return accountPreferences;
         } finally {
             lock.unlock();
         }
@@ -110,5 +105,4 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
         defaultPreferences.setUserTimeToLive(ZERO);
         return repository.save(defaultPreferences);
     }
-
 }
