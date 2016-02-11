@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.FilterChain;
@@ -7,11 +9,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
-
-import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.slf4j.Logger;
@@ -35,8 +32,14 @@ import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+
 @Configuration
 public class SecurityConfig {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Inject
     private UserDetailsService userDetailsService;
@@ -68,14 +71,20 @@ public class SecurityConfig {
     @EnableResourceServer
     protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
         private static final Logger LOGGER = LoggerFactory.getLogger(ResourceServerConfiguration.class);
-        private static final String[] CONNECTORS_URL_PATTERNS = new String[]{"/connectors/**"};
-        private static final String[] BLUEPRINT_URL_PATTERNS = new String[]{"/user/blueprints/**", "/account/blueprints/**", "/blueprints/**"};
-        private static final String[] TEMPLATE_URL_PATTERNS = new String[]{"/user/templates/**", "/account/templates/**", "/templates/**"};
-        private static final String[] CREDENTIAL_URL_PATTERNS = new String[]{"/user/credentials/**", "/account/credentials/**", "/credentials/**"};
-        private static final String[] RECIPE_URL_PATTERNS = new String[]{"/user/recipes/**", "/account/recipes/**", "/recipes/**"};
-        private static final String[] NETWORK_URL_PATTERNS = new String[]{"/user/networks/**", "/account/networks/**", "/networks/**"};
-        private static final String[] SECURITYGROUP_URL_PATTERNS = new String[]{"/user/securitygroups/**", "/account/securitygroups/**", "/securitygroups/**"};
-        private static final String[] STACK_URL_PATTERNS = new String[]{"/user/stacks/**", "/account/stacks/**", "/stacks/**", "/stacks/*/cluster/**"};
+        private static final String[] CONNECTORS_URL_PATTERNS = new String[]{"/api/v1/connectors/**"};
+        private static final String[] BLUEPRINT_URL_PATTERNS = new String[]{"/api/v1/user/blueprints/**", "/api/v1/account/blueprints/**",
+                                                                            "/api/v1/blueprints/**"};
+        private static final String[] TEMPLATE_URL_PATTERNS = new String[]{"/api/v1/user/templates/**", "/api/v1/account/templates/**",
+                                                                            "/api/v1/templates/**"};
+        private static final String[] CREDENTIAL_URL_PATTERNS = new String[]{"/api/v1/user/credentials/**", "/api/v1/account/credentials/**",
+                                                                            "/api/v1/credentials/**"};
+        private static final String[] RECIPE_URL_PATTERNS = new String[]{"/api/v1/user/recipes/**", "/api/v1/account/recipes/**",
+                                                                            "/api/v1/recipes/**"};
+        private static final String[] NETWORK_URL_PATTERNS = new String[]{"/api/v1/user/networks/**", "/api/v1/account/networks/**", "/api/v1/networks/**"};
+        private static final String[] SECURITYGROUP_URL_PATTERNS = new String[]{"/api/v1/user/securitygroups/**", "/api/v1/account/securitygroups/**",
+                                                                            "/api/v1/securitygroups/**"};
+        private static final String[] STACK_URL_PATTERNS = new String[]{"/api/v1/user/stacks/**", "/api/v1/account/stacks/**", "/api/v1/stacks/**",
+                                                                            "/api/v1/stacks/*/cluster/**"};
 
         @Value("${cb.client.id}")
         private String clientId;
@@ -139,18 +148,17 @@ public class SecurityConfig {
                     .antMatchers(NETWORK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.networks')")
                     .antMatchers(SECURITYGROUP_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.securitygroups')")
                     .antMatchers(STACK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
-                    .antMatchers("/stacks/ambari", "/stacks/*/certificate").access("#oauth2.hasScope('cloudbreak.autoscale')")
-                    .antMatchers("/events").access("#oauth2.hasScope('cloudbreak.events')")
-                    .antMatchers("/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
-                    .antMatchers("/account/usages/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
-                    .antMatchers("/user/usages/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
-                    .antMatchers("/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')")
-                    .antMatchers("/accountpreferences/*").access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')")
-                    .and()
-                    .csrf()
-                    .disable()
-                    .headers()
-                    .contentTypeOptions();
+                    .antMatchers("/api/v1/stacks/ambari", "/api/v1/stacks/*/certificate").access("#oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers("/api/v1/events").access("#oauth2.hasScope('cloudbreak.events')")
+                    .antMatchers("/api/v1/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
+                    .antMatchers("/api/v1/account/usages/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
+                    .antMatchers("/api/v1/user/usages/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
+                    .antMatchers("/api/v1/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')")
+                    .antMatchers("/api/v1/accountpreferences/*").access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')");
+
+                    http.csrf().disable();
+
+                    http.headers().contentTypeOptions();
         }
     }
 
