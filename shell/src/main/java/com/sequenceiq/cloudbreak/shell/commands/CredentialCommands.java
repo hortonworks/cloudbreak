@@ -254,7 +254,10 @@ public class CredentialCommands implements CommandMarker {
             help = "Create a new AWS credential")
     public String createAwsCredential(
             @CliOption(key = "name", mandatory = true, help = "Name of the credential") String name,
-            @CliOption(key = "roleArn", mandatory = true, help = "roleArn of the credential") String roleArn,
+            @CliOption(key = "roleArn", mandatory = false,
+                    help = "roleArn for assuming roles or use access and secret based authentication") String roleArn,
+            @CliOption(key = "accessKey", mandatory = false, help = "accessKey of the credential") String accessKey,
+            @CliOption(key = "secretKey", mandatory = false, help = "secretKey of the credential") String secretKey,
             @CliOption(key = "sshKeyPath", mandatory = false, help = "path of a public SSH key file") File sshKeyPath,
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key file") String sshKeyUrl,
             @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
@@ -262,7 +265,7 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the credential belongs to") Long platformId
     ) {
-        return createEc2Credential(name, roleArn, sshKeyPath, sshKeyUrl, sshKeyString, publicInAccount, description, platformId);
+        return createEc2Credential(name, roleArn, accessKey, secretKey, sshKeyPath, sshKeyUrl, sshKeyString, publicInAccount, description, platformId);
     }
 
 
@@ -270,7 +273,10 @@ public class CredentialCommands implements CommandMarker {
             help = "Create a new AWS credential ('credential create --EC2' is deprecated will be removed soon)")
     public String createEc2Credential(
             @CliOption(key = "name", mandatory = true, help = "Name of the credential") String name,
-            @CliOption(key = "roleArn", mandatory = true, help = "roleArn of the credential") String roleArn,
+            @CliOption(key = "roleArn", mandatory = false,
+                    help = "roleArn for assuming roles or use access and secret based authentication") String roleArn,
+            @CliOption(key = "accessKey", mandatory = false, help = "accessKey of the credential") String accessKey,
+            @CliOption(key = "secretKey", mandatory = false, help = "secretKey of the credential") String secretKey,
             @CliOption(key = "sshKeyPath", mandatory = false, help = "path of a public SSH key file") File sshKeyPath,
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key file") String sshKeyUrl,
             @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
@@ -306,7 +312,14 @@ public class CredentialCommands implements CommandMarker {
             credentialRequest.setPublicKey(sshKey);
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put("roleArn", roleArn);
+            if (roleArn != null) {
+                parameters.put("roleArn", roleArn);
+            } else if (accessKey != null && secretKey != null) {
+                parameters.put("accessKey", accessKey);
+                parameters.put("secretKey", secretKey);
+            } else {
+                return "Please specify the roleArn or both the access and secret key";
+            }
 
             credentialRequest.setParameters(parameters);
             if (platformId != null) {
@@ -328,7 +341,6 @@ public class CredentialCommands implements CommandMarker {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
-
 
 
     @CliCommand(value = "credential create --GCP", help = "Create a new Gcp credential")

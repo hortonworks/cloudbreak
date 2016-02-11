@@ -12,7 +12,6 @@ import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.service.stack.resource.definition.MissingParameterException;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.ResourceDefinitionService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -81,10 +80,12 @@ public class CredentialDefinitionService {
         for (Value value : values) {
             String key = value.getName();
             String property = getProperty(properties, key);
-            if (isEncrypted(value)) {
-                property = revert ? encryptor.decrypt(property) : encryptor.encrypt(property);
+            if (property != null) {
+                if (isEncrypted(value)) {
+                    property = revert ? encryptor.decrypt(property) : encryptor.encrypt(property);
+                }
+                processed.put(key, property);
             }
-            processed.put(key, property);
         }
         return processed;
     }
@@ -100,10 +101,7 @@ public class CredentialDefinitionService {
 
     private String getProperty(Map<String, Object> properties, String key) {
         Object value = properties.get(key);
-        if (value == null) {
-            throw new MissingParameterException(String.format("Missing '%s' property!", key));
-        }
-        return String.valueOf(value);
+        return value == null ? null : String.valueOf(value);
     }
 
 }

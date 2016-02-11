@@ -32,6 +32,8 @@ integrationtest:
     awscredential:
        name:
        roleArn:
+       accessKey:
+       secretKey:
        publicKeyFile:
 
     # openstack credential details
