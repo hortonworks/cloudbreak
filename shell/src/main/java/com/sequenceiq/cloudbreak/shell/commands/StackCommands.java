@@ -389,7 +389,7 @@ public class StackCommands implements CommandMarker {
             if (stackResponse != null) {
                 return renderSingleMap(responseTransformer.transformObjectToStringMap(stackResponse), "FIELD", "VALUE");
             }
-            return "No stack specified.";
+            return "No stack specified (select a stack by --id or --name).";
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -420,11 +420,12 @@ public class StackCommands implements CommandMarker {
     }
 
     private StackResponse getStackResponse(String name, String id) {
-        if (id == null) {
+        if (name != null) {
             return cloudbreakClient.stackEndpoint().getPublic(name);
-        } else {
+        } else if (id != null) {
             return cloudbreakClient.stackEndpoint().get(Long.valueOf(id));
         }
+        return null;
     }
 
     private Map<String, List<String>> collectMetadata(List<InstanceGroupJson> instanceGroups, final String group) {
