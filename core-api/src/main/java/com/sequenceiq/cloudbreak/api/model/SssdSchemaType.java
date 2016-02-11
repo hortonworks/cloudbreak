@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.api.model;
 public enum SssdSchemaType {
 
     RFC2307("rfc2307"),
-    RFC2307BIS("rfc2307bis");
+    RFC2307BIS("rfc2307bis"),
+    IPA("IPA"),
+    AD("AD");
 
     private String representation;
 

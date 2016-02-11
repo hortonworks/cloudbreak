@@ -329,7 +329,8 @@ public class AmbariClusterConnector {
     private void executeSssdRecipe(Stack stack, Set<String> hosts) throws CloudbreakSecuritySetupException {
         SssdConfig config = stack.getCluster().getSssdConfig();
         List<String> payload = Arrays.asList(config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
-                config.getBaseSearch());
+                config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
+                config.getKerberosServer(), config.getKerberosRealm());
         pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.SSSD_SETUP, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT, payload, hosts);
     }
 

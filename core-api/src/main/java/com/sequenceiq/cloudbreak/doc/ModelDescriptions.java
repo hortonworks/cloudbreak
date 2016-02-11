@@ -100,9 +100,14 @@ public class ModelDescriptions {
 
     public static class SssdConfigModelDescription {
         public static final String PROVIDER_TYPE = "provider type";
-        public static final String URL = "url of the provider";
+        public static final String URL = "comma-separated list of URIs of the LDAP servers";
         public static final String SCHEMA = "schema of the database";
         public static final String BASE_SEARCH = "search base of the database";
+        public static final String TLS_REQUCERT = "TLS behavior of the connection";
+        public static final String AD_SERVER = "comma-separated list of IP addresses or hostnames of the AD servers";
+        public static final String KERBEROS_SERVER = "comma-separated list of IP addresses or hostnames of the Kerberos servers";
+        public static final String KERBEROS_REALM = "name of the Kerberos realm";
+        public static final String CONFIGURATION = "custom configuration";
     }
 
     public static class InstanceGroupModelDescription {

@@ -18,6 +18,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.SssdConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
+import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
+import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcert;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
@@ -50,6 +53,9 @@ public class SssdConfigCommandsTest {
         dummyResult = new SssdConfigResponse();
         dummyResult.setId(CONFIG_ID);
         dummyResult.setName(CONFIG_NAME);
+        dummyResult.setProviderType(SssdProviderType.LDAP);
+        dummyResult.setSchema(SssdSchemaType.RFC2307);
+        dummyResult.setTlsReqcert(SssdTlsReqcert.NEVER);
         given(cloudbreakClient.sssdConfigEndpoint()).willReturn(sssdConfigEndpoint);
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
     }
@@ -83,7 +89,7 @@ public class SssdConfigCommandsTest {
     @Test
     public void testPublicAdd() {
         given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
-        underTest.add("name", "desc", "ldap", "url", "rfc2307", "base", true);
+        underTest.add("name", "desc", "ldap", "url", "rfc2307", "base", "never", null, null, null, true);
         verify(sssdConfigEndpoint, times(1)).postPublic(any(SssdConfigRequest.class));
         verify(sssdConfigEndpoint, times(0)).postPrivate(any(SssdConfigRequest.class));
     }
@@ -91,7 +97,7 @@ public class SssdConfigCommandsTest {
     @Test
     public void testPrivateAdd() {
         given(sssdConfigEndpoint.postPrivate(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
-        underTest.add("name", "desc", "ldap", "url", "rfc2307", "base", false);
+        underTest.add("name", "desc", "ldap", "url", "rfc2307", "base", "never", null, null, null, false);
         verify(sssdConfigEndpoint, times(0)).postPublic(any(SssdConfigRequest.class));
         verify(sssdConfigEndpoint, times(1)).postPrivate(any(SssdConfigRequest.class));
     }

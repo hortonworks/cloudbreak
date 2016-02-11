@@ -16,6 +16,11 @@ public class SssdConfigToJsonConverter extends AbstractConversionServiceAwareCon
         json.setUrl(config.getUrl());
         json.setSchema(config.getSchema());
         json.setBaseSearch(config.getBaseSearch());
+        json.setTlsReqcert(config.getTlsReqcert());
+        json.setAdServer(config.getAdServer());
+        json.setKerberosServer(config.getKerberosServer());
+        json.setKerberosRealm(config.getKerberosRealm());
+        json.setConfiguration(config.getConfiguration());
         json.setId(config.getId());
         json.setPublicInAccount(config.isPublicInAccount());
         return json;
