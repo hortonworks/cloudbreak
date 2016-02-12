@@ -35,6 +35,17 @@ abstract class SssdConfigBase implements JsonEntity {
     @Size(min = 10, max = 255, message = "The length of the config's search base has to be in range of 10 to 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.BASE_SEARCH, required = true)
     private String baseSearch;
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.TLS_REQUCERT, required = true)
+    private SssdTlsReqcert tlsReqcert;
+    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.AD_SERVER)
+    private String adServer;
+    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.KERBEROS_SERVER)
+    private String kerberosServer;
+    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.KERBEROS_REALM)
+    private String kerberosRealm;
+    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.CONFIGURATION)
+    private String configuration;
 
     public String getName() {
         return name;
@@ -82,5 +93,45 @@ abstract class SssdConfigBase implements JsonEntity {
 
     public void setBaseSearch(String baseSearch) {
         this.baseSearch = baseSearch;
+    }
+
+    public SssdTlsReqcert getTlsReqcert() {
+        return tlsReqcert;
+    }
+
+    public void setTlsReqcert(SssdTlsReqcert tlsReqcert) {
+        this.tlsReqcert = tlsReqcert;
+    }
+
+    public String getAdServer() {
+        return adServer;
+    }
+
+    public void setAdServer(String adServer) {
+        this.adServer = adServer;
+    }
+
+    public String getKerberosServer() {
+        return kerberosServer;
+    }
+
+    public void setKerberosServer(String kerberosServer) {
+        this.kerberosServer = kerberosServer;
+    }
+
+    public String getKerberosRealm() {
+        return kerberosRealm;
+    }
+
+    public void setKerberosRealm(String kerberosRealm) {
+        this.kerberosRealm = kerberosRealm;
+    }
+
+    public String getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(String configuration) {
+        this.configuration = configuration;
     }
 }

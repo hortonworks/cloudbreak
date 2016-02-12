@@ -15,6 +15,7 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
+import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcert;
 
 @Entity
 @Table(name = "sssdconfig", uniqueConstraints = {
@@ -71,6 +72,18 @@ public class SssdConfig implements ProvisionEntity {
 
     @Column(length = 500, columnDefinition = "TEXT")
     private String baseSearch;
+
+    @Enumerated(EnumType.STRING)
+    private SssdTlsReqcert tlsReqcert = SssdTlsReqcert.HARD;
+
+    private String adServer;
+
+    private String kerberosServer;
+
+    private String kerberosRealm;
+
+    @Column(length = 1000, columnDefinition = "TEXT")
+    private String configuration;
 
     public Long getId() {
         return id;
@@ -150,5 +163,45 @@ public class SssdConfig implements ProvisionEntity {
 
     public void setBaseSearch(String baseSearch) {
         this.baseSearch = baseSearch;
+    }
+
+    public SssdTlsReqcert getTlsReqcert() {
+        return tlsReqcert;
+    }
+
+    public void setTlsReqcert(SssdTlsReqcert tlsReqcert) {
+        this.tlsReqcert = tlsReqcert;
+    }
+
+    public String getAdServer() {
+        return adServer;
+    }
+
+    public void setAdServer(String adServer) {
+        this.adServer = adServer;
+    }
+
+    public String getKerberosServer() {
+        return kerberosServer;
+    }
+
+    public void setKerberosServer(String kerberosServer) {
+        this.kerberosServer = kerberosServer;
+    }
+
+    public String getKerberosRealm() {
+        return kerberosRealm;
+    }
+
+    public void setKerberosRealm(String kerberosRealm) {
+        this.kerberosRealm = kerberosRealm;
+    }
+
+    public String getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(String configuration) {
+        this.configuration = configuration;
     }
 }

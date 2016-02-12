@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
+import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcert;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
@@ -96,10 +97,17 @@ public class SssdConfigCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the config") String name,
             @CliOption(key = "description", help = "Description of the config") String description,
             @CliOption(key = "providerType", mandatory = true, help = "Type of the provider (ldap or ad)") String providerType,
-            @CliOption(key = "url", mandatory = true, help = "URL of the provider") String url,
-            @CliOption(key = "schema", mandatory = true, help = "Schema of the database (rfc2307 or rfc2307bis") String schema,
+            @CliOption(key = "url", mandatory = true, help = "comma-separated list of URIs of the LDAP servers") String url,
+            @CliOption(key = "schema", mandatory = true, help = "Schema of the database (rfc2307, rfc2307bis, IPA, AD") String schema,
             @CliOption(key = "baseSearch", mandatory = true, help = "Search base of the database") String baseSearch,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the config is public in the account") Boolean publicInAccount) {
+            @CliOption(key = "tlsReqcert", mandatory = true, unspecifiedDefaultValue = "hard", specifiedDefaultValue = "hard",
+                    help = "TLS behavior of connection (never, allow, try, demand, hard)") String tlsReqcert,
+            @CliOption(key = "adServer", mandatory = false, help = "comma-separated list of IP addresses or hostnames of the AD servers") String adServer,
+            @CliOption(key = "kerberosServer", mandatory = false,
+                    help = "comma-separated list of IP addresses or hostnames of the Kerberos servers") String kerberosServer,
+            @CliOption(key = "kerberosRealm", mandatory = false, help = "name of the Kerberos realm") String kerberosRealm,
+            @CliOption(key = "publicInAccount", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
+                    help = "flags if the config is public in the account") Boolean publicInAccount) {
         try {
             SssdConfigRequest request = new SssdConfigRequest();
             request.setName(name);
@@ -108,8 +116,11 @@ public class SssdConfigCommands implements CommandMarker {
             request.setUrl(url);
             request.setSchema(SssdSchemaType.fromString(schema));
             request.setBaseSearch(baseSearch);
+            request.setTlsReqcert(SssdTlsReqcert.fromString(tlsReqcert));
+            request.setAdServer(adServer);
+            request.setKerberosServer(kerberosServer);
+            request.setKerberosRealm(kerberosRealm);
             IdJson id;
-            publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
                 id = cloudbreakClient.sssdConfigEndpoint().postPublic(request);
             } else {
@@ -138,7 +149,20 @@ public class SssdConfigCommands implements CommandMarker {
             map.put("id", response.getId().toString());
             map.put("name", response.getName());
             map.put("description", response.getDescription());
-
+            map.put("provider type", response.getProviderType().getType());
+            map.put("url", response.getUrl());
+            map.put("schema", response.getSchema().getRepresentation());
+            map.put("base search", response.getBaseSearch());
+            map.put("tls", response.getTlsReqcert().getRepresentation());
+            if (response.getAdServer() != null) {
+                map.put("ad server", response.getAdServer());
+            }
+            if (response.getKerberosServer() != null) {
+                map.put("kerberos server", response.getKerberosServer());
+            }
+            if (response.getKerberosRealm() != null) {
+                map.put("kerberos realm", response.getKerberosRealm());
+            }
             return renderSingleMap(map, "FIELD", "INFO");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
