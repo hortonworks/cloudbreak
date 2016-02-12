@@ -14,10 +14,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariConfigurationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
@@ -37,19 +35,15 @@ public class HostFilterService {
     @Inject
     private AmbariClientProvider ambariClientProvider;
 
-    @Inject
-    private TlsSecurityService tlsSecurityService;
-
-    public List<HostMetadata> filterHostsForDecommission(Stack stack, Set<HostMetadata> hosts, String hostGroup) throws CloudbreakSecuritySetupException {
+    public List<HostMetadata> filterHostsForDecommission(Cluster cluster, Set<HostMetadata> hosts, String hostGroup) throws CloudbreakSecuritySetupException {
         List<HostMetadata> filteredList = new ArrayList<>(hosts);
         try {
-            Cluster cluster = stack.getCluster();
             HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             Map<String, String> config = configurationService.getConfiguration(ambariClient, hostGroup);
             for (HostFilter hostFilter : hostFilters) {
                 try {
-                    filteredList = hostFilter.filter(stack.getId(), config, filteredList);
+                    filteredList = hostFilter.filter(cluster.getId(), config, filteredList);
                 } catch (HostFilterException e) {
                     LOGGER.warn("Filter didn't succeed, moving to next filter", e);
                 }

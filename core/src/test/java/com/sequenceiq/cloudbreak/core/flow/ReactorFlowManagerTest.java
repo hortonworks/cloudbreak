@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
@@ -83,7 +82,7 @@ public class ReactorFlowManagerTest {
 
     @Test
     public void shouldReturnTheNextFailureTransition() throws Exception {
-        ProvisionRequest provisionRequest =  new ProvisionRequest(GCP_PLATFORM, 1L);
+        ProvisionRequest provisionRequest = new ProvisionRequest(GCP_PLATFORM, 1L);
         StackStatusUpdateRequest stackStatusUpdateRequest = new StackStatusUpdateRequest(GCP_PLATFORM, 1L, StatusRequest.STARTED);
         ClusterStatusUpdateRequest clusterStatusUpdateRequest = new ClusterStatusUpdateRequest(1L, StatusRequest.STARTED, GCP_PLATFORM);
         StackDeleteRequest stackDeleteRequest = new StackDeleteRequest(GCP_PLATFORM, 1L);
@@ -91,7 +90,7 @@ public class ReactorFlowManagerTest {
         UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(GCP_PLATFORM, 1L, 1, "master", ScalingType.DOWNSCALE_ONLY_CLUSTER);
         RemoveInstanceRequest removeInstanceRequest = new RemoveInstanceRequest(GCP_PLATFORM, 1L, "instanceId");
         UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(1L, new HostGroupAdjustmentJson(),
-                new ArrayList<HostMetadata>(), true, GCP_PLATFORM, ScalingType.DOWNSCALE_ONLY_CLUSTER);
+                true, GCP_PLATFORM, ScalingType.DOWNSCALE_ONLY_CLUSTER);
         UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = new UpdateAllowedSubnetsRequest(GCP_PLATFORM, 1L, new ArrayList<SecurityRule>());
         ClusterUserNamePasswordUpdateRequest clusterUserNamePasswordUpdateRequest =
                 new ClusterUserNamePasswordUpdateRequest(1L, "admin", "admin1", GCP_PLATFORM);

@@ -252,7 +252,7 @@ public class ClusterContainerRunner {
             ContainerConstraint ambariAgentConstraint = getAmbariAgentConstraint(ambariServerHost, ambariAgentApp, cloudPlatform, hostGroup, adjustment);
             containers.put(hostGroup.getName(), containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
                     ambariAgentConstraint, stackDeletionBasedExitCriteriaModel(stack.getId())));
-            
+
             if ("SWARM".equals(orchestrator.getType())) {
                 List<String> hosts = collectUpscaleCandidates(cluster.getId(), hostGroupName, adjustment);
 

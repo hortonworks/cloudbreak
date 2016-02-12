@@ -6,20 +6,22 @@ import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.service.cluster.DataNodeUtils.sortByUsedSpace;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
-import java.io.IOException;
-import java.net.ConnectException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -70,13 +72,8 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+
 import groovyx.net.http.HttpResponseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
@@ -84,8 +81,6 @@ public class AmbariClusterService implements ClusterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterService.class);
     private static final String MASTER_CATEGORY = "MASTER";
-    private static final String DATANODE = "DATANODE";
-    private static final double SAFETY_PERCENTAGE = 1.2;
 
     @Inject
     private StackService stackService;
@@ -110,12 +105,6 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private AmbariClientProvider ambariClientProvider;
-
-    @Inject
-    private AmbariConfigurationService configurationService;
-
-    @Inject
-    private HostFilterService hostFilterService;
 
     @Inject
     private FlowManager flowManager;
@@ -289,14 +278,12 @@ public class AmbariClusterService implements ClusterService {
         UpdateAmbariHostsRequest updateRequest;
         if (decommissionRequest) {
             updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment,
-                    collectDownscaleCandidates(hostGroupAdjustment, stack, cluster, decommissionRequest),
                     decommissionRequest, platform(stack.cloudPlatform()),
                     hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER);
             updateClusterStatusByStackId(stackId, UPDATE_REQUESTED);
             flowManager.triggerClusterDownscale(updateRequest);
         } else {
             updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment,
-                    new ArrayList<HostMetadata>(),
                     decommissionRequest, platform(stack.cloudPlatform()),
                     ScalingType.UPSCALE_ONLY_CLUSTER);
             flowManager.triggerClusterUpscale(updateRequest);
@@ -504,38 +491,6 @@ public class AmbariClusterService implements ClusterService {
         return downScale;
     }
 
-    private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster, boolean decommissionRequest)
-            throws CloudbreakSecuritySetupException {
-        List<HostMetadata> downScaleCandidates = new ArrayList<>();
-        if (decommissionRequest) {
-            HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
-            int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), adjustmentJson.getHostGroup());
-            Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
-            List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup, adjustmentJson.getHostGroup());
-            int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
-            verifyNodeCount(cluster, replication, adjustmentJson.getScalingAdjustment(), filteredHostList, reservedInstances);
-            if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup.getName())) {
-                downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication,
-                        adjustmentJson.getScalingAdjustment(), filteredHostList);
-            } else {
-                downScaleCandidates = filteredHostList;
-            }
-        }
-        return downScaleCandidates;
-    }
-
-    private int getReplicationFactor(AmbariClient ambariClient, String hostGroup) {
-        try {
-            Map<String, String> configuration = configurationService.getConfiguration(ambariClient, hostGroup);
-            return Integer.parseInt(configuration.get(ConfigParam.DFS_REPLICATION.key()));
-        } catch (ConnectException e) {
-            LOGGER.error("Cannot connect to Ambari to get the configuration", e);
-            throw new BadRequestException("Cannot connect to Ambari");
-        }
-    }
-
     private void validateComponentsCategory(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
@@ -586,105 +541,6 @@ public class AmbariClusterService implements ClusterService {
                     stack.getCluster().getName(), hostGroupAdjustment.getHostGroup()));
         }
         return hostGroup;
-    }
-
-    private void verifyNodeCount(Cluster cluster, int replication, int scalingAdjustment, List<HostMetadata> filteredHostList, int reservedInstances) {
-        int adjustment = Math.abs(scalingAdjustment);
-        int hostSize = filteredHostList.size();
-        if (hostSize + reservedInstances - adjustment <= replication || hostSize < adjustment) {
-            LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
-            throw new BadRequestException("There is not enough node to downscale. "
-                    + "Check the replication factor and the ApplicationMaster occupation.");
-        }
-    }
-
-    private boolean doesHostGroupContainDataNode(AmbariClient client, String blueprint, String hostGroup) {
-        return client.getBlueprintMap(blueprint).get(hostGroup).contains(DATANODE);
-    }
-
-    private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication,
-            int adjustment, List<HostMetadata> filteredHostList) {
-        int removeCount = Math.abs(adjustment);
-        Map<String, Map<Long, Long>> dfsSpace = client.getDFSSpace();
-        Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
-        Map<String, Long> selectedNodes = selectNodes(sortedAscending, filteredHostList, removeCount);
-        Map<String, Long> remainingNodes = removeSelected(sortedAscending, selectedNodes);
-        LOGGER.info("Selected nodes for decommission: {}", selectedNodes);
-        LOGGER.info("Remaining nodes after decommission: {}", remainingNodes);
-        long usedSpace = getSelectedUsage(selectedNodes);
-        long remainingSpace = getRemainingSpace(remainingNodes, dfsSpace);
-        long safetyUsedSpace = ((Double) (usedSpace * replication * SAFETY_PERCENTAGE)).longValue();
-        LOGGER.info("Checking DFS space for decommission, usedSpace: {}, remainingSpace: {}", usedSpace, remainingSpace);
-        LOGGER.info("Used space with replication: {} and safety space: {} is: {}", replication, SAFETY_PERCENTAGE, safetyUsedSpace);
-        if (remainingSpace < safetyUsedSpace) {
-            throw new BadRequestException(
-                    String.format("Trying to move '%s' bytes worth of data to nodes with '%s' bytes of capacity is not allowed", usedSpace, remainingSpace)
-            );
-        }
-        return convert(selectedNodes, filteredHostList);
-    }
-
-    private Map<String, Long> selectNodes(Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {
-        Map<String, Long> select = new HashMap<>();
-        int i = 0;
-        for (String host : sortedAscending.keySet()) {
-            if (i < removeCount) {
-                for (HostMetadata hostMetadata : filteredHostList) {
-                    if (hostMetadata.getHostName().equalsIgnoreCase(host)) {
-                        select.put(host, sortedAscending.get(host));
-                        i++;
-                        break;
-                    }
-                }
-            } else {
-                break;
-            }
-        }
-        return select;
-    }
-
-    private Map<String, Long> removeSelected(Map<String, Long> all, Map<String, Long> selected) {
-        Map<String, Long> copy = new HashMap<>(all);
-        for (String host : selected.keySet()) {
-            Iterator<String> iterator = copy.keySet().iterator();
-            while (iterator.hasNext()) {
-                if (iterator.next().equalsIgnoreCase(host)) {
-                    iterator.remove();
-                    break;
-                }
-            }
-        }
-        return copy;
-    }
-
-    private long getSelectedUsage(Map<String, Long> selected) {
-        long usage = 0;
-        for (String host : selected.keySet()) {
-            usage += selected.get(host);
-        }
-        return usage;
-    }
-
-    private long getRemainingSpace(Map<String, Long> remainingNodes, Map<String, Map<Long, Long>> dfsSpace) {
-        long remaining = 0;
-        for (String host : remainingNodes.keySet()) {
-            Map<Long, Long> space = dfsSpace.get(host);
-            remaining += space.keySet().iterator().next();
-        }
-        return remaining;
-    }
-
-    private List<HostMetadata> convert(Map<String, Long> selectedNodes, List<HostMetadata> filteredHostList) {
-        List<HostMetadata> result = new ArrayList<>();
-        for (String host : selectedNodes.keySet()) {
-            for (HostMetadata hostMetadata : filteredHostList) {
-                if (hostMetadata.getHostName().equalsIgnoreCase(host)) {
-                    result.add(hostMetadata);
-                    break;
-                }
-            }
-        }
-        return result;
     }
 
     private void updateHostMetadataByHostState(Stack stack, String hostName, Map<String, String> hostStatuses) {

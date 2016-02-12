@@ -4,11 +4,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.util.JsonUtil.readValue;
 import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
 
-import javax.annotation.Nullable;
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
@@ -16,6 +11,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+
+import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -40,7 +42,6 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
-import org.springframework.stereotype.Component;
 
 @Component
 @Transactional
@@ -50,22 +51,16 @@ public class ClusterTerminationService {
 
     @Inject
     private ClusterRepository clusterRepository;
-
     @Inject
     private HostGroupRepository hostGroupRepository;
-
     @Resource
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
-
     @Inject
     private HostMetadataRepository hostMetadataRepository;
-
     @Inject
     private ConstraintRepository constraintRepository;
-
     @Inject
     private ContainerRepository containerRepository;
-
     @Inject
     private ContainerOrchestratorResolver orchestratorResolver;
 

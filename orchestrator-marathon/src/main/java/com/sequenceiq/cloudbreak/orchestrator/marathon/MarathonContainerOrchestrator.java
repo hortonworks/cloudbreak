@@ -4,7 +4,9 @@ package com.sequenceiq.cloudbreak.orchestrator.marathon;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
@@ -23,6 +26,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.marathon.poller.MarathonAppBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.marathon.poller.MarathonAppDeletion;
+import com.sequenceiq.cloudbreak.orchestrator.marathon.poller.MarathonTaskDeletion;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
@@ -122,18 +126,52 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
         try {
             Marathon client = MarathonClient.getInstance(cred.getApiEndpoint());
             List<Future<Boolean>> futures = new ArrayList<>();
+
+            Map<String, Set<String>> containersPerApp = new HashMap<>();
             for (ContainerInfo info : containerInfo) {
-                String appId = info.getName();
-                try {
-                    client.deleteApp(appId);
-                    MarathonAppDeletion appDeletion = new MarathonAppDeletion(client, appId);
-                    Callable<Boolean> runner = runner(appDeletion, getExitCriteria(), null);
-                    futures.add(getParallelContainerRunner().submit(runner));
-                } catch (MarathonException me) {
-                    if (STATUS_NOT_FOUND.equals(me.getStatus())) {
-                        LOGGER.info("Marathon app '{}' has already been deleted.", appId);
-                    } else {
-                        throw new CloudbreakOrchestratorFailedException(me);
+                if (!containersPerApp.containsKey(info.getName())) {
+                    containersPerApp.put(info.getName(), Sets.newHashSet(info.getId()));
+                } else {
+                    containersPerApp.get(info.getName()).add(info.getId());
+                }
+            }
+
+            for (String appName : containersPerApp.keySet()) {
+                App app = client.getApp(appName).getApp();
+                Set<String> tasksInApp = FluentIterable.from(app.getTasks()).transform(new Function<Task, String>() {
+                    @Override
+                    public String apply(Task input) {
+                        return input.getId();
+                    }
+                }).toSet();
+                if (containersPerApp.get(appName).containsAll(tasksInApp)) {
+                    try {
+                        client.deleteApp(appName);
+                        MarathonAppDeletion appDeletion = new MarathonAppDeletion(client, appName);
+                        Callable<Boolean> runner = runner(appDeletion, getExitCriteria(), null);
+                        futures.add(getParallelContainerRunner().submit(runner));
+                    } catch (MarathonException me) {
+                        if (STATUS_NOT_FOUND.equals(me.getStatus())) {
+                            LOGGER.info("Marathon app '{}' has already been deleted.", appName);
+                        } else {
+                            throw new CloudbreakOrchestratorFailedException(me);
+                        }
+                    }
+                } else {
+                    Set<String> taskIds = containersPerApp.get(appName);
+                    for (String taskId : taskIds) {
+                        try {
+                            client.deleteAppTask(appName, taskId, "true");
+                            MarathonTaskDeletion taskDeletion = new MarathonTaskDeletion(client, appName, taskIds);
+                            Callable<Boolean> runner = runner(taskDeletion, getExitCriteria(), null);
+                            futures.add(getParallelContainerRunner().submit(runner));
+                        } catch (MarathonException me) {
+                            if (STATUS_NOT_FOUND.equals(me.getStatus())) {
+                                LOGGER.info("Marathon task '{}' has already been deleted from app '{}'.", taskId, appName);
+                            } else {
+                                throw new CloudbreakOrchestratorFailedException(me);
+                            }
+                        }
                     }
                 }
             }

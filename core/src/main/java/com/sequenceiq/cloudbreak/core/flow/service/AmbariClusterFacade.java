@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
@@ -84,49 +85,36 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Inject
     private AmbariClientProvider ambariClientProvider;
-
     @Inject
     private AmbariStartupListenerTask ambariStartupListenerTask;
-
     @Inject
     private StackUpdater stackUpdater;
-
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
-
+    @Inject
+    private AmbariDecommissioner ambariDecommissioner;
     @Inject
     private StackService stackService;
-
     @Inject
     private ClusterService clusterService;
-
     @Inject
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
-
     @Inject
     private EmailSenderService emailSenderService;
-
     @Inject
     private CloudbreakEventService eventService;
-
     @Inject
     private HostGroupService hostGroupService;
-
     @Inject
     private ClusterContainerRunner containerRunner;
-
     @Inject
     private TlsSecurityService tlsSecurityService;
-
     @Inject
     private AmbariClusterStatusUpdater ambariClusterStatusUpdater;
-
     @Inject
     private CloudbreakMessagesService messagesService;
-
     @Inject
     private InstanceMetadataService instanceMetadataService;
-
     @Inject
     private ClusterTerminationService clusterTerminationService;
 
@@ -372,14 +360,14 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALING_DOWN, UPDATE_IN_PROGRESS.name());
-        Set<String> hostNames = ambariClusterConnector
-                .decommissionAmbariNodes(stack.getId(), actualContext.getHostGroupAdjustment(), actualContext.getCandidates());
+        Set<String> hostNames = ambariDecommissioner.decommissionAmbariNodes(stack.getId(), actualContext.getHostGroupAdjustment());
         updateInstanceMetadataAfterScaling(true, hostNames, stack);
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), actualContext.getHostGroupAdjustment().getHostGroup());
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
         context = new StackScalingContext(stack.getId(),
-                actualContext.getCloudPlatform(), actualContext.getCandidates().size() * (-1), hostGroup.getConstraint().getInstanceGroup().getGroupName(),
+                actualContext.getCloudPlatform(), hostNames.size() * (-1),
+                hostGroup.getConstraint().getInstanceGroup() == null ? null : hostGroup.getConstraint().getInstanceGroup().getGroupName(),
                 null, actualContext.getScalingType(), null);
         return context;
     }
@@ -552,10 +540,12 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     private void updateInstanceMetadataAfterScaling(boolean decommission, String hostName, Stack stack) {
-        if (decommission) {
-            stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
-        } else {
-            stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.REGISTERED);
+        if (!"BYOS".equals(stack.cloudPlatform())) {
+            if (decommission) {
+                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
+            } else {
+                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.REGISTERED);
+            }
         }
     }
 
