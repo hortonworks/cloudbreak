@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintTemplateRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -85,7 +86,7 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
             constraint = decorateConstraint(stackId, user, constraint, constraintJson.getInstanceGroupName(), constraintJson.getConstraintTemplateName());
             subject.setConstraint(constraint);
         } else {
-            subject = reloadHostGroup(stackId, constraint, constraintJson, subject, user);
+            subject = getHostGroup(stackId, constraint, constraintJson, subject, user);
         }
 
         subject.getRecipes().clear();
@@ -123,26 +124,43 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         return constraint;
     }
 
-    private HostGroup reloadHostGroup(Long stackId, Constraint constraint, ConstraintJson constraintJson, HostGroup subject, CbUser user) {
-        HostGroup result;
+    private HostGroup getHostGroup(Long stackId, Constraint constraint, ConstraintJson constraintJson, HostGroup subject, CbUser user) {
+        HostGroup result = subject;
+        final String instanceGroupName = constraintJson.getInstanceGroupName();
+        final String constraintTemplateName = constraintJson.getConstraintTemplateName();
         Cluster cluster = clusterService.retrieveClusterByStackId(stackId);
         if (constraintJson == null) {
             throw new BadRequestException("The constraint field must be set in the reinstall request!");
         }
-        final String instanceGroupName = constraintJson.getInstanceGroupName();
-        String constraintTemplateName = constraintJson.getConstraintTemplateName();
+        Constraint decoratedConstraint = decorateConstraint(stackId, user, constraint, instanceGroupName, constraintTemplateName);
         if (!isEmpty(instanceGroupName)) {
-            result = getHostGroupByInstanceGroupName(constraintJson, subject, cluster, instanceGroupName);
+            result = getHostGroupByInstanceGroupName(decoratedConstraint, subject, cluster, instanceGroupName);
         } else if (!isEmpty(constraintTemplateName)) {
-            result = getHostGroupByConstraintTemplateName(stackId, constraint, subject, user, instanceGroupName, constraintTemplateName);
+            subject.setConstraint(constraintRepository.save(constraint));
         } else {
-            throw new BadRequestException("The constraint field must contain the 'constraintTemplateName' or 'instanceGroupName'!");
+            throw new BadRequestException("The constraint field must contain the 'constraintTemplateName' or 'instanceGroupName' parameter!");
         }
         return result;
     }
 
-    private HostGroup getHostGroupByInstanceGroupName(ConstraintJson constraintJson, HostGroup subject, Cluster cluster, final String instanceGroupName) {
-        Set<HostGroup> hostGroups = cluster.getHostGroups();
+    private HostGroup getHostGroupByInstanceGroupName(Constraint constraint, HostGroup subject, Cluster cluster, final String instanceGroupName) {
+        HostGroup result = subject;
+        Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+        if (hostGroups.isEmpty()) {
+            Stack stack = cluster.getStack();
+            if (stack == null) {
+                String msg = String.format("There is no stack associated to cluster (id:'%s', name: '%s')!", cluster.getId(), cluster.getName());
+                throw new BadRequestException(msg);
+            } else {
+                subject.setConstraint(constraint);
+            }
+        } else {
+            result = getDetailsFromExistingHostGroup(constraint, subject, instanceGroupName, hostGroups);
+        }
+        return result;
+    }
+
+    private HostGroup getDetailsFromExistingHostGroup(Constraint constraint, HostGroup subject, final String instanceGroupName, Set<HostGroup> hostGroups) {
         Optional<HostGroup> hostGroupOptional = FluentIterable.from(hostGroups).firstMatch(new Predicate<HostGroup>() {
             @Override
             public boolean apply(HostGroup input) {
@@ -153,26 +171,14 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         if (hostGroupOptional.isPresent()) {
             HostGroup hostGroup = hostGroupOptional.get();
             Integer instanceGroupNodeCount = hostGroup.getConstraint().getInstanceGroup().getNodeCount();
-            if (constraintJson.getHostCount() > instanceGroupNodeCount) {
+            if (constraint.getHostCount() > instanceGroupNodeCount) {
                 throw new BadRequestException(String.format("The 'hostCount' of host group '%s' constraint could not be more than '%s'!"));
             }
-            hostGroup.getConstraint().setHostCount(constraintJson.getHostCount());
+            hostGroup.getConstraint().setHostCount(constraint.getHostCount());
             hostGroup.setName(subject.getName());
             return hostGroup;
         } else {
             throw new BadRequestException(String.format("Invalid 'instanceGroupName'! Could not find instance group with name: '%s'", instanceGroupName));
         }
-    }
-
-    private HostGroup getHostGroupByConstraintTemplateName(Long stackId, Constraint constraint, HostGroup subject, CbUser user, String instanceGroupName,
-                                                           String constraintTemplateName) {
-        ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByNameInAccount(constraintTemplateName,
-                user.getAccount(), user.getUserId());
-        if (constraintTemplate == null) {
-            throw new BadRequestException(String.format("Constraint template could not be found with name: '%s'!", constraintTemplateName));
-        }
-        constraint = decorateConstraint(stackId, user, constraint, instanceGroupName, constraintTemplateName);
-        subject.setConstraint(constraintRepository.save(constraint));
-        return subject;
     }
 }

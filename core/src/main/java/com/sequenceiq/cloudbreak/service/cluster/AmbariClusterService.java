@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -62,7 +61,9 @@ import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateReques
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
@@ -108,9 +109,6 @@ public class AmbariClusterService implements ClusterService {
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Inject
-    private HostGroupRepository hostGroupRepository;
-
-    @Inject
     private AmbariClientProvider ambariClientProvider;
 
     @Inject
@@ -137,6 +135,12 @@ public class AmbariClusterService implements ClusterService {
     @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private ClusterTerminationService clusterTerminationService;
+
+    @Inject
+    private HostGroupService hostGroupService;
 
     private enum Msg {
         AMBARI_CLUSTER_START_IGNORED("ambari.cluster.start.ignored"),
@@ -226,7 +230,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public void updateHostCountWithAdjustment(Long clusterId, String hostGroupName, Integer adjustment) {
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupName);
         Constraint constraint = hostGroup.getConstraint();
         constraint.setHostCount(constraint.getHostCount() + adjustment);
         constraintRepository.save(constraint);
@@ -235,7 +239,7 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public void updateHostMetadata(Long clusterId, Map<String, List<String>> hostsPerHostGroup) {
         for (Map.Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
-            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupEntry.getKey());
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey());
             if (hostGroup != null) {
                 for (String hostName : hostGroupEntry.getValue()) {
                     HostMetadata hostMetadataEntry = new HostMetadata();
@@ -244,7 +248,7 @@ public class AmbariClusterService implements ClusterService {
                     hostMetadataEntry.setHostMetadataState(HostMetadataState.CONTAINER_RUNNING);
                     hostGroup.getHostMetadata().add(hostMetadataEntry);
                 }
-                hostGroupRepository.save(hostGroup);
+                hostGroupService.save(hostGroup);
             }
         }
     }
@@ -442,22 +446,28 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(Transactional.TxType.NEVER)
     public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, AmbariStackDetails ambariStackDetails) {
         if (blueprintId == null || hostGroups == null) {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
         }
-        Stack stack = stackService.get(stackId);
         Blueprint blueprint = blueprintService.get(blueprintId);
         if (blueprint == null) {
             throw new BadRequestException(String.format("Blueprint not exist with '%s' id.", blueprintId));
         }
+        Stack stack = stackService.getById(stackId);
         Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
         if (validateBlueprint) {
-            blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackService.getById(stackId).getInstanceGroups());
+            blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stack.getInstanceGroups());
         }
+
+        if ("MARATHON".equals(stack.getOrchestrator().getType())) {
+            clusterTerminationService.deleteClusterContainers(cluster.getId());
+            cluster = clusterRepository.findById(stack.getCluster().getId());
+        }
+
+        hostGroups = hostGroupService.saveOrUpdateWithMetadata(hostGroups, cluster);
         cluster.setBlueprint(blueprint);
-        cluster.getHostGroups().removeAll(cluster.getHostGroups());
+        cluster.getHostGroups().clear();
         cluster.getHostGroups().addAll(hostGroups);
         if (ambariStackDetails != null) {
             cluster.setAmbariStackDetails(ambariStackDetails);
@@ -466,11 +476,6 @@ public class AmbariClusterService implements ClusterService {
         cluster.setStatus(REQUESTED);
         cluster.setStack(stack);
         cluster = clusterRepository.save(cluster);
-
-        for (HostGroup hg : hostGroups) {
-            hg.setCluster(cluster);
-            hostGroupRepository.save(hg);
-        }
 
         if (cluster.getContainers().isEmpty()) {
             flowManager.triggerClusterInstall(new ProvisionRequest(platform(stack.cloudPlatform()), stack.getId()));
@@ -506,7 +511,7 @@ public class AmbariClusterService implements ClusterService {
             HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
             int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
-            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), adjustmentJson.getHostGroup());
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), adjustmentJson.getHostGroup());
             Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
             List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup, adjustmentJson.getHostGroup());
             int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
@@ -562,7 +567,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void validateRegisteredHosts(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
-        Set<HostMetadata> hostMetadata = hostGroupRepository.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup())
+        Set<HostMetadata> hostMetadata = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup())
                 .getHostMetadata();
         if (hostMetadata.size() <= -1 * hostGroupAdjustment.getScalingAdjustment()) {
             String errorMessage = String.format("[hostGroup: '%s', current hosts: %s, decommissions requested: %s]",
@@ -574,7 +579,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private HostGroup getHostGroup(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
-        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup());
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup());
         if (hostGroup == null) {
             throw new BadRequestException(String.format(
                     "Invalid host group: cluster '%s' does not contain a host group named '%s'.",
