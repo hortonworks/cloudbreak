@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
@@ -64,6 +65,12 @@ public class CleanupService {
         for (BlueprintResponse blueprint : blueprints) {
             if (blueprint.getName().startsWith("it-")) {
                 deleteBlueprint(cloudbreakClient, String.valueOf(blueprint.getId()));
+            }
+        }
+        Set<RecipeResponse> recipes = cloudbreakClient.recipeEndpoint().getPrivates();
+        for (RecipeResponse recipe : recipes) {
+            if (recipe.getName().startsWith("it-")) {
+                deleteRecipe(cloudbreakClient, recipe.getId());
             }
         }
         Set<CredentialResponse> credentials = cloudbreakClient.credentialEndpoint().getPrivates();
