@@ -8,11 +8,16 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import com.sequenceiq.cloudbreak.api.endpoint.SssdConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
@@ -44,7 +49,12 @@ public class SssdConfigCommandsTest {
     @Mock
     private ExceptionTransformer exceptionTransformer;
 
+    @Mock
+    private File mockFile;
+
     private SssdConfigResponse dummyResult;
+
+    private File dummyFile;
 
     @Before
     public void setUp() throws Exception {
@@ -56,6 +66,9 @@ public class SssdConfigCommandsTest {
         dummyResult.setProviderType(SssdProviderType.LDAP);
         dummyResult.setSchema(SssdSchemaType.RFC2307);
         dummyResult.setTlsReqcert(SssdTlsReqcert.NEVER);
+        String classPackage = getClass().getPackage().getName().replaceAll("\\.", "/");
+        Resource resource = new ClassPathResource(classPackage + "/" + getClass().getSimpleName() + ".class");
+        dummyFile = resource.getFile();
         given(cloudbreakClient.sssdConfigEndpoint()).willReturn(sssdConfigEndpoint);
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
     }
@@ -98,6 +111,34 @@ public class SssdConfigCommandsTest {
     public void testPrivateAdd() {
         given(sssdConfigEndpoint.postPrivate(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
         underTest.add("name", "desc", "ldap", "url", "rfc2307", "base", "never", null, null, null, false);
+        verify(sssdConfigEndpoint, times(0)).postPublic(any(SssdConfigRequest.class));
+        verify(sssdConfigEndpoint, times(1)).postPrivate(any(SssdConfigRequest.class));
+    }
+
+    @Test
+    public void testUploadFileNotFound() {
+        given(mockFile.exists()).willReturn(false);
+        given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
+        underTest.upload("name", "desc", mockFile, true);
+        verify(mockFile, times(1)).exists();
+        verify(sssdConfigEndpoint, times(0)).postPublic(any(SssdConfigRequest.class));
+        verify(sssdConfigEndpoint, times(0)).postPrivate(any(SssdConfigRequest.class));
+
+    }
+
+    @Test
+    public void testPublicUpload() throws IOException {
+        given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
+        underTest.upload("name", "desc", dummyFile, true);
+        verify(sssdConfigEndpoint, times(1)).postPublic(any(SssdConfigRequest.class));
+        verify(sssdConfigEndpoint, times(0)).postPrivate(any(SssdConfigRequest.class));
+    }
+
+    @Test
+    public void testPrivateUpload() {
+        given(mockFile.exists()).willReturn(true);
+        given(sssdConfigEndpoint.postPrivate(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
+        underTest.upload("name", "desc", dummyFile, false);
         verify(sssdConfigEndpoint, times(0)).postPublic(any(SssdConfigRequest.class));
         verify(sssdConfigEndpoint, times(1)).postPrivate(any(SssdConfigRequest.class));
     }

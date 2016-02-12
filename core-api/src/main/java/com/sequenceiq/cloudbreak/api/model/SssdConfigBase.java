@@ -21,21 +21,16 @@ abstract class SssdConfigBase implements JsonEntity {
     @Size(max = 1000, message = "The length of the config's description has to be less than 1000")
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
-    @NotNull
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.PROVIDER_TYPE, required = true)
     private SssdProviderType providerType;
-    @NotNull
     @Size(min = 10, max = 255, message = "The length of the config's url has to be in range of 10 to 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.URL, required = true)
     private String url;
-    @NotNull
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.SCHEMA, required = true)
     private SssdSchemaType schema;
-    @NotNull
     @Size(min = 10, max = 255, message = "The length of the config's search base has to be in range of 10 to 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.BASE_SEARCH, required = true)
     private String baseSearch;
-    @NotNull
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.TLS_REQUCERT, required = true)
     private SssdTlsReqcert tlsReqcert;
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.AD_SERVER)

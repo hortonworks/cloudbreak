@@ -2,11 +2,14 @@ package com.sequenceiq.cloudbreak.shell.commands;
 
 import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderSingleMap;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -92,6 +95,7 @@ public class SssdConfigCommands implements CommandMarker {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
     }
+
     @CliCommand(value = "sssdconfig add", help = "Add a new config")
     public String add(
             @CliOption(key = "name", mandatory = true, help = "Name of the config") String name,
@@ -132,6 +136,34 @@ public class SssdConfigCommands implements CommandMarker {
         }
     }
 
+    @CliCommand(value = "sssdconfig upload", help = "Upload a new config")
+    public String upload(
+            @CliOption(key = "name", mandatory = true, help = "Name of the config") String name,
+            @CliOption(key = "description", help = "Description of the config") String description,
+            @CliOption(key = "file", mandatory = true, help = "Path of the configuration file") File configFile,
+            @CliOption(key = "publicInAccount", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
+                    help = "flags if the config is public in the account") Boolean publicInAccount) {
+        try {
+            if (configFile != null && !configFile.exists()) {
+                return "Pre install script file not exists.";
+            }
+            SssdConfigRequest request = new SssdConfigRequest();
+            request.setName(name);
+            request.setDescription(description);
+            String config = IOUtils.toString(new FileInputStream(configFile));
+            request.setConfiguration(config);
+            IdJson id;
+            if (publicInAccount) {
+                id = cloudbreakClient.sssdConfigEndpoint().postPublic(request);
+            } else {
+                id = cloudbreakClient.sssdConfigEndpoint().postPrivate(request);
+            }
+            return String.format("SSSD config '%s' has been added with id: %s", request.getName(), id.getId());
+        } catch (Exception ex) {
+            throw exceptionTransformer.transformToRuntimeException(ex);
+        }
+    }
+
     @CliCommand(value = "sssdconfig show", help = "Shows the properties of the specified config")
     public Object show(
             @CliOption(key = "id", mandatory = false, help = "Id of the config") String id,
@@ -149,20 +181,6 @@ public class SssdConfigCommands implements CommandMarker {
             map.put("id", response.getId().toString());
             map.put("name", response.getName());
             map.put("description", response.getDescription());
-            map.put("provider type", response.getProviderType().getType());
-            map.put("url", response.getUrl());
-            map.put("schema", response.getSchema().getRepresentation());
-            map.put("base search", response.getBaseSearch());
-            map.put("tls", response.getTlsReqcert().getRepresentation());
-            if (response.getAdServer() != null) {
-                map.put("ad server", response.getAdServer());
-            }
-            if (response.getKerberosServer() != null) {
-                map.put("kerberos server", response.getKerberosServer());
-            }
-            if (response.getKerberosRealm() != null) {
-                map.put("kerberos realm", response.getKerberosRealm());
-            }
             return renderSingleMap(map, "FIELD", "INFO");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);

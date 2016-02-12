@@ -80,11 +80,11 @@ public class ClusterController implements ClusterEndpoint {
         MDCBuilder.buildUserMdcContext(user);
         fileSystemValidator.validateFileSystem(stackService.getById(stackId).cloudPlatform(), request.getFileSystem());
         Cluster cluster = conversionService.convert(request, Cluster.class);
-        if (cluster.isLdapRequired()) {
-            cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
-        }
         cluster = clusterDecorator.decorate(cluster, stackId, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
                 request.getSssdConfigId());
+        if (cluster.isLdapRequired() && cluster.getSssdConfig() == null) {
+            cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
+        }
         clusterService.create(user, stackId, cluster);
         return Response.status(Response.Status.ACCEPTED).build();
     }

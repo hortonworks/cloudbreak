@@ -113,6 +113,7 @@ public class AmbariClusterConnector {
     private static final String FQDN = "fqdn";
     private static final String UPSCALE_REQUEST_CONTEXT = "Logical Request: Scale Cluster";
     private static final String UPSCALE_REQUEST_STATUS = "IN_PROGRESS";
+    private static final String SSSD_CONFIG = "sssd-config-";
 
     @Inject
     private StackRepository stackRepository;
@@ -328,9 +329,21 @@ public class AmbariClusterConnector {
 
     private void executeSssdRecipe(Stack stack, Set<String> hosts) throws CloudbreakSecuritySetupException {
         SssdConfig config = stack.getCluster().getSssdConfig();
-        List<String> payload = Arrays.asList(config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
-                config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
-                config.getKerberosServer(), config.getKerberosRealm());
+        List<String> payload;
+        if (config.getConfiguration() != null) {
+            Map<String, String> keyValues = new HashMap<>();
+            String configName = SSSD_CONFIG + config.getId();
+            keyValues.put(configName, config.getConfiguration());
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+            pluginManager.prepareKeyValues(clientConfig, keyValues);
+            payload = Arrays.asList(configName);
+        } else {
+            payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
+                    config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
+                    config.getKerberosServer(), config.getKerberosRealm());
+        }
         pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.SSSD_SETUP, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT, payload, hosts);
     }
 
