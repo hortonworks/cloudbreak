@@ -26,7 +26,7 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group" ng-repeat="(key, value) in getCredentialParameters(credential)">
+    <div class="form-group" ng-repeat="(key, value) in getCredentialParameters(credential)" ng-show="value">
         <label class="col-sm-3 control-label" for="openstackendpoint">{{getParameterLabel(key)}}</label>
 
         <div class="col-sm-9">
