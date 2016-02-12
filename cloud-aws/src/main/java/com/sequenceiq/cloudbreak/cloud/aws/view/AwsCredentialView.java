@@ -22,8 +22,12 @@ public class AwsCredentialView {
         return cloudCredential.getParameter("roleArn", String.class);
     }
 
-    public String getKeyPairName() {
-        return cloudCredential.getParameter("keyPairName", String.class);
+    public String getAccessKey() {
+        return cloudCredential.getParameter("accessKey", String.class);
+    }
+
+    public String getSecretKey() {
+        return cloudCredential.getParameter("secretKey", String.class);
     }
 
     public Long getId() {
