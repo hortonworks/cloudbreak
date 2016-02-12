@@ -6,7 +6,11 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
     function($scope, $rootScope, $filter, $base64, $interpolate, UserCredential, AccountCredential, GlobalCredential, GlobalCredentialCertificate) {
         $rootScope.credentials = AccountCredential.query();
         $scope.credentialInCreation = false;
-        $scope.credentialAws = {};
+        $scope.credentialAws = {
+            parameters: {
+                selector: 'role-based'
+            }
+        };
         $scope.credentialAzure = {};
         $scope.credentialAzureRm = {};
         $scope.credentialGcp = {};
@@ -93,12 +97,16 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             function handleAwsCredentialSuccess(result) {
                 $scope.credentialAws.id = result.id;
                 $rootScope.credentials.push($scope.credentialAws);
-                $scope.credentialAws = {};
                 $scope.showSuccess($filter("format")($rootScope.msg.aws_credential_success, String(result.id)));
                 $scope.awsCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
                 $scope.credentialInCreation = false;
                 $scope.unShowErrorMessageAlert();
+                $scope.credentialAws = {
+                     parameters: {
+                        selector: 'role-based'
+                    }
+                };
             }
         }
 
