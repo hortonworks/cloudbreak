@@ -66,8 +66,8 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public boolean areAllNodesAvailable(GatewayConfig gatewayConfig, Set<Node> nodes) {
-        return false;
+    public List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
+        return new ArrayList<>();
     }
 
     @Override

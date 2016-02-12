@@ -29,6 +29,7 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
@@ -65,7 +66,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
      */
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, String consulLogLocation,
-                                            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try {
             String privateGatewayIp = getPrivateGatewayIp(gatewayConfig.getPublicAddress(), nodes);
             Set<String> privateAddresses = getPrivateAddresses(nodes);
@@ -88,7 +89,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, String consulLogLocation,
-                                            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try {
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
@@ -107,7 +108,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint,
-                                            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         List<ContainerInfo> containerInfos = new ArrayList<>();
         String image = imageName(config);
         try {
@@ -149,17 +150,20 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public boolean areAllNodesAvailable(GatewayConfig gatewayConfig, Set<Node> nodes) {
+    public List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
+        Set<String> missingNodes = getPrivateAddresses(nodes);
         LOGGER.info("Checking if Swarm manager is available and if the agents are registered.");
         try {
-            List<String> allAvailableNode = getAvailableNodes(gatewayConfig, nodes);
-            if (allAvailableNode.size() == getPrivateAddresses(nodes).size()) {
-                return true;
+            List<String> allAvailableNodes = getAvailableNodes(gatewayConfig, nodes);
+            LOGGER.info("Available swarm nodes: {}/{}", allAvailableNodes.size(), missingNodes.size());
+            for (String availableNode : allAvailableNodes) {
+                missingNodes.remove(availableNode);
             }
+
         } catch (Exception t) {
             LOGGER.info(String.format("Cannot connect to Swarm manager, maybe it hasn't started yet: %s", t.getMessage()));
         }
-        return false;
+        return Lists.newArrayList(missingNodes);
     }
 
     @Override
@@ -220,7 +224,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     private CreateContainerCmd decorateCreateContainerCmd(String image, ContainerConstraint constraint, String hostname,
-                                                                DockerClient dockerApiClient, String name, String privateIp) {
+            DockerClient dockerApiClient, String name, String privateIp) {
         String[] env = createEnv(constraint, hostname, privateIp);
         String[] cmd = constraint.getCmd();
         CreateContainerCmd createCmd = dockerApiClient.createContainerCmd(image)
@@ -393,7 +397,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @VisibleForTesting
     public Callable<Boolean> runner(ContainerBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
-                                    Map<String, String> mdcMap) {
+            Map<String, String> mdcMap) {
         return new ContainerBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, mdcMap);
     }
 
