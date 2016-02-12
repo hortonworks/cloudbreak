@@ -1,3 +1,12 @@
+
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="awscredentialtype">{{msg.credential_aws_select}}</label>
+    <div class="col-sm-3">
+        <select class="form-control" id="awscredentialtype" name="awscredentialtype" ng-model="credentialAws.parameters.selector" ng-options="option.id as option.name for option in $root.config.AWS_SELECTOR" ng-init="credentialAws.parameters.selector == 'role-based'">
+        </select>
+    </div>
+</div>
+
 <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.awscname.$dirty && awsCredentialForm.awscname.$invalid }">
     <label class="col-sm-3 control-label" for="awscname">{{msg.name_label}}</label>
 
@@ -25,13 +34,37 @@
 </div>
 
 <!-- .form-group -->
-<div class="form-group" ng-class="{ 'has-error': awsCredentialForm.croleArn.$dirty && awsCredentialForm.croleArn.$invalid }">
+<div class="form-group" ng-class="{ 'has-error': awsCredentialForm.croleArn.$dirty && awsCredentialForm.croleArn.$invalid }" ng-if="credentialAws.parameters.selector=='role-based'">
     <label class="col-sm-3 control-label" for="croleArn">{{msg.credential_aws_form_iam_label}}</label>
 
     <div class="col-sm-9">
         <input type="text" class="form-control" name="croleArn" ng-model="credentialAws.parameters.roleArn" ng-minlength="5" required id="croleArn">
         <div class="help-block" ng-show="awsCredentialForm.croleArn.$dirty && awsCredentialForm.croleArn.$invalid">
             <i class="fa fa-warning"></i> {{msg.credential_iam_role_invalid}}
+        </div>
+    </div>
+    <!-- .col-sm-9 -->
+
+</div>
+<div class="form-group" ng-class="{ 'has-error': awsCredentialForm.accessKey.$dirty && awsCredentialForm.accessKey.$invalid }" ng-if="credentialAws.parameters.selector=='key-based'">
+    <label class="col-sm-3 control-label" for="accessKey">{{msg.credential_aws_form_access_key_label}}</label>
+
+    <div class="col-sm-9">
+        <input type="text" class="form-control" name="accessKey" ng-model="credentialAws.parameters.accessKey" ng-minlength="5" required id="accessKey">
+        <div class="help-block" ng-show="awsCredentialForm.accessKey.$dirty && awsCredentialForm.accessKey.$invalid">
+            <i class="fa fa-warning"></i> {{msg.credential_access_key_invalid}}
+        </div>
+    </div>
+    <!-- .col-sm-9 -->
+
+</div>
+<div class="form-group" ng-class="{ 'has-error': awsCredentialForm.secretKey.$dirty && awsCredentialForm.secretKey.$invalid }" ng-if="credentialAws.parameters.selector=='key-based'">
+    <label class="col-sm-3 control-label" for="croleArn">{{msg.credential_aws_form_secret_key_label}}</label>
+
+    <div class="col-sm-9">
+        <input type="text" class="form-control" name="secretKey" ng-model="credentialAws.parameters.secretKey" ng-minlength="5" required id="secretKey">
+        <div class="help-block" ng-show="awsCredentialForm.secretKey.$dirty && awsCredentialForm.secretKey.$invalid">
+            <i class="fa fa-warning"></i> {{msg.credential_secret_key_invalid}}
         </div>
     </div>
     <!-- .col-sm-9 -->

@@ -23,6 +23,15 @@ angular.module('uluwatuControllers')
             }
 
             $rootScope.config = {
+                'AWS_SELECTOR': [
+                    {
+                        name: 'Key Based',
+                        id: 'key-based'
+                    }, {
+                        name: 'Role Based',
+                        id: 'role-based'
+                    }
+                ],
                 'RECIPE_TYPE': {
                     content_types: [{
                         key: 'SCRIPT',
