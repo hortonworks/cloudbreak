@@ -30,6 +30,9 @@ public class UserDataBuilder {
     @Value("${cb.docker.relocate:}")
     private Boolean relocateDocker;
 
+    @Value("${cb.custom.user.data:}")
+    private String customUserData;
+
     @Inject
     private Configuration freemarkerConfiguration;
 
@@ -49,6 +52,7 @@ public class UserDataBuilder {
         model.put("tmpSshKey", tmpSshKey);
         model.put("sshUser", sshUser);
         model.put("publicSshKey", publicSssKey);
+        model.put("customUserData", customUserData);
         model.put("relocateDocker", relocateDocker);
         return build(model);
     }

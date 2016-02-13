@@ -36,7 +36,10 @@ cb:
   
   blueprint.defaults: hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster
   template.defaults: minviable-gcp,minviable-azure,minviable-aws
-  
+  custom.user.data: |
+    touch /tmp/custom-user-data
+    date >> /tmp/custom-user-data
+
   mail:
     smtp:
     auth: true
