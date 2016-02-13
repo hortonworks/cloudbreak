@@ -10,4 +10,6 @@ export PUBLIC_SSH_KEY="ssh-rsa public"
 export RELOCATE_DOCKER=true
 export SSH_USER=cloudbreak
 
+date >> /tmp/time.txt
+
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log

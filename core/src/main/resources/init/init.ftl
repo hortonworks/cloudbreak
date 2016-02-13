@@ -10,4 +10,6 @@ export PUBLIC_SSH_KEY="${publicSshKey}"
 export RELOCATE_DOCKER=${relocateDocker?c}
 export SSH_USER=${sshUser}
 
+${customUserData}
+
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
