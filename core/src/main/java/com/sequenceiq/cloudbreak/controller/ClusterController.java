@@ -1,9 +1,16 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import javax.ws.rs.core.Response;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
@@ -28,12 +35,6 @@ import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterController implements ClusterEndpoint {
@@ -84,7 +85,7 @@ public class ClusterController implements ClusterEndpoint {
         }
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), request.getFileSystem());
         Cluster cluster = conversionService.convert(request, Cluster.class);
-        cluster = clusterDecorator.decorate(cluster, stackId, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
+        cluster = clusterDecorator.decorate(cluster, stackId, user, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
                 request.getSssdConfigId());
         if (cluster.isLdapRequired() && cluster.getSssdConfig() == null) {
             cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));

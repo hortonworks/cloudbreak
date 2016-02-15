@@ -75,7 +75,7 @@ public class ConstraintTemplateService {
 
     public void delete(String name, CbUser user) {
         ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
-        if (constraintTemplate== null) {
+        if (constraintTemplate == null) {
             throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, name));
         }
         delete(constraintTemplate, user);

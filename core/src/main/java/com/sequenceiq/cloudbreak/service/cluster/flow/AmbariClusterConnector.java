@@ -19,10 +19,6 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAUL
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 
-import javax.annotation.Nullable;
-import javax.annotation.Resource;
-import javax.inject.Inject;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +31,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -53,6 +57,7 @@ import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.CloudbreakRecipeSetupException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
@@ -74,6 +79,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
@@ -85,10 +91,8 @@ import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+
 import groovyx.net.http.HttpResponseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AmbariClusterConnector {
@@ -149,6 +153,8 @@ public class AmbariClusterConnector {
     private RecipeBuilder recipeBuilder;
     @Inject
     private DefaultConfigProvider defaultConfigProvider;
+    @Inject
+    private TlsSecurityService tlsSecurityService;
 
     private enum Msg {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
@@ -200,22 +206,9 @@ public class AmbariClusterConnector {
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
-            if (cluster.getSssdConfig() != null) {
-                executeSssdRecipe(stack, null);
-            }
+            executeSssdRecipe(stack, null, cluster.getSssdConfig());
 
-            if (SWARM.equals(cluster.getStack().getOrchestrator().getType())) {
-                if (fs != null) {
-                    addFsRecipes(blueprintText, fs, hostGroups);
-                }
-                addHDFSRecipe(cluster, blueprintText, hostGroups);
-            }
-
-            final boolean recipesFound = recipesFound(hostGroups);
-            if (recipesFound) {
-                recipeEngine.setupRecipes(stack, hostGroups);
-                recipeEngine.executePreInstall(stack);
-            }
+            final boolean recipesFound = recipesPreInstall(stack, cluster, blueprintText, fs, hostGroups);
             String clusterName = cluster.getName();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
             String configStrategy = cluster.getConfigStrategy().name();
@@ -225,13 +218,12 @@ public class AmbariClusterConnector {
             } else {
                 ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy);
             }
-            PollingResult pollingResult = ambariOperationService.waitForOperationsToStart(stack, ambariClient, singletonMap("INSTALL_START", 1), START_OPERATION_STATE);
+            PollingResult pollingResult = ambariOperationService.waitForOperationsToStart(stack, ambariClient, singletonMap("INSTALL_START", 1),
+                    START_OPERATION_STATE);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
             pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
-            if (recipesFound) {
-                recipeEngine.executePostInstall(stack);
-            }
+            recipesPostInstall(stack, recipesFound);
             executeSmokeTest(stack, ambariClient);
             createDefaultViews(ambariClient, blueprintText, hostGroups);
             cluster = handleClusterCreationSuccess(stack, cluster);
@@ -244,6 +236,29 @@ public class AmbariClusterConnector {
         } catch (Exception e) {
             LOGGER.error("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new AmbariOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private boolean recipesPreInstall(Stack stack, Cluster cluster, String blueprintText, FileSystem fs, Set<HostGroup> hostGroups)
+            throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
+        if (SWARM.equals(cluster.getStack().getOrchestrator().getType())) {
+            if (fs != null) {
+                addFsRecipes(blueprintText, fs, hostGroups);
+            }
+            addHDFSRecipe(cluster, blueprintText, hostGroups);
+        }
+
+        final boolean recipesFound = recipesFound(hostGroups);
+        if (recipesFound) {
+            recipeEngine.setupRecipes(stack, hostGroups);
+            recipeEngine.executePreInstall(stack);
+        }
+        return recipesFound;
+    }
+
+    private void recipesPostInstall(Stack stack, boolean recipesFound) throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
+        if (recipesFound) {
+            recipeEngine.executePostInstall(stack);
         }
     }
 
@@ -280,20 +295,20 @@ public class AmbariClusterConnector {
         }
         PollingResult pollingResult = waitForHosts(stack, ambariClient, hostsInCluster.size(), hostsInCluster);
         if (isSuccess(pollingResult)) {
+            List<String> upscaleHostNames = FluentIterable.from(hostMetadata).transform(new Function<HostMetadata, String>() {
+                @Nullable
+                @Override
+                public String apply(HostMetadata input) {
+                    return input.getHostName();
+                }
+            }).toList();
             if (cluster.getSssdConfig() != null) {
-                executeSssdRecipe(stack, new HashSet<>(hosts));
+                executeSssdRecipe(stack, new HashSet<>(upscaleHostNames), cluster.getSssdConfig());
             }
             final boolean recipesFound = recipesFound(hostGroupAsSet);
             if (!recipesFound || prepareAndExecuteRecipes(true, stack, hostGroup, hostMetadata)) {
-                List<String> upscaleHostNames = FluentIterable.from(hostMetadata).transform(new Function<HostMetadata, String>() {
-                    @Nullable
-                    @Override
-                    public String apply(HostMetadata input) {
-                        return input.getHostName();
-                    }
-                }).toList();
-                pollingResult = ambariOperationService.waitForOperations(stack, ambariClient, installServices(upscaleHostNames, stack, ambariClient, hostGroupName),
-                        INSTALL_AMBARI_PROGRESS_STATE);
+                pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
+                        installServices(upscaleHostNames, stack, ambariClient, hostGroupName), INSTALL_AMBARI_PROGRESS_STATE);
                 if (isSuccess(pollingResult)) {
                     successHosts = new HashSet<>(upscaleHostNames);
                     if (recipesFound && !prepareAndExecuteRecipes(false, stack, hostGroup, hostMetadata)) {
@@ -306,24 +321,26 @@ public class AmbariClusterConnector {
         return hostMetadata;
     }
 
-    private void executeSssdRecipe(Stack stack, Set<String> hosts) throws CloudbreakSecuritySetupException {
-        SssdConfig config = stack.getCluster().getSssdConfig();
-        List<String> payload;
-        if (config.getConfiguration() != null) {
-            Map<String, String> keyValues = new HashMap<>();
-            String configName = SSSD_CONFIG + config.getId();
-            keyValues.put(configName, config.getConfiguration());
-            InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-            HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
-            pluginManager.prepareKeyValues(httpClientConfig, keyValues);
-            payload = Arrays.asList(configName);
-        } else {
-            payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
-                    config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
-                    config.getKerberosServer(), config.getKerberosRealm());
+    private void executeSssdRecipe(Stack stack, Set<String> hosts, SssdConfig sssdConfig) throws CloudbreakSecuritySetupException {
+        if (sssdConfig != null) {
+            SssdConfig config = stack.getCluster().getSssdConfig();
+            List<String> payload;
+            if (config.getConfiguration() != null) {
+                Map<String, String> keyValues = new HashMap<>();
+                String configName = SSSD_CONFIG + config.getId();
+                keyValues.put(configName, config.getConfiguration());
+                InstanceGroup gateway = stack.getGatewayInstanceGroup();
+                InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+                HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+                pluginManager.prepareKeyValues(httpClientConfig, keyValues);
+                payload = Arrays.asList(configName);
+            } else {
+                payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
+                        config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
+                        config.getKerberosServer(), config.getKerberosRealm());
+            }
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.SSSD_SETUP, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT, payload, hosts);
         }
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.SSSD_SETUP, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT, payload, hosts);
     }
 
     private boolean prepareAndExecuteRecipes(boolean preExecute, Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata) {
@@ -555,7 +572,6 @@ public class AmbariClusterConnector {
     }
 
 
-
     private Cluster handleClusterCreationSuccess(Stack stack, Cluster cluster) {
         LOGGER.info("Cluster created successfully. Cluster name: {}", cluster.getName());
         cluster.setCreationFinished(new Date().getTime());
@@ -745,7 +761,8 @@ public class AmbariClusterConnector {
             List<Map<String, String>> hostInfoForHostGroup = new ArrayList<>();
             if (hostGroup.getConstraint().getInstanceGroup() != null) {
                 Map<String, String> topologyMapping = getTopologyMapping(hostGroup);
-                List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(hostGroup.getConstraint().getInstanceGroup().getId());
+                Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
+                List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroupId);
                 for (InstanceMetaData meta : metas) {
                     Map<String, String> hostInfo = new HashMap<>();
                     hostInfo.put(FQDN, meta.getDiscoveryFQDN());

@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,9 +13,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.sun.istack.internal.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @NamedQueries({
@@ -121,12 +117,10 @@ public class HostGroup {
     }
 
     public Set<String> getHostNames() {
-        return FluentIterable.from(hostMetadata).transform(new Function<HostMetadata, String>() {
-            @Nullable
-            @Override
-            public String apply(HostMetadata input) {
-                return input.getHostName();
-            }
-        }).toSet();
+        Set<String> hostNames = new HashSet<>(hostMetadata.size());
+        for (HostMetadata metadata : hostMetadata) {
+            hostNames.add(metadata.getHostName());
+        }
+        return hostNames;
     }
 }

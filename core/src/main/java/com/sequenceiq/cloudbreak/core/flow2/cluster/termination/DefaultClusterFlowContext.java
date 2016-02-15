@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 
-public class DefaultClusterFlowContext extends DefaultFlowContext{
+public class DefaultClusterFlowContext extends DefaultFlowContext {
 
     private Long clusterId;
 

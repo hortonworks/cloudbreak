@@ -66,7 +66,7 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
             hostGroup.setName(json.getName());
             Constraint constraint = conversionService.convert(json.getConstraint(), Constraint.class);
             final String instanceGroupName = json.getConstraint().getInstanceGroupName();
-            if (instanceGroupName!=null) {
+            if (instanceGroupName != null) {
                 InstanceGroup instanceGroup = FluentIterable.from(instanceGroups).firstMatch(new Predicate<InstanceGroup>() {
                     @Override
                     public boolean apply(@Nullable InstanceGroup instanceGroup) {

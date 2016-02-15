@@ -16,6 +16,12 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.Bind;
@@ -45,11 +51,6 @@ import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.MunchausenBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.SwarmContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.SwarmContainerDeletion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
@@ -70,7 +71,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
      */
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, String consulLogLocation,
-                          ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try {
             String privateGatewayIp = getPrivateGatewayIp(gatewayConfig.getPublicAddress(), nodes);
             Set<String> privateAddresses = getPrivateAddresses(nodes);
@@ -93,7 +94,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, String consulLogLocation,
-                                  ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try {
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
@@ -118,7 +119,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint,
-                                            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         List<ContainerInfo> containerInfos = new ArrayList<>();
         String image = imageName(config);
         try {
@@ -174,7 +175,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                 future.get();
             }
         } catch (Exception ex) {
-            String msg = String.format("Failed to delete Marathon app with app ids: '%s'.", Arrays.toString(containerInfo.toArray(new String[containerInfo.size()])));
+            String msg = String.format("Failed to delete containers: '%s'.", Arrays.toString(containerInfo.toArray(new String[containerInfo.size()])));
             throw new CloudbreakOrchestratorFailedException(msg, ex);
         }
     }
@@ -251,7 +252,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     private CreateContainerCmd decorateCreateContainerCmd(String image, ContainerConstraint constraint, String hostname,
-                                                          DockerClient dockerApiClient, String name) {
+            DockerClient dockerApiClient, String name) {
         String[] env = createEnv(constraint, hostname);
         String[] cmd = constraint.getCmd();
         CreateContainerCmd createCmd = dockerApiClient.createContainerCmd(image)
@@ -418,7 +419,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @VisibleForTesting
     public Callable<Boolean> runner(ContainerBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
-                                    Map<String, String> mdcMap) {
+            Map<String, String> mdcMap) {
         return new ContainerBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, mdcMap);
     }
 
