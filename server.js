@@ -392,9 +392,9 @@ function continueInit() {
     }
 
     function concatAndResolveUrl(url, concat) {
-        if( url.substr(-1) === "/" ) {
-          console.log(url.substring(0, url.length-1));
-          return url.substring(0, url.length-1);
+        if (url.substr(-1) === "/") {
+            console.log(url.substring(0, url.length - 1));
+            return url.substring(0, url.length - 1);
         }
         //replaceAll("https:", "https://").replaceAll("http:", "http://");
         return url;
@@ -471,14 +471,14 @@ function continueInit() {
     // socket ======================================================================
 
 
-    sessionSockets.on('connection', function (err, socket, session) {
-      if (session) {
-          retrieveUserByToken(session.token, function(data) {
-              socket.join(data.user_id)
-          });
-      } else {
-          console.log("No session found, websocket notifications won't work [socket ID: " + socket.id + "] " + err)
-      }
+    sessionSockets.on('connection', function(err, socket, session) {
+        if (session) {
+            retrieveUserByToken(session.token, function(data) {
+                socket.join(data.user_id)
+            });
+        } else {
+            console.log("No session found, websocket notifications won't work [socket ID: " + socket.id + "] " + err)
+        }
     });
 
     // errors  =====================================================================

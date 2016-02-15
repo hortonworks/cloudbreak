@@ -249,14 +249,14 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             }
         }
 
-        $scope.filterByCloudPlatform = function (topology) {
+        $scope.filterByCloudPlatform = function(topology) {
             return (topology.cloudPlatform === 'AWS' && $scope.awsTemplate) ||
-                    (topology.cloudPlatform === 'GCP' && $scope.gcpTemplate) ||
-                    (topology.cloudPlatform === 'AZURE_RM' && $scope.azureTemplate) ||
-                    (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackTemplate)
+                (topology.cloudPlatform === 'GCP' && $scope.gcpTemplate) ||
+                (topology.cloudPlatform === 'AZURE_RM' && $scope.azureTemplate) ||
+                (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackTemplate)
         }
 
-        $scope.getTopologyNameById = function (topologyId) {
+        $scope.getTopologyNameById = function(topologyId) {
             var result;
             angular.forEach($rootScope.topologies, function(topology) {
                 if (topology.id === topologyId) {

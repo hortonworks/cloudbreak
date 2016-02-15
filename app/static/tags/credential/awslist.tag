@@ -27,7 +27,7 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-     <div class="form-group" ng-if="credential.parameters.selector=='key-based'">
+    <div class="form-group" ng-if="credential.parameters.selector=='key-based'">
         <label class="col-sm-3 control-label" for="roleArn">{{msg.credential_aws_form_access_key_label}}</label>
 
         <div class="col-sm-9">

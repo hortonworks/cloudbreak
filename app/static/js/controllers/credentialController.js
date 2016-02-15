@@ -65,11 +65,11 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             });
         }
 
-        $scope.filterByCloudPlatform = function (topology) {
+        $scope.filterByCloudPlatform = function(topology) {
             return (topology.cloudPlatform === 'AWS' && $scope.awsCredential) ||
-                    (topology.cloudPlatform === 'GCP' && $scope.gcpCredential) ||
-                    (topology.cloudPlatform === 'AZURE_RM' && $scope.azureRmCredential) ||
-                    (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackCredential)
+                (topology.cloudPlatform === 'GCP' && $scope.gcpCredential) ||
+                (topology.cloudPlatform === 'AZURE_RM' && $scope.azureRmCredential) ||
+                (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackCredential)
         }
 
         $scope.createAwsCredential = function() {
@@ -103,7 +103,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.credentialInCreation = false;
                 $scope.unShowErrorMessageAlert();
                 $scope.credentialAws = {
-                     parameters: {
+                    parameters: {
                         selector: 'role-based'
                     }
                 };
@@ -128,7 +128,11 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             function handleOpenstackCredentialSuccess(result) {
                 $scope.credentialOpenstack.id = result.id;
                 $rootScope.credentials.push($scope.credentialOpenstack);
-                $scope.credentialOpenstack = {parameters:{keystoneVersion:"cb-keystone-v2"}};
+                $scope.credentialOpenstack = {
+                    parameters: {
+                        keystoneVersion: "cb-keystone-v2"
+                    }
+                };
                 $scope.showSuccess($filter("format")($rootScope.msg.openstack_credential_success, String(result.id)));
                 $scope.openstackCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
@@ -235,7 +239,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         }
 
-        $scope.getTopologyNameById = function (topologyId) {
+        $scope.getTopologyNameById = function(topologyId) {
             var result;
             angular.forEach($rootScope.topologies, function(topology) {
                 if (topology.id === topologyId) {
@@ -265,7 +269,9 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         }
 
         $scope.getParameterLabel = function(key) {
-            return $rootScope.msg[$interpolate("credential_openstack_form_{{key}}_label")({key: key})]
+            return $rootScope.msg[$interpolate("credential_openstack_form_{{key}}_label")({
+                key: key
+            })]
         }
 
         function collapseCreateCredentialFormPanel() {

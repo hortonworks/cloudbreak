@@ -2,7 +2,7 @@
 
 var log = log4javascript.getLogger("accountuserController-logger");
 
-angular.module('uluwatuControllers').controller('accountuserController', ['$scope', '$rootScope', '$filter', 'UserInvite', 'AccountUsers', 'ActivateAccountUsers', 'UserPermission', 'AccountDetails', 'UserOperation','AccountPreferences',
+angular.module('uluwatuControllers').controller('accountuserController', ['$scope', '$rootScope', '$filter', 'UserInvite', 'AccountUsers', 'ActivateAccountUsers', 'UserPermission', 'AccountDetails', 'UserOperation', 'AccountPreferences',
     function($scope, $rootScope, $filter, UserInvite, AccountUsers, ActivateAccountUsers, UserPermission, AccountDetails, UserOperation, AccountPreferences) {
 
         initInvite();
@@ -154,7 +154,7 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
             })
         }
 
-        $scope.isChecked = function (platform) {
+        $scope.isChecked = function(platform) {
             return $rootScope.params.platforms.indexOf(platform) > -1
         }
 
