@@ -246,6 +246,8 @@ subprojects {
   repositories {
     mavenCentral()
     maven { url "http://maven.sequenceiq.com/releases" }
+    maven { url "http://repo.spring.io/milestone" }
+    maven { url "https://repo.spring.io/snapshot" }
     mavenLocal()
   }
 }
