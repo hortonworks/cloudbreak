@@ -190,6 +190,12 @@ allprojects {
   apply plugin: 'idea'
   apply plugin: 'eclipse'
   group = 'com.sequenceiq'
+  configurations {
+    testRuntime {
+      exclude group: "org.springframework.cloud"
+    }
+  }
+
 }
 
 subprojects {
