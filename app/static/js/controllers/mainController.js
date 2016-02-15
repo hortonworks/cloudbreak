@@ -49,6 +49,57 @@ angular.module('uluwatuControllers')
                         value: 'ONE_NODE'
                     }]
                 },
+                'SSSDCONFIG_TYPE': {
+                    content_types: [{
+                        key: 'TEXT',
+                        value: 'TEXT'
+                    }, {
+                        key: 'FILE',
+                        value: 'FILE'
+                    }, {
+                        key: 'PARAMS',
+                        value: 'PARAMETERS'
+                    }],
+                    provider_types: [{
+                        key: 'LDAP',
+                        value: 'LDAP'
+                    }, {
+                        key: 'AD',
+                        value: 'Active Directory'
+                    }, {
+                        key: 'IPA',
+                        value: 'FreeIPA'
+                    }],
+                    schema_types: [{
+                        key: 'RFC2307',
+                        value: 'rfc2307'
+                    }, {
+                        key: 'RFC2307BIS',
+                        value: 'rfc2307bis'
+                    }, {
+                        key: 'AD',
+                        value: 'Active Directory'
+                    }, {
+                        key: 'IPA',
+                        value: 'FreeIPA'
+                    }],
+                    tls_types: [{
+                        key: 'NEVER',
+                        value: 'never'
+                    }, {
+                        key: 'ALLOW',
+                        value: 'allow'
+                    }, {
+                        key: 'TRY',
+                        value: 'try'
+                    }, {
+                        key: 'DEMAND',
+                        value: 'demand'
+                    }, {
+                        key: 'HARD',
+                        value: 'hard'
+                    }]
+                },
                 'BLUEPRINT_TYPE': [{
                     key: 'TEXT',
                     value: 'TEXT'

@@ -28,7 +28,7 @@
     <div class="form-group">
         <label class="col-sm-3 control-label" for="recipetype">{{msg.plugins_label}}</label>
         <div class="col-sm-9">
-            <div id="recipetype" name="recipetype" class="row">
+            <div class="row">
                 <div class="col-md-3">
                     <select class="form-control" id="recipetype" name="recipetype" ng-options="recipeType.key as recipeType.value for recipeType in $root.config.RECIPE_TYPE.content_types" ng-model="recipeType"></select>
                 </div>
@@ -40,7 +40,7 @@
     </div>
 
     <div class="form-group" ng-show="recipeType == 'FILE'" ng-class="{ 'has-error': !fileReadAvailable }">
-        <label class="col-sm-3 control-label" for="recipeurl" style="border-bottom: 0">{{msg.recipe_pre_install_file}}</label>
+        <label class="col-sm-3 control-label" for="preInstallFile" style="border-bottom: 0">{{msg.recipe_pre_install_file}}</label>
         <div class="col-sm-9">
             <input type="file" name="preInstallFile" id="preInstallFile" onchange="angular.element(this).scope().generateStoredPluginFromFile()" ng-disabled="{{!fileReadAvailable}}" />
             <div class="help-block" ng-show="!fileReadAvailable"><i class="fa fa-warning"></i> {{msg.file_upload_not_allowed}}

@@ -74,6 +74,24 @@ uluwatuServices.factory('GlobalRecipe', ['$resource',
     }
 ]);
 
+uluwatuServices.factory('UserSssdConfig', ['$resource',
+    function($resource) {
+        return $resource('sssd/user');
+    }
+]);
+
+uluwatuServices.factory('AccountSssdConfig', ['$resource',
+    function($resource) {
+        return $resource('sssd/account');
+    }
+]);
+
+uluwatuServices.factory('GlobalSssdConfig', ['$resource',
+    function($resource) {
+        return $resource('sssd/:id');
+    }
+]);
+
 uluwatuServices.factory('UserCredential', ['$resource',
     function($resource) {
         return $resource('user/credentials');
