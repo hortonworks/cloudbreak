@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.api.model;
 public enum SssdProviderType {
 
     LDAP("ldap"),
-    ACTIVE_DIRECTORY("ad");
+    ACTIVE_DIRECTORY("ad"),
+    IPA("ipa");
 
     private String type;
 

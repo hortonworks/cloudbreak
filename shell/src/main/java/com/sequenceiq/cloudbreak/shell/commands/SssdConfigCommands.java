@@ -117,10 +117,19 @@ public class SssdConfigCommands implements CommandMarker {
             request.setName(name);
             request.setDescription(description);
             request.setProviderType(SssdProviderType.fromString(providerType));
+            if (request.getProviderType() == null) {
+                return "Type of the provider is wrong.";
+            }
             request.setUrl(url);
             request.setSchema(SssdSchemaType.fromString(schema));
+            if (request.getSchema() == null) {
+                return "Schema of the database is wrong.";
+            }
             request.setBaseSearch(baseSearch);
             request.setTlsReqcert(SssdTlsReqcert.fromString(tlsReqcert));
+            if (request.getTlsReqcert() == null) {
+                return "TLS behavior of connection is wrong.";
+            }
             request.setAdServer(adServer);
             request.setKerberosServer(kerberosServer);
             request.setKerberosRealm(kerberosRealm);
@@ -145,7 +154,7 @@ public class SssdConfigCommands implements CommandMarker {
                     help = "flags if the config is public in the account") Boolean publicInAccount) {
         try {
             if (configFile != null && !configFile.exists()) {
-                return "Pre install script file not exists.";
+                return "Configuration file not exists.";
             }
             SssdConfigRequest request = new SssdConfigRequest();
             request.setName(name);
