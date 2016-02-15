@@ -73,11 +73,11 @@
                         <td>{{hypervisor}}</td>
                         <td>{{rack}}</td>
                         <td><span id="deleteMapping" class="label label-danger" ng-click="deleteMapping(hypervisor)" role="button"><i class="fa fa-minus"></i></span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        </tr>
+        </tbody>
+        </table>
     </div>
+</div>
 </div>
 
 <div class="row btn-row">

@@ -106,14 +106,14 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
             $scope.network = {};
         }
 
-        $scope.filterByCloudPlatform = function (topology) {
+        $scope.filterByCloudPlatform = function(topology) {
             return (topology.cloudPlatform === 'AWS' && $scope.awsNetwork) ||
-                    (topology.cloudPlatform === 'GCP' && $scope.gcpNetwork) ||
-                    (topology.cloudPlatform === 'AZURE_RM' && $scope.azureNetwork) ||
-                    (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackNetwork)
+                (topology.cloudPlatform === 'GCP' && $scope.gcpNetwork) ||
+                (topology.cloudPlatform === 'AZURE_RM' && $scope.azureNetwork) ||
+                (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackNetwork)
         }
 
-        $scope.getTopologyNameById = function (topologyId) {
+        $scope.getTopologyNameById = function(topologyId) {
             var result;
             angular.forEach($rootScope.topologies, function(topology) {
                 if (topology.id === topologyId) {

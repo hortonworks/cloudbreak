@@ -228,7 +228,7 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.params.platforms = platforms
             }
         }
-  ]);
+    ]);
 
 cloudbreakApp.directive('startdatevalidation', function($parse) {
     return {

@@ -49,9 +49,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.configStrategies = [
-             "NEVER_APPLY",
-             "ONLY_STACK_DEFAULTS_APPLY",
-             "ALWAYS_APPLY"
+            "NEVER_APPLY",
+            "ONLY_STACK_DEFAULTS_APPLY",
+            "ALWAYS_APPLY"
         ]
 
         $rootScope.activeCluster = {};

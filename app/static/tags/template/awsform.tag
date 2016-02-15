@@ -99,7 +99,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="topologySelect">{{msg.credential_select_topology}}</label>
     <div class="col-sm-9">
-        <select class="form-control" id="topologySelect" name="topologySelect" ng-model="awsTemp.topologyId" ng-options="topology.id as topology.name for topology in $root.topologies | filter: filterByCloudPlatform | orderBy:'name'" >
+        <select class="form-control" id="topologySelect" name="topologySelect" ng-model="awsTemp.topologyId" ng-options="topology.id as topology.name for topology in $root.topologies | filter: filterByCloudPlatform | orderBy:'name'">
             <option value="">-- {{msg.credential_select_topology.toLowerCase()}} --</option>
         </select>
     </div>
