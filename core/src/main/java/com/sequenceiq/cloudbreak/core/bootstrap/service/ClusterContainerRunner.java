@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 @Component
 public class ClusterContainerRunner {
     private static final String CONTAINER_VOLUME_PATH = "/var/log";
+    private static final String HADOOP_MOUNT_DIR = "/hadoopfs";
     private static final String HOST_VOLUME_PATH = VolumeUtils.getLogVolume("logs");
     private static final String HOST_NETWORK_MODE = "host";
     private static final int AMBARI_PORT = 8080;
@@ -265,7 +266,7 @@ public class ClusterContainerRunner {
                 .addEnv(Arrays.asList(String.format("SERVICE_NAME=%s", SHIPYARD.getName())))
                 .addLink("swarm-manager", "swarm")
                 .addLink(SHIPYARD_DB.getName(), "rethinkdb")
-                .cmd(new String[]{"server" , "-d", "tcp://swarm:3376"})
+                .cmd(new String[]{"server", "-d", "tcp://swarm:3376"})
                 .build();
     }
 
@@ -281,24 +282,14 @@ public class ClusterContainerRunner {
     private void runAmbariAgentContainers(Boolean add, Set<String> candidateAddresses, ContainerOrchestrator orchestrator, String cloudPlatform, Stack stack,
             OrchestrationCredential cred) throws CloudbreakOrchestratorException {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            int volumeCount = instanceGroup.getTemplate().getVolumeCount();
-            Map<String, String> dataVolumeBinds = getDataVolumeBinds(volumeCount);
+            Map<String, String> dataVolumeBinds = new HashMap<>();
+            dataVolumeBinds.put(HADOOP_MOUNT_DIR, HADOOP_MOUNT_DIR);
+            dataVolumeBinds.putAll(ImmutableMap.of("/data/jars", "/data/jars", HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH));
             Map<String, String> privateIpsByHostname = getPrivateIpsByHostname(add, candidateAddresses, cred, instanceGroup);
-            ImmutableMap<String, String> volumeBinds = ImmutableMap.of("/data/jars", "/data/jars", HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH);
-            dataVolumeBinds.putAll(volumeBinds);
             ContainerConstraint ambariAgentConstraint = getAmbariAgentConstraint(cloudPlatform, dataVolumeBinds, privateIpsByHostname);
             orchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), cred, ambariAgentConstraint,
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
         }
-    }
-
-    private Map<String, String> getDataVolumeBinds(long volumeCount) {
-        Map<String, String> dataVolumeBinds = new HashMap<>();
-        for (int i = 1; i <= volumeCount; i++) {
-            String dataVolumePath = VolumeUtils.VOLUME_PREFIX + i;
-            dataVolumeBinds.put(dataVolumePath, dataVolumePath);
-        }
-        return dataVolumeBinds;
     }
 
     private ContainerConstraint getAmbariAgentConstraint(String cloudPlatform, Map<String, String> dataVolumeBinds, Map<String, String> privateIpsByHostname) {
