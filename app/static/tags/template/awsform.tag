@@ -68,12 +68,12 @@
     </div>
 </div>
 
-<div class="form-group">
+<div class="form-group" ng-class="{ 'has-error': awsTemplateForm.aws_tspotprice.$dirty && awsTemplateForm.aws_tspotprice.$invalid }">
     <label class="col-sm-3 control-label" for="aws_tspotprice">{{msg.template_aws_form_spot_price_label}}</label>
 
     <div class="col-sm-9">
         <input type="number" name="aws_tspotprice" class="form-control" id="aws_tspotprice" ng-model="awsTemp.parameters.spotPrice" min="0.04" max="100.0">
-        <div class="help-block" ng-show="awsTemplateForm.aws_tspotprice.$dirty"><i class="fa fa-warning"></i> {{msg.template_aws_form_spot_price_help}}
+        <div class="help-block" ng-show="awsTemplateForm.aws_tspotprice.$dirty && !awsTemplateForm.aws_tspotprice.$invalid"><i class="fa"></i> {{msg.template_aws_form_spot_price_help}}
         </div>
         <div class="help-block" ng-show="awsTemplateForm.aws_tspotprice.$dirty && awsTemplateForm.aws_tspotprice.$invalid"><i class="fa fa-warning"></i> {{msg.spot_price_invalid}}
         </div>
