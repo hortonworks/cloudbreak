@@ -60,6 +60,8 @@ integrationtest:
 
     defaultBlueprintName: multi-node-hdfs-yarn
 
+    ambariContainer: hortonworks/ambari-agent
+
     defaultPrivateKeyFile:
 
     testsuite:

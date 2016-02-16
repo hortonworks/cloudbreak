@@ -33,6 +33,9 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.defaultPrivateKeyFile}")
     private String defaultPrivateKeyFile;
 
+    @Value("${integrationtest.ambariContainer}")
+    private String ambariContainer;
+
     @Test
     @Parameters({ "searchRecipesOnHosts", "lookingFor", "require" })
     public void testFetchRecipeResult(String searchRecipesOnHosts, String lookingFor, Integer require) throws Exception {
@@ -98,12 +101,12 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
 
             session = jsch.getSession("cloudbreak", host, 22);
             session.setConfig(config);
-            session.connect(1000);
+            session.connect(10000);
 
             executor = (ChannelExec) session.openChannel("exec");
-            executor.setCommand("sudo docker exec -it $(sudo docker ps |grep sequenceiq/ambari:2 |cut -d\" \" -f1) file " + file);
+            executor.setCommand("sudo docker exec -it $(sudo docker ps |grep " + ambariContainer + " |cut -d\" \" -f1) file " + file);
             executor.setPty(true);
-            executor.connect(1000);
+            executor.connect(10000);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(executor.getInputStream()));
             String line;
