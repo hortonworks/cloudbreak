@@ -119,6 +119,7 @@ public class ClusterTerminationService {
         hostGroupRepository.delete(hostGroups);
         constraintRepository.delete(constraintsToDelete);
         cluster.getHostGroups().clear();
+        cluster.getContainers().clear();
         clusterRepository.save(cluster);
     }
 

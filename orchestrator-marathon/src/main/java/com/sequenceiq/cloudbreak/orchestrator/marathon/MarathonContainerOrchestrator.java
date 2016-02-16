@@ -151,16 +151,28 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             for (Future<Boolean> future : futures) {
                 future.get();
             }
+        } catch (MarathonException me) {
+            String appNames = appNamesAsString(containerInfo);
+            if (STATUS_NOT_FOUND.equals(me.getStatus())) {
+                LOGGER.warn("Failed to delete Marathon app it has been already deleted app ids: '{}'.", appNames);
+            } else {
+                String msg = String.format("Failed to delete Marathon app with app ids: '%s'.", appNames);
+                throw new CloudbreakOrchestratorFailedException(msg, me);
+            }
         } catch (Exception ex) {
-            String appNames = Arrays.toString(FluentIterable.from(containerInfo).transform(new Function<ContainerInfo, String>() {
-                @Override
-                public String apply(ContainerInfo input) {
-                    return input.getName();
-                }
-            }).toArray(String.class));
+            String appNames = appNamesAsString(containerInfo);
             String msg = String.format("Failed to delete Marathon app with app ids: '%s'.", appNames);
             throw new CloudbreakOrchestratorFailedException(msg, ex);
         }
+    }
+
+    private String appNamesAsString(List<ContainerInfo> containerInfo) {
+        return Arrays.toString(FluentIterable.from(containerInfo).transform(new Function<ContainerInfo, String>() {
+            @Override
+            public String apply(ContainerInfo input) {
+                return input.getName();
+            }
+        }).toArray(String.class));
     }
 
     @Override
