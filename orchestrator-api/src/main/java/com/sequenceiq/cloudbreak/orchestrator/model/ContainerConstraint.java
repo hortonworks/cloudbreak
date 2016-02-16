@@ -16,7 +16,7 @@ public class ContainerConstraint {
     private Map<String, String> env;
     private final String networkMode;
     private final TcpPortBinding tcpPortBinding;
-    private final String name;
+    private ContainerName containerName;
     private final Map<String, String> links;
     private final String appName;
 
@@ -39,7 +39,7 @@ public class ContainerConstraint {
         this.networkMode = builder.networkMode;
         this.tcpPortBinding = builder.tcpPortBinding;
         this.hosts = builder.hosts;
-        this.name = builder.name;
+        this.containerName = builder.containerName;
         this.links = builder.links;
         this.appName = builder.appName;
         this.disk = builder.disk;
@@ -89,8 +89,8 @@ public class ContainerConstraint {
         return mem;
     }
 
-    public String getName() {
-        return name;
+    public ContainerName getContainerName() {
+        return containerName;
     }
 
     public Map<String, String> getLinks() {
@@ -118,7 +118,7 @@ public class ContainerConstraint {
         private String networkMode;
         private TcpPortBinding tcpPortBinding;
         private List<String> hosts = new ArrayList<>();
-        private String name;
+        private ContainerName containerName;
         private Map<String, String> links = new HashMap<>();
         private String appName;
         private Double disk;
@@ -135,7 +135,7 @@ public class ContainerConstraint {
             this.networkMode = containerConstraint.getNetworkMode();
             this.tcpPortBinding = containerConstraint.getTcpPortBinding();
             this.hosts = containerConstraint.getHosts();
-            this.name = containerConstraint.getName();
+            this.containerName = containerConstraint.getContainerName();
             this.links = containerConstraint.getLinks();
             this.appName = containerConstraint.getAppName();
             this.disk = containerConstraint.getDisk();
@@ -202,8 +202,13 @@ public class ContainerConstraint {
             return this;
         }
 
+        public Builder withNamePrefix(String namePrefix) {
+            this.containerName = new ContainerName(null, namePrefix);
+            return this;
+        }
+
         public Builder withName(String name) {
-            this.name = name;
+            this.containerName = new ContainerName(name, null);
             return this;
         }
 

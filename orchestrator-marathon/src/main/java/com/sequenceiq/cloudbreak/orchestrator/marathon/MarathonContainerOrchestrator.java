@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.orchestrator.marathon;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,9 +72,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
         String image = config.getName() + ":" + config.getVersion();
-        String timeStamp = String.valueOf(new Date().getTime());
-        String randomSuffix = timeStamp.substring(timeStamp.length() - LENGTH_OF_RANDOM_SUFFIX_CHARS);
-        String name = constraint.getName().replace("_", "-") + "-" + randomSuffix;
+        String name = constraint.getContainerName().getName().replace("_", "-");
         String appName = constraint.getAppName();
 
         try {

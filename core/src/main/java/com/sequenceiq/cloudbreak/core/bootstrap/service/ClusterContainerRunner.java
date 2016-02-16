@@ -193,7 +193,7 @@ public class ClusterContainerRunner {
                 containers.put(SHIPYARD_DB.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD_DB), credential,
                         shipyardDbConstraint, stackDeletionBasedExitCriteriaModel(stack.getId())));
 
-                ContainerConstraint shipyardConstraint = getShipyardConstraint(cloudPlatform, ambariServerHost);
+                ContainerConstraint shipyardConstraint = getShipyardConstraint(ambariServerHost);
                 containers.put(SHIPYARD.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD), credential, shipyardConstraint,
                         stackDeletionBasedExitCriteriaModel(stack.getId())));
             }
@@ -325,7 +325,7 @@ public class ClusterContainerRunner {
 
     private ContainerConstraint getHavegedConstraint(String gatewayHostname, String clusterName) {
         return new ContainerConstraint.Builder()
-                .withName(createContainerInstanceName(HAVEGED.getName(), clusterName))
+                .withNamePrefix(createContainerInstanceName(HAVEGED.getName(), clusterName))
                 .instances(1)
                 .addHosts(ImmutableList.of(gatewayHostname))
                 .build();
@@ -345,7 +345,7 @@ public class ClusterContainerRunner {
         }
 
         return new ContainerConstraint.Builder()
-                .withName(LDAP.getName())
+                .withNamePrefix(LDAP.getName())
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
                 .tcpPortBinding(new TcpPortBinding(LDAP_PORT, "0.0.0.0", LDAP_PORT))
@@ -377,7 +377,17 @@ public class ClusterContainerRunner {
                 .build();
     }
 
-    private ContainerConstraint getShipyardConstraint(String cloudPlatform, String gatewayHostname) {
+    private ContainerConstraint getShipyardDbConstraint(String gatewayHostname) {
+        return new ContainerConstraint.Builder()
+                .withName(SHIPYARD_DB.getName())
+                .instances(1)
+                .tcpPortBinding(new TcpPortBinding(SHIPYARD_DB_CONTAINER_PORT, "0.0.0.0", SHIPYARD_DB_EXPOSED_PORT))
+                .addHosts(ImmutableList.of(gatewayHostname))
+                .addEnv(ImmutableMap.of("SERVICE_NAME", SHIPYARD_DB.getName()))
+                .build();
+    }
+
+    private ContainerConstraint getShipyardConstraint(String gatewayHostname) {
         return new ContainerConstraint.Builder()
                 .withName(SHIPYARD.getName())
                 .instances(1)
@@ -387,16 +397,6 @@ public class ClusterContainerRunner {
                 .addLink("swarm-manager", "swarm")
                 .addLink(SHIPYARD_DB.getName(), "rethinkdb")
                 .cmd(new String[]{"server", "-d", "tcp://swarm:3376"})
-                .build();
-    }
-
-    private ContainerConstraint getShipyardDbConstraint(String gatewayHostname) {
-        return new ContainerConstraint.Builder()
-                .withName(SHIPYARD_DB.getName())
-                .instances(1)
-                .tcpPortBinding(new TcpPortBinding(SHIPYARD_DB_CONTAINER_PORT, "0.0.0.0", SHIPYARD_DB_EXPOSED_PORT))
-                .addHosts(ImmutableList.of(gatewayHostname))
-                .addEnv(ImmutableMap.of("SERVICE_NAME", SHIPYARD_DB.getName()))
                 .build();
     }
 
@@ -413,7 +413,7 @@ public class ClusterContainerRunner {
             HostGroup hostGroup, Integer adjustment) {
         Constraint hgConstraint = hostGroup.getConstraint();
         ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
-                .withName(createContainerInstanceName(hostGroup, AMBARI_AGENT.getName()))
+                .withNamePrefix(createContainerInstanceName(hostGroup, AMBARI_AGENT.getName()))
                 .withAppName(ambariAgentApp)
                 .networkMode(HOST_NETWORK_MODE);
         if (hgConstraint.getInstanceGroup() != null) {
@@ -452,7 +452,7 @@ public class ClusterContainerRunner {
 
     private ContainerConstraint getConsulWatchConstraint(List<String> hosts) {
         return new ContainerConstraint.Builder()
-                .withName(CONSUL_WATCH.getName())
+                .withNamePrefix(CONSUL_WATCH.getName())
                 .addEnv(ImmutableMap.of("CONSUL_HOST", "127.0.0.1"))
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of("/var/run/docker.sock", "/var/run/docker.sock"))
@@ -462,7 +462,7 @@ public class ClusterContainerRunner {
 
     private ContainerConstraint getLogrotateConstraint(List<String> hosts) {
         return new ContainerConstraint.Builder()
-                .withName(LOGROTATE.getName())
+                .withNamePrefix(LOGROTATE.getName())
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of("/var/lib/docker/containers", "/var/lib/docker/containers"))
                 .addHosts(hosts)

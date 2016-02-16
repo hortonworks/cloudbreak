@@ -7,7 +7,6 @@ import static java.lang.String.format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -128,7 +127,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (String fqdn : constraint.getHosts()) {
                 String nodeName = fqdn.split("\\.")[0];
                 DockerClient dockerApiClient = swarmClient(cred);
-                String name = String.format("%s-%s", constraint.getName(), String.valueOf(new Date().getTime()) + i++);
+                String name = createSwarmContainerName(constraint, i++);
                 CreateContainerCmd createCmd = decorateCreateContainerCmd(image, constraint, nodeName, dockerApiClient, name);
                 ContainerBootstrap bootstrap = new SwarmContainerBootstrap(dockerApiClient, nodeName, createCmd);
                 Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
@@ -249,6 +248,14 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @Override
     public String name() {
         return "SWARM";
+    }
+
+    private String createSwarmContainerName(ContainerConstraint constraint, int index) {
+        String name = constraint.getContainerName().getName();
+        if (constraint.getHosts().size() > 1) {
+            name = String.format("%s-%s", name, index);
+        }
+        return name;
     }
 
     private CreateContainerCmd decorateCreateContainerCmd(String image, ContainerConstraint constraint, String hostname,
