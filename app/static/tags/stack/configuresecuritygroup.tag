@@ -46,6 +46,25 @@
         </div>
     </div>
 </div>
+<div class="form-group" name="cluster_ldap1">
+    <label class="col-sm-3 control-label" for="cluster_ldap">{{msg.cluster_form_enable_ldap}}</label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="cluster_ldap" id="cluster_ldap" ng-model="cluster.ldapRequired">
+        <div class="help-block" ng-show="cluster.ldapRequired"><i class="fa fa-warning"></i> {{msg.cluster_form_enable_ldap_hint}}</div>
+    </div>
+</div>
+<div class="form-group" name="cluster_sssd1" ng-show="$root.sssdConfigs.length">
+    <label class="col-sm-3 control-label" for="cluster_sssd">{{msg.cluster_form_enable_sssd}}</label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="cluster_sssd" id="cluster_sssd" ng-model="selectSssd.show" ng-change="cluster.sssdConfigId = null">
+    </div>
+</div>
+<div class="form-group" name="sssd_configuration1" ng-show="selectSssd.show">
+    <label class="col-sm-3 control-label" for="sssd_configuration">{{msg.cluster_form_sssd_configuration}}</label>
+    <div class="col-sm-8">
+        <select class="form-control" id="sssd_configuration" name="sssd_configuration" ng-options="sssdConfig.id as sssdConfig.name for sssdConfig in $root.sssdConfigs" ng-model="cluster.sssdConfigId" ng-required="selectSssd.show"></select>
+    </div>
+</div>
 <div class="form-group">
     <div class="col-sm-11">
         <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
@@ -56,7 +75,7 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId" ng-click="showWizardActualElement('configureHostGroups')">{{msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i></button>
+                <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId || (selectSssd.show && !cluster.sssdConfigId)" ng-click="showWizardActualElement('configureHostGroups')">{{msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i></button>
             </div>
         </div>
     </div>

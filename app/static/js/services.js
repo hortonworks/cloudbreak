@@ -367,6 +367,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         kerberosMasterKey: cluster.kerberosMasterKey || null,
                         kerberosAdmin: cluster.kerberosAdmin || null,
                         kerberosPassword: cluster.kerberosPassword || null,
+                        ldapRequired: cluster.ldapRequired || false,
+                        sssdConfigId: cluster.sssdConfigId || null,
                         validateBlueprint: cluster.validateBlueprint,
                         fileSystem: cluster.fileSystem || null,
                         ambariStackDetails: cluster.ambariStackDetails === 'undefined' ? null : cluster.ambariStackDetails,
