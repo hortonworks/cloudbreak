@@ -44,7 +44,7 @@ public class TemplateAdditionHelper {
             String groupName = addition.getGroupName();
             instanceGroups.add(new InstanceGroup(templateId, addition.getGroupName(), addition.getNodeCount(), addition.getType()));
             if ("CORE".equals(addition.getType())) {
-                hostGroups.add(new HostGroup(groupName, groupName));
+                hostGroups.add(new HostGroup(groupName, groupName, addition.getNodeCount()));
             }
         }
     }

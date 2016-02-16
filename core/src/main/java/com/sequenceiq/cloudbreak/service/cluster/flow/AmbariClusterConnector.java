@@ -195,7 +195,7 @@ public class AmbariClusterConnector {
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, defaultConfigProvider.getDefaultConfigs(), false);
 
             HttpClientConfig ambariClientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
-            AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariClientConfig);
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(ambariClientConfig, cluster.getUserName(), cluster.getPassword());
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, blueprintText);
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());

@@ -192,7 +192,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private List<HostGroup> createHostGroups(List<String[]> hostGroupStrings) {
         List<HostGroup> hostGroups = new ArrayList<>();
         for (String[] hostGroupStr : hostGroupStrings) {
-            hostGroups.add(new HostGroup(hostGroupStr[0], hostGroupStr[1]));
+            hostGroups.add(new HostGroup(hostGroupStr[0], hostGroupStr[1], Integer.valueOf(hostGroupStr[2])));
         }
         return hostGroups;
     }
