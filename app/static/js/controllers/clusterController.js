@@ -329,8 +329,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $jq('#sort-clusters-btn').removeClass('disabled');
                     $jq('#create-cluster-btn').removeClass('disabled');
                     $jq("#notification-n-filtering").prop("disabled", false);
-                    $scope.clusterCreationForm.$setPristine();
                     initCluster();
+                    $scope.clusterCreationForm.$setPristine();
                 }
             }, function(failure) {
                 $scope.showError(failure, $rootScope.msg.cluster_failed);
@@ -591,7 +591,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 setSecurityGroup();
                 setRegion();
                 initWizard();
-                $scope.cluster.platformVariant = $rootScope.params.defaultVariants[$rootScope.activeCredential.cloudPlatform];
+                setPlatformVariant();
             }
         });
 
@@ -628,6 +628,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function setRegion() {
             if ($rootScope.activeCredential !== undefined) {
                 $scope.cluster.region = $rootScope.params.defaultRegions[$rootScope.activeCredential.cloudPlatform];
+            }
+        }
+
+        function setPlatformVariant() {
+            if ($rootScope.activeCredential !== undefined) {
+                $scope.cluster.platformVariant = $rootScope.params.defaultVariants[$rootScope.activeCredential.cloudPlatform];
             }
         }
 
@@ -860,6 +866,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             setNetwork();
             setSecurityGroup();
             setRegion();
+            setPlatformVariant();
         }
 
         $scope.getPlatformVariants = function() {
