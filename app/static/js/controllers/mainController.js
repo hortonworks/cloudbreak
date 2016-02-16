@@ -40,13 +40,6 @@ angular.module('uluwatuControllers')
                     }, {
                         key: 'URL',
                         value: 'URL'
-                    }],
-                    execution_types: [{
-                        key: 'ALL_NODES',
-                        value: 'ALL_NODES'
-                    }, {
-                        key: 'ONE_NODE',
-                        value: 'ONE_NODE'
                     }]
                 },
                 'SSSDCONFIG_TYPE': {
@@ -59,45 +52,6 @@ angular.module('uluwatuControllers')
                     }, {
                         key: 'PARAMS',
                         value: 'PARAMETERS'
-                    }],
-                    provider_types: [{
-                        key: 'LDAP',
-                        value: 'LDAP'
-                    }, {
-                        key: 'AD',
-                        value: 'Active Directory'
-                    }, {
-                        key: 'IPA',
-                        value: 'FreeIPA'
-                    }],
-                    schema_types: [{
-                        key: 'RFC2307',
-                        value: 'rfc2307'
-                    }, {
-                        key: 'RFC2307BIS',
-                        value: 'rfc2307bis'
-                    }, {
-                        key: 'AD',
-                        value: 'Active Directory'
-                    }, {
-                        key: 'IPA',
-                        value: 'FreeIPA'
-                    }],
-                    tls_types: [{
-                        key: 'NEVER',
-                        value: 'never'
-                    }, {
-                        key: 'ALLOW',
-                        value: 'allow'
-                    }, {
-                        key: 'TRY',
-                        value: 'try'
-                    }, {
-                        key: 'DEMAND',
-                        value: 'demand'
-                    }, {
-                        key: 'HARD',
-                        value: 'hard'
                     }]
                 },
                 'BLUEPRINT_TYPE': [{

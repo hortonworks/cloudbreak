@@ -33,7 +33,7 @@
                     <select class="form-control" id="recipetype" name="recipetype" ng-options="recipeType.key as recipeType.value for recipeType in $root.config.RECIPE_TYPE.content_types" ng-model="recipeType"></select>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-control" id="recipeexecutiontype" name="recipeexecutiontype" ng-options="executionType.key as executionType.value for executionType in $root.config.RECIPE_TYPE.execution_types" ng-model="recipePlugin.type" required></select>
+                    <select class="form-control" id="recipeexecutiontype" name="recipeexecutiontype" ng-options="executionType as executionType for executionType in $root.settings.recipe.executionTypes" ng-model="recipePlugin.type" required></select>
                 </div>
             </div>
         </div>

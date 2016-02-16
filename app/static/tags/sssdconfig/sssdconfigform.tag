@@ -52,7 +52,7 @@
             <div class="col-sm-9">
                 <div class="row">
                     <div class="col-md-3">
-                        <select class="form-control" id="sssdconfigprovidertype" name="sssdconfigprovidertype" ng-options="providerType.key as providerType.value for providerType in $root.config.SSSDCONFIG_TYPE.provider_types" ng-model="sssdConfig.providerType" ng-required="sssdConfigType == 'PARAMS'"></select>
+                        <select class="form-control" id="sssdconfigprovidertype" name="sssdconfigprovidertype" ng-options="providerType as providerType for providerType in $root.settings.sssdConfig.providerTypes" ng-model="sssdConfig.providerType" ng-required="sssdConfigType == 'PARAMS'"></select>
                     </div>
                 </div>
             </div>
@@ -71,7 +71,7 @@
             <div class="col-sm-9">
                 <div class="row">
                     <div class="col-md-3">
-                        <select class="form-control" id="sssdconfigschematype" name="sssdconfigschematype" ng-options="schemaType.key as schemaType.value for schemaType in $root.config.SSSDCONFIG_TYPE.schema_types" ng-model="sssdConfig.schema" ng-required="sssdConfigType == 'PARAMS'"></select>
+                        <select class="form-control" id="sssdconfigschematype" name="sssdconfigschematype" ng-options="schemaType as schemaType for schemaType in $root.settings.sssdConfig.schemaTypes" ng-model="sssdConfig.schema" ng-required="sssdConfigType == 'PARAMS'"></select>
                     </div>
                 </div>
             </div>
@@ -90,7 +90,7 @@
             <div class="col-sm-9">
                 <div class="row">
                     <div class="col-md-3">
-                        <select class="form-control" id="sssdconfigtlstype" name="sssdconfigtlstype" ng-options="tlsType.key as tlsType.value for tlsType in $root.config.SSSDCONFIG_TYPE.tls_types" ng-model="sssdConfig.tlsReqcert" ng-required="sssdConfigType == 'PARAMS'"></select>
+                        <select class="form-control" id="sssdconfigtlstype" name="sssdconfigtlstype" ng-options="tlsType as tlsType for tlsType in $root.settings.sssdConfig.tlsReqcertTypes" ng-model="sssdConfig.tlsReqcert" ng-required="sssdConfigType == 'PARAMS'"></select>
                     </div>
                 </div>
             </div>

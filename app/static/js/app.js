@@ -5,7 +5,7 @@
 var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'blockUI', 'ui.bootstrap', 'uluwatuControllers', 'uluwatuServices']);
 
 (function() {
-    fetchAccountPreferences().then(fetchConfigData()).then(fetchLocalConfigData).then(bootstrapApplication);
+    fetchAccountPreferences().then(fetchOptions()).then(fetchConfigData()).then(fetchLocalConfigData).then(bootstrapApplication);
 
     function fetchAccountPreferences() {
         var initInjector = angular.injector(["ng"]);
@@ -15,6 +15,18 @@ var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'block
             cloudbreakApp.constant("accountpreferences", response.data);
         }, function(errorResponse) {
             cloudbreakApp.constant("accountpreferences", null);
+            console.log(errorResponse);
+        });
+    }
+
+    function fetchOptions() {
+        var initInjector = angular.injector(["ng"]);
+        var $http = initInjector.get("$http");
+
+        return $http.get("/settings/all").then(function(response) {
+            cloudbreakApp.constant("settings", response.data);
+        }, function(errorResponse) {
+            cloudbreakApp.constant("settings", null);
             console.log(errorResponse);
         });
     }
@@ -180,6 +192,15 @@ cloudbreakApp.run(function($rootScope, $http) {
             }
         });
     })
+    .run(['$rootScope', 'settings',
+        function($rootScope, settings) {
+            if (settings !== null) {
+                $rootScope.settings = settings;
+            } else {
+                $rootScope.settings = {};
+            }
+        }
+    ])
     .run(['$rootScope', 'initconf',
         function($rootScope, initconf) {
             if (initconf !== null) {
