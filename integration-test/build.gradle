@@ -25,7 +25,7 @@ dependencies {
     compile group:  'org.springframework',          name: 'spring-web',               version: springFrameworkVersion
     compile group:  'org.springframework',          name: 'spring-context-support',   version: springFrameworkVersion
     compile group:  'org.apache.velocity',          name: 'velocity',                 version: '1.7'
-    compile group:  'com.jcraft',                   name: 'jsch',                     version: '0.1.53'
+    compile group:  'com.jcraft',                   name: 'jsch',                     version: jschVersion
     compile group:  'org.testng',                   name: 'testng',                   version: '6.9.10'
     compile group:  'javax.el',                     name: 'javax.el-api',             version: '3.0.0'
 
