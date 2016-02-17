@@ -164,25 +164,26 @@ buildscript {
   }
 }
 
-apply plugin: 'org.ajoberstar.release-opinion'
+if (project.hasProperty("release.stage")) {
+  apply plugin: 'org.ajoberstar.release-opinion'
 
-release {
-  grgit = Grgit.open(project.file('.'))
+  release {
+    grgit = Grgit.open(project.file('.'))
 
-  VersionStrategies versionStrategies = new VersionStrategies(grgit)
+    VersionStrategies versionStrategies = new VersionStrategies(grgit)
 
-  versionStrategy versionStrategies.FINAL
-  versionStrategy versionStrategies.RC
-  versionStrategy versionStrategies.FEATURE_BRANCH
-  versionStrategy versionStrategies.DEV
+    versionStrategy versionStrategies.FINAL
+    versionStrategy versionStrategies.RC
+    versionStrategy versionStrategies.FEATURE_BRANCH
+    versionStrategy versionStrategies.DEV
 
-  defaultVersionStrategy = versionStrategies.FEATURE_BRANCH
+    defaultVersionStrategy = versionStrategies.FEATURE_BRANCH
 
-  tagStrategy {
-    prefixNameWithV = false
+    tagStrategy {
+      prefixNameWithV = false
+    }
   }
 }
-
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 
