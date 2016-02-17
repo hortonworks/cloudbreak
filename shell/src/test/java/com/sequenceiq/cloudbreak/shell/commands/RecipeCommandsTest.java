@@ -18,10 +18,10 @@ import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.completion.PluginExecutionType;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
@@ -112,31 +112,33 @@ public class RecipeCommandsTest {
 
     @Test(expected = RuntimeException.class)
     public void testStoreRecipePreScriptExists() throws Exception {
-        underTest.storeRecipe("name", null, PluginExecutionType.ALL_NODES, new File(getClass().getResource("/store-recipe-test").getFile()), null, null, null);
+        underTest.storeRecipe("name", null, new PluginExecutionType("ALL_NODES"), new File(getClass().getResource("/store-recipe-test").getFile()), null, null,
+                null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
     @Test(expected = RuntimeException.class)
     public void testStoreRecipePostScriptExists() throws Exception {
-        underTest.storeRecipe("name", null, PluginExecutionType.ALL_NODES, null, new File(getClass().getResource("/store-recipe-test").getFile()), null, null);
+        underTest.storeRecipe("name", null, new PluginExecutionType("ALL_NODES"), null, new File(getClass().getResource("/store-recipe-test").getFile()), null,
+                null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipeMissingScriptFiles() throws Exception {
-        underTest.storeRecipe("name", null, PluginExecutionType.ALL_NODES, null, null, null, null);
+        underTest.storeRecipe("name", null, new PluginExecutionType("ALL_NODES"), null, null, null, null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipeNotExistsPreScriptFile() throws Exception {
-        underTest.storeRecipe("name", null, PluginExecutionType.ALL_NODES, new File(""), null, null, null);
+        underTest.storeRecipe("name", null, new PluginExecutionType("ALL_NODES"), new File(""), null, null, null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipeNotExistsPostScriptFile() throws Exception {
-        underTest.storeRecipe("name", null, PluginExecutionType.ALL_NODES, null, new File(""), null, null);
+        underTest.storeRecipe("name", null, new PluginExecutionType("ALL_NODES"), null, new File(""), null, null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 }

@@ -15,7 +15,7 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
-import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcert;
+import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 
 @Entity
 @Table(name = "sssdconfig", uniqueConstraints = {
@@ -74,7 +74,7 @@ public class SssdConfig implements ProvisionEntity {
     private String baseSearch;
 
     @Enumerated(EnumType.STRING)
-    private SssdTlsReqcert tlsReqcert = SssdTlsReqcert.HARD;
+    private SssdTlsReqcertType tlsReqcert = SssdTlsReqcertType.HARD;
 
     private String adServer;
 
@@ -165,11 +165,11 @@ public class SssdConfig implements ProvisionEntity {
         this.baseSearch = baseSearch;
     }
 
-    public SssdTlsReqcert getTlsReqcert() {
+    public SssdTlsReqcertType getTlsReqcert() {
         return tlsReqcert;
     }
 
-    public void setTlsReqcert(SssdTlsReqcert tlsReqcert) {
+    public void setTlsReqcert(SssdTlsReqcertType tlsReqcert) {
         this.tlsReqcert = tlsReqcert;
     }
 

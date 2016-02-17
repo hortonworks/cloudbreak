@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
-import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcert;
+import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
@@ -388,7 +388,7 @@ public class TestUtil {
             config.setUrl("ldap://ldap.domain");
             config.setSchema(SssdSchemaType.RFC2307);
             config.setBaseSearch("dc=domain");
-            config.setTlsReqcert(SssdTlsReqcert.NEVER);
+            config.setTlsReqcert(SssdTlsReqcertType.NEVER);
             config.setAdServer("ad.domain");
             config.setKerberosServer("kerberos.domain");
             config.setKerberosRealm("KERBEROS_DOMAIN");

@@ -22,10 +22,10 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.completion.PluginExecutionType;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -148,7 +148,7 @@ public class RecipeCommands implements CommandMarker {
     public String storeRecipe(
             @CliOption(key = "name", mandatory = true, help = "Unique name of the recepie") String name,
             @CliOption(key = "description", help = "Description of the recepie") String description,
-            @CliOption(key = "executionType", mandatory = true, help = "Type of recepie execution: ONE_NODE, ALL_NODES") PluginExecutionType executionType,
+            @CliOption(key = "executionType", mandatory = true, help = "Type of recepie execution") PluginExecutionType executionType,
             @CliOption(key = "preInstallScriptFile", help = "Path of the pre install script file") File preInstallScriptFile,
             @CliOption(key = "postInstallScriptFile", help = "Path of the post install script file") File postInstallScriptFile,
             @CliOption(key = "timeout", help = "Timeout of the script execution") Integer timeout,
@@ -171,8 +171,9 @@ public class RecipeCommands implements CommandMarker {
                 addScriptContent(pluginContentBuilder, "recipe-post-install", postInstallScriptFile);
             }
 
-            Map<String, PluginExecutionType> plugins = new HashMap<>();
-            plugins.put("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()), executionType);
+            Map<String, com.sequenceiq.cloudbreak.api.model.PluginExecutionType> plugins = new HashMap<>();
+            plugins.put("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()),
+                    com.sequenceiq.cloudbreak.api.model.PluginExecutionType.valueOf(executionType.getName()));
 
             RecipeRequest recipeRequest = new RecipeRequest();
             recipeRequest.setName(name);

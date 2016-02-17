@@ -15,13 +15,4 @@ public enum SssdProviderType {
     public String getType() {
         return type;
     }
-
-    public static SssdProviderType fromString(String providerType) {
-        for (SssdProviderType type : SssdProviderType.values()) {
-            if (type.type.equalsIgnoreCase(providerType)) {
-                return type;
-            }
-        }
-        return null;
-    }
 }

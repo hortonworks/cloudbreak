@@ -32,7 +32,7 @@ abstract class SssdConfigBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.BASE_SEARCH, required = true)
     private String baseSearch;
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.TLS_REQUCERT, required = true)
-    private SssdTlsReqcert tlsReqcert;
+    private SssdTlsReqcertType tlsReqcert;
     @Size(max = 255, message = "The length of the active directory server has to be less than 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.AD_SERVER)
     private String adServer;
@@ -94,11 +94,11 @@ abstract class SssdConfigBase implements JsonEntity {
         this.baseSearch = baseSearch;
     }
 
-    public SssdTlsReqcert getTlsReqcert() {
+    public SssdTlsReqcertType getTlsReqcert() {
         return tlsReqcert;
     }
 
-    public void setTlsReqcert(SssdTlsReqcert tlsReqcert) {
+    public void setTlsReqcert(SssdTlsReqcertType tlsReqcert) {
         this.tlsReqcert = tlsReqcert;
     }
 

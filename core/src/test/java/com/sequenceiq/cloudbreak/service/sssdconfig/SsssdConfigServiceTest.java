@@ -51,9 +51,9 @@ public class SsssdConfigServiceTest {
         underTest = new SssdConfigService();
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(underTest, "sssdName", "Test SSSD Config");
-        ReflectionTestUtils.setField(underTest, "sssdType", "ldap");
+        ReflectionTestUtils.setField(underTest, "sssdType", "LDAP");
         ReflectionTestUtils.setField(underTest, "sssdUrl", "ldap://domain");
-        ReflectionTestUtils.setField(underTest, "sssdSchema", "rfc2307");
+        ReflectionTestUtils.setField(underTest, "sssdSchema", "RFC2307");
         ReflectionTestUtils.setField(underTest, "sssdBase", "dc=domain");
     }
 
