@@ -47,7 +47,7 @@ migrate-execute-mybatis-migrations() {
         local scripts_location=$(pwd)/.schema/$service_name
         rm -rf $scripts_location
         mkdir -p $scripts_location
-        docker run --label cbreak.sidekick=true --entrypoint bash -v $scripts_location:/migrate/scripts $docker_image_name -c "cp /schema/* /migrate/scripts/"
+        docker run --label cbreak.sidekick=true --entrypoint bash -v $scripts_location:/migrate/scripts $docker_image_name -c "cp -r /schema/* /migrate/scripts/"
     fi
     local migration_command=$1
     local new_scripts_location=$scripts_location"/app"
