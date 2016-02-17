@@ -42,7 +42,11 @@ public class UserDataBuilderTest {
         Configuration configuration = factoryBean.getObject();
         userDataBuilder.setFreemarkerConfiguration(configuration);
         userDataBuilder.setRelocateDocker(true);
-        ReflectionTestUtils.setField(userDataBuilder, "customUserData", "date >> /tmp/time.txt");
+
+        UserDataBuilderParams params = new UserDataBuilderParams();
+        params.setCustomData("date >> /tmp/time.txt");
+
+        ReflectionTestUtils.setField(userDataBuilder, "userDataBuilderParams", params);
     }
 
     @Test
