@@ -14,10 +14,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
+import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
 
 public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackRequest> {
 
@@ -33,19 +34,19 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         MockitoAnnotations.initMocks(this);
     }
 
-
     @Test
     public void testConvert() {
         // GIVEN
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroup>());
         given(conversionService.convert(any(Object.class), any(Class.class)))
-                .willReturn(new FailurePolicy());
+                .willReturn(new FailurePolicy())
+                .willReturn(new Orchestrator());
         // WHEN
         Stack stack = underTest.convert(getRequest("stack/stack.json"));
         // THEN
         assertAllFieldsNotNull(stack, Arrays.asList("description", "statusReason", "cluster", "credential",
-                "template", "network", "securityConfig", "securityGroup", "version", "created", "platformVariant"));
+                "template", "network", "securityConfig", "securityGroup", "version", "created", "platformVariant", "cloudPlatform"));
     }
 
     @Override

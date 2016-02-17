@@ -188,8 +188,8 @@ public class StackCommands implements CommandMarker {
             }
             stackRequest.setParameters(params);
             List<InstanceGroupJson> instanceGroupJsonList = new ArrayList<>();
-            for (Map.Entry<String, Object> stringObjectEntry : context.getInstanceGroups().entrySet()) {
-                InstanceGroupEntry instanceGroupEntry = (InstanceGroupEntry) stringObjectEntry.getValue();
+            for (Map.Entry<String, InstanceGroupEntry> stringObjectEntry : context.getInstanceGroups().entrySet()) {
+                InstanceGroupEntry instanceGroupEntry = stringObjectEntry.getValue();
                 InstanceGroupJson instanceGroupJson = new InstanceGroupJson();
                 instanceGroupJson.setType(InstanceGroupType.valueOf(instanceGroupEntry.getType()));
                 instanceGroupJson.setTemplateId(instanceGroupEntry.getTemplateId());

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterC
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -79,6 +81,9 @@ public class ClusterBootstrapperTest {
     @Mock
     private ContainerConfigService containerConfigService;
 
+    @Mock
+    private OrchestratorRepository orchestratorRepository;
+
     @InjectMocks
     private ClusterBootstrapper underTest;
 
@@ -103,7 +108,7 @@ public class ClusterBootstrapperTest {
                 .thenReturn(PollingResult.SUCCESS);
         doNothing().when(clusterBootstrapperErrorHandler)
                 .terminateFailedNodes(any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), any(Set.class));
-
+        when(orchestratorRepository.save(any(Orchestrator.class))).thenReturn(new Orchestrator());
         underTest.bootstrapCluster(context);
 
         verify(tlsSecurityService, times(1)).buildGatewayConfig(anyLong(), anyString(), anyString());

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
@@ -40,8 +39,8 @@ public class CloudbreakContext {
     private Focus focus;
     private Hints hint;
     private Map<PropertyKey, String> properties = new HashMap<>();
-    private Map<String, Object> instanceGroups = new HashMap<>();
-    private Map<String, Map<String, Object>> hostGroups = new HashMap<>();
+    private Map<String, InstanceGroupEntry> instanceGroups = new HashMap<>();
+    private Map<String, HostgroupEntry> hostGroups = new HashMap<>();
     private Set<String> activeHostGroups = new HashSet<>();
     private Set<String> activeInstanceGroups = new HashSet<>();
     private Set<String> activeTemplates = new HashSet<>();
@@ -96,29 +95,29 @@ public class CloudbreakContext {
         removeProperty(PropertyKey.STACK_ID, id);
     }
 
-    public void setInstanceGroups(Map<String, Object> instanceGroups) {
+    public void setInstanceGroups(Map<String, InstanceGroupEntry> instanceGroups) {
         this.instanceGroups = instanceGroups;
     }
 
-    public Map<String, Object> getInstanceGroups() {
+    public Map<String, InstanceGroupEntry> getInstanceGroups() {
         return this.instanceGroups;
     }
 
-    public void setHostGroups(Map<String, Map<String, Object>> hostGroups) {
+    public void setHostGroups(Map<String, HostgroupEntry> hostGroups) {
         this.hostGroups = hostGroups;
     }
 
-    public Map<String, Map<String, Object>> getHostGroups() {
+    public Map<String, HostgroupEntry> getHostGroups() {
         return hostGroups;
     }
 
-    public Map<String, Object> putInstanceGroup(String name, InstanceGroupEntry value) {
+    public Map<String, InstanceGroupEntry> putInstanceGroup(String name, InstanceGroupEntry value) {
         this.instanceGroups.put(name, value);
         return this.instanceGroups;
     }
 
-    public Map<String, Map<String, Object>> putHostGroup(Map.Entry<String, Object> hostGroup) {
-        this.hostGroups.put(hostGroup.getKey(), ImmutableMap.of(hostGroup.getKey(), hostGroup.getValue()));
+    public Map<String, HostgroupEntry> putHostGroup(String name, HostgroupEntry hostgroupEntry) {
+        this.hostGroups.put(name, hostgroupEntry);
         return this.hostGroups;
     }
 

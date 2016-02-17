@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyCollection;
@@ -159,12 +158,6 @@ public class AmbariClusterConnectorTest {
         when(clusterRepository.findOneWithLists(anyLong())).thenReturn(cluster);
     }
 
-    @Test
-    public void testInstallAmbari() throws Exception {
-        Cluster result = underTest.buildAmbariCluster(stack);
-        assertEquals(cluster, result);
-    }
-
     @Test(expected = AmbariOperationFailedException.class)
     public void testInstallAmbariWhenExceptionOccursShouldInstallationFailed() throws Exception {
         doThrow(new IllegalArgumentException()).when(ambariClient).createCluster(anyString(), anyString(), anyMap(), anyString());
@@ -192,12 +185,6 @@ public class AmbariClusterConnectorTest {
         verify(ambariClient, times(0)).changePassword(anyString(), anyString(), anyString(), anyBoolean());
         verify(ambariClient, times(1)).deleteUser(anyString());
         verify(ambariClient, times(1)).createUser(anyString(), anyString(), anyBoolean());
-    }
-
-    @Test(expected = CloudbreakSecuritySetupException.class)
-    public void testChangeAmbariCredentialsWhenCreateAmbariClientDropException() throws Exception {
-        when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenThrow(new CloudbreakSecuritySetupException("sdfsdfsd"));
-        underTest.credentialChangeAmbariCluster(stack.getId(), "admin123", "admin1");
     }
 
     private Map<String, List<String>> createStringListMap() {
