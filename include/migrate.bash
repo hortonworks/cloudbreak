@@ -88,7 +88,7 @@ migrate-one-db() {
             ;;
         uaadb)
             local scripts_location=${UAA_SCHEMA_SCRIPTS_LOCATION}
-            local docker_image_name=sequenceiq/sultans-bin:${DOCKER_TAG_SULTANS}
+            local docker_image_name=hortonworks/cloudbreak-auth:${DOCKER_TAG_SULTANS}
             ;;
         *)
             migrateError "Invalid database service name: $service_name. Supported databases: cbdb, pcdb and uaadb"
