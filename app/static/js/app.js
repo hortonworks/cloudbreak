@@ -140,6 +140,45 @@ cloudbreakApp.directive('file', function() {
     };
 });
 
+cloudbreakApp.directive('sssdconfig', function() {
+    return {
+        require: 'ngModel',
+        link: function(scope, elem, attrs, ngModel) {
+            var testSssdConfig = function(config) {
+                var propertyIsValid = function(section, key) {
+                    var section = ini.get(section);
+                    return section && section.get(key) && typeof(section.get(key).value) == "string" && section.get(key).value.length
+                }
+                try {
+                    var ini = Ini.parse(config);
+                    if (!propertyIsValid("sssd", "services") || !propertyIsValid("sssd", "domains")) {
+                        return false;
+                    }
+                    var domains = ini.get("sssd").get("domains").value.split(",");
+                    for (var i = 0; i < domains.length; i++) {
+                        var domain = "domain/" + domains[i].trim();
+                        if (!propertyIsValid(domain, "id_provider") || !propertyIsValid(domain, "auth_provider")) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } catch (e) {}
+                return false
+            }
+            
+            ngModel.$parsers.unshift(function(value) {
+                var valid = testSssdConfig(value);
+                ngModel.$setValidity('sssdconfig', valid);
+                return valid ? value : null;
+            });
+
+            ngModel.$formatters.unshift(function(value) {
+                ngModel.$setValidity('sssdconfig', testSssdConfig(value));
+                return value;
+            });
+        }
+    };
+});
 
 cloudbreakApp.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
     $routeProvider.when('/', {
