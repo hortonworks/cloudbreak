@@ -858,8 +858,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 failurePolicy: {
                     adjustmentType: "BEST_EFFORT",
                 },
-                configStrategy: $scope.configStrategies[1]
-
+                configStrategy: $scope.configStrategies[1],
+                ldapRequired: false,
+                sssdConfigId: null
+            };
+            $scope.selectSssd = {
+                show: false
             };
             setFileSystem();
             initWizard();

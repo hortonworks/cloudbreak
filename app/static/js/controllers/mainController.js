@@ -40,13 +40,18 @@ angular.module('uluwatuControllers')
                     }, {
                         key: 'URL',
                         value: 'URL'
-                    }],
-                    execution_types: [{
-                        key: 'ALL_NODES',
-                        value: 'ALL_NODES'
+                    }]
+                },
+                'SSSDCONFIG_TYPE': {
+                    content_types: [{
+                        key: 'TEXT',
+                        value: 'TEXT'
                     }, {
-                        key: 'ONE_NODE',
-                        value: 'ONE_NODE'
+                        key: 'FILE',
+                        value: 'FILE'
+                    }, {
+                        key: 'PARAMS',
+                        value: 'PARAMETERS'
                     }]
                 },
                 'BLUEPRINT_TYPE': [{
