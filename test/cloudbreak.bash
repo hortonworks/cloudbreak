@@ -4,6 +4,7 @@ T_checkSedVersion() {
 
 T_consulRecursorOneValid() {
     result=$(consul-recursors <(cat <<EOF
+# hello nameserver hello
 nameserver 4.4.4.4
 EOF
 ) 172.17.42.1)

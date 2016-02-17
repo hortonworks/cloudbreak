@@ -55,7 +55,7 @@ consul-recursors() {
     declare bridge=${2:? 'required 2.param: bridge ip'}
     declare dockerIP=${3:- none}
 
-    local nameservers=$(sed -n "/nameserver/ s/^.*nameserver[^0-9]*//p;" $resolvConf)
+    local nameservers=$(sed -n "/^nameserver/ s/^.*nameserver[^0-9]*//p;" $resolvConf)
     debug "nameservers on host:\n$nameservers"
     debug bridge=$bridge
     echo "$nameservers" | grep -v "$bridge\|$dockerIP" | sed -n '{s/^/ -recursor /;H;}; $ {x;s/[\n\r]//g;p}'
