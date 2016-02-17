@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -36,6 +35,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
+import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -46,15 +48,13 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
@@ -101,6 +101,9 @@ public class AmbariClusterServiceTest {
     @Mock
     private FlowManager flowManager;
 
+    @Mock
+    private HostGroupService hostGroupService;
+
     @Captor
     private ArgumentCaptor<Event<UpdateAmbariHostsRequest>> eventCaptor;
 
@@ -136,6 +139,7 @@ public class AmbariClusterServiceTest {
     @Test(expected = BadRequestException.class)
     public void testStopWhenAwsHasEphemeralVolume() {
         cluster = TestUtil.cluster(TestUtil.blueprint(), TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential()), 1L);
+        cluster.getStack().setCloudPlatform("AWS");
         stack = TestUtil.setEphemeral(cluster.getStack());
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStack(stack);
@@ -195,15 +199,11 @@ public class AmbariClusterServiceTest {
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
         when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(Collections.<HostMetadata>emptyList());
+        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
 
-        Exception result = null;
-        try {
-            underTest.updateHosts(stack.getId(), json);
-        } catch (BadRequestException e) {
-            result = e;
-        }
+        UpdateAmbariHostsRequest updateAmbariHostsRequest = underTest.updateHosts(stack.getId(), json);
 
-        assertTrue(result.getMessage().startsWith("There is not enough node to downscale."));
+        assertTrue(updateAmbariHostsRequest.isDecommission());
     }
 
     @Test
@@ -226,15 +226,11 @@ public class AmbariClusterServiceTest {
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
         when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(asList(metadata2, metadata3));
+        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
 
-        Exception result = null;
-        try {
-            underTest.updateHosts(stack.getId(), json);
-        } catch (BadRequestException e) {
-            result = e;
-        }
+        UpdateAmbariHostsRequest updateAmbariHostsRequest = underTest.updateHosts(stack.getId(), json);
 
-        assertTrue(result.getMessage().startsWith("There is not enough node to downscale."));
+        assertTrue(updateAmbariHostsRequest.isDecommission());
     }
 
     @Test
@@ -280,6 +276,8 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData4);
+        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+
         doNothing().when(flowManager).triggerClusterDownscale(anyObject());
 
         underTest.updateHosts(stack.getId(), json);
@@ -325,6 +323,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
+        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
         doNothing().when(flowManager).triggerClusterDownscale(anyObject());
 
         underTest.updateHosts(stack.getId(), json);
@@ -376,6 +375,8 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData3);
+        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+
         doNothing().when(flowManager).triggerClusterDownscale(anyObject());
 
         underTest.updateHosts(stack.getId(), json);
@@ -418,17 +419,13 @@ public class AmbariClusterServiceTest {
         when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
+        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
 
-        Exception result = null;
-        try {
-            underTest.updateHosts(stack.getId(), json);
-        } catch (BadRequestException e) {
-            result = e;
-        }
+        UpdateAmbariHostsRequest updateAmbariHostsRequest = underTest.updateHosts(stack.getId(), json);
 
-        assertEquals("Trying to move '10000' bytes worth of data to nodes with '11000' bytes of capacity is not allowed", result.getMessage());
+        assertTrue(updateAmbariHostsRequest.isDecommission());
     }
 }

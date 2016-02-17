@@ -155,7 +155,7 @@ public final class TableRenderer {
         return format(table);
     }
 
-    public static String renderObjectValueMap(Map<String, Object> rows, String mainHeader) {
+    public static <E extends Object> String renderObjectValueMap(Map<String, E> rows, String mainHeader) {
         Table table = new Table();
         List<String> mainHeaders = new ArrayList<>();
         if (rows != null) {

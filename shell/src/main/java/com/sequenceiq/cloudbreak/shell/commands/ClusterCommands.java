@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
@@ -193,12 +195,18 @@ public class ClusterCommands implements CommandMarker {
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             Set<HostGroupJson> hostGroupList = new HashSet<>();
-            for (Map<String, Object> hostGroupListEntity : context.getHostGroups().values()) {
+            for (Map.Entry<String, HostgroupEntry> entry : context.getHostGroups().entrySet()) {
                 HostGroupJson hostGroupJson = new HostGroupJson();
-                hostGroupJson.setName(hostGroupListEntity.keySet().iterator().next().toString());
-                //TODO: constraint
-//                hostGroupJson.setInstanceGroupName(hostGroupListEntity.keySet().iterator().next().toString());
-                hostGroupJson.setRecipeIds((Set<Long>) hostGroupListEntity.values().iterator().next());
+                hostGroupJson.setRecipeIds(entry.getValue().getRecipeIdSet());
+                hostGroupJson.setName(entry.getKey());
+
+                ConstraintJson constraintJson = new ConstraintJson();
+                constraintJson.setInstanceGroupName(entry.getKey());
+                constraintJson.setHostCount(entry.getValue().getNodeCount());
+
+                hostGroupJson.setConstraint(constraintJson);
+                hostGroupJson.setRecipeIds(entry.getValue().getRecipeIdSet());
+
                 hostGroupList.add(hostGroupJson);
             }
             wait = wait == null ? false : wait;

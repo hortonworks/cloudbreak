@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
@@ -72,7 +73,7 @@ public class InstanceGroupCommands implements CommandMarker {
                 Map<Long, Integer> map = new HashMap<>();
                 map.put(parsedTemplateId, nodeCount);
                 if (!"cbgateway".equals(instanceGroup.getName())) {
-                    context.putHostGroup(new HashMap.SimpleEntry<String, Object>(instanceGroup.getName(), new HashSet<>()));
+                    context.putHostGroup(instanceGroup.getName(), new HostgroupEntry(nodeCount, new HashSet<Long>()));
                     context.putInstanceGroup(instanceGroup.getName(), new InstanceGroupEntry(parsedTemplateId, nodeCount, "CORE"));
                 } else {
                     context.putInstanceGroup(instanceGroup.getName(), new InstanceGroupEntry(parsedTemplateId, nodeCount, "GATEWAY"));

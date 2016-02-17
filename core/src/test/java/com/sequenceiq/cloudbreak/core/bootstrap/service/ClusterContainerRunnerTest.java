@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,14 +25,21 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.repository.ContainerRepository;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterContainerRunnerTest {
@@ -47,10 +56,22 @@ public class ClusterContainerRunnerTest {
     private TlsSecurityService tlsSecurityService;
 
     @Mock
+    private ContainerService containerService;
+
+    @Mock
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Mock
     private ClusterService clusterService;
 
     @Mock
+    private HostGroupRepository hostGroupRepository;
+
+    @Mock
     private MockContainerOrchestrator mockContainerOrchestrator;
+
+    @Mock
+    private ContainerRepository containerRepository;
 
     @Mock
     private CancelledMockContainerOrchestrator cancelledMockContainerOrchestrator;
@@ -65,7 +86,7 @@ public class ClusterContainerRunnerTest {
     private ClusterContainerRunner underTest;
 
     @Before
-    public void setUp() {
+    public void setUp() throws CloudbreakException {
         ReflectionTestUtils.setField(containerConfigService, "ambariAgent", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "ambariServer", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "registratorDockerImageName", "sequence/testcont:0.1.1");
@@ -79,14 +100,37 @@ public class ClusterContainerRunnerTest {
     public void runNewNodesClusterContainersWhenContainerRunnerFailed()
             throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
         Stack stack = TestUtil.stack();
-        stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
+        Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
+        stack.setCluster(cluster);
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
         ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson, ScalingType.UPSCALE_ONLY_CLUSTER);
-        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new FailedMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get(anyString())).thenReturn(new FailedMockContainerOrchestrator());
+        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
+
+        Set<Container> containers = new HashSet<>();
+
+        Container ambariServer = new Container();
+        ambariServer.setName("server");
+        ambariServer.setImage(DockerContainer.AMBARI_SERVER.getName());
+        ambariServer.setHost("hostname-1");
+        ambariServer.setContainerId("1");
+
+        Container ambariAgent = new Container();
+        ambariAgent.setName("agent");
+        ambariAgent.setImage(DockerContainer.AMBARI_AGENT.getName());
+        ambariAgent.setHost("hostname-2");
+        ambariAgent.setContainerId("1");
+
+        containers.add(ambariAgent);
+        containers.add(ambariServer);
+
+        when(containerRepository.findContainersInCluster(anyLong())).thenReturn(containers);
+        when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-
+        when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<InstanceMetaData>());
+        when(containerService.save(anyList())).thenReturn(new ArrayList<Container>());
         underTest.addClusterContainers(context);
     }
 
@@ -94,13 +138,35 @@ public class ClusterContainerRunnerTest {
     public void runNewNodesClusterContainersWhenContainerRunnerCancelled()
             throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
         Stack stack = TestUtil.stack();
-        stack.setCluster(TestUtil.cluster(TestUtil.blueprint(), stack, 1L));
+        Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
+        stack.setCluster(cluster);
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
         ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson, ScalingType.UPSCALE_ONLY_CLUSTER);
-        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new CancelledMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
+        when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
+        when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
+
+        Set<Container> containers = new HashSet<>();
+
+        Container ambariServer = new Container();
+        ambariServer.setName("server");
+        ambariServer.setImage(DockerContainer.AMBARI_SERVER.getName());
+        ambariServer.setHost("hostname-1");
+        ambariServer.setContainerId("1");
+
+        Container ambariAgent = new Container();
+        ambariAgent.setName("agent");
+        ambariAgent.setImage(DockerContainer.AMBARI_AGENT.getName());
+        ambariAgent.setHost("hostname-2");
+        ambariAgent.setContainerId("1");
+
+        containers.add(ambariAgent);
+        containers.add(ambariServer);
+
+        when(containerRepository.findContainersInCluster(anyLong())).thenReturn(containers);
 
         underTest.addClusterContainers(context);
     }

@@ -19,6 +19,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -43,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -50,6 +53,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 public class TestUtil {
 
@@ -146,6 +150,8 @@ public class TestUtil {
         stack.setStatusReason("statusReason");
         stack.setRegion("region");
         stack.setCreated(123L);
+        stack.setCloudPlatform(credential.cloudPlatform());
+        stack.setOrchestrator(orchestrator());
         switch (credential.cloudPlatform()) {
             case AWS:
                 stack.setInstanceGroups(generateAwsInstanceGroups(3));
@@ -160,6 +166,19 @@ public class TestUtil {
                 break;
         }
         return stack;
+    }
+
+    public static Orchestrator orchestrator() {
+        Orchestrator orchestrator = new Orchestrator();
+        orchestrator.setType("DUMMY");
+        orchestrator.setApiEndpoint("endpoint");
+        try {
+            orchestrator.setAttributes(new Json("{\"test\": \"test\"}"));
+        } catch (JsonProcessingException e) {
+            orchestrator.setAttributes(null);
+        }
+        orchestrator.setId(1L);
+        return orchestrator;
     }
 
     private static SecurityGroup securityGroup(long id) {
@@ -336,7 +355,12 @@ public class TestUtil {
         hostGroup.setName(DUMMY_NAME);
         hostGroup.setRecipes(TestUtil.recipes(1));
         hostGroup.setHostMetadata(TestUtil.hostMetadata(hostGroup, 1));
-        //hostGroup.setInstanceGroup(TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.gcpTemplate(1L)));
+        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.gcpTemplate(1L));
+        Constraint constraint = new Constraint();
+        constraint.setInstanceGroup(instanceGroup);
+        constraint.setHostCount(instanceGroup.getNodeCount());
+        hostGroup.setConstraint(constraint);
+        hostGroup.setCluster(TestUtil.cluster(TestUtil.blueprint(), TestUtil.stack(), 1L));
         return hostGroup;
     }
 

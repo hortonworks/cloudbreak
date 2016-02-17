@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
@@ -94,6 +95,7 @@ public class ReactorFlowManagerTest {
         UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = new UpdateAllowedSubnetsRequest(GCP_PLATFORM, 1L, new ArrayList<SecurityRule>());
         ClusterUserNamePasswordUpdateRequest clusterUserNamePasswordUpdateRequest =
                 new ClusterUserNamePasswordUpdateRequest(1L, "admin", "admin1", GCP_PLATFORM);
+        ClusterDeleteRequest clusterDeleteRequest = new ClusterDeleteRequest(1L, GCP_PLATFORM, 1L);
 
         flowManager.triggerProvisioning(provisionRequest);
         flowManager.triggerClusterInstall(provisionRequest);
@@ -115,6 +117,7 @@ public class ReactorFlowManagerTest {
         flowManager.triggerClusterSync(clusterStatusUpdateRequest);
         flowManager.triggerStackSync(stackStatusUpdateRequest);
         flowManager.triggerClusterUserNamePasswordUpdate(clusterUserNamePasswordUpdateRequest);
+        flowManager.triggerClusterTermination(clusterDeleteRequest);
 
         int count = -1;
         for (Method method : flowManager.getClass().getDeclaredMethods()) {

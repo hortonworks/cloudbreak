@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
@@ -250,8 +251,10 @@ public class BlueprintValidatorTest {
     private HostGroup createHostGroup(String groupName, InstanceGroup instanceGroup) {
         HostGroup group = new HostGroup();
         group.setName(groupName);
-        //TODO
-//        group.setInstanceGroup(instanceGroup);
+        Constraint constraint = new Constraint();
+        constraint.setHostCount(instanceGroup.getNodeCount());
+        constraint.setInstanceGroup(instanceGroup);
+        group.setConstraint(constraint);
         return group;
     }
 
