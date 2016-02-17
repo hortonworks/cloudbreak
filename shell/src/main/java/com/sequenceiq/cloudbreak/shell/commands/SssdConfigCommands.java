@@ -19,10 +19,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
-import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
-import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcert;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.completion.SssdProviderType;
+import com.sequenceiq.cloudbreak.shell.completion.SssdSchemaType;
+import com.sequenceiq.cloudbreak.shell.completion.SssdTlsReqcertType;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
@@ -100,12 +100,12 @@ public class SssdConfigCommands implements CommandMarker {
     public String add(
             @CliOption(key = "name", mandatory = true, help = "Name of the config") String name,
             @CliOption(key = "description", help = "Description of the config") String description,
-            @CliOption(key = "providerType", mandatory = true, help = "Type of the provider (ldap or ad)") String providerType,
+            @CliOption(key = "providerType", mandatory = true, help = "Type of the provider") SssdProviderType providerType,
             @CliOption(key = "url", mandatory = true, help = "comma-separated list of URIs of the LDAP servers") String url,
-            @CliOption(key = "schema", mandatory = true, help = "Schema of the database (rfc2307, rfc2307bis, IPA, AD") String schema,
+            @CliOption(key = "schema", mandatory = true, help = "Schema of the database") SssdSchemaType schema,
             @CliOption(key = "baseSearch", mandatory = true, help = "Search base of the database") String baseSearch,
             @CliOption(key = "tlsReqcert", mandatory = true, unspecifiedDefaultValue = "hard", specifiedDefaultValue = "hard",
-                    help = "TLS behavior of connection (never, allow, try, demand, hard)") String tlsReqcert,
+                    help = "TLS behavior of connection") SssdTlsReqcertType tlsReqcert,
             @CliOption(key = "adServer", mandatory = false, help = "comma-separated list of IP addresses or hostnames of the AD servers") String adServer,
             @CliOption(key = "kerberosServer", mandatory = false,
                     help = "comma-separated list of IP addresses or hostnames of the Kerberos servers") String kerberosServer,
@@ -116,20 +116,11 @@ public class SssdConfigCommands implements CommandMarker {
             SssdConfigRequest request = new SssdConfigRequest();
             request.setName(name);
             request.setDescription(description);
-            request.setProviderType(SssdProviderType.fromString(providerType));
-            if (request.getProviderType() == null) {
-                return "Type of the provider is wrong.";
-            }
+            request.setProviderType(com.sequenceiq.cloudbreak.api.model.SssdProviderType.valueOf(providerType.getName()));
             request.setUrl(url);
-            request.setSchema(SssdSchemaType.fromString(schema));
-            if (request.getSchema() == null) {
-                return "Schema of the database is wrong.";
-            }
+            request.setSchema(com.sequenceiq.cloudbreak.api.model.SssdSchemaType.valueOf(schema.getName()));
             request.setBaseSearch(baseSearch);
-            request.setTlsReqcert(SssdTlsReqcert.fromString(tlsReqcert));
-            if (request.getTlsReqcert() == null) {
-                return "TLS behavior of connection is wrong.";
-            }
+            request.setTlsReqcert(com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType.valueOf(tlsReqcert.getName()));
             request.setAdServer(adServer);
             request.setKerberosServer(kerberosServer);
             request.setKerberosRealm(kerberosRealm);

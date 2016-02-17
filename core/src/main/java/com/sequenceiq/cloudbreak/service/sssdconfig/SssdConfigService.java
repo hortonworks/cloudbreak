@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
-import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcert;
+import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -55,11 +55,11 @@ public class SssdConfigService {
                     config.setAccount(user.getAccount());
                     config.setOwner(user.getUserId());
                     config.setName(sssdName);
-                    config.setProviderType(SssdProviderType.fromString(sssdType));
+                    config.setProviderType(SssdProviderType.valueOf(sssdType));
                     config.setUrl(sssdUrl);
-                    config.setSchema(SssdSchemaType.fromString(sssdSchema));
+                    config.setSchema(SssdSchemaType.valueOf(sssdSchema));
                     config.setBaseSearch(sssdBase);
-                    config.setTlsReqcert(SssdTlsReqcert.NEVER);
+                    config.setTlsReqcert(SssdTlsReqcertType.NEVER);
                     sssdConfigRepository.save(config);
                 }
             }

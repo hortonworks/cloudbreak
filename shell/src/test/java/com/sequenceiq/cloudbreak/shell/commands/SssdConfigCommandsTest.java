@@ -23,10 +23,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.SssdConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
-import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
-import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcert;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.completion.SssdProviderType;
+import com.sequenceiq.cloudbreak.shell.completion.SssdSchemaType;
+import com.sequenceiq.cloudbreak.shell.completion.SssdTlsReqcertType;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
@@ -63,9 +63,9 @@ public class SssdConfigCommandsTest {
         dummyResult = new SssdConfigResponse();
         dummyResult.setId(CONFIG_ID);
         dummyResult.setName(CONFIG_NAME);
-        dummyResult.setProviderType(SssdProviderType.LDAP);
-        dummyResult.setSchema(SssdSchemaType.RFC2307);
-        dummyResult.setTlsReqcert(SssdTlsReqcert.NEVER);
+        dummyResult.setProviderType(com.sequenceiq.cloudbreak.api.model.SssdProviderType.LDAP);
+        dummyResult.setSchema(com.sequenceiq.cloudbreak.api.model.SssdSchemaType.RFC2307);
+        dummyResult.setTlsReqcert(com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType.NEVER);
         String classPackage = getClass().getPackage().getName().replaceAll("\\.", "/");
         Resource resource = new ClassPathResource(classPackage + "/" + getClass().getSimpleName() + ".class");
         dummyFile = resource.getFile();
@@ -102,7 +102,8 @@ public class SssdConfigCommandsTest {
     @Test
     public void testPublicAdd() {
         given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
-        underTest.add("name", "desc", "ldap", "url", "rfc2307", "base", "never", null, null, null, true);
+        underTest.add("name", "desc", new SssdProviderType("LDAP"), "url", new SssdSchemaType("RFC2307"), "base", new SssdTlsReqcertType("NEVER"), null, null,
+                null, true);
         verify(sssdConfigEndpoint, times(1)).postPublic(any(SssdConfigRequest.class));
         verify(sssdConfigEndpoint, times(0)).postPrivate(any(SssdConfigRequest.class));
     }
@@ -110,7 +111,8 @@ public class SssdConfigCommandsTest {
     @Test
     public void testPrivateAdd() {
         given(sssdConfigEndpoint.postPrivate(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
-        underTest.add("name", "desc", "ldap", "url", "rfc2307", "base", "never", null, null, null, false);
+        underTest.add("name", "desc", new SssdProviderType("LDAP"), "url", new SssdSchemaType("RFC2307"), "base", new SssdTlsReqcertType("NEVER"), null, null,
+                null, false);
         verify(sssdConfigEndpoint, times(0)).postPublic(any(SssdConfigRequest.class));
         verify(sssdConfigEndpoint, times(1)).postPrivate(any(SssdConfigRequest.class));
     }

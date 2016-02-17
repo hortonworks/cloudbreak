@@ -32,9 +32,13 @@ import com.sequenceiq.cloudbreak.shell.converter.InstanceGroupTemplateNameConver
 import com.sequenceiq.cloudbreak.shell.converter.NetworkIdConverter;
 import com.sequenceiq.cloudbreak.shell.converter.NetworkNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.PlatformVariantConverter;
+import com.sequenceiq.cloudbreak.shell.converter.PluginExecutionTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityGroupIdConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityGroupNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityRulesConverter;
+import com.sequenceiq.cloudbreak.shell.converter.SssdProviderTypeConverter;
+import com.sequenceiq.cloudbreak.shell.converter.SssdSchemaTypeConverter;
+import com.sequenceiq.cloudbreak.shell.converter.SssdTlsReqcertTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.StackAvailabilityZoneConverter;
 import com.sequenceiq.cloudbreak.shell.converter.StackRegionConverter;
 
@@ -207,5 +211,25 @@ public class ConverterConfiguration {
     @Bean
     Converter azureInstanceTypeConverter() {
         return new AzureInstanceTypeConverter();
+    }
+
+    @Bean
+    Converter getPluginExecutionTypeConverter() {
+        return new PluginExecutionTypeConverter();
+    }
+
+    @Bean
+    Converter getSssdProviderTypeConverter() {
+        return new SssdProviderTypeConverter();
+    }
+
+    @Bean
+    Converter getSssdSchemaTypeConverter() {
+        return new SssdSchemaTypeConverter();
+    }
+
+    @Bean
+    Converter getSssdTlsReqcertTypeConverter() {
+        return new SssdTlsReqcertTypeConverter();
     }
 }

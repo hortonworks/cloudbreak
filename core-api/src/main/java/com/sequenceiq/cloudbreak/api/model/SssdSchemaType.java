@@ -16,13 +16,4 @@ public enum SssdSchemaType {
     public String getRepresentation() {
         return representation;
     }
-
-    public static SssdSchemaType fromString(String representation) {
-        for (SssdSchemaType type : SssdSchemaType.values()) {
-            if (type.representation.equalsIgnoreCase(representation)) {
-                return type;
-            }
-        }
-        return null;
-    }
 }

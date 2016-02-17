@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.SettingsEndpoint;
 import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
-import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcert;
+import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 
 @Component
 public class SettingsController implements SettingsEndpoint {
@@ -42,7 +42,7 @@ public class SettingsController implements SettingsEndpoint {
         Map<String, Object> sssdConfig = new HashMap<>();
         sssdConfig.put("providerTypes", SssdProviderType.values());
         sssdConfig.put("schemaTypes", SssdSchemaType.values());
-        sssdConfig.put("tlsReqcertTypes", SssdTlsReqcert.values());
+        sssdConfig.put("tlsReqcertTypes", SssdTlsReqcertType.values());
         return sssdConfig;
     }
 }

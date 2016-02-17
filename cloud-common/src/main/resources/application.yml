@@ -72,9 +72,9 @@ cb:
 
   sssd:
     name: cloudbreak-default-ldap
-    type: ldap
+    type: LDAP
     url: ldap://ldap.service.consul
-    schema: rfc2307
+    schema: RFC2307
     base: dc=nodomain
 
   arm:
