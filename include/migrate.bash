@@ -35,7 +35,7 @@ migrate-execute-mybatis-migrations() {
     local docker_image_name=$1 && shift
     local service_name=$1 && shift
     local container_name=$(compose-get-container $service_name)
-        migrateDebug "Migration command on $service_name with params: '$*' will be executed on container: $container_name"
+    migrateDebug "Migration command on $service_name with params: '$*' will be executed on container: $container_name"
     if [[ ! "$container_name" ]]; then
         migrateError "DB container with matching name is not running. Expected name: .*$service_name.*"
         return 1
@@ -49,11 +49,16 @@ migrate-execute-mybatis-migrations() {
         mkdir -p $scripts_location
         docker run --label cbreak.sidekick=true --entrypoint bash -v $scripts_location:/migrate/scripts $docker_image_name -c "cp /schema/* /migrate/scripts/"
     fi
-    migrateDebug "Scripts location:  $scripts_location"
+    local migration_command=$1
+    local new_scripts_location=$scripts_location"/app"
+    if [[ "$migration_command" = "up" ]]; then
+        new_scripts_location=$scripts_location"/mybatis"
+    fi
+    migrateDebug "Scripts location:  $new_scripts_location"
     local migrateResult=$(docker run \
         --label cbreak.sidekick=true \
         --link $container_name:db \
-        -v $scripts_location:/migrate/scripts \
+        -v $new_scripts_location:/migrate/scripts \
         sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION "$@" \
       | tee -a "$DB_MIGRATION_LOG")
 
