@@ -328,7 +328,7 @@ sultans:
     volumes:
         - $SULTANS_VOLUME_HOST:$SULTANS_VOLUME_CONTAINER
     dns: $PRIVATE_IP
-    image: sequenceiq/sultans-bin:$DOCKER_TAG_SULTANS
+    image: hortonworks/cloudbreak-auth:$DOCKER_TAG_SULTANS
 
 uluwatu:
     environment:
