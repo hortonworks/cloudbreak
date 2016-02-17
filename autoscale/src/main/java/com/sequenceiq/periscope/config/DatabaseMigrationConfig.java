@@ -1,13 +1,5 @@
 package com.sequenceiq.periscope.config;
 
-import javax.inject.Inject;
-import javax.sql.DataSource;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.PrintStream;
-import java.util.Properties;
-
 import org.apache.commons.io.Charsets;
 import org.apache.ibatis.migration.DataSourceConnectionProvider;
 import org.apache.ibatis.migration.FileMigrationLoader;
@@ -21,6 +13,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import javax.inject.Inject;
+import javax.sql.DataSource;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.PrintStream;
+import java.util.Properties;
+
 @Configuration
 public class DatabaseMigrationConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMigrationConfig.class);
@@ -28,6 +27,8 @@ public class DatabaseMigrationConfig {
     private static final String SCHEMA_IN_CONTAINER = "container";
     private static final String DEFAULT_SCHEMA_LOCATION_IN_SOURCE = "autoscale/src/main/resources/schema";
     private static final String PENDING_OPERATION_WARNING_MSG = "WARNING: Running pending migrations out of order can create unexpected results.";
+    private static final String UP_OPERATION_SUBFOLDER = "/mybatis";
+    private static final String PENDING_OPERATION_SUBFOLDER = "/app";
 
     @Value("${periscope.schema.scripts.location:" + DEFAULT_SCHEMA_LOCATION_IN_SOURCE + "}")
     private String schemaLocation;
@@ -49,10 +50,10 @@ public class DatabaseMigrationConfig {
             operationOption.setRemoveCRs(true);
             ByteArrayOutputStream upOutStream = new ByteArrayOutputStream();
             ByteArrayOutputStream pendingOutStream = new ByteArrayOutputStream();
-            FileMigrationLoader migrationsLoader = fileMigrationLoader();
-            LOGGER.info("Applying the necessary database migration scripts from location: '{}'....", schemaLocation);
-            upOperation = upOperation.operate(dataSourceConnectionProvider, migrationsLoader, operationOption, new PrintStream(upOutStream));
-            pendingOperation.operate(dataSourceConnectionProvider, migrationsLoader, operationOption, new PrintStream(pendingOutStream));
+            FileMigrationLoader upMigrationsLoader = upMigrationLoader();
+            upOperation = upOperation.operate(dataSourceConnectionProvider, upMigrationsLoader, operationOption, new PrintStream(upOutStream));
+            FileMigrationLoader pendingOperationsLoader = pendingMigrationLoader();
+            pendingOperation.operate(dataSourceConnectionProvider, pendingOperationsLoader, operationOption, new PrintStream(pendingOutStream));
             String upMigrationResult = upOutStream.toString().trim();
             String pendingMigrationResult = pendingOutStream.toString().trim();
             if (upMigrationResult.isEmpty() && pendingMigrationResult.equals(PENDING_OPERATION_WARNING_MSG)) {
@@ -67,11 +68,28 @@ public class DatabaseMigrationConfig {
 
 
     @Bean
-    public FileMigrationLoader fileMigrationLoader() {
+    public FileMigrationLoader upMigrationLoader() {
+        String schemaLoc = schemaLocation;
         if (SCHEMA_IN_CONTAINER.equals(schemaLocation)) {
-            schemaLocation = DEFAULT_SCHEMA_LOCATION_IN_CONTAINER;
+            schemaLoc = DEFAULT_SCHEMA_LOCATION_IN_CONTAINER;
         }
-        File scriptsDir = new File(schemaLocation);
+        schemaLoc = schemaLoc + UP_OPERATION_SUBFOLDER;
+        LOGGER.info("Creating up operation migration loader for location: '{}'.....", schemaLoc);
+        File scriptsDir = new File(schemaLoc);
+        Properties emptyProperties = new Properties();
+        String charset = Charsets.UTF_8.displayName();
+        return new FileMigrationLoader(scriptsDir, charset, emptyProperties);
+    }
+
+    @Bean
+    public FileMigrationLoader pendingMigrationLoader() {
+        String schemaLoc = schemaLocation;
+        if (SCHEMA_IN_CONTAINER.equals(schemaLocation)) {
+            schemaLoc = DEFAULT_SCHEMA_LOCATION_IN_CONTAINER;
+        }
+        schemaLoc = schemaLoc + PENDING_OPERATION_SUBFOLDER;
+        LOGGER.info("Creating pending operation migration loader for location: '{}'.....", schemaLoc);
+        File scriptsDir = new File(schemaLoc);
         Properties emptyProperties = new Properties();
         String charset = Charsets.UTF_8.displayName();
         return new FileMigrationLoader(scriptsDir, charset, emptyProperties);
