@@ -42,7 +42,6 @@ abstract class SssdConfigBase implements JsonEntity {
     @Size(max = 255, message = "The length of the kerberos realm has to be less than 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.KERBEROS_REALM)
     private String kerberosRealm;
-    @Size(max = 1000, min = 50, message = "The length of the config's description has to be in range 50 to 1000")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.CONFIGURATION)
     private String configuration;
 
