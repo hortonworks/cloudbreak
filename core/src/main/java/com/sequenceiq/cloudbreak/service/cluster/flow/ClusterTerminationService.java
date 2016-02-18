@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 
@@ -63,13 +65,18 @@ public class ClusterTerminationService {
     private ContainerRepository containerRepository;
     @Inject
     private ContainerOrchestratorResolver orchestratorResolver;
+    @Inject
+    private TlsSecurityService tlsSecurityService;
 
     public void deleteClusterContainers(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
         try {
             if (cluster != null) {
                 Orchestrator orchestrator = cluster.getStack().getOrchestrator();
-                OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap());
+                Map<String, Object> map = new HashMap<>();
+                map.putAll(orchestrator.getAttributes().getMap());
+                map.put("certificateDir", tlsSecurityService.prepareCertDir(cluster.getStack().getId()));
+                OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
                 ContainerOrchestrator containerOrchestrator = orchestratorResolver.get(orchestrator.getType());
                 Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
                 List<ContainerInfo> containerInfo = FluentIterable.from(containers).transform(new Function<Container, ContainerInfo>() {

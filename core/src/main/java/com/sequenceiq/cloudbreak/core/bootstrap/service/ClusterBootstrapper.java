@@ -5,10 +5,8 @@ import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.
 import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -17,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.BootstrapApiContext;
@@ -28,7 +25,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -127,9 +123,6 @@ public class ClusterBootstrapper {
             Orchestrator orchestrator = new Orchestrator();
             orchestrator.setApiEndpoint(gatewayInstance.getPublicIp() + ":443");
             orchestrator.setType("SWARM");
-            Map<String, String> attributes = new HashMap<>();
-            attributes.put("certificateDir", gatewayConfig.getCertificateDir());
-            orchestrator.setAttributes(new Json(attributes));
             orchestratorRepository.save(orchestrator);
             stack.setOrchestrator(orchestrator);
             stackRepository.save(stack);
@@ -138,7 +131,7 @@ public class ClusterBootstrapper {
             }
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException | JsonProcessingException e) {
+        } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }
     }

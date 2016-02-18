@@ -327,7 +327,10 @@ public class AmbariDecommissioner {
 
     private void stopAndDeleteHosts(Stack stack, AmbariClient ambariClient, final List<String> hostList, Set<String> components) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap());
+        Map<String, Object> map = new HashMap<>();
+        map.putAll(orchestrator.getAttributes().getMap());
+        map.put("certificateDir", tlsSecurityService.prepareCertDir(stack.getId()));
+        OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
         ContainerOrchestrator containerOrchestrator = orchestratorResolver.get(orchestrator.getType());
         Set<Container> containers = containerRepository.findContainersInCluster(stack.getCluster().getId());
 

@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
@@ -108,6 +109,9 @@ public class ClusterContainerRunner {
     @Inject
     private ConversionService conversionService;
 
+    @Inject
+    private TlsSecurityService tlsSecurityService;
+
     public Map<String, List<Container>> runClusterContainers(ProvisioningContext context) throws CloudbreakException {
         try {
             Stack stack = stackRepository.findOneWithLists(context.getStackId());
@@ -146,7 +150,10 @@ public class ClusterContainerRunner {
             throws CloudbreakException, CloudbreakOrchestratorException {
 
         Orchestrator orchestrator = stack.getOrchestrator();
-        OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap());
+        Map<String, Object> map = new HashMap<>();
+        map.putAll(orchestrator.getAttributes().getMap());
+        map.put("certificateDir", tlsSecurityService.prepareCertDir(stack.getId()));
+        OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
         Map<String, List<ContainerInfo>> containers = new HashMap<>();
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
@@ -236,7 +243,10 @@ public class ClusterContainerRunner {
             throws CloudbreakException, CloudbreakOrchestratorException {
 
         Orchestrator orchestrator = stack.getOrchestrator();
-        OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap());
+        Map<String, Object> map = new HashMap<>();
+        map.putAll(orchestrator.getAttributes().getMap());
+        map.put("certificateDir", tlsSecurityService.prepareCertDir(stack.getId()));
+        OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
         Map<String, List<ContainerInfo>> containers = new HashMap<>();
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());

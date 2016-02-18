@@ -378,7 +378,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     private DockerClientConfig getSwarmClientConfig(String publicAddress, String certificateDir) {
-
         return DockerClientConfig.createDefaultConfigBuilder()
                 .withDockerCertPath(certificateDir)
                 .withVersion("1.18")
