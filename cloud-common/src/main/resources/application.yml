@@ -57,8 +57,8 @@ cb:
   
   docker:
     container:
-      ambari.server: hortonworks/ambari-server:2.2.1-v1
-      ambari.agent: hortonworks/ambari-agent:2.2.1-v1
+      ambari.server: hortonworks/ambari-server:2.2.1-v7
+      ambari.agent: hortonworks/ambari-agent:2.2.1-v7
       ambari.db: postgres:9.4.1
       registrator: gliderlabs/registrator:v6
       docker.consul.watch.plugn: sequenceiq/docker-consul-watch-plugn:1.6
