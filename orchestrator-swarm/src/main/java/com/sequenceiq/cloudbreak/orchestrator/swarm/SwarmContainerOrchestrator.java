@@ -65,7 +65,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
      * @return The API address of the container orchestrator
      */
     @Override
-    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, String consulLogLocation,
+    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try {
             String privateGatewayIp = getPrivateGatewayIp(gatewayConfig.getPublicAddress(), nodes);
@@ -74,7 +74,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             Set<String> consulServers = selectConsulServers(privateGatewayIp, privateAddressesWithoutGateway, consulServerCount);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
 
-            String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", consulLogLocation, "--consulServers",
+            String[] cmd = {"--debug", "bootstrap", "--wait", MUNCHAUSEN_WAIT, "--consulServers",
                     concatToString(consulServers), concatToString(result)};
 
             runner(munchausenBootstrap(gatewayConfig, imageName(config), cmd),
@@ -88,13 +88,12 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, String consulLogLocation,
+    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try {
             Set<String> privateAddresses = getPrivateAddresses(nodes);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
-            String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--consulLogLocation", consulLogLocation,
-                    "--join", getConsulJoinIp(gatewayConfig.getPrivateAddress()), concatToString(result)};
+            String[] cmd = {"--debug", "add", "--wait", MUNCHAUSEN_WAIT, "--join", getConsulJoinIp(gatewayConfig.getPrivateAddress()), concatToString(result)};
 
             runner(munchausenNewNodeBootstrap(gatewayConfig, imageName(config), cmd),
                     getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap()).call();

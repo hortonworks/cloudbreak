@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 
 @Component
 public class ClusterBootstrapper {
@@ -43,8 +42,6 @@ public class ClusterBootstrapper {
     private static final int POLLING_INTERVAL = 5000;
 
     private static final int MAX_POLLING_ATTEMPTS = 500;
-
-    private static final String CONSUL_LOG_LOCATION = VolumeUtils.getLogVolume("logs/consul");
 
     @Inject
     private StackRepository stackRepository;
@@ -93,7 +90,6 @@ public class ClusterBootstrapper {
                     MAX_POLLING_ATTEMPTS);
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             containerOrchestrator.bootstrap(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(0), stack.getConsulServers(),
-                    CONSUL_LOG_LOCATION,
                     stackDeletionBasedExitCriteriaModel(stack.getId()));
             if (nodeMap.size() > 1) {
                 clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
@@ -101,7 +97,7 @@ public class ClusterBootstrapper {
                         POLLING_INTERVAL,
                         MAX_POLLING_ATTEMPTS);
                 for (int i = 1; i < nodeMap.size(); i++) {
-                    containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i), CONSUL_LOG_LOCATION,
+                    containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i),
                             stackDeletionBasedExitCriteriaModel(stack.getId()));
                     clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
                             new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
@@ -141,7 +137,7 @@ public class ClusterBootstrapper {
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get();
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             for (int i = 0; i < nodeMap.size(); i++) {
-                containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i), CONSUL_LOG_LOCATION,
+                containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i),
                         stackDeletionBasedExitCriteriaModel(stack.getId()));
                 clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
                         new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
