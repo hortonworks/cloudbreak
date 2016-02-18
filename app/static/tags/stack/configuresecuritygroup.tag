@@ -17,7 +17,7 @@
 <div class="form-group" name="cluster_security1">
     <label class="col-sm-3 control-label" for="cluster_security">{{msg.cluster_form_enable_security}}</label>
     <div class="col-sm-8">
-        <input type="checkbox" name="cluster_security" id="cluster_security" ng-model="cluster.enableSecurity" ng-change="changeStackAdvisor()">
+        <input type="checkbox" name="cluster_security" id="cluster_security" ng-model="cluster.enableSecurity">
         <div class="help-block" ng-show="cluster.enableSecurity"><i class="fa fa-warning"></i> {{msg.cluster_form_enable_security_hint}}
         </div>
     </div>

@@ -129,14 +129,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
-        $scope.changeStackAdvisor = function() {
-            if ($scope.cluster.enableSecurity) {
-                $scope.cluster.configStrategy = "NEVER_APPLY";
-            } else {
-                $scope.cluster.configStrategy = "ONLY_STACK_DEFAULTS_APPLY";
-            }
-        }
-
         $scope.selectBlueprintreinstallChange = function() {
             var actualBp = $filter('filter')($rootScope.blueprints, {
                 id: $rootScope.reinstallClusterObject.blueprintId
