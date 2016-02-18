@@ -303,6 +303,7 @@ cloudbreak:
         - 8080:8080
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
+        - /dev/urandom:/dev/random
     dns: $PRIVATE_IP
     image: sequenceiq/cloudbreak:$DOCKER_TAG_CLOUDBREAK
     command: bash
@@ -391,6 +392,7 @@ periscope:
     dns: $PRIVATE_IP
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
+        - /dev/urandom:/dev/random
     image: sequenceiq/periscope:$DOCKER_TAG_PERISCOPE
 
 EOF
