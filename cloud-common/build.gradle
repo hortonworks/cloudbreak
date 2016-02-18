@@ -20,5 +20,8 @@ dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
     compile group: 'com.google.guava', name: 'guava', version: guavaVersion
     compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
-    runtime group: 'org.springframework.cloud', name: 'spring-cloud-starter-consul-config', version:'1.0.0.M6-seq'
+
+    runtime ('org.springframework.cloud:spring-cloud-starter-consul-config:1.0.0.M6-seq'){
+      exclude group: 'com.ecwid.consul';
+    }
 }
