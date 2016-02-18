@@ -1,3 +1,7 @@
+spring:
+  cloud:
+    consul:
+      host: consul.service.consul
 cb:
   threadpool:
     core.size: 40
