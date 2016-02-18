@@ -44,7 +44,7 @@ But we use only the first one, which is based on Consul’s distributed key-valu
 
 
 You just need to put the `spring-cloud-starter-consul-config` and related jars to the runtime classpath, and you will be
-able to change configurations.
+able to change configurations. See [Spring Cloud docs](http://projects.spring.io/spring-cloud/spring-cloud.html#_client_side_usage)
 
 By default all configurations are searched in the `/configuration/application` path of consul’s kv store.
 
@@ -110,3 +110,9 @@ public class HelloController {
 ```
 
 In that case you can use the `/configuration/application/cb/gateway` and `/configuration/application/cb/customData` consul kv keys.
+
+## Snapshot dependency
+
+Unfortunately the dynamic config change watch behaviour is implemented only in master branch [commit #d1141a8](https://github.com/spring-cloud/spring-cloud-consul/commit/d1141a8). 
+So its not available even on the `1.0.0-M6`. We didn’t wanted to rely on `1.0.0-BUILD-SNAPSHOT`, so we put it into our own maven repo
+as version `1.0.0-M6-seq`, once it has an official release we should move back to it.
