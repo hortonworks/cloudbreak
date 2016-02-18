@@ -38,7 +38,7 @@ public class UpdateStackRequestValidatorTest {
     public void setUp() {
         underTest = new UpdateStackRequestValidator();
         constraintValidatorContext = new ConstraintValidatorContextImpl(
-                new ArrayList<String>(),
+                new ArrayList<String>(), null,
                 PathImpl.createRootPath(),
                 new DummyConstraintDescriptor()
         );

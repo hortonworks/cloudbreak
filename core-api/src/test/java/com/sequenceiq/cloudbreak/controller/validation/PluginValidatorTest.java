@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyString;
-
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -23,10 +19,13 @@ import javax.validation.metadata.ConstraintDescriptor;
 import org.apache.commons.codec.binary.Base64;
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorContextImpl;
 import org.hibernate.validator.internal.engine.path.PathImpl;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -49,9 +48,9 @@ public class PluginValidatorTest {
     @Before
     public void setUp() {
         underTest.initialize(validPlugin);
-        given(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).willReturn(
+        BDDMockito.given(constraintValidatorContext.buildConstraintViolationWithTemplate(Matchers.anyString())).willReturn(
                 new ConstraintValidatorContextImpl(
-                        new ArrayList<String>(),
+                        new ArrayList<String>(), null,
                         PathImpl.createRootPath(),
                         new DummyConstraintDescriptor()
                 ).buildConstraintViolationWithTemplate("dummytemplate")
@@ -65,38 +64,38 @@ public class PluginValidatorTest {
         plugins.put("https://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
         plugins.put("git://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
         plugins.put("base64://" + Base64.encodeBase64String("plugin.toml:\nrecipe-pre-install:".getBytes()), PluginExecutionType.ALL_NODES);
-        assertEquals(underTest.isValid(plugins, constraintValidatorContext), true);
+        Assert.assertEquals(underTest.isValid(plugins, constraintValidatorContext), true);
     }
 
     @Test
     public void inValidPluginNullReturnFalse() {
-        assertEquals(underTest.isValid(null, constraintValidatorContext), false);
+        Assert.assertEquals(underTest.isValid(null, constraintValidatorContext), false);
     }
 
     @Test
     public void inValidPluginEmptyReturnFalse() {
-        assertEquals(underTest.isValid(Collections.<String, PluginExecutionType>emptyMap(), constraintValidatorContext), false);
+        Assert.assertEquals(underTest.isValid(Collections.<String, PluginExecutionType>emptyMap(), constraintValidatorContext), false);
     }
 
     @Test
     public void inValidPluginUrlJsonWillReturnFalse() {
         Map<String, PluginExecutionType> plugins = new HashMap<>();
         plugins.put("asd://github.com/user/plugin1.git", PluginExecutionType.ALL_NODES);
-        assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
+        Assert.assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
     }
 
     @Test
     public void inValidBase64MissingScriptWillReturnFalse() {
         Map<String, PluginExecutionType> plugins = new HashMap<>();
         plugins.put("base64://" + Base64.encodeBase64String("plugin.toml:".getBytes()), PluginExecutionType.ALL_NODES);
-        assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
+        Assert.assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
     }
 
     @Test
     public void inValidBase64MissingPluginDotTomlWillReturnFalse() {
         Map<String, PluginExecutionType> plugins = new HashMap<>();
         plugins.put("base64://" + Base64.encodeBase64String("recipe-pre-install:\nrecipe-post-install:".getBytes()), PluginExecutionType.ALL_NODES);
-        assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
+        Assert.assertEquals(underTest.isValid(plugins, constraintValidatorContext), false);
     }
 
     private class DummyAnnotation implements Annotation {
