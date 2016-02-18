@@ -14,8 +14,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
-import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -24,6 +22,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -69,9 +73,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
@@ -164,21 +165,19 @@ public class AmbariClusterFacade implements ClusterFacade {
             MDCBuilder.buildMdcContext(cluster);
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Ambari cluster is now starting.");
             fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_STARTING, UPDATE_IN_PROGRESS.name());
-
             clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
-            HttpClientConfig ambariClientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
-            AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariClientConfig);
-            AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, ambariClientConfig.getApiAddress(), ambariClient);
+            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+            AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
+            AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, clientConfig.getApiAddress(), ambariClient);
             PollingResult pollingResult = ambariStartupPollerObjectPollingService
                     .pollWithTimeoutSingleFailure(ambariStartupListenerTask, ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-
             if (isSuccess(pollingResult)) {
                 LOGGER.info("Ambari has successfully started! Polling result: {}", pollingResult);
             } else {
                 LOGGER.info("Could not start Ambari. polling result: {},  Context: {}", pollingResult, context);
                 throw new CloudbreakException(String.format("Could not start Ambari. polling result: '%s',  Context: '%s'", pollingResult, context));
             }
-            changeAmbariCredentials(ambariClientConfig, stack);
+            changeAmbariCredentials(clientConfig, stack);
         }
         return context;
     }
@@ -503,7 +502,7 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     private HttpClientConfig buildAmbariClientConfig(Stack stack, List<Container> containers) throws CloudbreakSecuritySetupException {
         HttpClientConfig ambariClientConfig;
-        if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
+        if (stack.isInstanceGroupsSpecified()) {
             Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
             newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
             newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);

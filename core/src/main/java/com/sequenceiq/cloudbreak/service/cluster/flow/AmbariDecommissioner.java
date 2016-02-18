@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
@@ -114,6 +115,8 @@ public class AmbariDecommissioner {
     private ContainerOrchestratorResolver orchestratorResolver;
     @Inject
     private ContainerRepository containerRepository;
+    @Inject
+    private TlsSecurityService tlsSecurityService;
 
     private enum Msg {
         AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup");
@@ -140,7 +143,7 @@ public class AmbariDecommissioner {
         LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroupName);
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP.code(), asList(adjustment, hostGroupName)), hostGroupName);
-        HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
         PollingResult pollingResult = startServiceIfNeeded(stack, ambariClient, blueprintName);
@@ -173,7 +176,7 @@ public class AmbariDecommissioner {
 
     public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
         boolean hostDeleted = false;
-        HttpClientConfig clientConfig = new HttpClientConfig(stack.getCluster().getAmbariIp(), stack.getCluster().getCertDir());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getCluster());
         Set<String> components = getHadoopComponents(ambariClient, data.getHostGroup().getName(), stack.getCluster().getBlueprint().getBlueprintName());
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
@@ -196,7 +199,7 @@ public class AmbariDecommissioner {
     private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster)
             throws CloudbreakSecuritySetupException {
         List<HostMetadata> downScaleCandidates;
-        HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
         int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), adjustmentJson.getHostGroup());

@@ -194,8 +194,7 @@ public class AmbariClusterConnector {
 
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, defaultConfigProvider.getDefaultConfigs(), false);
 
-            HttpClientConfig ambariClientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(ambariClientConfig, cluster.getUserName(), cluster.getPassword());
+            AmbariClient ambariClient = getAmbariClient(stack);
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, blueprintText);
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
@@ -285,8 +284,7 @@ public class AmbariClusterConnector {
         Set<String> successHosts = Collections.emptySet();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
+        AmbariClient ambariClient = getSecureAmbariClient(stack);
         Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
         Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
@@ -367,10 +365,16 @@ public class AmbariClusterConnector {
         }
     }
 
-    public AmbariClient getAmbariClientByStack(Stack stack) throws CloudbreakSecuritySetupException {
+    private AmbariClient getAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         return ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+    }
+
+    private AmbariClient getSecureAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
+        Cluster cluster = stack.getCluster();
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        return ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
     }
 
     public Cluster resetAmbariCluster(Long stackId) throws CloudbreakException {
@@ -403,8 +407,7 @@ public class AmbariClusterConnector {
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         String oldUserName = cluster.getUserName();
         String oldPassword = cluster.getPassword();
-        HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
+        AmbariClient ambariClient = getSecureAmbariClient(stack);
         if (newUserName.equals(oldUserName)) {
             if (!newPassword.equals(oldPassword)) {
                 ambariClient.changePassword(oldUserName, oldPassword, newPassword, true);
@@ -417,9 +420,7 @@ public class AmbariClusterConnector {
     }
 
     public void stopCluster(Stack stack) throws CloudbreakException {
-        Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+        AmbariClient ambariClient = getAmbariClient(stack);
         try {
             if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
                 stopAllServices(stack, ambariClient);
@@ -434,9 +435,7 @@ public class AmbariClusterConnector {
     }
 
     public void startCluster(Stack stack) throws CloudbreakException {
-        Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+        AmbariClient ambariClient = getAmbariClient(stack);
         waitForAmbariToStart(stack);
         if (!"BYOS".equals(stack.cloudPlatform())) {
             startAmbariAgents(stack);
@@ -448,8 +447,7 @@ public class AmbariClusterConnector {
         boolean result = false;
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
-            HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+            AmbariClient ambariClient = getAmbariClient(stack);
             AmbariClientPollerObject ambariClientPollerObject = new AmbariClientPollerObject(stack, ambariClient);
             try {
                 result = ambariHealthCheckerTask.checkStatus(ambariClientPollerObject);
@@ -624,11 +622,10 @@ public class AmbariClusterConnector {
 
     private void waitForAmbariToStart(Stack stack) throws CloudbreakException {
         LOGGER.info("Checking if Ambari Server is available.");
-        Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = new HttpClientConfig(cluster.getAmbariIp(), cluster.getCertDir());
+        AmbariClient ambariClient = getAmbariClient(stack);
         PollingResult ambariHealthCheckResult = ambariHealthChecker.pollWithTimeout(
                 ambariHealthCheckerTask,
-                new AmbariClientPollerObject(stack, ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword())),
+                new AmbariClientPollerObject(stack, ambariClient),
                 AMBARI_POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_HOSTS,
                 AmbariOperationService.MAX_FAILURE_COUNT);
@@ -670,7 +667,7 @@ public class AmbariClusterConnector {
     private PollingResult waitForHostsToJoin(Stack stack) throws CloudbreakSecuritySetupException {
         Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
         AmbariHostsCheckerContext ambariHostsCheckerContext =
-                new AmbariHostsCheckerContext(stack, getAmbariClientByStack(stack), hostsInCluster, stack.getFullNodeCount());
+                new AmbariHostsCheckerContext(stack, getAmbariClient(stack), hostsInCluster, stack.getFullNodeCount());
         return ambariHostJoin.pollWithTimeout(
                 ambariHostsJoinStatusCheckerTask,
                 ambariHostsCheckerContext,

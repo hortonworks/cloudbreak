@@ -193,8 +193,13 @@ public class TlsSecurityService {
     }
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
-        prepareCertDir(stackId);
-        return new HttpClientConfig(apiAddress, prepareCertDir(stackId));
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        if (stack.isInstanceGroupsSpecified()) {
+            prepareCertDir(stackId);
+            return new HttpClientConfig(apiAddress, prepareCertDir(stackId));
+        } else {
+            return new HttpClientConfig(apiAddress);
+        }
     }
 
     public String readClientKey(Long stackId) throws CloudbreakSecuritySetupException {
