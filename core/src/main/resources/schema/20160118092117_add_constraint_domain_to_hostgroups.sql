@@ -44,13 +44,36 @@ ALTER TABLE ONLY hostgroup_constraint
     ADD CONSTRAINT fk_hostgroup_constraint_constrainttemplate_id FOREIGN KEY (constrainttemplate_id) REFERENCES constrainttemplate(id);
 
 ALTER TABLE ONLY hostgroup
-    DROP COLUMN instancegroup_id;
-
-ALTER TABLE ONLY hostgroup
     ADD COLUMN constraint_id BIGINT;
 
 ALTER TABLE ONLY hostgroup
     ADD CONSTRAINT fk_hostgroup_hostgroup_constraint_id FOREIGN KEY (constraint_id) REFERENCES hostgroup_constraint(id);
+
+INSERT INTO hostgroup_constraint(
+	id,
+	instancegroup_id,
+	hostcount
+)SELECT
+	nextval('hostgroup_constraint_id_seq') AS "id",
+	ig.id AS "instancegroup_id",
+	ig.nodecount AS "hostcount"
+FROM cluster c, hostgroup h, instancegroup ig
+WHERE h.cluster_id = c.id AND ig.id = h.instancegroup_id
+GROUP BY ig.nodecount,  ig.id,  ig.groupname;
+
+
+WITH constraint_hostgroup_temp AS (
+	SELECT
+		hc.id AS "constraint_id",
+		h.id AS "hostgroup_id"
+	FROM hostgroup_constraint hc, hostgroup h
+	WHERE h.instancegroup_id = hc.instancegroup_id
+	GROUP BY h.id, hc.id
+) UPDATE hostgroup SET constraint_id=cht.constraint_id FROM constraint_hostgroup_temp cht WHERE cht.hostgroup_id=id;
+
+ALTER TABLE ONLY hostgroup
+    DROP COLUMN instancegroup_id;
+
 
 -- //@UNDO
 -- SQL to undo the change goes here.
@@ -63,6 +86,8 @@ ALTER TABLE ONLY hostgroup
 
 ALTER TABLE ONLY hostgroup
     ADD CONSTRAINT fk_hostgroup_instancegroup_id FOREIGN KEY (instancegroup_id) REFERENCES instancegroup(id);
+
+UPDATE hostgroup SET instancegroup_id=hc.instancegroup_id FROM hostgroup_constraint hc WHERE constraint_id=hc.id;
 
 ALTER TABLE ONLY hostgroup
     DROP COLUMN constraint_id;
