@@ -340,7 +340,7 @@ public class ClusterBootstrapperTest {
 
     class FailedNewNodesMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
-        public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, String consulLocation, ExitCriteriaModel
+        public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel
                 exitCriteriaModel)
                 throws CloudbreakOrchestratorFailedException {
             throw new CloudbreakOrchestratorFailedException("failed");
@@ -349,8 +349,7 @@ public class ClusterBootstrapperTest {
 
     class CancelledMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
-        public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount,
-                String consulLocation, ExitCriteriaModel exitCriteriaModel)
+        public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
                 throws CloudbreakOrchestratorCancelledException {
             throw new CloudbreakOrchestratorCancelledException("cancelled");
         }
@@ -358,8 +357,7 @@ public class ClusterBootstrapperTest {
 
     class CancelledNewNodesMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
-        public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, String consulLocation, ExitCriteriaModel
-                exitCriteriaModel)
+        public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
                 throws CloudbreakOrchestratorCancelledException {
             throw new CloudbreakOrchestratorCancelledException("cancelled");
         }
@@ -374,8 +372,7 @@ public class ClusterBootstrapperTest {
 
     class FailedMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
-        public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount,
-                String consulLocation, ExitCriteriaModel exitCriteriaModel)
+        public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
                 throws CloudbreakOrchestratorFailedException {
             throw new CloudbreakOrchestratorFailedException("failed");
         }

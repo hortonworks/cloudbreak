@@ -16,10 +16,10 @@ public interface ContainerOrchestrationBootstrap {
 
     void init(ParallelContainerRunner parallelContainerRunner, ExitCriteria exitCriteria);
 
-    void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, String consulLogLocation,
+    void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount,
                             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
-    void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, String consulLogLocation,
+    void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes,
                             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);

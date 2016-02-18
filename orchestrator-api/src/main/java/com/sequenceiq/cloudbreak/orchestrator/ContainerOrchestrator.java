@@ -23,7 +23,7 @@ public interface ContainerOrchestrator extends ContainerOrchestrationBootstrap {
 
     void deleteContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException;
 
-    boolean areAllNodesAvailable(GatewayConfig gatewayConfig, Set<Node> nodes);
+    List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 

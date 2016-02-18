@@ -57,14 +57,14 @@ cb:
   
   docker:
     container:
-      ambari.server: hortonworks/ambari-server:2.2.1-v7
-      ambari.agent: hortonworks/ambari-agent:2.2.1-v7
+      ambari.server: hortonworks/ambari-server:2.2.1-v9
+      ambari.agent: hortonworks/ambari-agent:2.2.1-v9
       ambari.db: postgres:9.4.1
       registrator: gliderlabs/registrator:v6
       docker.consul.watch.plugn: sequenceiq/docker-consul-watch-plugn:1.6
       kerberos: sequenceiq/kerberos:1.1
       logrotate: sequenceiq/logrotate:v0.5.1
-      munchausen: sequenceiq/munchausen:0.5.5
+      munchausen: sequenceiq/munchausen:0.6.0
       haveged: sequenceiq/haveged:1.0
       ldap: sequenceiq/docker-ldap:1.0
       shipyard: shipyard/shipyard:v3.0.0
