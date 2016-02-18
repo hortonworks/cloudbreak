@@ -300,6 +300,7 @@ cloudbreak:
         - CB_MAIL_SMTP_TYPE=$CLOUDBREAK_SMTP_TYPE
         - CB_SCHEMA_SCRIPTS_LOCATION=$CB_SCHEMA_SCRIPTS_LOCATION
         - CB_SCHEMA_MIGRATION_AUTO=$CB_SCHEMA_MIGRATION_AUTO
+        - SPRING_CLOUD_CONSUL_HOST=consul.service.consul
     ports:
         - 8080:8080
     volumes:
