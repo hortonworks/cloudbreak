@@ -18,6 +18,7 @@
 
 ### Added
 
+- Possibilty to use Consul kv store as configuration source.
 - Command `remote-cloudbreak-shell` will show can use cloudbreak shell on local machine
 - Command `cbd aws list-roles` will list all role names
 - Command `cbd azure configure-arm` will create your arm application which can used by cloudbreak
