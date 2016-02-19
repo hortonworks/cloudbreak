@@ -43,12 +43,12 @@ public class SecurityGroupCommands implements CommandMarker {
 
     @CliAvailabilityIndicator({ "securitygroup create", "securitygroup list" })
     public boolean areSecurityGroupCommandsAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator({ "securitygroup delete", "securitygroup select", "securitygroup show" })
     public boolean areExistSecurityGroupCommandsAvailable() {
-        return !context.getSecurityGroups().isEmpty();
+        return !context.getSecurityGroups().isEmpty() && !context.isMarathonMode();
     }
 
     @CliCommand(value = "securitygroup create", help = "Creates a new security group")

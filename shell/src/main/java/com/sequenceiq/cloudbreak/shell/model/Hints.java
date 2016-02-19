@@ -18,7 +18,12 @@ public enum Hints {
     CREATE_CLUSTER("Create a cluster with the 'cluster create' command or configure the recipes with 'hostgroup configure' command"),
     CONFIGURE_INSTANCEGROUP("Configure instancegroups with the 'instancegroup configure' command"),
     CONFIGURE_HOSTGROUP("Configure hostgroups with the 'hostgroup configure' command"),
-    NONE("No more hints for you.. :(");
+    NONE("No more hints for you.. :("),
+
+    MARATHON_STACK("Create a marathon stack with 'marathon create' command select one of them with 'marathon select'"),
+    CONFIGURE_MARATHON_HOSTGROUP("Configure hostgroups with 'marathon hostgroup configure'."),
+    MARATHON_CLUSTER("Create marathon cluster with 'cluster create' command");
+
 
     private final String message;
 

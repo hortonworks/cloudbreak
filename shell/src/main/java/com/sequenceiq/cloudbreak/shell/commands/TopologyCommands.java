@@ -47,17 +47,17 @@ public class TopologyCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "platform list")
     public boolean isTopologyListCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "platform show")
     public boolean isTopologyShowCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "platform delete")
     public boolean isTopologyDeleteCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
 

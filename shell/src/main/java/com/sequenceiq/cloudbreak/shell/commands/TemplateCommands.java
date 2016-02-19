@@ -51,23 +51,23 @@ public class TemplateCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "template list")
     public boolean isTemplateListCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "template show")
     public boolean isTemplateShowCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "template delete")
     public boolean isTemplateDeleteCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator({ "template create --GCP", "template create --EC2", "template create --AWS",
             "template create --AZURE", "template create --OPENSTACK" })
     public boolean isTemplateEc2CreateCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliCommand(value = "template list", help = "Shows the currently available cloud templates")
