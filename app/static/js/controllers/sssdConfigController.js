@@ -32,14 +32,16 @@ angular.module('uluwatuControllers').controller('sssdConfigController', ['$scope
         };
 
         $scope.generateSssdConfigFromFile = function() {
-            $scope.sssdConfig.configuration = "";
             File.getBase64ContentById("sssdconfigfile", function(content) {
                 if (content) {
                     $scope.sssdConfig.configuration = $base64.decode(content);
                 }
                 $scope.$apply();
+                if ($scope.sssdConfigCreationForm.$error.sssdconfig) {
+                    $scope.sssdConfigCreationForm.$error.sssdconfig[0].$setDirty();
+                    $scope.$apply();
+                }
             });
-            $scope.$apply();
         };
 
         $scope.deleteSssdConfig = function(config) {
@@ -57,7 +59,15 @@ angular.module('uluwatuControllers').controller('sssdConfigController', ['$scope
             var sssdConfig = getEmptySssdConfig();
             sssdConfig.name = $scope.sssdConfig.name;
             sssdConfig.description = $scope.sssdConfig.description;
-            $scope.sssdConfig = sssdConfig;
+            $scope.sssdConfig = angular.copy(sssdConfig);
+            $scope.sssdConfigCreationForm.$setPristine();
+            var inputs = ['sssdconfigname', 'sssdconfigdescription'];
+            for (var i = 0; i < inputs.length; i++) {
+                var input = $scope.sssdConfigCreationForm[inputs[i]];
+                if (input.$viewValue || input.$modelValue) {
+                    input.$setDirty();
+                }
+            }
         };
 
         function getEmptySssdConfig() {

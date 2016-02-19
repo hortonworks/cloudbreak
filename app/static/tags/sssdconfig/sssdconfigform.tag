@@ -29,12 +29,12 @@
         </div>
     </div>
 
-    <div class="form-group" ng-show="sssdConfigType == 'FILE'" ng-class="{ 'has-error': !fileReadAvailable || sssdConfigCreationForm.sssdconfigtext.$dirty || sssdConfigCreationForm.sssdconfigtext.$invalid }">
+    <div class="form-group" ng-show="sssdConfigType == 'FILE'" ng-class="{ 'has-error': (sssdConfigCreationForm.sssdconfigtext.$dirty && sssdConfigCreationForm.sssdconfigtext.$invalid) || !fileReadAvailable }">
         <label class="col-sm-3 control-label" for="sssdconfigfile" style="border-bottom: 0">{{msg.sssdconfig_config_file_label}}</label>
         <div class="col-sm-9">
             <input type="file" name="sssdconfigfile" id="sssdconfigfile" onchange="angular.element(this).scope().generateSssdConfigFromFile()" ng-disabled="{{!fileReadAvailable}}" />
             <div class="help-block" ng-show="!fileReadAvailable"><i class="fa fa-warning"></i> {{msg.file_upload_not_allowed}}</div>
-            <div class="help-block" ng-show="sssdConfigCreationForm.sssdconfigtext.$dirty || sssdConfigCreationForm.sssdconfigtext.$invalid"><i class="fa fa-warning"></i> {{msg.sssdconfig_configuration_invalid}}</div>
+            <div class="help-block" ng-show="sssdConfigCreationForm.sssdconfigtext.$dirty && sssdConfigCreationForm.sssdconfigtext.$invalid"><i class="fa fa-warning"></i> {{msg.sssdconfig_configuration_invalid}}</div>
         </div>
     </div>
 
