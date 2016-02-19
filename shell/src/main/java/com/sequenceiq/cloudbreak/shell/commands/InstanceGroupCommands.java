@@ -38,13 +38,13 @@ public class InstanceGroupCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "instancegroup configure")
     public boolean isCreateInstanceGroupAvailable() {
-        return context.isBlueprintAvailable() && context.isCredentialAvailable();
+        return (context.isBlueprintAvailable() && context.isCredentialAvailable())  && !context.isMarathonMode();
     }
 
 
     @CliAvailabilityIndicator(value = "instancegroup show")
     public boolean isShowInstanceGroupAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliCommand(value = "instancegroup configure", help = "Configure instance groups")

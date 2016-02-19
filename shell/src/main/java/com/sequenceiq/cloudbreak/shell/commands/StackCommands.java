@@ -64,34 +64,34 @@ public class StackCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "stack list")
     public boolean isStackListCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "stack terminate")
     public boolean isStackTerminateCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "stack create")
     public boolean isStackCreateCommandAvailable() {
         return context.isCredentialAvailable()
                 && (context.getActiveHostGroups().size() == context.getInstanceGroups().size() - 1
-                && context.getActiveHostGroups().size() != 0);
+                && context.getActiveHostGroups().size() != 0) && !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator({ "stack node --ADD", "stack node --REMOVE", "stack stop", "stack start" })
     public boolean isStackNodeCommandAvailable() {
-        return context.isStackAvailable();
+        return context.isStackAvailable() && !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator({ "stack show", "stack metadata" })
     public boolean isStackShowCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "stack select")
     public boolean isStackSelectCommandAvailable() throws Exception {
-        return context.isStackAccessible();
+        return context.isStackAccessible() && !context.isMarathonMode();
     }
 
     @CliCommand(value = "stack node --ADD", help = "Add new nodes to the cluster")
