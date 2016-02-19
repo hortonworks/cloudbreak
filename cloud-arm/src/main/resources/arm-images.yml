@@ -1,14 +1,14 @@
 azure_rm:
-  East Asia: https://sequenceiqeastasia2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  East US: https://sequenceiqeastus12.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  Central US: https://sequenceiqcentralus2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  North Europe: https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  South Central US: https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  North Central US: https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  East US 2: https://sequenceiqeastus22.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  Japan East: https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  Japan West: https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  Southeast Asia: https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  West US: https://sequenceiqwestus2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  West Europe: https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
-  Brazil South: https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-centos71-amb221-2016-01-28_2016-01-28_12-01-os-2016-01-28.vhd
+  East Asia: https://sequenceiqeastasia2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  East US: https://sequenceiqeastus12.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  Central US: https://sequenceiqcentralus2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  North Europe: https://sequenceiqnortheurope2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  South Central US: https://sequenceiqouthcentralus2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  North Central US: https://sequenceiqorthcentralus2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  East US 2: https://sequenceiqeastus22.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  Japan East: https://sequenceiqjapaneast2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  Japan West: https://sequenceiqjapanwest2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  Southeast Asia: https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  West US: https://sequenceiqwestus2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  West Europe: https://sequenceiqwesteurope2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
+  Brazil South: https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cloudbreak-2016-02-19.vhd
