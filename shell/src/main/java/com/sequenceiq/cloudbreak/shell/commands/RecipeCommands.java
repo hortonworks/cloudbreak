@@ -46,27 +46,27 @@ public class RecipeCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "recipe list")
     public boolean isRecipeListCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "recipe select")
     public boolean isRecipeSelectCommandAvailable() throws Exception {
-        return context.isRecipeAccessible();
+        return context.isRecipeAccessible() && !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "recipe add")
     public boolean isRecipeAddCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "recipe show")
     public boolean isRecipeShowCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "recipe delete")
     public boolean isRecipeDeleteCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliCommand(value = "recipe list", help = "Shows the currently available recipes")
