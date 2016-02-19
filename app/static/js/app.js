@@ -145,6 +145,9 @@ cloudbreakApp.directive('sssdconfig', function() {
         require: 'ngModel',
         link: function(scope, elem, attrs, ngModel) {
             var testSssdConfig = function(config) {
+                if (!config) {
+                    return true;
+                }
                 var propertyIsValid = function(section, key) {
                     var section = ini.get(section);
                     return section && section.get(key) && typeof(section.get(key).value) == "string" && section.get(key).value.length
@@ -165,11 +168,10 @@ cloudbreakApp.directive('sssdconfig', function() {
                 } catch (e) {}
                 return false
             }
-            
+
             ngModel.$parsers.unshift(function(value) {
-                var valid = testSssdConfig(value);
-                ngModel.$setValidity('sssdconfig', valid);
-                return valid ? value : null;
+                ngModel.$setValidity('sssdconfig', testSssdConfig(value));
+                return value;
             });
 
             ngModel.$formatters.unshift(function(value) {
