@@ -23,6 +23,7 @@ import org.springframework.shell.core.Converter;
 import com.sequenceiq.cloudbreak.shell.converter.AwsInstanceTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.AwsVolumeTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.AzureInstanceTypeConverter;
+import com.sequenceiq.cloudbreak.shell.converter.ConstraintNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.GcpInstanceTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.GcpVolumeTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.HostGroupConverter;
@@ -207,5 +208,10 @@ public class ConverterConfiguration {
     @Bean
     Converter azureInstanceTypeConverter() {
         return new AzureInstanceTypeConverter();
+    }
+
+    @Bean
+    Converter constraintNameConverter() {
+        return new ConstraintNameConverter();
     }
 }

@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.model.MarathonContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
 public class BlueprintCommandsTest {
@@ -38,6 +39,9 @@ public class BlueprintCommandsTest {
     private CloudbreakContext mockContext;
 
     @Mock
+    private MarathonContext mockMarathonContext;
+
+    @Mock
     private ExceptionTransformer exceptionTransformer;
 
     private BlueprintResponse dummyResult;
@@ -48,6 +52,8 @@ public class BlueprintCommandsTest {
         MockitoAnnotations.initMocks(this);
         dummyResult = new BlueprintResponse();
         dummyResult.setId(BLUEPRINT_ID);
+        given(mockContext.isMarathonMode()).willReturn(false);
+        doNothing().when(mockMarathonContext).resetHostGroups();
         given(cloudbreakClient.blueprintEndpoint()).willReturn(blueprintEndpoint);
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
     }

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
+import com.sequenceiq.cloudbreak.shell.model.MarathonContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
@@ -41,6 +42,8 @@ public class ClusterCommands implements CommandMarker {
 
     @Inject
     private CloudbreakContext context;
+    @Inject
+    private MarathonContext marathonContext;
     @Inject
     private CloudbreakClient cloudbreakClient;
     @Inject
@@ -52,22 +55,25 @@ public class ClusterCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "cluster create")
     public boolean isClusterCreateCommandAvailable() {
-        return context.isBlueprintAvailable() && context.isStackAvailable() && context.getActiveHostGroups().size() == context.getHostGroups().keySet().size();
+        return context.isBlueprintAvailable()
+                && ((context.isStackAvailable() && context.getActiveHostGroups().size() == context.getHostGroups().keySet().size())
+                        || (context.isMarathonMode() && marathonContext.isSelectedMarathonStackAvailable()
+                && context.getActiveHostGroups().size() == marathonContext.getHostgroups().size()));
     }
 
     @CliAvailabilityIndicator(value = { "cluster show", "cluster stop", "cluster start" })
     public boolean isClusterShowCommandAvailable() {
-        return context.isStackAvailable();
+        return context.isStackAvailable() || (context.isMarathonMode() && marathonContext.isSelectedMarathonStackAvailable());
     }
 
     @CliAvailabilityIndicator({ "cluster node --ADD", "cluster node --REMOVE" })
     public boolean isClusterNodeCommandAvailable() {
-        return context.isStackAvailable();
+        return context.isStackAvailable() || (context.isMarathonMode() && marathonContext.isSelectedMarathonStackAvailable());
     }
 
     @CliAvailabilityIndicator({ "cluster fileSystem --DASH", "cluster fileSystem --GCS", "cluster fileSystem --WASB" })
     public boolean isClusterFileSystemCommandAvailable() {
-        return context.isStackAvailable();
+        return context.isStackAvailable() && !context.isMarathonMode();
     }
 
     @CliCommand(value = "cluster fileSystem --DASH", help = "Set Windows Azure Blob Storage filesystem with DASH on cluster")
@@ -120,7 +126,8 @@ public class ClusterCommands implements CommandMarker {
     @CliCommand(value = "cluster show", help = "Shows the cluster by stack id")
     public String configCluster() {
         try {
-            ClusterResponse clusterResponse = cloudbreakClient.clusterEndpoint().get(Long.valueOf(context.getStackId()));
+            String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
+            ClusterResponse clusterResponse = cloudbreakClient.clusterEndpoint().get(Long.valueOf(stackId));
             return renderSingleMap(responseTransformer.transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
         } catch (IndexOutOfBoundsException ex) {
             throw exceptionTransformer.transformToRuntimeException("There was no cluster for this account.");
@@ -143,7 +150,8 @@ public class ClusterCommands implements CommandMarker {
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            cloudbreakClient.clusterEndpoint().put(Long.valueOf(context.getStackId()), updateClusterJson);
+            String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
+            cloudbreakClient.clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson);
             return context.getStackId();
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -165,7 +173,8 @@ public class ClusterCommands implements CommandMarker {
             hostGroupAdjustmentJson.setWithStackUpdate(withStackDownScale == null ? false : withStackDownScale);
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            cloudbreakClient.clusterEndpoint().put(Long.valueOf(context.getStackId()), updateClusterJson);
+            String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
+            cloudbreakClient.clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson);
             return context.getStackId();
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -195,7 +204,9 @@ public class ClusterCommands implements CommandMarker {
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             Set<HostGroupJson> hostGroupList = new HashSet<>();
-            for (Map.Entry<String, HostgroupEntry> entry : context.getHostGroups().entrySet()) {
+            Set<Map.Entry<String, HostgroupEntry>> entries = context.isMarathonMode()
+                    ? marathonContext.getHostgroups().entrySet() : context.getHostGroups().entrySet();
+            for (Map.Entry<String, HostgroupEntry> entry : entries) {
                 HostGroupJson hostGroupJson = new HostGroupJson();
                 hostGroupJson.setRecipeIds(entry.getValue().getRecipeIdSet());
                 hostGroupJson.setName(entry.getKey());
@@ -203,15 +214,18 @@ public class ClusterCommands implements CommandMarker {
                 ConstraintJson constraintJson = new ConstraintJson();
                 constraintJson.setInstanceGroupName(entry.getKey());
                 constraintJson.setHostCount(entry.getValue().getNodeCount());
+                if (context.isMarathonMode()) {
+                    constraintJson.setConstraintTemplateName(entry.getValue().getConstraintName());
+                }
 
                 hostGroupJson.setConstraint(constraintJson);
                 hostGroupJson.setRecipeIds(entry.getValue().getRecipeIdSet());
-
                 hostGroupList.add(hostGroupJson);
             }
+
             wait = wait == null ? false : wait;
             ClusterRequest clusterRequest = new ClusterRequest();
-            clusterRequest.setName(context.getStackName());
+            clusterRequest.setName(context.isMarathonMode() ? marathonContext.getSelectedMarathonStackName() : context.getStackName());
             clusterRequest.setDescription(description);
             clusterRequest.setUserName(userName);
             clusterRequest.setPassword(password);
@@ -220,15 +234,17 @@ public class ClusterCommands implements CommandMarker {
             clusterRequest.setEnableSecurity(enableSecurity);
             clusterRequest.setHostGroups(hostGroupList);
 
-            FileSystemRequest fileSystemRequest = new FileSystemRequest();
-            fileSystemRequest.setName(context.getStackName());
-            fileSystemRequest.setDefaultFs(context.getDefaultFileSystem() == null ? true : context.getDefaultFileSystem());
-            fileSystemRequest.setType(context.getFileSystemType());
+            if (!context.isMarathonMode()) {
+                FileSystemRequest fileSystemRequest = new FileSystemRequest();
+                fileSystemRequest.setName(context.getStackName());
+                fileSystemRequest.setDefaultFs(context.getDefaultFileSystem() == null ? true : context.getDefaultFileSystem());
+                fileSystemRequest.setType(context.getFileSystemType());
 
-            if (context.getDefaultFileSystem() == null && context.getFileSystemType() == null) {
-                fileSystemRequest = null;
+                if (context.getDefaultFileSystem() == null && context.getFileSystemType() == null) {
+                    fileSystemRequest = null;
+                }
+                clusterRequest.setFileSystem(fileSystemRequest);
             }
-            clusterRequest.setFileSystem(fileSystemRequest);
             clusterRequest.setKerberosAdmin(kerberosAdmin);
             clusterRequest.setKerberosMasterKey(kerberosMasterKey);
             clusterRequest.setKerberosPassword(kerberosPassword);
@@ -254,14 +270,15 @@ public class ClusterCommands implements CommandMarker {
             }
             clusterRequest.setAmbariStackDetails(ambariStackDetailsJson);
 
-            cloudbreakClient.clusterEndpoint().post(Long.valueOf(context.getStackId()), clusterRequest);
+            String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
+            cloudbreakClient.clusterEndpoint().post(Long.valueOf(stackId), clusterRequest);
             context.setHint(Hints.NONE);
             context.resetFileSystemConfiguration();
             if (wait) {
                 CloudbreakShellUtil.WaitResult waitResult =
-                        cloudbreakShellUtil.waitAndCheckClusterStatus(Long.valueOf(context.getStackId()), Status.AVAILABLE.name());
+                        cloudbreakShellUtil.waitAndCheckClusterStatus(Long.valueOf(stackId), Status.AVAILABLE.name());
                 if (CloudbreakShellUtil.WaitResult.FAILED.equals(waitResult)) {
-                    throw exceptionTransformer.transformToRuntimeException("Cluster creation failed on stack with id: " + context.getStackId());
+                    throw exceptionTransformer.transformToRuntimeException("Cluster creation failed on stack with id: " + stackId);
                 } else {
                     return "Cluster creation finished";
                 }
@@ -277,7 +294,8 @@ public class ClusterCommands implements CommandMarker {
         try {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.STOPPED);
-            cloudbreakClient.clusterEndpoint().put(Long.valueOf(context.getStackId()), updateClusterJson);
+            String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
+            cloudbreakClient.clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson);
             return "Cluster is stopping";
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -289,7 +307,8 @@ public class ClusterCommands implements CommandMarker {
         try {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.STARTED);
-            cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
+            String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
+            cloudbreakClient.stackEndpoint().put(Long.valueOf(stackId), updateStackJson);
             return "Cluster is starting";
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);

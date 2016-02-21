@@ -54,28 +54,28 @@ public class CredentialCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "credential list")
     public boolean isCredentialListCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "credential delete")
     public boolean isCredentialDeleteCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "credential show")
     public boolean isCredentialShowCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "credential select")
     public boolean isCredentialSelectCommandAvailable() throws Exception {
-        return context.isCredentialAccessible();
+        return context.isCredentialAccessible() && !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator({ "credential create --GCP", "credential create --EC2", "credential create --AWS", "credential create --AZURE",
             "credential create --OPENSTACK" })
     public boolean isCredentialEc2CreateCommandAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliCommand(value = "credential show", help = "Shows the credential by its id")

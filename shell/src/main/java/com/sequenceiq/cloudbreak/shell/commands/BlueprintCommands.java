@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.model.MarathonContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
@@ -37,6 +38,8 @@ public class BlueprintCommands implements CommandMarker {
 
     @Inject
     private CloudbreakContext context;
+    @Inject
+    private MarathonContext marathonContext;
     @Inject
     private CloudbreakClient cloudbreakClient;
     @Inject
@@ -144,14 +147,16 @@ public class BlueprintCommands implements CommandMarker {
             if (id != null) {
                 if (cloudbreakClient.blueprintEndpoint().get(Long.valueOf(id)) != null) {
                     context.addBlueprint(id);
-                    context.setHint(Hints.CONFIGURE_INSTANCEGROUP);
+                    marathonContext.resetHostGroups();
+                    context.setHint(context.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.CONFIGURE_INSTANCEGROUP);
                     return String.format("Blueprint has been selected, id: %s", id);
                 }
             } else if (name != null) {
                 BlueprintResponse blueprint = cloudbreakClient.blueprintEndpoint().getPublic(name);
                 if (blueprint != null) {
                     context.addBlueprint(blueprint.getId().toString());
-                    context.setHint(Hints.CONFIGURE_INSTANCEGROUP);
+                    marathonContext.resetHostGroups();
+                    context.setHint(context.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.CONFIGURE_INSTANCEGROUP);
                     return String.format("Blueprint has been selected, name: %s", name);
                 }
             }
@@ -185,9 +190,9 @@ public class BlueprintCommands implements CommandMarker {
                 }
                 context.addBlueprint(id);
                 if (cloudbreakClient.blueprintEndpoint().getPublics().isEmpty()) {
-                    context.setHint(Hints.CONFIGURE_INSTANCEGROUP);
+                    context.setHint(context.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.CONFIGURE_INSTANCEGROUP);
                 } else {
-                    context.setHint(Hints.SELECT_STACK);
+                    context.setHint(context.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.SELECT_STACK);
                 }
                 message = String.format("Blueprint: '%s' has been added, id: %s", getBlueprintName(json), id);
             } else {

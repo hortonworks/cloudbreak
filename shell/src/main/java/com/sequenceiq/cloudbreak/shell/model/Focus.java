@@ -18,6 +18,10 @@ public class Focus {
         return type.prefix();
     }
 
+    public FocusType getType() {
+        return type;
+    }
+
     public String getValue() {
         return value;
     }
