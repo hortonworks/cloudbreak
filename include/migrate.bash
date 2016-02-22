@@ -8,7 +8,6 @@ migrate-config() {
     env-import PERISCOPE_SCHEMA_SCRIPTS_LOCATION "container"
     env-import PERISCOPE_SCHEMA_MIGRATION_AUTO true
     env-import UAA_SCHEMA_SCRIPTS_LOCATION "container"
-    env-import SKIP_DB_MIGRATION_ON_START false
     env-import DB_MIGRATION_LOG "db_migration.log"
     env-import VERBOSE_MIGRATION false
 }
@@ -105,6 +104,10 @@ execute-migration() {
     if [ $# -eq 0 ]; then
         migrate-one-db uaadb up
         migrate-one-db uaadb pending
+        migrate-one-db cbdb up
+        migrate-one-db cbdb pending
+        migrate-one-db pcdb up
+        migrate-one-db pcdb pending
     else
         VERBOSE_MIGRATION=true
         migrate-one-db "$@"
