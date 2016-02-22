@@ -327,6 +327,16 @@ main() {
     cmd-export env-show
     cmd-export env-export
 
+    cmd-export-ns aws "Amazon Webservice namespace"
+    cmd-export aws-show-role
+    cmd-export aws-generate-role
+    cmd-export aws-delete-role
+    cmd-export aws-list-roles
+
+    cmd-export-ns azure "Azure namespace"
+    cmd-export azure-deploy-dash
+    cmd-export azure-configure-arm
+    
     if [[ "$PROFILE_LOADED" ]] ; then
         cmd-export deployer-generate generate
         cmd-export deployer-regenerate regenerate
@@ -341,17 +351,7 @@ main() {
 
         cmd-export migrate-startdb-cmd startdb
         cmd-export migrate-cmd migrate
-
-        cmd-export-ns aws "Amazon Webservice namespace"
-        cmd-export aws-show-role
-        cmd-export aws-generate-role
-        cmd-export aws-delete-role
-        cmd-export aws-list-roles
-
-        cmd-export-ns azure "Azure namespace"
-        cmd-export azure-deploy-dash
-        cmd-export azure-configure-arm
-
+        
         cmd-export-ns util "Util namespace"
         cmd-export util-cloudbreak-shell
         cmd-export util-cloudbreak-shell-quiet
