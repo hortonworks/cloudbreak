@@ -307,6 +307,8 @@ cloudbreak:
         - "$CBD_CERT_ROOT_PATH:/certs"
         - /dev/urandom:/dev/random
     dns: $PRIVATE_IP
+    links:
+        - consul
     image: sequenceiq/cloudbreak:$DOCKER_TAG_CLOUDBREAK
     command: bash
 
