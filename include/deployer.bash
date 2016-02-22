@@ -263,21 +263,17 @@ deployer-login() {
 }
 
 start-and-migrate-cmd() {
-    declare desc="Starts containers with docker-compose and migrates the databases, migration can be skipped with SKIP_DB_MIGRATION_ON_START=1"
     declare services="$@"
 
     deployer-generate
 
-    if [[ "$SKIP_DB_MIGRATION_ON_START" != true ]]; then
-        migrate
-        if ! [[ "$services" ]]; then
-            debug "All services must be started"
-            local dbServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep "db$" | xargs)
-            local otherServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep -v "db$" | xargs)
-            if [[ $(docker-compose -p cbreak ps -q $dbServices | wc -l) -eq 3 ]]; then
-                debug "DB services: $dbServices are already running, start only other services"
-                services="${otherServices}"
-            fi
+    if ! [[ "$services" ]]; then
+        debug "All services must be started"
+        local dbServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep "db$" | xargs)
+        local otherServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep -v "db$" | xargs)
+        if [[ $(docker-compose -p cbreak ps -q $dbServices | wc -l) -eq 3 ]]; then
+            debug "DB services: $dbServices are already running, start only other services"
+            services="${otherServices}"
         fi
     fi
 
