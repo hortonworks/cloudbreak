@@ -25,12 +25,12 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsTemplateChange" ng-show="isVisible('AWS')" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureTemplateChange" ng-show="isVisible('AZURE_RM')" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
+                                        <a id="awsTemplateChange" ng-if="isVisible('AWS')" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">{{msg.aws_label}}</a>
+                                        <a id="azureTemplateChange" ng-if="isVisible('AZURE_RM')" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                        <a id="gcpTemplateChange" ng-show="isVisible('GCP')" class="btn btn-default" role="button" ng-click="createGcpTemplateRequest()">{{msg.gcp_label}}</a>
-                                        <a id="openstackTemplateChange" ng-show="isVisible('OPENSTACK')" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">{{msg.openstack_label}}</a>
+                                        <a id="gcpTemplateChange" ng-if="isVisible('GCP')" class="btn btn-default" role="button" ng-click="createGcpTemplateRequest()">{{msg.gcp_label}}</a>
+                                        <a id="openstackTemplateChange" ng-if="isVisible('OPENSTACK')" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
