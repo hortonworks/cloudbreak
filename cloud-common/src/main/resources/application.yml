@@ -69,6 +69,11 @@ cb:
       ldap: sequenceiq/docker-ldap:1.0
       shipyard: shipyard/shipyard:v3.0.0
       shipyard.db: rethinkdb:2.2.4
+      certs: ehazlett/cert-tool:0.0.3
+      alpine: gliderlabs/alpine:3.1
+      consul: gliderlabs/consul:0.6
+      gateway: sequenceiq/cb-gateway-nginx:0.3
+      swarm: swarm:1.1.0
     env:
       ldap: SLAPD_PASSWORD=cloudbreak|SLAPD_BINDUSER=ambari-qa|SLAPD_BINDPWD=cloudbreak|SLAPD_BINDGROUP=hadoop
       shipyard.enabled: true
