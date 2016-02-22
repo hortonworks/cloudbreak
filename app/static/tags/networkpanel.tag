@@ -25,12 +25,12 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsNetworkChange" ng-show="isVisible('AWS')" type="button" class="btn btn-info" role="button" ng-click="createAwsNetworkRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureNetworkChange" ng-show="isVisible('AZURE_RM')" class="btn btn-default" role="button" ng-click="createAzureNetworkRequest()">{{msg.azure_label}}</a>
+                                        <a id="awsNetworkChange" ng-if="isVisible('AWS')" type="button" class="btn btn-info" role="button" ng-click="createAwsNetworkRequest()">{{msg.aws_label}}</a>
+                                        <a id="azureNetworkChange" ng-if="isVisible('AZURE_RM')" class="btn btn-default" role="button" ng-click="createAzureNetworkRequest()">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                        <a id="gcpNetworkChange" ng-show="isVisible('GCP')" class="btn btn-default" role="button" ng-click="createGcpNetworkRequest()">{{msg.gcp_label}}</a>
-                                        <a id="openstackNetworkChange" ng-show="isVisible('OPENSTACK')" class="btn btn-default" role="button" ng-click="createOpenstackNetworkRequest()">{{msg.openstack_label}}</a>
+                                        <a id="gcpNetworkChange" ng-if="isVisible('GCP')" class="btn btn-default" role="button" ng-click="createGcpNetworkRequest()">{{msg.gcp_label}}</a>
+                                        <a id="openstackNetworkChange" ng-if="isVisible('OPENSTACK')" class="btn btn-default" role="button" ng-click="createOpenstackNetworkRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>

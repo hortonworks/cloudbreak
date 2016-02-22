@@ -5111,8 +5111,12 @@ form.form-horizontal .control-label {
     margin-bottom: 0
 }
 
-.btn-group .btn + .btn, .btn-segmented-control .btn + .btn {
-    border-left: none
+.btn-group .btn {
+    border-right-style: hidden;
+}
+
+.btn-group .btn:last-child {
+    border-right-style: solid;
 }
 
 .btn-group-justified + .btn-group-justified .btn {
