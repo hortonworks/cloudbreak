@@ -184,6 +184,7 @@ doctor() {
     declare desc="Deployer doctor: Checks your environment, and reports a diagnose."
 
     info "===> $desc"
+    network-doctor
     cbd-version
     if [[ "$(uname)" == "Darwin" ]]; then
         debug "checking OSX specific dependencies..."
@@ -199,6 +200,37 @@ doctor() {
     docker-check-version
     compose-generate-check-diff verbose
     generate_uaa_check_diff verbose
+}
+
+network-doctor() {
+    ping -c 1 -W 1 8.8.8.8 &> /dev/null
+    if [[ "$?" -ne "0" ]]; then
+        error "Could not reach 8.8.8.8."
+        _exit 1
+    else
+        info "ping 8.8.8.8 on host OK"
+    fi
+    ping -c 1 -W 1 github.com &> /dev/null
+    if [[ "$?" -ne "0" ]]; then
+        error "Could not reach github.com."
+        _exit 1
+    else
+        info "ping github.com on host OK"
+    fi
+    docker run --label cbreak.sidekick=true alpine sh -c 'ping -c 1 -W 1 8.8.8.8' &> /dev/null
+    if [[ "$?" -ne "0" ]]; then
+        error "[ERROR] Could not reach 8.8.8.8 inside a container."
+        _exit 1
+    else
+        info "ping 8.8.8.8 in container OK"
+    fi
+    docker run --label cbreak.sidekick=true alpine sh -c 'ping -c 1 -W 1 github.com' &> /dev/null
+    if [[ "$?" -ne "0" ]]; then
+        error "[ERROR] Could not reach github.com inside a container."
+        _exit 1
+     else
+        info "ping github.com in container OK"
+    fi
 }
 
 cbd-find-root() {
