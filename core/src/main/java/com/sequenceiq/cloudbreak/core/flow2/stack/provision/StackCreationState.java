@@ -17,8 +17,8 @@ public enum StackCreationState implements FlowState<StackCreationState, StackCre
     IMAGESETUP_STATE(PrepareImageAction.class, StackCreationEvent.IMAGE_PREPARATION_FAILED_EVENT),
     IMAGE_CHECK_STATE(CheckImageAction.class, StackCreationEvent.IMAGE_COPY_FAILED_EVENT),
     START_PROVISIONING_STATE(StartProvisioningAction.class, StackCreationEvent.LAUNCH_STACK_FAILED_EVENT),
-    PROVISIONING_FINISHED_STATE(ProvisioningFinishedAction.class, StackCreationEvent.LAUNCH_STACK_FAILED_EVENT),
-    COLLECTMETADATA_STATE(CollectMetadataAction.class, StackCreationEvent.COLLECT_METADATA_FAILED_EVENT),
+    PROVISIONING_FINISHED_STATE(ProvisioningFinishedAction.class, StackCreationEvent.COLLECT_METADATA_FAILED_EVENT),
+    COLLECTMETADATA_STATE(CollectMetadataAction.class, StackCreationEvent.SSHFINGERPRINTS_FAILED_EVENT),
     TLS_SETUP_STATE(TlsSetupAction.class, StackCreationEvent.SSHFINGERPRINTS_FAILED_EVENT),
     FINAL_STATE();
 

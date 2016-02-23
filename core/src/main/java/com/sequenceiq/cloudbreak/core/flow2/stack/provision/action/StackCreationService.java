@@ -142,10 +142,10 @@ public class StackCreationService {
         return stackService.getById(stack.getId());
     }
 
-    public void handeStackCreationFailure(StackContext context, Exception errorDetails) {
+    public void handleStackCreationFailure(StackContext context, Exception errorDetails) {
         final Stack stack = context.getStack();
         MDCBuilder.buildMdcContext(stack);
-        String errorReason = errorDetails.getMessage();
+        String errorReason = errorDetails == null ? "Unknown error" : errorDetails.getMessage();
         if (errorDetails instanceof CancellationException || ExceptionUtils.getRootCause(errorDetails) instanceof CancellationException) {
             LOGGER.warn("The flow has been cancelled.");
         } else {
