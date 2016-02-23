@@ -74,7 +74,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" ng-show="activeCluster.credentialId">
                                 <label class="col-sm-3 control-label" for="sl_platformVariant">{{msg.active_cluster_variant_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_platformVariant" class="form-control-static">{{activeCluster.platformVariant}}</p>
@@ -96,7 +96,7 @@
                                     <p id="sl_nodeCount" class="form-control-static">{{activeCluster.nodeCount}}</p>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" ng-show="activeCluster.region">
                                 <label class="col-sm-3 control-label" for="sl_region">{{msg.active_cluster_region_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_region" class="form-control-static">{{$root.displayNames.getRegion(activeCluster.cloudPlatform, activeCluster.region)}}</p>
@@ -118,20 +118,26 @@
                                     <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}</p>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" ng-show="activeCluster.credentialId">
                                 <label class="col-sm-3 control-label" for="sl_credential_active">{{msg.active_cluster_credential_label}}</label>
                                 <div class="credentialselect col-sm-8">
-                                    <a id="sl_credential_active" segment="#panel-credential-collapse{{activeClusterCredential.id}}" class="credentialselect form-control-static review-a" ng-repeat="credential in $root.credentials|filter: { id: activeClusterCredential.id }:true">{{activeClusterCredential.name}}</a>
+                                    <a id="sl_credential_active" segment="#panel-credential-collapse{{activeClusterCredential.id}}" class="credentialselect form-control-static review-a">{{activeClusterCredential.name}}</a>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" ng-hide="activeCluster.credentialId">
+                                <label class="col-sm-3 control-label" for="sl_credential_active">{{msg.active_cluster_credential_label}}</label>
+                                <div class="credentialselect col-sm-8">
+                                    <a id="sl_credential_active" segment="#panel-credential-collapse-imported{{activeCluster.id}}" class="credentialselect form-control-static review-a">{{activeCluster.stackName}}</a>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-show="activeCluster.networkId">
                                 <label class="col-sm-3 control-label" for="sl_network_active">{{msg.active_cluster_network_label}}</label>
                                 <div class="networkselect col-sm-8">
                                     <a id="sl_network_active" class="networkselect form-control-static review-a" ng-repeat="network in $root.networks|filter: { id: $root.activeCluster.networkId }:notStrictFilter" segment="#panel-network-collapse{{$root.activeCluster.networkId}}">{{network.name}}</a>
                                 </div>
                             </div>
                             <div class="row" style="margin-top: 20px;    margin-bottom: 30px;">
-                                <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs">
+                                <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs" ng-show="activeCluster.instanceGroups[0] != null">
                                     <ul id="myTabs" class="nav nav-tabs" role="tablist">
                                         <li role="presentation" ng-class="{true:'active', false:''}[group.group == $root.activeCluster.activeGroup]" ng-repeat="group in $root.activeCluster.instanceGroups| orderBy: 'group'"><a ng-click="changeActiveClusterGroup(group.group)" href="" id="{{group.group}}-tab" role="tab" data-toggle="tab" aria-controls="{{group.group}}" aria-expanded="true">{{group.group}}</a></li>
                                     </ul>
@@ -145,7 +151,7 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="form-group">
+                                                <div class="form-group" ng-show="activeCluster.securityGroupId">
                                                     <label class="col-sm-2 control-label" for="sl_securitygroup_active">Security group: </label>
                                                     <div class="securitygroupselect col-sm-9">
                                                         <a id="sl_securitygroup_active" class="securitygroupselect form-control-static review-a" ng-repeat="securitygroup in $root.securitygroups|filter: { id: $root.activeCluster.securityGroupId }:true" segment="#panel-securitygroup-collapse{{securitygroup.id}}">{{securitygroup.name}}</a>
@@ -161,6 +167,42 @@
                                                     <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
                                                     <div class="col-sm-5 col-lg-6">
                                                         <div class="host-group-table row" ng-repeat="hostgroup in $root.activeClusterBlueprint.ambariBlueprint.host_groups|filter: { name: group.group }:true">
+                                                            <div class="list-group">
+                                                                <a href="" class="list-group-item active" style="text-decoration: none;    font-size: 15px;">{{hostgroup.name}}</a>
+                                                                <a href="" ng-repeat="component in hostgroup.components" class="list-group-item" style="text-decoration: none;    font-size: 15px;">{{component.name}}</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs" ng-show="activeCluster.instanceGroups[0] == null">
+                                    <ul id="myTabs" class="nav nav-tabs" role="tablist">
+                                        <li role="presentation" ng-class="{true:'active', false:''}[group.name == $root.activeCluster.activeGroup]" ng-repeat="group in $root.activeCluster.hostGroups| orderBy: 'name'"><a ng-click="changeActiveClusterGroup(group.name)" href="" id="{{group.name}}-tab" role="tab" data-toggle="tab" aria-controls="{{group.name}}" aria-expanded="true">{{group.name}}</a></li>
+                                    </ul>
+                                    <div id="myTabContent" class="tab-content">
+                                        <div role="tabpanel" class="tab-pane fade active review-tab" ng-class="{true:'in', false:''}[group.name == $root.activeCluster.activeGroup]" ng-hide="group.name != $root.activeCluster.activeGroup" ng-show="group.name == $root.activeCluster.activeGroup" ng-repeat="group in $root.activeCluster.hostGroups" id="{{group.name}}" aria-labelledby="{{group.name}}-tab">
+                                            <div class="container">
+                                                <div class="form-group">
+                                                    <label class="col-sm-2 control-label" for="sl_template_active">Constraint template: </label>
+                                                    <div class="templateselect col-sm-9">
+                                                        <a id="sl_template_active" class="templateselect form-control-static review-a" ng-repeat="template in $root.constraints|filter: { name: group.constraint.constraintTemplateName }:true" segment="#panel-constraint-collapse{{template.id}}">{{template.name}}</a>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-sm-2 control-label" for="sl_nodecount">Node count: </label>
+                                                    <div class="col-sm-9">
+                                                        <p id="sl_nodecount" class="form-control-static">{{group.constraint.hostCount}}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
+                                                    <div class="col-sm-5 col-lg-6">
+                                                        <div class="host-group-table row" ng-repeat="hostgroup in $root.activeClusterBlueprint.ambariBlueprint.host_groups|filter: { name: group.name }:true">
                                                             <div class="list-group">
                                                                 <a href="" class="list-group-item active" style="text-decoration: none;    font-size: 15px;">{{hostgroup.name}}</a>
                                                                 <a href="" ng-repeat="component in hostgroup.components" class="list-group-item" style="text-decoration: none;    font-size: 15px;">{{component.name}}</a>
@@ -411,7 +453,7 @@
                         <div class="form-group">
                             <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselected">{{msg.cluster_upscale_form_hostgroup}}</label>
                             <div class="col-sm-6">
-                                <select class="form-control" id="hostgroupselected" ng-model="upscaleCluster.hostGroup" ng-options="group.group as group.group for group in $root.activeCluster.instanceGroups | filter:{group: '!cbgateway'}">
+                                <select class="form-control" id="hostgroupselected" ng-model="upscaleCluster.hostGroup" ng-options="group.name as group.name for group in $root.activeCluster.hostGroups">
                                 </select>
                             </div>
                         </div>
@@ -450,7 +492,7 @@
                         <div class="form-group">
                             <label class="col-sm-3 col-sm-offset-1 control-label" for="hostgroupselected">{{msg.cluster_upscale_form_hostgroup}}</label>
                             <div class="col-sm-6">
-                                <select class="form-control" id="hostgroupselected" ng-model="downscaleCluster.hostGroup" ng-options="group.group as group.group for group in $root.activeCluster.instanceGroups | filter:{group: '!cbgateway'}">
+                                <select class="form-control" id="hostgroupselected" ng-model="downscaleCluster.hostGroup" ng-options="group.name as group.name for group in $root.activeCluster.hostGroups">
                                 </select>
                             </div>
                         </div>
@@ -591,11 +633,11 @@
                                         <div class="panel-heading" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
                                             <h3 class="panel-title">{{msg.active_cluster_reset_hostgroup_message_prefix}} <kbd>{{newhostgroup.instanceGroupName}}</kbd> {{msg.active_cluster_reset_hostgroup_message_suffix}}</h3>
                                         </div>
-                                        <div class="panel-body">
+                                        <div class="panel-body" ng-show="newhostgroup.constraint.instanceGroupName">
                                             <div class="form-group" name="templateNodeform{{$index}}">
                                                 <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">{{msg.active_cluster_reset_hostgroup_label}}</label>
                                                 <div class="col-sm-9">
-                                                    <select class="form-control" id="newhostgroupsdiv" ng-model="newhostgroup.name" required ng-options="hgvalue.name as hgvalue.name for hgvalue in $root.reinstallClusterObject.fullBp.ambariBlueprint.host_groups">
+                                                    <select class="form-control" ng-model="newhostgroup.name" required ng-options="hgvalue.name as hgvalue.name for hgvalue in $root.reinstallClusterObject.fullBp.ambariBlueprint.host_groups">
                                                     </select>
                                                 </div>
                                                 <div ng-show="recipes && recipes.length">
@@ -605,10 +647,20 @@
                                                     </div>
                                                     <div ng-show="recipesToShow[$index]">
                                                         <div class="col-sm-9">
-                                                            <select class="form-control" id="newhostgroupsdiv" ng-model="newhostgroup.recipeIds" ng-options="rvalue.id as rvalue.name for rvalue in $root.recipes" multiple="true">
+                                                            <select class="form-control" ng-model="newhostgroup.recipeIds" ng-options="rvalue.id as rvalue.name for rvalue in $root.recipes" multiple="true">
                                                             </select>
                                                         </div>
                                                     </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="panel-body" ng-show="newhostgroup.constraint.constraintTemplateName">
+                                            <div class="form-group" name="templateNodeform{{$index}}">
+                                                <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">{{msg.active_cluster_reset_hostgroup_label}}</label>
+                                                <div class="col-sm-9">
+                                                    <select class="form-control" ng-model="newhostgroup.constraint.constraintTemplateName" required ng-options="const.name as const.name for const in $root.constraints">
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>

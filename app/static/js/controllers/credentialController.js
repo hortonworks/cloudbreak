@@ -2,9 +2,11 @@
 
 var log = log4javascript.getLogger("credentialController-logger");
 
-angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', '$filter', '$base64', '$interpolate', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'GlobalCredentialCertificate',
-    function($scope, $rootScope, $filter, $base64, $interpolate, UserCredential, AccountCredential, GlobalCredential, GlobalCredentialCertificate) {
+angular.module('uluwatuControllers').controller('credentialController', [
+    '$scope', '$rootScope', '$filter', '$base64', '$interpolate', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'GlobalCredentialCertificate', 'AccountStack', 'UserStack', 'GlobalStack',
+    function($scope, $rootScope, $filter, $base64, $interpolate, UserCredential, AccountCredential, GlobalCredential, GlobalCredentialCertificate, AccountStack, UserStack, GlobalStack) {
         $rootScope.credentials = AccountCredential.query();
+        $rootScope.importedStacks = AccountStack.query();
         $scope.credentialInCreation = false;
         $scope.credentialAws = {
             parameters: {
@@ -15,10 +17,12 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.credentialAzureRm = {};
         $scope.credentialGcp = {};
         $scope.credentialOpenstack = {};
+        $scope.mesosStack = {};
         $scope.azureRmCredential = false;
         $scope.awsCredential = true;
         $scope.gcpCredential = false;
         $scope.openstackCredential = false;
+        $scope.mesosStac = false;
         $scope.awsCredentialForm = {};
         $scope.gcpCredentialForm = {};
         $scope.azureCredentialForm = {};
@@ -34,6 +38,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
             $scope.azureRmCredential = true;
+            $scope.mesosCredential = false;
         }
 
         $scope.createAwsCredentialRequest = function() {
@@ -41,6 +46,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
             $scope.azureRmCredential = false;
+            $scope.mesosCredential = false;
         }
 
         $scope.createGcpCredentialRequest = function() {
@@ -48,6 +54,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.gcpCredential = true;
             $scope.openstackCredential = false;
             $scope.azureRmCredential = false;
+            $scope.mesosCredential = false;
         }
 
         $scope.createOpenstackCredentialRequest = function() {
@@ -55,6 +62,15 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.gcpCredential = false;
             $scope.openstackCredential = true;
             $scope.azureRmCredential = false;
+            $scope.mesosCredential = false;
+        }
+
+        $scope.importMesosStackRequest = function() {
+            $scope.awsCredential = false;
+            $scope.gcpCredential = false;
+            $scope.openstackCredential = false;
+            $scope.azureRmCredential = false;
+            $scope.mesosCredential = true;
         }
 
         $scope.refreshCertificateFile = function(credentialId) {
@@ -227,6 +243,40 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         }
 
+        $scope.importMesosStack = function() {
+            $scope.credentialInCreation = true;
+            $scope.mesosStack.orchestrator.type = "MARATHON";
+            if ($scope.mesosStack.public) {
+                AccountStack.save($scope.mesosStack, function(result) {
+                    stackSuccessHandler(result)
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.mesos_credential_failed);
+                    $scope.credentialInCreation = false;
+                    $scope.showErrorMessageAlert();
+                });
+            } else {
+                UserStack.save($scope.mesosStack, function(result) {
+                    stackSuccessHandler(result)
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.mesos_credential_failed);
+                    $scope.credentialInCreation = false;
+                    $scope.showErrorMessageAlert();
+                });
+            }
+
+            function stackSuccessHandler(result) {
+                $scope.mesosStack.id = result.id;
+                $rootScope.importedStacks.push($scope.mesosStack);
+                $scope.mesosStack = {};
+                $scope.showSuccess($filter("format")($rootScope.msg.mesos_credential_success, String(result.id)));
+                $scope.mesosImportStackForm.$setPristine();
+                collapseCreateCredentialFormPanel();
+                $scope.credentialInCreation = false;
+                $scope.unShowErrorMessageAlert();
+            }
+        }
+
+
         $scope.deleteCredential = function(credential) {
             GlobalCredential.delete({
                 id: credential.id
@@ -239,7 +289,23 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         }
 
-        $scope.getTopologyNameById = function(topologyId) {
+        $scope.deleteImportedStack = function(importedStack) {
+            GlobalStack.delete({
+                id: importedStack.id
+            }, function(success) {
+                $rootScope.importedStacks.splice($rootScope.importedStacks.indexOf(importedStack), 1);
+                $scope.showSuccess($filter("format")($rootScope.msg.credential_delete_success, importedStack.id));
+            }, function(error) {
+                if (error.status === 400){
+                    $scope.showErrorMessage($rootScope.msg.credential_delete_failed);
+                } else {
+                    $scope.showError(error);
+                }
+            });
+
+        }
+
+        $scope.getTopologyNameById = function (topologyId) {
             var result;
             angular.forEach($rootScope.topologies, function(topology) {
                 if (topology.id === topologyId) {

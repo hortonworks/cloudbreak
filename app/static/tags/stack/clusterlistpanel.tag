@@ -1,6 +1,5 @@
 <div>
     <!-- this slide is active at start -->
-
     <div class="row cluster-block collapse in">
         <div class="isotope-wrapper">
 

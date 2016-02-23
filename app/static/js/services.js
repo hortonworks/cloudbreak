@@ -26,6 +26,24 @@ uluwatuServices.factory('AccountTemplate', ['$resource',
     }
 ]);
 
+uluwatuServices.factory('UserConstraint', ['$resource',
+    function($resource) {
+        return $resource('user/constraints');
+    }
+]);
+
+uluwatuServices.factory('AccountConstraint', ['$resource',
+    function($resource) {
+        return $resource('account/constraints');
+    }
+]);
+
+uluwatuServices.factory('GlobalConstraint', ['$resource',
+    function($resource) {
+        return $resource('constraints/:id');
+    }
+]);
+
 uluwatuServices.factory('AccountTopology', ['$resource',
     function($resource) {
         return $resource('account/topologies/:id');
@@ -270,15 +288,26 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
         function AggregateCluster(UserStack, AccountStack, Cluster) {
 
             var decorateCluster = function(cluster) {
+                cluster.stackName = cluster.name;
+                cluster.name = cluster.cluster.name ? cluster.cluster.name : cluster.name;
+                cluster.status = cluster.cluster.status ? cluster.cluster.status : cluster.status;
                 cluster.hoursUp = cluster.cluster.hoursUp;
                 cluster.minutesUp = cluster.cluster.minutesUp;
                 cluster.blueprintId = cluster.cluster.blueprintId;
+                cluster.hostGroups = cluster.cluster.hostGroups;
                 cluster.nodeCount = 0;
-                angular.forEach(cluster.instanceGroups, function(group) {
-                    cluster.nodeCount += group.nodeCount;
-                });
+                if (!cluster.cloudPlatform) {
+                    cluster.cloudPlatform = cluster.orchestrator.type;
+                }
+                if (cluster.instanceGroups.length === 0) {
+                    angular.forEach(cluster.hostGroups, function(group) {
+                        cluster.nodeCount += group.constraint.hostCount;
+                    });
+                }
+
                 cluster.metadata = [];
                 angular.forEach(cluster.instanceGroups, function(group) {
+                    cluster.nodeCount += group.nodeCount;
                     angular.forEach(group.metadata, function(metadata) {
                         cluster.metadata.push(metadata);
                     });
@@ -298,8 +327,13 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                 AccountStack.query(function(stacks) {
                     var clusters = [];
                     for (var i = 0; i < stacks.length; i++) {
-                        clusters[i] = stacks[i];
-                        decorateCluster(clusters[i]);
+                        if (stacks[i].platformVariant !== 'BYOS' && stacks[i].status && stacks[i].status !== 'DELETE_COMPLETED') {
+                            decorateCluster(stacks[i]);
+                            clusters.push(stacks[i]);
+                        } else if (stacks[i].platformVariant === 'BYOS' && stacks[i].cluster.status && stacks[i].cluster.status !== 'DELETE_COMPLETED') {
+                            decorateCluster(stacks[i]);
+                            clusters.push(stacks[i]);
+                        }
                     }
                     successHandler(clusters);
                 });
@@ -389,13 +423,23 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
             }
 
             this.delete = function(cluster, successHandler, failureHandler) {
-                GlobalStack.delete({
-                    id: cluster.id
-                }, function(result) {
-                    successHandler(result);
-                }, function(failure) {
-                    failureHandler(failure);
-                });
+                if (cluster.orchestrator != null && cluster.orchestrator.type === "MARATHON") {
+                    Cluster.delete({
+                        id: cluster.id
+                    }, function(result) {
+                        successHandler(result);
+                    }, function(failure) {
+                        failureHandler(failure);
+                    });
+                } else {
+                    GlobalStack.delete({
+                        id: cluster.id
+                    }, function(result) {
+                        successHandler(result);
+                    }, function(failure) {
+                        failureHandler(failure);
+                    });
+                }
             }
 
             this.forcedDelete = function(cluster, successHandler, failureHandler) {

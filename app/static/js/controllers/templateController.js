@@ -2,18 +2,22 @@
 
 var log = log4javascript.getLogger("templateController-logger");
 
-angular.module('uluwatuControllers').controller('templateController', ['$scope', '$rootScope', '$filter', 'UserTemplate', 'AccountTemplate', 'GlobalTemplate',
-    function($scope, $rootScope, $filter, UserTemplate, AccountTemplate, GlobalTemplate) {
+angular.module('uluwatuControllers').controller('templateController', [
+    '$scope', '$rootScope', '$filter', 'UserTemplate', 'AccountTemplate', 'GlobalTemplate', 'UserConstraint', 'AccountConstraint', 'GlobalConstraint',
+    function($scope, $rootScope, $filter, UserTemplate, AccountTemplate, GlobalTemplate, UserConstraint, AccountConstraint, GlobalConstraint) {
 
         $rootScope.templates = AccountTemplate.query();
+        $rootScope.constraints = AccountConstraint.query();
         $scope.awsTemplateForm = {};
         $scope.gcpTemplateForm = {};
         $scope.openstackTemplateForm = {};
+        $scope.mesosTemplateForm = {};
         $scope.awsInstanceType = {};
         initializeAzureTemp();
         initializeAwsTemp();
         initializeGcpTemp();
         initializeOpenstackTemp();
+        initializeMesosTemp();
         $scope.showAlert = false;
         $scope.alertMessage = "";
 
@@ -22,6 +26,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.awsTemplate = true;
             $scope.gcpTemplate = false;
             $scope.openstackTemplate = false;
+            $scope.mesosTemplate = false;
         }
 
         $scope.createAzureTemplateRequest = function() {
@@ -29,6 +34,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.awsTemplate = false;
             $scope.gcpTemplate = false;
             $scope.openstackTemplate = false;
+            $scope.mesosTemplate = false;
         }
 
         $scope.createGcpTemplateRequest = function() {
@@ -36,6 +42,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.awsTemplate = false;
             $scope.gcpTemplate = true;
             $scope.openstackTemplate = false;
+            $scope.mesosTemplate = false;
         }
 
         $scope.createOpenstackTemplateRequest = function() {
@@ -43,7 +50,17 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.awsTemplate = false;
             $scope.gcpTemplate = false;
             $scope.openstackTemplate = true;
+            $scope.mesosTemplate = false;
         }
+
+        $scope.createMesosTemplateRequest = function() {
+            $scope.azureTemplate = false;
+            $scope.awsTemplate = false;
+            $scope.gcpTemplate = false;
+            $scope.openstackTemplate = false;
+            $scope.mesosTemplate = true;
+        }
+
 
         $scope.createAwsTemplate = function() {
             $scope.awsTemp.cloudPlatform = 'AWS';
@@ -163,6 +180,34 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             }
         }
 
+        $scope.createMesosTemplate = function() {
+            if ($scope.mesosTemp.public) {
+                AccountConstraint.save($scope.mesosTemp, function(result) {
+                    handleMesosTemplateSuccess(result)
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.mesos_template_failed);
+                    $scope.showErrorMessageAlert();
+                });
+            } else {
+                UserConstraint.save($scope.mesosTemp, function(result) {
+                    handleMesosTemplateSuccess(result)
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.mesos_template_failed);
+                    $scope.showErrorMessageAlert();
+                });
+            }
+
+            function handleMesosTemplateSuccess(result) {
+                $scope.mesosTemp.id = result.id;
+                $rootScope.constraints.push($scope.mesosTemp);
+                initializeMesosTemp();
+                $scope.showSuccess($filter("format")($rootScope.msg.mesos_template_success, String(result.id)));
+                $scope.mesosTemplateForm.$setPristine();
+                collapseCreateTemplateFormPanel();
+                $scope.unShowErrorMessageAlert();
+            }
+        }
+
         $scope.deleteTemplate = function(template) {
             GlobalTemplate.delete({
                 id: template.id
@@ -173,6 +218,18 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.showError(error, $rootScope.msg.template_delete_failed)
             });
         }
+
+        $scope.deleteConstraint = function(constraint) {
+            GlobalConstraint.delete({
+                id: constraint.id
+            }, function(success) {
+                $rootScope.constraints.splice($rootScope.constraints.indexOf(constraint), 1);
+                $scope.showSuccess($filter("format")($rootScope.msg.constraint_delete_success, String(constraint.id)));
+            }, function(error) {
+                $scope.showError(error, $rootScope.msg.constraint_delete_failed)
+            });
+        }
+
 
         $scope.filterByVolumetype = function(volume) {
             try {
@@ -229,6 +286,14 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 parameters: {}
             }
         }
+
+        function initializeMesosTemp() {
+            $scope.mesosTemp = {
+                cpu: 2,
+                memory: 4096
+            }
+        }
+
 
         function initializeOpenstackTemp() {
             $scope.openstackTemp = {

@@ -22,10 +22,10 @@
         </div>
     </div>
 </div>
-<div class="form-group">
+<div class="form-group" ng-show="activeCredential">
     <label class="col-sm-3 control-label" for="selectRegion">{{msg.cluster_form_region_label}}</label>
     <div class="col-sm-8">
-        <select class="form-control" id="selectRegion" ng-model="cluster.region" required ng-show="activeCredential.cloudPlatform == 'AWS'">
+        <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-required="activeCredential !== undefined" ng-show="activeCredential.cloudPlatform == 'AWS'">
             <option ng-repeat="region in $root.params.regions.AWS" value="{{region}}">{{$root.displayNames.getRegion(activeCredential.cloudPlatform, region)}}</option>
         </select>
         <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'GCP'">
@@ -53,7 +53,8 @@
         <input type="checkbox" id="awsDedicatedInstancesRequested" ng-model="cluster.parameters.dedicatedInstances" name="awsDedicatedInstancesRequested">
     </div>
 </div>
-<div class="form-group" ng-show="getPlatformVariants().length > 1">
+
+<div class="form-group" ng-show="activeCredential && showAdvancedOptionForm && cluster.platformVariant && getPlatformVariants().length > 1">
     <label class="col-sm-3 control-label" for="platformVariant">{{msg.cluster_form_platform_variant_label}}</label>
     <div class="col-sm-3">
         <select class="form-control" id="platformVariant" ng-model="cluster.platformVariant" ng-options="variant as variant for variant in getPlatformVariants()"></select>
@@ -81,7 +82,11 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region" ng-click="showWizardActualElement('configureSecurity')">{{msg.cluster_form_ambari_network_tag}} <i class="fa fa-angle-double-right"></i></button>
+                <button type="button" class="btn btn-sm btn-sm btn-default" 
+                    ng-disabled="!cluster.name || (activeCredential !== undefined && !cluster.region)"
+                    ng-click="activeStack === undefined ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
+                    {{activeStack === undefined ? msg.cluster_form_ambari_network_tag : msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i>
+                </button>
             </div>
         </div>
     </div>

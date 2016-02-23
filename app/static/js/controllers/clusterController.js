@@ -135,59 +135,106 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }, true);
             var hostGroups = [];
             var index = 0;
-            $rootScope.activeCluster.instanceGroups.forEach(function(value) {
-                if (value.type != 'GATEWAY') {
-                    var tmpRecipes = $filter('filter')($rootScope.activeCluster.cluster.hostGroups, {
-                        instanceGroupName: value.group
-                    }, true)[0];
+            if ($rootScope.activeCluster.instanceGroups.length > 0) {
+                $rootScope.activeCluster.instanceGroups.forEach(function(value) {
+                    if (value.type != 'GATEWAY') {
+                        var tmpRecipes = $filter('filter')($rootScope.activeCluster.cluster.hostGroups, {
+                            instanceGroupName: value.group
+                        }, true)[0];
+                        hostGroups.push({
+                            name: actualBp[0].ambariBlueprint.host_groups[index].name,
+                            instanceGroupName: value.group,
+                            constraint: {
+                                instanceGroupName: value.group,
+                                hostCount: 1
+                            },
+                            recipeIds: tmpRecipes != undefined ? tmpRecipes.recipeIds : []
+                        });
+                        index++;
+                    }
+                });
+            } else {
+                actualBp[0].ambariBlueprint.host_groups.forEach(function(bpHostGroup) {
                     hostGroups.push({
-                        name: actualBp[0].ambariBlueprint.host_groups[index].name,
-                        instanceGroupName: value.group,
-                        recipeIds: tmpRecipes.recipeIds
+                        name: bpHostGroup.name,
+                        instanceGroupName: bpHostGroup.name,
+                        constraint: {
+                            constraintTemplateName: $rootScope.constraints[0].name,
+                            hostCount: 1
+                        },
+                        recipeIds: []
                     });
-                    index++;
-                }
-            });
+                });
+            }
             $rootScope.reinstallClusterObject.hostgroups = hostGroups;
             $rootScope.reinstallClusterObject.fullBp = actualBp[0];
         }
 
         $scope.selectedBlueprintChange = function() {
-            var tmpCloudPlatform = $rootScope.activeCredential.cloudPlatform;
-            var templatesByProvider = $filter('filter')($rootScope.templates, {
-                cloudPlatform: tmpCloudPlatform
-            }, true);
-            var tmpTemplate = $filter('orderBy')(templatesByProvider, 'name', false)[0];
-            var tmpTemplateId = null;
-            if (tmpTemplate != null) {
-                tmpTemplateId = tmpTemplate.id;
-            }
-            var actualBp = $filter('filter')($rootScope.blueprints, {
-                id: $scope.cluster.blueprintId
-            }, true);
-            var instanceGroups = [];
-            var hostGroups = [];
-            instanceGroups.push({
-                templateId: tmpTemplateId,
-                group: "cbgateway",
-                nodeCount: 1,
-                type: "GATEWAY"
-            });
-            actualBp[0].ambariBlueprint.host_groups.forEach(function(k) {
+            if ($rootScope.activeCredential) {
+                var tmpCloudPlatform = $rootScope.activeCredential.cloudPlatform;
+                var templatesByProvider = $filter('filter')($rootScope.templates, {
+                    cloudPlatform: tmpCloudPlatform
+                }, true);
+                var tmpTemplate = $filter('orderBy')(templatesByProvider, 'name', false)[0];
+                var tmpTemplateId = null;
+                if (tmpTemplate != null) {
+                    tmpTemplateId = tmpTemplate.id;
+                }
+                var actualBp = $filter('filter')($rootScope.blueprints, {
+                    id: $scope.cluster.blueprintId
+                }, true);
+                var instanceGroups = [];
+                var hostGroups = [];
                 instanceGroups.push({
                     templateId: tmpTemplateId,
-                    group: k.name,
+                    group: "cbgateway",
                     nodeCount: 1,
-                    type: "CORE"
+                    type: "GATEWAY"
                 });
-                hostGroups.push({
-                    name: k.name,
-                    instanceGroupName: k.name,
-                    recipeIds: []
-                })
-            });
-            $scope.cluster.instanceGroups = instanceGroups;
-            $scope.cluster.hostGroups = hostGroups;
+                actualBp[0].ambariBlueprint.host_groups.forEach(function(k) {
+                    instanceGroups.push({
+                        templateId: tmpTemplateId,
+                        group: k.name,
+                        nodeCount: 1,
+                        type: "CORE"
+                    });
+                    hostGroups.push({
+                        name: k.name,
+                        constraint: {
+                            instanceGroupName: k.name,
+                            hostCount: 1
+                        },
+                        recipeIds: []
+                    })
+                });
+                $scope.cluster.instanceGroups = instanceGroups;
+                $scope.cluster.hostGroups = hostGroups;
+                $scope.cluster.activeGroup = 'cbgateway';
+            } else {
+                var constraintTemplates = $rootScope.constraints;
+                var tmpConstraint = $filter('orderBy')(constraintTemplates, 'name', false)[0];
+                var tmpConstraintName
+                if (tmpConstraint != null) {
+                    tmpConstraintName = tmpConstraint.name;
+                }
+                var actualBp = $filter('filter')($rootScope.blueprints, {
+                    id: $scope.cluster.blueprintId
+                }, true);
+                var hostGroups = [];
+                actualBp[0].ambariBlueprint.host_groups.forEach(function(k) {
+                    hostGroups.push({
+                        name: k.name,
+                        constraint: {
+                            constraintTemplateName: tmpConstraintName,
+                            hostCount: 1
+                        },
+                        recipeIds: []
+                    })
+                });
+                $scope.cluster.hostGroups = hostGroups;
+                $scope.cluster.activeGroup = $scope.cluster.hostGroups[0].name;
+            }
         }
 
         $scope.isUndefined = function(variable) {
@@ -232,14 +279,22 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 id: $scope.cluster.blueprintId
             }, true)[0];
             var tmpNodeCount = 0;
-            angular.forEach($scope.cluster.instanceGroups, function(group) {
-                tmpNodeCount += group.nodeCount;
+            angular.forEach($scope.cluster.hostGroups, function(hg) {
+                if ($scope.cluster.instanceGroups) {
+                    angular.forEach($scope.cluster.instanceGroups, function(ig) {
+                        if (ig.group === hg.name) {
+                            hg.constraint.hostCount = ig.nodeCount
+                        }
+                    });
+                }
+                tmpNodeCount += hg.nodeCount;
             });
+
             if (blueprint.hostGroupCount > tmpNodeCount) {
                 $scope.showErrorMessage($rootScope.msg.hostgroup_invalid_node_count);
                 return;
             }
-            if (blueprint.hostGroupCount === 1 && tmpNodeCount != 2) {
+            if (blueprint.hostGroupCount === 1 && tmpNodeCount != 1) {
                 $scope.showErrorMessage($rootScope.msg.hostgroup_single_invalid);
                 return;
             }
@@ -262,7 +317,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     return;
                 }
             }
-            if ($rootScope.activeCredential.cloudPlatform == 'AWS' || $rootScope.activeCredential.cloudPlatform == 'OPENSTACK') {
+            if ($rootScope.activeCredential && ($rootScope.activeCredential.cloudPlatform == 'AWS' || $rootScope.activeCredential.cloudPlatform == 'OPENSTACK')) {
                 delete $scope.cluster.fileSystem;
             }
             if (!$scope.isUndefined($scope.cluster.ambariStackDetails) && Object.keys($scope.cluster.ambariStackDetails).length !== 0) {
@@ -283,50 +338,91 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             } else {
                 $scope.cluster.ambariStackDetails = null;
             }
-            $scope.cluster.credentialId = $rootScope.activeCredential.id;
-            $scope.prepareParameters($scope.cluster);
-            UluwatuCluster.save($scope.cluster, $rootScope.activeCredential.cloudPlatform, function(result) {
-                var nodeCount = 0;
-                angular.forEach(result.instanceGroups, function(group) {
-                    nodeCount += group.nodeCount;
-                });
-                result.nodeCount = nodeCount;
-                result.cloudPlatform = $filter('filter')($rootScope.credentials, {
-                    id: $rootScope.activeCredential.id
-                }, true)[0].cloudPlatform;
-                result.public = $scope.cluster.public;
-                angular.forEach(result.instanceGroups, function(item) {
-                    item.templateId = parseFloat(item.templateId);
-                });
-                result.blueprintId = parseFloat(result.blueprintId);
-
-                var existingCluster = $filter('filter')($rootScope.clusters, {
-                    id: result.id
-                }, true)[0];
-                if (result !== undefined && result.id !== undefined) {
-                    GlobalStack.get({
-                        id: result.id
-                    }, function(success) {
-                        result.platformVariant = success.platformVariant;
+            if ($scope.activeCredential) {
+                $scope.cluster.credentialId = $rootScope.activeCredential.id;
+                $scope.prepareParameters($scope.cluster);
+                UluwatuCluster.save($scope.cluster, $rootScope.activeCredential.cloudPlatform, function(result) {
+                    var nodeCount = 0;
+                    angular.forEach(result.instanceGroups, function(group) {
+                        nodeCount += group.nodeCount;
                     });
+                    result.nodeCount = nodeCount;
+                    result.cloudPlatform = $filter('filter')($rootScope.credentials, {
+                        id: $rootScope.activeCredential.id
+                    }, true)[0].cloudPlatform;
+                    result.public = $scope.cluster.public;
+                    angular.forEach(result.instanceGroups, function(item) {
+                        item.templateId = parseFloat(item.templateId);
+                    });
+                    result.blueprintId = parseFloat(result.blueprintId);
+
+                    var existingCluster = $filter('filter')($rootScope.clusters, {
+                        id: result.id
+                    }, true)[0];
+                    if (result !== undefined && result.id !== undefined) {
+                        GlobalStack.get({
+                            id: result.id
+                        }, function(success) {
+                            result.platformVariant = success.platformVariant;
+                        });
+                    }
+                    if (existingCluster != undefined) {
+                        existingCluster = result;
+                    } else {
+                        pushCluster(result);
+                    }
+                }, function(failure) {
+                    $scope.showError(failure, $rootScope.msg.cluster_failed);
+                });
+            } else {
+                $scope.prepareParameters($scope.cluster);
+                var cbCluster = {
+                    name: $scope.cluster.name,
+                    blueprintId: $scope.cluster.blueprintId,
+                    emailNeeded: $scope.cluster.email,
+                    hostGroups: $scope.cluster.hostGroups,
+                    password: $scope.cluster.password,
+                    userName: $scope.cluster.userName,
+                    enableSecurity: $scope.cluster.enableSecurity || false,
+                    kerberosMasterKey: $scope.cluster.kerberosMasterKey || null,
+                    kerberosAdmin: $scope.cluster.kerberosAdmin || null,
+                    kerberosPassword: $scope.cluster.kerberosPassword || null,
+                    validateBlueprint: $scope.cluster.validateBlueprint,
+                    fileSystem: $scope.cluster.fileSystem || null,
+                    ambariStackDetails: $scope.cluster.ambariStackDetails === 'undefined' ? null : $scope.cluster.ambariStackDetails
                 }
-                if (existingCluster != undefined) {
-                    existingCluster = result;
-                } else {
-                    $rootScope.clusters.push(result);
-                    $scope.$parent.orderClusters();
-                    $jq('.carousel').carousel(0);
-                    // enable toolbar buttons
-                    $jq('#toggle-cluster-block-btn').removeClass('disabled');
-                    $jq('#sort-clusters-btn').removeClass('disabled');
-                    $jq('#create-cluster-btn').removeClass('disabled');
-                    $jq("#notification-n-filtering").prop("disabled", false);
-                    initCluster();
-                    $scope.clusterCreationForm.$setPristine();
-                }
-            }, function(failure) {
-                $scope.showError(failure, $rootScope.msg.cluster_failed);
-            });
+                Cluster.save({
+                    id: $scope.activeStack.id
+                }, cbCluster, function(result) {
+                    result.id = $scope.activeStack.id
+                    var hostCount = 0;
+                    angular.forEach(result.hostGroups, function(group) {
+                        hostCount += group.constraint.hostCount;
+                    });
+                    result.nodeCount = hostCount;
+                    result.cloudPlatform = $rootScope.activeStack.orchestrator.type;
+                    result.public = $scope.cluster.public;
+                    result.hoursUp = 0;
+                    result.minutesUp = 0;
+                    result.status = 'REQUESTED';
+                    pushCluster(result);
+                }, function(failure) {
+                    $scope.showError(failure, $rootScope.msg.cluster_failed);
+                });
+            }
+        }
+
+        function pushCluster(cluster){
+            $rootScope.clusters.push(cluster);
+            $scope.$parent.orderClusters();
+            $jq('.carousel').carousel(0);
+            // enable toolbar buttons
+            $jq('#toggle-cluster-block-btn').removeClass('disabled');
+            $jq('#sort-clusters-btn').removeClass('disabled');
+            $jq('#create-cluster-btn').removeClass('disabled');
+            $jq("#notification-n-filtering").prop("disabled", false);
+            $scope.clusterCreationForm.$setPristine();
+            initCluster();
         }
 
         $scope.errorInFileSystemConfig = function() {
@@ -446,18 +542,27 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, {
                     id: $rootScope.activeCluster.blueprintId
                 })[0];
-                $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {
-                    id: $rootScope.activeCluster.credentialId
-                }, true)[0];
-                $rootScope.activeClusterNetwork = $filter('filter')($rootScope.networks, {
-                    id: $rootScope.activeCluster.networkId
-                })[0];
-                $rootScope.activeClusterSecurityGroup = $filter('filter')($rootScope.securitygroups, {
-                    id: $rootScope.activeCluster.securityGroupId
-                })[0];
-                $rootScope.activeCluster.cloudPlatform = $rootScope.activeClusterCredential.cloudPlatform;
+                if ($rootScope.activeCluster.credentialId) {
+                    $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {
+                        id: $rootScope.activeCluster.credentialId
+                    }, true)[0];
+                    $rootScope.activeCluster.cloudPlatform = $rootScope.activeClusterCredential.cloudPlatform
+                    $rootScope.activeCluster.activeGroup = "cbgateway";
+                } else {
+                    $rootScope.activeCluster.cloudPlatform = $rootScope.activeCluster.orchestrator.type
+                    $rootScope.activeCluster.activeGroup = $rootScope.activeCluster.hostGroups != undefined && $rootScope.activeCluster.hostGroups.length > 0 ? $rootScope.activeCluster.hostGroups[0].name : '';
+                }
+                if ($rootScope.activeCluster.networkId) {
+                    $rootScope.activeClusterNetwork = $filter('filter')($rootScope.networks, {
+                        id: $rootScope.activeCluster.networkId
+                    })[0];
+                }
+                if ($rootScope.activeCluster.securityGroupId) {
+                    $rootScope.activeClusterSecurityGroup = $filter('filter')($rootScope.securitygroups, {
+                        id: $rootScope.activeCluster.securityGroupId
+                    })[0];
+                }
                 $scope.newCredential = {};
-                $rootScope.activeCluster.activeGroup = "cbgateway";
                 $scope.newCredential.newUserName = $rootScope.activeCluster.cluster.userName;
                 $scope.upscaleCluster = {
                     hostGroup: $scope.getHostGroupName(),
@@ -480,30 +585,56 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.upscaleCluster.numberOfInstances = 1;
                 return;
             }
-            var scaleJson = {
-                "instanceGroupAdjustment": {
-                    "instanceGroup": $scope.upscaleCluster.hostGroup,
-                    "scalingAdjustment": $scope.upscaleCluster.numberOfInstances,
-                    "withClusterEvent": true
-                }
-            };
-            GlobalStack.update({
-                id: $rootScope.activeCluster.id
-            }, scaleJson, function(success) {
-                angular.forEach($rootScope.activeCluster.instanceGroups, function(igroup) {
-                    if (igroup.group == $scope.upscaleCluster.hostGroup) {
-                        igroup.nodeCount += $scope.upscaleCluster.numberOfInstances;
-                        return;
+            if ($rootScope.activeCluster.orchestrator != null && $rootScope.activeCluster.orchestrator.type === "MARATHON") {
+                var scaleJson = {
+                    "hostGroupAdjustment": {
+                        "hostGroup": $scope.upscaleCluster.hostGroup,
+                        "scalingAdjustment": $scope.upscaleCluster.numberOfInstances
                     }
-                });
-                $scope.showSuccess($rootScope.msg.cluster_upscale_update_success);
-                $scope.upscaleCluster = {
-                    hostGroup: $scope.getHostGroupName(),
-                    numberOfInstances: 1
                 };
-            }, function(error) {
-                $scope.showError(error, $rootScope.msg.cluster_upscale_update_failed);
-            });
+                Cluster.update({
+                    id: $rootScope.activeCluster.id
+                }, scaleJson, function(success) {
+                    angular.forEach($rootScope.activeCluster.hostGroups, function(hg) {
+                        if (hg.name == $scope.upscaleCluster.hostGroup) {
+                            hg.hostCount += $scope.upscaleCluster.numberOfInstances;
+                            return;
+                        }
+                    });
+                    $scope.showSuccess($rootScope.msg.cluster_upscale_update_success);
+                    $scope.upscaleCluster = {
+                        hostGroup: $scope.getHostGroupName(),
+                        numberOfInstances: 1
+                    };
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.cluster_upscale_update_failed);
+                });
+            } else {
+                var scaleJson = {
+                    "instanceGroupAdjustment": {
+                        "instanceGroup": $scope.upscaleCluster.hostGroup,
+                        "scalingAdjustment": $scope.upscaleCluster.numberOfInstances,
+                        "withClusterEvent": true
+                    }
+                };
+                GlobalStack.update({
+                    id: $rootScope.activeCluster.id
+                }, scaleJson, function(success) {
+                    angular.forEach($rootScope.activeCluster.hostGroups, function(hg) {
+                        if (hg.name == $scope.upscaleCluster.hostGroup) {
+                            hg.hostCount += $scope.upscaleCluster.numberOfInstances;
+                            return;
+                        }
+                    });
+                    $scope.showSuccess($rootScope.msg.cluster_upscale_update_success);
+                    $scope.upscaleCluster = {
+                        hostGroup: $scope.getHostGroupName(),
+                        numberOfInstances: 1
+                    };
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.cluster_upscale_update_failed);
+                });
+            }
         };
 
         $scope.startDownScaleCluster = function() {
@@ -513,18 +644,23 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 return;
             }
             var scaleJson = {
-                "hostGroupAdjustment": {
-                    "hostGroup": $scope.downscaleCluster.hostGroup,
-                    "scalingAdjustment": $scope.downscaleCluster.numberOfInstances * (-1),
-                    "withStackUpdate": true
-                }
+                    "hostGroupAdjustment": {
+                        "hostGroup": $scope.downscaleCluster.hostGroup,
+                        "scalingAdjustment": $scope.downscaleCluster.numberOfInstances * (-1),
+                        "withStackUpdate": false
+                    }
             };
+            if ($rootScope.activeCluster.orchestrator != null && $rootScope.activeCluster.orchestrator.type === "MARATHON") {
+                scaleJson.hostGroupAdjustment.withStackUpdate = false;
+            } else {
+                scaleJson.hostGroupAdjustment.withStackUpdate = true;
+            }
             Cluster.update({
                 id: $rootScope.activeCluster.id
             }, scaleJson, function(success) {
-                angular.forEach($rootScope.activeCluster.instanceGroups, function(igroup) {
-                    if (igroup.group == $scope.upscaleCluster.hostGroup) {
-                        igroup.nodeCount += $scope.downscaleCluster.numberOfInstances;
+                angular.forEach($rootScope.activeCluster.hostGroups, function(hg) {
+                    if (hg.name == $scope.downscaleCluster.hostGroup) {
+                        hg.nodeCount -= $scope.downscaleCluster.numberOfInstances;
                         return;
                     }
                 });
@@ -539,24 +675,18 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         };
 
         $scope.getHostGroupName = function() {
-            var hgroup = "";
-            angular.forEach($rootScope.activeCluster.instanceGroups, function(igroup) {
-                if (igroup.group != 'cbgateway') {
-                    hgroup = igroup.group;
-                    return;
-                }
-            });
-            return hgroup;
+            return $rootScope.activeCluster.hostGroups[0].name;
         };
 
         $scope.initReinstallClusterObject = function() {
             $rootScope.reinstallClusterObject = {
                 validateBlueprint: true,
                 blueprintId: $rootScope.activeClusterBlueprint.id,
-                hostgroups: $rootScope.activeCluster.cluster != undefined ? $rootScope.activeCluster.cluster.hostGroups : [],
+                hostgroups: $rootScope.activeCluster.cluster != undefined  && $rootScope.activeCluster.cluster.hostGroups.length > 0 ? $rootScope.activeCluster.cluster.hostGroups : [],
                 ambariStackDetails: $rootScope.activeCluster.cluster != undefined ? $rootScope.activeCluster.cluster.ambariStackDetails : '',
                 fullBp: $rootScope.activeClusterBlueprint,
             };
+            $scope.selectBlueprintreinstallChange();
         };
 
         $scope.changeActiveGroup = function(group) {
@@ -571,19 +701,38 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $rootScope.$watch('activeCredential', function() {
             if ($rootScope.activeCredential != null) {
+                $rootScope.activeStack = undefined;
                 $scope.cluster.bestEffort = "BEST_EFFORT";
                 $scope.cluster.failurePolicy.adjustmentType = "BEST_EFFORT";
                 $scope.cluster.failurePolicy.threshold = null;
                 $scope.cluster.parameters = {};
                 $scope.cluster.availabilityZone = null;
                 $scope.cluster.region = null;
-                $scope.cluster.activeGroup = "cbgateway";
+                delete $scope.cluster.hostGroups;
+                delete $scope.cluster.instanceGroups;
+                delete $scope.cluster.blueprintId;
                 setFileSystem();
                 setNetwork();
                 setSecurityGroup();
                 setRegion();
                 initWizard();
                 setPlatformVariant();
+            }
+        });
+
+        $rootScope.$watch('activeStack', function() {
+            if ($rootScope.activeStack != null) {
+                $rootScope.activeCredential = undefined;
+                $scope.cluster.parameters = {};
+                $scope.cluster.region = null;
+                $scope.cluster.activeGroup = "cbgateway";
+                delete $scope.cluster.fileSystem;
+                delete $scope.cluster.network;
+                delete $scope.cluster.securityGroup;
+                delete $scope.cluster.hostGroups;
+                delete $scope.cluster.instanceGroups;
+                delete $scope.cluster.blueprintId;
+                initWizard();
             }
         });
 

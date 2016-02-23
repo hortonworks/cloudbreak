@@ -172,8 +172,21 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         }
 
         $scope.filterByVisiblePlatform = function(resource) {
-            return $scope.isVisible(resource.cloudPlatform)
+            if (resource.cloudPlatform) {
+                return $scope.isVisible(resource.cloudPlatform)
+            } else {
+                return $scope.isVisible("BYOS")
+            }
         }
+
+        $scope.filterByImportedStack = function(resource) {
+            if (resource.orchestrator) {
+                if (resource.orchestrator.type === "MARATHON") {
+                    return $scope.isVisible("BYOS")
+                }
+            }
+        }
+
 
         function getUserPermission() {
             UserPermission.get(function(success) {
