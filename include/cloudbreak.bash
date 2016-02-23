@@ -10,6 +10,7 @@ cloudbreak-config() {
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
   cloudbreak-conf-cloud-provider
+  cloudbreak-conf-rest-client
   cloudbreak-conf-ui
   cloudbreak-conf-java
   cloudbreak-conf-baywatch
@@ -176,6 +177,13 @@ cloudbreak-conf-cloud-provider() {
 
     env-import CB_AWS_HOSTKEY_VERIFY "false"
     env-import CB_GCP_HOSTKEY_VERIFY "false"
+}
+
+cloudbreak-conf-rest-client() {
+    declare desc="Defines rest client related parameters"
+
+    env-import REST_DEBUG "false"
+    env-import CERT_VALIDATION "true"
 }
 
 cloudbreak-conf-ui() {
