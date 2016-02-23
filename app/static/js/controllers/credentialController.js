@@ -18,10 +18,6 @@ angular.module('uluwatuControllers').controller('credentialController', [
         $scope.credentialGcp = {};
         $scope.credentialOpenstack = {};
         $scope.mesosStack = {};
-        $scope.azureRmCredential = false;
-        $scope.awsCredential = true;
-        $scope.gcpCredential = false;
-        $scope.openstackCredential = false;
         $scope.mesosStac = false;
         $scope.awsCredentialForm = {};
         $scope.gcpCredentialForm = {};
@@ -32,6 +28,10 @@ angular.module('uluwatuControllers').controller('credentialController', [
         $scope.gcp.p12 = "";
         $scope.showAlert = false;
         $scope.alertMessage = "";
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "BYOS", "GCP", "OPENSTACK"]);
+        if (firstVisiblePlatform != -1) {
+            $scope[["awsCredential", "azureRmCredential", "mesosCredential", "gcpCredential", "openstackCredential"][firstVisiblePlatform]] = true;
+        }
 
         $scope.createAzureRmCredentialRequest = function() {
             $scope.awsCredential = false;
@@ -296,7 +296,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
                 $rootScope.importedStacks.splice($rootScope.importedStacks.indexOf(importedStack), 1);
                 $scope.showSuccess($filter("format")($rootScope.msg.credential_delete_success, importedStack.id));
             }, function(error) {
-                if (error.status === 400){
+                if (error.status === 400) {
                     $scope.showErrorMessage($rootScope.msg.credential_delete_failed);
                 } else {
                     $scope.showError(error);
@@ -305,7 +305,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
 
         }
 
-        $scope.getTopologyNameById = function (topologyId) {
+        $scope.getTopologyNameById = function(topologyId) {
             var result;
             angular.forEach($rootScope.topologies, function(topology) {
                 if (topology.id === topologyId) {

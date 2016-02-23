@@ -412,7 +412,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
-        function pushCluster(cluster){
+        function pushCluster(cluster) {
             $rootScope.clusters.push(cluster);
             $scope.$parent.orderClusters();
             $jq('.carousel').carousel(0);
@@ -644,11 +644,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 return;
             }
             var scaleJson = {
-                    "hostGroupAdjustment": {
-                        "hostGroup": $scope.downscaleCluster.hostGroup,
-                        "scalingAdjustment": $scope.downscaleCluster.numberOfInstances * (-1),
-                        "withStackUpdate": false
-                    }
+                "hostGroupAdjustment": {
+                    "hostGroup": $scope.downscaleCluster.hostGroup,
+                    "scalingAdjustment": $scope.downscaleCluster.numberOfInstances * (-1),
+                    "withStackUpdate": false
+                }
             };
             if ($rootScope.activeCluster.orchestrator != null && $rootScope.activeCluster.orchestrator.type === "MARATHON") {
                 scaleJson.hostGroupAdjustment.withStackUpdate = false;
@@ -682,7 +682,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $rootScope.reinstallClusterObject = {
                 validateBlueprint: true,
                 blueprintId: $rootScope.activeClusterBlueprint.id,
-                hostgroups: $rootScope.activeCluster.cluster != undefined  && $rootScope.activeCluster.cluster.hostGroups.length > 0 ? $rootScope.activeCluster.cluster.hostGroups : [],
+                hostgroups: $rootScope.activeCluster.cluster != undefined && $rootScope.activeCluster.cluster.hostGroups.length > 0 ? $rootScope.activeCluster.cluster.hostGroups : [],
                 ambariStackDetails: $rootScope.activeCluster.cluster != undefined ? $rootScope.activeCluster.cluster.ambariStackDetails : '',
                 fullBp: $rootScope.activeClusterBlueprint,
             };

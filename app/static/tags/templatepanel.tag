@@ -25,13 +25,13 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsTemplateChange" ng-if="isVisible('AWS')" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureTemplateChange" ng-if="isVisible('AZURE_RM')" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
-                                        <a id="mesosTemplateChange" ng-if="isVisible('BYOS')" class="btn btn-default" role="button" ng-click="createMesosTemplateRequest()">{{msg.mesos_label}}</a>
+                                        <a id="awsTemplateChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsTemplate, 'btn-default':!awsTemplate}" role="button" ng-click="createAwsTemplateRequest()">{{msg.aws_label}}</a>
+                                        <a id="azureTemplateChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureTemplate, 'btn-default':!azureTemplate}" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
+                                        <a id="mesosTemplateChange" ng-if="isVisible('BYOS')" ng-class="{'btn':true, 'btn-info':mesosTemplate, 'btn-default':!mesosTemplate}" role="button" ng-click="createMesosTemplateRequest()">{{msg.mesos_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                        <a id="gcpTemplateChange" ng-if="isVisible('GCP')" class="btn btn-default" role="button" ng-click="createGcpTemplateRequest()">{{msg.gcp_label}}</a>
-                                        <a id="openstackTemplateChange" ng-if="isVisible('OPENSTACK')" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">{{msg.openstack_label}}</a>
+                                        <a id="gcpTemplateChange" ng-if="isVisible('GCP')" ng-class="{'btn':true, 'btn-info':gcpTemplate, 'btn-default':!gcpTemplate}" role="button" ng-click="createGcpTemplateRequest()">{{msg.gcp_label}}</a>
+                                        <a id="openstackTemplateChange" ng-if="isVisible('OPENSTACK')" ng-class="{'btn':true, 'btn-info':openstackTemplate, 'btn-default':!openstackTemplate}" role="button" ng-click="createOpenstackTemplateRequest()">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
@@ -103,23 +103,23 @@
                     </div>
                     <div class="panel panel-default" ng-repeat="constraint in $root.constraints | filter:filterByVisiblePlatform | orderBy:['name']">
                         <div class="panel-heading">
-                                <h5>
+                            <h5>
                                     <a href="" data-toggle="collapse" data-parent="#constraint-list-accordion" data-target="#panel-constraint-collapse{{constraint.id}}"><i class="fa fa-file-o fa-fw"></i>{{constraint.name}}</a>
                                     <span class="label label-info pull-right" >MESOS</span>
                                     <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="constraint.public"></i>
                                 </h5>
+                        </div>
+                        <div id="panel-constraint-collapse{{constraint.id}}" class="panel-collapse collapse">
+
+                            <p class="btn-row-over-panel">
+                                <a href="" class="btn btn-danger" role="button" ng-click="deleteConstraint(constraint)">
+                                    <i class="fa fa-times fa-fw"></i><span> {{msg.constraint_list_delete}}</span>
+                                </a>
+                            </p>
+
+                            <div class="panel-body">
+                                <div ng-include src="'tags/template/mesoslist.tag'"></div>
                             </div>
-                         <div id="panel-constraint-collapse{{constraint.id}}" class="panel-collapse collapse">
-
-                                <p class="btn-row-over-panel">
-                                    <a href="" class="btn btn-danger" role="button" ng-click="deleteConstraint(constraint)">
-                                        <i class="fa fa-times fa-fw"></i><span> {{msg.constraint_list_delete}}</span>
-                                    </a>
-                                </p>
-
-                                <div class="panel-body">
-                                    <div ng-include src="'tags/template/mesoslist.tag'"></div>
-                                </div>
                         </div>
                     </div>
                     <!-- .panel -->

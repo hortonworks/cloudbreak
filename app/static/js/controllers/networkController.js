@@ -7,9 +7,12 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
 
         $rootScope.networks = AccountNetwork.query();
         $scope.network = {};
-        $scope.awsNetwork = true;
         $scope.showAlert = false;
         $scope.alertMessage = "";
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "GCP", "OPENSTACK"]);
+        if (firstVisiblePlatform != -1) {
+            $scope[["awsNetwork", "azureNetwork", "gcpNetwork", "openstackNetwork"][firstVisiblePlatform]] = true;
+        }
 
         $scope.createAwsNetworkRequest = function() {
             initializeFormsAndScopeNetwork()
