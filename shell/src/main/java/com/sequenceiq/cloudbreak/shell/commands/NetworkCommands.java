@@ -40,12 +40,12 @@ public class NetworkCommands implements CommandMarker {
 
     @CliAvailabilityIndicator({ "network list", "network create --AWS", "network create --AZURE", "network create --GCP", "network create --OPENSTACK" })
     public boolean areNetworkCommandsAvailable() {
-        return true;
+        return !context.isMarathonMode();
     }
 
     @CliAvailabilityIndicator({ "network delete", "network select", "network show" })
     public boolean isNetworkDeleteCommandAvailable() {
-        return !context.getNetworksByProvider().isEmpty();
+        return !context.getNetworksByProvider().isEmpty()  && !context.isMarathonMode();
     }
 
     @CliCommand(value = "network list", help = "Shows the currently available networks configurations")

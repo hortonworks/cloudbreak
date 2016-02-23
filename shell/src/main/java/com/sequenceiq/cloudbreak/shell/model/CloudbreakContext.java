@@ -399,6 +399,10 @@ public class CloudbreakContext {
         return focus.getValue();
     }
 
+    public FocusType getFocusType() {
+        return focus.getType();
+    }
+
     /**
      * Sets what should be the next hint message.
      *
@@ -435,11 +439,15 @@ public class CloudbreakContext {
     }
 
     private String formatPrompt(String prefix, String postfix) {
-        return String.format("%s:%s>", prefix, postfix);
+        return prefix + (postfix == null ? "" : ":" + postfix) + ">";
     }
 
     private boolean isPropertyAvailable(PropertyKey key) {
         return properties.get(key) != null && !properties.get(key).isEmpty();
+    }
+
+    public boolean isMarathonMode() {
+        return getFocusType().equals(FocusType.MARATHON);
     }
 
     private void addProperty(PropertyKey key, String value) {
