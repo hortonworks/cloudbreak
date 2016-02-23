@@ -1,30 +1,34 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractInstanceConnector;
+import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class GcpInstanceConnector extends AbstractInstanceConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpInstanceConnector.class);
+
+    @Value("${cb.gcp.hostkey.verify:}")
+    private boolean verifyHostKey;
 
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
@@ -57,6 +61,9 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
 
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
+        if (!verifyHostKey) {
+            throw new CloudOperationNotSupportedException("Host key verification is disabled on GCP");
+        }
         CloudCredential credential = authenticatedContext.getCloudCredential();
         try {
             Compute.Instances.GetSerialPortOutput instanceGet = GcpStackUtil.buildCompute(credential).instances()

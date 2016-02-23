@@ -104,3 +104,6 @@ cb:
   cloud.api.executorservice.pool.size: 40
 
   platform.default.variants: OPENSTACK:HEAT
+
+  gcp:
+    hostkey.verify: false
