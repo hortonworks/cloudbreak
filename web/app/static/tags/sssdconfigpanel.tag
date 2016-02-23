@@ -4,7 +4,7 @@
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a href="" id="sssdconfigs-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-sssdconfigs-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-            <h4><span class="badge pull-right">{{$root.sssdConfigs.length}}</span> manage SSSD configurations</h4>
+            <h4><span class="badge pull-right">{{$root.sssdConfigs.length}}</span> manage security configurations</h4>
         </div>
 
         <div id="panel-sssdconfigs-collapse" class="panel-btn-in-header-collapse collapse">
