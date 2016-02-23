@@ -57,8 +57,7 @@
 
         <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-default"
-                    ng-click="activeStack === undefined ? showWizardActualElement('configureFailureAction') : showWizardActualElement('configureHostGroups')">
+                <button type="button" class="btn btn-sm btn-default" ng-click="activeStack === undefined ? showWizardActualElement('configureFailureAction') : showWizardActualElement('configureHostGroups')">
                     <i class="fa fa-angle-double-left"></i> {{activeStack === undefined ? msg.cluster_form_ambari_failure_tag : msg.cluster_form_ambari_blueprint_tag}}
                 </button>
             </div>

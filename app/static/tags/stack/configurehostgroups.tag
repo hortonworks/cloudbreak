@@ -100,8 +100,7 @@
 
         <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-default"
-                    ng-click="activeStack === undefined ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureCluster')">
+                <button type="button" class="btn btn-sm btn-default" ng-click="activeStack === undefined ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureCluster')">
                     <i class="fa fa-angle-double-left"></i> {{activeStack === undefined ? msg.cluster_form_ambari_network_tag : msg.cluster_form_ambari_cluster_tag}}
                 </button>
             </div>
@@ -112,16 +111,12 @@
                 <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureFileSystem')" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId || !cluster.blueprintId">{{msg.cluster_form_ambari_filesystem_tag}} <i class="fa fa-angle-double-right"></i></button>
             </div>
             <div class="btn-group" role="group" ng-if="activeCredential.cloudPlatform != 'AZURE_RM' && activeCredential.cloudPlatform != 'GCP'" ng-hide="!showAdvancedOptionForm">
-                <button type="button" class="btn btn-sm btn-default"
-                    ng-click="activeStack === undefined ? showWizardActualElement('configureFailureAction') : showWizardActualElement('configureAmbariRepository')"
-                    ng-disabled="!cluster.name || !cluster.blueprintId || (activeCredential !== undefined && (!cluster.region || !cluster.securityGroupId || !cluster.networkId))">
+                <button type="button" class="btn btn-sm btn-default" ng-click="activeStack === undefined ? showWizardActualElement('configureFailureAction') : showWizardActualElement('configureAmbariRepository')" ng-disabled="!cluster.name || !cluster.blueprintId || (activeCredential !== undefined && (!cluster.region || !cluster.securityGroupId || !cluster.networkId))">
                     {{activeStack === undefined ? msg.cluster_form_ambari_failure_tag : msg.cluster_form_ambari_hdprepo_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>
             <div class="btn-group" role="group" ng-if="activeCredential.cloudPlatform != 'AZURE_RM' && activeCredential.cloudPlatform != 'GCP'" ng-hide="clusterCreationForm.$invalid || showAdvancedOptionForm">
-                <button type="button" class="btn btn-sm btn-default"
-                    ng-click="showWizardActualElement('configureReview')"
-                    ng-disabled="!cluster.name || !cluster.blueprintId || (activeCredential !== undefined && (!cluster.region || !cluster.securityGroupId || !cluster.networkId))">
+                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureReview')" ng-disabled="!cluster.name || !cluster.blueprintId || (activeCredential !== undefined && (!cluster.region || !cluster.securityGroupId || !cluster.networkId))">
                     {{msg.cluster_form_ambari_launch_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>

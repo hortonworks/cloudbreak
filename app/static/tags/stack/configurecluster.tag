@@ -82,9 +82,7 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-sm btn-default" 
-                    ng-disabled="!cluster.name || (activeCredential !== undefined && !cluster.region)"
-                    ng-click="activeStack === undefined ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
+                <button type="button" class="btn btn-sm btn-sm btn-default" ng-disabled="!cluster.name || (activeCredential !== undefined && !cluster.region)" ng-click="activeStack === undefined ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
                     {{activeStack === undefined ? msg.cluster_form_ambari_network_tag : msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>

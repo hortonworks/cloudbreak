@@ -103,23 +103,23 @@
                     </div>
                     <div class="panel panel-default" ng-repeat="constraint in $root.constraints | filter:filterByVisiblePlatform | orderBy:['name']">
                         <div class="panel-heading">
-                                <h5>
+                            <h5>
                                     <a href="" data-toggle="collapse" data-parent="#constraint-list-accordion" data-target="#panel-constraint-collapse{{constraint.id}}"><i class="fa fa-file-o fa-fw"></i>{{constraint.name}}</a>
                                     <span class="label label-info pull-right" >MESOS</span>
                                     <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="constraint.public"></i>
                                 </h5>
+                        </div>
+                        <div id="panel-constraint-collapse{{constraint.id}}" class="panel-collapse collapse">
+
+                            <p class="btn-row-over-panel">
+                                <a href="" class="btn btn-danger" role="button" ng-click="deleteConstraint(constraint)">
+                                    <i class="fa fa-times fa-fw"></i><span> {{msg.constraint_list_delete}}</span>
+                                </a>
+                            </p>
+
+                            <div class="panel-body">
+                                <div ng-include src="'tags/template/mesoslist.tag'"></div>
                             </div>
-                         <div id="panel-constraint-collapse{{constraint.id}}" class="panel-collapse collapse">
-
-                                <p class="btn-row-over-panel">
-                                    <a href="" class="btn btn-danger" role="button" ng-click="deleteConstraint(constraint)">
-                                        <i class="fa fa-times fa-fw"></i><span> {{msg.constraint_list_delete}}</span>
-                                    </a>
-                                </p>
-
-                                <div class="panel-body">
-                                    <div ng-include src="'tags/template/mesoslist.tag'"></div>
-                                </div>
                         </div>
                     </div>
                     <!-- .panel -->

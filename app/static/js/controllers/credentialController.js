@@ -296,7 +296,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
                 $rootScope.importedStacks.splice($rootScope.importedStacks.indexOf(importedStack), 1);
                 $scope.showSuccess($filter("format")($rootScope.msg.credential_delete_success, importedStack.id));
             }, function(error) {
-                if (error.status === 400){
+                if (error.status === 400) {
                     $scope.showErrorMessage($rootScope.msg.credential_delete_failed);
                 } else {
                     $scope.showError(error);
@@ -305,7 +305,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
 
         }
 
-        $scope.getTopologyNameById = function (topologyId) {
+        $scope.getTopologyNameById = function(topologyId) {
             var result;
             angular.forEach($rootScope.topologies, function(topology) {
                 if (topology.id === topologyId) {
