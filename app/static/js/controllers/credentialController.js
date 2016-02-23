@@ -18,10 +18,6 @@ angular.module('uluwatuControllers').controller('credentialController', [
         $scope.credentialGcp = {};
         $scope.credentialOpenstack = {};
         $scope.mesosStack = {};
-        $scope.azureRmCredential = false;
-        $scope.awsCredential = true;
-        $scope.gcpCredential = false;
-        $scope.openstackCredential = false;
         $scope.mesosStac = false;
         $scope.awsCredentialForm = {};
         $scope.gcpCredentialForm = {};
@@ -32,6 +28,10 @@ angular.module('uluwatuControllers').controller('credentialController', [
         $scope.gcp.p12 = "";
         $scope.showAlert = false;
         $scope.alertMessage = "";
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "BYOS", "GCP", "OPENSTACK"]);
+        if (firstVisiblePlatform != -1) {
+            $scope[["awsCredential", "azureRmCredential", "mesosCredential", "gcpCredential", "openstackCredential"][firstVisiblePlatform]] = true;
+        }
 
         $scope.createAzureRmCredentialRequest = function() {
             $scope.awsCredential = false;

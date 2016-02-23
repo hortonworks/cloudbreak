@@ -167,6 +167,15 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             return parseFloat(element.eventTimestamp);
         }
 
+        $scope.firstVisible = function(platforms) {
+            for (var i = 0; i < platforms.length; i++) {
+                if ($scope.isVisible(platforms[i])) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         $scope.isVisible = function(platform) {
             return $rootScope.params.platforms.indexOf(platform) > -1
         }

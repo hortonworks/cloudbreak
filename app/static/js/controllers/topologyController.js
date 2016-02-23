@@ -13,13 +13,13 @@ angular.module('uluwatuControllers').controller('topologyController', ['$scope',
         initializeTemps();
         $scope.showAlert = false;
         $scope.alertMessage = "";
-        $scope.openstackTopology = false;
-        $scope.azureTopology = false;
-        $scope.gcpTopology = false;
-        $scope.awsTopology = true;
         $scope.tmpMapping = {}
         $scope.modify = false
         $scope.modifyTopology = {}
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "GCP", "OPENSTACK"]);
+        if (firstVisiblePlatform != -1) {
+            $scope[["awsTopology", "azureTopology", "gcpTopology", "openstackTopology"][firstVisiblePlatform]] = true;
+        }
 
         function createTopologyRequest(type) {
             if (type === 'OPENSTACK') {

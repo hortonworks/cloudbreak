@@ -20,6 +20,10 @@ angular.module('uluwatuControllers').controller('templateController', [
         initializeMesosTemp();
         $scope.showAlert = false;
         $scope.alertMessage = "";
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "BYOS", "GCP", "OPENSTACK"]);
+        if (firstVisiblePlatform != -1) {
+            $scope[["awsTemplate", "azureTemplate", "mesosTemplate", "gcpTemplate", "openstackTemplate"][firstVisiblePlatform]] = true;
+        }
 
         $scope.createAwsTemplateRequest = function() {
             $scope.azureTemplate = false;
