@@ -96,7 +96,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         Map<String, String> result = new HashMap<>();
 
         List<Port> ports = NetworkUtils.getPorts(Optional.<Stack>absent());
-        //collectPortsOfAdditionalServices(result, ambariIp);
+        collectPortsOfAdditionalServices(result, ambariIp);
         try {
             JsonNode hostGroupsNode = blueprintValidator.getHostGroupNode(blueprint);
             Map<String, HostGroup> hostGroupMap = blueprintValidator.createHostGroupMap(hostGroups);
