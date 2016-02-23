@@ -174,6 +174,8 @@ cloudbreak-conf-cloud-provider() {
     env-import AWS_ACCESS_KEY_ID ""
     env-import AWS_SECRET_ACCESS_KEY ""
 
+    env-import CB_AWS_HOSTKEY_VERIFY "false"
+    env-import CB_GCP_HOSTKEY_VERIFY "false"
 }
 
 cloudbreak-conf-ui() {
