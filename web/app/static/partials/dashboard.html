@@ -1,0 +1,198 @@
+<div data-spy="scroll" data-target="#notification-controls" jquery-event-listener-registrar ng-controller="mainController">
+
+    <!-- NAVBAR ............................................................... -->
+
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+
+            <div class="navbar-header">
+                <span class="navbar-brand">
+                    {{msg.dashboard_title}}
+                </span>
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+                    <span class="sr-only">{{msg.dashboard_toogle_label}}</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <!-- .navbar-header -->
+
+            <div class="collapse navbar-collapse" id="navbar-collapse-1">
+
+                <ul class="nav navbar-nav navbar-right">
+
+                    <li ng-class="showManagement == true ? 'active' : ''" ng-disabled="showManagement"><a data-value="cred-002" ng-click="activateManagement()"><i class="fa fa-cloud fa-fw"></i> {{msg.dashboard_board_panel_label}}</a></li>
+
+                    <li ng-class="showAccountPanel == true ? 'active' : ''" ng-disabled="showAccountPanel"><a data-value="cred-003" ng-click="activateAccountPanel()"><i class="fa fa-tasks fa-fw"></i> {{msg.dashboard_account_panel_label}}</a></li>
+
+                    <!-- ........ CREDENTIALS DROPDOWN ......................................... -->
+
+                    <li class="dropdown" id="menu-credential">
+                        <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-tag fa-fw"></i>
+                            <span ng-class="$root.activeCredential === undefined && $root.activeStack === undefined? 'text-danger' : 'text'">{{$root.activeCredential === undefined ? ($root.activeStack === undefined ? msg.dashboard_select_credential_label : $root.activeStack.name) : $root.activeCredential.name}}</span>
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li ng-repeat="credential in $root.credentials | filter:filterByVisiblePlatform | orderBy:'name'">
+                                <a href="" id="{{credential.id}}" value="{{credential.name}}" ng-click="$root.activeCredential = credential">{{credential.name}}</a>
+                            </li>
+                            <li ng-repeat="importedStack in $root.importedStacks | filter:filterByImportedStack | orderBy:'name'">
+                                <a href="" id="{{importedStack.id}}" value="{{importedStack.name}}" ng-click="$root.activeStack = importedStack">{{importedStack.name}}</a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="" class="not-option" data-toggle="collapse" data-target="#panel-credentials-collapse"><i class="fa fa-edit fa-fw"></i>
+                                {{msg.credential_manage_title}}</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-user fa-fw"></i> {{user.email}} <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/logout" data-value="cred-001"><i class="fa fa-sign-out fa-fw"></i> {{msg.dashboard_logout_label}}</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <!-- .navbar-nav -->
+            </div>
+            <!-- navbar-collapse -->
+        </div>
+        <!-- .container -->
+    </nav>
+
+
+    <section class="clusters">
+        <div class="container-fluid carousel slide">
+
+            <!-- .... CLUSTERS PANEL NOTIFICATION AND CONTROLS BAR ...................... -->
+
+            <div class="row" id="clusters-bar" data-spy="affix" data-offset-top="52">
+                <!-- data-offset-top = @navbar-height -->
+
+                <!-- collapse/open button and notification -->
+                <div class="col-sm-7 col-xs-8 combo-box {{statusclass}}">
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                        <a href="" id="toggle-cluster-block-btn" class="btn btn-fa-2x btn-info" role="button" title="toggle cluster panel"><i class="fa fa-angle-up fa-2x fa-fw-forced"></i></a>
+                    </span>
+                        <input id="notification-n-filtering" disabled role="alert" type="text" class="form-control" placeholder="" value="{{shortStatusMessage}}">
+                        <i class="fa fa-warning form-control-feedback" style="line-height: 40px !important;"></i>
+                    </div>
+                </div>
+                <div class="col-sm-2 col-xs-2">
+                    <div class="dropdown">
+                        <button class="btn btn-info btn-block btn-collapse-title dropdown-toggle" type="button" id="sort-clusters-btn" data-toggle="dropdown">
+                            <i class="fa fa-sort-amount-asc fa-fw"></i><span class="sr-only">{{msg.dashboard_sort_title}} </span><span class="title"> {{msg.dashboard_sort_name_label}}</span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                            <li class="dropdown-header">{{msg.dashboard_sort_prefix}}</li>
+                            <!-- <li class="disabled"><a href="" data-sort-by="state" data-sort-asc="true">state</a></li> -->
+                            <li><a id="orderByNameBtn" href="" ng-click="order('name',false)">{{msg.dashboard_sort_name_label}}</a></li>
+                            <li><a href="" ng-click="order('nodeCount',false)">{{msg.dashboard_sort_nodes_label}}</a></li>
+                            <li><a href="" ng-click="orderByUptime()">{{msg.dashboard_sort_uptime_label}}</a></li>
+                        </ul>
+                    </div>
+                    <!-- .dropdown -->
+                </div>
+
+                <!-- create cluster button -->
+                <div class="col-sm-3 col-xs-2">
+                    <button id="create-cluster-btn" ng-disabled="activeCredential === undefined && activeStack === undefined" class="btn btn-success btn-block btn-collapse-title" role="button">
+                        <i class="fa fa-plus fa-fw"></i>
+                        <span> {{msg.dashboard_create_cluster_label}}</span>
+                    </button>
+                </div>
+
+            </div>
+            <!-- .row .notification-controls -->
+
+            <div class="carousel-inner" ng-controller="clusterController">
+
+                <!-- .... CLUSTERS "SLIDE 1" ................................................ -->
+
+                <div class="item active">
+                    <div ng-include src="'tags/stack/clusterlistpanel.tag'" onload="addClusterListPanelJQEventListeners()"></div>
+                </div>
+                <!-- .item -->
+
+                <!-- .... CLUSTER DETAILS "SLIDE 2" ......................................... -->
+
+                <div class="item">
+                    <div class="row cluster-details" ng-include src="'tags/stack/activecluster.tag'" onload="addActiveClusterJQEventListeners()"></div>
+                </div>
+                <!-- .item -->
+
+                <!-- .... CREATE CLUSTER "SLIDE 3" .......................................... -->
+
+                <!-- <div class="item"> -->
+                <div class="item">
+                    <div class="row create-cluster" ng-include src="'tags/stack/clusterform.tag'" onload="addClusterFormJQEventListeners()" style="margin-bottom: 15px;"></div>
+                    <!-- .create-cluster -->
+                </div>
+                <!-- .item -->
+
+            </div>
+            <!-- .carousel-inner -->
+
+
+        </div>
+        <!-- .container-fluid carousel -->
+    </section>
+
+
+    <section class="management-panels" ng-show="showManagement">
+        <div class="container-fluid">
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('securitygroup')" src="'tags/securitygrouppanel.tag'"></div>
+            </div>
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('network')" src="'tags/networkpanel.tag'"></div>
+            </div>
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('templates')" src="'tags/templatepanel.tag'"></div>
+            </div>
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('blueprints')" src="'tags/blueprintpanel.tag'"></div>
+            </div>
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('credentials')" src="'tags/credentialpanel.tag'"></div>
+            </div>
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('recipes')" src="'tags/recipepanel.tag'"></div>
+            </div>
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('sssdConfigs')" src="'tags/sssdconfigpanel.tag'"></div>
+            </div>
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('topologies')" src="'tags/topologypanel.tag'"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="management-panels" ng-show="showAccountPanel">
+        <link href="css/Admin.min.css" rel="stylesheet">
+        <div class="container-fluid">
+            <div class="row">
+                <div ng-include onload="addPanelJQueryEventListeners('usages'); addDatePickerPanelJQueryEventListeners()" src="'tags/usagepanel.tag'"></div>
+            </div>
+            <div ng-controller="accountuserController">
+                <div class="row">
+                    <div ng-include onload="addPanelJQueryEventListeners('account')" src="'tags/accountpanel.tag'"></div>
+                </div>
+                <div class="row">
+                    <div ng-include onload="addPanelJQueryEventListeners('users')" src="'tags/userspanel.tag'"></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div ng-controller="notificationController"></div>
+
+</div>

@@ -1,0 +1,51 @@
+{
+  "name": "uluwatu",
+  "homepage": "http://github.com/sequenceiq/uluwatu",
+  "authors": [
+    "Hortonworks"
+  ],
+  "description": "",
+  "keywords": [
+    "uluwatu"
+  ],
+  "license": "Apache",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "pages",
+    "index.html",
+    "/js"
+  ],
+  "main": [
+    "css/Cloudbreak.min.css",
+    "js/app.js"
+  ],
+  "dependencies": {
+    "jquery": "~1.11.0",
+    "angular-block-ui": "v0.1.1",
+    "angular-notify": "2.5.0",
+    "angular-bootstrap": "0.12.0",
+    "font-awesome": "~4.4.0",
+    "metrics-graphics": "v2.7",
+    "retina.js": "1.3.0",
+    "log4javascript": "1.4.6",
+    "angular": "~v1.3.12",
+    "angular-route": "~v1.3.12",
+    "angular-resource": "~v1.3.12",
+    "angular-base64": "~v2.0.5",
+    "angular-animate": "~v1.3.12",
+    "moment": "2.5.1",
+    "eonasdan-bootstrap-datetimepicker": "3.0.0",
+    "bootstrap": "~3.3.1",
+    "d3": "3.5.9"
+  },
+  "resolutions": {
+    "jquery": "~1.11.1",
+    "font-awesome": "~4.4.0",
+    "angular": "~v1.3.12",
+    "moment": "2.5.1"
+  }
+}
