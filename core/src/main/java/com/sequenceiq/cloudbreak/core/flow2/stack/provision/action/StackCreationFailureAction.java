@@ -34,7 +34,7 @@ public class StackCreationFailureAction extends AbstractStackCreationAction<Flow
 
     @Override
     protected void doExecute(StackContext context, FlowFailureEvent payload, Map<Object, Object> variables) {
-        stackCreationService.handeStackCreationFailure(context, payload.getException());
+        stackCreationService.handleStackCreationFailure(context, payload.getException());
         sendEvent(context.getFlowId(), StackCreationEvent.STACK_CREATION_FAILED_EVENT.stringRepresentation(), payload);
     }
 

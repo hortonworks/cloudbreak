@@ -56,7 +56,7 @@ public final class StackCreationFlowConfig extends AbstractFlowConfiguration<Sta
             new Transition<>(COLLECTMETADATA_STATE, TLS_SETUP_STATE, SSHFINGERPRINTS_EVENT)
     );
     private static final FlowEdgeConfig<StackCreationState, StackCreationEvent> EDGE_CONFIG =
-            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, PROVISIONING_FINISHED_STATE, STACK_CREATION_FINISHED_EVENT, STACK_CREATION_FAILED_STATE,
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, TLS_SETUP_STATE, STACK_CREATION_FINISHED_EVENT, STACK_CREATION_FAILED_STATE,
                     STACK_CREATION_FAILED_EVENT);
 
     @Override

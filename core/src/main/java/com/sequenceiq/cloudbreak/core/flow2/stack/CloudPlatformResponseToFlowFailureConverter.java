@@ -11,6 +11,7 @@ public class CloudPlatformResponseToFlowFailureConverter implements PayloadConve
 
     @Override
     public FlowFailureEvent convert(Object payload) {
-        return new FlowFailureEvent(((CloudPlatformResult) payload).getRequest().getCloudContext().getId(), ((CloudPlatformResult) payload).getErrorDetails());
+        CloudPlatformResult cloudPlatformResult = (CloudPlatformResult) payload;
+        return new FlowFailureEvent(cloudPlatformResult.getRequest().getCloudContext().getId(), cloudPlatformResult.getErrorDetails());
     }
 }
