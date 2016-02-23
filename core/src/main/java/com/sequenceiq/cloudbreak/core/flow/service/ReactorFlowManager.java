@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackInstanceUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.DefaultClusterFlowContext;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
@@ -140,6 +142,14 @@ public class ReactorFlowManager implements FlowManager {
         StackDeleteRequest deleteRequest = (StackForcedDeleteRequest) object;
         DefaultFlowContext context = new DefaultFlowContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
         reactor.notify(FlowPhases.FORCED_TERMINATION.name(), eventFactory.createEvent(context, FlowPhases.FORCED_TERMINATION.name()));
+    }
+
+    @Override
+    public void triggerClusterTermination(Object object) {
+        ClusterDeleteRequest deleteRequest = (ClusterDeleteRequest) object;
+        DefaultClusterFlowContext context = new DefaultClusterFlowContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform(),
+                deleteRequest.getClusterId());
+        reactor.notify(FlowPhases.CLUSTER_TERMINATION.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_TERMINATION.name()));
     }
 
     @Override

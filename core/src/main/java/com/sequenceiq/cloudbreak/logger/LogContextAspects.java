@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.task.FetchTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.core.flow.context.AmbariClusterContext;
+import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariClusterRequest;
 
 import reactor.bus.Event;
 
@@ -35,6 +37,10 @@ public class LogContextAspects {
 
     @Pointcut("execution(public * com.sequenceiq.cloudbreak.cloud.task.PollTask+.call(..))")
     public void interceptPollTasksCallMethod() {
+    }
+
+    @Pointcut("execution(public * com.sequenceiq.cloudbreak.core.flow.handlers.AmbariClusterEventHandler+.accept(..))")
+    public void interceptReactorClusterHandlersAcceptMethod() {
     }
 
     @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptReactorHandlersAcceptMethod()")
@@ -72,5 +78,16 @@ public class LogContextAspects {
         CloudContext cloudContext = pollTask.getAuthenticatedContext().getCloudContext();
         MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getId()), cloudContext.getName(), cloudContext.getOwner());
         LOGGER.debug("A PollTask's 'call' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
+    }
+
+    @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptReactorClusterHandlersAcceptMethod()")
+    public void buildLogContextForClusterReactorHandler(JoinPoint joinPoint) {
+        Event<AmbariClusterRequest> event = (Event<AmbariClusterRequest>) joinPoint.getArgs()[0];
+        AmbariClusterRequest ambariClusterRequest = event.getData();
+        AmbariClusterContext clusterContext = ambariClusterRequest.getClusterContext();
+        if (clusterContext != null) {
+            MDCBuilder.buildMdcContext(String.valueOf(clusterContext.getStackId()), clusterContext.getStackName(), clusterContext.getOwner());
+        }
+        LOGGER.info("A Reactor event handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 }

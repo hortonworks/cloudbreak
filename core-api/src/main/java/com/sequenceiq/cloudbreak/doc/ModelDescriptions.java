@@ -27,12 +27,24 @@ public class ModelDescriptions {
         public static final String PARAMETERS = "cloud specific parameters for credential";
     }
 
+    public static class OrchestratorModelDescription {
+        public static final String TYPE = "type of the orchestrator (Swarm or Marathon)";
+        public static final String PARAMETERS = "orchestrator specific parameters, like authentication details";
+        public static final String ENDPOINT = "endpoint for the container orchestration api";
+    }
+
     public static class TemplateModelDescription {
         public static final String VOLUME_COUNT = "number of volumes";
         public static final String VOLUME_SIZE = "size of volumes";
         public static final String VOLUME_TYPE = "type of the volumes";
         public static final String INSTANCE_TYPE = "type of the instance";
         public static final String PARAMETERS = "cloud specific parameters for template";
+    }
+
+    public static class ConstraintTemplateModelDescription {
+        public static final String CPU = "number of CPU cores needed for the Ambari node";
+        public static final String MEMORY = "memory needed for the Ambari container (GB)";
+        public static final String DISK = "disk size needed for an Ambari node (GB)";
     }
 
     public static class StackModelDescription {
@@ -52,12 +64,12 @@ public class ModelDescriptions {
         public static final String STACK_STATUS = "status of the stack";
         public static final String STATUS_REASON = "status message of the stack";
         public static final String AMBARI_IP = "public ambari ip of the stack";
-        public static final String HASH = "unique hash identifier for stack";
         public static final String BLUEPRINT_ID = "id of the referenced blueprint";
         public static final String NETWORK_ID = "network resource id for the stack";
         public static final String CERTIFICATE = "certificate used by the gateway";
         public static final String CLUSTER_STATUS = "status of the cluster";
         public static final String PLATFORM_VARIANT = "cloud provider api variant";
+        public static final String ORCHESTRATOR = "the details of the container orchestrator api to use";
     }
 
     public static class ClusterModelDescription {
@@ -126,6 +138,9 @@ public class ModelDescriptions {
     public static class HostGroupModelDescription {
         public static final String RECIPE_IDS = "referenced recipe ids";
         public static final String HOST_GROUP_NAME = "name of the host group";
+        public static final String CONSTRAINT = "instance group or resource constraint for a hostgroup";
+        public static final String INSTANCE_GROUP = "name of an instance group where the hostgroup will be deployed";
+        public static final String CONSTRAINT_NAME = "name of a constraint template that defines the resource constraints for the hostgroup";
     }
 
     public static class UserNamePasswordModelDescription {

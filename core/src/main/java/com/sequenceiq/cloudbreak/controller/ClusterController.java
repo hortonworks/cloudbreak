@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -78,9 +79,13 @@ public class ClusterController implements ClusterEndpoint {
             return Response.status(Response.Status.ACCEPTED).build();
         }
         MDCBuilder.buildUserMdcContext(user);
-        fileSystemValidator.validateFileSystem(stackService.getById(stackId).cloudPlatform(), request.getFileSystem());
+        Stack stack = stackService.getById(stackId);
+        if (!stack.isAvailable() && CloudConstants.BYOS.equals(stack.cloudPlatform())) {
+            throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
+        }
+        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), request.getFileSystem());
         Cluster cluster = conversionService.convert(request, Cluster.class);
-        cluster = clusterDecorator.decorate(cluster, stackId, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
+        cluster = clusterDecorator.decorate(cluster, stackId, user, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
                 request.getSssdConfigId());
         if (cluster.isLdapRequired() && cluster.getSssdConfig() == null) {
             cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
@@ -120,6 +125,14 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     @Override
+    public void delete(Long stackId) throws Exception {
+        CbUser user = authenticatedUserService.getCbUser();
+        Stack stack = stackService.get(stackId);
+        MDCBuilder.buildMdcContext(stack);
+        clusterService.delete(user, stackId);
+    }
+
+    @Override
     public Response put(Long stackId, UpdateClusterJson updateJson) throws CloudbreakSecuritySetupException {
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
@@ -142,14 +155,14 @@ public class ClusterController implements ClusterEndpoint {
         }
 
         if (updateJson.getHostGroupAdjustment() != null) {
-            clusterHostgroupAdjusmentChange(stackId, updateJson, stack);
+            clusterHostgroupAdjustmentChange(stackId, updateJson, stack);
             return Response.status(Response.Status.ACCEPTED).build();
         }
         LOGGER.error("Invalid cluster update request received. Stack id: {}", stackId);
         throw new BadRequestException("Invalid update cluster request!");
     }
 
-    private void clusterHostgroupAdjusmentChange(Long stackId, UpdateClusterJson updateJson, Stack stack)
+    private void clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterJson updateJson, Stack stack)
             throws CloudbreakSecuritySetupException {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format(
@@ -168,11 +181,12 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     private void recreateCluster(Long stackId, UpdateClusterJson updateJson) {
+        CbUser user = authenticatedUserService.getCbUser();
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupJson json : updateJson.getHostgroups()) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, json.getInstanceGroupName(), json.getRecipeIds(), false);
-            hostGroups.add(hostGroupService.save(hostGroup));
+            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, user, json.getConstraint(), json.getRecipeIds(), false);
+            hostGroups.add(hostGroup);
         }
         AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();
         AmbariStackDetails ambariStackDetails = null;

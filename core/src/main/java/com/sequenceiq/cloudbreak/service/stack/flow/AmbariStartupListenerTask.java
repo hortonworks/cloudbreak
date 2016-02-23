@@ -15,15 +15,15 @@ public class AmbariStartupListenerTask extends StackBasedStatusCheckerTask<Ambar
     @Override
     public boolean checkStatus(AmbariStartupPollerObject aSPO) {
         boolean ambariRunning = false;
-        LOGGER.info("Starting polling of Ambari server's status [Ambari server IP: '{}'].", aSPO.getAmbariIp());
+        LOGGER.info("Polling Ambari server's status [Ambari server address: '{}'].", aSPO.getAmbariAddress());
         try {
             String ambariHealth = aSPO.getAmbariClient().healthCheck();
-            LOGGER.info("Ambari health check returned: {} [Ambari server IP: '{}']", ambariHealth, aSPO.getAmbariIp());
+            LOGGER.info("Ambari health check returned: {} [Ambari server address: '{}']", ambariHealth, aSPO.getAmbariAddress());
             if ("RUNNING".equals(ambariHealth)) {
                 ambariRunning = true;
             }
         } catch (Exception e) {
-            LOGGER.info("Ambari health check failed. {} Trying again in next polling interval.", e.getMessage());
+            LOGGER.info("Ambari health check failed: {}", e.getMessage());
         }
         return ambariRunning;
     }

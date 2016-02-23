@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.common.type;
 
 public enum HostMetadataState {
+    CONTAINER_RUNNING("CONTAINER_RUNNING"),
     HEALTHY("HEALTY"),
     UNHEALTHY("UNHEALTHY");
 

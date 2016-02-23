@@ -26,6 +26,6 @@ public class ClusterInstallHandler extends AbstractFlowHandler<ProvisioningConte
     protected Object handleErrorFlow(Throwable throwable, ProvisioningContext data) throws Exception {
         LOGGER.info("handleErrorFlow() for phase: {}", getClass());
         data.setErrorReason(throwable.getMessage());
-        return getFlowFacade().handleClusterCreationFailure(data);
+        return getFlowFacade().handleClusterInstallationFailure(data);
     }
 }

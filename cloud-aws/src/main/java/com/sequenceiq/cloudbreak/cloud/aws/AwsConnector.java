@@ -19,8 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 public class AwsConnector implements CloudConnector {
 
     @Inject
-    private AwsClient awsClient;
-    @Inject
     private AwsResourceConnector awsResourceConnector;
     @Inject
     private AwsInstanceConnector awsInstanceConnector;

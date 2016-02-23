@@ -23,6 +23,9 @@ public class CredentialToCloudCredentialConverter {
     private CredentialDefinitionService definitionService;
 
     public CloudCredential convert(Credential credential) {
+        if (credential == null) {
+            return null;
+        }
         Json attributes = credential.getAttributes();
         Map<String, Object> fields = attributes == null ? Collections.<String, Object>emptyMap() : attributes.getMap();
         fields = definitionService.revertProperties(platform(credential.cloudPlatform()), fields);

@@ -11,11 +11,15 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -40,6 +46,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -53,6 +60,8 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -62,10 +71,12 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
-import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
+import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 
 @Service
 public class AmbariClusterFacade implements ClusterFacade {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterFacade.class);
     private static final int POLLING_INTERVAL = 5000;
     private static final int MS_PER_SEC = 1000;
@@ -75,51 +86,40 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Inject
     private AmbariClientProvider ambariClientProvider;
-
     @Inject
     private AmbariStartupListenerTask ambariStartupListenerTask;
-
     @Inject
     private StackUpdater stackUpdater;
-
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
-
+    @Inject
+    private AmbariDecommissioner ambariDecommissioner;
     @Inject
     private StackService stackService;
-
     @Inject
     private ClusterService clusterService;
-
     @Inject
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
-
     @Inject
     private EmailSenderService emailSenderService;
-
     @Inject
     private CloudbreakEventService eventService;
-
     @Inject
     private HostGroupService hostGroupService;
-
     @Inject
     private ClusterContainerRunner containerRunner;
-
     @Inject
     private TlsSecurityService tlsSecurityService;
-
     @Inject
     private AmbariClusterStatusUpdater ambariClusterStatusUpdater;
-
     @Inject
     private CloudbreakMessagesService messagesService;
-
     @Inject
     private InstanceMetadataService instanceMetadataService;
+    @Inject
+    private ClusterTerminationService clusterTerminationService;
 
     private enum Msg {
-
         AMBARI_CLUSTER_BUILDING("ambari.cluster.building"),
         AMBARI_CLUSTER_BUILT("ambari.cluster.built"),
         AMBARI_CLUSTER_NOTIFICATION_EMAIL("ambari.cluster.notification.email"),
@@ -165,22 +165,19 @@ public class AmbariClusterFacade implements ClusterFacade {
             MDCBuilder.buildMdcContext(cluster);
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Ambari cluster is now starting.");
             fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_STARTING, UPDATE_IN_PROGRESS.name());
-
             clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
-            TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), actualContext.getAmbariIp());
+            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
-            AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, actualContext.getAmbariIp(), ambariClient);
+            AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, clientConfig.getApiAddress(), ambariClient);
             PollingResult pollingResult = ambariStartupPollerObjectPollingService
                     .pollWithTimeoutSingleFailure(ambariStartupListenerTask, ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-
             if (isSuccess(pollingResult)) {
                 LOGGER.info("Ambari has successfully started! Polling result: {}", pollingResult);
             } else {
                 LOGGER.info("Could not start Ambari. polling result: {},  Context: {}", pollingResult, context);
                 throw new CloudbreakException(String.format("Could not start Ambari. polling result: '%s',  Context: '%s'", pollingResult, context));
             }
-            clusterService.updateAmbariIp(cluster.getId(), actualContext.getAmbariIp());
-            changeAmbariCredentials(actualContext.getAmbariIp(), stack);
+            changeAmbariCredentials(clientConfig, stack);
         }
         return context;
     }
@@ -263,8 +260,22 @@ public class AmbariClusterFacade implements ClusterFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
-        containerRunner.addClusterContainers(actualContext);
-        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, actualContext.getUpscaleCandidateAddresses());
+        Map<String, List<Container>> containers = containerRunner.addClusterContainers(actualContext);
+        Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
+        for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
+            List<String> hostNames = new ArrayList<>();
+            for (Container container : containersEntry.getValue()) {
+                hostNames.add(container.getHost());
+            }
+            hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
+        }
+        clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup);
+        Set<String> allHosts = new HashSet<>();
+        for (Map.Entry<String, List<String>> hostsPerHostGroupEntry : hostsPerHostGroup.entrySet()) {
+            allHosts.addAll(hostsPerHostGroupEntry.getValue());
+        }
+        clusterService.updateHostCountWithAdjustment(stack.getCluster().getId(), actualContext.getHostGroupAdjustment().getHostGroup(), allHosts.size());
+        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE, "New containers added to the cluster.");
         return context;
     }
@@ -277,14 +288,22 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
         fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
-        Set<HostMetadata> hostMetaData = ambariClusterConnector.installAmbariNode(stack.getId(), actualContext.getHostGroupAdjustment());
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), actualContext.getHostGroupAdjustment().getHostGroup());
+        Set<HostMetadata> upscaleHosts = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
+        Set<HostMetadata> hostMetaData = ambariClusterConnector.installAmbariNode(stack.getId(), upscaleHosts,
+                actualContext.getHostGroupAdjustment().getHostGroup());
         int failedHosts = 0;
+
         for (HostMetadata hostMeta : hostMetaData) {
-            updateInstanceMetadataAfterScaling(false, hostMeta.getHostName(), stack);
+            if (hostGroup.getConstraint().getInstanceGroup() != null) {
+                updateInstanceMetadataAfterScaling(false, hostMeta.getHostName(), stack);
+            }
+            hostGroupService.updateHostMetaDataStatus(hostMeta.getId(), HostMetadataState.HEALTHY);
             if (hostMeta.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
                 failedHosts++;
             }
         }
+
         boolean success = failedHosts == 0;
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         if (success) {
@@ -310,16 +329,20 @@ public class AmbariClusterFacade implements ClusterFacade {
             MDCBuilder.buildMdcContext(cluster);
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Running cluster containers.");
             fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RUN_CONTAINERS, UPDATE_IN_PROGRESS.name());
-            containerRunner.runClusterContainers(actualContext);
-            Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
-            newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
-            newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
-            instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
-            InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            Map<String, List<Container>> containers = containerRunner.runClusterContainers(actualContext);
+            HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, containers.get(AMBARI_SERVER.name()));
+            clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
+            Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
+            for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
+                List<String> hostNames = new ArrayList<>();
+                for (Container container : containersEntry.getValue()) {
+                    hostNames.add(container.getHost());
+                }
+                hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
+            }
+            clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup);
             context = new ProvisioningContext.Builder()
                     .setDefaultParams(stack.getId(), actualContext.getCloudPlatform())
-                    .setAmbariIp(gatewayInstance.getPublicIp())
                     .build();
         } else {
             LOGGER.info("The stack has started but there were no cluster request, yet. Won't install cluster now.");
@@ -336,14 +359,14 @@ public class AmbariClusterFacade implements ClusterFacade {
         MDCBuilder.buildMdcContext(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALING_DOWN, UPDATE_IN_PROGRESS.name());
-        Set<String> hostNames = ambariClusterConnector
-                .decommissionAmbariNodes(stack.getId(), actualContext.getHostGroupAdjustment(), actualContext.getCandidates());
+        Set<String> hostNames = ambariDecommissioner.decommissionAmbariNodes(stack.getId(), actualContext.getHostGroupAdjustment());
         updateInstanceMetadataAfterScaling(true, hostNames, stack);
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), actualContext.getHostGroupAdjustment().getHostGroup());
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
         context = new StackScalingContext(stack.getId(),
-                actualContext.getCloudPlatform(), actualContext.getCandidates().size() * (-1), hostGroup.getInstanceGroup().getGroupName(),
+                actualContext.getCloudPlatform(), hostNames.size() * (-1),
+                hostGroup.getConstraint().getInstanceGroup() == null ? null : hostGroup.getConstraint().getInstanceGroup().getGroupName(),
                 null, actualContext.getScalingType(), null);
         return context;
     }
@@ -358,7 +381,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         ambariClusterConnector.resetAmbariCluster(stack.getId());
         context = new ProvisioningContext.Builder()
                 .withProvisioningContext(actualContext)
-                .setAmbariIp(stack.getAmbariIp())
                 .build();
         return context;
     }
@@ -431,18 +453,12 @@ public class AmbariClusterFacade implements ClusterFacade {
 
     @Override
     public FlowContext handleClusterCreationFailure(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(cluster);
-        clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, actualContext.getErrorReason());
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), actualContext.getErrorReason());
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
-            fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
-        }
-        return actualContext;
+        return handleClusterCreationFailure(context, true);
+    }
+
+    @Override
+    public FlowContext handleClusterInstallationFailure(FlowContext context) throws CloudbreakException {
+        return handleClusterCreationFailure(context, false);
     }
 
     @Override
@@ -460,13 +476,58 @@ public class AmbariClusterFacade implements ClusterFacade {
         return context;
     }
 
-    private void changeAmbariCredentials(String ambariIp, Stack stack) throws CloudbreakSecuritySetupException {
+    private FlowContext handleClusterCreationFailure(FlowContext context, boolean deleteClusterContainers) throws CloudbreakException {
+        ProvisioningContext actualContext = (ProvisioningContext) context;
+        Stack stack = stackService.getById(actualContext.getStackId());
+        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
+        MDCBuilder.buildMdcContext(cluster);
+        clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, actualContext.getErrorReason());
+        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
+        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), actualContext.getErrorReason());
+
+        if (deleteClusterContainers) {
+            try {
+                clusterTerminationService.deleteClusterContainers(cluster.getId());
+            } catch (TerminationFailedException ex) {
+                LOGGER.error("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
+            }
+        }
+
+        if (cluster.getEmailNeeded()) {
+            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
+            fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
+        }
+        return actualContext;
+    }
+
+    private HttpClientConfig buildAmbariClientConfig(Stack stack, List<Container> containers) throws CloudbreakSecuritySetupException {
+        HttpClientConfig ambariClientConfig;
+        if (stack.isInstanceGroupsSpecified()) {
+            Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
+            newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
+            newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
+            instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            ambariClientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        } else {
+            String ambariServerAddress = FluentIterable.from(containers).firstMatch(new Predicate<Container>() {
+                @Override
+                public boolean apply(Container input) {
+                    return input.getImage().contains(AMBARI_SERVER.getName());
+                }
+            }).get().getHost();
+            ambariClientConfig = new HttpClientConfig(ambariServerAddress);
+        }
+        return ambariClientConfig;
+    }
+
+    private void changeAmbariCredentials(HttpClientConfig ambariClientConfig, Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
-        LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), ambariIp);
+        LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), ambariClientConfig.getApiAddress());
         String userName = cluster.getUserName();
         String password = cluster.getPassword();
-        TLSClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), ambariIp);
-        AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
+        AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariClientConfig);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {
                 ambariClient.changePassword(ADMIN, ADMIN, password, true);
@@ -478,10 +539,12 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     private void updateInstanceMetadataAfterScaling(boolean decommission, String hostName, Stack stack) {
-        if (decommission) {
-            stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
-        } else {
-            stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.REGISTERED);
+        if (!"BYOS".equals(stack.cloudPlatform())) {
+            if (decommission) {
+                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
+            } else {
+                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.REGISTERED);
+            }
         }
     }
 

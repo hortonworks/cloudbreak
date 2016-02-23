@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,6 +12,9 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @NamedQueries({
@@ -40,7 +40,7 @@ import javax.persistence.SequenceGenerator;
                 name = "HostGroup.findHostGroupsByInstanceGroupName",
                 query = "SELECT h FROM HostGroup h "
                         + "WHERE h.cluster.id= :clusterId "
-                        + "AND h.instanceGroup.groupName= :instanceGroupName")
+                        + "AND h.constraint.instanceGroup.groupName= :instanceGroupName")
 })
 public class HostGroup {
 
@@ -56,7 +56,7 @@ public class HostGroup {
     private Cluster cluster;
 
     @OneToOne
-    private InstanceGroup instanceGroup;
+    private Constraint constraint;
 
     @OneToMany(mappedBy = "hostGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostMetadata> hostMetadata = new HashSet<>();
@@ -88,12 +88,12 @@ public class HostGroup {
         this.cluster = cluster;
     }
 
-    public InstanceGroup getInstanceGroup() {
-        return instanceGroup;
+    public Constraint getConstraint() {
+        return constraint;
     }
 
-    public void setInstanceGroup(InstanceGroup instanceGroup) {
-        this.instanceGroup = instanceGroup;
+    public void setConstraint(Constraint constraint) {
+        this.constraint = constraint;
     }
 
     public Set<HostMetadata> getHostMetadata() {
@@ -114,5 +114,13 @@ public class HostGroup {
 
     public void addRecipe(Recipe recipe) {
         this.recipes.add(recipe);
+    }
+
+    public Set<String> getHostNames() {
+        Set<String> hostNames = new HashSet<>(hostMetadata.size());
+        for (HostMetadata metadata : hostMetadata) {
+            hostNames.add(metadata.getHostName());
+        }
+        return hostNames;
     }
 }

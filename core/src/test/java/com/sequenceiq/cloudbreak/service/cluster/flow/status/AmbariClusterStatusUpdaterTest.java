@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.flow.TLSClientConfig;
+import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 public class AmbariClusterStatusUpdaterTest {
     private static final Long TEST_STACK_ID = 0L;
@@ -53,7 +53,7 @@ public class AmbariClusterStatusUpdaterTest {
     public void testUpdateClusterStatusShouldUpdateStackStatusWhenStackStatusChanged() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.any(TLSClientConfig.class), BDDMockito.any(String.class),
+        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.any(HttpClientConfig.class), BDDMockito.any(String.class),
                 BDDMockito.any(String.class))).willReturn(ambariClient);
         BDDMockito.given(clusterStatusFactory.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(ClusterStatus.INSTALLED);
         // WHEN
@@ -66,7 +66,7 @@ public class AmbariClusterStatusUpdaterTest {
     public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusNotChanged() throws CloudbreakSecuritySetupException {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
-        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.any(TLSClientConfig.class), BDDMockito.any(String.class),
+        BDDMockito.given(ambariClientProvider.getAmbariClient(BDDMockito.any(HttpClientConfig.class), BDDMockito.any(String.class),
                 BDDMockito.any(String.class))).willReturn(ambariClient);
         BDDMockito.given(clusterStatusFactory.createClusterStatus(ambariClient, TEST_BLUEPRINT)).willReturn(ClusterStatus.STARTED);
         // WHEN

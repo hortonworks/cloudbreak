@@ -15,7 +15,7 @@ public class AmbariStartupPollerObject extends StackContext {
         this.ambariClient = ambariClient;
     }
 
-    public String getAmbariIp() {
+    public String getAmbariAddress() {
         return ambariIp;
     }
 

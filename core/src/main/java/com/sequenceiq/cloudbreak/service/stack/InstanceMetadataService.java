@@ -41,7 +41,7 @@ public class InstanceMetadataService {
             Set<String> candidateAddresses) {
         for (InstanceGroup group : instanceGroup) {
             for (InstanceMetaData instanceMetaData : group.getInstanceMetaData()) {
-                if (candidateAddresses.contains(instanceMetaData.getPrivateIp())) {
+                if (candidateAddresses.contains(instanceMetaData.getDiscoveryFQDN())) {
                     instanceMetaData.setInstanceStatus(newStatus);
                     instanceMetaDataRepository.save(instanceMetaData);
                 }

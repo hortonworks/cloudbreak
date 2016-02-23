@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @Service
@@ -21,9 +20,6 @@ public class StackStopService {
 
     @Inject
     private StackRepository stackRepository;
-
-    @Inject
-    private CloudbreakEventService cloudbreakEventService;
 
     @Inject
     private ServiceProviderConnectorAdapter connector;

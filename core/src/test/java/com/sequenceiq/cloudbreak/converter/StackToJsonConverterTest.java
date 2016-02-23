@@ -16,14 +16,16 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.FailurePolicy;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack> {
 
@@ -44,7 +46,8 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // GIVEN
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ClusterResponse())
-                .willReturn(new FailurePolicyJson());
+                .willReturn(new FailurePolicyJson())
+                .willReturn(new OrchestratorResponse());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroupJson>());
         // WHEN
@@ -58,7 +61,8 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // GIVEN
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ClusterResponse())
-                .willReturn(new FailurePolicyJson());
+                .willReturn(new FailurePolicyJson())
+                .willReturn(new OrchestratorResponse());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroupJson>());
         // WHEN
@@ -72,7 +76,8 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // GIVEN
         getSource().setCluster(null);
         given(conversionService.convert(any(Object.class), any(Class.class)))
-                .willReturn(new FailurePolicyJson());
+                .willReturn(new FailurePolicyJson())
+                .willReturn(new OrchestratorResponse());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroupJson>());
         getSource().setCluster(null);
@@ -87,7 +92,8 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // GIVEN
         getSource().setFailurePolicy(null);
         given(conversionService.convert(any(Object.class), any(Class.class)))
-                .willReturn(new ClusterResponse());
+                .willReturn(new ClusterResponse())
+                .willReturn(new OrchestratorResponse());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroupJson>());
         // WHEN
@@ -102,7 +108,8 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         getSource().setNetwork(null);
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ClusterResponse())
-                .willReturn(new FailurePolicyJson());
+                .willReturn(new FailurePolicyJson())
+                .willReturn(new OrchestratorResponse());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroupJson>());
         // WHEN
@@ -121,7 +128,13 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         network.setId(1L);
         stack.setNetwork(network);
         stack.setFailurePolicy(new FailurePolicy());
+        Orchestrator orchestrator = new Orchestrator();
+        orchestrator.setId(1L);
+        orchestrator.setApiEndpoint("endpoint");
+        orchestrator.setType("type");
+        stack.setOrchestrator(orchestrator);
         stack.setParameters(new HashMap<String, String>());
+        stack.setCloudPlatform("OPENSTACK");
         return stack;
     }
 }

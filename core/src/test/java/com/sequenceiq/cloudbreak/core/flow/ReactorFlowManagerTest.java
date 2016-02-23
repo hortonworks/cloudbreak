@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,14 +18,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.core.flow.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
@@ -84,18 +83,19 @@ public class ReactorFlowManagerTest {
 
     @Test
     public void shouldReturnTheNextFailureTransition() throws Exception {
-        ProvisionRequest provisionRequest =  new ProvisionRequest(GCP_PLATFORM, 1L);
+        ProvisionRequest provisionRequest = new ProvisionRequest(GCP_PLATFORM, 1L);
         StackStatusUpdateRequest stackStatusUpdateRequest = new StackStatusUpdateRequest(GCP_PLATFORM, 1L, StatusRequest.STARTED);
         ClusterStatusUpdateRequest clusterStatusUpdateRequest = new ClusterStatusUpdateRequest(1L, StatusRequest.STARTED, GCP_PLATFORM);
         StackDeleteRequest stackDeleteRequest = new StackDeleteRequest(GCP_PLATFORM, 1L);
         StackForcedDeleteRequest stackForcedDeleteRequest = new StackForcedDeleteRequest(GCP_PLATFORM, 1L);
         UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(GCP_PLATFORM, 1L, 1, "master", ScalingType.DOWNSCALE_ONLY_CLUSTER);
         RemoveInstanceRequest removeInstanceRequest = new RemoveInstanceRequest(GCP_PLATFORM, 1L, "instanceId");
-        UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(1L, new HostGroupAdjustmentJson(), new HashSet<String>(),
-                new ArrayList<HostMetadata>(), true, GCP_PLATFORM, ScalingType.DOWNSCALE_ONLY_CLUSTER);
+        UpdateAmbariHostsRequest updateAmbariHostsRequest = new UpdateAmbariHostsRequest(1L, new HostGroupAdjustmentJson(),
+                true, GCP_PLATFORM, ScalingType.DOWNSCALE_ONLY_CLUSTER);
         UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = new UpdateAllowedSubnetsRequest(GCP_PLATFORM, 1L, new ArrayList<SecurityRule>());
         ClusterUserNamePasswordUpdateRequest clusterUserNamePasswordUpdateRequest =
                 new ClusterUserNamePasswordUpdateRequest(1L, "admin", "admin1", GCP_PLATFORM);
+        ClusterDeleteRequest clusterDeleteRequest = new ClusterDeleteRequest(1L, GCP_PLATFORM, 1L);
 
         flowManager.triggerProvisioning(provisionRequest);
         flowManager.triggerClusterInstall(provisionRequest);
@@ -117,6 +117,7 @@ public class ReactorFlowManagerTest {
         flowManager.triggerClusterSync(clusterStatusUpdateRequest);
         flowManager.triggerStackSync(stackStatusUpdateRequest);
         flowManager.triggerClusterUserNamePasswordUpdate(clusterUserNamePasswordUpdateRequest);
+        flowManager.triggerClusterTermination(clusterDeleteRequest);
 
         int count = -1;
         for (Method method : flowManager.getClass().getDeclaredMethods()) {

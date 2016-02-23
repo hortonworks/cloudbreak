@@ -67,7 +67,7 @@ public class AmbariClusterStatusFactory {
                 clusterStatus = determineClusterStatus(orderedPartialStatuses, orderedFullStatuses);
             }
         } catch (Exception ex) {
-            LOGGER.warn("There was a problem with the ambari.");
+            LOGGER.warn("An error occurred while trying to reach Ambari.", ex);
             clusterStatus = ClusterStatus.UNKNOWN;
         }
         return clusterStatus;

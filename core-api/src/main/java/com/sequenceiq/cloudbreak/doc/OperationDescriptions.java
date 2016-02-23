@@ -27,6 +27,19 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete template by id";
     }
 
+    public static class ConstraintOpDescription {
+        public static final String POST_PRIVATE = "create constraint template as private resource";
+        public static final String POST_PUBLIC = "create constraint template as public resource";
+        public static final String GET_PRIVATE = "retrieve private constraint templates";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) constraint templates";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private constraint template by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) constraint template by name";
+        public static final String GET_BY_ID = "retrieve constraint template by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private constraint template by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private constraint template by name";
+        public static final String DELETE_BY_ID = "delete constraint template by id";
+    }
+
     public static class TopologyOpDesctiption {
         public static final String GET_BY_ID = "retrieve topology by id";
         public static final String GET_PUBLIC = "retrieve topoligies";
@@ -76,6 +89,7 @@ public class OperationDescriptions {
         public static final String GET_BY_STACK_ID = "retrieve cluster by stack id";
         public static final String GET_PRIVATE_BY_NAME = "retrieve cluster by stack name (private)";
         public static final String GET_PUBLIC_BY_NAME = "retrieve cluster by stack name (public)";
+        public static final String DELETE_BY_STACK_ID = "delete cluster on a specific stack";
         public static final String PUT_BY_STACK_ID = "update cluster by stack id";
     }
 

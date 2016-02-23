@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterC
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -79,6 +81,9 @@ public class ClusterBootstrapperTest {
     @Mock
     private ContainerConfigService containerConfigService;
 
+    @Mock
+    private OrchestratorRepository orchestratorRepository;
+
     @InjectMocks
     private ClusterBootstrapper underTest;
 
@@ -90,12 +95,12 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenEverythingWorksNormally() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new MockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -103,7 +108,7 @@ public class ClusterBootstrapperTest {
                 .thenReturn(PollingResult.SUCCESS);
         doNothing().when(clusterBootstrapperErrorHandler)
                 .terminateFailedNodes(any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), any(Set.class));
-
+        when(orchestratorRepository.save(any(Orchestrator.class))).thenReturn(new Orchestrator());
         underTest.bootstrapCluster(context);
 
         verify(tlsSecurityService, times(1)).buildGatewayConfig(anyLong(), anyString(), anyString());
@@ -118,11 +123,11 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenTimeOutComesInClusterAvailabilityPoller() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new MockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -145,12 +150,12 @@ public class ClusterBootstrapperTest {
     @Test(expected = CancellationException.class)
     public void bootstrapClusterWhenOrchestratorDropCancelledException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new CancelledMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new CancelledMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -165,12 +170,12 @@ public class ClusterBootstrapperTest {
     @Test(expected = CloudbreakException.class)
     public void bootstrapClusterWhenOrchestratorDropFailedException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new FailedMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new FailedMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -185,12 +190,12 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenEverythingWorksNormallyWithMoreBootstrapSegment() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setAmbariIp("10.0.0.1").setDefaultParams(1L, GCP_PLATFORM).build();
+        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new TwoLengthMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new TwoLengthMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -218,7 +223,7 @@ public class ClusterBootstrapperTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new MockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -244,7 +249,7 @@ public class ClusterBootstrapperTest {
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new TwoLengthMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new TwoLengthMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -271,7 +276,7 @@ public class ClusterBootstrapperTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new MockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -297,7 +302,7 @@ public class ClusterBootstrapperTest {
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString())).thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new CancelledNewNodesMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new CancelledNewNodesMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -318,7 +323,7 @@ public class ClusterBootstrapperTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
-        when(containerOrchestratorResolver.get()).thenReturn(new FailedNewNodesMockContainerOrchestrator());
+        when(containerOrchestratorResolver.get("SWARM")).thenReturn(new FailedNewNodesMockContainerOrchestrator());
         when(bootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(BootstrapApiContext.class), anyInt(), anyInt()))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),

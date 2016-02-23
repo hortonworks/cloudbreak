@@ -13,7 +13,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STARTED;
 import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,7 +41,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
@@ -233,14 +231,7 @@ public class SimpleStackFacade implements StackFacade {
 
         Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(stack, actualCont.getInstanceGroup());
         fireEventAndLog(actualCont.getStackId(), context, Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
-        HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
         Integer scalingAdjustment = actualCont.getScalingAdjustment();
-        hostGroupAdjustmentJson.setWithStackUpdate(false);
-        hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-        if (stack.getCluster() != null) {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), actualCont.getInstanceGroup());
-            hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
-        }
         return new StackScalingContext(stack.getId(), actualCont.getCloudPlatform(), scalingAdjustment, actualCont.getInstanceGroup(),
                 actualCont.getResources(), actualCont.getScalingType(), upscaleCandidateAddresses);
     }
@@ -277,8 +268,7 @@ public class SimpleStackFacade implements StackFacade {
             }
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack upscale has been finished successfully.");
             fireEventAndLog(stack.getId(), actualContext, Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
-            context = new ClusterScalingContext(stack.getId(), actualContext.getCloudPlatform(),
-                    hostGroupAdjustmentJson, actualContext.getUpscaleCandidateAddresses(), new ArrayList<HostMetadata>(), actualContext.getScalingType());
+            context = new ClusterScalingContext(stack.getId(), actualContext.getCloudPlatform(), hostGroupAdjustmentJson, actualContext.getScalingType());
         } catch (Exception e) {
             LOGGER.error("Exception during the extend consul metadata phase: {}", e.getMessage());
             throw new CloudbreakException(e);

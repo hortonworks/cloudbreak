@@ -3,10 +3,12 @@ package com.sequenceiq.it.cloudbreak;
 public class HostGroup {
     private String name;
     private String instanceGroupName;
+    private Integer hostCount;
 
-    public HostGroup(String name, String instanceGroupName) {
+    public HostGroup(String name, String instanceGroupName, Integer hostCount) {
         this.name = name;
         this.instanceGroupName = instanceGroupName;
+        this.hostCount = hostCount;
     }
 
     public String getName() {
@@ -15,5 +17,9 @@ public class HostGroup {
 
     public String getInstanceGroupName() {
         return instanceGroupName;
+    }
+
+    public Integer getHostCount() {
+        return hostCount;
     }
 }

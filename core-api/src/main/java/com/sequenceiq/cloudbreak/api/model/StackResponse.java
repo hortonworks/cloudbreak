@@ -34,6 +34,9 @@ public class StackResponse extends StackBase {
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
     @ApiModelProperty(StackModelDescription.CONSUL_SERVER_COUNT)
     private Integer consulServerCount;
+    @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
+    private OrchestratorResponse orchestrator;
+
 
     public String getAccount() {
         return account;
@@ -106,5 +109,13 @@ public class StackResponse extends StackBase {
 
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
+    }
+
+    public OrchestratorResponse getOrchestrator() {
+        return orchestrator;
+    }
+
+    public void setOrchestrator(OrchestratorResponse orchestrator) {
+        this.orchestrator = orchestrator;
     }
 }

@@ -152,15 +152,15 @@ public final class ConsulUtils {
         }
     }
 
-    public static ConsulClient createClient(TLSClientConfig tlsClientConfig) {
-        return createClient(tlsClientConfig, DEFAULT_TIMEOUT_MS);
+    public static ConsulClient createClient(HttpClientConfig httpClientConfig) {
+        return createClient(httpClientConfig, DEFAULT_TIMEOUT_MS);
     }
 
-    public static ConsulClient createClient(TLSClientConfig tlsClientConfig, int timeout) {
-        return new ConsulClient("https://" + tlsClientConfig.getApiAddress(), GATEWAY_PORT,
-                tlsClientConfig.getClientCert(),
-                tlsClientConfig.getClientKey(),
-                tlsClientConfig.getServerCert(),
+    public static ConsulClient createClient(HttpClientConfig httpClientConfig, int timeout) {
+        return new ConsulClient("https://" + httpClientConfig.getApiAddress(), GATEWAY_PORT,
+                httpClientConfig.getClientCert(),
+                httpClientConfig.getClientKey(),
+                httpClientConfig.getServerCert(),
                 timeout);
     }
 

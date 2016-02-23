@@ -7,5 +7,5 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 
 public interface HostFilter {
 
-    List<HostMetadata> filter(long stackId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException;
+    List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException;
 }

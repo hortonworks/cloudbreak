@@ -6,7 +6,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
 @Component("FlowFinalizeAction")
-public final class FlowFinalizeAction extends AbstarctAction<FlowState, FlowEvent, CommonContext, Object> {
+public final class FlowFinalizeAction extends AbstractAction<FlowState, FlowEvent, CommonContext, Object> {
     public FlowFinalizeAction() {
         super(Object.class);
     }

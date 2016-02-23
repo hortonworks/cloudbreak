@@ -1,0 +1,30 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+repositories {
+    maven { url 'http://repo.spring.io/libs-release' }
+    mavenCentral()
+}
+
+jar {
+    baseName = 'cloud-byos'
+}
+
+dependencies {
+
+    compile project(':cloud-api')
+    compile project(':cloud-common')
+    compile project(':cloud-reactor')
+
+    compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+    compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+    compile group: 'commons-io',                    name: 'commons-io',                     version: '2.4'
+    compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
+    compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
+
+    testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
+    testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+
+}
