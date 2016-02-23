@@ -356,7 +356,7 @@ uluwatu:
     volumes:
         - $ULUWATU_VOLUME_HOST:$ULUWATU_VOLUME_CONTAINER
     dns: $PRIVATE_IP
-    image: sequenceiq/uluwatu-bin:$DOCKER_TAG_ULUWATU
+    image: hortonworks/cloudbreak-web:$DOCKER_TAG_ULUWATU
 
 pcdb:
     environment:
