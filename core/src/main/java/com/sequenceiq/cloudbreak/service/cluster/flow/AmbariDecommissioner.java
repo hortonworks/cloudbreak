@@ -156,7 +156,9 @@ public class AmbariDecommissioner {
             if (isSuccess(pollingResult)) {
                 pollingResult = waitForDataNodeDecommission(stack, ambariClient);
                 if (isSuccess(pollingResult)) {
-                    pollingResult = waitForRegionServerDecommission(stack, ambariClient, hostList, components);
+                    //TODO https://hortonworks.jira.com/browse/BUG-53283
+                    //TODO for now we only wait for the Ambari request to finish
+                    //pollingResult = waitForRegionServerDecommission(stack, ambariClient, hostList, components);
                     if (isSuccess(pollingResult)) {
                         pollingResult = stopHadoopComponents(stack, ambariClient, hostList);
                         if (isSuccess(pollingResult)) {
@@ -384,11 +386,8 @@ public class AmbariDecommissioner {
             return SUCCESS;
         }
         LOGGER.info("Waiting for RegionServers to move the regions to other servers");
-        return rsPollerService.pollWithTimeoutSingleFailure(
-                rsDecommissionStatusCheckerTask,
-                new AmbariHostsWithNames(stack, ambariClient, hosts),
-                AMBARI_POLLING_INTERVAL,
-                MAX_ATTEMPTS_FOR_REGION_DECOM);
+        return rsPollerService.pollWithTimeoutSingleFailure(rsDecommissionStatusCheckerTask, new AmbariHostsWithNames(stack, ambariClient, hosts),
+                AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_REGION_DECOM);
     }
 
     private Map<String, HostMetadata> selectHostsToRemove(List<HostMetadata> decommissionCandidates, int adjustment) {
@@ -418,8 +417,9 @@ public class AmbariDecommissioner {
             decommissionRequests.put("DATANODE_DECOMMISSION", requestId);
         }
         if (components.contains("HBASE_REGIONSERVER")) {
-            ambariClient.decommissionHBaseRegionServers(hosts);
             ambariClient.setHBaseRegionServersToMaintenance(hosts, true);
+            int requestId = ambariClient.decommissionHBaseRegionServers(hosts);
+            decommissionRequests.put("HBASE_DECOMMISSION", requestId);
         }
         return decommissionRequests;
     }

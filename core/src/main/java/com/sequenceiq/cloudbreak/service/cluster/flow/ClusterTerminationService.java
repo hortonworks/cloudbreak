@@ -103,14 +103,14 @@ public class ClusterTerminationService {
         Cluster cluster = clusterRepository.findById(clusterId);
         String terminatedName = cluster.getName() + DELIMITER + new Date().getTime();
         cluster.setName(terminatedName);
-        cluster.setBlueprint(null);
-        cluster.setStack(null);
-        cluster.setStatus(DELETE_COMPLETED);
-        deleteClusterHostGroupsWithItsMetadata(cluster);
         FileSystem fs = cluster.getFileSystem();
         if (fs != null) {
             deleteFileSystemResources(cluster.getStack().getId(), fs);
         }
+        cluster.setBlueprint(null);
+        cluster.setStack(null);
+        cluster.setStatus(DELETE_COMPLETED);
+        deleteClusterHostGroupsWithItsMetadata(cluster);
     }
 
     private void deleteClusterHostGroupsWithItsMetadata(Cluster cluster) {
