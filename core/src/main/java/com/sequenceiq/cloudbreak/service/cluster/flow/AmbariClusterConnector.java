@@ -222,6 +222,8 @@ public class AmbariClusterConnector {
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
             pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
+            //TODO https://hortonworks.jira.com/browse/BUG-51920
+            startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
             recipesPostInstall(stack, recipesFound);
             executeSmokeTest(stack, ambariClient);
             createDefaultViews(ambariClient, blueprintText, hostGroups);
@@ -687,6 +689,25 @@ public class AmbariClusterConnector {
             }
         }
         return stopped;
+    }
+
+    private void startStoppedServices(Stack stack, AmbariClient ambariClient, String blueprint) throws CloudbreakException {
+        Set<String> components = new HashSet<>();
+        Map<String, Map<String, String>> hostComponentsStates = ambariClient.getHostComponentsStates();
+        Collection<Map<String, String>> values = hostComponentsStates.values();
+        Map<String, String> componentsCategory = ambariClient.getComponentsCategory(blueprint);
+        for (Map<String, String> value : values) {
+            for (Entry<String, String> entry : value.entrySet()) {
+                String category = componentsCategory.get(entry.getKey());
+                if ("INSTALLED".equals(entry.getValue()) && !"CLIENT".equals(category)) {
+                    components.add(entry.getKey());
+                }
+            }
+        }
+
+        if (!components.isEmpty()) {
+            startAllServices(stack, ambariClient);
+        }
     }
 
     private void setBaseRepoURL(Cluster cluster, AmbariClient ambariClient) {
