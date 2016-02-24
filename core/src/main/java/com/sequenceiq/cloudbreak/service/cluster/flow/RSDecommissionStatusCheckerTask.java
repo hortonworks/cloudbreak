@@ -14,16 +14,20 @@ import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 public class RSDecommissionStatusCheckerTask extends StackBasedStatusCheckerTask<AmbariHostsWithNames> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RSDecommissionStatusCheckerTask.class);
+    private static final String FINAL_STATE = "INSTALLED";
 
     @Override
     public boolean checkStatus(AmbariHostsWithNames t) {
         MDCBuilder.buildMdcContext(t.getStack());
         AmbariClient ambariClient = t.getAmbariClient();
-        Map<String, Long> rs = ambariClient.getHBaseRegionServersWithData(t.getHostNames());
-        for (Map.Entry<String, Long> entry : rs.entrySet()) {
-            LOGGER.info("RegionServer: {} decommission is in progress, {} storefiles left", entry.getKey(), entry.getValue());
+        Map<String, String> rs = ambariClient.getHBaseRegionServersState(t.getHostNames());
+        for (Map.Entry<String, String> entry : rs.entrySet()) {
+            if (!FINAL_STATE.equals(entry.getValue())) {
+                LOGGER.info("RegionServer: {} decommission is in progress, current state: {}", entry.getKey(), entry.getValue());
+                return false;
+            }
         }
-        return rs.isEmpty();
+        return true;
     }
 
     @Override
