@@ -1,23 +1,24 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
-
-import java.util.Collections;
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.Map;
+
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
 
 @Component("ClusterTerminationFinishedAction")
 public class ClusterTerminationFinishedAction extends AbstractClusterTerminationAction<TerminateClusterResult> {
@@ -34,6 +35,8 @@ public class ClusterTerminationFinishedAction extends AbstractClusterTermination
     private CloudbreakEventService cloudbreakEventService;
     @Inject
     private ClusterService clusterService;
+    @Inject
+    private StackUpdater stackUpdater;
 
     protected ClusterTerminationFinishedAction() {
         super(TerminateClusterResult.class);
@@ -47,6 +50,8 @@ public class ClusterTerminationFinishedAction extends AbstractClusterTermination
         cloudbreakEventService.fireCloudbreakEvent(cluster.getStack().getId(), DELETE_COMPLETED.name(),
                 messagesService.getMessage(Msg.CLUSTER_DELETE_COMPLETED.code(), Collections.singletonList(cluster.getId())));
         clusterService.updateClusterStatusByStackId(cluster.getStack().getId(), DELETE_COMPLETED);
+        InMemoryStateStore.deleteCluster(cluster.getId());
+        stackUpdater.updateStackStatus(cluster.getStack().getId(), AVAILABLE);
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendTerminationSuccessEmail(cluster.getOwner(), cluster.getAmbariIp(), cluster.getName());
             cloudbreakEventService.fireCloudbreakEvent(cluster.getStack().getId(), DELETE_COMPLETED.name(),

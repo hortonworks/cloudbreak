@@ -1,26 +1,13 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.client.Client;
-
-import java.io.File;
-import java.io.IOException;
-import java.security.Security;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClient;
 import com.sequenceiq.cloudbreak.client.config.ConfigKey;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -42,6 +29,18 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.client.Client;
+import java.io.File;
+import java.io.IOException;
+import java.security.Security;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class AppConfig implements ResourceLoaderAware {
@@ -110,8 +109,8 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    public ExitCriteria stackDeletionBasedExitCriteria() {
-        return new StackDeletionBasedExitCriteria();
+    public ExitCriteria clusterDeletionBasedExitCriteria() {
+        return new ClusterDeletionBasedExitCriteria();
     }
 
     @Bean
@@ -123,7 +122,7 @@ public class AppConfig implements ResourceLoaderAware {
     public Map<String, ContainerOrchestrator> containerOrchestrators() {
         Map<String, ContainerOrchestrator> map = new HashMap<>();
         for (ContainerOrchestrator containerOrchestrator : containerOrchestrators) {
-            containerOrchestrator.init(simpleParallelContainerRunnerExecutor(), stackDeletionBasedExitCriteria());
+            containerOrchestrator.init(simpleParallelContainerRunnerExecutor(), clusterDeletionBasedExitCriteria());
             map.put(containerOrchestrator.name(), containerOrchestrator);
         }
         return map;

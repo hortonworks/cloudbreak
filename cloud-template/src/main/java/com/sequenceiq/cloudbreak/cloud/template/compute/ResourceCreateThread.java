@@ -1,21 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
-import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
-import static java.lang.String.format;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -28,8 +13,21 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
+import static java.lang.String.format;
 
 @Component(ResourceCreateThread.NAME)
 @Scope(value = "prototype")
@@ -72,7 +70,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
                 buildableResources.addAll(list);
                 createResource(auth, list);
 
-                PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getId());
+                PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
                 if (pollGroup != null && CANCELLED.equals(pollGroup)) {
                     throw new CancellationException(format("Building of %s has been cancelled", list));
                 }

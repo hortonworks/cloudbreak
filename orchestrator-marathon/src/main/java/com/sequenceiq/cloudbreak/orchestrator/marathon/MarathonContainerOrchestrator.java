@@ -99,7 +99,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             return result;
         } catch (Exception ex) {
             //To provide that the failed Marathon app and its deployment are not deleted from Marathon
-            deleteContainer(Arrays.asList(new ContainerInfo(name, name, "", image)), cred);
+            deleteApp(cred.getApiEndpoint(), name);
             String msg = String.format("Failed to create marathon app from image: '%s', with name: '%s'.", image, name);
             throw new CloudbreakOrchestratorFailedException(msg, ex);
         }
@@ -212,6 +212,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
         app.setMem(constraint.getMem() != null ? constraint.getMem() : MIN_MEM);
         app.setInstances(constraint.getInstances() != null ? constraint.getInstances() : MIN_INSTANCES);
         app.setEnv(constraint.getEnv());
+        app.setConstraints(constraint.getConstraints());
 
         String[] arrayOfCmd = constraint.getCmd();
         if (arrayOfCmd != null && arrayOfCmd.length > 0) {
@@ -237,6 +238,19 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
         container.setDocker(docker);
         app.setContainer(container);
         return app;
+    }
+
+    private void deleteApp(String apiEndpoint, String appName) throws CloudbreakOrchestratorFailedException {
+        List<Future<Boolean>> futures = new ArrayList<>();
+        try {
+            Marathon client = MarathonClient.getInstance(apiEndpoint);
+            deleteEntireApp(client, futures, appName);
+            for (Future<Boolean> future : futures) {
+                future.get();
+            }
+        } catch (Exception e) {
+            throw new CloudbreakOrchestratorFailedException("Marathon app could not be deleted after creation error: ", e);
+        }
     }
 
     private void deleteEntireApp(Marathon client, List<Future<Boolean>> futures, String appName) throws CloudbreakOrchestratorFailedException {

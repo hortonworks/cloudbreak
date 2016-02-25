@@ -27,10 +27,10 @@ public class StackDeletionBasedExitCriteriaTest {
         stack.setCluster(cluster);
         StackDeletionBasedExitCriteriaModel exitCriteriaModel = new StackDeletionBasedExitCriteriaModel(1L);
 
-        InMemoryStateStore.put(1L, PollGroup.POLLABLE);
+        InMemoryStateStore.putStack(1L, PollGroup.POLLABLE);
         assertFalse(underTest.isExitNeeded(exitCriteriaModel));
 
-        InMemoryStateStore.put(1L, PollGroup.CANCELLED);
+        InMemoryStateStore.putStack(1L, PollGroup.CANCELLED);
         assertTrue(underTest.isExitNeeded(exitCriteriaModel));
 
     }

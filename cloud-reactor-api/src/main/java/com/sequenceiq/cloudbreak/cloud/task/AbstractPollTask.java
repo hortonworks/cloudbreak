@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.task;
 
-import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
-
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+
+import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
 
 public abstract class AbstractPollTask<T> implements PollTask<T> {
 
@@ -31,7 +31,7 @@ public abstract class AbstractPollTask<T> implements PollTask<T> {
         if (!cancellable) {
             return false;
         }
-        PollGroup pollGroup = InMemoryStateStore.get(getAuthenticatedContext().getCloudContext().getId());
+        PollGroup pollGroup = InMemoryStateStore.getStack(getAuthenticatedContext().getCloudContext().getId());
         return pollGroup != null && CANCELLED.equals(pollGroup);
     }
 }

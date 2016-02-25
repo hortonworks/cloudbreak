@@ -1,20 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.StackDeletionBasedExitCriteriaModel.stackDeletionBasedExitCriteriaModel;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.MUNCHAUSEN;
-import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.BootstrapApiContext;
@@ -35,6 +20,19 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.MUNCHAUSEN;
+import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
 
 @Component
 public class ClusterBootstrapper {
@@ -95,7 +93,7 @@ public class ClusterBootstrapper {
                     MAX_POLLING_ATTEMPTS);
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             containerOrchestrator.bootstrap(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(0), stack.getConsulServers(),
-                    stackDeletionBasedExitCriteriaModel(stack.getId()));
+                    clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
             if (nodeMap.size() > 1) {
                 clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
                         new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(0)),
@@ -103,7 +101,7 @@ public class ClusterBootstrapper {
                         MAX_POLLING_ATTEMPTS);
                 for (int i = 1; i < nodeMap.size(); i++) {
                     containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i),
-                            stackDeletionBasedExitCriteriaModel(stack.getId()));
+                            clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
                     clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
                             new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
                             POLLING_INTERVAL,
@@ -150,7 +148,7 @@ public class ClusterBootstrapper {
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
             for (int i = 0; i < nodeMap.size(); i++) {
                 containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i),
-                        stackDeletionBasedExitCriteriaModel(stack.getId()));
+                        clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
                 clusterAvailabilityPollingService.pollWithTimeoutSingleFailure(clusterAvailabilityCheckerTask,
                         new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
                         POLLING_INTERVAL,

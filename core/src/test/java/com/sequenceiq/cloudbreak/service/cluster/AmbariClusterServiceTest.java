@@ -1,38 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.net.ConnectException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
@@ -40,7 +7,9 @@ import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -57,10 +26,42 @@ import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
-
 import groovyx.net.http.HttpResponseException;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+
+import java.net.ConnectException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterServiceTest {
@@ -103,6 +104,9 @@ public class AmbariClusterServiceTest {
 
     @Mock
     private HostGroupService hostGroupService;
+
+    @Mock
+    private StatusToPollGroupConverter statusToPollGroupConverter;
 
     @Captor
     private ArgumentCaptor<Event<UpdateAmbariHostsRequest>> eventCaptor;
@@ -200,6 +204,7 @@ public class AmbariClusterServiceTest {
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
         when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(Collections.<HostMetadata>emptyList());
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         UpdateAmbariHostsRequest updateAmbariHostsRequest = underTest.updateHosts(stack.getId(), json);
 
@@ -227,6 +232,7 @@ public class AmbariClusterServiceTest {
         when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
         when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(asList(metadata2, metadata3));
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         UpdateAmbariHostsRequest updateAmbariHostsRequest = underTest.updateHosts(stack.getId(), json);
 
@@ -277,6 +283,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData4);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         doNothing().when(flowManager).triggerClusterDownscale(anyObject());
 
@@ -324,6 +331,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
         doNothing().when(flowManager).triggerClusterDownscale(anyObject());
 
         underTest.updateHosts(stack.getId(), json);
@@ -376,6 +384,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData3);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         doNothing().when(flowManager).triggerClusterDownscale(anyObject());
 
@@ -423,6 +432,7 @@ public class AmbariClusterServiceTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
+        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         UpdateAmbariHostsRequest updateAmbariHostsRequest = underTest.updateHosts(stack.getId(), json);
 
