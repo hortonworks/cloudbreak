@@ -43,10 +43,11 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             doExecute(flowContext, payload, context.getExtendedState().getVariables());
         } catch (Exception ex) {
             FlowEvent failureEvent = context.getStateMachine().getState().getId().failureEvent();
+            LOGGER.error("Error during execution of " + getClass().getSimpleName(), ex);
             if (failureEvent != null) {
                 sendEvent(flowContext.getFlowId(), failureEvent.stringRepresentation(), getFailurePayload(flowContext, ex));
             } else {
-                LOGGER.error("Missing error handling for " + getClass().getSimpleName(), ex);
+                LOGGER.error("Missing error handling for " + getClass().getSimpleName());
             }
         }
     }

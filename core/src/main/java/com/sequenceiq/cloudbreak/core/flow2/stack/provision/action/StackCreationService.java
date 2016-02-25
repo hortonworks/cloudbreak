@@ -145,6 +145,7 @@ public class StackCreationService {
     public void handleStackCreationFailure(StackContext context, Exception errorDetails) {
         final Stack stack = context.getStack();
         MDCBuilder.buildMdcContext(stack);
+        LOGGER.error("Error during stack creation flow:", errorDetails);
         String errorReason = errorDetails == null ? "Unknown error" : errorDetails.getMessage();
         if (errorDetails instanceof CancellationException || ExceptionUtils.getRootCause(errorDetails) instanceof CancellationException) {
             LOGGER.warn("The flow has been cancelled.");

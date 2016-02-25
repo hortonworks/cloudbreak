@@ -61,10 +61,12 @@ public class StackTerminationFailureAction extends AbstractStackTerminationActio
             Msg eventMessage;
             Status status;
             if (!forced) {
-                stackUpdateMessage = "Termination failed: " + payload.getErrorDetails().getMessage();
+                Exception errorDetails = payload.getErrorDetails();
+                stackUpdateMessage = "Termination failed: " + errorDetails.getMessage();
                 status = DELETE_FAILED;
                 eventMessage = Msg.STACK_INFRASTRUCTURE_DELETE_FAILED;
                 stackUpdater.updateStackStatus(stack.getId(), status, stackUpdateMessage);
+                LOGGER.error("Error during stack termination flow: ", errorDetails);
             } else {
                 terminationService.finalizeTermination(stack.getId(), true);
                 clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);

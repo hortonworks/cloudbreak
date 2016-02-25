@@ -43,11 +43,13 @@ public class ClusterTerminationFailureAction extends AbstractClusterTerminationA
     protected void doExecute(ClusterContext context, TerminateClusterResult payload, Map<Object, Object> variables) throws Exception {
         LOGGER.info("Handling cluster delete failure event.");
         Msg eventMessage = Msg.CLUSTER_DELETE_FAILED;
+        Exception errorDetails = payload.getErrorDetails();
+        LOGGER.error("Error during cluster termination flow: ", errorDetails);
         Cluster cluster = clusterService.getById(context.getCluster().getId());
         cluster.setStatus(DELETE_FAILED);
-        cluster.setStatusReason(payload.getErrorDetails().getMessage());
+        cluster.setStatusReason(errorDetails.getMessage());
         clusterService.updateCluster(cluster);
-        String message = messagesService.getMessage(eventMessage.code(), Arrays.asList(payload.getErrorDetails().getMessage()));
+        String message = messagesService.getMessage(eventMessage.code(), Arrays.asList(errorDetails.getMessage()));
         eventService.fireCloudbreakEvent(cluster.getStack().getId(), DELETE_FAILED.name(), message);
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendTerminationFailureEmail(cluster.getOwner(), cluster.getAmbariIp(), cluster.getName());
