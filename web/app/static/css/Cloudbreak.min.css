@@ -5236,8 +5236,12 @@ form hr.form-group-separator {
     border-right-style: solid;
 }
 
-.btn-group-justified + .btn-group-justified .btn {
-    border-top: none
+.btn-segmented-control .btn-group .btn {
+    border-bottom-style: hidden;
+}
+
+.btn-segmented-control .btn-group:last-child .btn {
+    border-bottom-style: solid;
 }
 
 .btn-segmented-control .btn-info {
