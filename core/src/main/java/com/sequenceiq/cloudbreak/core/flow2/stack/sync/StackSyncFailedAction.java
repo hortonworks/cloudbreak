@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
 @Component("StackSyncFailedAction")
 public class StackSyncFailedAction extends AbstractStackSyncAction<GetInstancesStateResult> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackSyncFailedAction.class);
 
     @Inject
     private CloudbreakEventService eventService;
@@ -27,6 +30,7 @@ public class StackSyncFailedAction extends AbstractStackSyncAction<GetInstancesS
 
     @Override
     protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) {
+        LOGGER.error("Error during Stack synchronization flow:", payload.getErrorDetails());
         eventService.fireCloudbreakEvent(context.getStack().getId(), AVAILABLE.name(),
                 cloudbreakMessagesService.getMessage(STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE.code()));
         sendEvent(context.getFlowId(), StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.stringRepresentation(), null);
