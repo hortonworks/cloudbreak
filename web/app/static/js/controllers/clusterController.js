@@ -1080,5 +1080,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.filterByTopology = function(resource) {
             return !resource.topologyId || ($rootScope.activeCredential && resource.topologyId == $rootScope.activeCredential.topologyId)
         }
+
+        $scope.isExistingVpc = function() {
+            if($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform == 'AZURE_RM' && $scope.cluster.networkId) {
+                var network = $filter('filter')($rootScope.networks, {
+                    id: $scope.cluster.networkId
+                })[0];
+                if (network && network.parameters && network.parameters.resourceGroupName && network.parameters.networkId && network.parameters.subnetId) {
+                    return true
+                }
+            }
+            return false
+        }
     }
 ]);

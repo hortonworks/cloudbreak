@@ -12,6 +12,7 @@
         <select class="form-control" id="select-cluster-securitygroup" ng-model="cluster.securityGroupId" ng-required="activeCredential !== undefined">
             <option ng-repeat="securitygroup in $root.securitygroups | orderBy:'name'" value="{{securitygroup.id}}">{{securitygroup.name}}</option>
         </select>
+        <div class="help-block" ng-show="isExistingVpc()"><i class="fa fa-warning"></i> {{msg.cluster_form_securitygroup_existingvpc}}
     </div>
 </div>
 <div class="form-group" name="cluster_security1">

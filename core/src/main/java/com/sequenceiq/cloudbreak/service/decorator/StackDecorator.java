@@ -45,13 +45,15 @@ public class StackDecorator implements Decorator<Stack> {
         if (credentialId != null) {
             Object securityGroupId = data[DecorationData.SECURITY_GROUP_ID.ordinal()];
             Object networkId = data[DecorationData.NETWORK_ID.ordinal()];
-            if (subject.getInstanceGroups() == null || securityGroupId == null || networkId == null) {
-                throw new BadRequestException("Instance groups, security group and network must be specified!");
+            if (subject.getInstanceGroups() == null || networkId == null) {
+                throw new BadRequestException("Instance groups and network must be specified!");
             }
             Credential credential = credentialService.get((Long) credentialId);
             subject.setCloudPlatform(credential.cloudPlatform());
             subject.setCredential(credential);
-            subject.setSecurityGroup(securityGroupService.get((Long) securityGroupId));
+            if (securityGroupId != null) {
+                subject.setSecurityGroup(securityGroupService.get((Long) securityGroupId));
+            }
             int consulServers = getConsulServerCount((Integer) data[DecorationData.USR_CONSUL_SERVER_COUNT.ordinal()], subject.getFullNodeCount());
             subject.setConsulServers(consulServers);
 
