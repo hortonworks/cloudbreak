@@ -1,8 +1,9 @@
 {
   "name": "sultans",
-  "description": "SequenceIQ Registration App",
+  "description": "Cloudbreak Registration App",
   "main": "main.js",
-  "author": "SequenceIQ",
+  "author": "Hortonworks",
+  "license": "Apache-2.0",
   "dependencies": {
     "express": "~4.9.3",
     "express-session": "~1.8.2",
@@ -21,10 +22,13 @@
     "needle": "~0.7",
     "request": "~2.48.0",
     "MD5": "~1.2.1",
-    "cookie": "~0.2.3"
+    "cookie": "~0.2.3",
+    "grunt": "0.4.5",
+    "grunt-cli": "0.1.13",
+    "grunt-jsbeautifier": "0.2.10"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sequenceiq/sultans.git"
+    "url": "git@github.com:sequenceiq/cloudbreak.git"
   }
 }

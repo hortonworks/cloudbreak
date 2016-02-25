@@ -6,3 +6,7 @@ generate-image-yamls:
 	 make -C cloud-arm generate-yml
 	 make -C cloud-gcp generate-yml
 	 make -C cloud-aws generate-yml
+
+beautify:
+	 auth/format.sh
+	 web/format.sh
