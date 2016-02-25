@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.event.platform;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class ResourceDefinitionResult extends CloudPlatformResult {
 
@@ -23,8 +24,8 @@ public class ResourceDefinitionResult extends CloudPlatformResult {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GetResourceDefinitionResult{");
-        sb.append("definition='").append(definition).append('\'');
+        final StringBuilder sb = new StringBuilder("ResourceDefinitionResult{");
+        sb.append("definition='").append(JsonUtil.minify(definition)).append('\'');
         sb.append('}');
         return sb.toString();
     }

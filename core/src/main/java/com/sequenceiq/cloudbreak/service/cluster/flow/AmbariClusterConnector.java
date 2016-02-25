@@ -751,7 +751,7 @@ public class AmbariClusterConnector {
                 }
                 blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);
             }
-            LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.readTree(blueprintText).toString());
+            LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
             ambariClient.addBlueprint(blueprintText);
         } catch (IOException e) {
             if ("Conflict".equals(e.getMessage())) {

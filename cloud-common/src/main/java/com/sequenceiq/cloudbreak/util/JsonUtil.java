@@ -31,6 +31,14 @@ public class JsonUtil {
         return MAPPER.readTree(content);
     }
 
+    public static String minify(String content) {
+        try {
+            return readTree(content).toString();
+        } catch (IOException e) {
+            return "INVALID_JSON_CONTENT";
+        }
+    }
+
     public static <T> T treeToValue(TreeNode n, Class<T> valueType) throws JsonProcessingException {
         return MAPPER.treeToValue(n, valueType);
     }
