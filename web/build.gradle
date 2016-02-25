@@ -1,13 +1,29 @@
 buildscript {
   repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
+    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url "http://maven.sequenceiq.com/releases" }
   }
 
   dependencies {
     classpath "com.moowork.gradle:gradle-node-plugin:0.11"
+    classpath "com.moowork.gradle:gradle-grunt-plugin:0.11-fixed-grunt"
   }
 }
 
 apply plugin: 'com.moowork.node'
+apply plugin: 'com.moowork.grunt'
+
+grunt_jsbeautifier.dependsOn 'npmInstall'
+grunt_jsbeautifier.dependsOn 'installGrunt'
+
+build.dependsOn grunt_jsbeautifier
+
+node {
+  version = '5.7.0'
+  download = true
+}
+
+grunt {
+  colors = true
+  bufferOutput = false
+}
