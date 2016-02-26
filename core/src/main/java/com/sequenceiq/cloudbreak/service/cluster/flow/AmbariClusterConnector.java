@@ -222,10 +222,10 @@ public class AmbariClusterConnector {
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
             pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
-            //TODO https://hortonworks.jira.com/browse/BUG-51920
-            startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
             recipesPostInstall(stack, recipesFound);
             executeSmokeTest(stack, ambariClient);
+            //TODO https://hortonworks.jira.com/browse/BUG-51920
+            startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
             createDefaultViews(ambariClient, blueprintText, hostGroups);
             cluster = handleClusterCreationSuccess(stack, cluster);
             return cluster;
