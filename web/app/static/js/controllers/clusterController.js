@@ -1082,7 +1082,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.isExistingVpc = function() {
-            if($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform == 'AZURE_RM' && $scope.cluster.networkId) {
+            if ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform == 'AZURE_RM' && $scope.cluster.networkId) {
                 var network = $filter('filter')($rootScope.networks, {
                     id: $scope.cluster.networkId
                 })[0];

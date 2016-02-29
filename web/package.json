@@ -3,6 +3,7 @@
   "description": "Cloudbreak frontend.",
   "main": "server.js",
   "author": "Hortonworks",
+  "license": "Apache-2.0",
   "dependencies": {
     "body-parser": "~1.8.2",
     "consolidate": "~0.10.0",
@@ -20,10 +21,13 @@
     "express": "3.0.x",
     "jade": "0.27.x",
     "session.socket.io": "0.2.x",
-    "socket.io": "1.2.0"
+    "socket.io": "1.2.0",
+    "grunt": "0.4.5",
+    "grunt-cli": "0.1.13",
+    "grunt-jsbeautifier": "0.2.10"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:sequenceiq/uluwatu.git"
+    "url": "git@github.com:sequenceiq/cloudbreak.git"
   }
 }
