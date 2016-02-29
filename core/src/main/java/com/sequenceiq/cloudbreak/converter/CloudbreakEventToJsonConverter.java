@@ -26,6 +26,8 @@ public class CloudbreakEventToJsonConverter extends AbstractConversionServiceAwa
         json.setNodeCount(entity.getNodeCount());
         json.setInstanceGroup(entity.getInstanceGroup());
         json.setClusterStatus(entity.getClusterStatus());
+        json.setClusterId(entity.getClusterId());
+        json.setClusterName(entity.getClusterName());
         return json;
     }
 }

@@ -76,6 +76,7 @@ public class ModelDescriptions {
         public static final String STATUS = "status of the cluster";
         public static final String STATUS_REASON = "status message of the cluster";
         public static final String CLUSTER_NAME = "name of the cluster";
+        public static final String CLUSTER_ID = "id of the cluster";
         public static final String BLUEPRINT_ID = "blueprint id for the cluster";
         public static final String HOURS = "duration - how long the cluster is running in hours";
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";
