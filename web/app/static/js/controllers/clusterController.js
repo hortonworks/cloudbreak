@@ -529,50 +529,56 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         };
 
         $scope.selectActiveCluster = function(clusterId) {
-            UluwatuCluster.get(clusterId, function(success) {
-                $scope.pagination = {
-                    currentPage: 1,
-                    itemsPerPage: 10,
-                    totalItems: success.metadata.length
-                }
-                var actClusterIndex = $rootScope.clusters.indexOf($filter('filter')($rootScope.clusters, {
-                    id: clusterId
-                })[0]);
-                $rootScope.activeCluster = $rootScope.clusters[actClusterIndex] = success;
-                $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, {
-                    id: $rootScope.activeCluster.blueprintId
-                })[0];
-                if ($rootScope.activeCluster.credentialId) {
-                    $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {
-                        id: $rootScope.activeCluster.credentialId
-                    }, true)[0];
-                    $rootScope.activeCluster.cloudPlatform = $rootScope.activeClusterCredential.cloudPlatform
-                    $rootScope.activeCluster.activeGroup = "cbgateway";
-                } else {
-                    $rootScope.activeCluster.cloudPlatform = $rootScope.activeCluster.orchestrator.type
-                    $rootScope.activeCluster.activeGroup = $rootScope.activeCluster.hostGroups != undefined && $rootScope.activeCluster.hostGroups.length > 0 ? $rootScope.activeCluster.hostGroups[0].name : '';
-                }
-                if ($rootScope.activeCluster.networkId) {
-                    $rootScope.activeClusterNetwork = $filter('filter')($rootScope.networks, {
-                        id: $rootScope.activeCluster.networkId
+            var actClusterIndex = $rootScope.clusters.indexOf($filter('filter')($rootScope.clusters, {
+                id: clusterId
+            })[0]);
+            var disabled = $rootScope.clusters[actClusterIndex].status == "DELETE_IN_PROGRESS";
+            if (disabled) {
+                $rootScope.activeCluster = $rootScope.clusters[actClusterIndex];
+            } else {
+                UluwatuCluster.get(clusterId, function(success) {
+                    $scope.pagination = {
+                        currentPage: 1,
+                        itemsPerPage: 10,
+                        totalItems: success.metadata.length
+                    }
+
+                    $rootScope.activeCluster = $rootScope.clusters[actClusterIndex] = success;
+                    $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, {
+                        id: $rootScope.activeCluster.blueprintId
                     })[0];
-                }
-                if ($rootScope.activeCluster.securityGroupId) {
-                    $rootScope.activeClusterSecurityGroup = $filter('filter')($rootScope.securitygroups, {
-                        id: $rootScope.activeCluster.securityGroupId
-                    })[0];
-                }
-                $scope.newCredential = {};
-                $scope.newCredential.newUserName = $rootScope.activeCluster.cluster.userName;
-                $scope.upscaleCluster = {
-                    hostGroup: $scope.getHostGroupName(),
-                    numberOfInstances: 1
-                };
-                $scope.downscaleCluster = {
-                    hostGroup: $scope.getHostGroupName(),
-                    numberOfInstances: 1
-                };
-            });
+                    if ($rootScope.activeCluster.credentialId) {
+                        $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {
+                            id: $rootScope.activeCluster.credentialId
+                        }, true)[0];
+                        $rootScope.activeCluster.cloudPlatform = $rootScope.activeClusterCredential.cloudPlatform
+                        $rootScope.activeCluster.activeGroup = "cbgateway";
+                    } else {
+                        $rootScope.activeCluster.cloudPlatform = $rootScope.activeCluster.orchestrator.type
+                        $rootScope.activeCluster.activeGroup = $rootScope.activeCluster.hostGroups != undefined && $rootScope.activeCluster.hostGroups.length > 0 ? $rootScope.activeCluster.hostGroups[0].name : '';
+                    }
+                    if ($rootScope.activeCluster.networkId) {
+                        $rootScope.activeClusterNetwork = $filter('filter')($rootScope.networks, {
+                            id: $rootScope.activeCluster.networkId
+                        })[0];
+                    }
+                    if ($rootScope.activeCluster.securityGroupId) {
+                        $rootScope.activeClusterSecurityGroup = $filter('filter')($rootScope.securitygroups, {
+                            id: $rootScope.activeCluster.securityGroupId
+                        })[0];
+                    }
+                    $scope.newCredential = {};
+                    $scope.newCredential.newUserName = $rootScope.activeCluster.cluster.userName;
+                    $scope.upscaleCluster = {
+                        hostGroup: $scope.getHostGroupName(),
+                        numberOfInstances: 1
+                    };
+                    $scope.downscaleCluster = {
+                        hostGroup: $scope.getHostGroupName(),
+                        numberOfInstances: 1
+                    };
+                });
+            }
         };
 
         $scope.changeActiveClusterGroup = function(group) {

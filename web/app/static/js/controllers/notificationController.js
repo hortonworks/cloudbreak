@@ -38,6 +38,11 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                 switch (eventType) {
                     case "DELETE_COMPLETED":
                         $scope.showSuccess(notification.eventMessage, notification.stackName);
+                        var actCluster = getActCluster(notification);
+                        if (actCluster != undefined && actCluster.id == notification.stackId) {
+                            $rootScope.activeCluster = {};
+                            $jq("#cluster-details-back-btn").click();
+                        }
                         $rootScope.clusters = $filter('filter')($rootScope.clusters, function(value, index) {
                             return value.id != notification.stackId;
                         });
@@ -94,10 +99,14 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
             $scope.$apply();
         }
 
-        function handleStatusChange(notification, refresh) {
-            var actCluster = $filter('filter')($rootScope.clusters, {
+        function getActCluster(notification) {
+            return $filter('filter')($rootScope.clusters, {
                 id: notification.stackId
             })[0];
+        }
+
+        function handleStatusChange(notification, refresh) {
+            var actCluster = getActCluster(notification);
             if (actCluster == undefined) {
                 UluwatuCluster.get(notification.stackId, function(cluster) {
                     actCluster = $filter('filter')($rootScope.clusters, {
@@ -127,18 +136,14 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
         }
 
         function handleCopyStatus(notification) {
-            var actCluster = $filter('filter')($rootScope.clusters, {
-                id: notification.stackId
-            })[0];
+            var actCluster = getActCluster(notification);
             if (actCluster != undefined) {
                 actCluster.copyState = notification.eventMessage;
             }
         }
 
         function handleAmbariProgressState(notification, message) {
-            var actCluster = $filter('filter')($rootScope.clusters, {
-                id: notification.stackId
-            })[0];
+            var actCluster = getActCluster(notification);
             if (actCluster != undefined) {
                 actCluster.ambariProgressState = notification.eventMessage;
                 actCluster.progressMessage = message;
@@ -146,9 +151,7 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
         }
 
         function handleAvailableNotification(notification) {
-            var actCluster = $filter('filter')($rootScope.clusters, {
-                id: notification.stackId
-            })[0];
+            var actCluster = getActCluster(notification);
             var msg = notification.eventMessage;
             var nodeCount = notification.nodeCount;
             if (nodeCount != null && nodeCount != undefined && nodeCount != 0) {
@@ -161,9 +164,7 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
         }
 
         function handleUptimeNotification(notification) {
-            var actCluster = $filter('filter')($rootScope.clusters, {
-                id: notification.stackId
-            })[0];
+            var actCluster = getActCluster(notification);
             if (actCluster != undefined) {
                 var SECONDS_PER_MINUTE = 60;
                 var MILLIS_PER_SECOND = 1000;
@@ -176,9 +177,7 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
         }
 
         function handleUpdateInProgressNotification(notification) {
-            var actCluster = $filter('filter')($rootScope.clusters, {
-                id: notification.stackId
-            })[0];
+            var actCluster = getActCluster(notification);
             var msg = notification.eventMessage;
             var indexOfAmbariIp = msg.indexOf("Ambari ip:");
             if (actCluster != undefined && msg != null && msg != undefined && indexOfAmbariIp > -1) {
