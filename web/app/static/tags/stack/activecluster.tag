@@ -31,7 +31,7 @@
                             <a href="" class="btn btn-warning" role="button" ng-show="((activeCluster.status == 'AVAILABLE' && activeCluster.cluster.status != 'START_REQUESTED') || ((activeCluster.status == 'STOP_REQUESTED' || activeCluster.status == 'STOP_FAILED') && activeCluster.cluster.status == 'STOPPED')) &&  activeCluster.cluster.status != 'WAIT_FOR_SYNC' && !isEphemeralCluster(activeCluster)" data-toggle="modal" data-target="#modal-stop-cluster">
                                 <i class="fa fa-pause fa-fw"></i><span> {{msg.active_cluster_command_stop_label}}</span>
                             </a>
-                            <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate" ng-click='inherited.forcedTermination = false'>
+                            <a href="" id="terminate-btn" class="btn btn-danger" role="button" ng-show="activeCluster.status != 'DELETE_IN_PROGRESS'" data-toggle="modal" data-target="#modal-terminate" ng-click='inherited.forcedTermination = false'>
                                 <i class="fa fa-trash-o fa-fw"></i><span> {{msg.active_cluster_command_terminate_label}}</span>
                             </a>
                         </p>

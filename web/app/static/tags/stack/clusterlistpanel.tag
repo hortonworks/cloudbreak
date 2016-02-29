@@ -5,8 +5,7 @@
 
             <div class="cluster" id="cluster-{{cluster.id}}" ng-repeat="cluster in $root.clusters">
                 <h4>
-                    <span ng-if="cluster.status == 'DELETE_IN_PROGRESS'" class="disabled btn-cluster btn-block">{{cluster.name}}</span>
-                    <a href="" ng-if="cluster.status != 'DELETE_IN_PROGRESS'" id="btn-cluster" class="btn btn-cluster btn-block" role="button" ng-click="selectActiveCluster(cluster.id)">{{cluster.name}}<i class="fa fa-angle-right fa-25x"></i></a>
+                    <a href="" id="btn-cluster" class="btn btn-cluster btn-block" role="button" ng-click="selectActiveCluster(cluster.id)">{{cluster.name}}<i class="fa fa-angle-right fa-25x"></i></a>
                 </h4>
                 <dl class="row" style="padding-bottom: 4px;height: 25px;">
                     <div class="col-md-6">
