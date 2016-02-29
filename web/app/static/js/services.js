@@ -531,9 +531,13 @@ uluwatuServices.factory('ErrorHandler', function() {
             var failedMsg = ""
             if (error.data != null && error.data.message != null) {
                 failedMsg += error.data.message
-            } else if (error.status == '403' && error.data != null && error.data.error_description != null) {
+            } else if (error.status == '403' && error.data != null) {
                 failedMsg += 'Forbidden: '
-                failedMsg += error.data.error_description
+                if (error.data.error_description) {
+                    failedMsg += error.data.error_description
+                } else if (error.data.InsufficientScopeException && error.data.InsufficientScopeException.error_description != null) {
+                    failedMsg += error.data.InsufficientScopeException.error_description
+                }
             } else if (error.data != null && Object.prototype.toString.call(error.data) === '[object Object]' && "validationErrors" in error.data) {
                 var errorData = error.data["validationErrors"]
                 for (var key in errorData) {
