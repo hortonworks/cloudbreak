@@ -57,10 +57,10 @@ tests:
 
   - name: create cluster
     parameters:
-      stackName: it-gcp-credandsmoke-stack-ssud
+      stackName: it-gcp-cred-ssud
       region: europe-west1
       availabilityZone: europe-west1-b
-      clusterName: it-gcp-credandsmoke-cluster-ssud
+      clusterName: it-gcp-cred-ssud
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest

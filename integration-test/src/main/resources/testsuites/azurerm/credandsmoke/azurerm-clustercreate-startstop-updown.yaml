@@ -54,9 +54,9 @@ tests:
 
   - name: create cluster
     parameters:
-      stackName: it-azurerm-credandsmoke-stack-ssud
+      stackName: it-azurerm-cred-ssud
       region: North Europe
-      clusterName: it-azurerm-credandsmoke-cluster-ssud
+      clusterName: it-azurerm-cred-ssud
       sleepTime: 60000
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest

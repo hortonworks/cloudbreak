@@ -56,10 +56,10 @@ tests:
 
   - name: create cluster
     parameters:
-      stackName: it-nativeos-credandsmoke-stack
+      stackName: it-nativeos-cred
       region: local
       variant: NATIVE
-      clusterName: it-nativeos-credandsmoke-cluster
+      clusterName: it-nativeos-cred
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
