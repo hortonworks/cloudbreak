@@ -14,5 +14,7 @@
   "stackStatus" : "AVAILABLE",
   "nodeCount" : 10,
   "instanceGroup" : "slave_1",
-  "clusterStatus" : "AVAILABLE"
+  "clusterStatus" : "AVAILABLE",
+  "clusterId": 1,
+  "clusterName": "test"
 }

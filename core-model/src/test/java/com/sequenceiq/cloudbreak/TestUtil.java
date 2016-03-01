@@ -483,6 +483,8 @@ public class TestUtil {
         cloudbreakEvent.setStackStatus(AVAILABLE);
         cloudbreakEvent.setNodeCount(1);
         cloudbreakEvent.setClusterStatus(AVAILABLE);
+        cloudbreakEvent.setClusterId(1L);
+        cloudbreakEvent.setClusterName("test");
         return cloudbreakEvent;
     }
 

@@ -108,7 +108,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent.setNodeCount(stack.getRunningInstanceMetaData().size());
         stackEvent.setRegion(stack.getRegion());
         stackEvent.setAvailabilityZone(stack.getAvailabilityZone());
-        stackEvent.setCloud(stack.getCredential() == null ? "" : stack.cloudPlatform());
+        stackEvent.setCloud(stack.cloudPlatform());
 
         populateClusterData(stackEvent, stack);
 
@@ -127,6 +127,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
                 stackEvent.setBlueprintId(cluster.getBlueprint().getId());
                 stackEvent.setBlueprintName(cluster.getBlueprint().getBlueprintName());
             }
+            stackEvent.setClusterId(cluster.getId());
+            stackEvent.setClusterName(cluster.getName());
         } else {
             LOGGER.debug("No cluster data available for the stack: {}", stack.getId());
         }

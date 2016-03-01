@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EventModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -32,6 +33,10 @@ public class CloudbreakEventsJson implements JsonEntity {
     private long blueprintId;
     @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_ID)
+    private Long clusterId;
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_NAME)
+    private String clusterName;
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
     @ApiModelProperty(StackModelDescription.STACK_NAME)
@@ -147,6 +152,22 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setStackName(String stackName) {
         this.stackName = stackName;
+    }
+
+    public Long getClusterId() {
+        return clusterId;
+    }
+
+    public void setClusterId(Long clusterId) {
+        this.clusterId = clusterId;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 
     public String getInstanceGroup() {

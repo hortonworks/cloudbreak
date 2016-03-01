@@ -1062,10 +1062,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.logFilterFunction = function(element) {
             try {
                 if (element.stackId === $rootScope.activeCluster.id) {
-                    return (!element.eventType.match('BILLING_STARTED') && !element.eventType.match('BILLING_STOPPED') && !element.eventType.match('BILLING_CHANGED')) ? true : false;
-                } else {
-                    return false;
+                    if (element.clusterId !== null && element.cloud === 'BYOS') {
+                        if (element.clusterId === $rootScope.activeCluster.cluster.id && element.clusterName === $rootScope.activeCluster.cluster.name) {
+                            return (!element.eventType.match('BILLING_STARTED') && !element.eventType.match('BILLING_STOPPED') && !element.eventType.match('BILLING_CHANGED')) ? true : false;
+                        }
+                    } else if ($rootScope.activeCluster.platformVariant !== 'BYOS') {
+                        return (!element.eventType.match('BILLING_STARTED') && !element.eventType.match('BILLING_STOPPED') && !element.eventType.match('BILLING_CHANGED')) ? true : false;
+                    }
                 }
+                return false;
             } catch (err) {
                 return false;
             }
