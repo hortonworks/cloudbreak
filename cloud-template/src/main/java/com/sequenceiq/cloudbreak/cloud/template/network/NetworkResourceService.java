@@ -47,7 +47,7 @@ public class NetworkResourceService {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
         for (NetworkResourceBuilder builder : resourceBuilders.network(cloudContext.getPlatform())) {
-            PollGroup pollGroup = InMemoryStateStore.get(auth.getCloudContext().getId());
+            PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
             if (pollGroup != null && CANCELLED.equals(pollGroup)) {
                 break;
             }

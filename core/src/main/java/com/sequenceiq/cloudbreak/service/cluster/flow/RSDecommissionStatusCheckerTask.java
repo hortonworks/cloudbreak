@@ -1,17 +1,16 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import java.util.Map;
-
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
+import java.util.Map;
 
 @Component
-public class RSDecommissionStatusCheckerTask extends StackBasedStatusCheckerTask<AmbariHostsWithNames> {
+public class RSDecommissionStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariHostsWithNames> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RSDecommissionStatusCheckerTask.class);
     private static final String FINAL_STATE = "INSTALLED";

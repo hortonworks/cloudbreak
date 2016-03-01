@@ -1,17 +1,15 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon.poller;
 
-import java.util.Collection;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.model.v2.Task;
 import mesosphere.marathon.client.utils.MarathonException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Set;
 
 public class MarathonTaskDeletion implements ContainerBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarathonAppDeletion.class);
@@ -37,7 +35,11 @@ public class MarathonTaskDeletion implements ContainerBootstrap {
                 }
             }
         } catch (MarathonException me) {
-            throw new CloudbreakOrchestratorFailedException(me);
+            if (STATUS_NOT_FOUND.equals(me.getStatus())) {
+                LOGGER.info("Marathon app '{}' has already been deleted.", appId);
+            } else {
+                throw new CloudbreakOrchestratorFailedException(me);
+            }
         }
         return true;
     }
