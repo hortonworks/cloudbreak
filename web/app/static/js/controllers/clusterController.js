@@ -811,9 +811,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function addStatesToMetadata(filteredData) {
             angular.forEach(filteredData, function(data) {
                 if (data != null && data.discoveryFQDN != null) {
-                    angular.forEach($rootScope.activeCluster.cluster.hostGroups, function(hg){
+                    angular.forEach($rootScope.activeCluster.cluster.hostGroups, function(hg) {
                         if (hg.constraint.instanceGroupName == data.instanceGroup) {
-                            angular.forEach(hg.metadata, function(m){
+                            angular.forEach(hg.metadata, function(m) {
                                 if (m.name == data.discoveryFQDN) {
                                     data.state = m.state;
                                 }
