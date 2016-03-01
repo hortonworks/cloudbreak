@@ -51,6 +51,7 @@ public class ContainerConstraintFactory {
     private static final int SHIPYARD_DB_EXPOSED_PORT = 7071;
     private static final int LDAP_PORT = 389;
     private static final int REGISTRATOR_RESYNC_SECONDS = 60;
+    private static final String HOSTNAME_SEPARATOR = "|";
 
     @Value("#{'${cb.docker.env.ldap}'.split('\\|')}")
     private List<String> ldapEnvs;
@@ -186,7 +187,7 @@ public class ContainerConstraintFactory {
     }
 
     public ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String ambariAgentApp, String cloudPlatform,
-                                                        HostGroup hostGroup, Integer adjustment) {
+                                                        HostGroup hostGroup, Integer adjustment, List<String> hostBlackList) {
         Constraint hgConstraint = hostGroup.getConstraint();
         ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
                 .withNamePrefix(createContainerInstanceName(hostGroup, AMBARI_AGENT.getName()))
@@ -212,7 +213,7 @@ public class ContainerConstraintFactory {
         if (hgConstraint.getConstraintTemplate() != null) {
             builder.cpus(hgConstraint.getConstraintTemplate().getCpu());
             builder.memory(hgConstraint.getConstraintTemplate().getMemory());
-            builder.constraints(ImmutableList.<List<String>>of(ImmutableList.of("hostname", "UNIQUE")));
+            builder.constraints(getConstraints(hostBlackList));
             if (adjustment != null) {
                 builder.instances(adjustment);
             } else {
@@ -224,6 +225,22 @@ public class ContainerConstraintFactory {
         }
 
         return builder.build();
+    }
+
+    private List<List<String>> getConstraints(List<String> hostBlackList) {
+        List<List<String>> constraints = new ArrayList<>();
+        constraints.add(ImmutableList.of("hostname", "UNIQUE"));
+        if (!hostBlackList.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hostBlackList.size(); i++) {
+                sb.append(hostBlackList.get(i));
+                if (i < hostBlackList.size() - 1) {
+                    sb.append(HOSTNAME_SEPARATOR);
+                }
+            }
+            constraints.add(ImmutableList.of("hostname", "UNLIKE", sb.toString()));
+        }
+        return constraints;
     }
 
     public ContainerConstraint getConsulWatchConstraint(List<String> hosts) {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -177,10 +179,14 @@ public class ClusterContainerRunner {
                         clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId())));
             }
 
+            List<String> hostBlackList = new ArrayList<>();
             for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(stack.getCluster().getId())) {
-                ContainerConstraint ambariAgentConstraint = constraintFactory.getAmbariAgentConstraint(ambariServerHost, null, cloudPlatform, hostGroup, null);
-                containers.put(hostGroup.getName(), containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
-                        ambariAgentConstraint, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId())));
+                ContainerConstraint ambariAgentConstraint = constraintFactory.getAmbariAgentConstraint(ambariServerHost, null, cloudPlatform, hostGroup,
+                        null, hostBlackList);
+                List<ContainerInfo> containerInfos = containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
+                        ambariAgentConstraint, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+                containers.put(hostGroup.getName(), containerInfos);
+                hostBlackList.addAll(getHostsFromContainerInfo(containerInfos));
             }
 
             if ("SWARM".equals(orchestrator.getType())) {
@@ -247,8 +253,9 @@ public class ClusterContainerRunner {
                     return hostGroup.getHostNames().contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName());
                 }
             }).get().getName();
+            List<String> hostBlackList = getOtherHostgroupsAgentHostsFromContainer(existingContainers, hostGroupName);
             ContainerConstraint ambariAgentConstraint = constraintFactory.getAmbariAgentConstraint(ambariServerHost, ambariAgentApp,
-                    cloudPlatform, hostGroup, adjustment);
+                    cloudPlatform, hostGroup, adjustment, hostBlackList);
             containers.put(hostGroup.getName(), containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
                     ambariAgentConstraint, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId())));
 
@@ -271,6 +278,32 @@ public class ClusterContainerRunner {
             }
             throw ex;
         }
+    }
+
+    private List<String> getOtherHostgroupsAgentHostsFromContainer(Set<Container> existingContainers, String hostGroupName) {
+        final String hostGroupNamePart = hostGroupName.replace("_", "-");
+        return FluentIterable.from(existingContainers).filter(new Predicate<Container>() {
+            @Override
+            public boolean apply(@Nullable Container input) {
+                return input.getImage().contains(AMBARI_AGENT.getName()) && !input.getName().contains(hostGroupNamePart);
+            }
+        }).transform(new Function<Container, String>() {
+            @Nullable
+            @Override
+            public String apply(@Nullable Container input) {
+                return input.getHost();
+            }
+        }).toList();
+    }
+
+    private List<String> getHostsFromContainerInfo(List<ContainerInfo> containerInfos) {
+        return FluentIterable.from(containerInfos).transform(new Function<ContainerInfo, String>() {
+            @Nullable
+            @Override
+            public String apply(@Nullable ContainerInfo input) {
+                return input.getHost();
+            }
+        }).toList();
     }
 
     private List<String> getHosts(Stack stack) {

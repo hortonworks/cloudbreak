@@ -102,6 +102,7 @@ public class ClusterContainerRunnerTest {
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+        hostGroupAdjustmentJson.setHostGroup("agent");
         ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson, ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new FailedMockContainerOrchestrator());
         when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
@@ -131,7 +132,8 @@ public class ClusterContainerRunnerTest {
         when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<InstanceMetaData>());
         when(containerService.save(anyList())).thenReturn(new ArrayList<Container>());
         when(constraintFactory.getAmbariAgentConstraint(ambariServer.getHost(), null, stack.cloudPlatform(),
-                TestUtil.hostGroup(), context.getHostGroupAdjustment().getScalingAdjustment())).thenReturn(new ContainerConstraint.Builder().build());
+                TestUtil.hostGroup(), context.getHostGroupAdjustment().getScalingAdjustment(), new ArrayList<String>()))
+                .thenReturn(new ContainerConstraint.Builder().build());
         underTest.addClusterContainers(context);
     }
 
@@ -142,6 +144,7 @@ public class ClusterContainerRunnerTest {
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+        hostGroupAdjustmentJson.setHostGroup("agent");
         ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson, ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
