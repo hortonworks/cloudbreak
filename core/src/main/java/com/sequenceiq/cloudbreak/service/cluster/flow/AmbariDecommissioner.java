@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
+
 import groovyx.net.http.HttpResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,7 +144,7 @@ public class AmbariDecommissioner {
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
-        PollingResult pollingResult = startServiceIfNeeded(stack, ambariClient, blueprintName);
+        PollingResult pollingResult = startServicesIfNeeded(stack, ambariClient, blueprintName);
         if (isSuccess(pollingResult)) {
             Set<String> components = getHadoopComponents(ambariClient, hostGroupName, blueprintName);
             Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(collectDownscaleCandidates(adjustmentRequest, stack, cluster), adjustment);
@@ -207,8 +208,7 @@ public class AmbariDecommissioner {
         int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
         verifyNodeCount(replication, adjustmentJson.getScalingAdjustment(), filteredHostList, reservedInstances);
         if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup.getName())) {
-            downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication,
-                    adjustmentJson.getScalingAdjustment(), filteredHostList);
+            downScaleCandidates = checkAndSortByAvailableSpace(ambariClient, replication, adjustmentJson.getScalingAdjustment(), filteredHostList);
         } else {
             downScaleCandidates = filteredHostList;
         }
@@ -239,8 +239,7 @@ public class AmbariDecommissioner {
         return client.getBlueprintMap(blueprint).get(hostGroup).contains(DATANODE);
     }
 
-    private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication,
-            int adjustment, List<HostMetadata> filteredHostList) {
+    private List<HostMetadata> checkAndSortByAvailableSpace(AmbariClient client, int replication, int adjustment, List<HostMetadata> filteredHostList) {
         int removeCount = Math.abs(adjustment);
         Map<String, Map<Long, Long>> dfsSpace = client.getDFSSpace();
         Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
@@ -432,20 +431,25 @@ public class AmbariDecommissioner {
         }
     }
 
-    private PollingResult startServiceIfNeeded(Stack stack, AmbariClient ambariClient, String blueprint) throws CloudbreakException {
+    private PollingResult startServicesIfNeeded(Stack stack, AmbariClient ambariClient, String blueprint) throws CloudbreakException {
         Map<String, Integer> stringIntegerMap = new HashMap<>();
         Map<String, String> componentsCategory = ambariClient.getComponentsCategory(blueprint);
         Map<String, Map<String, String>> hostComponentsStates = ambariClient.getHostComponentsStates();
         Set<String> services = new HashSet<>();
         collectServicesToStart(componentsCategory, hostComponentsStates, services);
         if (!services.isEmpty()) {
-            if (services.contains("HDFS")) {
-                int requestId = ambariClient.startService("HDFS");
-                stringIntegerMap.put("HDFS_START", requestId);
-            }
-            if (services.contains("HBASE")) {
-                int requestId = ambariClient.startService("HBASE");
-                stringIntegerMap.put("HBASE_START", requestId);
+            try {
+                if (services.contains("HDFS")) {
+                    int requestId = ambariClient.startService("HDFS");
+                    stringIntegerMap.put("HDFS_START", requestId);
+                }
+                if (services.contains("HBASE")) {
+                    int requestId = ambariClient.startService("HBASE");
+                    stringIntegerMap.put("HBASE_START", requestId);
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to start HDFS/HBASE", e);
+                throw new BadRequestException("Failed to start the HDFS and HBASE services, it's possible that some of the nodes are unavailable");
             }
         }
 
