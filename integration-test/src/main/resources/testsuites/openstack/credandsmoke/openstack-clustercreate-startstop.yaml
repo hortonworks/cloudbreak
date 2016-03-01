@@ -56,9 +56,9 @@ tests:
 
   - name: create cluster
     parameters:
-      stackName: it-openstack-credandsmoke-stack-ss
+      stackName: it-openstack-cred-ss
       region: local
-      clusterName: it-openstack-credandsmoke-cluster-ss
+      clusterName: it-openstack-cred-ss
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest

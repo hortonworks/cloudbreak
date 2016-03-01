@@ -51,9 +51,9 @@ tests:
 
   - name: create cluster
     parameters:
-      stackName: it-aws-credandsmoke-stack
+      stackName: it-aws-cred
       region: eu-west-1
-      clusterName: it-aws-credandsmoke-cluster
+      clusterName: it-aws-cred
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest

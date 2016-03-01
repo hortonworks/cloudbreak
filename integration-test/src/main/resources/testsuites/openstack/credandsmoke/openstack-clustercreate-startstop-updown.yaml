@@ -62,9 +62,9 @@ tests:
 
   - name: create cluster
     parameters:
-      stackName: it-openstack-credandsmoke-stack-ssud
+      stackName: it-openstack-cred-ssud
       region: local
-      clusterName: it-openstack-credandsmoke-cluster-ssud
+      clusterName: it-openstack-cred-ssud
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
