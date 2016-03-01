@@ -82,6 +82,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             } else {
                 app = getMarathonApp(client, constraint.getAppName());
                 app.setInstances(app.getTasksRunning() + constraint.getInstances());
+                app.setConstraints(constraint.getConstraints());
                 updateApp(client, createMarathonUpdateApp(app));
             }
 

@@ -1,22 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -32,14 +15,30 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterContainerRunnerTest {
@@ -71,9 +70,6 @@ public class ClusterContainerRunnerTest {
     private MockContainerOrchestrator mockContainerOrchestrator;
 
     @Mock
-    private ContainerRepository containerRepository;
-
-    @Mock
     private CancelledMockContainerOrchestrator cancelledMockContainerOrchestrator;
 
     @Mock
@@ -81,6 +77,9 @@ public class ClusterContainerRunnerTest {
 
     @Mock
     private ContainerConfigService containerConfigService;
+
+    @Mock
+    private ContainerConstraintFactory constraintFactory;
 
     @InjectMocks
     private ClusterContainerRunner underTest;
@@ -103,6 +102,7 @@ public class ClusterContainerRunnerTest {
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+        hostGroupAdjustmentJson.setHostGroup("agent");
         ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson, ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new FailedMockContainerOrchestrator());
         when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
@@ -124,13 +124,16 @@ public class ClusterContainerRunnerTest {
         containers.add(ambariAgent);
         containers.add(ambariServer);
 
-        when(containerRepository.findContainersInCluster(anyLong())).thenReturn(containers);
+        when(containerService.findContainersInCluster(anyLong())).thenReturn(containers);
         when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"));
         when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<InstanceMetaData>());
         when(containerService.save(anyList())).thenReturn(new ArrayList<Container>());
+        when(constraintFactory.getAmbariAgentConstraint(ambariServer.getHost(), null, stack.cloudPlatform(),
+                TestUtil.hostGroup(), context.getHostGroupAdjustment().getScalingAdjustment(), new ArrayList<String>()))
+                .thenReturn(new ContainerConstraint.Builder().build());
         underTest.addClusterContainers(context);
     }
 
@@ -141,6 +144,7 @@ public class ClusterContainerRunnerTest {
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
+        hostGroupAdjustmentJson.setHostGroup("agent");
         ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson, ScalingType.UPSCALE_ONLY_CLUSTER);
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
@@ -166,7 +170,7 @@ public class ClusterContainerRunnerTest {
         containers.add(ambariAgent);
         containers.add(ambariServer);
 
-        when(containerRepository.findContainersInCluster(anyLong())).thenReturn(containers);
+        when(containerService.findContainersInCluster(anyLong())).thenReturn(containers);
 
         underTest.addClusterContainers(context);
     }
