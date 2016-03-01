@@ -67,7 +67,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label" for="sl_securitygroup_active">Security group: </label>
+                            <label class="col-sm-2 control-label" for="sl_securitygroup_active">{{msg.cluster_form_securitygroup_label}}: </label>
                             <div class="securitygroupselect col-sm-9">
                                 <a id="sl_securitygroup_active" class="securitygroupselect form-control-static review-a" ng-repeat="securitygroup in $root.securitygroups|filter: { id: cluster.securityGroupId }:true" segment="#panel-securitygroup-collapse{{securitygroup.id}}">{{securitygroup.name}}</a>
                             </div>
@@ -96,7 +96,7 @@
                 <div role="tabpanel" class="tab-pane fade active review-tab" ng-class="{true:'in', false:''}[group.name == cluster.activeGroup]" ng-hide="group.name != cluster.activeGroup" ng-show="group.name == cluster.activeGroup" ng-repeat="group in cluster.hostGroups" id="{{group.name}}" aria-labelledby="{{group.name}}-tab">
                     <div class="container">
                         <div class="form-group">
-                            <label class="col-sm-2 control-label" for="sl_template_active">Constraint template: </label>
+                            <label class="col-sm-2 control-label" for="sl_template_active">{{msg.cluster_form_hostgroup_constraint_label}}: </label>
                             <div class="templateselect col-sm-9">
                                 <a id="sl_template_active" class="templateselect form-control-static review-a" ng-repeat="template in $root.constraints|filter: { name: group.constraint.constraintTemplateName }:true" segment="#panel-constraint-collapse{{template.id}}">{{template.name}}</a>
                             </div>
