@@ -113,7 +113,7 @@
 
                             <p class="btn-row-over-panel">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteConstraint(constraint)">
-                                    <i class="fa fa-times fa-fw"></i><span> {{msg.constraint_list_delete}}</span>
+                                    <i class="fa fa-times fa-fw"></i><span> {{msg.template_list_delete}}</span>
                                 </a>
                             </p>
 
