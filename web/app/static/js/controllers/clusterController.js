@@ -811,17 +811,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function addStatesToMetadata(filteredData) {
             angular.forEach(filteredData, function(data) {
                 if (data != null && data.discoveryFQDN != null) {
-                    var hostGroup = $filter('filter')($rootScope.activeCluster.cluster.hostGroups, {
-                        instanceGroupName: data.instanceGroup
-                    });
-                    if (hostGroup != null && hostGroup.length > 0) {
-                        var hostMetadata = $filter('filter')(hostGroup[0].metadata, {
-                            name: data.discoveryFQDN
-                        })
-                        if (hostMetadata != null && hostMetadata.length > 0) {
-                            data.state = hostMetadata[0].state
+                    angular.forEach($rootScope.activeCluster.cluster.hostGroups, function(hg){
+                        if (hg.constraint.instanceGroupName == data.instanceGroup) {
+                            angular.forEach(hg.metadata, function(m){
+                                if (m.name == data.discoveryFQDN) {
+                                    data.state = m.state;
+                                }
+                            });
                         }
-                    }
+                    });
                 }
             });
             return filteredData;
