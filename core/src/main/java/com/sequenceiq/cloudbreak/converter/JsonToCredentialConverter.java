@@ -9,10 +9,10 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
 import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
@@ -57,7 +57,7 @@ public class JsonToCredentialConverter extends AbstractConversionServiceAwareCon
     private void setUserName(Credential credential, Map<String, Object> parameters) {
         if (parameters.containsKey("keystoneVersion")) {
             credential.setLoginUserName(SSH_USER_CENT);
-        } else if (parameters.containsKey("roleArn")) {
+        } else if (parameters.containsKey("roleArn") || (parameters.containsKey("accessKey") && parameters.containsKey("secretKey"))) {
             credential.setLoginUserName(SSH_USER_EC2);
         } else {
             credential.setLoginUserName(SSH_USER_CB);
