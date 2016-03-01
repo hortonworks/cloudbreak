@@ -10,3 +10,6 @@ generate-image-yamls:
 beautify:
 	 auth/format.sh
 	 web/format.sh
+
+beautify-deps:
+	 npm install -g js-beautify
