@@ -36,7 +36,7 @@ public class ArmMetadataCollector implements MetadataCollector {
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
-        AzureRMClient access = armClient.createAccess(authenticatedContext.getCloudCredential());
+        AzureRMClient access = armClient.getClient(authenticatedContext.getCloudCredential());
         final CloudResource resource = armTemplateUtils.getTemplateResource(resources);
         List<CloudVmMetaDataStatus> results = new ArrayList<>();
 

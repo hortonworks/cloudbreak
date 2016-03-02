@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.task.ArmPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -49,17 +50,22 @@ public class ArmResourceConnector implements ResourceConnector {
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
     @Inject
     private ArmPollTaskFactory armPollTaskFactory;
+    @Inject
+    private ArmStorage armStorage;
 
     @Override
-    public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier,
+    public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
-        String stackName = armUtils.getStackName(authenticatedContext.getCloudContext());
-        String resourceGroupName = armUtils.getResourceGroupName(authenticatedContext.getCloudContext());
-        String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), authenticatedContext.getCloudContext(), stack);
-        String parameters = armTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
-        AzureRMClient client = armClient.createAccess(authenticatedContext.getCloudCredential());
+        String stackName = armUtils.getStackName(ac.getCloudContext());
+        String resourceGroupName = armUtils.getResourceGroupName(ac.getCloudContext());
+        String template = armTemplateBuilder.build(stackName, ac.getCloudCredential(), ac.getCloudContext(), stack);
+        String parameters = armTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        String region = ac.getCloudContext().getLocation().getRegion().value();
+        String attachedStorageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), region);
+        AzureRMClient client = armClient.getClient(ac.getCloudCredential());
         armUtils.validateSubnetRules(client, stack.getNetwork());
         try {
+            armStorage.createStorage(ac, client, attachedStorageName, resourceGroupName, region);
             client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
         } catch (HttpResponseException e) {
             throw new CloudConnectorException(String.format("Error occurred when creating stack: %s", e.getResponse().getData().toString()));
@@ -68,7 +74,7 @@ public class ArmResourceConnector implements ResourceConnector {
         }
 
         CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(stackName).build();
-        List<CloudResourceStatus> resources = check(authenticatedContext, Arrays.asList(cloudResource));
+        List<CloudResourceStatus> resources = check(ac, Arrays.asList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
     }
@@ -76,7 +82,7 @@ public class ArmResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         List<CloudResourceStatus> result = new ArrayList<>();
-        AzureRMClient access = armClient.createAccess(authenticatedContext.getCloudCredential());
+        AzureRMClient access = armClient.getClient(authenticatedContext.getCloudCredential());
         String stackName = armUtils.getStackName(authenticatedContext.getCloudContext());
 
         for (CloudResource resource : resources) {
@@ -107,7 +113,7 @@ public class ArmResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        AzureRMClient azureRMClient = armClient.createAccess(authenticatedContext.getCloudCredential());
+        AzureRMClient azureRMClient = armClient.getClient(authenticatedContext.getCloudCredential());
         for (CloudResource resource : resources) {
             try {
                 azureRMClient.deleteResourceGroup(resource.getName());
@@ -116,6 +122,14 @@ public class ArmResourceConnector implements ResourceConnector {
                 Boolean statePollerResult = task.call();
                 if (!task.completed(statePollerResult)) {
                     syncPollingScheduler.schedule(task);
+                }
+                if (armUtils.isPersistentStorage()) {
+                    CloudContext cloudCtx = authenticatedContext.getCloudContext();
+                    String storageName = armUtils.getPersistentStorageName(authenticatedContext.getCloudCredential(),
+                            cloudCtx.getLocation().getRegion().value());
+                    String imageResourceGroupName = armUtils.getImageResourceGroupName(cloudCtx);
+                    String diskContainer = armUtils.getDiskContainerName(cloudCtx);
+                    deleteContainer(azureRMClient, imageResourceGroupName, storageName, diskContainer);
                 }
             } catch (HttpResponseException e) {
                 if (e.getStatusCode() != NOT_FOUND) {
@@ -164,7 +178,7 @@ public class ArmResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        AzureRMClient azureRMClient = armClient.createAccess(authenticatedContext.getCloudCredential());
+        AzureRMClient azureRMClient = armClient.getClient(authenticatedContext.getCloudCredential());
 
         String stackName = armUtils.getStackName(authenticatedContext.getCloudContext());
         String template = armTemplateBuilder.build(stackName, authenticatedContext.getCloudCredential(), authenticatedContext.getCloudContext(), stack);
@@ -184,7 +198,7 @@ public class ArmResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) {
-        AzureRMClient client = armClient.createAccess(auth.getCloudCredential());
+        AzureRMClient client = armClient.getClient(auth.getCloudCredential());
         String stackName = armUtils.getStackName(auth.getCloudContext());
         String storageName = armUtils.getStorageName(auth.getCloudCredential(), auth.getCloudContext(),
                 auth.getCloudContext().getLocation().getRegion().value());

@@ -41,4 +41,9 @@ public class ArmCredentialView {
     public String getPassword() {
         return cloudCredential.getPublicKey().replaceAll("Basic: ", "");
     }
+
+    public String getLoginUserName() {
+        return cloudCredential.getLoginUserName();
+    }
+
 }

@@ -49,36 +49,31 @@ public class ArmTemplateBuilder {
 
     public String build(String stackName, CloudCredential cloudCredential, CloudContext cloudContext, CloudStack cloudStack) {
         try {
-            String imageName = cloudStack.getImage().getImageName();
-            imageName = imageName.replace("https://", "");
-            String[] split = imageName.split("/");
+            String imageUrl = cloudStack.getImage().getImageName();
+            String imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
             Network network = cloudStack.getNetwork();
             ArmCredentialView armCredentialView = new ArmCredentialView(cloudCredential);
             Map<String, Object> model = new HashMap<>();
+            model.put("credential", armCredentialView);
+            String rootDiskStorage;
             if (armUtils.isPersistentStorage()) {
-                model.put("storage_account_name",
-                        armUtils.getPersistentStorageName(cloudCredential, cloudContext.getLocation().getRegion().value()));
-                model.put("attached_disk_storage_account_name",
-                        armUtils.getStorageName(cloudCredential, cloudContext, cloudContext.getLocation().getRegion().value()));
+                rootDiskStorage = armUtils.getPersistentStorageName(cloudCredential, cloudContext.getLocation().getRegion().value());
             } else {
-                model.put("storage_account_name", armUtils.getStorageName(cloudCredential, cloudContext, cloudContext.getLocation().getRegion().value()));
-                model.put("attached_disk_storage_account_name",
-                        armUtils.getStorageName(cloudCredential, cloudContext, cloudContext.getLocation().getRegion().value()));
+                rootDiskStorage = armUtils.getStorageName(cloudCredential, cloudContext, cloudContext.getLocation().getRegion().value());
             }
-            model.put("image_storage_container_name", ArmSetup.IMAGES);
+            model.put("storage_account_name", rootDiskStorage);
+            String attachedDiskStorage = armUtils.getStorageName(cloudCredential, cloudContext, cloudContext.getLocation().getRegion().value());
+            model.put("image_storage_container_name", ArmStorage.IMAGES);
             model.put("storage_container_name", armUtils.getDiskContainerName(cloudContext));
-            model.put("storage_vhd_name", split[2]);
-            model.put("admin_user_name", cloudCredential.getLoginUserName());
+            model.put("storage_vhd_name", imageName);
             model.put("stackname", stackName);
-            model.put("ssh_key", armCredentialView.getPublicKey());
             model.put("region", cloudContext.getLocation().getRegion().value());
             model.put("subnet1Prefix", network.getSubnet().getCidr());
-            model.put("groups", new ArmGroupView(cloudStack.getGroups()).getGroups());
+            model.put("groups", new ArmGroupView(cloudStack.getGroups(), rootDiskStorage, attachedDiskStorage).getGroups());
             model.put("securities", new ArmSecurityView(cloudStack.getSecurity()));
             model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.CORE)));
             model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.GATEWAY)));
             model.put("disablePasswordAuthentication", !armCredentialView.passwordAuthenticationRequired());
-            model.put("adminPassword", armCredentialView.getPassword());
             model.put("existingVPC", armUtils.isExistingNetwork(network));
             model.put("resourceGroupName", armUtils.getCustomResourceGroupName(network));
             model.put("existingVNETName", armUtils.getCustomNetworkId(network));

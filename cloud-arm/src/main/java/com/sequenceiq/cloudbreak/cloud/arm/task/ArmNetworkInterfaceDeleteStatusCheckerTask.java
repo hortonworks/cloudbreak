@@ -31,7 +31,7 @@ public class ArmNetworkInterfaceDeleteStatusCheckerTask extends PollBooleanState
 
     @Override
     public Boolean call() {
-        AzureRMClient client = armClient.createAccess(networkInterfaceCheckerContext.getArmCredentialView());
+        AzureRMClient client = armClient.getClient(networkInterfaceCheckerContext.getArmCredentialView());
         try {
             client.getNetworkInterface(networkInterfaceCheckerContext.getGroupName(), networkInterfaceCheckerContext.getNetworkName());
         } catch (HttpResponseException e) {

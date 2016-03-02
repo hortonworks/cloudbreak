@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cloud.arm.ArmStorage;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class ArmInstanceView {
@@ -17,9 +18,15 @@ public class ArmInstanceView {
 
     private InstanceGroupType type;
 
-    public ArmInstanceView(InstanceTemplate instance, InstanceGroupType type) {
+    private String rootDiskStorage;
+
+    private String attachedDiskStorage;
+
+    public ArmInstanceView(InstanceTemplate instance, InstanceGroupType type, String rootDiskStorage, String attachedDiskStorage) {
         this.instance = instance;
         this.type = type;
+        this.rootDiskStorage = rootDiskStorage;
+        this.attachedDiskStorage = attachedDiskStorage;
     }
 
     public String getFlavor() {
@@ -47,6 +54,10 @@ public class ArmInstanceView {
             index++;
         }
         return list;
+    }
+
+    public String getAttachedDiskStorageUrl() {
+        return String.format(ArmStorage.STORAGE_BLOB_PATTERN, attachedDiskStorage);
     }
 
     public String getMetadata() {

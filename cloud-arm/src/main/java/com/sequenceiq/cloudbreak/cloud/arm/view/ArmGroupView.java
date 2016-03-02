@@ -12,7 +12,7 @@ public class ArmGroupView {
 
     private Map<String, List<ArmInstanceView>> groups = new HashMap<>();
 
-    public ArmGroupView(List<Group> groupList) {
+    public ArmGroupView(List<Group> groupList, String rootDiskStorage, String attachedDiskStorage) {
         for (Group group : groupList) {
             String groupName = group.getType().name();
             List<ArmInstanceView> existingInstances = groups.get(groupName);
@@ -21,8 +21,8 @@ public class ArmGroupView {
                 groups.put(groupName, existingInstances);
             }
             for (CloudInstance instance : group.getInstances()) {
-                ArmInstanceView novaInstance = new ArmInstanceView(instance.getTemplate(), group.getType());
-                existingInstances.add(novaInstance);
+                ArmInstanceView azureInstance = new ArmInstanceView(instance.getTemplate(), group.getType(), rootDiskStorage, attachedDiskStorage);
+                existingInstances.add(azureInstance);
             }
         }
     }

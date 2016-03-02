@@ -28,7 +28,7 @@ public class ArmVirtualMachineStatusCheckerTask extends PollBooleanStateTask {
 
     @Override
     public Boolean call() {
-        AzureRMClient client = armClient.createAccess(virtualMachineCheckerContext.getArmCredentialView());
+        AzureRMClient client = armClient.getClient(virtualMachineCheckerContext.getArmCredentialView());
         try {
             Map virtualMachine = client.getVirtualMachine(virtualMachineCheckerContext.getGroupName(), virtualMachineCheckerContext.getVirtualMachine());
             Map properties = (Map) virtualMachine.get("properties");

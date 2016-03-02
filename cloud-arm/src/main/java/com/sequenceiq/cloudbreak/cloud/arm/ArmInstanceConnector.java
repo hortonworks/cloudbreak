@@ -36,7 +36,7 @@ public class ArmInstanceConnector implements InstanceConnector {
 
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
+        AzureRMClient azureRMClient = armClient.getClient(ac.getCloudCredential());
         String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
 
@@ -55,7 +55,7 @@ public class ArmInstanceConnector implements InstanceConnector {
 
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
+        AzureRMClient azureRMClient = armClient.getClient(ac.getCloudCredential());
         String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
 
@@ -75,7 +75,7 @@ public class ArmInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        AzureRMClient azureRMClient = armClient.createAccess(ac.getCloudCredential());
+        AzureRMClient azureRMClient = armClient.getClient(ac.getCloudCredential());
         String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
 
         for (CloudInstance vm : vms) {

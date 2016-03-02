@@ -33,7 +33,7 @@ public class ArmResourceGroupDeleteStatusCheckerTask extends PollBooleanStateTas
 
     @Override
     public Boolean call() {
-        AzureRMClient client = armClient.createAccess(resourceGroupDeleteCheckerContext.getArmCredentialView());
+        AzureRMClient client = armClient.getClient(resourceGroupDeleteCheckerContext.getArmCredentialView());
         try {
             Map<String, Object> resourceGroup = client.getResourceGroup(resourceGroupDeleteCheckerContext.getGroupName());
         } catch (HttpResponseException e) {

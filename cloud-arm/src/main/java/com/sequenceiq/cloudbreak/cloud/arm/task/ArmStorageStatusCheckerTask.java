@@ -25,7 +25,7 @@ public class ArmStorageStatusCheckerTask extends PollBooleanStateTask {
 
     @Override
     public Boolean call() {
-        AzureRMClient client = armClient.createAccess(storageCheckerContext.getArmCredentialView());
+        AzureRMClient client = armClient.getClient(storageCheckerContext.getArmCredentialView());
         try {
             String storageStatus = client.getStorageStatus(storageCheckerContext.getGroupName(), storageCheckerContext.getStorageName());
             if ("Succeeded".equals(storageStatus)) {
