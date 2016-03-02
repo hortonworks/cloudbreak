@@ -13,17 +13,17 @@ public class ArmClient {
 
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
-        AzureRMClient azureRMClient = createAccess(cloudCredential);
+        AzureRMClient azureRMClient = getClient(cloudCredential);
         authenticatedContext.putParameter(AzureRMClient.class, azureRMClient);
         return authenticatedContext;
     }
 
-    public AzureRMClient createAccess(CloudCredential credential) {
+    public AzureRMClient getClient(CloudCredential credential) {
         ArmCredentialView armCredential = new ArmCredentialView(credential);
-        return createAccess(armCredential);
+        return getClient(armCredential);
     }
 
-    public AzureRMClient createAccess(ArmCredentialView armCredential) {
+    public AzureRMClient getClient(ArmCredentialView armCredential) {
         return new AzureRMClient(armCredential.getTenantId(), armCredential.getAccessKey(), armCredential.getSecretKey(), armCredential.getSubscriptionId());
     }
 

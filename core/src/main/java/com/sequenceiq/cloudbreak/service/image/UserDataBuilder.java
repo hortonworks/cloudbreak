@@ -38,8 +38,12 @@ public class UserDataBuilder {
 
     Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, String pubKey, String tmpSshKey, String sshUser, PlatformParameters parameters) {
         Map<InstanceGroupType, String> result = new HashMap<>();
-        result.put(InstanceGroupType.GATEWAY, build(InstanceGroupType.GATEWAY, cloudPlatform, pubKey, tmpSshKey, sshUser, parameters));
-        result.put(InstanceGroupType.CORE, build(InstanceGroupType.CORE, cloudPlatform, pubKey, tmpSshKey, sshUser, parameters));
+        for (InstanceGroupType type : InstanceGroupType.values()) {
+            String userData = build(type, cloudPlatform, pubKey, tmpSshKey, sshUser, parameters);
+            result.put(type, userData);
+            LOGGER.debug("User data for {}, content; {}", type, userData);
+        }
+
         return result;
     }
 

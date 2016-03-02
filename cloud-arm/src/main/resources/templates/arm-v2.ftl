@@ -6,10 +6,6 @@
             "type": "string",
             "defaultValue" : "${storage_account_name}"
         },
-        "userAttachedDiskStorageAccountName": {
-            "type": "string",
-            "defaultValue" : "${attached_disk_storage_account_name}"
-        },
         "userImageStorageContainerName" : {
             "type" : "string",
             "defaultValue" : "${image_storage_container_name}"
@@ -24,7 +20,7 @@
         },
         "adminUsername" : {
           "type" : "string",
-          "defaultValue" : "${admin_user_name}"
+          "defaultValue" : "${credential.loginUserName}"
         },
         <#if existingVPC>
         "resourceGroupName" : {
@@ -59,7 +55,7 @@
         },
         "sshKeyData" : {
             "type" : "string",
-            "defaultValue" : "${ssh_key}"
+            "defaultValue" : "${credential.publicKey}"
         },
         "loadBalancerName" : {
             "type" : "string",
@@ -95,7 +91,6 @@
   	"variables" : {
       "userImageName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userImageStorageContainerName'),'/',parameters('userImageVhdName'))]",
       "osDiskVhdName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'osDisk')]",
-      "dataDiskVhdName" : "[concat('https://',parameters('userAttachedDiskStorageAccountName'),'.blob.core.windows.net/',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk')]",
       <#if existingVPC>
       "vnetID": "[resourceId(parameters('resourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('existingVNETName'))]",
       "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('existingSubnetName'))]",
@@ -312,7 +307,7 @@
                         "computername": "[concat('vm', '${instance.instanceId}')]",
                         "adminUsername": "[parameters('adminUsername')]",
                         <#if disablePasswordAuthentication == false>
-                        "adminPassword": "${adminPassword}",
+                        "adminPassword": "${credential.password}",
                         </#if>
                         "linuxConfiguration": {
                             "disablePasswordAuthentication": "${disablePasswordAuthentication?c}",
@@ -353,7 +348,7 @@
                                 "diskSizeGB": ${volume.size},
                                 "lun":  ${volume_index},
                                 "vhd": {
-                                    "Uri": "[concat(variables('dataDiskVhdName'), 'datadisk', '${instance.instanceId}', '${volume_index}', '.vhd')]"
+                                    "Uri": "[concat('${instance.attachedDiskStorageUrl}',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk','${instance.instanceId}', '${volume_index}', '.vhd')]"
                                 },
                                 "caching": "None",
                                 "createOption": "Empty"
@@ -371,7 +366,7 @@
                     "diagnosticsProfile": {
                       "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[concat('https://',parameters('userAttachedDiskStorageAccountName'),'.blob.core.windows.net/')]"
+                        "storageUri": "${instance.attachedDiskStorageUrl}"
                       }
                     }
                 }
