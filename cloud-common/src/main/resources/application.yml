@@ -85,6 +85,7 @@ cb:
 
   arm:
     persistent.storage: cbstore
+    attached.storage: SINGLE
     template.path: templates/arm-v2.ftl
     parameter.path: templates/parameters.ftl
 

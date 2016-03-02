@@ -28,9 +28,9 @@ public class ArmPollTaskFactory {
         return createPollTask(ArmResourceGroupDeleteStatusCheckerTask.NAME, authenticatedContext, armClient, resourceGroupDeleteCheckerContext);
     }
 
-    public PollTask<Boolean> newStorageStatusCheckerTask(AuthenticatedContext authenticatedContext, ArmClient armClient, StorageCheckerContext
+    public PollTask<Boolean> newStorageStatusCheckerTask(AuthenticatedContext authenticatedContext, StorageCheckerContext
             storageCheckerContext) {
-        return createPollTask(ArmStorageStatusCheckerTask.NAME, authenticatedContext, armClient, storageCheckerContext);
+        return createPollTask(ArmStorageStatusCheckerTask.NAME, authenticatedContext, storageCheckerContext);
     }
 
     public PollTask<Boolean> newVirtualMachineDeleteStatusCheckerTask(AuthenticatedContext authenticatedContext, ArmClient armClient,
