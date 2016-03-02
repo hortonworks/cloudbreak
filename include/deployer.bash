@@ -295,6 +295,17 @@ deployer-login() {
 }
 
 start-and-migrate-cmd() {
+    start-requested-services "$@"
+    deployer-login
+}
+
+start-wait-and-migrate-cmd() {
+    start-requested-services "$@"
+    wait-for-cloudbreak
+    deployer-login
+}
+
+start-requested-services() {
     declare services="$@"
 
     deployer-generate
@@ -311,11 +322,20 @@ start-and-migrate-cmd() {
 
     create-logfile
     compose-up $services
-    info "Cloudbreak containers are started ..."
-    info "In a couple of minutes you can reach the UI (called Uluwatu)"
-    echo "  $ULU_HOST_ADDRESS" | blue
-    warn "Credentials are not printed here. You can get them by:"
-    echo '  cbd login' | blue
+}
+
+wait-for-cloudbreak() {
+    declare max_retry=50
+    declare retry_count=1
+    while ! $(curl -s -m 1 -f ${CB_HOST_ADDRESS}/info) ; do
+      info "Waiting for Cloudbreak...$retry_count"
+      ((retry_count++)) && ((retry_count==max_retry)) && break
+      sleep 4
+    done
+    if [[ "$retry_count" -ge "$max_retry" ]]; then
+        error "Could not reach Cloudbreak in time."
+        _exit 1
+    fi
 }
 
 create-temp-dir() {
@@ -371,6 +391,7 @@ main() {
         cmd-export deployer-delete delete
         cmd-export compose-ps ps
         cmd-export start-and-migrate-cmd start
+        cmd-export start-wait-and-migrate-cmd start-wait
         cmd-export compose-kill kill
         cmd-export compose-logs logs
         cmd-export compose-pull pull
