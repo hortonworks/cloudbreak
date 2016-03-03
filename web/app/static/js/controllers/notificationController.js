@@ -41,7 +41,11 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                         var actCluster = getActCluster(notification);
                         if (actCluster != undefined && actCluster.id == notification.stackId) {
                             $rootScope.activeCluster = {};
-                            $jq("#cluster-details-back-btn").click();
+                            $jq('.carousel').carousel(0);
+                            $jq('#toggle-cluster-block-btn').removeClass('disabled');
+                            $jq('#sort-clusters-btn').removeClass('disabled');
+                            $jq('#create-cluster-btn').removeClass('disabled');
+                            $jq("#notification-n-filtering").prop("disabled", false);
                         }
                         $rootScope.clusters = $filter('filter')($rootScope.clusters, function(value, index) {
                             return value.id != notification.stackId;
