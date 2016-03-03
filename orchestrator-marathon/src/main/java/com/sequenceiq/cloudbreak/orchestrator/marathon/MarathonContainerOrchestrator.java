@@ -82,7 +82,8 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             } else {
                 app = getMarathonApp(client, constraint.getAppName());
                 app.setInstances(app.getTasksRunning() + constraint.getInstances());
-                updateApp(client, createMarathonUpdateApp(app, constraint.getConstraints()));
+                app.setConstraints(constraint.getConstraints());
+                updateApp(client, createMarathonUpdateApp(app));
             }
 
             MarathonAppBootstrap bootstrap = new MarathonAppBootstrap(client, app);
@@ -298,11 +299,10 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
         }
     }
 
-    private App createMarathonUpdateApp(App appResponse, List<List<String>> constraints) {
+    private App createMarathonUpdateApp(App appResponse) {
         App app = new App();
         app.setId(appResponse.getId());
         app.setInstances(appResponse.getInstances());
-        app.setConstraints(constraints);
         return app;
     }
 
