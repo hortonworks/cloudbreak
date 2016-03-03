@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
@@ -204,6 +205,7 @@ public class ClusterContainerRunner {
             if (!containers.isEmpty()) {
                 saveContainers(containers, cluster);
             }
+            checkCancellation(ex);
             throw ex;
         }
     }
@@ -276,6 +278,7 @@ public class ClusterContainerRunner {
             if (!containers.isEmpty()) {
                 saveContainers(containers, cluster);
             }
+            checkCancellation(ex);
             throw ex;
         }
     }
@@ -332,6 +335,12 @@ public class ClusterContainerRunner {
             containerService.save(hostGroupContainers);
         }
         return containers;
+    }
+
+    private void checkCancellation(CloudbreakOrchestratorException ex) {
+        if (ex instanceof CloudbreakOrchestratorCancelledException || ExceptionUtils.getRootCause(ex) instanceof CloudbreakOrchestratorCancelledException) {
+            throw new CancellationException("Creation of cluster containers was cancelled.");
+        }
     }
 }
 
