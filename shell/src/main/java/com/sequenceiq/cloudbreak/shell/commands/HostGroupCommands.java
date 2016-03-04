@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.shell.commands;
 
-import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderObjectMap;
 import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderObjectValueMap;
 
 import java.util.HashSet;
@@ -60,7 +59,7 @@ public class HostGroupCommands implements CommandMarker {
             }
             context.putHostGroup(hostgroup.getName(),
                     new HostgroupEntry(context.getInstanceGroups().get(hostgroup.getName()).getNodeCount(), recipeIdSet));
-            return renderObjectMap(context.getHostGroups(), "hostgroup", "instanceGroupName", "recipeIds");
+            return renderObjectValueMap(context.getHostGroups(), "hostgroup");
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

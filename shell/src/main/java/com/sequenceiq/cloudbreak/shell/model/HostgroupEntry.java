@@ -3,26 +3,17 @@ package com.sequenceiq.cloudbreak.shell.model;
 import java.util.HashSet;
 import java.util.Set;
 
-public class HostgroupEntry {
+public class HostgroupEntry implements NodeCountEntry {
 
     private Integer nodeCount;
     private Set<Long> recipeIdSet = new HashSet<>();
-    private String constraintName;
 
     public HostgroupEntry(Integer nodeCount, Set<Long> recipeIdSet) {
         this.nodeCount = nodeCount;
         this.recipeIdSet = recipeIdSet;
     }
 
-    public HostgroupEntry(Integer nodeCount, String constraintName) {
-        this.nodeCount = nodeCount;
-        this.constraintName = constraintName;
-    }
-
-    public String getConstraintName() {
-        return constraintName;
-    }
-
+    @Override
     public Integer getNodeCount() {
         return nodeCount;
     }

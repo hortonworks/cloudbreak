@@ -40,6 +40,8 @@ public class CredentialCommands implements CommandMarker {
     private static final String FILE_NOT_FOUND = "File not found with ssh key.";
     private static final String URL_NOT_FOUND = "Url not Available for ssh key.";
     private static final String P12_FILE_NOT_FOUND = "File not found with service account private key (p12) file.";
+    private static final String CREATE_SUCCESS_MESSAGE = "Credential created with id: '%d' and name: '%s'";
+
 
     private List<Map> maps = new ArrayList<>();
 
@@ -244,7 +246,7 @@ public class CredentialCommands implements CommandMarker {
             }
             context.setCredential(idJson.getId().toString());
             createOrSelectTemplateHint();
-            return "Credential created, id: " + idJson.getId().toString();
+            return String.format(CREATE_SUCCESS_MESSAGE, idJson.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -338,7 +340,7 @@ public class CredentialCommands implements CommandMarker {
             }
             context.setCredential(id.getId().toString());
             createOrSelectTemplateHint();
-            return "Credential created, id: " + id.getId().toString();
+            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -415,7 +417,7 @@ public class CredentialCommands implements CommandMarker {
             }
             context.setCredential(id.getId().toString());
             createOrSelectTemplateHint();
-            return "Credential created, id: " + id.getId().toString();
+            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -497,7 +499,7 @@ public class CredentialCommands implements CommandMarker {
             }
             context.setCredential(id.getId().toString());
             createOrSelectTemplateHint();
-            return "Credential created, id: " + id.getId().toString();
+            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

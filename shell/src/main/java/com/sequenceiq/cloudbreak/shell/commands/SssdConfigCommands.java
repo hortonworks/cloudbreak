@@ -130,7 +130,7 @@ public class SssdConfigCommands implements CommandMarker {
             } else {
                 id = cloudbreakClient.sssdConfigEndpoint().postPrivate(request);
             }
-            return String.format("SSSD config '%s' has been added with id: %s", request.getName(), id.getId());
+            return String.format("SSSD config created with id: '%d' and name: '%s'", id.getId(), request.getName());
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -158,7 +158,7 @@ public class SssdConfigCommands implements CommandMarker {
             } else {
                 id = cloudbreakClient.sssdConfigEndpoint().postPrivate(request);
             }
-            return String.format("SSSD config '%s' has been added with id: %s", request.getName(), id.getId());
+            return String.format("SSSD config created with id: '%d' and name: '%s'", id.getId(), request.getName());
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.FocusType;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
-import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.MarathonContext;
+import com.sequenceiq.cloudbreak.shell.model.MarathonHostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
@@ -84,7 +84,8 @@ public class MarathonCommands implements CommandMarker {
             orchestratorRequest.setType("MARATHON");
             stackRequest.setName(name);
             stackRequest.setOrchestrator(orchestratorRequest);
-            return String.format("Marathon stack imported with id: %s", cloudbreakClient.stackEndpoint().postPublic(stackRequest).getId());
+            return String.format("Marathon stack imported with id: '%d' and name: '%s'",
+                    cloudbreakClient.stackEndpoint().postPublic(stackRequest).getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -273,7 +274,7 @@ public class MarathonCommands implements CommandMarker {
         try {
             ConstraintTemplateResponse constraintTemplateResponse = getConstraintTemplateResponse(null, constraintTemplateName.getName());
             if (constraintTemplateResponse != null) {
-                marathonContext.putHostGroup(hostgroup.getName(), new HostgroupEntry(nodecount, constraintTemplateName.getName()));
+                marathonContext.putHostGroup(hostgroup.getName(), new MarathonHostgroupEntry(nodecount, constraintTemplateName.getName()));
                 if (marathonContext.getHostGroups().size() == context.getActiveHostGroups().size()) {
                     context.setHint(Hints.MARATHON_CLUSTER);
                 }

@@ -40,6 +40,9 @@ public class TemplateCommands implements CommandMarker {
     public static final int VOLUME_COUNT_MAX = 8;
     public static final int VOLUME_SIZE_MIN = 1;
     public static final int VOLUME_SIZE_MAX = 1024;
+
+    private static final String CREATE_SUCCESS_MESSAGE = "Template created with id: '%d' and name: '%s'";
+
     @Inject
     private CloudbreakContext context;
     @Inject
@@ -118,7 +121,7 @@ public class TemplateCommands implements CommandMarker {
                 id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
             }
             createOrSelectBlueprintHint();
-            return "Template created, id: " + id.getId().toString();
+            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -192,7 +195,7 @@ public class TemplateCommands implements CommandMarker {
                 id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
             }
             createOrSelectBlueprintHint();
-            return "Template created, id: " + id.getId();
+            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -241,7 +244,7 @@ public class TemplateCommands implements CommandMarker {
                 id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
             }
             createOrSelectBlueprintHint();
-            return "Template created, id: " + id.getId().toString();
+            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -287,7 +290,7 @@ public class TemplateCommands implements CommandMarker {
                 id = cloudbreakClient.templateEndpoint().postPrivate(templateRequest);
             }
             createOrSelectBlueprintHint();
-            return "Template created, id: " + id.getId().toString();
+            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

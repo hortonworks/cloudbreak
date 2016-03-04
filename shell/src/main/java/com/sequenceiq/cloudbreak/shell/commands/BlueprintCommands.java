@@ -194,7 +194,7 @@ public class BlueprintCommands implements CommandMarker {
                 } else {
                     context.setHint(context.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.SELECT_STACK);
                 }
-                message = String.format("Blueprint: '%s' has been added, id: %s", getBlueprintName(json), id);
+                message = String.format("Blueprint created with id: '%s' and name: '%s'", id, name);
             } else {
                 message = "No blueprint specified";
             }
@@ -202,16 +202,6 @@ public class BlueprintCommands implements CommandMarker {
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
-    }
-
-    private String getBlueprintName(String json) {
-        String result = "";
-        try {
-            result = objectMapper.readTree(json.getBytes()).get("Blueprints").get("blueprint_name").asText();
-        } catch (IOException e) {
-            e.toString();
-        }
-        return result;
     }
 
     private  Map<String, List<String>> getComponentMap(String json) {

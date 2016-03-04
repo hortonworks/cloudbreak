@@ -15,7 +15,7 @@ public class MarathonContext {
     private Long selectedMarathonStackId;
     private String selectedMarathonStackName;
     private Set<String> constraintTemplates = new HashSet<>();
-    private Map<String, HostgroupEntry> hostgroups = new HashMap<>();
+    private Map<String, MarathonHostgroupEntry> hostgroups = new HashMap<>();
 
     public Long getSelectedMarathonStackId() {
         return selectedMarathonStackId;
@@ -41,7 +41,7 @@ public class MarathonContext {
         this.selectedMarathonStackId = selectedMarathonStackId;
     }
 
-    public Map<String, HostgroupEntry> getHostgroups() {
+    public Map<String, MarathonHostgroupEntry> getHostgroups() {
         return hostgroups;
     }
 
@@ -49,7 +49,7 @@ public class MarathonContext {
         this.hostgroups = new HashMap<>();
     }
 
-    public void setHostgroups(Map<String, HostgroupEntry> hostgroups) {
+    public void setHostgroups(Map<String, MarathonHostgroupEntry> hostgroups) {
         this.hostgroups = hostgroups;
     }
 
@@ -64,12 +64,12 @@ public class MarathonContext {
         }
     }
 
-    public Map<String, HostgroupEntry> putHostGroup(String name, HostgroupEntry hostgroupEntry) {
+    public Map<String, MarathonHostgroupEntry> putHostGroup(String name, MarathonHostgroupEntry hostgroupEntry) {
         this.hostgroups.put(name, hostgroupEntry);
         return this.hostgroups;
     }
 
-    public Map<String, HostgroupEntry> getHostGroups() {
+    public Map<String, MarathonHostgroupEntry> getHostGroups() {
         return hostgroups;
     }
 
