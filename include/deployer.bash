@@ -325,14 +325,16 @@ start-requested-services() {
 }
 
 wait-for-cloudbreak() {
-    declare max_retry=50
-    declare retry_count=1
-    while ! $(curl -s -m 1 -f ${CB_HOST_ADDRESS}/info) ; do
-      info "Waiting for Cloudbreak...$retry_count"
-      ((retry_count++)) && ((retry_count==max_retry)) && break
-      sleep 4
+    info "Waiting for Cloudbreak UI (timeout: $CB_UI_MAX_WAIT)"
+    
+    local count=0
+    while ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/info &&  [ $((count++)) -lt $CB_UI_MAX_WAIT ] ; do
+        echo -n . 1>&2
+        sleep 1;
     done
-    if [[ "$retry_count" -ge "$max_retry" ]]; then
+    echo 1>&2
+
+    if ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/info; then
         error "Could not reach Cloudbreak in time."
         _exit 1
     fi
