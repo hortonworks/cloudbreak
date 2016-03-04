@@ -6,7 +6,7 @@ public class ArmVolumeView {
 
     private static final String KVM_DEVICE_PREFIX = "/dev/vd";
 
-    private static final char[] DEVICE_CHAR = {'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
+    private static final char[] DEVICE_CHAR = {'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm'};
 
     private Volume volume;
 

@@ -18,15 +18,12 @@ public class ArmInstanceView {
 
     private InstanceGroupType type;
 
-    private String rootDiskStorage;
-
     private String attachedDiskStorage;
 
-    public ArmInstanceView(InstanceTemplate instance, InstanceGroupType type, String rootDiskStorage, String attachedDiskStorage) {
+    public ArmInstanceView(InstanceTemplate instance, InstanceGroupType type, ArmStorageView armStorageView) {
         this.instance = instance;
         this.type = type;
-        this.rootDiskStorage = rootDiskStorage;
-        this.attachedDiskStorage = attachedDiskStorage;
+        this.attachedDiskStorage = armStorageView.getAttachedDiskStorageName(instance.getPrivateId());
     }
 
     public String getFlavor() {
@@ -54,6 +51,10 @@ public class ArmInstanceView {
             index++;
         }
         return list;
+    }
+
+    public String getAttachedDiskStorageName() {
+        return attachedDiskStorage;
     }
 
     public String getAttachedDiskStorageUrl() {

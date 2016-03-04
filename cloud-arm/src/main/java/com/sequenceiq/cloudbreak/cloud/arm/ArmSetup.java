@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
+import static com.sequenceiq.cloudbreak.cloud.arm.ArmStorage.IMAGES;
 import static com.sequenceiq.cloudbreak.cloud.arm.ArmUtils.NOT_FOUND;
 
 import java.net.URISyntaxException;
@@ -60,28 +61,23 @@ public class ArmSetup implements Setup {
     @Override
     public void prepareImage(AuthenticatedContext ac, Image image) {
         LOGGER.info("prepare image: {}", image);
-        String storageName;
-        if (armUtils.isPersistentStorage()) {
-            storageName = armUtils.getPersistentStorageName(ac.getCloudCredential(), ac.getCloudContext().getLocation().getRegion().value());
-        } else {
-            storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
-        }
-
+        ArmCredentialView acv = new ArmCredentialView(ac.getCloudCredential());
+        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext());
         String resourceGroupName = armUtils.getResourceGroupName(ac.getCloudContext());
-        String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
+        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext());
         AzureRMClient client = armClient.getClient(ac.getCloudCredential());
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
             if (!resourceGroupExist(client, resourceGroupName)) {
                 client.createResourceGroup(resourceGroupName, region);
             }
-
             if (!resourceGroupExist(client, imageResourceGroupName)) {
                 client.createResourceGroup(imageResourceGroupName, region);
             }
-            armStorage.createStorage(ac, client, storageName, imageResourceGroupName, region);
-            if (!storageContainsImage(client, imageResourceGroupName, storageName, image.getImageName())) {
-                client.copyImageBlobInStorageContainer(imageResourceGroupName, storageName, ArmStorage.IMAGES, image.getImageName());
+            armStorage.createStorage(ac, client, imageStorageName, imageResourceGroupName, region);
+            client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES);
+            if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
+                client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES, image.getImageName());
             }
         } catch (HttpResponseException ex) {
             throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
@@ -93,17 +89,13 @@ public class ArmSetup implements Setup {
 
     @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, Image image) {
-        String storageName;
-        if (armUtils.isPersistentStorage()) {
-            storageName = armUtils.getPersistentStorageName(ac.getCloudCredential(), ac.getCloudContext().getLocation().getRegion().value());
-        } else {
-            storageName = armUtils.getStorageName(ac.getCloudCredential(), ac.getCloudContext(), ac.getCloudContext().getLocation().getRegion().value());
-        }
-        String imageResourceGroupName = armUtils.getImageResourceGroupName(ac.getCloudContext());
+        ArmCredentialView acv = new ArmCredentialView(ac.getCloudCredential());
+        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext());
+        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext());
         ArmCredentialView armCredentialView = new ArmCredentialView(ac.getCloudCredential());
         AzureRMClient client = armClient.getClient(armCredentialView);
         try {
-            CopyState copyState = client.getCopyStatus(imageResourceGroupName, storageName, ArmStorage.IMAGES, image.getImageName());
+            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES, image.getImageName());
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             } else if (CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus())) {
@@ -182,7 +174,7 @@ public class ArmSetup implements Setup {
     }
 
     private boolean storageContainsImage(AzureRMClient client, String groupName, String storageName, String image) throws URISyntaxException, StorageException {
-        List<ListBlobItem> listBlobItems = client.listBlobInStorage(groupName, storageName, ArmStorage.IMAGES);
+        List<ListBlobItem> listBlobItems = client.listBlobInStorage(groupName, storageName, IMAGES);
         for (ListBlobItem listBlobItem : listBlobItems) {
             if (getNameFromConnectionString(listBlobItem.getUri().getPath()).equals(image.split("/")[image.split("/").length - 1])) {
                 return true;

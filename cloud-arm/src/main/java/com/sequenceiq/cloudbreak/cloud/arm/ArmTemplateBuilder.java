@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
-import com.sequenceiq.cloudbreak.cloud.arm.view.ArmGroupView;
+import com.sequenceiq.cloudbreak.cloud.arm.view.ArmStackView;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmSecurityView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -41,35 +41,29 @@ public class ArmTemplateBuilder {
 
     @Inject
     private Configuration freemarkerConfiguration;
-    @Inject
-    private ArmClient armClient;
 
     @Inject
     private ArmUtils armUtils;
 
-    public String build(String stackName, CloudCredential cloudCredential, CloudContext cloudContext, CloudStack cloudStack) {
+    @Inject
+    private ArmStorage armStorage;
+
+    public String build(String stackName, ArmCredentialView armCredentialView, ArmStackView armStack, CloudContext cloudContext, CloudStack cloudStack) {
         try {
             String imageUrl = cloudStack.getImage().getImageName();
             String imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
             Network network = cloudStack.getNetwork();
-            ArmCredentialView armCredentialView = new ArmCredentialView(cloudCredential);
             Map<String, Object> model = new HashMap<>();
             model.put("credential", armCredentialView);
-            String rootDiskStorage;
-            if (armUtils.isPersistentStorage()) {
-                rootDiskStorage = armUtils.getPersistentStorageName(cloudCredential, cloudContext.getLocation().getRegion().value());
-            } else {
-                rootDiskStorage = armUtils.getStorageName(cloudCredential, cloudContext, cloudContext.getLocation().getRegion().value());
-            }
+            String rootDiskStorage = armStorage.getImageStorageName(armCredentialView, cloudContext);
             model.put("storage_account_name", rootDiskStorage);
-            String attachedDiskStorage = armUtils.getStorageName(cloudCredential, cloudContext, cloudContext.getLocation().getRegion().value());
             model.put("image_storage_container_name", ArmStorage.IMAGES);
-            model.put("storage_container_name", armUtils.getDiskContainerName(cloudContext));
+            model.put("storage_container_name", armStorage.getDiskContainerName(cloudContext));
             model.put("storage_vhd_name", imageName);
             model.put("stackname", stackName);
             model.put("region", cloudContext.getLocation().getRegion().value());
             model.put("subnet1Prefix", network.getSubnet().getCidr());
-            model.put("groups", new ArmGroupView(cloudStack.getGroups(), rootDiskStorage, attachedDiskStorage).getGroups());
+            model.put("groups", armStack.getGroups());
             model.put("securities", new ArmSecurityView(cloudStack.getSecurity()));
             model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.CORE)));
             model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.GATEWAY)));

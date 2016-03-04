@@ -10,6 +10,10 @@ public class ArmCredentialView {
         this.cloudCredential = cloudCredential;
     }
 
+    public Long getId() {
+        return cloudCredential.getId();
+    }
+
     public String getPublicKey() {
         return cloudCredential.getPublicKey();
     }

@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.arm.task;
 
+import static com.sequenceiq.cloudbreak.cloud.arm.ArmUtils.NOT_FOUND;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -9,32 +15,59 @@ import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
+import groovyx.net.http.HttpResponseException;
+
 @Component(ArmStorageStatusCheckerTask.NAME)
 @Scope(value = "prototype")
 public class ArmStorageStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "armStorageStatusCheckerTask";
 
-    private StorageCheckerContext storageCheckerContext;
-    private ArmClient armClient;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArmStorageStatusCheckerTask.class);
 
-    public ArmStorageStatusCheckerTask(AuthenticatedContext authenticatedContext, ArmClient armClient, StorageCheckerContext storageCheckerContext) {
+    @Inject
+    private ArmClient armClient;
+    private StorageCheckerContext storageCheckerContext;
+
+    public ArmStorageStatusCheckerTask(AuthenticatedContext authenticatedContext, StorageCheckerContext storageCheckerContext) {
         super(authenticatedContext, true);
-        this.armClient = armClient;
         this.storageCheckerContext = storageCheckerContext;
     }
 
     @Override
     public Boolean call() {
         AzureRMClient client = armClient.getClient(storageCheckerContext.getArmCredentialView());
+        StorageStatus status = StorageStatus.OTHER;
         try {
             String storageStatus = client.getStorageStatus(storageCheckerContext.getGroupName(), storageCheckerContext.getStorageName());
-            if ("Succeeded".equals(storageStatus)) {
-                return true;
+            if (StorageStatus.SUCCEEDED.getValue().equals(storageStatus)) {
+                status = StorageStatus.SUCCEEDED;
+            }
+        } catch (HttpResponseException e) {
+            if (e.getStatusCode() == NOT_FOUND) {
+                status = StorageStatus.NOTFOUND;
+            } else {
+                LOGGER.warn("HttpResponseException occured: {}", e.getMessage());
             }
         } catch (Exception ex) {
-            return false;
+            LOGGER.warn("Error has happened while polling storage account: {}", ex.getMessage());
+        }
+        if (storageCheckerContext.getExpectedStatus() == status) {
+            return true;
         }
         return false;
+    }
+
+    public enum StorageStatus {
+        SUCCEEDED("Succeeded"), NOTFOUND("NotFound"), OTHER("Other");
+        private final String value;
+
+        StorageStatus(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
     }
 
 }
