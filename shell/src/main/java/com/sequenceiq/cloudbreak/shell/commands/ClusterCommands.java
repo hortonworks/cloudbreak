@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
@@ -201,6 +202,7 @@ public class ClusterCommands implements CommandMarker {
             @CliOption(key = "kerberosPassword", mandatory = false, specifiedDefaultValue = "admin", help = "Kerberos admin password") String kerberosPassword,
             @CliOption(key = "ldapRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "Start and configure LDAP authentication support for Ambari hosts") Boolean ldapRequired,
+            @CliOption(key = "configStrategy", mandatory = false, help = "Config recommendation strategy") ConfigStrategy strategy,
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             Set<HostGroupJson> hostGroupList = new HashSet<>();
@@ -235,6 +237,10 @@ public class ClusterCommands implements CommandMarker {
             clusterRequest.setEmailNeeded(false);
             clusterRequest.setEnableSecurity(enableSecurity);
             clusterRequest.setHostGroups(hostGroupList);
+
+            if (strategy != null) {
+                clusterRequest.setConfigStrategy(strategy);
+            }
 
             if (!context.isMarathonMode()) {
                 FileSystemRequest fileSystemRequest = new FileSystemRequest();
