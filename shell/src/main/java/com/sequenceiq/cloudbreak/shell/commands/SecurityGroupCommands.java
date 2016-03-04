@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Component
 public class SecurityGroupCommands implements CommandMarker {
-    private static final String CREATE_SUCCESS_MSG = "Security group created and selected successfully, with id: '%s'";
+    private static final String CREATE_SUCCESS_MSG = "Security group created and selected successfully, with id: '%d' and name: '%s'";
 
     @Inject
     private CloudbreakContext context;
@@ -103,7 +103,7 @@ public class SecurityGroupCommands implements CommandMarker {
             context.putSecurityGroup(id.getId().toString(), name);
             context.setActiveSecurityGroupId(id.getId().toString());
             setHint();
-            return String.format(CREATE_SUCCESS_MSG, id);
+            return String.format(CREATE_SUCCESS_MSG, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

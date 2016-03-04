@@ -280,7 +280,8 @@ public class ClusterCommands implements CommandMarker {
                 CloudbreakShellUtil.WaitResult waitResult =
                         cloudbreakShellUtil.waitAndCheckClusterStatus(Long.valueOf(stackId), Status.AVAILABLE.name());
                 if (CloudbreakShellUtil.WaitResult.FAILED.equals(waitResult)) {
-                    throw exceptionTransformer.transformToRuntimeException("Cluster creation failed on stack with id: " + stackId);
+                    throw exceptionTransformer.transformToRuntimeException(
+                            String.format("Cluster creation failed on stack with id: '%d' and name: '%s'", stackId, context.getStackName()));
                 } else {
                     return "Cluster creation finished";
                 }

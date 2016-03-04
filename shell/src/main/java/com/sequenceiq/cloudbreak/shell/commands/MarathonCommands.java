@@ -84,7 +84,8 @@ public class MarathonCommands implements CommandMarker {
             orchestratorRequest.setType("MARATHON");
             stackRequest.setName(name);
             stackRequest.setOrchestrator(orchestratorRequest);
-            return String.format("Marathon stack imported with id: %s", cloudbreakClient.stackEndpoint().postPublic(stackRequest).getId());
+            return String.format("Marathon stack imported with id: '%d' and name: '%s'",
+                    cloudbreakClient.stackEndpoint().postPublic(stackRequest).getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

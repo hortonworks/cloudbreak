@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 @Component
 public class RecipeCommands implements CommandMarker {
 
+    private static final String CREATE_SUCCESS_MESSAGE = "Recipe created with id: %s and name: '%s'";
     @Inject
     private CloudbreakContext context;
     @Inject
@@ -93,7 +94,7 @@ public class RecipeCommands implements CommandMarker {
             } else {
                 id = cloudbreakClient.recipeEndpoint().postPrivate(recipeRequest);
             }
-            return String.format("Recipe '%s' has been added with id: %s", recipeRequest.getName(), id.getId());
+            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), recipeRequest.getName());
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -186,7 +187,7 @@ public class RecipeCommands implements CommandMarker {
             } else {
                 id = cloudbreakClient.recipeEndpoint().postPrivate(recipeRequest);
             }
-            return String.format("Recipe '%s' has been stored with id: %s", name, id.getId());
+            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), recipeRequest.getName());
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

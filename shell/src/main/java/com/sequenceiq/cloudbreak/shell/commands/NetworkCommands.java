@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Component
 public class NetworkCommands implements CommandMarker {
-    private static final String CREATE_SUCCESS_MSG = "Network created and selected successfully, with id: '%s'";
+    private static final String CREATE_SUCCESS_MSG = "Network created and selected successfully, with id: '%s' and name: '%s'";
 
     @Inject
     private CloudbreakContext context;
@@ -101,7 +101,7 @@ public class NetworkCommands implements CommandMarker {
                 id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), cloudPlatform);
-            return String.format(CREATE_SUCCESS_MSG, id.getId());
+            return String.format(CREATE_SUCCESS_MSG, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -151,7 +151,7 @@ public class NetworkCommands implements CommandMarker {
                 id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), cloudPlatform);
-            return String.format(CREATE_SUCCESS_MSG, id.getId());
+            return String.format(CREATE_SUCCESS_MSG, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -194,7 +194,7 @@ public class NetworkCommands implements CommandMarker {
                 id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), cloudPlatform);
-            return String.format(CREATE_SUCCESS_MSG, id.getId());
+            return String.format(CREATE_SUCCESS_MSG, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
@@ -245,7 +245,7 @@ public class NetworkCommands implements CommandMarker {
                 id = cloudbreakClient.networkEndpoint().postPrivate(networkJson);
             }
             createHintAndAddNetworkToContext(id.getId().toString(), cloudPlatform);
-            return String.format(CREATE_SUCCESS_MSG, id.getId());
+            return String.format(CREATE_SUCCESS_MSG, id.getId(), name);
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

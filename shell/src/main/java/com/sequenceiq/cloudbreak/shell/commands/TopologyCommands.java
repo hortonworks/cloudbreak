@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Component
 public class TopologyCommands implements CommandMarker {
-    private static final String CREATE_SUCCESS_MSG = "Platform created successfully, with id: '%s'";
+    private static final String CREATE_SUCCESS_MSG = "Platform created with id: '%d' and name: '%s'";
 
     @Inject
     private CloudbreakContext context;
@@ -154,7 +154,7 @@ public class TopologyCommands implements CommandMarker {
             req.setNodes(mapping);
             IdJson id = cloudbreakClient.topologyEndpoint().postPublic(req);
             context.setHint(Hints.CREATE_CREDENTIAL_WITH_TOPOLOGY);
-            return String.format(CREATE_SUCCESS_MSG, id.getId());
+            return String.format(CREATE_SUCCESS_MSG, id.getId(), name);
         } catch (Exception e) {
             throw exceptionTransformer.transformToRuntimeException(e);
         }

@@ -215,7 +215,7 @@ public class StackCommands implements CommandMarker {
                     return "Stack creation finished with name: " + name;
                 }
             }
-            return "Stack creation started with name: " + name;
+            return String.format("Stack creation started with id: '%s' and name: '%s'", id.getId(), name);
         } catch (ValidationException ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         } catch (Exception ex) {
