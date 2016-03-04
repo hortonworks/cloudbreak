@@ -1,0 +1,51 @@
+{
+  "kerberos_descriptor": {
+    "services": [
+      {
+        "name": "HIVE",
+        "components": [
+          {
+            "name": "HIVE_METASTORE",
+            "identities": [
+              {
+                "name": "hive_metastore_hive",
+                "keytab": {
+                  "file": "${keytab_dir}/hive2.service.keytab",
+                  "owner": {
+                    "name": "${hive-env/hive_user}",
+                    "access": "r"
+                  },
+                  "group": {
+                    "name": "${cluster-env/user_group}",
+                    "access": ""
+                  },
+                  "configuration": "hive-site/hive.metastore.kerberos.keytab.file"
+                }
+              }
+            ]
+          },
+          {
+            "name": "HIVE_SERVER",
+            "identities": [
+              {
+                "name": "hive_server_hive",
+                "keytab": {
+                  "file": "${keytab_dir}/hive2.service.keytab",
+                  "owner": {
+                    "name": "${hive-env/hive_user}",
+                    "access": "r"
+                  },
+                  "group": {
+                    "name": "${cluster-env/user_group}",
+                    "access": ""
+                  },
+                  "configuration": "hive-site/hive.server2.authentication.kerberos.keytab"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
