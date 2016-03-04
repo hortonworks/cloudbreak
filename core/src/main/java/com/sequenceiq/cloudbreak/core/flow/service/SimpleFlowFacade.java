@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.concurrent.LockedMethod;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
@@ -13,6 +7,11 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
 
 @Service
 public class SimpleFlowFacade implements FlowFacade {
@@ -74,7 +73,7 @@ public class SimpleFlowFacade implements FlowFacade {
         try {
             return clusterFacade.startAmbari(context);
         } catch (Exception e) {
-            LOGGER.error("Exception while starting Ambari :", e.getMessage());
+            LOGGER.error("Exception while starting Ambari : {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -87,7 +86,7 @@ public class SimpleFlowFacade implements FlowFacade {
             LOGGER.debug("Building ambari cluster DONE");
             return context;
         } catch (Exception e) {
-            LOGGER.error("Exception during the cluster build process: ", e.getMessage());
+            LOGGER.error("Exception during the cluster build process: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
