@@ -63,6 +63,9 @@
           "name": "HBASE_MASTER"
         },
         {
+          "name": "HBASE_CLIENT"
+        },
+        {
           "name": "HDFS_CLIENT"
         },
         {

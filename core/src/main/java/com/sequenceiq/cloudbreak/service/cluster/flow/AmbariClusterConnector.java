@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,6 +41,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
@@ -750,6 +754,7 @@ public class AmbariClusterConnector {
                     gatewayHost = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId()).get(0);
                 }
                 blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);
+                blueprintText = addHBaseClient(blueprintText);
             }
             LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
             ambariClient.addBlueprint(blueprintText);
@@ -763,6 +768,39 @@ public class AmbariClusterConnector {
                 throw new CloudbreakServiceException(e);
             }
         }
+    }
+
+    // TODO https://hortonworks.jira.com/browse/BUG-53064
+    private String addHBaseClient(String blueprint) {
+        String processingBlueprint = blueprint;
+        try {
+            JsonNode root = JsonUtil.readTree(processingBlueprint);
+            ArrayNode hostGroupsNode = (ArrayNode) root.path("host_groups");
+            Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
+            while (hostGroups.hasNext()) {
+                JsonNode hostGroupNode = hostGroups.next();
+                ArrayNode componentsArray = (ArrayNode) hostGroupNode.path("components");
+                Iterator<JsonNode> iterator = componentsArray.elements();
+                boolean masterPresent = false;
+                boolean clientPresent = false;
+                while (iterator.hasNext()) {
+                    String componentName = iterator.next().path("name").textValue();
+                    if ("HBASE_MASTER".equals(componentName)) {
+                        masterPresent = true;
+                    } else if ("HBASE_CLIENT".equals(componentName)) {
+                        clientPresent = true;
+                    }
+                }
+                if (masterPresent && !clientPresent) {
+                    ObjectNode arrayElementNode = componentsArray.addObject();
+                    arrayElementNode.put("name", "HBASE_CLIENT");
+                }
+            }
+            processingBlueprint = JsonUtil.writeValueAsString(root);
+        } catch (Exception e) {
+            LOGGER.warn("Cannot extend blueprint with HBASE_CLIENT", e);
+        }
+        return processingBlueprint;
     }
 
     private PollingResult waitForHosts(Stack stack, AmbariClient ambariClient, int nodeCount, Set<HostMetadata> hostsInCluster) {
