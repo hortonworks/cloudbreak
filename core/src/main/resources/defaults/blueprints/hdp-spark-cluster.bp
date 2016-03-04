@@ -83,6 +83,9 @@
           "name": "HBASE_MASTER"
         },
         {
+          "name": "HBASE_CLIENT"
+        },
+        {
           "name": "HDFS_CLIENT"
         },
         {
@@ -209,4 +212,3 @@
     "stack_version": "2.4"
   }
 }
-    
