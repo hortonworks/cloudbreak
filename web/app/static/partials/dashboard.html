@@ -28,7 +28,7 @@
 
                     <!-- ........ CREDENTIALS DROPDOWN ......................................... -->
 
-                    <li class="dropdown" id="menu-credential">
+                    <li class="dropdown" id="menu-credential" ng-if="isWriteScope('stacks', userDetails.groups)">
                         <a href="" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-tag fa-fw"></i>
                             <span ng-class="$root.activeCredential === undefined && $root.activeStack === undefined? 'text-danger' : 'text'">{{$root.activeCredential === undefined ? ($root.activeStack === undefined ? msg.dashboard_select_credential_label : $root.activeStack.name) : $root.activeCredential.name}}</span>
@@ -84,7 +84,7 @@
                         <i class="fa fa-warning form-control-feedback" style="line-height: 40px !important;"></i>
                     </div>
                 </div>
-                <div class="col-sm-2 col-xs-2">
+                <div class="col-sm-2 col-xs-2" ng-if="isWriteScope('stacks', userDetails.groups)">
                     <div class="dropdown">
                         <button class="btn btn-info btn-block btn-collapse-title dropdown-toggle" type="button" id="sort-clusters-btn" data-toggle="dropdown">
                             <i class="fa fa-sort-amount-asc fa-fw"></i><span class="sr-only">{{msg.dashboard_sort_title}} </span><span class="title"> {{msg.dashboard_sort_name_label}}</span>
@@ -102,7 +102,7 @@
                 </div>
 
                 <!-- create cluster button -->
-                <div class="col-sm-3 col-xs-2">
+                <div class="col-sm-3 col-xs-2" ng-if="isWriteScope('stacks', userDetails.groups)">
                     <button id="create-cluster-btn" ng-disabled="activeCredential === undefined && activeStack === undefined" class="btn btn-success btn-block btn-collapse-title" role="button">
                         <i class="fa fa-plus fa-fw"></i>
                         <span> {{msg.dashboard_create_cluster_label}}</span>
