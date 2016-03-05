@@ -364,6 +364,7 @@ function continueInit() {
             updateGroup(token, userId, 'cloudbreak.credentials')
             updateGroup(token, userId, 'cloudbreak.events')
             updateGroup(token, userId, 'cloudbreak.recipes')
+            updateGroup(token, userId, 'cloudbreak.sssdconfigs')
             updateGroup(token, userId, 'cloudbreak.usages.user')
             updateGroup(token, userId, 'periscope.cluster')
         } else {
@@ -402,6 +403,11 @@ function continueInit() {
             } else {
                 updateGroup(token, userId, 'cloudbreak.networks.read')
             }
+            if (requestedScopes.sssdconfigs.write) {
+                updateGroup(token, userId, 'cloudbreak.sssdconfigs')
+            } else {
+                updateGroup(token, userId, 'cloudbreak.sssdconfigs.read')
+            }
             updateGroup(token, userId, 'cloudbreak.usages.user')
             updateGroup(token, userId, 'periscope.cluster')
             updateGroup(token, userId, 'cloudbreak.events')
@@ -409,6 +415,7 @@ function continueInit() {
     }
 
     updateGroup = function(token, userId, displayName) {
+        var requestedName = displayName
         var getGroupOptions = {
             headers: {
                 'Accept': 'application/json',
@@ -460,7 +467,7 @@ function continueInit() {
                             }
                         });
                 } else {
-                    console.log("GET - cannot retrieve group: " + displayName)
+                    console.log("GET - cannot retrieve group: " + requestedName)
                 }
             });
     }

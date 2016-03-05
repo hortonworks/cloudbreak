@@ -4,15 +4,15 @@
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a href="" id="sssdconfigs-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-sssdconfigs-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-            <h4><span class="badge pull-right">{{$root.sssdConfigs.length}}</span> manage security configurations</h4>
+            <h4><span class="badge pull-right">{{$root.sssdConfigs.length}}</span> {{msg.sssdconfig_manage_configs}}</h4>
         </div>
 
         <div id="panel-sssdconfigs-collapse" class="panel-btn-in-header-collapse collapse">
             <div class="panel-body">
 
-                <p class="btn-row-over-panel">
+                <p class="btn-row-over-panel" ng-if="isWriteScope('sssdconfigs', userDetails.groups)">
                     <a href="" id="panel-create-sssdconfigs-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-sssdconfigs-collapse">
-                        <i class="fa fa-plus fa-fw"></i><span> create SSSD configuration</span>
+                        <i class="fa fa-plus fa-fw"></i><span> {{msg.sssdconfig_form_create}}</span>
                     </a>
                 </p>
 
@@ -43,7 +43,7 @@
                         </div>
                         <div id="panel-sssdconfig-collapse{{sssdConfig.id}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel">
+                            <p class="btn-row-over-panel" ng-if="isWriteScope('sssdconfigs', userDetails.groups)">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteSssdConfig(sssdConfig)">
                                     <i class="fa fa-times fa-fw"></i><span> delete</span>
                                 </a>

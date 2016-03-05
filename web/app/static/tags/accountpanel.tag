@@ -68,43 +68,49 @@
                                         <tr>
                                             <th scope="row">{{msg.account_details_blueprints}}</th>
                                             <td class="is-visible">
-                                                <input type="checkbox" disabled name="bpch1" id="bpch1" ng-checked="isWriteScope('blueprints', userDetails.groups)">
+                                                <input type="checkbox" disabled name="bpch1" ng-checked="isWriteScope('blueprints', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
                                             <th scope="row">{{msg.account_details_recipes}}</th>
                                             <td class="is-visible">
-                                                <input type="checkbox" disabled name="recch1" id="recch1" ng-checked="isWriteScope('recipes', userDetails.groups)">
+                                                <input type="checkbox" disabled name="recch1" ng-checked="isWriteScope('recipes', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
                                             <th scope="row">{{msg.account_details_templates}}</th>
                                             <td class="is-visible">
-                                                <input type="checkbox" disabled name="tmch1" id="tmch1" ng-checked="isWriteScope('templates', userDetails.groups)">
+                                                <input type="checkbox" disabled name="tmch1" ng-checked="isWriteScope('templates', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
                                             <th scope="row">{{msg.account_details_credentials}}</th>
                                             <td class="is-visible">
-                                                <input type="checkbox" disabled name="crch1" id="crch1" ng-checked="isWriteScope('credentials', userDetails.groups)">
+                                                <input type="checkbox" disabled name="crch1" ng-checked="isWriteScope('credentials', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
                                             <th scope="row">{{msg.account_details_stacks}}</th>
                                             <td class="is-visible">
-                                                <input type="checkbox" disabled name="stch1" id="stch1" ng-checked="isWriteScope('stacks', userDetails.groups)">
+                                                <input type="checkbox" disabled name="stch1" ng-checked="isWriteScope('stacks', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
                                             <th scope="row">{{msg.account_details_networks}}</th>
                                             <td class="is-visible">
-                                                <input type="checkbox" disabled name="nwcrch1" id="nwcrch1" ng-checked="isWriteScope('networks', userDetails.groups)">
+                                                <input type="checkbox" disabled name="nwcrch1" ng-checked="isWriteScope('networks', userDetails.groups)">
                                             </td>
                                         </tr>
                                         <tr>
                                             <th scope="row">{{msg.account_details_securitygroups}}</th>
                                             <td class="is-visible">
-                                                <input type="checkbox" disabled name="sgstch1" id="sgstch1" ng-checked="isWriteScope('securitygroups', userDetails.groups)">
+                                                <input type="checkbox" disabled name="sgstch1" ng-checked="isWriteScope('securitygroups', userDetails.groups)">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">{{msg.account_details_sssdconfigs}}</th>
+                                            <td class="is-visible">
+                                                <input type="checkbox" disabled name="sssdch1" ng-checked="isWriteScope('sssdconfigs', userDetails.groups)">
                                             </td>
                                         </tr>
                                     </tbody>

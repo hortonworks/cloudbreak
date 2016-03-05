@@ -109,6 +109,7 @@ public class ClusterTerminationService {
         }
         cluster.setBlueprint(null);
         cluster.setStack(null);
+        cluster.setSssdConfig(null);
         cluster.setStatus(DELETE_COMPLETED);
         deleteClusterHostGroupsWithItsMetadata(cluster);
     }
