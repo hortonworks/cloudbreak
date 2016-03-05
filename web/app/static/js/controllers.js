@@ -167,35 +167,6 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             return parseFloat(element.eventTimestamp);
         }
 
-        $scope.isWriteScope = function(name, groups) {
-            if (searchScopeElement(name, groups) != null) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        var searchScopeElement = function(element, groups) {
-            var result = null;
-            if (groups != undefined && groups != null) {
-                angular.forEach(groups, function(item) {
-                    if (endsWith(item.display, element)) {
-                        result = item;
-                        return result;
-                    }
-                });
-            }
-            return result;
-        }
-
-        var endsWith = function(str, suffix) {
-            if (str != undefined && str.indexOf(suffix, str.length - suffix.length) !== -1) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
         $scope.firstVisible = function(platforms) {
             for (var i = 0; i < platforms.length; i++) {
                 if ($scope.isVisible(platforms[i])) {

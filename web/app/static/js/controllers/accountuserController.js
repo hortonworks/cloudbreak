@@ -7,7 +7,7 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
 
         initInvite();
         $rootScope.accountUsers = [];
-        $rootScope.userDetails = AccountDetails.get()
+        $scope.userDetails = AccountDetails.get()
         getUsersForAccount();
 
         $scope.inviteUser = function() {
@@ -43,6 +43,36 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
                 return false;
             }
         }
+
+        $scope.endsWith = function(str, suffix) {
+            if (str != undefined && str.indexOf(suffix, str.length - suffix.length) !== -1) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        $scope.searchScopeElement = function(element, groups) {
+            var result = null;
+            if (groups != undefined && groups != null) {
+                angular.forEach(groups, function(item) {
+                    if ($scope.endsWith(item.display, element)) {
+                        result = item;
+                        return result;
+                    }
+                });
+            }
+            return result;
+        }
+
+        $scope.isWriteScope = function(name, groups) {
+            if ($scope.searchScopeElement(name, groups) != null) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
 
         $scope.getUsers = function() {
             $rootScope.accountUsers = AccountUsers.query(function(result) {

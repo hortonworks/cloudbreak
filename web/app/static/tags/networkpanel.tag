@@ -11,7 +11,7 @@
         <div id="panel-network-collapse" class="panel-btn-in-header-collapse collapse">
             <div class="panel-body">
 
-                <p class="btn-row-over-panel" ng-if="isWriteScope('networks', userDetails.groups)">
+                <p class="btn-row-over-panel">
                     <a href="" id="panel-create-network-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-network-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> {{msg.network_form_create}}</span>
                     </a>
@@ -73,7 +73,7 @@
                         </div>
                         <div id="panel-network-collapse{{network.id}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel" ng-if="isWriteScope('networks', userDetails.groups)">
+                            <p class="btn-row-over-panel">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteNetwork(network)">
                                     <i class="fa fa-times fa-fw"></i><span> {{msg.network_list_delete}}</span>
                                 </a>

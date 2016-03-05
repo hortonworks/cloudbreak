@@ -11,7 +11,7 @@
         <div id="panel-blueprints-collapse" class="panel-btn-in-header-collapse collapse">
             <div class="panel-body">
 
-                <p class="btn-row-over-panel" ng-if="isWriteScope('blueprints', userDetails.groups)">
+                <p class="btn-row-over-panel">
                     <a href="" id="panel-create-blueprints-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-blueprints-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> {{msg.blueprint_form_create}}</span>
                     </a>
@@ -53,12 +53,12 @@
                         </div>
                         <div id="panel-blueprint-collapse{{blueprint.id}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel pull-left" ng-if="isWriteScope('blueprints', userDetails.groups)">
+                            <p class="btn-row-over-panel pull-left">
                                 <a href="" class="btn btn-info" role="button" ng-click="copyAndEditBlueprint(blueprint)">
                                     <i class="fa fa-copy fa-fw"></i><span> {{msg.blueprint_list_copy}}</span>
                                 </a>
                             </p>
-                            <p class="btn-row-over-panel" ng-if="isWriteScope('blueprints', userDetails.groups)">
+                            <p class="btn-row-over-panel">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteBlueprint(blueprint)">
                                     <i class="fa fa-times fa-fw"></i><span> {{msg.blueprint_list_delete}}</span>
                                 </a>

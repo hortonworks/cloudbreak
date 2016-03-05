@@ -15,7 +15,7 @@
         <div id="panel-credentials-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
             <div class="panel-body">
 
-                <p class="btn-row-over-panel" ng-if="isWriteScope('credentials', userDetails.groups)">
+                <p class="btn-row-over-panel">
                     <a href="" id="panel-create-credentials-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-credentials-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> {{msg.credential_form_create}}</span>
                     </a>
@@ -81,7 +81,7 @@
                         </div>
                         <div id="panel-credential-collapse{{credential.id}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel" ng-if="isWriteScope('credentials', userDetails.groups)">
+                            <p class="btn-row-over-panel">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteCredential(credential)">
                                     <i class="fa fa-times fa-fw"></i>
                                     <span> {{msg.credential_list_delete}}</span>
