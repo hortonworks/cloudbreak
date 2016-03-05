@@ -11,7 +11,7 @@
         <div id="panel-templates-collapse" class="panel-btn-in-header-collapse collapse">
             <div class="panel-body">
 
-                <p class="btn-row-over-panel">
+                <p class="btn-row-over-panel" ng-if="isWriteScope('templates', userDetails.groups)">
                     <a href="" id="panel-create-templates-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-templates-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> {{msg.template_form_create}}</span>
                     </a>
@@ -77,7 +77,7 @@
                         </div>
                         <div id="panel-template-collapse{{template.id}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel">
+                            <p class="btn-row-over-panel" ng-if="isWriteScope('templates', userDetails.groups)">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteTemplate(template)">
                                     <i class="fa fa-times fa-fw"></i><span> {{msg.template_list_delete}}</span>
                                 </a>
