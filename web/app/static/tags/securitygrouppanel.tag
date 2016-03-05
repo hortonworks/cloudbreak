@@ -13,7 +13,7 @@
 
                 <!-- ............ CREATE FORM ............................................. -->
 
-                <p class="btn-row-over-panel">
+                <p class="btn-row-over-panel" ng-if="isWriteScope('securitygroups', userDetails.groups)">
                     <a href="" id="panel-create-securitygroup-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-securitygroup-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> {{msg.securitygroup_form_create}}</span>
                     </a>
@@ -48,7 +48,7 @@
                         </div>
                         <div id="panel-securitygroup-collapse{{securitygroup.id}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel">
+                            <p class="btn-row-over-panel" ng-if="isWriteScope('securitygroups', userDetails.groups)">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteSecurityGroup(securitygroup)">
                                     <i class="fa fa-times fa-fw"></i><span> {{msg.securitygroup_list_delete}}</span>
                                 </a>
