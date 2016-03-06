@@ -88,6 +88,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
+import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -651,7 +652,11 @@ public class AmbariClusterConnector {
 
     private void startAmbariAgents(Stack stack) throws CloudbreakException {
         LOGGER.info("Starting Ambari agents on the hosts.");
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+        try {
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+        } catch (PluginFailureException e) {
+            LOGGER.warn("Ambari agent start event couldn't finish in time, safely ignoring it", e);
+        }
         PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
         if (PollingResult.EXIT.equals(hostsJoinedResult)) {
             throw new CancellationException("Cluster was terminated while starting Ambari agents.");
@@ -662,7 +667,11 @@ public class AmbariClusterConnector {
     }
 
     private void restartAmbariAgents(Stack stack) throws CloudbreakException {
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+        try {
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+        } catch (PluginFailureException e) {
+            LOGGER.warn("Ambari agent restart event couldn't finish in time, safely ignoring it", e);
+        }
         PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
         if (isExited(hostsJoinedResult)) {
             throw new CancellationException("Cluster was terminated while restarting Ambari agents.");
