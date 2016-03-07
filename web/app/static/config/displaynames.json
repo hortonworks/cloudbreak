@@ -28,6 +28,11 @@
             "ephemeral": "Ephemeral",
             "standard": "Magnetic",
             "gp2": "General Purpose (SSD)"
+        },
+        "AZURE_RM": {
+            "Standard_LRS": "Locally-redundant storage",
+            "Standard_GRS": "Geo-redundant storage",
+            "Premium_LRS": "Premium locally-redundant storage"
         }
     },
     "properties" : {

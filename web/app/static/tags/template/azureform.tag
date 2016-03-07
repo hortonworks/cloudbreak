@@ -32,6 +32,16 @@
     <!-- .col-sm-9 -->
 </div>
 
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="azure_tvolumetype">{{msg.template_form_volume_type_label}}</label>
+
+    <div class="col-sm-9">
+        <select class="form-control" id="azure_tvolumetype" name="azure_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AZURE_RM', volumeType) for volumeType in $root.params.diskTypes.AZURE_RM | filter:filterByVolumetype" ng-model="azureTemp.volumeType" required>
+        </select>
+    </div>
+    <!-- .col-sm-9 -->
+</div>
+
 <div class="form-group" ng-class="{ 'has-error': azureTemplateForm.azure_tvolumescount.$dirty && azureTemplateForm.azure_tvolumescount.$invalid }">
     <label class="col-sm-3 control-label" for="azure_tvolumescount">{{msg.template_form_volume_count_label}}</label>
 

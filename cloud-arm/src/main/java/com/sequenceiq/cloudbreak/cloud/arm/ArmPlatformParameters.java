@@ -42,20 +42,23 @@ public class ArmPlatformParameters implements PlatformParameters {
     @Override
     public DiskTypes diskTypes() {
         return new DiskTypes(getDiskTypes(), defaultDiskType());
-
-    }
-
-    private Collection<DiskType> getDiskTypes() {
-        return Lists.newArrayList();
-    }
-
-    private DiskType defaultDiskType() {
-        return diskType("HDD");
     }
 
     @Override
     public Regions regions() {
         return new Regions(getRegions(), defaultRegion());
+    }
+
+    private Collection<DiskType> getDiskTypes() {
+        Collection<DiskType> disks = Lists.newArrayList();
+        for (ArmDiskType diskType : ArmDiskType.values()) {
+            disks.add(diskType(diskType.value()));
+        }
+        return disks;
+    }
+
+    private DiskType defaultDiskType() {
+        return diskType(ArmDiskType.LOCALLY_REDUNDANT.value());
     }
 
     private Collection<Region> getRegions() {
@@ -101,7 +104,7 @@ public class ArmPlatformParameters implements PlatformParameters {
         return vmType(ArmVmType.STANDARD_D3.vmType());
     }
 
-    public enum ArmVmType {
+    private enum ArmVmType {
         STANDARD_A5("Standard_A5", meta(4)),
         STANDARD_A6("Standard_A6", meta(8)),
         STANDARD_A7("Standard_A7", meta(16)),
@@ -135,7 +138,7 @@ public class ArmPlatformParameters implements PlatformParameters {
         private final String vmType;
         private final VmTypeMeta meta;
 
-        private ArmVmType(String vmType, VmTypeMeta meta) {
+        ArmVmType(String vmType, VmTypeMeta meta) {
             this.vmType = vmType;
             this.meta = meta;
         }
@@ -175,7 +178,7 @@ public class ArmPlatformParameters implements PlatformParameters {
 
         private final String value;
 
-        private ArmRegion(String value) {
+        ArmRegion(String value) {
             this.value = value;
         }
 

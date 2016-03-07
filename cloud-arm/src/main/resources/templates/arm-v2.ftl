@@ -362,13 +362,15 @@
                                 "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'), '${instance.instanceId}'))]"
                             }
                         ]
-                    },
-                    "diagnosticsProfile": {
+                    }
+                    <#if instance.bootDiagnosticsEnabled>
+                    ,"diagnosticsProfile": {
                       "bootDiagnostics": {
                         "enabled": true,
                         "storageUri": "${instance.attachedDiskStorageUrl}"
                       }
                     }
+                    </#if>
                 }
               }<#if (instance_index + 1) != groups[instanceGroup]?size>,</#if>
           </#list>

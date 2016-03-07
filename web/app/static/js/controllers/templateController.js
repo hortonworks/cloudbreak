@@ -285,7 +285,7 @@ angular.module('uluwatuControllers').controller('templateController', [
             $scope.azureTemp = {
                 volumeCount: 1,
                 volumeSize: 100,
-                volumeType: "HDD",
+                volumeType: $rootScope.params.defaultDisks.AZURE_RM,
                 instanceType: $rootScope.params.defaultVmTypes.AZURE_RM,
                 parameters: {}
             }

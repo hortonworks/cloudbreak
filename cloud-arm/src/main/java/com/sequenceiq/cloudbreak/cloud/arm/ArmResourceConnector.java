@@ -68,8 +68,9 @@ public class ArmResourceConnector implements ResourceConnector {
         armUtils.validateSubnetRules(client, stack.getNetwork());
         try {
             String region = ac.getCloudContext().getLocation().getRegion().value();
-            for (String attachedStorageName : armStackView.getStorageAccountNames()) {
-                armStorage.createStorage(ac, client, attachedStorageName, resourceGroupName, region);
+            Map<String, ArmDiskType> storageAccounts = armStackView.getStorageAccounts();
+            for (String name : storageAccounts.keySet()) {
+                armStorage.createStorage(ac, client, name, storageAccounts.get(name), resourceGroupName, region);
             }
             client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
         } catch (HttpResponseException e) {
@@ -166,8 +167,9 @@ public class ArmResourceConnector implements ResourceConnector {
 
         try {
             String region = authenticatedContext.getCloudContext().getLocation().getRegion().value();
-            for (String attachedStorageName : armStackView.getStorageAccountNames()) {
-                armStorage.createStorage(authenticatedContext, azureRMClient, attachedStorageName, resourceGroupName, region);
+            Map<String, ArmDiskType> storageAccounts = armStackView.getStorageAccounts();
+            for (String name : storageAccounts.keySet()) {
+                armStorage.createStorage(authenticatedContext, azureRMClient, name, storageAccounts.get(name), resourceGroupName, region);
             }
             azureRMClient.createTemplateDeployment(stackName, stackName, template, parameters);
             List<CloudResourceStatus> check = new ArrayList<>();
@@ -194,7 +196,8 @@ public class ArmResourceConnector implements ResourceConnector {
             List<String> storageProfileDiskNames = new ArrayList<>();
             String instanceId = instance.getInstanceId();
             Long privateId = instance.getTemplate().getPrivateId();
-            String attachedDiskStorageName = armStorage.getAttachedDiskStorageName(armCredentialView, privateId, ac.getCloudContext());
+            ArmDiskType armDiskType = ArmDiskType.getByValue(instance.getTemplate().getVolumeType());
+            String attachedDiskStorageName = armStorage.getAttachedDiskStorageName(armCredentialView, privateId, ac.getCloudContext(), armDiskType);
             try {
                 Map<String, Object> virtualMachine = client.getVirtualMachine(stackName, instanceId);
 

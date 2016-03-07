@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cloud.arm.ArmDiskType;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmStorage;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
@@ -15,19 +16,29 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class ArmInstanceView {
 
     private InstanceTemplate instance;
-
     private InstanceGroupType type;
-
     private String attachedDiskStorage;
+    private String attachedDiskStorageType;
 
-    public ArmInstanceView(InstanceTemplate instance, InstanceGroupType type, ArmStorageView armStorageView) {
+    public ArmInstanceView(InstanceTemplate instance, InstanceGroupType type, String attachedDiskStorage, String attachedDiskStorageType) {
         this.instance = instance;
         this.type = type;
-        this.attachedDiskStorage = armStorageView.getAttachedDiskStorageName(instance.getPrivateId());
+        this.attachedDiskStorage = attachedDiskStorage;
+        this.attachedDiskStorageType = attachedDiskStorageType;
     }
 
+    /**
+     * Used in freemarker template.
+     */
     public String getFlavor() {
         return instance.getFlavor();
+    }
+
+    /**
+     * Used in freemarker template.
+     */
+    public boolean isBootDiagnosticsEnabled() {
+        return ArmDiskType.LOCALLY_REDUNDANT.equals(ArmDiskType.getByValue(instance.getVolumeType()));
     }
 
     public InstanceGroupType getType() {
@@ -57,6 +68,13 @@ public class ArmInstanceView {
         return attachedDiskStorage;
     }
 
+    public String getAttachedDiskStorageType() {
+        return attachedDiskStorageType;
+    }
+
+    /**
+     * Used in freemarker template.
+     */
     public String getAttachedDiskStorageUrl() {
         return String.format(ArmStorage.STORAGE_BLOB_PATTERN, attachedDiskStorage);
     }

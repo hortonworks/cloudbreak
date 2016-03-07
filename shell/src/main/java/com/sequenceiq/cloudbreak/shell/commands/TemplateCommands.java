@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.AwsInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.AwsVolumeType;
 import com.sequenceiq.cloudbreak.shell.completion.AzureInstanceType;
+import com.sequenceiq.cloudbreak.shell.completion.AzureVolumeType;
 import com.sequenceiq.cloudbreak.shell.completion.GcpInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.GcpVolumeType;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
@@ -210,6 +211,7 @@ public class TemplateCommands implements CommandMarker {
     public String createAzureTemplate(
             @CliOption(key = "name", mandatory = true, help = "Name of the template") String name,
             @CliOption(key = "instanceType", mandatory = true, help = "type of the VM") AzureInstanceType vmType,
+            @CliOption(key = "volumeType", mandatory = false, help = "volumeType of the template") AzureVolumeType volumeType,
             @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
             @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
@@ -233,6 +235,7 @@ public class TemplateCommands implements CommandMarker {
             templateRequest.setInstanceType(vmType.getName());
             templateRequest.setVolumeCount(volumeCount);
             templateRequest.setVolumeSize(volumeSize);
+            templateRequest.setVolumeType(volumeType == null ? "Standard_LRS" : volumeType.getName());
             if (platformId != null) {
                 checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), platformId, cloudPlatform);
             }

@@ -43,8 +43,8 @@ public class CloudFormationTemplateBuilder {
                             group.getName(),
                             instanceTemplate.getVolumes().size(),
                             instanceTemplate.getParameter("encrypted", Boolean.class).equals(Boolean.TRUE),
-                            instanceTemplate.getVolumes().get(0).getSize(),
-                            instanceTemplate.getVolumes().get(0).getType(),
+                            instanceTemplate.getVolumeSize(),
+                            instanceTemplate.getVolumeType(),
                             instanceTemplate.getParameter("spotPrice", Double.class)
                     )
             );

@@ -36,6 +36,14 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
+        <label class="col-sm-3 control-label" for="azurevolumetype">{{msg.template_form_volume_type_label}}</label>
+
+        <div class="col-sm-9">
+            <p id="azurevolumetype" class="form-control-static">{{$root.displayNames.getDisk('AZURE_RM', template.volumeType)}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
         <label class="col-sm-3 control-label" for="location">{{msg.template_form_volume_count_label}}</label>
 
         <div class="col-sm-9">
