@@ -251,7 +251,7 @@ public class StackCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "stack select", help = "Select the stack by its id")
+    @CliCommand(value = "stack select", help = "Select the stack by its id or its name")
     public String selectStack(
             @CliOption(key = "id", mandatory = false, help = "Id of the stack") String id,
             @CliOption(key = "name", mandatory = false, help = "Name of the stack") String name) {
@@ -303,7 +303,7 @@ public class StackCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "stack terminate", help = "Terminate the stack by its id")
+    @CliCommand(value = "stack terminate", help = "Terminate the stack by its id or its name")
     public String terminateStack(
             @CliOption(key = "id", mandatory = false, help = "Id of the stack") String id,
             @CliOption(key = "name", mandatory = false, help = "Name of the stack") String name,

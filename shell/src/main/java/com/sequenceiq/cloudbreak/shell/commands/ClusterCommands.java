@@ -64,7 +64,7 @@ public class ClusterCommands implements CommandMarker {
                 && context.getActiveHostGroups().size() == marathonContext.getHostgroups().size()));
     }
 
-    @CliAvailabilityIndicator(value = { "cluster show", "cluster stop", "cluster start" })
+    @CliAvailabilityIndicator(value = { "cluster show", "cluster stop", "cluster start", "cluster delete" })
     public boolean isClusterShowCommandAvailable() {
         return context.isStackAvailable() || (context.isMarathonMode() && marathonContext.isSelectedMarathonStackAvailable());
     }
@@ -134,6 +134,17 @@ public class ClusterCommands implements CommandMarker {
             return renderSingleMap(responseTransformer.transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
         } catch (IndexOutOfBoundsException ex) {
             throw exceptionTransformer.transformToRuntimeException("There was no cluster for this account.");
+        } catch (Exception ex) {
+            throw exceptionTransformer.transformToRuntimeException(ex);
+        }
+    }
+
+    @CliCommand(value = "cluster delete", help = "Delete the cluster by stack id")
+    public String deleteCluster() {
+        try {
+            String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
+            cloudbreakClient.clusterEndpoint().delete(Long.valueOf(stackId));
+            return "Cluster deletion started with stack id: " + stackId;
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }
