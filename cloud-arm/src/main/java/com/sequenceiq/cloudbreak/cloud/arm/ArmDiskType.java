@@ -2,8 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.arm;
 
 public enum ArmDiskType {
     LOCALLY_REDUNDANT("Standard_LRS", "l"),
-    GEO_REDUNDANT("Standard_GRS", "g"),
-    PREMIUM_LOCALLY_REDUNDANT("Premium_LRS", "p");
+    GEO_REDUNDANT("Standard_GRS", "g");
+    // TODO DS_ instance types are required
+    // PREMIUM_LOCALLY_REDUNDANT("Premium_LRS", "p");
 
     private final String value;
     private final String abbreviation;
@@ -27,8 +28,8 @@ public enum ArmDiskType {
                 return LOCALLY_REDUNDANT;
             case "Standard_GRS":
                 return GEO_REDUNDANT;
-            case "Premium_LRS":
-                return PREMIUM_LOCALLY_REDUNDANT;
+            // case "Premium_LRS":
+            //    return PREMIUM_LOCALLY_REDUNDANT;
             default:
                 return LOCALLY_REDUNDANT;
         }
