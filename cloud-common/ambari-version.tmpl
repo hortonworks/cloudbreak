@@ -1,0 +1,1 @@
+{{ $url := printf "https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cloudbreak/%s.image/search" $cloud }}{{ $images := httpget $url | json | pointer "/versions/0/metadata/all_docker_images" | split "," | splitkv ":" }}{{index $images "hortonworks/ambari-server" }}

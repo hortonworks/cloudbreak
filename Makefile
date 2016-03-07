@@ -6,6 +6,7 @@ generate-image-yamls:
 	 make -C cloud-arm generate-yml
 	 make -C cloud-gcp generate-yml
 	 make -C cloud-aws generate-yml
+	 make -C cloud-common update-ambari-image
 
 beautify:
 	 auth/format.sh
