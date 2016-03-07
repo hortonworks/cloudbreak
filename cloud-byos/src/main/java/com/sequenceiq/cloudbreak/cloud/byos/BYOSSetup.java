@@ -10,12 +10,12 @@ import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 
 public class BYOSSetup implements Setup {
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, Image image) {
+    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
 
     }
 
     @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, Image image) {
+    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
         return null;
     }
 

@@ -1,5 +1,31 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_DB;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.CONSUL_WATCH;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.HAVEGED;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.KERBEROS;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LDAP;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LOGROTATE;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.REGISTRATOR;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.SHIPYARD;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.SHIPYARD_DB;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -25,38 +51,10 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_DB;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.CONSUL_WATCH;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.HAVEGED;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.KERBEROS;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LDAP;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.LOGROTATE;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.REGISTRATOR;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.SHIPYARD;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.SHIPYARD_DB;
 
 @Component
 public class ClusterContainerRunner {
     private static final String NONE = "none";
-
-    @Value("${cb.docker.env.shipyard.enabled:}")
-    private Boolean shipyardEnabled;
 
     @Inject
     private ClusterService clusterService;
@@ -170,7 +168,7 @@ public class ClusterContainerRunner {
                         clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId())));
             }
 
-            if ("SWARM".equals(orchestrator.getType()) && shipyardEnabled) {
+            if ("SWARM".equals(orchestrator.getType()) && cluster.getEnableShipyard()) {
                 ContainerConstraint shipyardDbConstraint = constraintFactory.getShipyardDbConstraint(ambariServerHost);
                 containers.put(SHIPYARD_DB.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD_DB), credential,
                         shipyardDbConstraint, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId())));

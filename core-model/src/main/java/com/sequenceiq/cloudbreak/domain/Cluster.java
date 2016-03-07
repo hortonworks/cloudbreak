@@ -113,6 +113,7 @@ public class Cluster implements ProvisionEntity {
     private String kerberosPassword;
 
     private Boolean ldapRequired;
+    private Boolean enableShipyard;
 
     @ManyToOne
     private SssdConfig sssdConfig;
@@ -385,6 +386,18 @@ public class Cluster implements ProvisionEntity {
 
     public boolean isDeleteCompleted() {
         return DELETE_COMPLETED.equals(status);
+    }
+
+    public Boolean getSecure() {
+        return secure;
+    }
+
+    public Boolean getEnableShipyard() {
+        return enableShipyard;
+    }
+
+    public void setEnableShipyard(Boolean enableShipyard) {
+        this.enableShipyard = enableShipyard;
     }
 
     public boolean isClusterReadyForStart() {

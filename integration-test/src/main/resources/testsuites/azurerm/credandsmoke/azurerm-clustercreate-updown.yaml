@@ -52,6 +52,7 @@ tests:
       region: North Europe
       clusterName: it-azurerm-cred-ud
       sleepTime: 60000
+      persistentStorage: cbstore
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest

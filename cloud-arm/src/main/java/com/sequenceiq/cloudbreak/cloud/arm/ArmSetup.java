@@ -59,12 +59,13 @@ public class ArmSetup implements Setup {
     private ArmStorage armStorage;
 
     @Override
-    public void prepareImage(AuthenticatedContext ac, Image image) {
+    public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
         LOGGER.info("prepare image: {}", image);
         ArmCredentialView acv = new ArmCredentialView(ac.getCloudCredential());
-        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext());
+        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), armStorage.getPersistentStorageName(stack.getParameters()),
+                armStorage.getArmAttachedStorageOption(stack.getParameters()));
         String resourceGroupName = armUtils.getResourceGroupName(ac.getCloudContext());
-        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext());
+        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack.getParameters());
         AzureRMClient client = armClient.getClient(ac.getCloudCredential());
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
@@ -88,10 +89,11 @@ public class ArmSetup implements Setup {
     }
 
     @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext ac, Image image) {
+    public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
         ArmCredentialView acv = new ArmCredentialView(ac.getCloudCredential());
-        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext());
-        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext());
+        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), armStorage.getPersistentStorageName(stack.getParameters()),
+                armStorage.getArmAttachedStorageOption(stack.getParameters()));
+        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack.getParameters());
         ArmCredentialView armCredentialView = new ArmCredentialView(ac.getCloudCredential());
         AzureRMClient client = armClient.getClient(armCredentialView);
         try {

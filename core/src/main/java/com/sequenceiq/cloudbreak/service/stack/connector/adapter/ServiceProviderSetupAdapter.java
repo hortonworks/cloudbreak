@@ -34,11 +34,11 @@ public class ServiceProviderSetupAdapter {
     @Inject
     private EventBus eventBus;
     @Inject
-    private StackToCloudStackConverter cloudStackConverter;
-    @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
     @Inject
     private ImageService imageService;
+    @Inject
+    private StackToCloudStackConverter cloudStackConverter;
 
     public ImageStatusResult checkImage(Stack stack) throws Exception {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -46,7 +46,8 @@ public class ServiceProviderSetupAdapter {
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         Image image = imageService.getImage(stack.getId());
-        CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(cloudContext, cloudCredential, image);
+        CheckImageRequest<CheckImageResult> checkImageRequest =
+                new CheckImageRequest<>(cloudContext, cloudCredential, cloudStackConverter.convert(stack), image);
         LOGGER.info("Triggering event: {}", checkImageRequest);
         eventBus.notify(checkImageRequest.selector(), Event.wrap(checkImageRequest));
         try {

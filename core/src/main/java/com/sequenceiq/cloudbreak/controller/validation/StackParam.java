@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 
 public enum StackParam implements TemplateParam {
 
     DISK_PER_STORAGE("diskPerStorage", false, String.class, Optional.<String>absent()),
-    DEDICATED_INSTANCES("dedicatedInstances", false, Boolean.class, Optional.<String>absent());
+    DEDICATED_INSTANCES("dedicatedInstances", false, Boolean.class, Optional.<String>absent()),
+    PERSISTENT_STORAGE("persistentStorage", false, String.class, Optional.<String>absent()),
+    ATTACHED_STORAGE_OPTION("attachedStorageOption", false, ArmAttachedStorageOption.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;

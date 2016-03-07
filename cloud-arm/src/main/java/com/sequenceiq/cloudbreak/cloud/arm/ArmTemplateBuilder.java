@@ -55,7 +55,9 @@ public class ArmTemplateBuilder {
             Network network = cloudStack.getNetwork();
             Map<String, Object> model = new HashMap<>();
             model.put("credential", armCredentialView);
-            String rootDiskStorage = armStorage.getImageStorageName(armCredentialView, cloudContext);
+            String rootDiskStorage = armStorage.getImageStorageName(armCredentialView, cloudContext,
+                    armStorage.getPersistentStorageName(cloudStack.getParameters()),
+                    armStorage.getArmAttachedStorageOption(cloudStack.getParameters()));
             model.put("storage_account_name", rootDiskStorage);
             model.put("image_storage_container_name", ArmStorage.IMAGES);
             model.put("storage_container_name", armStorage.getDiskContainerName(cloudContext));

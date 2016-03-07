@@ -152,6 +152,7 @@ public class TestUtil {
         stack.setCreated(123L);
         stack.setCloudPlatform(credential.cloudPlatform());
         stack.setOrchestrator(orchestrator());
+        stack.setRelocateDocker(true);
         switch (credential.cloudPlatform()) {
             case AWS:
                 stack.setInstanceGroups(generateAwsInstanceGroups(3));
@@ -343,6 +344,7 @@ public class TestUtil {
         cluster.setUserName("admin");
         cluster.setPassword("admin");
         cluster.setSssdConfig(sssdConfig);
+        cluster.setEnableShipyard(true);
         AmbariStackDetails ambariStackDetails = new AmbariStackDetails();
         cluster.setAmbariStackDetails(ambariStackDetails);
         cluster.setHostGroups(hostGroups(cluster));

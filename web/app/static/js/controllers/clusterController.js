@@ -748,14 +748,19 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.cluster.fileSystem = {};
                     $scope.cluster.fileSystem.type = "WASB";
                     $scope.cluster.fileSystem.defaultFs = true;
+                    $scope.cluster.relocateDocker = true;
+                    $scope.cluster.parameters.persistentStorage = "cbstore";
+                    $scope.cluster.parameters.attachedStorageOption = "SINGLE";
                 } else if ($rootScope.activeCredential.cloudPlatform == 'GCP') {
                     $scope.cluster.fileSystem = {};
                     $scope.cluster.fileSystem.type = "LOCAL";
                     $scope.cluster.fileSystem.properties = {};
+                    $scope.cluster.relocateDocker = false;
                     $scope.cluster.fileSystem.properties.projectId = $rootScope.activeCredential.parameters.projectId;
                     $scope.cluster.fileSystem.properties.serviceAccountEmail = $rootScope.activeCredential.parameters.serviceAccountId;
                     $scope.cluster.fileSystem.properties.privateKeyEncoded = $rootScope.activeCredential.parameters.serviceAccountPrivateKey;
                 } else {
+                    $scope.cluster.relocateDocker = false;
                     delete $scope.cluster.fileSystem;
                 }
             }
@@ -1005,7 +1010,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 },
                 configStrategy: $scope.configStrategies[1],
                 ldapRequired: false,
-                sssdConfigId: null
+                sssdConfigId: null,
+                enableShipyard: true
             };
             $scope.selectSssd = {
                 show: false

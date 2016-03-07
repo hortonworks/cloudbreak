@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
@@ -149,6 +150,9 @@ public class StackCommands implements CommandMarker {
             @CliOption(key = "diskPerStorage", mandatory = false, help = "disk per Storage Account on Azure") Integer diskPerStorage,
             @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
             @CliOption(key = "dedicatedInstances", mandatory = false, help = "request dedicated instances on AWS") Boolean dedicatedInstances,
+            @CliOption(key = "relocateDocker", mandatory = false, help = "relocate docker in startup time") Boolean relocateDocker,
+            @CliOption(key = "attachedStorageType", mandatory = false, help = "type of the storage creation") ArmAttachedStorageOption attachedStorageOption,
+            @CliOption(key = "persistentStorage", mandatory = false, help = "name of the persistent storage") String persistentStorage,
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             validateNetwork();
@@ -166,6 +170,7 @@ public class StackCommands implements CommandMarker {
             IdJson id;
             StackRequest stackRequest = new StackRequest();
             stackRequest.setName(name);
+            stackRequest.setRelocateDocker(relocateDocker == null ? ("AZURE_RM".equals(context.getActiveCloudPlatform()) ? true : false) : relocateDocker);
             stackRequest.setRegion(region.getName());
             if (availabilityZone != null) {
                 stackRequest.setAvailabilityZone(availabilityZone.getName());
@@ -186,6 +191,17 @@ public class StackCommands implements CommandMarker {
             if (diskPerStorage != null) {
                 params.put("diskPerStorage", diskPerStorage.toString());
             }
+            if (attachedStorageOption != null) {
+                params.put("attachedStorageOption", attachedStorageOption.name());
+            } else {
+                params.put("attachedStorageOption", ArmAttachedStorageOption.SINGLE.name());
+            }
+            if (persistentStorage != null) {
+                params.put("persistentStorage", persistentStorage);
+            } else {
+                params.put("persistentStorage", "cbstore");
+            }
+
             stackRequest.setParameters(params);
             List<InstanceGroupJson> instanceGroupJsonList = new ArrayList<>();
             for (Map.Entry<String, InstanceGroupEntry> stringObjectEntry : context.getInstanceGroups().entrySet()) {

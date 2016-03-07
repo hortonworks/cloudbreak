@@ -70,7 +70,8 @@ public class ImageService {
             String tmpSshKey = tlsSecurityService.readPublicSshKey(stack.getId());
             String sshUser = stack.getCredential().getLoginUserName();
             String publicSssKey = stack.getCredential().getPublicKey();
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, tmpSshKey, sshUser, params);
+            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, tmpSshKey, sshUser, params,
+                    stack.getRelocateDocker() == null ? false : stack.getRelocateDocker());
             Image image = new Image(imageName, userData);
             Component component = new Component(ComponentType.IMAGE, IMAGE_NAME, new Json(image), stack);
             componentRepository.save(component);

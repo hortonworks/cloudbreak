@@ -47,6 +47,16 @@ public class ClusterResponse {
     private Map<String, String> serviceEndPoints = new HashMap<>();
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy;
+    @ApiModelProperty(ClusterModelDescription.ENABLE_SHIPYARD)
+    private Boolean enableShipyard;
+
+    public Boolean getEnableShipyard() {
+        return enableShipyard;
+    }
+
+    public void setEnableShipyard(Boolean enableShipyard) {
+        this.enableShipyard = enableShipyard;
+    }
 
     public String getDescription() {
         return description;

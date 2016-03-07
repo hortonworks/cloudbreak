@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
@@ -50,7 +51,8 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             Image image = request.getImage();
-            ImageStatusResult progress = connector.setup().checkImageStatus(auth, image);
+            CloudStack stack = request.getStack();
+            ImageStatusResult progress = connector.setup().checkImageStatus(auth, stack, image);
             CheckImageResult imageResult = new CheckImageResult(request, progress.getImageStatus(), progress.getStatusProgressValue());
             request.getResult().onNext(imageResult);
             LOGGER.info("Provision setup finished for {}", cloudContext);
