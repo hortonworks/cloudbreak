@@ -113,6 +113,12 @@
                                                 <input type="checkbox" disabled name="sssdch1" ng-checked="isWriteScope('sssdconfigs', userDetails.groups)">
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <th scope="row">{{msg.account_details_cloudplatforms}}</th>
+                                            <td class="is-visible">
+                                                <input type="checkbox" disabled name="pch1" ng-checked="isWriteScope('platforms', userDetails.groups)">
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
