@@ -36,6 +36,7 @@ public class AzureTemplateCreationTest extends AbstractCloudbreakIntegrationTest
         templateRequest.setDescription("AZURE_RM template for integration testing");
         templateRequest.setCloudPlatform("AZURE_RM");
         templateRequest.setInstanceType(azureVmType);
+        templateRequest.setVolumeType("Standard_LRS");
         templateRequest.setVolumeCount(Integer.valueOf(azureVolumeCount));
         templateRequest.setVolumeSize(Integer.valueOf(azureVolumeSize));
         String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();

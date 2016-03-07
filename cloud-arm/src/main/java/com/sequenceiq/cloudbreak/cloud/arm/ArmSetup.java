@@ -74,7 +74,7 @@ public class ArmSetup implements Setup {
             if (!resourceGroupExist(client, imageResourceGroupName)) {
                 client.createResourceGroup(imageResourceGroupName, region);
             }
-            armStorage.createStorage(ac, client, imageStorageName, imageResourceGroupName, region);
+            armStorage.createStorage(ac, client, imageStorageName, ArmDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region);
             client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES);
             if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
                 client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES, image.getImageName());

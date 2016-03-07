@@ -35,7 +35,6 @@ public class ArmStorage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmStorage.class);
 
-    private static final String LOCALLY_REDUNDANT_STORAGE = "Standard_LRS";
     private static final int RADIX = 32;
     private static final int MAX_LENGTH_OF_NAME_SLICE = 8;
     private static final int MAX_LENGTH_OF_RESOURCE_NAME = 24;
@@ -62,21 +61,21 @@ public class ArmStorage {
         if (isPersistentStorage()) {
             storageName = getPersistentStorageName(acv, cloudContext.getLocation().getRegion().value());
         } else {
-            storageName = buildStorageName(acv, null, cloudContext);
+            storageName = buildStorageName(acv, null, cloudContext, ArmDiskType.LOCALLY_REDUNDANT);
         }
         return storageName;
     }
 
-    public String getAttachedDiskStorageName(ArmCredentialView acv, Long vmId, CloudContext cloudContext) {
-        return buildStorageName(acv, vmId, cloudContext);
+    public String getAttachedDiskStorageName(ArmCredentialView acv, Long vmId, CloudContext cloudContext, ArmDiskType storageType) {
+        return buildStorageName(acv, vmId, cloudContext, storageType);
     }
 
-    public void createStorage(AuthenticatedContext authenticatedContext, AzureRMClient client, String osStorageName, String storageGroup, String region)
+    public void createStorage(AuthenticatedContext ac, AzureRMClient client, String osStorageName, ArmDiskType storageType, String storageGroup, String region)
             throws Exception {
         if (!storageAccountExist(client, osStorageName)) {
-            client.createStorageAccount(storageGroup, osStorageName, region, LOCALLY_REDUNDANT_STORAGE);
-            PollTask<Boolean> task = armPollTaskFactory.newStorageStatusCheckerTask(authenticatedContext,
-                    new StorageCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()), storageGroup, osStorageName, SUCCEEDED));
+            client.createStorageAccount(storageGroup, osStorageName, region, storageType.value());
+            PollTask<Boolean> task = armPollTaskFactory.newStorageStatusCheckerTask(ac,
+                    new StorageCheckerContext(new ArmCredentialView(ac.getCloudCredential()), storageGroup, osStorageName, SUCCEEDED));
             syncPollingScheduler.schedule(task);
         }
     }
@@ -91,7 +90,7 @@ public class ArmStorage {
         }
     }
 
-    private String buildStorageName(ArmCredentialView acv, Long vmId, CloudContext cloudContext) {
+    private String buildStorageName(ArmCredentialView acv, Long vmId, CloudContext cloudContext, ArmDiskType storageType) {
         String result;
         String name = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "");
         name = name.length() > MAX_LENGTH_OF_NAME_SLICE ? name.substring(0, MAX_LENGTH_OF_NAME_SLICE) : name;
@@ -104,7 +103,7 @@ public class ArmStorage {
             if (armAttachedStorageOption == ArmAttachedStorageOption.PER_VM && vmId != null) {
                 paddedId = String.format("%3s", Long.toString(vmId, RADIX)).replace(' ', '0');
             }
-            result = name + paddedId + new BigInteger(1, digest).toString(RADIX);
+            result = name + storageType.getAbbreviation() + paddedId + new BigInteger(1, digest).toString(RADIX);
         } catch (NoSuchAlgorithmException e) {
             result = name + acv.getId() + cloudContext.getId() + cloudContext.getOwner();
         }

@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.arm.view;
 
+import com.sequenceiq.cloudbreak.cloud.arm.ArmDiskType;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmStorage;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 public class ArmStorageView {
 
@@ -17,7 +19,7 @@ public class ArmStorageView {
         this.armStorage = armStorage;
     }
 
-    public String getAttachedDiskStorageName(Long vmId) {
-        return armStorage.getAttachedDiskStorageName(acv, vmId, cloudContext);
+    public String getAttachedDiskStorageName(InstanceTemplate template) {
+        return armStorage.getAttachedDiskStorageName(acv, template.getPrivateId(), cloudContext, ArmDiskType.getByValue(template.getVolumeType()));
     }
 }

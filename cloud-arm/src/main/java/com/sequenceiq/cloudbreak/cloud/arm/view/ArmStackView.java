@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.cloud.arm.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cloud.arm.ArmDiskType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 public class ArmStackView {
 
@@ -23,7 +23,9 @@ public class ArmStackView {
                 groups.put(groupName, existingInstances);
             }
             for (CloudInstance instance : group.getInstances()) {
-                ArmInstanceView azureInstance = new ArmInstanceView(instance.getTemplate(), group.getType(), armStorageView);
+                InstanceTemplate template = instance.getTemplate();
+                String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
+                ArmInstanceView azureInstance = new ArmInstanceView(template, group.getType(), attachedDiskStorageName, template.getVolumeType());
                 existingInstances.add(azureInstance);
             }
         }
@@ -33,13 +35,13 @@ public class ArmStackView {
         return groups;
     }
 
-    public Set<String> getStorageAccountNames() {
-        Set<String> storageAccountNames = new HashSet<>();
+    public Map<String, ArmDiskType> getStorageAccounts() {
+        Map<String, ArmDiskType> storageAccounts = new HashMap<>();
         for (List<ArmInstanceView> list : getGroups().values()) {
             for (ArmInstanceView armInstanceView : list) {
-                storageAccountNames.add(armInstanceView.getAttachedDiskStorageName());
+                storageAccounts.put(armInstanceView.getAttachedDiskStorageName(), ArmDiskType.getByValue(armInstanceView.getAttachedDiskStorageType()));
             }
         }
-        return storageAccountNames;
+        return storageAccounts;
     }
 }
