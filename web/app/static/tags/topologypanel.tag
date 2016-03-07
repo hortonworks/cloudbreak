@@ -1,6 +1,6 @@
 <!-- .... TOPOLOGIES PANEL ................................................. -->
 
-<div id="panel-topoligies" ng-controller="topologyController" class="col-md-12 col-lg-11">
+<div id="panel-topoligies" ng-controller="topologyController" class="col-md-12 col-lg-11" ng-if="isWriteScope('platforms', userDetails.groups)">
 
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">

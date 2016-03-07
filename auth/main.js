@@ -365,6 +365,7 @@ function continueInit() {
             updateGroup(token, userId, 'cloudbreak.events')
             updateGroup(token, userId, 'cloudbreak.recipes')
             updateGroup(token, userId, 'cloudbreak.sssdconfigs')
+            updateGroup(token, userId, 'cloudbreak.platforms')
             updateGroup(token, userId, 'cloudbreak.usages.user')
             updateGroup(token, userId, 'periscope.cluster')
         } else {
@@ -407,6 +408,11 @@ function continueInit() {
                 updateGroup(token, userId, 'cloudbreak.sssdconfigs')
             } else {
                 updateGroup(token, userId, 'cloudbreak.sssdconfigs.read')
+            }
+            if (requestedScopes.platforms.write) {
+                updateGroup(token, userId, 'cloudbreak.platforms')
+            } else {
+                updateGroup(token, userId, 'cloudbreak.platforms.read')
             }
             updateGroup(token, userId, 'cloudbreak.usages.user')
             updateGroup(token, userId, 'periscope.cluster')
