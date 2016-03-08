@@ -62,6 +62,7 @@ public class ArmResourceConnector implements ResourceConnector {
         String stackName = armUtils.getStackName(ac.getCloudContext());
         String resourceGroupName = armUtils.getResourceGroupName(ac.getCloudContext());
         ArmStackView armStackView = getArmStack(armCredentialView, ac.getCloudContext(), stack);
+        armUtils.validateStorageType(stack);
         String template = armTemplateBuilder.build(stackName, armCredentialView, armStackView, ac.getCloudContext(), stack);
         String parameters = armTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
         AzureRMClient client = armClient.getClient(ac.getCloudCredential());

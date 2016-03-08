@@ -105,6 +105,7 @@ public class ArmPlatformParameters implements PlatformParameters {
     }
 
     private enum ArmVmType {
+
         STANDARD_A5("Standard_A5", meta(4)),
         STANDARD_A6("Standard_A6", meta(8)),
         STANDARD_A7("Standard_A7", meta(16)),
@@ -112,11 +113,13 @@ public class ArmPlatformParameters implements PlatformParameters {
         STANDARD_A9("Standard_A9", meta(16)),
         STANDARD_A10("Standard_A10", meta(16)),
         STANDARD_A11("Standard_A11", meta(16)),
+
         STANDARD_G1("Standard_G1", meta(1)),
         STANDARD_G2("Standard_G2", meta(2)),
         STANDARD_G3("Standard_G3", meta(4)),
         STANDARD_G4("Standard_G4", meta(8)),
         STANDARD_G5("Standard_G5", meta(16)),
+
         STANDARD_D1("Standard_D1", meta(2)),
         STANDARD_D2("Standard_D2", meta(4)),
         STANDARD_D3("Standard_D3", meta(8)),
@@ -125,6 +128,7 @@ public class ArmPlatformParameters implements PlatformParameters {
         STANDARD_D12("Standard_D12", meta(8)),
         STANDARD_D13("Standard_D13", meta(16)),
         STANDARD_D14("Standard_D14", meta(32)),
+
         STANDARD_D1_V2("Standard_D1_v2", meta(2)),
         STANDARD_D2_V2("Standard_D2_v2", meta(4)),
         STANDARD_D3_V2("Standard_D3_v2", meta(8)),
@@ -133,7 +137,15 @@ public class ArmPlatformParameters implements PlatformParameters {
         STANDARD_D11_V2("Standard_D11_v2", meta(4)),
         STANDARD_D12_V2("Standard_D12_v2", meta(8)),
         STANDARD_D13_V2("Standard_D13_v2", meta(16)),
-        STANDARD_D14_V2("Standard_D14_v2", meta(32));
+        STANDARD_D14_V2("Standard_D14_v2", meta(32)),
+
+        STANDARD_DS2("Standard_DS2", meta(4)),
+        STANDARD_DS3("Standard_DS3", meta(8)),
+        STANDARD_DS4("Standard_DS4", meta(16)),
+        STANDARD_DS11("Standard_DS11", meta(4)),
+        STANDARD_DS12("Standard_DS12", meta(8)),
+        STANDARD_DS13("Standard_DS13", meta(16)),
+        STANDARD_DS14("Standard_DS14", meta(32));
 
         private final String vmType;
         private final VmTypeMeta meta;
