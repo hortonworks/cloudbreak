@@ -18,6 +18,9 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -72,7 +75,7 @@ public class ArmUtils {
         ResourceStatus resourceStatus = ArmStackStatus.mapResourceStatus(status);
         CloudResourceStatus armResourceStatus = null;
         if (ResourceStatus.FAILED.equals(resourceStatus)) {
-            LOGGER.debug("Cloudresource status: {}", resourceStatus);
+            LOGGER.debug("Cloud resource status: {}", resourceStatus);
             try {
                 Map<String, Object> templateDeploymentOperations = access.getTemplateDeploymentOperations(stackName, stackName);
                 List<Map> value = (ArrayList<Map>) templateDeploymentOperations.get("value");
@@ -93,18 +96,16 @@ public class ArmUtils {
                 armResourceStatus = new CloudResourceStatus(resource, ArmStackStatus.mapResourceStatus(status), e.getMessage());
             }
         } else {
-            LOGGER.debug("Cloudresource status: {}", resourceStatus);
+            LOGGER.debug("Cloud resource status: {}", resourceStatus);
             armResourceStatus = new CloudResourceStatus(resource, ArmStackStatus.mapResourceStatus(status));
         }
         return armResourceStatus;
     }
 
 
-
     public String getResourceGroupName(CloudContext cloudContext) {
         return getStackName(cloudContext);
     }
-
 
 
     public boolean isExistingNetwork(Network network) {
@@ -132,6 +133,18 @@ public class ArmUtils {
             Map networkSecurityGroup = (Map) subnetProperties.get("networkSecurityGroup");
             if (networkSecurityGroup != null) {
                 validateSecurityGroup(client, networkSecurityGroup);
+            }
+        }
+    }
+
+    public void validateStorageType(CloudStack stack) {
+        for (Group group : stack.getGroups()) {
+            InstanceTemplate template = group.getInstances().get(0).getTemplate();
+            String flavor = template.getFlavor();
+            String volumeType = template.getVolumeType();
+            ArmDiskType diskType = ArmDiskType.getByValue(volumeType);
+            if (ArmDiskType.PREMIUM_LOCALLY_REDUNDANT.equals(diskType) && !flavor.contains("_DS")) {
+                throw new CloudConnectorException("Only the DS instance types supports the premium storage.");
             }
         }
     }
