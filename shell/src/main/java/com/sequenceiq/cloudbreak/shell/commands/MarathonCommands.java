@@ -1,19 +1,5 @@
 package com.sequenceiq.cloudbreak.shell.commands;
 
-import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderObjectValueMap;
-import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderSingleMap;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
@@ -30,6 +16,18 @@ import com.sequenceiq.cloudbreak.shell.model.MarathonContext;
 import com.sequenceiq.cloudbreak.shell.model.MarathonHostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
+import org.springframework.shell.core.CommandMarker;
+import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
+import org.springframework.shell.core.annotation.CliCommand;
+import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.HashSet;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderObjectValueMap;
+import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderSingleMap;
 
 @Component
 public class MarathonCommands implements CommandMarker {
@@ -199,8 +197,8 @@ public class MarathonCommands implements CommandMarker {
             constraintTemplateRequest.setDescription(description);
             constraintTemplateRequest.setDisk(disk);
             constraintTemplateRequest.setMemory(memory);
-            constraintTemplateRequest.setPublicInAccount(publicInAccount == null ? false : publicInAccount);
-            if (constraintTemplateRequest.isPublicInAccount()) {
+            publicInAccount = publicInAccount == null ? false : publicInAccount;
+            if (publicInAccount) {
                 idJson = cloudbreakClient.constraintTemplateEndpoint().postPublic(constraintTemplateRequest);
             } else {
                 idJson = cloudbreakClient.constraintTemplateEndpoint().postPrivate(constraintTemplateRequest);
