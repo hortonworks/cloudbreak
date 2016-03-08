@@ -1,17 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Map;
-import java.util.Set;
-
-import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
@@ -33,6 +21,16 @@ import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.core.Response;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 public class StackController implements StackEndpoint {
@@ -160,6 +158,7 @@ public class StackController implements StackEndpoint {
         Stack stack = stackService.getById(id);
         if ("BYOS".equals(stack.cloudPlatform())) {
             LOGGER.warn("A 'Bring your own stack' type of infrastructure cannot be modified.");
+            return Response.status(Response.Status.BAD_REQUEST).build();
         } else {
             if (updateRequest.getStatus() != null) {
                 stackService.updateStatus(id, updateRequest.getStatus());

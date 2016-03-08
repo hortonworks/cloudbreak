@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-
-import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class ConstraintTemplateBase implements JsonEntity {
@@ -22,10 +21,6 @@ public abstract class ConstraintTemplateBase implements JsonEntity {
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
-
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, readOnly = true)
-    private boolean publicInAccount;
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.CPU, readOnly = true)
@@ -53,14 +48,6 @@ public abstract class ConstraintTemplateBase implements JsonEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public Double getCpu() {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,8 +14,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -72,7 +72,7 @@ public class ConstraintTemplate {
 
     @Column(nullable = false)
     private String name;
-    @Column(length = 1000000, columnDefinition = "TEXT")
+    @Column(length = 1000, columnDefinition = "TEXT")
     private String description;
 
     private String owner;
