@@ -1964,6 +1964,7 @@ textarea.input-lg, textarea.form-group-lg .form-control, select[multiple].input-
 
 .btn {
     display: inline-block;
+    overflow: hidden;
     margin-bottom: 0;
     font-weight: 700;
     text-align: center;
