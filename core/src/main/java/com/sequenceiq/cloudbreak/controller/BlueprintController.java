@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +9,12 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
@@ -56,8 +54,7 @@ public class BlueprintController implements BlueprintEndpoint {
         MDCBuilder.buildUserMdcContext(user);
         Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
         if (blueprints.isEmpty()) {
-            Set<Blueprint> blueprintsList = blueprintLoaderService.loadBlueprints(user);
-            blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintService.save(blueprintsList));
+            blueprints = blueprintLoaderService.loadBlueprints(user);
         }
         return toJsonList(blueprints);
     }
@@ -81,8 +78,8 @@ public class BlueprintController implements BlueprintEndpoint {
     public Set<BlueprintResponse> getPublics() {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        Set<Blueprint> blueprints = blueprintLoaderService.loadBlueprints(user);
-        blueprints.addAll(blueprintService.retrieveAccountBlueprints(user));
+        blueprintLoaderService.loadBlueprints(user);
+        Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
         return toJsonList(blueprints);
     }
 

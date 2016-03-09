@@ -48,16 +48,16 @@ public class NetworkController implements NetworkEndpoint {
     @Override
     public Set<NetworkJson> getPrivates() {
         CbUser user = authenticatedUserService.getCbUser();
-        Set<Network> networks = networkCreator.createDefaultNetworks(user);
-        networks.addAll(networkService.retrievePrivateNetworks(user));
+        networkCreator.createDefaultNetworks(user);
+        Set<Network> networks = networkService.retrievePrivateNetworks(user);
         return convert(networks);
     }
 
     @Override
     public Set<NetworkJson> getPublics() {
         CbUser user = authenticatedUserService.getCbUser();
-        Set<Network> networks = networkCreator.createDefaultNetworks(user);
-        networks.addAll(networkService.retrieveAccountNetworks(user));
+        networkCreator.createDefaultNetworks(user);
+        Set<Network> networks = networkService.retrieveAccountNetworks(user);
         return convert(networks);
     }
 

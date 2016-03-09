@@ -46,16 +46,16 @@ public class SecurityGroupController implements SecurityGroupEndpoint {
     @Override
     public Set<SecurityGroupJson> getPrivates() {
         CbUser user = authenticatedUserService.getCbUser();
-        Set<SecurityGroup> securityGroups = defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
-        securityGroups.addAll(securityGroupService.retrievePrivateSecurityGroups(user));
+        defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
+        Set<SecurityGroup> securityGroups = securityGroupService.retrievePrivateSecurityGroups(user);
         return convert(securityGroups);
     }
 
     @Override
     public Set<SecurityGroupJson> getPublics() {
         CbUser user = authenticatedUserService.getCbUser();
-        Set<SecurityGroup> securityGroups = defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
-        securityGroups.addAll(securityGroupService.retrieveAccountSecurityGroups(user));
+        defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
+        Set<SecurityGroup> securityGroups = securityGroupService.retrieveAccountSecurityGroups(user);
         return convert(securityGroups);
     }
 
