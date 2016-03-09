@@ -23,6 +23,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NetworkConfigurationValidatorTest {

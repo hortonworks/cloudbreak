@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 
 /**
@@ -53,4 +56,11 @@ public interface PlatformParameters {
      * @return the definition in JSON
      */
     String resourceDefinition(String resource);
+
+    /**
+     * Return the additional stack parameters
+     *
+     * @return the {@link StackParamValidation} of a platform
+     */
+    List<StackParamValidation> additionalStackParameters();
 }

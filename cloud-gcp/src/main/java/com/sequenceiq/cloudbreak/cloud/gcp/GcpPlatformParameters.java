@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -81,6 +83,11 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Override
     public String resourceDefinition(String resource) {
         return FileReaderUtils.readFileFromClasspathQuietly("definitions/gcp-" + resource + ".json");
+    }
+
+    @Override
+    public List<StackParamValidation> additionalStackParameters() {
+        return Collections.emptyList();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller.validation;
+package com.sequenceiq.cloudbreak.controller.validation.network;
 
 import java.util.Set;
 
