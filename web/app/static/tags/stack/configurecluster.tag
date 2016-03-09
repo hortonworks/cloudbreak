@@ -60,6 +60,14 @@
         <select class="form-control" id="platformVariant" ng-model="cluster.platformVariant" ng-options="variant as variant for variant in getPlatformVariants()"></select>
     </div>
 </div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="enableShipyard">{{msg.shipyard_enabled_label}}</label>
+    <div class="col-sm-8">
+        <input type="checkbox" id="enableShipyard" ng-model="cluster.enableShipyard" name="enableShipyard">
+    </div>
+</div>
+
 <div class="form-group">
     <label class="col-sm-3 control-label" for="emailneeded">{{msg.cluster_form_email_label}}</label>
     <div class="col-sm-8">

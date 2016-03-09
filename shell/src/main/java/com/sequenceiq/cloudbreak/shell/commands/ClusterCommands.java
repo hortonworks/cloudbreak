@@ -216,6 +216,7 @@ public class ClusterCommands implements CommandMarker {
             @CliOption(key = "ldapRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "Start and configure LDAP authentication support for Ambari hosts") Boolean ldapRequired,
             @CliOption(key = "configStrategy", mandatory = false, help = "Config recommendation strategy") ConfigStrategy strategy,
+            @CliOption(key = "enableShipyard", mandatory = false, help = "Run shipyard in cluster") Boolean enableShipyard,
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             Set<HostGroupJson> hostGroupList = new HashSet<>();
@@ -241,6 +242,7 @@ public class ClusterCommands implements CommandMarker {
 
             wait = wait == null ? false : wait;
             ClusterRequest clusterRequest = new ClusterRequest();
+            clusterRequest.setEnableShipyard(enableShipyard == null ? (context.isMarathonMode() ? false : true) : enableShipyard);
             clusterRequest.setName(context.isMarathonMode() ? marathonContext.getSelectedMarathonStackName() : context.getStackName());
             clusterRequest.setDescription(description);
             clusterRequest.setUserName(userName);

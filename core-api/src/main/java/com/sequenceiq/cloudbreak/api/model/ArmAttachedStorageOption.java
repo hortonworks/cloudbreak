@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.arm;
+package com.sequenceiq.cloudbreak.api.model;
 
 public enum ArmAttachedStorageOption {
     SINGLE, PER_VM

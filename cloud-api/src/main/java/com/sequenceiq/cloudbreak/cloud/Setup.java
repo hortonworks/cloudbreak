@@ -19,18 +19,20 @@ public interface Setup {
      * To check whether the image copy is finished use {@link #checkImageStatus(AuthenticatedContext, Image)}
      *
      * @param authenticatedContext the context which already contains the authenticated client
+     * @param stack                stack the definition of infrastucture that needs to be launched
      * @param image                the image to be copied
      */
-    void prepareImage(AuthenticatedContext authenticatedContext, Image image);
+    void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image);
 
     /**
      * Invoked by Cloudbreak to check the whether the image copy is finished
      *
      * @param authenticatedContext the context which already contains the authenticated client
+     * @param stack                stack the definition of infrastucture that needs to be launched
      * @param image                the image to be copied
      * @return state of the image
      */
-    ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, Image image);
+    ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, Image image);
 
     /**
      * Implementation of this method shall contain basic checks, e.g. checking that the the flavours defined in {@link CloudStack} available or the

@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 
 import reactor.bus.Event;
@@ -41,7 +42,8 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             Image image = request.getImage();
-            connector.setup().prepareImage(auth, image);
+            CloudStack stack = request.getStack();
+            connector.setup().prepareImage(auth, stack, image);
 
             PrepareImageResult result = new PrepareImageResult(request);
             request.getResult().onNext(result);

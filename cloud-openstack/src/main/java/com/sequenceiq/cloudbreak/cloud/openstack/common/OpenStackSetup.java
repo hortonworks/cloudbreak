@@ -33,14 +33,14 @@ public class OpenStackSetup implements Setup {
     private OpenStackClient openStackClient;
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, com.sequenceiq.cloudbreak.cloud.model.Image image) {
+    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         String imageName = image.getImageName();
         OSClient osClient = openStackClient.createOSClient(authenticatedContext);
         verifyImage(osClient, imageName);
     }
 
     @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, com.sequenceiq.cloudbreak.cloud.model.Image image) {
+    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
     }
 

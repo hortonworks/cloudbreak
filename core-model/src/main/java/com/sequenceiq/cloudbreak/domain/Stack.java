@@ -265,6 +265,7 @@ public class Stack implements ProvisionEntity {
     @OneToOne
     private Orchestrator orchestrator;
     private Long created;
+    private Boolean relocateDocker;
 
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
@@ -440,6 +441,14 @@ public class Stack implements ProvisionEntity {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public Boolean getRelocateDocker() {
+        return relocateDocker;
+    }
+
+    public void setRelocateDocker(Boolean relocateDocker) {
+        this.relocateDocker = relocateDocker;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {

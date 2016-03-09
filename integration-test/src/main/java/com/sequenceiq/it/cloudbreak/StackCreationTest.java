@@ -1,7 +1,9 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -28,10 +30,10 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone" })
+    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage" })
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
-            @Optional("")String variant, @Optional() String availabilityZone) throws Exception {
+            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
@@ -61,6 +63,12 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         stackRequest.setPlatformVariant(variant);
         stackRequest.setAvailabilityZone(availabilityZone);
         stackRequest.setInstanceGroups(igMap);
+
+        Map<String, String> map = new HashMap<>();
+        if (persistentStorage != null && !persistentStorage.isEmpty()) {
+            map.put("persistentStorage", persistentStorage);
+        }
+        stackRequest.setParameters(map);
 
         // WHEN
         String stackId = getCloudbreakClient().stackEndpoint().postPrivate(stackRequest).getId().toString();

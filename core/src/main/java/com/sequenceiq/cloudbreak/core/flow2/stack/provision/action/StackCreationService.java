@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
+import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
@@ -90,6 +91,8 @@ public class StackCreationService {
     private MetadataSetupService metadatSetupService;
     @Inject
     private TlsSetupService tlsSetupService;
+    @Inject
+    private StackToCloudStackConverter cloudStackConverter;
 
     public void startProvisioning(StackContext context) {
         Stack stack = context.getStack();
@@ -111,7 +114,8 @@ public class StackCreationService {
     public CheckImageResult checkImage(StackContext context) {
         Stack stack = context.getStack();
         Image image = imageService.getImage(stack.getId());
-        CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(), image);
+        CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
+                cloudStackConverter.convert(stack), image);
         LOGGER.info("Triggering event: {}", checkImageRequest);
         eventBus.notify(checkImageRequest.selector(), Event.wrap(checkImageRequest));
         try {

@@ -60,6 +60,8 @@ public class ClusterRequest {
     private FileSystemRequest fileSystem;
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy = ConfigStrategy.ONLY_STACK_DEFAULTS_APPLY;
+    @ApiModelProperty(value = ClusterModelDescription.ENABLE_SHIPYARD, required = false)
+    private Boolean enableShipyard = Boolean.TRUE;
 
     public String getDescription() {
         return description;
@@ -195,5 +197,13 @@ public class ClusterRequest {
 
     public void setConfigStrategy(ConfigStrategy configStrategy) {
         this.configStrategy = configStrategy;
+    }
+
+    public Boolean getEnableShipyard() {
+        return enableShipyard;
+    }
+
+    public void setEnableShipyard(Boolean enableShipyard) {
+        this.enableShipyard = enableShipyard;
     }
 }

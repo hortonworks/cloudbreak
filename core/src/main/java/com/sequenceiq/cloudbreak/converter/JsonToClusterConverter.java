@@ -30,6 +30,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setLdapRequired(source.getLdapRequired());
         cluster.setConfigStrategy(source.getConfigStrategy());
         AmbariStackDetailsJson ambariStackDetails = source.getAmbariStackDetails();
+        cluster.setEnableShipyard(source.getEnableShipyard());
         if (ambariStackDetails != null) {
             cluster.setAmbariStackDetails(getConversionService().convert(ambariStackDetails, AmbariStackDetails.class));
         }

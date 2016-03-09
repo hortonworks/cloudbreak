@@ -70,6 +70,7 @@ public class ModelDescriptions {
         public static final String CLUSTER_STATUS = "status of the cluster";
         public static final String PLATFORM_VARIANT = "cloud provider api variant";
         public static final String ORCHESTRATOR = "the details of the container orchestrator api to use";
+        public static final String RELOCATE_DOCKER = "relocate the docker service in startup time";
     }
 
     public static class ClusterModelDescription {
@@ -85,6 +86,7 @@ public class ModelDescriptions {
         public static final String CONFIG_STRATEGY = "config recommendation strategy";
         public static final String LDAP_REQUIRED = "flag for default LDAP support";
         public static final String SSSDCONFIG_ID = "SSSD config id for the cluster";
+        public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
     }
 
     public static class AmbariStackDetailsDescription {

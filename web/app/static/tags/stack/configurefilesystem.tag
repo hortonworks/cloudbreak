@@ -86,6 +86,28 @@
         <input type="checkbox" id="asdefaultfs" ng-model="cluster.fileSystem.defaultFs" ng-disabled="activeCredential.cloudPlatform == 'GCP'" name="asdefaultfs">
     </div>
 </div>
+<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE_RM'">
+    <label class="col-sm-3 control-label" for="relocateDocker">{{msg.relocate_docker_label}}</label>
+    <div class="col-sm-8">
+        <input type="checkbox" id="relocateDocker" ng-model="cluster.relocateDocker" name="relocateDocker">
+    </div>
+</div>
+<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE_RM'">
+    <label class="col-sm-3 control-label" for="attachedstoragetype">{{msg.attached_storage_type}}</label>
+    <div class="col-sm-8">
+        <select class="form-control" id="attachedstoragetype" ng-model="cluster.parameters.attachedStorageOption">
+            <option value="SINGLE">{{msg.single_storage_label}}</option>
+            <option value="PER_VM">{{msg.per_vm_storage_label}}</option>
+        </select>
+    </div>
+</div>
+<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE_RM'">
+    <label class="col-sm-3 control-label" for="persistentstoragename">{{msg.persistent_storage_name}}</label>
+    <div class="col-sm-8">
+        <input class="form-control" type="text" id="persistentstoragename" ng-model="cluster.parameters.persistentStorage">
+    </div>
+</div>
+
 <div class="form-group">
     <div class="col-sm-11">
 

@@ -14,11 +14,11 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
+import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.task.ArmPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
@@ -39,12 +39,6 @@ public class ArmStorage {
     private static final int MAX_LENGTH_OF_NAME_SLICE = 8;
     private static final int MAX_LENGTH_OF_RESOURCE_NAME = 24;
 
-    @Value("${cb.arm.persistent.storage:}")
-    private String persistentStorage;
-
-    @Value("${cb.arm.attached.storage:}")
-    private ArmAttachedStorageOption armAttachedStorageOption;
-
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
     @Inject
@@ -52,22 +46,28 @@ public class ArmStorage {
     @Inject
     private ArmUtils armUtils;
 
-    public ArmAttachedStorageOption getArmAttachedStorageOption() {
-        return armAttachedStorageOption;
+    public ArmAttachedStorageOption getArmAttachedStorageOption(Map<String, String> parameters) {
+        String attachedStorageOption = parameters.get("attachedStorageOption");
+        if (Strings.isNullOrEmpty(attachedStorageOption)) {
+            return ArmAttachedStorageOption.SINGLE;
+        }
+        return ArmAttachedStorageOption.valueOf(attachedStorageOption);
     }
 
-    public String getImageStorageName(ArmCredentialView acv, CloudContext cloudContext) {
+    public String getImageStorageName(ArmCredentialView acv, CloudContext cloudContext, String persistentStorageName,
+            ArmAttachedStorageOption armAttachedStorageOption) {
         String storageName;
-        if (isPersistentStorage()) {
-            storageName = getPersistentStorageName(acv, cloudContext.getLocation().getRegion().value());
+        if (isPersistentStorage(persistentStorageName)) {
+            storageName = getPersistentStorageName(persistentStorageName, acv, cloudContext.getLocation().getRegion().value());
         } else {
-            storageName = buildStorageName(acv, null, cloudContext, ArmDiskType.LOCALLY_REDUNDANT);
+            storageName = buildStorageName(armAttachedStorageOption, acv, null, cloudContext, ArmDiskType.LOCALLY_REDUNDANT);
         }
         return storageName;
     }
 
-    public String getAttachedDiskStorageName(ArmCredentialView acv, Long vmId, CloudContext cloudContext, ArmDiskType storageType) {
-        return buildStorageName(acv, vmId, cloudContext, storageType);
+    public String getAttachedDiskStorageName(ArmAttachedStorageOption armAttachedStorageOption, ArmCredentialView acv, Long vmId, CloudContext cloudContext,
+            ArmDiskType storageType) {
+        return buildStorageName(armAttachedStorageOption, acv, vmId, cloudContext, storageType);
     }
 
     public void createStorage(AuthenticatedContext ac, AzureRMClient client, String osStorageName, ArmDiskType storageType, String storageGroup, String region)
@@ -90,7 +90,8 @@ public class ArmStorage {
         }
     }
 
-    private String buildStorageName(ArmCredentialView acv, Long vmId, CloudContext cloudContext, ArmDiskType storageType) {
+    private String buildStorageName(ArmAttachedStorageOption armAttachedStorageOption, ArmCredentialView acv, Long vmId, CloudContext cloudContext,
+                ArmDiskType storageType) {
         String result;
         String name = cloudContext.getName().toLowerCase().replaceAll("\\s+|-", "");
         name = name.length() > MAX_LENGTH_OF_NAME_SLICE ? name.substring(0, MAX_LENGTH_OF_NAME_SLICE) : name;
@@ -114,10 +115,10 @@ public class ArmStorage {
         return result;
     }
 
-    private String getPersistentStorageName(ArmCredentialView acv, String region) {
+    private String getPersistentStorageName(String persistentStorageName, ArmCredentialView acv, String region) {
         String subscriptionIdPart = acv.getSubscriptionId().replaceAll("-", "").toLowerCase();
         String regionInitials = WordUtils.initials(region, '_').toLowerCase();
-        String result = String.format("%s%s%s", persistentStorage, regionInitials, subscriptionIdPart);
+        String result = String.format("%s%s%s", persistentStorageName, regionInitials, subscriptionIdPart);
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
         }
@@ -129,13 +130,17 @@ public class ArmStorage {
         return armUtils.getStackName(cloudContext);
     }
 
-    public boolean isPersistentStorage() {
-        return !Strings.isNullOrEmpty(persistentStorage);
+    public String getPersistentStorageName(Map<String, String> parameters) {
+        return parameters.get("persistentStorage");
     }
 
-    public String getImageResourceGroupName(CloudContext cloudContext) {
-        if (isPersistentStorage()) {
-            return persistentStorage;
+    public boolean isPersistentStorage(String persistentStorageName) {
+        return !Strings.isNullOrEmpty(persistentStorageName);
+    }
+
+    public String getImageResourceGroupName(CloudContext cloudContext, Map<String, String> parameters) {
+        if (isPersistentStorage(getPersistentStorageName(parameters))) {
+            return getPersistentStorageName(parameters);
         }
         return armUtils.getResourceGroupName(cloudContext);
     }

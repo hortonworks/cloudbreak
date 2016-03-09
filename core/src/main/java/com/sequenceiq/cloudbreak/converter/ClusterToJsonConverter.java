@@ -11,7 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,9 +36,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     private static final int SECONDS_PER_MINUTE = 60;
     private static final int MILLIS_PER_SECOND = 1000;
-
-    @Value("${cb.docker.env.shipyard.enabled:}")
-    private Boolean shipyardEnabled;
 
     @Inject
     private BlueprintValidator blueprintValidator;
@@ -79,7 +76,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setPassword(source.getPassword());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
-        clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source.getHostGroups(), source.getBlueprint(), source.getAmbariIp()));
+        clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source.getHostGroups(), source.getBlueprint(), source.getAmbariIp(),
+                source.getEnableShipyard()));
+        clusterResponse.setEnableShipyard(source.getEnableShipyard());
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
         return clusterResponse;
     }
@@ -92,11 +91,11 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         return jsons;
     }
 
-    private Map<String, String> prepareServiceEndpointsMap(Set<HostGroup> hostGroups, Blueprint blueprint, String ambariIp) {
+    private Map<String, String> prepareServiceEndpointsMap(Set<HostGroup> hostGroups, Blueprint blueprint, String ambariIp, Boolean shipyardEnabled) {
         Map<String, String> result = new HashMap<>();
 
         List<Port> ports = NetworkUtils.getPorts(Optional.<Stack>absent());
-        collectPortsOfAdditionalServices(result, ambariIp);
+        collectPortsOfAdditionalServices(result, ambariIp, shipyardEnabled);
         try {
             JsonNode hostGroupsNode = blueprintValidator.getHostGroupNode(blueprint);
             Map<String, HostGroup> hostGroupMap = blueprintValidator.createHostGroupMap(hostGroups);
@@ -123,8 +122,8 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         return result;
     }
 
-    private void collectPortsOfAdditionalServices(Map<String, String> result, String ambariIp) {
-        if (shipyardEnabled) {
+    private void collectPortsOfAdditionalServices(Map<String, String> result, String ambariIp, Boolean shipyardEnabled) {
+        if (BooleanUtils.isTrue(shipyardEnabled)) {
             Port shipyardPort = NetworkUtils.getPortByServiceName(SHIPYARD);
             result.put(shipyardPort.getName(), String.format("%s:%s%s", ambariIp, shipyardPort.getPort(), shipyardPort.getExposedService().getPostFix()));
         }

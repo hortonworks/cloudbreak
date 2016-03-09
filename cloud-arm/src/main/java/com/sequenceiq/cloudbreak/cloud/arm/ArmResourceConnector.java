@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.arm.view.ArmStorageView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -130,10 +131,11 @@ public class ArmResourceConnector implements ResourceConnector {
                 if (!task.completed(statePollerResult)) {
                     syncPollingScheduler.schedule(task);
                 }
-                if (armStorage.isPersistentStorage()) {
+                if (armStorage.isPersistentStorage(armStorage.getPersistentStorageName(stack.getParameters()))) {
                     CloudContext cloudCtx = authenticatedContext.getCloudContext();
-                    String imageStorageName = armStorage.getImageStorageName(new ArmCredentialView(authenticatedContext.getCloudCredential()), cloudCtx);
-                    String imageResourceGroupName = armStorage.getImageResourceGroupName(cloudCtx);
+                    String imageStorageName = armStorage.getImageStorageName(new ArmCredentialView(authenticatedContext.getCloudCredential()), cloudCtx,
+                            armStorage.getPersistentStorageName(stack.getParameters()), armStorage.getArmAttachedStorageOption(stack.getParameters()));
+                    String imageResourceGroupName = armStorage.getImageResourceGroupName(cloudCtx, stack.getParameters());
                     String diskContainer = armStorage.getDiskContainerName(cloudCtx);
                     deleteContainer(azureRMClient, imageResourceGroupName, imageStorageName, diskContainer);
                 }
@@ -198,7 +200,8 @@ public class ArmResourceConnector implements ResourceConnector {
             String instanceId = instance.getInstanceId();
             Long privateId = instance.getTemplate().getPrivateId();
             ArmDiskType armDiskType = ArmDiskType.getByValue(instance.getTemplate().getVolumeType());
-            String attachedDiskStorageName = armStorage.getAttachedDiskStorageName(armCredentialView, privateId, ac.getCloudContext(), armDiskType);
+            String attachedDiskStorageName = armStorage.getAttachedDiskStorageName(armStorage.getArmAttachedStorageOption(stack.getParameters()),
+                    armCredentialView, privateId, ac.getCloudContext(), armDiskType);
             try {
                 Map<String, Object> virtualMachine = client.getVirtualMachine(stackName, instanceId);
 
@@ -234,7 +237,7 @@ public class ArmResourceConnector implements ResourceConnector {
                 deleteVirtualMachine(ac, client, stackName, instanceId);
                 deleteNetworkInterfaces(ac, client, stackName, networkInterfacesNames);
                 deleteDisk(storageProfileDiskNames, client, resourceGroupName, attachedDiskStorageName, diskContainer);
-                if (armStorage.getArmAttachedStorageOption() == ArmAttachedStorageOption.PER_VM) {
+                if (armStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
                     armStorage.deleteStorage(ac, client, attachedDiskStorageName, resourceGroupName);
                 }
             } catch (CloudConnectorException e) {
@@ -248,7 +251,8 @@ public class ArmResourceConnector implements ResourceConnector {
     }
 
     private ArmStackView getArmStack(ArmCredentialView armCredentialView, CloudContext cloudContext, CloudStack cloudStack) {
-        return new ArmStackView(cloudStack.getGroups(), new ArmStorageView(armCredentialView, cloudContext, armStorage));
+        return new ArmStackView(cloudStack.getGroups(), new ArmStorageView(armCredentialView, cloudContext, armStorage,
+                armStorage.getArmAttachedStorageOption(cloudStack.getParameters())));
     }
 
     private void deleteContainer(AzureRMClient azureRMClient, String resourceGroup, String storageName, String

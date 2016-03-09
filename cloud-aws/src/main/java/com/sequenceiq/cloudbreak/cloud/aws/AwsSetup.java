@@ -43,12 +43,12 @@ public class AwsSetup implements Setup {
     private AwsClient awsClient;
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, Image image) {
+    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
         LOGGER.debug("prepare image has been executed");
     }
 
     @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, Image image) {
+    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
         return new ImageStatusResult(ImageStatus.CREATE_FINISHED, FINISHED_PROGRESS_VALUE);
     }
 

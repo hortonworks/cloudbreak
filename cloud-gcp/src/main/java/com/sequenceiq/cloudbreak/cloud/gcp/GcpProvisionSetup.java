@@ -45,7 +45,7 @@ public class GcpProvisionSetup implements Setup {
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, com.sequenceiq.cloudbreak.cloud.model.Image image) {
+    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         long stackId = authenticatedContext.getCloudContext().getId();
         CloudCredential credential = authenticatedContext.getCloudCredential();
         try {
@@ -87,7 +87,7 @@ public class GcpProvisionSetup implements Setup {
     }
 
     @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, com.sequenceiq.cloudbreak.cloud.model.Image image) {
+    public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         String projectId = getProjectId(credential);
         String imageName = image.getImageName();

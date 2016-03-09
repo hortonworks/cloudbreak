@@ -41,6 +41,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setCreated(Calendar.getInstance().getTimeInMillis());
         stack.setPlatformVariant(source.getPlatformVariant());
         stack.setOrchestrator(conversionService.convert(source.getOrchestrator(), Orchestrator.class));
+        stack.setRelocateDocker(source.getRelocateDocker() == null ? true : source.getRelocateDocker());
         return stack;
     }
 

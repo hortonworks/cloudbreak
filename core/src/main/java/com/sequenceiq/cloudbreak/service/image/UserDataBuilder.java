@@ -10,7 +10,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -27,19 +26,17 @@ public class UserDataBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDataBuilder.class);
 
-    @Value("${cb.docker.relocate:}")
-    private Boolean relocateDocker;
-
     @Inject
     private UserDataBuilderParams userDataBuilderParams;
 
     @Inject
     private Configuration freemarkerConfiguration;
 
-    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, String pubKey, String tmpSshKey, String sshUser, PlatformParameters parameters) {
+    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, String pubKey, String tmpSshKey, String sshUser, PlatformParameters parameters,
+            Boolean relocate) {
         Map<InstanceGroupType, String> result = new HashMap<>();
         for (InstanceGroupType type : InstanceGroupType.values()) {
-            String userData = build(type, cloudPlatform, pubKey, tmpSshKey, sshUser, parameters);
+            String userData = build(type, cloudPlatform, pubKey, tmpSshKey, sshUser, parameters, relocate);
             result.put(type, userData);
             LOGGER.debug("User data for {}, content; {}", type, userData);
         }
@@ -47,7 +44,8 @@ public class UserDataBuilder {
         return result;
     }
 
-    private String build(InstanceGroupType type, Platform cloudPlatform, String publicSssKey, String tmpSshKey, String sshUser, PlatformParameters params) {
+    private String build(InstanceGroupType type, Platform cloudPlatform, String publicSssKey, String tmpSshKey, String sshUser, PlatformParameters params,
+            Boolean relocate) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
@@ -57,7 +55,7 @@ public class UserDataBuilder {
         model.put("sshUser", sshUser);
         model.put("publicSshKey", publicSssKey);
         model.put("customUserData", userDataBuilderParams.getCustomData());
-        model.put("relocateDocker", relocateDocker);
+        model.put("relocateDocker", relocate.booleanValue());
         return build(model);
     }
 
@@ -68,11 +66,6 @@ public class UserDataBuilder {
             LOGGER.error(e.getMessage(), e);
             throw new CloudConnectorException("Failed to process init script freemarker template", e);
         }
-    }
-
-    @VisibleForTesting
-    void setRelocateDocker(Boolean relocateDocker) {
-        this.relocateDocker = relocateDocker;
     }
 
     @VisibleForTesting
