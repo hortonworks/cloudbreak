@@ -225,6 +225,9 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             }
         }
 
+        $rootScope.deselectActiveCluster = function() {
+            $rootScope.activeCluster = {};
+        };
 
         function getUserPermission() {
             UserPermission.get(function(success) {
