@@ -762,6 +762,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 } else {
                     $scope.cluster.relocateDocker = false;
                     delete $scope.cluster.fileSystem;
+                    delete $scope.cluster.parameters.persistentStorage;
                 }
             }
         }

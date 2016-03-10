@@ -91,6 +91,10 @@ public class CloudbreakContext {
         return this.activeCloudPlatform == null ? "" : this.activeCloudPlatform;
     }
 
+    public boolean isAzureActiveCredential() {
+        return "AZURE_RM".equals(getActiveCloudPlatform());
+    }
+
     public void removeStack(String id) {
         removeProperty(PropertyKey.STACK_ID, id);
     }

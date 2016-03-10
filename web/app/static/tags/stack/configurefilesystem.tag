@@ -101,10 +101,11 @@
         </select>
     </div>
 </div>
-<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE_RM'">
+<div class="form-group" ng-if="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE_RM'" ng-class="{ 'has-error': clusterCreationForm.persistentstoragename.$dirty && clusterCreationForm.persistentstoragename.$invalid }">
     <label class="col-sm-3 control-label" for="persistentstoragename">{{msg.persistent_storage_name}}</label>
     <div class="col-sm-8">
-        <input class="form-control" type="text" id="persistentstoragename" ng-model="cluster.parameters.persistentStorage">
+        <input class="form-control" type="text" id="persistentstoragename" name="persistentstoragename" ng-model="cluster.parameters.persistentStorage" ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="4" ng-maxlength="20" ng-required="($root.activeCredential.cloudPlatform=='AZURE_RM' && cluster.parameters.persistentStorage != '' && cluster.parameters.persistentStorage)">
+        <div class="help-block" ng-show="clusterCreationForm.persistentstoragename.$dirty && clusterCreationForm.persistentstoragename.$invalid"><i class="fa fa-warning"></i> {{msg.persistent_storage_name_invalid}}</div>
     </div>
 </div>
 
