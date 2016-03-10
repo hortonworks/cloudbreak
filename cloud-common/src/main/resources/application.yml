@@ -73,8 +73,6 @@ cb:
       swarm: swarm:1.1.0
     env:
       ldap: SLAPD_PASSWORD=cloudbreak|SLAPD_BINDUSER=ambari-qa|SLAPD_BINDPWD=cloudbreak|SLAPD_BINDGROUP=hadoop
-      shipyard.enabled: true
-    relocate: true
 
   sssd:
     name: cloudbreak-default-ldap
@@ -84,8 +82,6 @@ cb:
     base: dc=nodomain
 
   arm:
-    persistent.storage: cbstore
-    attached.storage: SINGLE
     template.path: templates/arm-v2.ftl
     parameter.path: templates/parameters.ftl
 
