@@ -20,7 +20,7 @@ tests:
     parameters:
       networkName: it-openstack-credandsmoke-network-ss
       subnetCIDR: 10.0.36.0/24
-      publicNetId: d2a580e3-0a5a-44e1-a136-b4df376d4fec
+      publicNetId: 290e220b-9177-4d21-9bcb-4cb18cd9c960
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
 
