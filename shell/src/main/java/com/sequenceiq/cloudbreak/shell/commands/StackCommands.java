@@ -152,7 +152,8 @@ public class StackCommands implements CommandMarker {
             @CliOption(key = "dedicatedInstances", mandatory = false, help = "request dedicated instances on AWS") Boolean dedicatedInstances,
             @CliOption(key = "relocateDocker", mandatory = false, help = "relocate docker in startup time") Boolean relocateDocker,
             @CliOption(key = "attachedStorageType", mandatory = false, help = "type of the storage creation") ArmAttachedStorageOption attachedStorageOption,
-            @CliOption(key = "persistentStorage", mandatory = false, help = "name of the persistent storage") String persistentStorage,
+            @CliOption(key = "persistentStorage", mandatory = false, help = "name of the persistent storage")
+            String persistentStorage,
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             validateNetwork();
@@ -191,14 +192,14 @@ public class StackCommands implements CommandMarker {
             if (diskPerStorage != null) {
                 params.put("diskPerStorage", diskPerStorage.toString());
             }
-            if (attachedStorageOption != null) {
+            if (attachedStorageOption != null && context.isAzureActiveCredential()) {
                 params.put("attachedStorageOption", attachedStorageOption.name());
-            } else {
+            } else if (context.isAzureActiveCredential()) {
                 params.put("attachedStorageOption", ArmAttachedStorageOption.SINGLE.name());
             }
-            if (persistentStorage != null) {
+            if (persistentStorage != null && context.isAzureActiveCredential()) {
                 params.put("persistentStorage", persistentStorage);
-            } else {
+            } else if (context.isAzureActiveCredential()) {
                 params.put("persistentStorage", "cbstore");
             }
 
