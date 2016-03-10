@@ -18,7 +18,8 @@ import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 public class TemplateValidator {
     private static final int MAXCOUNT = 24;
     private static final int MINCOUNT = 1;
-    private static final int MAXSIZE = 1000;
+    // TODO needs a proper validation
+    private static final int MAXSIZE = 2000;
     private static final int MINSIZE = 10;
 
     @Inject

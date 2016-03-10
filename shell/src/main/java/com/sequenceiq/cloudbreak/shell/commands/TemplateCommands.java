@@ -38,7 +38,9 @@ public class TemplateCommands implements CommandMarker {
 
     public static final int BUFFER = 1024;
     public static final int VOLUME_COUNT_MIN = 1;
-    public static final int VOLUME_COUNT_MAX = 8;
+    public static final int VOLUME_COUNT_MAX = 12;
+    // TODO needs a proper validation
+    public static final int AWS_VOLUME_COUNT_MAX = 20;
     public static final int VOLUME_SIZE_MIN = 1;
     public static final int VOLUME_SIZE_MAX = 1024;
 
@@ -164,8 +166,8 @@ public class TemplateCommands implements CommandMarker {
         try {
             String cloudPlatform = "AWS";
             publicInAccount = publicInAccount == null ? false : publicInAccount;
-            if (volumeCount < VOLUME_COUNT_MIN || volumeCount > VOLUME_COUNT_MAX) {
-                return "volumeCount has to be between 1 and 8.";
+            if (volumeCount < VOLUME_COUNT_MIN || volumeCount > AWS_VOLUME_COUNT_MAX) {
+                return "volumeCount has to be between 1 and 20.";
             }
             if (volumeSize < VOLUME_SIZE_MIN || volumeSize > VOLUME_SIZE_MAX) {
                 return "VolumeSize has to be between 1 and 1024.";
