@@ -37,7 +37,6 @@ public class StatusUpdateTest extends AbstractCloudbreakIntegrationTest {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.valueOf(newStatus));
             getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
-            getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, STOPPED);
         } else {
             UpdateStackJson updateStackJson = new UpdateStackJson();
