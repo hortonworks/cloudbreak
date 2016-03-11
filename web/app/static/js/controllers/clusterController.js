@@ -508,11 +508,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             } else {
                 del(UluwatuCluster.delete, cluster);
             }
-
+            $rootScope.deselectActiveCluster();
         }
 
         function del(deleteFunction, cluster) {
-            $rootScope.activeCluster = {};
             deleteFunction(cluster, function(result) {
                 var actCluster = $filter('filter')($rootScope.clusters, {
                     id: cluster.id
@@ -523,10 +522,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.showError(failure, $rootScope.msg.cluster_delete_failed);
             });
         }
-
-        $scope.deselectActiveCluster = function() {
-            $rootScope.activeCluster = {};
-        };
 
         $scope.selectActiveCluster = function(clusterId) {
             var actClusterIndex = $rootScope.clusters.indexOf($filter('filter')($rootScope.clusters, {

@@ -38,9 +38,9 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                 switch (eventType) {
                     case "DELETE_COMPLETED":
                         $scope.showSuccess(notification.eventMessage, notification.stackName);
-                        var actCluster = getActCluster(notification);
-                        if (actCluster != undefined && actCluster.id == notification.stackId) {
-                            $rootScope.activeCluster = {};
+                        var actCluster = $rootScope.activeCluster || {};
+                        if (actCluster.id == notification.stackId) {
+                            $rootScope.deselectActiveCluster();
                             $jq('.carousel').carousel(0);
                             $jq('#toggle-cluster-block-btn').removeClass('disabled');
                             $jq('#sort-clusters-btn').removeClass('disabled');
