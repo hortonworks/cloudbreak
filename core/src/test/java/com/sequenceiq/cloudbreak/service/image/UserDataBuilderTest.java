@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -83,6 +84,11 @@ public class UserDataBuilderTest {
             @Override
             public String resourceDefinition(String resource) {
                 return "";
+            }
+
+            @Override
+            public List<StackParamValidation> additionalStackParameters() {
+                return new ArrayList<>();
             }
 
             @Override

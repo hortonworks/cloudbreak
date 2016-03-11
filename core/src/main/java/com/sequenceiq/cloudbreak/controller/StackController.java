@@ -10,7 +10,9 @@ import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
@@ -61,6 +63,9 @@ public class StackController implements StackEndpoint {
 
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
+
+    @Autowired
+    private StackValidator stackValidator;
 
     @Override
     public IdJson postPrivate(StackRequest stackRequest) {
@@ -156,7 +161,7 @@ public class StackController implements StackEndpoint {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getById(id);
-        if ("BYOS".equals(stack.cloudPlatform())) {
+        if (CloudConstants.BYOS.equals(stack.cloudPlatform())) {
             LOGGER.warn("A 'Bring your own stack' type of infrastructure cannot be modified.");
             return Response.status(Response.Status.BAD_REQUEST).build();
         } else {
@@ -206,6 +211,7 @@ public class StackController implements StackEndpoint {
     }
 
     private IdJson createStack(CbUser user, StackRequest stackRequest, boolean publicInAccount) {
+        stackValidator.validate(stackRequest);
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
         stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getConsulServerCount(), stackRequest.getNetworkId(),

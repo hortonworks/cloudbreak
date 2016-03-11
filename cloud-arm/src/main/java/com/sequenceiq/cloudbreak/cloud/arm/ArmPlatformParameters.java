@@ -14,7 +14,9 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
@@ -23,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
@@ -85,6 +88,16 @@ public class ArmPlatformParameters implements PlatformParameters {
     @Override
     public String resourceDefinition(String resource) {
         return FileReaderUtils.readFileFromClasspathQuietly("definitions/arm-" + resource + ".json");
+    }
+
+    @Override
+    public List<StackParamValidation> additionalStackParameters() {
+        List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
+        additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.<String>absent()));
+        additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class, Optional.<String>of("^[a-z0-9]{0,24}$")));
+        additionalStackParameterValidations.add(new StackParamValidation("attachedStorageOption", false, ArmAttachedStorageOption.class,
+                Optional.<String>absent()));
+        return additionalStackParameterValidations;
     }
 
     @Override

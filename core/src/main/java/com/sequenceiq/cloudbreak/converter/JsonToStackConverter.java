@@ -12,20 +12,24 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.controller.validation.StackParam;
+import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 @Component
 public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
 
     @Inject
     private ConversionService conversionService;
+
+    @Inject
+    private StackParameterService stackParameterService;
 
     @Override
     public Stack convert(StackRequest source) {
@@ -49,8 +53,8 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         Map<String, String> params = new HashMap<>();
         Map<String, String> userParams = stackRequest.getParameters();
         if (userParams != null) {
-            for (StackParam stackParam : StackParam.values()) {
-                String paramName = stackParam.getName();
+            for (StackParamValidation stackParamValidation : stackParameterService.getStackParams(stackRequest)) {
+                String paramName = stackParamValidation.getName();
                 String value = userParams.get(paramName);
                 if (value != null) {
                     params.put(paramName, value);
