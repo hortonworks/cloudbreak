@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.shell.util;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,15 @@ public class CloudbreakShellUtil {
 
     @Inject
     private CloudbreakClient cloudbreakClient;
+
+    public void checkResponse(String operation, Response response) {
+        if (Response.Status.Family.SUCCESSFUL != response.getStatusInfo().getFamily()) {
+            String errormsg = "Error happened during " + operation + " rest operation: status: " + response.getStatus() + ", error: "
+                    + response.readEntity(String.class);
+            LOGGER.error(errormsg);
+            throw new RuntimeException(errormsg);
+        }
+    }
 
     public WaitResult waitAndCheckStackStatus(Long stackId, String desiredStatus) throws Exception {
         return waitAndCheckStatus(stackId, desiredStatus, "status");

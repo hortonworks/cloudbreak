@@ -110,7 +110,7 @@ public class StackCommands implements CommandMarker {
             instanceGroupAdjustmentJson.setWithClusterEvent(withClusterUpScale == null ? false : withClusterUpScale);
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup.getName());
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
+            cloudbreakUtil.checkResponse("upscaleStack", cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson));
             return context.getStackId();
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -131,7 +131,7 @@ public class StackCommands implements CommandMarker {
             instanceGroupAdjustmentJson.setWithClusterEvent(false);
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup.getName());
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
+            cloudbreakUtil.checkResponse("downscaleStack", cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson));
             return context.getStackId();
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -377,7 +377,7 @@ public class StackCommands implements CommandMarker {
         try {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.STOPPED);
-            cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
+            cloudbreakUtil.checkResponse("stopStack", cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson));
             return "Stack is stopping";
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -389,7 +389,7 @@ public class StackCommands implements CommandMarker {
         try {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.STARTED);
-            cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson);
+            cloudbreakUtil.checkResponse("startStack", cloudbreakClient.stackEndpoint().put(Long.valueOf(context.getStackId()), updateStackJson));
             return "Stack is starting";
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
