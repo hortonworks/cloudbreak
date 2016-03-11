@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,15 @@ public class CloudbreakUtil {
     private static final String DEFAULT_AMBARI_PORT = "8080";
 
     private CloudbreakUtil() {
+    }
+
+    public static void checkResponse(String operation, Response response) {
+        if (Response.Status.Family.SUCCESSFUL != response.getStatusInfo().getFamily()) {
+            String errormsg = "Error happened during " + operation + " rest operation: status: " + response.getStatus() + ", error: "
+                    + response.readEntity(String.class);
+            LOGGER.error(errormsg);
+            throw new RuntimeException(errormsg);
+        }
     }
 
     public static void waitAndCheckStackStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) throws Exception {
