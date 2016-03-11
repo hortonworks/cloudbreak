@@ -20,7 +20,6 @@ import com.sequenceiq.it.IntegrationTestContext;
 
 
 public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
-
     @BeforeMethod
     public void setContextParameters() {
         IntegrationTestContext itContext = getItContext();
@@ -58,9 +57,8 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
 
-
         ClusterEndpoint clusterEndpoint = getCloudbreakClient().clusterEndpoint();
-        clusterEndpoint.post(Long.valueOf(stackId), clusterRequest);
+        CloudbreakUtil.checkResponse("ClusterCreation", clusterEndpoint.post(Long.valueOf(stackId), clusterRequest));
         // THEN
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), stackIdStr, ambariUser, ambariPassword);

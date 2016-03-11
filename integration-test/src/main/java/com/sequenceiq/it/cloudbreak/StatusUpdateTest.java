@@ -32,20 +32,20 @@ public class StatusUpdateTest extends AbstractCloudbreakIntegrationTest {
         if (newStatus.equals(STOPPED)) {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.valueOf(newStatus));
-            getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
+            CloudbreakUtil.checkResponse("StopCluster", getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson));
             CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, STOPPED);
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.valueOf(newStatus));
-            getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
+            CloudbreakUtil.checkResponse("StopStack", getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson));
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, STOPPED);
         } else {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.valueOf(newStatus));
-            getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson);
+            CloudbreakUtil.checkResponse("StartStack", getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson));
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.valueOf(newStatus));
-            getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson);
+            CloudbreakUtil.checkResponse("StartCluster", getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson));
             CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         }
         // THEN
