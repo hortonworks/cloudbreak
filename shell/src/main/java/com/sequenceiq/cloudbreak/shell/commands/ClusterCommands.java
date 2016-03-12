@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
@@ -49,6 +48,8 @@ public class ClusterCommands implements CommandMarker {
     private MarathonContext marathonContext;
     @Inject
     private CloudbreakClient cloudbreakClient;
+    @Inject
+    private CloudbreakShellUtil cloudbreakUtil;
     @Inject
     private ResponseTransformer responseTransformer;
     @Inject
@@ -165,7 +166,7 @@ public class ClusterCommands implements CommandMarker {
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
             String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
-            cloudbreakClient.clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson);
+            cloudbreakUtil.checkResponse("upscaleCluster", cloudbreakClient.clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson));
             return context.getStackId();
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -188,7 +189,7 @@ public class ClusterCommands implements CommandMarker {
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
             String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
-            cloudbreakClient.clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson);
+            cloudbreakUtil.checkResponse("downscaleCluster", cloudbreakClient.clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson));
             return context.getStackId();
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -293,7 +294,7 @@ public class ClusterCommands implements CommandMarker {
             clusterRequest.setAmbariStackDetails(ambariStackDetailsJson);
 
             String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
-            cloudbreakClient.clusterEndpoint().post(Long.valueOf(stackId), clusterRequest);
+            cloudbreakUtil.checkResponse("createCluster", cloudbreakClient.clusterEndpoint().post(Long.valueOf(stackId), clusterRequest));
             context.setHint(Hints.NONE);
             context.resetFileSystemConfiguration();
             if (wait) {
@@ -318,7 +319,7 @@ public class ClusterCommands implements CommandMarker {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.STOPPED);
             String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
-            cloudbreakClient.clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson);
+            cloudbreakUtil.checkResponse("stopCluster", cloudbreakClient.clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson));
             return "Cluster is stopping";
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
@@ -328,10 +329,10 @@ public class ClusterCommands implements CommandMarker {
     @CliCommand(value = "cluster start", help = "Start your cluster")
     public String startCluster() {
         try {
-            UpdateStackJson updateStackJson = new UpdateStackJson();
-            updateStackJson.setStatus(StatusRequest.STARTED);
+            UpdateClusterJson updateClusterJson = new UpdateClusterJson();
+            updateClusterJson.setStatus(StatusRequest.STARTED);
             String stackId = context.isMarathonMode() ? marathonContext.getSelectedMarathonStackId().toString() : context.getStackId();
-            cloudbreakClient.stackEndpoint().put(Long.valueOf(stackId), updateStackJson);
+            cloudbreakUtil.checkResponse("startCluster", cloudbreakClient.clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson));
             return "Cluster is starting";
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
