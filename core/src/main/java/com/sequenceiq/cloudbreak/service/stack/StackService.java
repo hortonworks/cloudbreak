@@ -321,6 +321,7 @@ public class StackService {
         flowManager.triggerStackRemoveInstance(new RemoveInstanceRequest(platform(stack.cloudPlatform()), stack.getId(), instanceId));
     }
 
+    @Transactional(Transactional.TxType.NEVER)
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = get(stackId);
         Cluster cluster = null;
