@@ -69,7 +69,7 @@ public class DefaultStackServiceTest {
     @Test
     public void updateStatusTestStopWhenClusterStoppedThenStackStopTriggered() {
         Stack stack = stack(AVAILABLE, STOPPED);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STOPPED);
@@ -79,7 +79,7 @@ public class DefaultStackServiceTest {
     @Test
     public void updateStatusTestStopWhenClusterInStopInProgressThenTriggeredStackStopRequested() {
         Stack stack = stack(AVAILABLE, STOP_IN_PROGRESS);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STOPPED);
@@ -89,7 +89,7 @@ public class DefaultStackServiceTest {
     @Test
     public void updateStatusTestStopWhenClusterInStoppedAndStackAvailableThenTriggerStackStop() {
         Stack stack = stack(AVAILABLE, STOPPED);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STOPPED);
@@ -99,7 +99,7 @@ public class DefaultStackServiceTest {
     @Test
     public void updateStatusTestStopWhenClusterInStoppedAndStackStopFailedThenTriggerStackStop() {
         Stack stack = stack(STOP_FAILED, STOPPED);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STOPPED);
@@ -109,7 +109,7 @@ public class DefaultStackServiceTest {
     @Test(expected = BadRequestException.class)
     public void updateStatusTestStopWhenClusterInStoppedAndStackUpdateInProgressThenBadRequestExceptionDropping() {
         Stack stack = stack(UPDATE_IN_PROGRESS, STOPPED);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STOPPED);
@@ -120,7 +120,7 @@ public class DefaultStackServiceTest {
     @Test(expected = BadRequestException.class)
     public void updateStatusTestStopWhenClusterAndStackAvailableThenBadRequestExceptionDropping() {
         Stack stack = stack(AVAILABLE, AVAILABLE);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STOPPED);
@@ -129,7 +129,7 @@ public class DefaultStackServiceTest {
     @Test
     public void updateStatusTestStartWhenStackStoppedThenStackStartTriggered() {
         Stack stack = stack(STOPPED, STOPPED);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STARTED);
@@ -139,7 +139,7 @@ public class DefaultStackServiceTest {
     @Test(expected = BadRequestException.class)
     public void updateStatusTestStartWhenClusterInStoppedAndStackStopFailedThenBadRequestExceptionDropping() {
         Stack stack = stack(UPDATE_IN_PROGRESS, STOPPED);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STARTED);
@@ -148,7 +148,7 @@ public class DefaultStackServiceTest {
     @Test
     public void updateStatusTestStartWhenClusterInStoppedAndStackStartFailedThenTriggerStackStart() {
         Stack stack = stack(START_FAILED, STOPPED);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STARTED);
@@ -158,7 +158,7 @@ public class DefaultStackServiceTest {
     @Test(expected = BadRequestException.class)
     public void updateStatusTestStartWhenClusterAndStackUpdateInProgressThenBadRequestExceptionDropping() {
         Stack stack = stack(UPDATE_IN_PROGRESS, UPDATE_IN_PROGRESS);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STARTED);
@@ -167,7 +167,7 @@ public class DefaultStackServiceTest {
     @Test(expected = BadRequestException.class)
     public void updateStatusTestStopWhenClusterAndStackAvailableAndEphemeralThenBadRequestExceptionDropping() {
         Stack stack = TestUtil.setEphemeral(TestUtil.stack(AVAILABLE, TestUtil.awsCredential()));
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STOPPED);
