@@ -323,7 +323,7 @@ public class StackService {
 
     @Transactional(Transactional.TxType.NEVER)
     public void updateStatus(Long stackId, StatusRequest status) {
-        Stack stack = get(stackId);
+        Stack stack = getById(stackId);
         Cluster cluster = null;
         if (stack.getCluster() != null) {
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
