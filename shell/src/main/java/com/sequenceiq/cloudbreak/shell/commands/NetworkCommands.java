@@ -65,8 +65,8 @@ public class NetworkCommands implements CommandMarker {
             @CliOption(key = "vpcID", mandatory = false, help = "The ID of the virtual private cloud (VPC)") String vpcId,
             @CliOption(key = "internetGatewayID", mandatory = false,
                     help = "The ID of the internet gateway that is attached to the VPC (configured via 'vpcID' option)") String internetGatewayId,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "subnetId", mandatory = false, help = "The ID of the subnet which belongs to the custom VPC") String subnetId,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
     ) {
