@@ -184,6 +184,7 @@ consul:
     privileged: true
     volumes:
         - "/var/run/docker.sock:/var/run/docker.sock"
+        - "$CB_DB_ROOT_PATH/consul-data:/data"
     ports:
         - "$PRIVATE_IP:53:8600/udp"
         - "8400:8400"
@@ -282,10 +283,6 @@ cloudbreak:
         - CB_SMTP_SENDER_HOST=$CLOUDBREAK_SMTP_SENDER_HOST
         - CB_SMTP_SENDER_PORT=$CLOUDBREAK_SMTP_SENDER_PORT
         - CB_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
-        - CB_BAYWATCH_ENABLED=$CB_BAYWATCH_ENABLED
-        - CB_BAYWATCH_EXTERN_LOCATION=$CB_BAYWATCH_EXTERN_LOCATION
-        - CB_DOCKER_CONTAINER_AMBARI=$CB_DOCKER_CONTAINER_AMBARI
-        - CB_DOCKER_CONTAINER_AMBARI_WARM=$CB_DOCKER_CONTAINER_AMBARI_WARM
         - ENDPOINTS_AUTOCONFIG_ENABLED=false
         - ENDPOINTS_DUMP_ENABLED=false
         - ENDPOINTS_TRACE_ENABLED=false
@@ -301,11 +298,21 @@ cloudbreak:
         - CB_MAIL_SMTP_AUTH=$CLOUDBREAK_SMTP_AUTH
         - CB_MAIL_SMTP_STARTTLS_ENABLE=$CLOUDBREAK_SMTP_STARTTLS_ENABLE
         - CB_MAIL_SMTP_TYPE=$CLOUDBREAK_SMTP_TYPE
+        - CB_SCHEMA_SCRIPTS_LOCATION=$CB_SCHEMA_SCRIPTS_LOCATION
+        - CB_SCHEMA_MIGRATION_AUTO=$CB_SCHEMA_MIGRATION_AUTO
+        - SPRING_CLOUD_CONSUL_HOST=consul.service.consul
+        - CB_AWS_HOSTKEY_VERIFY=$CB_AWS_HOSTKEY_VERIFY
+        - CB_GCP_HOSTKEY_VERIFY=$CB_GCP_HOSTKEY_VERIFY
+        - REST_DEBUG=$REST_DEBUG
+        - CERT_VALIDATION=$CERT_VALIDATION
     ports:
         - 8080:8080
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
+        - /dev/urandom:/dev/random
     dns: $PRIVATE_IP
+    links:
+        - consul
     image: sequenceiq/cloudbreak:$DOCKER_TAG_CLOUDBREAK
     command: bash
 
@@ -330,7 +337,7 @@ sultans:
     volumes:
         - $SULTANS_VOLUME_HOST:$SULTANS_VOLUME_CONTAINER
     dns: $PRIVATE_IP
-    image: sequenceiq/sultans-bin:$DOCKER_TAG_SULTANS
+    image: hortonworks/cloudbreak-auth:$DOCKER_TAG_SULTANS
 
 uluwatu:
     environment:
@@ -353,7 +360,7 @@ uluwatu:
     volumes:
         - $ULUWATU_VOLUME_HOST:$ULUWATU_VOLUME_CONTAINER
     dns: $PRIVATE_IP
-    image: sequenceiq/uluwatu-bin:$DOCKER_TAG_ULUWATU
+    image: hortonworks/cloudbreak-web:$DOCKER_TAG_ULUWATU
 
 pcdb:
     environment:
@@ -386,11 +393,16 @@ periscope:
         - PERISCOPE_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
         - PERISCOPE_IDENTITY_SERVICEID=identity.service.consul
         - SECURE_RANDOM=$SECURE_RANDOM
+        - PERISCOPE_SCHEMA_SCRIPTS_LOCATION=$PERISCOPE_SCHEMA_SCRIPTS_LOCATION
+        - PERISCOPE_SCHEMA_MIGRATION_AUTO=$PERISCOPE_SCHEMA_MIGRATION_AUTO
+        - REST_DEBUG=$REST_DEBUG
+        - CERT_VALIDATION=$CERT_VALIDATION
     ports:
         - 8085:8080
     dns: $PRIVATE_IP
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
+        - /dev/urandom:/dev/random
     image: sequenceiq/periscope:$DOCKER_TAG_PERISCOPE
 
 EOF

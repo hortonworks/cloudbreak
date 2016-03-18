@@ -10,6 +10,7 @@ cloudbreak-config() {
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
   cloudbreak-conf-cloud-provider
+  cloudbreak-conf-rest-client
   cloudbreak-conf-ui
   cloudbreak-conf-java
   cloudbreak-conf-baywatch
@@ -23,18 +24,18 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ALPINE 3.1
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
-    env-import DOCKER_TAG_CLOUDBREAK 1.1.0-rc.47
-    env-import DOCKER_TAG_CBDB 1.1.0-rc.28
     env-import DOCKER_TAG_POSTGRES 9.4.1
-    env-import DOCKER_TAG_PERISCOPE 1.0.0-rc.3
-    env-import DOCKER_TAG_PCDB 1.0.0-rc.3
     env-import DOCKER_TAG_UAA 2.7.1
     env-import DOCKER_TAG_UAADB v2.7.1
-    env-import DOCKER_TAG_ULUWATU 1.1.0-rc.20
-    env-import DOCKER_TAG_SULTANS 1.1.0-rc.5
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
-    env-import DOCKER_TAG_CLOUDBREAK_SHELL 0.5.38
+    env-import DOCKER_TAG_CBDB 1.2.0
+    env-import DOCKER_TAG_PCDB 1.2.0
+    env-import DOCKER_TAG_PERISCOPE 1.2.0
+    env-import DOCKER_TAG_CLOUDBREAK 1.2.0
+    env-import DOCKER_TAG_ULUWATU 1.2.0
+    env-import DOCKER_TAG_SULTANS 1.2.0
+    env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.2.0
 
     env-import CB_DOCKER_CONTAINER_AMBARI ""
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
@@ -55,7 +56,7 @@ consul-recursors() {
     declare bridge=${2:? 'required 2.param: bridge ip'}
     declare dockerIP=${3:- none}
 
-    local nameservers=$(sed -n "/nameserver/ s/^.*nameserver[^0-9]*//p;" $resolvConf)
+    local nameservers=$(sed -n "/^nameserver/ s/^.*nameserver[^0-9]*//p;" $resolvConf)
     debug "nameservers on host:\n$nameservers"
     debug bridge=$bridge
     echo "$nameservers" | grep -v "$bridge\|$dockerIP" | sed -n '{s/^/ -recursor /;H;}; $ {x;s/[\n\r]//g;p}'
@@ -166,6 +167,7 @@ cloudbreak-conf-defaults() {
     env-import CB_TEMPLATE_DEFAULTS "minviable-gcp,minviable-azure,minviable-aws"
     env-import CB_LOCAL_DEV_BIND_ADDR "192.168.59.3"
     env-import ADDRESS_RESOLVING_TIMEOUT 120000
+    env-import CB_UI_MAX_WAIT 400
 }
 
 cloudbreak-conf-cloud-provider() {
@@ -174,6 +176,15 @@ cloudbreak-conf-cloud-provider() {
     env-import AWS_ACCESS_KEY_ID ""
     env-import AWS_SECRET_ACCESS_KEY ""
 
+    env-import CB_AWS_HOSTKEY_VERIFY "false"
+    env-import CB_GCP_HOSTKEY_VERIFY "false"
+}
+
+cloudbreak-conf-rest-client() {
+    declare desc="Defines rest client related parameters"
+
+    env-import REST_DEBUG "false"
+    env-import CERT_VALIDATION "true"
 }
 
 cloudbreak-conf-ui() {
@@ -182,6 +193,7 @@ cloudbreak-conf-ui() {
     env-import ULU_HOST_ADDRESS  "http://$PUBLIC_IP:3000"
     env-import ULU_OAUTH_REDIRECT_URI  "$ULU_HOST_ADDRESS/authorize"
     env-import ULU_SULTANS_ADDRESS  "http://$PUBLIC_IP:3001"
+    env-import CB_HOST_ADDRESS  "http://$PUBLIC_IP:8080"
 
 }
 
@@ -200,6 +212,24 @@ util-cloudbreak-shell() {
     declare desc="Starts an interactive CloudbreakShell"
 
     _cloudbreak-shell -it
+}
+
+util-cloudbreak-shell-remote(){
+    declare desc="Show CloudbreakShell run command"
+
+    cloudbreak-config
+
+    echo "If you want to run CloudbreakShell on your local machine then please copy and paste the next command:"
+    echo docker run -it \
+        --rm --name cloudbreak-shell \
+        -e CLOUDBREAK_ADDRESS=http://$PUBLIC_IP:8080 \
+        -e IDENTITY_ADDRESS=http://$PUBLIC_IP:8089 \
+        -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
+        -e SEQUENCEIQ_PASSWORD=$UAA_DEFAULT_USER_PW \
+        -w /data \
+        -v $PWD:/data \
+        sequenceiq/cb-shell:$DOCKER_TAG_CLOUDBREAK_SHELL
+
 }
 
 util-cloudbreak-shell-quiet() {
@@ -340,7 +370,7 @@ oauth:
       id: ${UAA_ULUWATU_ID}
       secret: ${UAA_ULUWATU_SECRET}
       authorized-grant-types: authorization_code,client_credentials
-      scope: cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.templates,cloudbreak.networks,cloudbreak.securitygroups,openid,password.write,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.events,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read
+      scope: cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.templates,cloudbreak.networks,cloudbreak.securitygroups,openid,password.write,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.events,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read
       authorities: cloudbreak.subscribe
       redirect-uri: ${ULU_OAUTH_REDIRECT_URI}
     ${UAA_CLOUDBREAK_ID}:
@@ -358,14 +388,14 @@ oauth:
     ${UAA_CLOUDBREAK_SHELL_ID}:
       id: ${UAA_CLOUDBREAK_SHELL_ID}
       authorized-grant-types: implicit
-      scope: cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.recipes,openid,password.write,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read
+      scope: cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.recipes,openid,password.write,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read
       authorities: uaa.none
       redirect-uri: http://cloudbreak.shell
 
 scim:
   username_pattern: '[a-z0-9+\-_.@]+'
   users:
-    - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|openid,cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read
+    - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|openid,cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read
 
 EOF
 }

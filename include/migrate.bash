@@ -4,10 +4,12 @@ migrate-config() {
 
     env-import DOCKER_TAG_MIGRATION 1.0.0
     env-import CB_SCHEMA_SCRIPTS_LOCATION "container"
+    env-import CB_SCHEMA_MIGRATION_AUTO true
     env-import PERISCOPE_SCHEMA_SCRIPTS_LOCATION "container"
+    env-import PERISCOPE_SCHEMA_MIGRATION_AUTO true
     env-import UAA_SCHEMA_SCRIPTS_LOCATION "container"
-    env-import SKIP_DB_MIGRATION_ON_START false
     env-import DB_MIGRATION_LOG "db_migration.log"
+    env-import VERBOSE_MIGRATION false
 }
 
 create-migrate-log() {
@@ -29,11 +31,10 @@ migrateError() {
 }
 
 migrate-execute-mybatis-migrations() {
-
     local docker_image_name=$1 && shift
     local service_name=$1 && shift
     local container_name=$(compose-get-container $service_name)
-        migrateDebug "Migration command on $service_name with params: '$*' will be executed on container: $container_name"
+    migrateDebug "Migration command on $service_name with params: '$*' will be executed on container: $container_name"
     if [[ ! "$container_name" ]]; then
         migrateError "DB container with matching name is not running. Expected name: .*$service_name.*"
         return 1
@@ -45,16 +46,24 @@ migrate-execute-mybatis-migrations() {
         local scripts_location=$(pwd)/.schema/$service_name
         rm -rf $scripts_location
         mkdir -p $scripts_location
-        docker run --label cbreak.sidekick=true --entrypoint bash -v $scripts_location:/migrate/scripts $docker_image_name -c "cp /schema/* /migrate/scripts/"
+        docker run --label cbreak.sidekick=true --entrypoint bash -v $scripts_location:/migrate/scripts $docker_image_name -c "cp -r /schema/* /migrate/scripts/"
     fi
-    migrateDebug "Scripts location:  $scripts_location"
+    local migration_command=$1
+    local new_scripts_location=$scripts_location"/app"
+    if [[ "$migration_command" = "up" ]]; then
+        new_scripts_location=$scripts_location"/mybatis"
+    fi
+    migrateDebug "Scripts location:  $new_scripts_location"
     local migrateResult=$(docker run \
         --label cbreak.sidekick=true \
         --link $container_name:db \
-        -v $scripts_location:/migrate/scripts \
+        -v $new_scripts_location:/migrate/scripts \
         sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION "$@" \
-      | tee -a "$DB_MIGRATION_LOG"
-    )
+      | tee -a "$DB_MIGRATION_LOG")
+
+    if ${VERBOSE_MIGRATION}; then
+        warn "$migrateResult";
+    fi
 
     if grep -q "MyBatis Migrations SUCCESS" <<< "${migrateResult}"; then
         info "Migration SUCCESS: $service_name $@"
@@ -78,10 +87,10 @@ migrate-one-db() {
             ;;
         uaadb)
             local scripts_location=${UAA_SCHEMA_SCRIPTS_LOCATION}
-            local docker_image_name=sequenceiq/sultans-bin:${DOCKER_TAG_SULTANS}
+            local docker_image_name=hortonworks/cloudbreak-auth:${DOCKER_TAG_SULTANS}
             ;;
         *)
-            migrateError "Invalid database service name: $service_name. Supported databases: cbdb and pcdb"
+            migrateError "Invalid database service name: $service_name. Supported databases: cbdb, pcdb and uaadb"
             return 1
             ;;
     esac
@@ -93,13 +102,14 @@ migrate-one-db() {
 
 execute-migration() {
     if [ $# -eq 0 ]; then
+        migrate-one-db uaadb up
+        migrate-one-db uaadb pending
         migrate-one-db cbdb up
         migrate-one-db cbdb pending
         migrate-one-db pcdb up
         migrate-one-db pcdb pending
-        migrate-one-db uaadb up
-        migrate-one-db uaadb pending
     else
+        VERBOSE_MIGRATION=true
         migrate-one-db "$@"
     fi
 }

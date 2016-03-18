@@ -2,7 +2,7 @@ docker-check-boot2docker() {
 
     boot2docker version &> /dev/null || local missing=1
     if [[ "$missing" ]]; then
-        echo "[ERROR] boot2docker command not found, please install by:" | red
+        error "boot2docker command not found, please install by:"
         echo "  brew install boot2docker" | blue
         _exit 127
     fi
@@ -12,12 +12,12 @@ docker-check-boot2docker() {
         if [[ "$(boot2docker shellinit 2>/dev/null)" == "" ]];then
             info "boot2docker shellinit: OK"
         else
-            echo "[ERROR] boot2docker shell env is not set correctly, please run:" | red
+            error "boot2docker shell env is not set correctly, please run:"
             echo ' eval "$(boot2docker shellinit)"' | blue
             _exit 125
         fi
     else
-        echo "[ERROR] boot2docker is not running, please start by:" | red
+        error "boot2docker is not running, please start by:"
         echo "  boot2docker start" | blue
         _exit 126
     fi
@@ -26,12 +26,12 @@ UNTIL-BOOT2DOCKER-CLI-366-GET-MERGED
         if [[ "$DOCKER_HOST" != "" ]] && [[ "$DOCKER_CERT_PATH" != "" ]] && [[ "$DOCKER_TLS_VERIFY" != "" ]]; then
             info "boot2docker shellinit: OK"
         else
-            echo "[ERROR] boot2docker shell env is not set correctly, please run:" | red
+            error "boot2docker shell env is not set correctly, please run:"
             echo ' eval "$(boot2docker shellinit)"' | blue
             _exit 125
         fi
     else
-        echo "[ERROR] boot2docker is not running, please start by:" | red
+        error "boot2docker is not running, please start by:"
         echo "  boot2docker start" | blue
         _exit 126
     fi
@@ -77,7 +77,7 @@ docker-check-client-version() {
 
     docker --version &> /dev/null || local missing=1
     if [[ "$missing" ]]; then
-        echo "[ERROR] docker command not found, please install docker. https://docs.docker.com/installation/" | red
+        error "docker command not found, please install docker. https://docs.docker.com/installation/"
         _exit 127
     fi
     info "docker command: OK"
@@ -88,8 +88,8 @@ docker-check-client-version() {
     if [ $numver -lt 180 ]; then
         local target=$(which docker 2>/dev/null || true)
         : ${target:=/usr/local/bin/docker}
-        echo "[ERROR] Please upgrade your docker version to 1.8.0 or latest" | red
-        echo "suggested command:" | red
+        error "Please upgrade your docker version to 1.8.0 or latest"
+        echo "suggested command:"
         echo "  sudo curl -Lo $target https://get.docker.com/builds/$(uname -s)/$(uname -m)/docker-latest ; chmod +x $target" | blue
         _exit 1
     fi
@@ -99,7 +99,7 @@ docker-check-client-version() {
 docker-check-server-version() {
     docker version &> $TEMP_DIR/cbd.log || noserver=1
     if [[ "$noserver" ]]; then
-        echo "[ERROR] docker version returned an error" | red
+        error "docker version returned an error"
         cat $TEMP_DIR/cbd.log | yellow
         _exit 127
     fi
@@ -119,8 +119,8 @@ docker-check-server-version() {
 
 
     if [ $numserver -lt 180 ]; then
-        echo "[ERROR] Please upgrade your docker version to 1.8.0 or latest" | red
-        echo "[WARNING] your local docker seems to be fine, only the server version is outdated" | yellow
+        error "Please upgrade your docker version to 1.8.0 or latest"
+        warn "your local docker seems to be fine, only the server version is outdated"
         _exit 1
     fi
     info "docker server version: OK"

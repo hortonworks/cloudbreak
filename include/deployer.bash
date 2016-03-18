@@ -3,8 +3,8 @@ shorten_function() {
   local max=25
   local context=5
   local word="$*"
-  
-  if [[ ${#word} -le ${max} ]]; then 
+
+  if [[ ${#word} -le ${max} ]]; then
       echo "${word}"
   else
       local keep=$(( ${#word} - (${max} - ${context} - 2) ))
@@ -126,6 +126,11 @@ init-profile() {
                 #echo "export PRIVATE_IP=$(curl 169.254.169.254/latest/meta-data/local-ipv4)" >> $CBD_PROFILE
             fi
 
+            # on openstack
+            if curl -m 1 -f  169.254.169.254/latest/meta-data/public-hostname | grep -q novalocal ; then
+                echo "export PUBLIC_IP=$(curl 169.254.169.254/latest/meta-data/public-ipv4)" > $CBD_PROFILE
+            fi
+            
             # on gce
             if curl -m 1 -f -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
                 echo "export PUBLIC_IP=$(curl -f -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)" > $CBD_PROFILE
@@ -179,6 +184,7 @@ doctor() {
     declare desc="Deployer doctor: Checks your environment, and reports a diagnose."
 
     info "===> $desc"
+    network-doctor
     cbd-version
     if [[ "$(uname)" == "Darwin" ]]; then
         debug "checking OSX specific dependencies..."
@@ -194,6 +200,37 @@ doctor() {
     docker-check-version
     compose-generate-check-diff verbose
     generate_uaa_check_diff verbose
+}
+
+network-doctor() {
+    ping -c 1 -W 1 8.8.8.8 &> /dev/null
+    if [[ "$?" -ne "0" ]]; then
+        error "Could not reach 8.8.8.8."
+        _exit 1
+    else
+        info "ping 8.8.8.8 on host OK"
+    fi
+    ping -c 1 -W 1 github.com &> /dev/null
+    if [[ "$?" -ne "0" ]]; then
+        error "Could not reach github.com."
+        _exit 1
+    else
+        info "ping github.com on host OK"
+    fi
+    docker run --label cbreak.sidekick=true alpine sh -c 'ping -c 1 -W 1 8.8.8.8' &> /dev/null
+    if [[ "$?" -ne "0" ]]; then
+        error "[ERROR] Could not reach 8.8.8.8 inside a container."
+        _exit 1
+    else
+        info "ping 8.8.8.8 in container OK"
+    fi
+    docker run --label cbreak.sidekick=true alpine sh -c 'ping -c 1 -W 1 github.com' &> /dev/null
+    if [[ "$?" -ne "0" ]]; then
+        error "[ERROR] Could not reach github.com inside a container."
+        _exit 1
+     else
+        info "ping github.com in container OK"
+    fi
 }
 
 cbd-find-root() {
@@ -236,7 +273,7 @@ deployer-regenerate() {
         mv docker-compose.yml docker-compose-${datetime}.yml
     fi
     compose-generate-yaml
-    
+
     if ! generate_uaa_check_diff; then
         info renaming: uaa.yml to: uaa-${datetime}.yml
         mv uaa.yml uaa-${datetime}.yml
@@ -258,31 +295,49 @@ deployer-login() {
 }
 
 start-and-migrate-cmd() {
-    declare desc="Starts containers with docker-compose and migrates the databases, migration can be skipped with SKIP_DB_MIGRATION_ON_START=1"
+    start-requested-services "$@"
+    deployer-login
+}
+
+start-wait-and-migrate-cmd() {
+    start-requested-services "$@"
+    wait-for-cloudbreak
+    deployer-login
+}
+
+start-requested-services() {
     declare services="$@"
 
     deployer-generate
 
-    if [[ "$SKIP_DB_MIGRATION_ON_START" != true ]]; then
-        migrate
-        if ! [[ "$services" ]]; then
-            debug "All services must be started"
-            local dbServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep "db$" | xargs)
-            local otherServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep -v "db$" | xargs)
-            if [[ $(docker-compose -p cbreak ps -q $dbServices | wc -l) -eq 3 ]]; then
-                debug "DB services: $dbServices are already running, start only other services"
-                services="${otherServices}"
-            fi
+    if ! [[ "$services" ]]; then
+        debug "All services must be started"
+        local dbServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep "db$" | xargs)
+        local otherServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep -v "db$" | xargs)
+        if [[ $(docker-compose -p cbreak ps -q $dbServices | wc -l) -eq 3 ]]; then
+            debug "DB services: $dbServices are already running, start only other services"
+            services="${otherServices}"
         fi
     fi
 
     create-logfile
     compose-up $services
-    info "Cloudbreak containers are started ..."
-    info "In a couple of minutes you can reach the UI (called Uluwatu)"
-    echo "  $ULU_HOST_ADDRESS" | blue
-    warn "Credentials are not printed here. You can get them by:"
-    echo '  cbd login' | blue
+}
+
+wait-for-cloudbreak() {
+    info "Waiting for Cloudbreak UI (timeout: $CB_UI_MAX_WAIT)"
+    
+    local count=0
+    while ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/info &&  [ $((count++)) -lt $CB_UI_MAX_WAIT ] ; do
+        echo -n . 1>&2
+        sleep 1;
+    done
+    echo 1>&2
+
+    if ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/info; then
+        error "Could not reach Cloudbreak in time."
+        _exit 1
+    fi
 }
 
 create-temp-dir() {
@@ -322,12 +377,23 @@ main() {
     cmd-export env-show
     cmd-export env-export
 
+    cmd-export-ns aws "Amazon Webservice namespace"
+    cmd-export aws-show-role
+    cmd-export aws-generate-role
+    cmd-export aws-delete-role
+    cmd-export aws-list-roles
+
+    cmd-export-ns azure "Azure namespace"
+    cmd-export azure-deploy-dash
+    cmd-export azure-configure-arm
+    
     if [[ "$PROFILE_LOADED" ]] ; then
         cmd-export deployer-generate generate
         cmd-export deployer-regenerate regenerate
         cmd-export deployer-delete delete
         cmd-export compose-ps ps
         cmd-export start-and-migrate-cmd start
+        cmd-export start-wait-and-migrate-cmd start-wait
         cmd-export compose-kill kill
         cmd-export compose-logs logs
         cmd-export compose-pull pull
@@ -336,20 +402,11 @@ main() {
 
         cmd-export migrate-startdb-cmd startdb
         cmd-export migrate-cmd migrate
-
-        cmd-export-ns aws "Amazon Webservice namespace"
-        cmd-export aws-show-role
-        cmd-export aws-generate-role
-        cmd-export aws-delete-role
-        cmd-export aws-list-roles
-
-        cmd-export-ns azure "Azure namespace"
-        cmd-export azure-deploy-dash
-        cmd-export azure-configure-arm
-
+        
         cmd-export-ns util "Util namespace"
         cmd-export util-cloudbreak-shell
         cmd-export util-cloudbreak-shell-quiet
+        cmd-export util-cloudbreak-shell-remote
         cmd-export util-token
         cmd-export util-local-dev
         cmd-export util-cleanup
