@@ -70,12 +70,15 @@ public class SssdConfigCommandsTest {
         Resource resource = new ClassPathResource(classPackage + "/" + getClass().getSimpleName() + ".class");
         dummyFile = resource.getFile();
         given(cloudbreakClient.sssdConfigEndpoint()).willReturn(sssdConfigEndpoint);
+        given(sssdConfigEndpoint.postPrivate(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
+        given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
+        given(sssdConfigEndpoint.get(anyLong())).willReturn(dummyResult);
+        given(sssdConfigEndpoint.getPublic(anyString())).willReturn(dummyResult);
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
     }
 
     @Test
     public void testSelectWithId() throws Exception {
-        given(sssdConfigEndpoint.get(anyLong())).willReturn(dummyResult);
         underTest.select(CONFIG_ID.toString(), null);
         verify(sssdConfigEndpoint, times(1)).get(anyLong());
         verify(sssdConfigEndpoint, times(0)).getPublic(anyString());
@@ -84,7 +87,6 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testSelectWithName() throws Exception {
-        given(sssdConfigEndpoint.getPublic(anyString())).willReturn(dummyResult);
         underTest.select(null, CONFIG_NAME);
         verify(sssdConfigEndpoint, times(0)).get(anyLong());
         verify(sssdConfigEndpoint, times(1)).getPublic(anyString());
@@ -101,7 +103,6 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testPublicAdd() {
-        given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
         underTest.add("name", "desc", new SssdProviderType("LDAP"), "url", new SssdSchemaType("RFC2307"), "base", new SssdTlsReqcertType("NEVER"), null, null,
                 null, true);
         verify(sssdConfigEndpoint, times(1)).postPublic(any(SssdConfigRequest.class));
@@ -110,7 +111,6 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testPrivateAdd() {
-        given(sssdConfigEndpoint.postPrivate(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
         underTest.add("name", "desc", new SssdProviderType("LDAP"), "url", new SssdSchemaType("RFC2307"), "base", new SssdTlsReqcertType("NEVER"), null, null,
                 null, false);
         verify(sssdConfigEndpoint, times(0)).postPublic(any(SssdConfigRequest.class));
@@ -120,7 +120,6 @@ public class SssdConfigCommandsTest {
     @Test
     public void testUploadFileNotFound() {
         given(mockFile.exists()).willReturn(false);
-        given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
         underTest.upload("name", "desc", mockFile, true);
         verify(mockFile, times(1)).exists();
         verify(sssdConfigEndpoint, times(0)).postPublic(any(SssdConfigRequest.class));
@@ -130,7 +129,6 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testPublicUpload() throws IOException {
-        given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
         underTest.upload("name", "desc", dummyFile, true);
         verify(sssdConfigEndpoint, times(1)).postPublic(any(SssdConfigRequest.class));
         verify(sssdConfigEndpoint, times(0)).postPrivate(any(SssdConfigRequest.class));
@@ -139,7 +137,6 @@ public class SssdConfigCommandsTest {
     @Test
     public void testPrivateUpload() {
         given(mockFile.exists()).willReturn(true);
-        given(sssdConfigEndpoint.postPrivate(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
         underTest.upload("name", "desc", dummyFile, false);
         verify(sssdConfigEndpoint, times(0)).postPublic(any(SssdConfigRequest.class));
         verify(sssdConfigEndpoint, times(1)).postPrivate(any(SssdConfigRequest.class));
@@ -147,15 +144,13 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testShowSssdConfigById() throws Exception {
-        given(sssdConfigEndpoint.get(CONFIG_ID)).willReturn(dummyResult);
         underTest.show(CONFIG_ID.toString(), null);
         verify(sssdConfigEndpoint, times(1)).get(anyLong());
+        verify(sssdConfigEndpoint, times(0)).getPublic(anyString());
     }
 
     @Test
     public void testShowSssdConfigByName() throws Exception {
-        given(sssdConfigEndpoint.getPublic(CONFIG_NAME)).willReturn(dummyResult);
-        given(sssdConfigEndpoint.get(CONFIG_ID)).willReturn(dummyResult);
         underTest.show(null, CONFIG_NAME);
         verify(sssdConfigEndpoint, times(0)).get(anyLong());
         verify(sssdConfigEndpoint, times(1)).getPublic(anyString());
@@ -165,6 +160,7 @@ public class SssdConfigCommandsTest {
     public void testShowSssdConfigWithoutIdAndName() throws Exception {
         underTest.show(null, null);
         verify(sssdConfigEndpoint, times(0)).get(anyLong());
+        verify(sssdConfigEndpoint, times(0)).getPublic(anyString());
     }
 
     @Test

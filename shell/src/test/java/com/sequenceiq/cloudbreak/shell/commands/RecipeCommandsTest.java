@@ -9,6 +9,7 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 
 import java.io.File;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
+import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -26,7 +28,7 @@ import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
 public class RecipeCommandsTest {
-    private static final String RECIPE_ID = "50";
+    private static final Long RECIPE_ID = 50L;
     private static final String RECIPE_NAME = "dummyName";
 
     @InjectMocks
@@ -54,22 +56,27 @@ public class RecipeCommandsTest {
         underTest = new RecipeCommands();
         MockitoAnnotations.initMocks(this);
         dummyResult = new RecipeResponse();
-        dummyResult.setId(Long.valueOf(RECIPE_ID));
+        dummyResult.setId(RECIPE_ID);
+        dummyResult.setTimeout(1);
+        dummyResult.setPlugins(Collections.<String, com.sequenceiq.cloudbreak.api.model.PluginExecutionType>emptyMap());
+        dummyResult.setProperties(Collections.<String, String>emptyMap());
         given(cloudbreakClient.recipeEndpoint()).willReturn(recipeEndpoint);
+        given(recipeEndpoint.postPrivate(any(RecipeRequest.class))).willReturn(new IdJson(1L));
+        given(recipeEndpoint.postPublic(any(RecipeRequest.class))).willReturn(new IdJson(1L));
+        given(recipeEndpoint.get(RECIPE_ID)).willReturn(dummyResult);
+        given(recipeEndpoint.getPublic(RECIPE_NAME)).willReturn(dummyResult);
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testShowRecipeById() throws Exception {
-        given(recipeEndpoint.getPublic(RECIPE_ID)).willReturn(dummyResult);
-        underTest.showRecipe(RECIPE_ID, null);
+        underTest.showRecipe(RECIPE_ID.toString(), null);
         verify(recipeEndpoint, times(1)).get(anyLong());
+        verify(recipeEndpoint, times(0)).getPublic(anyString());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testShowRecipeByName() throws Exception {
-        given(recipeEndpoint.getPublic(RECIPE_NAME)).willReturn(dummyResult);
-        given(recipeEndpoint.get(Long.valueOf(RECIPE_ID))).willReturn(dummyResult);
         underTest.showRecipe(null, RECIPE_NAME);
         verify(recipeEndpoint, times(0)).get(anyLong());
         verify(recipeEndpoint, times(1)).getPublic(anyString());
@@ -83,8 +90,8 @@ public class RecipeCommandsTest {
 
     @Test
     public void testDeleteRecipeById() throws Exception {
-        doNothing().when(recipeEndpoint).delete(Long.valueOf(RECIPE_ID));
-        underTest.deleteRecipe(RECIPE_ID, null);
+        doNothing().when(recipeEndpoint).delete(RECIPE_ID);
+        underTest.deleteRecipe(RECIPE_ID.toString(), null);
         verify(recipeEndpoint, times(1)).delete(anyLong());
     }
 
@@ -97,8 +104,8 @@ public class RecipeCommandsTest {
 
     @Test
     public void testDeleteRecipeByIdAndName() throws Exception {
-        doNothing().when(recipeEndpoint).delete(Long.valueOf(RECIPE_ID));
-        underTest.deleteRecipe(RECIPE_ID, RECIPE_NAME);
+        doNothing().when(recipeEndpoint).delete(RECIPE_ID);
+        underTest.deleteRecipe(RECIPE_ID.toString(), RECIPE_NAME);
         verify(recipeEndpoint, times(0)).deletePublic(anyString());
         verify(recipeEndpoint, times(1)).delete(anyLong());
     }
@@ -110,18 +117,21 @@ public class RecipeCommandsTest {
         verify(recipeEndpoint, times(0)).delete(anyLong());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testStoreRecipePreScriptExists() throws Exception {
+    @Test
+    public void testStoreRecipePreScriptExistsAndPublic() throws Exception {
+
         underTest.storeRecipe("name", null, new PluginExecutionType("ALL_NODES"), new File(getClass().getResource("/store-recipe-test").getFile()), null, null,
-                null);
-        verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
+                true);
+        verify(recipeEndpoint, times(1)).postPublic(any(RecipeRequest.class));
+        verify(recipeEndpoint, times(0)).postPrivate(any(RecipeRequest.class));
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testStoreRecipePostScriptExists() throws Exception {
+    @Test
+    public void testStoreRecipePostScriptExistsAndPrivate() throws Exception {
         underTest.storeRecipe("name", null, new PluginExecutionType("ALL_NODES"), null, new File(getClass().getResource("/store-recipe-test").getFile()), null,
-                null);
+                false);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
+        verify(recipeEndpoint, times(1)).postPrivate(any(RecipeRequest.class));
     }
 
     @Test
