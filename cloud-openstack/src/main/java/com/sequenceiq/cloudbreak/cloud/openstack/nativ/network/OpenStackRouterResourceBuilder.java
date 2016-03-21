@@ -42,7 +42,11 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
                         .adminStateUp(true)
                         .tenantId(context.getStringParameter(OpenStackConstants.TENANT_ID))
                         .externalGateway(networkView.getPublicNetId()).build();
-                routerId = osClient.networking().router().create(router).getId();
+                Router newRouter = osClient.networking().router().create(router);
+                if (newRouter == null) {
+                    throw new OpenStackResourceException("Router creation failed, maybe network does not exists", resourceType(), resource.getName());
+                }
+                routerId = newRouter.getId();
             }
             if (!utils.isExistingSubnet(network)) {
                 osClient.networking().router().attachInterface(routerId, AttachInterfaceType.SUBNET, context.getStringParameter(OpenStackConstants.SUBNET_ID));
