@@ -47,7 +47,10 @@ public class DatabaseMigrationConfig {
         if (schemaMigrationEnabled) {
             DataSourceConnectionProvider dataSourceConnectionProvider = new DataSourceConnectionProvider(dataSource);
             DatabaseOperationOption operationOption = new DatabaseOperationOption();
-            operationOption.setRemoveCRs(true);
+            operationOption.setDelimiter(";");
+            operationOption.setFullLineDelimiter(false);
+            operationOption.setSendFullScript(true);
+            operationOption.setAutoCommit(false);
             ByteArrayOutputStream upOutStream = new ByteArrayOutputStream();
             ByteArrayOutputStream pendingOutStream = new ByteArrayOutputStream();
             FileMigrationLoader upMigrationLoader = upMigrationLoader();
