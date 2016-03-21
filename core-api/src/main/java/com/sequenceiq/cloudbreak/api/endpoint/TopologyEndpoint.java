@@ -26,31 +26,31 @@ import com.sequenceiq.cloudbreak.api.model.TopologyResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/")
+@Path("/topologies")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/topologies", description = ControllerDescription.TOPOLOGY_DESCRIPTION, position = 9)
 public interface TopologyEndpoint {
 
     @GET
-    @Path(value = "account/topologies")
+    @Path(value = "account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TopologyOpDesctiption.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES)
     Set<TopologyResponse> getPublics();
 
     @GET
-    @Path(value = "account/topologies/{id}")
+    @Path(value = "account/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TopologyOpDesctiption.GET_BY_ID, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES)
     TopologyResponse get(@PathParam(value = "id") Long id);
 
     @POST
-    @Path(value = "account/topologies")
+    @Path(value = "account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TopologyOpDesctiption.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES)
     IdJson postPublic(@Valid TopologyRequest topologyRequest);
 
     @DELETE
-    @Path(value = "account/topologies/{id}")
+    @Path(value = "account/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TopologyOpDesctiption.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES)
     void delete(@PathParam(value = "id")Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced);

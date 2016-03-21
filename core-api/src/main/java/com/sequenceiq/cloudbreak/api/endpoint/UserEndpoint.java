@@ -17,19 +17,19 @@ import com.sequenceiq.cloudbreak.api.model.UserRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/")
+@Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/users", description = ControllerDescription.USER_DESCRIPTION, position = 9)
 public interface UserEndpoint {
 
     @PUT
-    @Path("users/{id}")
+    @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_DETAILS_EVICT, produces = ContentType.JSON, notes = Notes.USER_NOTES)
     String evictUserDetails(@PathParam(value = "id") String id, @Valid UserRequest userRequest);
 
     @GET
-    @Path("users/{id}/resources")
+    @Path("{id}/resources")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_GET_RESOURCE, produces = ContentType.JSON, notes = Notes.USER_NOTES)
     Boolean hasResources(@PathParam(value = "id") String id);

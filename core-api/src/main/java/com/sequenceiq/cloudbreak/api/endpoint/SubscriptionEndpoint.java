@@ -10,12 +10,11 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SubscriptionRequest;
 
-@Path("/")
+@Path("/subscriptions")
 @Consumes(MediaType.APPLICATION_JSON)
 public interface SubscriptionEndpoint {
 
     @POST
-    @Path("subscriptions")
     @Produces(MediaType.APPLICATION_JSON)
     IdJson subscribe(@Valid SubscriptionRequest subscriptionRequest);
 
