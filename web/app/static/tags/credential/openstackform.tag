@@ -161,6 +161,20 @@
     <!-- .col-sm-9 -->
 </div>
 
+<!-- .form-group -->
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="facing">{{msg.credential_openstack_form_facing_label}}</label>
+
+    <div class="col-sm-9">
+        <select name="facing" id="facing" ng-model="credentialOpenstack.parameters.facing" ng-dropdown required ng-init="credentialOpenstack.parameters.facing='public'">
+            <option ng-option value="public" ng-selected="true">public</option>
+            <option ng-option value="admin">admin</option>
+            <option ng-option value="internal">internal</option>
+        </select>
+    </div>
+    <!-- .col-sm-9 -->
+</div>
+
 <div class="form-group" ng-class="{ 'has-error': openstackCredentialForm.openstack_sshPublicKey.$dirty && openstackCredentialForm.openstack_sshPublicKey.$invalid }">
     <label class="col-sm-3 control-label" for="openstack_sshPublicKey">{{msg.credential_openstack_form_ssh_key_label}}</label>
 

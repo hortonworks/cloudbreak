@@ -146,7 +146,8 @@ angular.module('uluwatuControllers').controller('credentialController', [
                 $rootScope.credentials.push($scope.credentialOpenstack);
                 $scope.credentialOpenstack = {
                     parameters: {
-                        keystoneVersion: "cb-keystone-v2"
+                        keystoneVersion: "cb-keystone-v2",
+                        facing: "public"
                     }
                 };
                 $scope.showSuccess($filter("format")($rootScope.msg.openstack_credential_success, String(result.id)));
