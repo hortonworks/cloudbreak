@@ -180,6 +180,10 @@ compose-generate-yaml-force() {
         export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
     fi
     cat > ${composeFile} <<EOF
+haveged:
+    privileged: true
+    image: sequenceiq/haveged:$DOCKER_TAG_HAVEGED
+
 consul:
     privileged: true
     volumes:
@@ -294,7 +298,6 @@ cloudbreak:
         - CB_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
         - CB_IDENTITY_SERVICEID=identity.service.consul
         - CB_DB_SERVICEID=cbdb.service.consul
-        - SECURE_RANDOM=$SECURE_RANDOM
         - CB_MAIL_SMTP_AUTH=$CLOUDBREAK_SMTP_AUTH
         - CB_MAIL_SMTP_STARTTLS_ENABLE=$CLOUDBREAK_SMTP_STARTTLS_ENABLE
         - CB_MAIL_SMTP_TYPE=$CLOUDBREAK_SMTP_TYPE
@@ -392,7 +395,6 @@ periscope:
         - PERISCOPE_DB_SERVICEID=pcdb.service.consul
         - PERISCOPE_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
         - PERISCOPE_IDENTITY_SERVICEID=identity.service.consul
-        - SECURE_RANDOM=$SECURE_RANDOM
         - PERISCOPE_SCHEMA_SCRIPTS_LOCATION=$PERISCOPE_SCHEMA_SCRIPTS_LOCATION
         - PERISCOPE_SCHEMA_MIGRATION_AUTO=$PERISCOPE_SCHEMA_MIGRATION_AUTO
         - REST_DEBUG=$REST_DEBUG

@@ -22,6 +22,7 @@ cloudbreak-conf-tags() {
     declare desc="Defines docker image tags"
 
     env-import DOCKER_TAG_ALPINE 3.1
+    env-import DOCKER_TAG_HAVEGED 1.1
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
@@ -198,7 +199,7 @@ cloudbreak-conf-ui() {
 }
 
 cloudbreak-conf-java() {
-    env-import SECURE_RANDOM "false"
+    env-import CB_JAVA_OPTS ""
 }
 
 cloudbreak-conf-baywatch() {
