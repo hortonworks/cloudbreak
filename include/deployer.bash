@@ -78,11 +78,18 @@ cbd-update-release() {
     local osarch=$(uname -sm | tr " " _ )
     debug $desc
     debug binver=$binver lastver=$lastver osarch=$osarch | gray
-    local url=https://github.com/sequenceiq/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
-    info "Updating $SELF_EXECUTABLE from url: $url"
-    curl -Ls $url | tar -zx -C $TEMP_DIR
-    mv $TEMP_DIR/cbd $SELF_EXECUTABLE
-    debug $SELF_EXECUTABLE is updated
+
+    if [[ ${binver} != ${lastver} ]]; then
+        debug upgrade needed |yellow
+
+        local url=https://github.com/sequenceiq/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
+        info "Updating $SELF_EXECUTABLE from url: $url"
+        curl -Ls $url | tar -zx -C $TEMP_DIR
+        mv $TEMP_DIR/cbd $SELF_EXECUTABLE
+        debug $SELF_EXECUTABLE is updated
+    else
+        debug you have the latest version | green
+    fi
 }
 
 cbd-update-snap() {
