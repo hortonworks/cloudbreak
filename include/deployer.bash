@@ -288,11 +288,15 @@ deployer-login() {
 }
 
 start-and-migrate-cmd() {
+    declare desc="Starts Cloudbreak Deployer containers"
+
     start-requested-services "$@"
     deployer-login
 }
 
 start-wait-and-migrate-cmd() {
+    declare desc="Starts Cloudbreak Deployer containers, and waits until API is available"
+
     start-requested-services "$@"
     wait-for-cloudbreak
     deployer-login
