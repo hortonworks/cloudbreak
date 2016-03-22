@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.util;
 
+import static org.apache.commons.lang3.StringUtils.isAnyEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.io.ByteArrayInputStream;
@@ -46,6 +47,8 @@ public final class GcpStackUtil {
     private static final String PRIVATE_KEY = "serviceAccountPrivateKey";
     private static final String PROJECT_ID = "projectId";
     private static final String NETWORK_ID = "networkId";
+    private static final String SUBNET_ID = "subnetId";
+
 
     private GcpStackUtil() {
     }
@@ -191,8 +194,28 @@ public final class GcpStackUtil {
         return isNoneEmpty(getCustomNetworkId(network));
     }
 
+    public static boolean newSubnetInExistingNetwork(Network network) {
+        return isExistingNetwork(network) && isNoneEmpty(network.getSubnet().getCidr());
+    }
+
+    public static boolean newNetworkAndSubnet(Network network) {
+        return !isExistingNetwork(network);
+    }
+
+    public static boolean legacyNetwork(Network network) {
+        return isAnyEmpty(network.getSubnet().getCidr()) && isAnyEmpty(getSubnetId(network));
+    }
+
+    public static boolean isExistingSubnet(Network network) {
+        return isNoneEmpty(getSubnetId(network));
+    }
+
     public static String getCustomNetworkId(Network network) {
         return network.getStringParameter(NETWORK_ID);
+    }
+
+    public static String getSubnetId(Network network) {
+        return network.getStringParameter(SUBNET_ID);
     }
 
     public static String getClusterTag(CloudContext cloudContext) {

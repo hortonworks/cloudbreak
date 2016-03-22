@@ -33,46 +33,40 @@
 </div>
 
 
-<div class="form-group">
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_networkVPCId">{{msg.network_aws_form_custom_vpc_label}}</label>
-        <div class="col-sm-9" />
-    </div>
-    <div class="form-group" ng-class="{ 'has-error': awsNetworkForm.aws_networkVPCId.$dirty && awsNetworkForm.aws_networkVPCId.$invalid }">
-        <label class="col-sm-3 col-sm-offset-2 control-label" for="aws_networkVPCId">{{msg.network_aws_form_vpc_id_label}}</label>
+<div class="form-group" ng-class="{ 'has-error': awsNetworkForm.aws_networkVPCId.$dirty && awsNetworkForm.aws_networkVPCId.$invalid }">
+    <label class="col-sm-3 control-label" for="aws_networkVPCId">{{msg.network_aws_form_vpc_id_label}}</label>
 
-        <div class="col-sm-7">
-            <input type="text" class="form-control" name="aws_networkVPCId" ng-model="network.parameters.vpcId" ng-maxlength="30" id="aws_networkVPCId" placeholder="{{msg.network_aws_form_vpc_id_placeholder}}" ng-pattern="/vpc-[a-zA-Z0-9]{8}/">
-            <div class="help-block" ng-show="awsNetworkForm.aws_networkVPCId.$dirty && awsNetworkForm.aws_networkVPCId.$invalid">
-                <i class="fa fa-warning"></i> {{msg.network_vpcid_invalid}}
-            </div>
+    <div class="col-sm-9">
+        <input type="text" class="form-control" name="aws_networkVPCId" ng-model="network.parameters.vpcId" id="aws_networkVPCId" placeholder="{{msg.network_aws_form_vpc_id_placeholder}}" ng-pattern="/vpc-[a-zA-Z0-9]{8}/">
+        <div class="help-block" ng-show="awsNetworkForm.aws_networkVPCId.$dirty && awsNetworkForm.aws_networkVPCId.$invalid">
+            <i class="fa fa-warning"></i> {{msg.network_vpcid_invalid}}
         </div>
-        <!-- .col-sm-9 -->
     </div>
+    <!-- .col-sm-9 -->
+</div>
 
-    <div class="form-group" ng-class="{ 'has-error': awsNetworkForm.aws_networkIGWID.$dirty && awsNetworkForm.aws_networkIGWID.$invalid }">
-        <label class="col-sm-3 col-sm-offset-2 control-label" for="aws_networkIGWID">{{msg.network_aws_form_gateway_id_label}}</label>
+<div class="form-group" ng-class="{ 'has-error': awsNetworkForm.aws_networkIGWID.$dirty && awsNetworkForm.aws_networkIGWID.$invalid }">
+    <label class="col-sm-3 control-label" for="aws_networkIGWID">{{msg.network_aws_form_gateway_id_label}}</label>
 
-        <div class="col-sm-7">
-            <input type="text" class="form-control" name="aws_networkIGWID" ng-model="network.parameters.internetGatewayId" ng-maxlength="30" id="aws_networkIGWID" placeholder="{{msg.network_aws_form_gateway_id_placeholder}}" ng-pattern="/igw-[a-zA-Z0-9]{8}/">
-            <div class="help-block" ng-show="awsNetworkForm.aws_networkIGWID.$dirty && awsNetworkForm.aws_networkIGWID.$invalid">
-                <i class="fa fa-warning"></i> {{msg.network_internetgatewayid_invalid}}
-            </div>
+    <div class="col-sm-9">
+        <input type="text" class="form-control" name="aws_networkIGWID" ng-model="network.parameters.internetGatewayId" id="aws_networkIGWID" placeholder="{{msg.network_aws_form_gateway_id_placeholder}}" ng-pattern="/igw-[a-zA-Z0-9]{8}/">
+        <div class="help-block" ng-show="awsNetworkForm.aws_networkIGWID.$dirty && awsNetworkForm.aws_networkIGWID.$invalid">
+            <i class="fa fa-warning"></i> {{msg.network_internetgatewayid_invalid}}
         </div>
-        <!-- .col-sm-9 -->
     </div>
+    <!-- .col-sm-9 -->
+</div>
 
-    <div class="form-group" ng-class="{ 'has-error': awsNetworkForm.aws_networkSubnetId.$dirty && awsNetworkForm.aws_networkSubnetId.$invalid }">
-        <label class="col-sm-3 col-sm-offset-2 control-label" for="aws_networkSubnetId">{{msg.network_aws_form_subnet_id_label_optional}}</label>
+<div class="form-group" ng-class="{ 'has-error': awsNetworkForm.aws_networkSubnetId.$dirty && awsNetworkForm.aws_networkSubnetId.$invalid }">
+    <label class="col-sm-3 control-label" for="aws_networkSubnetId">{{msg.network_aws_form_subnet_id_label_optional}}</label>
 
-        <div class="col-sm-7">
-            <input type="text" class="form-control" name="aws_networkSubnetId" ng-model="network.parameters.subnetId" ng-maxlength="30" id="aws_networkSubnetId" placeholder="{{msg.network_aws_form_subnet_id_placeholder}}" ng-pattern="/subnet-[a-zA-Z0-9]{8}/">
-            <div class="help-block" ng-show="awsNetworkForm.aws_networkSubnetId.$dirty && awsNetworkForm.aws_networkSubnetId.$invalid">
-                <i class="fa fa-warning"></i> {{msg.network_subnetid_invalid}}
-            </div>
+    <div class="col-sm-9">
+        <input type="text" class="form-control" name="aws_networkSubnetId" ng-model="network.parameters.subnetId" id="aws_networkSubnetId" placeholder="{{msg.network_aws_form_subnet_id_placeholder}}" ng-pattern="/subnet-[a-zA-Z0-9]{8}/">
+        <div class="help-block" ng-show="awsNetworkForm.aws_networkSubnetId.$dirty && awsNetworkForm.aws_networkSubnetId.$invalid">
+            <i class="fa fa-warning"></i> {{msg.network_subnetid_invalid}}
         </div>
-        <!-- .col-sm-9 -->
     </div>
+    <!-- .col-sm-9 -->
 </div>
 
 <div class="form-group">

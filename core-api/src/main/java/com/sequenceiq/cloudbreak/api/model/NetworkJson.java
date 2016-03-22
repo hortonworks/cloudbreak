@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -29,7 +30,6 @@ public class NetworkJson implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, required = true)
     @NotNull
     private boolean publicInAccount;
-    @NotNull
     @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.SUBNET_CIDR, required = true)
     @Pattern(regexp =
             "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",

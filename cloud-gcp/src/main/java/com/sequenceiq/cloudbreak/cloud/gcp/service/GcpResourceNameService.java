@@ -31,6 +31,9 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
             case GCP_NETWORK:
                 resourceName = gcpNetworkResourceName(parts);
                 break;
+            case GCP_SUBNET:
+                resourceName = gcpSubnetResourceName(parts);
+                break;
             case GCP_FIREWALL_INTERNAL:
                 resourceName = stackBasedResourceWithSuffix(FIREWALL_INTERNAL_NAME_SUFFIX, parts);
                 break;
@@ -104,5 +107,16 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         networkName = appendHash(networkName, new Date());
         networkName = adjustBaseLength(networkName, maxResourceNameLength);
         return networkName;
+    }
+
+    private String gcpSubnetResourceName(Object[] parts) {
+        checkArgs(1, parts);
+        String subnetName = null;
+        String stackName = String.valueOf(parts[0]);
+        subnetName = normalize(stackName);
+        subnetName = adjustPartLength(subnetName);
+        subnetName = appendHash(subnetName, new Date());
+        subnetName = adjustBaseLength(subnetName, maxResourceNameLength);
+        return subnetName;
     }
 }

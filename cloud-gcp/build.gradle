@@ -19,7 +19,7 @@ dependencies {
     compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
     compile group: 'commons-io',                    name: 'commons-io',                     version: '2.4'
     compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
-    compile group: 'com.google.apis',               name: 'google-api-services-compute',    version: 'v1-rev46-1.19.1'
+    compile group: 'com.google.apis',               name: 'google-api-services-compute',    version: 'v1-rev102-1.21.0'
     compile group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev6-1.19.0'
     compile group: 'com.google.apis',               name: 'google-api-services-dns',        version: 'v1beta1-rev9-1.19.0'
     compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
