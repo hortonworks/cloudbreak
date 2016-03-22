@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 public class OpenStackConstants {
     public static final Platform OPENSTACK_PLATFORM = Platform.platform("OPENSTACK");
 
+    public static final String FACING = "facing";
     public static final String TENANT_ID = "tenantId";
     public static final String NETWORK_ID = "networkId";
     public static final String SUBNET_ID = "subnetId";

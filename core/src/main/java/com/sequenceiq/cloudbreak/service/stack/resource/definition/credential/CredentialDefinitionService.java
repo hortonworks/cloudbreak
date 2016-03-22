@@ -80,8 +80,8 @@ public class CredentialDefinitionService {
         Map<String, Object> processed = new HashMap<>();
         for (Value value : values) {
             String key = value.getName();
-            String property = getProperty(properties, key);
-            if (isEncrypted(value)) {
+            String property = getProperty(properties, key, isOptional(value));
+            if (property != null && !property.isEmpty() && isEncrypted(value)) {
                 property = revert ? encryptor.decrypt(property) : encryptor.encrypt(property);
             }
             processed.put(key, property);
@@ -94,16 +94,21 @@ public class CredentialDefinitionService {
         return isNotNull(encrypted) && encrypted;
     }
 
+    private boolean isOptional(Value value) {
+        Boolean optional = value.getOptional();
+        return isNotNull(optional) && optional;
+    }
+
     private boolean isNotNull(Object object) {
         return null != object;
     }
 
-    private String getProperty(Map<String, Object> properties, String key) {
+    private String getProperty(Map<String, Object> properties, String key, boolean optional) {
         Object value = properties.get(key);
-        if (value == null) {
+        if (value == null && !optional) {
             throw new MissingParameterException(String.format("Missing '%s' property!", key));
         }
-        return String.valueOf(value);
+        return value == null ? null : String.valueOf(value);
     }
 
 }

@@ -10,6 +10,8 @@ public class Value {
     private String type;
     @JsonProperty("encrypted")
     private Boolean encrypted;
+    @JsonProperty("optional")
+    private Boolean optional;
 
     public String getName() {
         return name;
@@ -33,5 +35,13 @@ public class Value {
 
     public void setEncrypted(Boolean encrypted) {
         this.encrypted = encrypted;
+    }
+
+    public Boolean getOptional() {
+        return optional;
+    }
+
+    public void setOptional(Boolean optional) {
+        this.optional = optional;
     }
 }

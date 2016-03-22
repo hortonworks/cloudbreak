@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
+import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.FACING;
+
 import javax.annotation.PostConstruct;
 
 import org.openstack4j.api.OSClient;
+import org.openstack4j.api.types.Facing;
 import org.openstack4j.model.common.Identifier;
 import org.openstack4j.model.identity.Access;
 import org.openstack4j.openstack.OSFactory;
@@ -35,15 +38,16 @@ public class OpenStackClient {
 
     public OSClient createOSClient(AuthenticatedContext authenticatedContext) {
         Access access = authenticatedContext.getParameter(Access.class);
-        return createOSClient(access);
+        String facing = authenticatedContext.getCloudCredential().getStringParameter(FACING);
+        return createOSClient(access, Facing.value(facing));
     }
 
     public KeystoneCredentialView createKeystoneCredential(AuthenticatedContext authenticatedContext) {
         return new KeystoneCredentialView(authenticatedContext);
     }
 
-    private OSClient createOSClient(Access access) {
-        return OSFactory.clientFromAccess(access);
+    private OSClient createOSClient(Access access, Facing facing) {
+        return OSFactory.clientFromAccess(access, facing);
     }
 
     private Access createAccess(AuthenticatedContext authenticatedContext) {

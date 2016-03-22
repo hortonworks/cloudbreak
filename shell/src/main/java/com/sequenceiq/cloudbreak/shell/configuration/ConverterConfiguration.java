@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.shell.converter.InstanceGroupTemplateIdConverte
 import com.sequenceiq.cloudbreak.shell.converter.InstanceGroupTemplateNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.NetworkIdConverter;
 import com.sequenceiq.cloudbreak.shell.converter.NetworkNameConverter;
+import com.sequenceiq.cloudbreak.shell.converter.OpenStackFacingConverter;
 import com.sequenceiq.cloudbreak.shell.converter.PlatformVariantConverter;
 import com.sequenceiq.cloudbreak.shell.converter.PluginExecutionTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityGroupIdConverter;
@@ -233,6 +234,11 @@ public class ConverterConfiguration {
     @Bean
     Converter getSssdSchemaTypeConverter() {
         return new SssdSchemaTypeConverter();
+    }
+
+    @Bean
+    Converter getOpenStackFacingConverter() {
+        return new OpenStackFacingConverter();
     }
 
     @Bean

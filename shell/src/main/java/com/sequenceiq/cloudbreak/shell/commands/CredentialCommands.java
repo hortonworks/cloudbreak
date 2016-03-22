@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.completion.OpenStackFacing;
 import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
@@ -167,6 +168,7 @@ public class CredentialCommands implements CommandMarker {
             @CliOption(key = "sshKeyPath", mandatory = false, help = "path of a public SSH key file") File sshKeyPath,
             @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key file") String sshKeyUrl,
             @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
+            @CliOption(key = "facing", mandatory = false, help = "URL perspective in which the API is accessing data") OpenStackFacing facing,
             @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the credential belongs to") Long platformId
@@ -230,6 +232,9 @@ public class CredentialCommands implements CommandMarker {
             parameters.put("domainName", domainName);
             parameters.put("projectDomainName", projectDomainName);
             parameters.put("projectName", projectName);
+            if (facing != null) {
+                parameters.put("facing", facing.getName());
+            }
 
             credentialRequest.setParameters(parameters);
             if (platformId != null) {
