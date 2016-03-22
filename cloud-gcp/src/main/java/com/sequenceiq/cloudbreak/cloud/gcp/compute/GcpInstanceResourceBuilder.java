@@ -190,7 +190,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private List<NetworkInterface> getNetworkInterface(List<CloudResource> resources,
             Region region, Group group, Compute compute, String projectId) throws IOException {
         NetworkInterface networkInterface = new NetworkInterface();
-        String networkName = filterResourcesByType(resources, ResourceType.GCP_NETWORK).get(0).getName();
+        List<CloudResource> subnet = filterResourcesByType(resources, ResourceType.GCP_SUBNET);
+        String networkName = subnet.isEmpty() ? filterResourcesByType(resources, ResourceType.GCP_NETWORK).get(0).getName() : subnet.get(0).getName();
         networkInterface.setName(networkName);
         AccessConfig accessConfig = new AccessConfig();
         accessConfig.setName(networkName);
@@ -201,7 +202,13 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             accessConfig.setNatIP(getReservedIp.execute().getAddress());
         }
         networkInterface.setAccessConfigs(asList(accessConfig));
-        networkInterface.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));
+        if (subnet.isEmpty()) {
+            networkInterface.setNetwork(
+                    String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));
+        } else {
+            networkInterface.setSubnetwork(
+                    String.format("https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s", projectId, region.value(), networkName));
+        }
         return asList(networkInterface);
     }
 

@@ -9,6 +9,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.ResourceNotNeededException;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
@@ -32,6 +35,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class NetworkResourceService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkResourceService.class);
 
     @Inject
     private ResourceBuilders resourceBuilders;
@@ -51,13 +56,17 @@ public class NetworkResourceService {
             if (pollGroup != null && CANCELLED.equals(pollGroup)) {
                 break;
             }
-            CloudResource buildableResource = builder.create(context, auth, network);
-            createResource(auth, buildableResource);
-            CloudResource resource = builder.build(context, auth, network, security, buildableResource);
-            updateResource(auth, resource);
-            PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, asList(resource), context, true);
-            List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-            results.addAll(pollerResult);
+            try {
+                CloudResource buildableResource = builder.create(context, auth, network);
+                createResource(auth, buildableResource);
+                CloudResource resource = builder.build(context, auth, network, security, buildableResource);
+                updateResource(auth, resource);
+                PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, asList(resource), context, true);
+                List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
+                results.addAll(pollerResult);
+            } catch (ResourceNotNeededException e) {
+                LOGGER.warn("Skipping resource creation: {}", e.getMessage());
+            }
         }
         return results;
     }

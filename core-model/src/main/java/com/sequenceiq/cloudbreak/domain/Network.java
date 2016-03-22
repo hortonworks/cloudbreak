@@ -84,7 +84,6 @@ public class Network {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String subnetCIDR;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
