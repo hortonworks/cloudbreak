@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.NetworkConfig;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -25,6 +26,7 @@ public class DefaultNetworkCreator {
 
     private static final String DEFAULT_AWS_NETWORK_NAME = "default-aws-network";
     private static final String DEFAULT_GCP_NETWORK_NAME = "default-gcp-network";
+    private static final String DEFAULT_AZURE_RM_NETWORK_NAME = "default-azure-rm-network";
 
     @Inject
     private NetworkRepository networkRepository;
@@ -47,6 +49,11 @@ public class DefaultNetworkCreator {
         setNetworkCommonFields(awsNetwork, DEFAULT_AWS_NETWORK_NAME, "Default network settings for AWS clusters.",
                 NetworkConfig.SUBNET_16, user, AWS);
         networks.add(networkRepository.save(awsNetwork));
+
+        Network azureNetwork = new Network();
+        setNetworkCommonFields(azureNetwork, DEFAULT_AZURE_RM_NETWORK_NAME, "Default network settings for Azure RM clusters.",
+                NetworkConfig.SUBNET_16, user, CloudConstants.AZURE_RM);
+        networks.add(networkRepository.save(azureNetwork));
 
         Network gcpNetwork = new Network();
         setNetworkCommonFields(gcpNetwork, DEFAULT_GCP_NETWORK_NAME, "Default network settings for Gcp clusters.",
