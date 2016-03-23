@@ -45,7 +45,7 @@ public class NetworkCommands implements CommandMarker {
 
     @CliAvailabilityIndicator({ "network delete", "network select", "network show" })
     public boolean isNetworkDeleteCommandAvailable() {
-        return !context.getNetworksByProvider().isEmpty()  && !context.isMarathonMode();
+        return !context.getNetworksByProvider().isEmpty() && !context.isMarathonMode();
     }
 
     @CliCommand(value = "network list", help = "Shows the currently available networks configurations")
@@ -160,8 +160,9 @@ public class NetworkCommands implements CommandMarker {
     @CliCommand(value = "network create --GCP", help = "Create a new GCP network configuration")
     public String createGcpNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
-            @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
+            @CliOption(key = "subnet", mandatory = false, help = "Subnet of the network in CIDR format") String subnet,
             @CliOption(key = "networkId", mandatory = false, help = "Id of a custom network") String networkId,
+            @CliOption(key = "subnetId", mandatory = false, help = "Id of a custom subnet") String subnetId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
@@ -177,6 +178,9 @@ public class NetworkCommands implements CommandMarker {
             Map<String, Object> parameters = new HashMap<>();
             if (networkId != null) {
                 parameters.put("networkId", networkId);
+            }
+            if (subnetId != null) {
+                parameters.put("subnetId", subnetId);
             }
 
             networkJson.setParameters(parameters);
