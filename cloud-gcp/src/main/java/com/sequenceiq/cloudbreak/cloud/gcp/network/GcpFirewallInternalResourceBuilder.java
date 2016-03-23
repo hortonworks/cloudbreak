@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingNetwork;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.legacyNetwork;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.newNetworkAndSubnet;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.newSubnetInExistingNetwork;
 
 import java.util.Arrays;
 
@@ -49,12 +52,16 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
         firewall.setTargetTags(Arrays.asList(GcpStackUtil.getClusterTag(auth.getCloudContext())));
         firewall.setAllowed(Arrays.asList(allowed1, allowed2, allowed3));
         firewall.setName(buildableResource.getName());
-        if (isExistingNetwork(network)) {
+        if (legacyNetwork(network)) {
             Compute.Networks.Get networkRequest = context.getCompute().networks().get(projectId, getCustomNetworkId(network));
             com.google.api.services.compute.model.Network existingNetwork = networkRequest.execute();
             firewall.setSourceRanges(Arrays.asList(existingNetwork.getIPv4Range()));
-        } else {
+        } else if (newNetworkAndSubnet(network) || newSubnetInExistingNetwork(network)) {
             firewall.setSourceRanges(Arrays.asList(network.getSubnet().getCidr()));
+        } else {
+            Compute.Subnetworks.Get sn = context.getCompute().subnetworks().get(projectId, context.getLocation().getRegion().value(), getSubnetId(network));
+            com.google.api.services.compute.model.Subnetwork existingSubnet = sn.execute();
+            firewall.setSourceRanges(Arrays.asList(existingSubnet.getIpCidrRange()));
         }
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId,
                 context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
@@ -89,6 +96,7 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
 
     @Override
     public int order() {
-        return 1;
+        return 2;
     }
+
 }

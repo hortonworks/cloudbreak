@@ -46,46 +46,40 @@
     <!-- .col-sm-9 -->
 </div>
 
-<div class="form-group">
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="openstack_networkVPCId">{{msg.network_openstack_form_custom_network_label}}</label>
-        <div class="col-sm-9" />
-    </div>
-    <div class="form-group" ng-class="{ 'has-error': openstackNetworkForm.openstack_networkVPCId.$dirty && openstackNetworkForm.openstack_networkVPCId.$invalid }">
-        <label class="col-sm-3 col-sm-offset-2 control-label" for="openstack_networkVPCId">{{msg.network_openstack_form_network_id_label}}</label>
+<div class="form-group" ng-class="{ 'has-error': openstackNetworkForm.openstack_networkVPCId.$dirty && openstackNetworkForm.openstack_networkVPCId.$invalid }">
+    <label class="col-sm-3 control-label" for="openstack_networkVPCId">{{msg.network_openstack_form_network_id_label}}</label>
 
-        <div class="col-sm-7">
-            <input type="text" class="form-control" name="openstack_networkVPCId" ng-model="network.parameters.networkId" id="openstack_networkVPCId" placeholder="{{msg.network_openstack_form_network_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/">
-            <div class="help-block" ng-show="openstackNetworkForm.openstack_networkVPCId.$dirty && openstackNetworkForm.openstack_networkVPCId.$invalid">
-                <i class="fa fa-warning"></i> {{msg.network_identifier_invalid}}
-            </div>
+    <div class="col-sm-9">
+        <input type="text" class="form-control" name="openstack_networkVPCId" ng-model="network.parameters.networkId" id="openstack_networkVPCId" placeholder="{{msg.network_openstack_form_network_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/">
+        <div class="help-block" ng-show="openstackNetworkForm.openstack_networkVPCId.$dirty && openstackNetworkForm.openstack_networkVPCId.$invalid">
+            <i class="fa fa-warning"></i> {{msg.network_identifier_invalid}}
         </div>
-        <!-- .col-sm-9 -->
     </div>
+    <!-- .col-sm-9 -->
+</div>
 
-    <div class="form-group" ng-class="{ 'has-error': openstackNetworkForm.openstack_networkRouterId.$dirty && openstackNetworkForm.openstack_networkRouterId.$invalid }">
-        <label class="col-sm-3 col-sm-offset-2 control-label" for="openstack_networkRouterId">{{msg.network_openstack_form_router_id_label}}</label>
+<div class="form-group" ng-class="{ 'has-error': openstackNetworkForm.openstack_networkRouterId.$dirty && openstackNetworkForm.openstack_networkRouterId.$invalid }">
+    <label class="col-sm-3 control-label" for="openstack_networkRouterId">{{msg.network_openstack_form_router_id_label}}</label>
 
-        <div class="col-sm-7">
-            <input type="text" class="form-control" name="openstack_networkRouterId" ng-model="network.parameters.routerId" id="openstack_networkRouterId" placeholder="{{msg.network_openstack_form_router_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/">
-            <div class="help-block" ng-show="openstackNetworkForm.openstack_networkRouterId.$dirty && openstackNetworkForm.openstack_networkRouterId.$invalid">
-                <i class="fa fa-warning"></i> {{msg.network_router_invalid}}
-            </div>
+    <div class="col-sm-9">
+        <input type="text" class="form-control" name="openstack_networkRouterId" ng-model="network.parameters.routerId" id="openstack_networkRouterId" placeholder="{{msg.network_openstack_form_router_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/">
+        <div class="help-block" ng-show="openstackNetworkForm.openstack_networkRouterId.$dirty && openstackNetworkForm.openstack_networkRouterId.$invalid">
+            <i class="fa fa-warning"></i> {{msg.network_router_invalid}}
         </div>
-        <!-- .col-sm-9 -->
     </div>
+    <!-- .col-sm-9 -->
+</div>
 
-    <div class="form-group" ng-class="{ 'has-error': openstackNetworkForm.openstack_networkSubnetId.$dirty && openstackNetworkForm.openstack_networkSubnetId.$invalid }">
-        <label class="col-sm-3 col-sm-offset-2 control-label" for="openstack_networkSubnetId">{{msg.network_openstack_form_subnet_id_label_optional}}</label>
+<div class="form-group" ng-class="{ 'has-error': openstackNetworkForm.openstack_networkSubnetId.$dirty && openstackNetworkForm.openstack_networkSubnetId.$invalid }">
+    <label class="col-sm-3 control-label" for="openstack_networkSubnetId">{{msg.network_openstack_form_subnet_id_label_optional}}</label>
 
-        <div class="col-sm-7">
-            <input type="text" class="form-control" name="openstack_networkSubnetId" ng-model="network.parameters.subnetId" id="openstack_networkSubnetId" placeholder="{{msg.network_openstack_form_subnet_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/">
-            <div class="help-block" ng-show="openstackNetworkForm.openstack_networkSubnetId.$dirty && openstackNetworkForm.openstack_networkSubnetId.$invalid">
-                <i class="fa fa-warning"></i> {{msg.network_subnetid2_invalid}}
-            </div>
+    <div class="col-sm-9">
+        <input type="text" class="form-control" name="openstack_networkSubnetId" ng-model="network.parameters.subnetId" id="openstack_networkSubnetId" placeholder="{{msg.network_openstack_form_subnet_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/">
+        <div class="help-block" ng-show="openstackNetworkForm.openstack_networkSubnetId.$dirty && openstackNetworkForm.openstack_networkSubnetId.$invalid">
+            <i class="fa fa-warning"></i> {{msg.network_subnetid2_invalid}}
         </div>
-        <!-- .col-sm-9 -->
     </div>
+    <!-- .col-sm-9 -->
 </div>
 
 

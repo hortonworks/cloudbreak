@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Service
 public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
 
+    private static final int ORDER = 3;
+
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
@@ -103,7 +105,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
     public int order() {
-        return 2;
+        return ORDER;
     }
 
     private List<String> getSourceRanges(Security security) {

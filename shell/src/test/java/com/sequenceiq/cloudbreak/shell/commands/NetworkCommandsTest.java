@@ -205,7 +205,7 @@ public class NetworkCommandsTest {
 
     @Test
     public void testCreateGcpNetworkPublic() {
-        underTest.createGcpNetwork("name", "subnet", "networkId", true, null, null);
+        underTest.createGcpNetwork("name", "subnet", "networkId", "subnetId", true, null, null);
         verify(networkEndpoint, times(0)).postPrivate(any(NetworkJson.class));
         verify(networkEndpoint, times(1)).postPublic(any(NetworkJson.class));
         verify(context, times(1)).setHint(any(Hints.class));
@@ -215,7 +215,7 @@ public class NetworkCommandsTest {
 
     @Test
     public void testCreateGcpNetworkPrivate() {
-        underTest.createGcpNetwork("name", "subnet", "networkId", false, null, null);
+        underTest.createGcpNetwork("name", "subnet", "networkId", "subnetId", false, null, null);
         verify(networkEndpoint, times(1)).postPrivate(any(NetworkJson.class));
         verify(networkEndpoint, times(0)).postPublic(any(NetworkJson.class));
         verify(context, times(1)).setHint(any(Hints.class));
@@ -228,7 +228,7 @@ public class NetworkCommandsTest {
         given(topologyEndpoint.getPublics()).willReturn(Collections.singleton(topologyResponse));
         given(topologyResponse.getId()).willReturn(1L);
         given(topologyResponse.getCloudPlatform()).willReturn("GCP");
-        underTest.createGcpNetwork("name", "subnet", null, null, null, 1L);
+        underTest.createGcpNetwork("name", "subnet", null, null, null, null, 1L);
         verify(cloudbreakClient, times(1)).topologyEndpoint();
         verify(topologyEndpoint, times(1)).getPublics();
         verify(context, times(1)).setHint(any(Hints.class));
@@ -238,19 +238,19 @@ public class NetworkCommandsTest {
 
     @Test(expected = RuntimeException.class)
     public void testCreateGcpNetworkWithPlatformWhichNotFound() {
-        underTest.createGcpNetwork("name", "subnet", null, null, null, 1L);
+        underTest.createGcpNetwork("name", "subnet", null, null, null, null, 1L);
     }
 
     @Test
     public void testCreateGcpNetworkWithoutExistingVpc() {
-        underTest.createGcpNetwork("name", "subnet", null, null, null, null);
+        underTest.createGcpNetwork("name", "subnet", null, null, null, null, null);
         verify(networkEndpoint, times(1)).postPrivate(networkCaptor.capture());
         assertEquals("Only empty parameters allowed", Collections.emptyMap(), networkCaptor.getValue().getParameters());
     }
 
     @Test
     public void testCreateGcpNetworkWithExistingVpc() {
-        underTest.createGcpNetwork("name", "subnet", "netId", null, null, null);
+        underTest.createGcpNetwork("name", "subnet", "netId", null, null, null, null);
         verify(networkEndpoint, times(1)).postPrivate(networkCaptor.capture());
         assertEquals("Only network id allowed", Collections.singletonMap("networkId", "netId"), networkCaptor.getValue().getParameters());
     }
