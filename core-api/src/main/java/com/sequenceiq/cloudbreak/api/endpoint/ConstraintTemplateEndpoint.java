@@ -23,67 +23,67 @@ import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/")
+@Path("/constraints")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/constraints", description = ControllerDescription.CONSTRAINT_TEMPLATE_DESCRIPTION, position = 2)
 public interface ConstraintTemplateEndpoint {
 
     @POST
-    @Path("user/constraints")
+    @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
     IdJson postPrivate(@Valid ConstraintTemplateRequest constraintTemplateRequest);
 
     @POST
-    @Path("account/constraints")
+    @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
     IdJson postPublic(ConstraintTemplateRequest constraintTemplateRequest);
 
     @GET
-    @Path("user/constraints")
+    @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
     Set<ConstraintTemplateResponse> getPrivates();
 
     @GET
-    @Path("account/constraints")
+    @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
     Set<ConstraintTemplateResponse> getPublics();
 
     @GET
-    @Path("user/constraints/{name}")
+    @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
     ConstraintTemplateResponse getPrivate(@PathParam(value = "name") String name);
 
     @GET
-    @Path("account/constraints/{name}")
+    @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
     ConstraintTemplateResponse getPublic(@PathParam(value = "name") String name);
 
     @GET
-    @Path("constraints/{id}")
+    @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
     ConstraintTemplateResponse get(@PathParam(value = "id") Long id);
 
     @DELETE
-    @Path("constraints/{id}")
+    @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
     void delete(@PathParam(value = "id") Long id);
 
     @DELETE
-    @Path("account/constraints/{name}")
+    @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
     void deletePublic(@PathParam(value = "name") String name);
 
     @DELETE
-    @Path("user/constraints/{name}")
+    @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
     void deletePrivate(@PathParam(value = "name") String name);

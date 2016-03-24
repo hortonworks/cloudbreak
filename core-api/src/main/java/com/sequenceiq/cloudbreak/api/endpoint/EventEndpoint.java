@@ -18,13 +18,12 @@ import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/")
+@Path("/events")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/events", description = ControllerDescription.EVENT_DESCRIPTION, position = 7)
 public interface EventEndpoint {
 
     @GET
-    @Path("events")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.EventOpDescription.GET_BY_TIMESTAMP, produces = ContentType.JSON, notes = Notes.EVENT_NOTES)
     List<CloudbreakEventsJson> get(@QueryParam("since") Long since);

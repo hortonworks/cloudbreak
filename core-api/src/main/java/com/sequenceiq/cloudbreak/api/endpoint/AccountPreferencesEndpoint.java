@@ -19,31 +19,28 @@ import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/")
+@Path("/accountpreferences")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/accountpreferences", description = ControllerDescription.ACCOUNT_PREFERENCES_DESCRIPTION)
 public interface AccountPreferencesEndpoint {
 
     @GET
-    @Path("accountpreferences")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
     AccountPreferencesJson get();
 
     @PUT
-    @Path("accountpreferences")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.PUT_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
     void put(@Valid AccountPreferencesJson updateRequest);
 
     @POST
-    @Path("accountpreferences")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
     void post(@Valid AccountPreferencesJson updateRequest);
 
     @GET
-    @Path("accountpreferences/validate")
+    @Path("validate")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.VALIDATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
     Response validate();

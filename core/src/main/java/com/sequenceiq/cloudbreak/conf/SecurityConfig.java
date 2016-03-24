@@ -70,19 +70,13 @@ public class SecurityConfig {
     @Configuration
     @EnableResourceServer
     protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
-        private static final String[] BLUEPRINT_URL_PATTERNS = new String[]{"/api/v1/user/blueprints/**", "/api/v1/account/blueprints/**",
-                                                                            "/api/v1/blueprints/**"};
-        private static final String[] TEMPLATE_URL_PATTERNS = new String[]{"/api/v1/user/templates/**", "/api/v1/account/templates/**",
-                                                                            "/api/v1/templates/**"};
-        private static final String[] CREDENTIAL_URL_PATTERNS = new String[]{"/api/v1/user/credentials/**", "/api/v1/account/credentials/**",
-                                                                            "/api/v1/credentials/**"};
-        private static final String[] RECIPE_URL_PATTERNS = new String[]{"/api/v1/user/recipes/**", "/api/v1/account/recipes/**",
-                                                                            "/api/v1/recipes/**"};
-        private static final String[] NETWORK_URL_PATTERNS = new String[]{"/api/v1/user/networks/**", "/api/v1/account/networks/**", "/api/v1/networks/**"};
-        private static final String[] SECURITYGROUP_URL_PATTERNS = new String[]{"/api/v1/user/securitygroups/**", "/api/v1/account/securitygroups/**",
-                                                                            "/api/v1/securitygroups/**"};
-        private static final String[] STACK_URL_PATTERNS = new String[]{"/api/v1/user/stacks/**", "/api/v1/account/stacks/**", "/api/v1/stacks/**",
-                                                                            "/api/v1/stacks/*/cluster/**"};
+        private static final String[] BLUEPRINT_URL_PATTERNS = new String[]{"/api/v1/blueprints/**"};
+        private static final String[] TEMPLATE_URL_PATTERNS = new String[]{"/api/v1/templates/**"};
+        private static final String[] CREDENTIAL_URL_PATTERNS = new String[]{"/api/v1/credentials/**"};
+        private static final String[] RECIPE_URL_PATTERNS = new String[]{"/api/v1/recipes/**"};
+        private static final String[] NETWORK_URL_PATTERNS = new String[]{"/api/v1/networks/**"};
+        private static final String[] SECURITYGROUP_URL_PATTERNS = new String[]{"/api/v1/securitygroups/**"};
+        private static final String[] STACK_URL_PATTERNS = new String[]{"/api/v1/stacks/**"};
 
         @Value("${cb.client.id}")
         private String clientId;
@@ -148,9 +142,9 @@ public class SecurityConfig {
                     .antMatchers(STACK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers("/api/v1/stacks/ambari", "/api/v1/stacks/*/certificate").access("#oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers("/api/v1/events").access("#oauth2.hasScope('cloudbreak.events')")
+                    .antMatchers("/api/v1/usages/account/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
+                    .antMatchers("/api/v1/usages/user/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
                     .antMatchers("/api/v1/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
-                    .antMatchers("/api/v1/account/usages/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
-                    .antMatchers("/api/v1/user/usages/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
                     .antMatchers("/api/v1/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')")
                     .antMatchers("/api/v1/accountpreferences/*").access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')");
 

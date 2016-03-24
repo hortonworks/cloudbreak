@@ -16,13 +16,13 @@ uluwatuServices.factory('User', ['$resource',
 
 uluwatuServices.factory('UserTemplate', ['$resource',
     function($resource) {
-        return $resource('user/templates');
+        return $resource('templates/user');
     }
 ]);
 
 uluwatuServices.factory('AccountTemplate', ['$resource',
     function($resource) {
-        return $resource('account/templates');
+        return $resource('templates/account');
     }
 ]);
 
@@ -34,7 +34,7 @@ uluwatuServices.factory('UserConstraint', ['$resource',
 
 uluwatuServices.factory('AccountConstraint', ['$resource',
     function($resource) {
-        return $resource('account/constraints');
+        return $resource('constraints/account');
     }
 ]);
 
@@ -46,7 +46,7 @@ uluwatuServices.factory('GlobalConstraint', ['$resource',
 
 uluwatuServices.factory('AccountTopology', ['$resource',
     function($resource) {
-        return $resource('account/topologies/:id');
+        return $resource('topologies/account/:id');
     }
 ]);
 
@@ -58,13 +58,13 @@ uluwatuServices.factory('GlobalTemplate', ['$resource',
 
 uluwatuServices.factory('UserBlueprint', ['$resource',
     function($resource) {
-        return $resource('user/blueprints');
+        return $resource('blueprints/user');
     }
 ]);
 
 uluwatuServices.factory('AccountBlueprint', ['$resource',
     function($resource) {
-        return $resource('account/blueprints');
+        return $resource('blueprints/account');
     }
 ]);
 
@@ -76,13 +76,13 @@ uluwatuServices.factory('GlobalBlueprint', ['$resource',
 
 uluwatuServices.factory('UserRecipe', ['$resource',
     function($resource) {
-        return $resource('user/recipes');
+        return $resource('recipes/user');
     }
 ]);
 
 uluwatuServices.factory('AccountRecipe', ['$resource',
     function($resource) {
-        return $resource('account/recipes');
+        return $resource('recipes/account');
     }
 ]);
 
@@ -112,13 +112,13 @@ uluwatuServices.factory('GlobalSssdConfig', ['$resource',
 
 uluwatuServices.factory('UserCredential', ['$resource',
     function($resource) {
-        return $resource('user/credentials');
+        return $resource('credentials/user');
     }
 ]);
 
 uluwatuServices.factory('AccountCredential', ['$resource',
     function($resource) {
-        return $resource('account/credentials');
+        return $resource('credentials/account');
     }
 ]);
 
@@ -161,13 +161,13 @@ uluwatuServices.factory('GlobalCredentialCertificate', ['$resource',
 
 uluwatuServices.factory('UserStack', ['$resource',
     function($resource) {
-        return $resource('user/stacks');
+        return $resource('stacks/user');
     }
 ]);
 
 uluwatuServices.factory('AccountStack', ['$resource',
     function($resource) {
-        return $resource('account/stacks');
+        return $resource('stacks/account');
     }
 ]);
 
@@ -185,13 +185,13 @@ uluwatuServices.factory('PlatformVariant', ['$resource',
 
 uluwatuServices.factory('UserUsages', ['$resource',
     function($resource) {
-        return $resource('user/usages');
+        return $resource('usages/user');
     }
 ]);
 
 uluwatuServices.factory('AccountUsages', ['$resource',
     function($resource) {
-        return $resource('account/usages');
+        return $resource('usages/account');
     }
 ]);
 
@@ -559,12 +559,12 @@ uluwatuServices.factory('ErrorHandler', function() {
 
 uluwatuServices.factory('UserNetwork', ['$resource',
     function($resource) {
-        return $resource('user/networks');
+        return $resource('networks/user');
     }
 ]);
 uluwatuServices.factory('AccountNetwork', ['$resource',
     function($resource) {
-        return $resource('account/networks');
+        return $resource('networks/account');
     }
 ]);
 uluwatuServices.factory('GlobalNetwork', ['$resource',
@@ -574,12 +574,12 @@ uluwatuServices.factory('GlobalNetwork', ['$resource',
 ]);
 uluwatuServices.factory('UserSecurityGroup', ['$resource',
     function($resource) {
-        return $resource('user/securitygroups');
+        return $resource('securitygroups/user');
     }
 ]);
 uluwatuServices.factory('AccountSecurityGroup', ['$resource',
     function($resource) {
-        return $resource('account/securitygroups');
+        return $resource('securitygroups/account');
     }
 ]);
 uluwatuServices.factory('GlobalSecurityGroup', ['$resource',

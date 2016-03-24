@@ -19,13 +19,12 @@ import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/")
+@Path("/usages")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/usages", description = ControllerDescription.USAGES_DESCRIPTION, position = 6)
 public interface UsageEndpoint {
 
     @GET
-    @Path("usages")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.USAGE_NOTES)
     List<CloudbreakUsageJson> getDeployer(
@@ -37,7 +36,7 @@ public interface UsageEndpoint {
             @QueryParam("zone") String zone);
 
     @GET
-    @Path("account/usages")
+    @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.USAGE_NOTES)
     List<CloudbreakUsageJson> getAccount(
@@ -48,7 +47,7 @@ public interface UsageEndpoint {
             @QueryParam("zone") String zone);
 
     @GET
-    @Path("user/usages")
+    @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.USAGE_NOTES)
     List<CloudbreakUsageJson> getUser(
@@ -58,7 +57,7 @@ public interface UsageEndpoint {
             @QueryParam("zone") String zone);
 
     @GET
-    @Path("/usages/generate")
+    @Path("generate")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GENERATE, produces = ContentType.JSON, notes = Notes.USAGE_NOTES)
     Response generate();
