@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.concurrent.LockedMethod;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
@@ -7,11 +13,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 
 @Service
 public class SimpleFlowFacade implements FlowFacade {
@@ -242,21 +243,6 @@ public class SimpleFlowFacade implements FlowFacade {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext removeInstance(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Remove instance from the stack. Context: {}", context);
-        try {
-            context = stackFacade.removeInstance(context);
-            LOGGER.debug("Removing instance from the stack is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during removing instance from the stack: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

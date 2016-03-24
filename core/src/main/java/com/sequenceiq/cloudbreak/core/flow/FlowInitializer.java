@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.DownscaleMetadataCollectHand
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendConsulMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataCollectHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.RemoveInstanceHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
@@ -83,7 +82,6 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_RESET.name()), getHandlerForClass(ClusterResetHandler.class));
         reactor.on($(FlowPhases.UPSCALE_STACK_SYNC.name()), getHandlerForClass(UpscaleStackSyncHandler.class));
         reactor.on($(FlowPhases.ADD_INSTANCES.name()), getHandlerForClass(AddInstancesHandler.class));
-        reactor.on($(FlowPhases.REMOVE_INSTANCE.name()), getHandlerForClass(RemoveInstanceHandler.class));
         reactor.on($(FlowPhases.EXTEND_METADATA.name()), getHandlerForClass(ExtendMetadataHandler.class));
         reactor.on($(FlowPhases.BOOTSTRAP_NEW_NODES.name()), getHandlerForClass(BootstrapNewNodesHandler.class));
         reactor.on($(FlowPhases.EXTEND_CONSUL_METADATA.name()), getHandlerForClass(ExtendConsulMetadataHandler.class));
@@ -204,9 +202,6 @@ public class FlowInitializer implements InitializingBean {
 
         transitionKeyService.registerTransition(StackDownscaleHandler.class, TransitionFactory
                 .createTransition(FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
-
-        transitionKeyService.registerTransition(RemoveInstanceHandler.class, TransitionFactory
-                .createTransition(FlowPhases.REMOVE_INSTANCE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerResetFlows() {

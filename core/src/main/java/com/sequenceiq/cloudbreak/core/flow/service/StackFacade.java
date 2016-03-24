@@ -15,8 +15,6 @@ public interface StackFacade {
 
     FlowContext addInstances(FlowContext context) throws CloudbreakException;
 
-    FlowContext removeInstance(FlowContext context) throws CloudbreakException;
-
     FlowContext extendMetadata(FlowContext context) throws CloudbreakException;
 
     FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException;

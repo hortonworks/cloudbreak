@@ -41,7 +41,7 @@ public class Flow2Handler implements Consumer<Event<?>> {
                     Flow<?, ?> flow = flowConfig.createFlow(flowId);
                     runningFlows.put(flowId, flow);
                     flow.start();
-                    flow.sendEvent((String) event.getKey(), payload);
+                    flow.sendEvent(key, payload);
                 }
             } else {
                 LOGGER.debug("flow control event arrived: key: {}, flowid: {}, payload: {}", key, flowId, payload);
