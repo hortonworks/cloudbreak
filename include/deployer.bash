@@ -55,7 +55,7 @@ cbd-version() {
     local releaseVer=$(latest-version)
     echo "$releaseVer" | green
 
-    if [ $(version-compare $localVer $releaseVer) -lt 0 ]; then
+    if [ $(version-compare ${localVer#v} $releaseVer) -lt 0 ]; then
         warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         warn "Your version is outdated"
         warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
