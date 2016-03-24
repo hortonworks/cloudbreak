@@ -188,6 +188,8 @@ doctor() {
     declare desc="Deployer doctor: Checks your environment, and reports a diagnose."
 
     info "===> $desc"
+    echo-n "uname: "
+    uname -a | green
     cbd-version
     if [[ "$(uname)" == "Darwin" ]]; then
         debug "checking OSX specific dependencies..."
