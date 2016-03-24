@@ -45,6 +45,10 @@ error() {
     echo "[ERROR] $*" | red 1>&2
 }
 
+command_exists() {
+	command -v "$@" > /dev/null 2>&1
+}
+
 cbd-version() {
     declare desc="Displays the version of Cloudbreak Deployer"
     echo -n "local version:"

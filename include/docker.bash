@@ -74,14 +74,6 @@ docker-getversion() {
 }
 
 docker-check-client-version() {
-
-    docker --version &> /dev/null || local missing=1
-    if [[ "$missing" ]]; then
-        error "docker command not found, please install docker. https://docs.docker.com/installation/"
-        _exit 127
-    fi
-    info "docker command: OK"
-
     local ver=$(docker --version 2> /dev/null)
     local numver=$(docker-getversion $ver)
     
@@ -97,13 +89,6 @@ docker-check-client-version() {
 }
 
 docker-check-server-version() {
-    docker version &> $TEMP_DIR/cbd.log || noserver=1
-    if [[ "$noserver" ]]; then
-        error "docker version returned an error"
-        cat $TEMP_DIR/cbd.log | yellow
-        _exit 127
-    fi
-
     local numserver
     # since docker 1.8.1 docker version supports --format
     if docker version --help | grep -q -- '--format'; then
@@ -128,6 +113,14 @@ docker-check-server-version() {
 
 docker-check-version() {
     declare desc="Checks if docker is at least 1.8.0"
+
+    echo-n "docker command: "
+    if command_exists docker; then
+        info "OK"
+    else
+        error
+        exit 1
+    fi
 
     docker-check-client-version
     docker-check-server-version
