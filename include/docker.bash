@@ -93,7 +93,7 @@ docker-check-client-version() {
         echo "  sudo curl -Lo $target https://get.docker.com/builds/$(uname -s)/$(uname -m)/docker-latest ; chmod +x $target" | blue
         _exit 1
     fi
-    info "docker client version: OK"
+    info "docker client version ($ver): OK"
 }
 
 docker-check-server-version() {
@@ -123,7 +123,7 @@ docker-check-server-version() {
         warn "your local docker seems to be fine, only the server version is outdated"
         _exit 1
     fi
-    info "docker server version: OK"
+    info "docker server version ($serverVer): OK"
 }
 
 docker-check-version() {
