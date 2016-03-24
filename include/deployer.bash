@@ -29,6 +29,10 @@ debug-cat() {
   fi
 }
 
+echo-n () {
+    echo -n "$*" 1>&2
+}
+
 info() {
     echo "$*" | green 1>&2
 }
@@ -184,7 +188,6 @@ doctor() {
     declare desc="Deployer doctor: Checks your environment, and reports a diagnose."
 
     info "===> $desc"
-    network-doctor
     cbd-version
     if [[ "$(uname)" == "Darwin" ]]; then
         debug "checking OSX specific dependencies..."
@@ -198,38 +201,43 @@ doctor() {
     fi
 
     docker-check-version
+    network-doctor
     compose-generate-check-diff verbose
     generate_uaa_check_diff verbose
 }
 
 network-doctor() {
-    ping -c 1 -W 1 8.8.8.8 &> /dev/null
-    if [[ "$?" -ne "0" ]]; then
-        error "Could not reach 8.8.8.8."
-        _exit 1
+    
+    echo-n "ping 8.8.8.8 on host: "
+    if ping -c 1 -W 1 8.8.8.8 &> /dev/null; then
+        info "OK"
     else
-        info "ping 8.8.8.8 on host OK"
-    fi
-    ping -c 1 -W 1 github.com &> /dev/null
-    if [[ "$?" -ne "0" ]]; then
-        error "Could not reach github.com."
+        error
         _exit 1
+    fi
+    
+    echo-n "ping github.com on host: "
+    if ping -c 1 -W 1 github.com &> /dev/null; then
+        info "OK"
     else
-        info "ping github.com on host OK"
-    fi
-    docker run --label cbreak.sidekick=true alpine sh -c 'ping -c 1 -W 1 8.8.8.8' &> /dev/null
-    if [[ "$?" -ne "0" ]]; then
-        error "[ERROR] Could not reach 8.8.8.8 inside a container."
+        error
         _exit 1
+    fi
+    
+    echo-n "ping 8.8.8.8 in container: "
+    if docker run --label cbreak.sidekick=true alpine sh -c 'ping -c 1 -W 1 8.8.8.8' &> /dev/null; then
+        info "OK"
     else
-        info "ping 8.8.8.8 in container OK"
-    fi
-    docker run --label cbreak.sidekick=true alpine sh -c 'ping -c 1 -W 1 github.com' &> /dev/null
-    if [[ "$?" -ne "0" ]]; then
-        error "[ERROR] Could not reach github.com inside a container."
+        error
         _exit 1
-     else
-        info "ping github.com in container OK"
+    fi
+    
+    echo-n "ping github.com in container: "
+    if docker run --label cbreak.sidekick=true alpine sh -c 'ping -c 1 -W 1 github.com' &> /dev/null; then
+        info "OK"
+    else
+        error
+        _exit 1
     fi
 }
 
