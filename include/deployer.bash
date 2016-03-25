@@ -219,7 +219,6 @@ network-doctor() {
         info "OK"
     else
         error
-        _exit 1
     fi
     
     echo-n "ping github.com on host: "
@@ -227,7 +226,6 @@ network-doctor() {
         info "OK"
     else
         error
-        _exit 1
     fi
     
     echo-n "ping 8.8.8.8 in container: "
@@ -235,7 +233,6 @@ network-doctor() {
         info "OK"
     else
         error
-        _exit 1
     fi
     
     echo-n "ping github.com in container: "
@@ -243,7 +240,6 @@ network-doctor() {
         info "OK"
     else
         error
-        _exit 1
     fi
 }
 
