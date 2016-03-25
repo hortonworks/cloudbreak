@@ -9,10 +9,6 @@ public interface StackFacade {
 
     FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException;
 
-    FlowContext start(FlowContext context) throws CloudbreakException;
-
-    FlowContext stop(FlowContext context) throws CloudbreakException;
-
     FlowContext handleCreationFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext handleStatusUpdateFailure(FlowContext context) throws CloudbreakException;

@@ -28,10 +28,6 @@ public interface FlowFacade {
 
     FlowContext handleClusterInstallationFailure(FlowContext flowContext) throws CloudbreakException;
 
-    FlowContext startStack(FlowContext context) throws CloudbreakException;
-
-    FlowContext stopStack(FlowContext context) throws CloudbreakException;
-
     FlowContext stopStackRequested(FlowContext context) throws CloudbreakException;
 
     FlowContext handleStackStatusUpdateFailure(FlowContext context) throws CloudbreakException;

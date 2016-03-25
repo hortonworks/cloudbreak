@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 public class StartStackComponentTest extends AbstractComponentTest<StartInstancesResult> {
@@ -19,8 +20,8 @@ public class StartStackComponentTest extends AbstractComponentTest<StartInstance
 
         assertEquals(1, result.getResults().getResults().size());
         assertEquals(InstanceStatus.STARTED, result.getResults().getResults().get(0).getStatus());
-        assertFalse(result.isFailed());
-        assertNull(result.getException());
+        assertFalse(result.getStatus().equals(EventStatus.FAILED));
+        assertNull(result.getErrorDetails());
     }
 
     @Override

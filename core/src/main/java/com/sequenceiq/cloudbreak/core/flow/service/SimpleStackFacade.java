@@ -3,14 +3,11 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STARTED;
 import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
 
 import java.util.Arrays;
@@ -72,8 +69,6 @@ public class SimpleStackFacade implements StackFacade {
     @Inject
     private CloudbreakEventService cloudbreakEventService;
     @Inject
-    private StackStartService stackStartService;
-    @Inject
     private StackStopService stackStopService;
     @Inject
     private StackScalingService stackScalingService;
@@ -130,53 +125,6 @@ public class SimpleStackFacade implements StackFacade {
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         } catch (Exception e) {
             LOGGER.error("Exception during the consul metadata setup process.", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext start(FlowContext context) throws CloudbreakException {
-        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            stackUpdater.updateStackStatus(actualContext.getStackId(), START_IN_PROGRESS, "Cluster infrastructure is now starting.");
-            fireEventAndLog(actualContext.getStackId(), actualContext, Msg.STACK_INFRASTRUCTURE_STARTING, START_IN_PROGRESS.name());
-            context = stackStartService.start(actualContext);
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Cluster infrastructure started successfully.");
-            fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_STARTED, AVAILABLE.name());
-            fireEventAndLog(stack.getId(), context, Msg.STACK_BILLING_STARTED, BILLING_STARTED.name());
-        } catch (Exception e) {
-            LOGGER.error("Exception during the stack start process.", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext stop(FlowContext context) throws CloudbreakException {
-        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
-        try {
-            if (stackStopService.isStopPossible(actualContext)) {
-                Stack stack = stackService.getById(actualContext.getStackId());
-                MDCBuilder.buildMdcContext(stack);
-                stackUpdater.updateStackStatus(actualContext.getStackId(), STOP_IN_PROGRESS, "Cluster infrastructure is now stopping.");
-                fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_STOPPING, STOP_IN_PROGRESS.name());
-                context = stackStopService.stop(actualContext);
-                stackUpdater.updateStackStatus(stack.getId(), STOPPED, "Cluster infrastructure stopped successfully.");
-
-                fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_STOPPED, STOPPED.name());
-
-                fireEventAndLog(stack.getId(), actualContext, Msg.STACK_BILLING_STOPPED, BILLING_STOPPED.name());
-
-                if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-                    emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
-                    fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, STOPPED.name());
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("Exception during the stack stop process: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
         return context;

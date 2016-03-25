@@ -144,31 +144,6 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext startStack(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Starting stack. Context: {}", context);
-        try {
-            context = stackFacade.start(context);
-            LOGGER.debug("Stack started.");
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during stack start!: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    @LockedMethod(lockPrefix = "stopStack")
-    public FlowContext stopStack(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Stopping stack. Context: {}", context);
-        try {
-            return stackFacade.stop(context);
-        } catch (Exception e) {
-            LOGGER.error("Exception during stack stop!: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
     public FlowContext stopStackRequested(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Stopping stack requested. Context: {}", context);
         try {

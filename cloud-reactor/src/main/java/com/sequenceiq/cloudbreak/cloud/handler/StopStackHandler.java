@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class StopStackHandler implements CloudPlatformEventHandler<StopInstancesRequest> {
@@ -36,6 +37,8 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
     private PollTaskFactory statusCheckFactory;
     @Inject
     private SyncPollingScheduler<InstancesStatusResult> syncPollingScheduler;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public Class<StopInstancesRequest> type() {
@@ -58,9 +61,13 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             if (!task.completed(statusResult)) {
                 statusResult = syncPollingScheduler.schedule(task);
             }
-            request.getResult().onNext(new StopInstancesResult(cloudContext, statusResult));
+            StopInstancesResult result = new StopInstancesResult(request, cloudContext, statusResult);
+            request.getResult().onNext(result);
+            eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
         } catch (Exception e) {
-            request.getResult().onNext(new StopInstancesResult(cloudContext, e));
+            StopInstancesResult failure = new StopInstancesResult("Failed to stop stack", e, request);
+            request.getResult().onNext(failure);
+            eventBus.notify(failure.selector(), new Event(event.getHeaders(), failure));
         }
     }
 

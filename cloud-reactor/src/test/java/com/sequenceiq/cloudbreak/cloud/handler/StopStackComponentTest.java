@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 public class StopStackComponentTest extends AbstractComponentTest<StopInstancesResult> {
@@ -19,8 +20,8 @@ public class StopStackComponentTest extends AbstractComponentTest<StopInstancesR
 
         assertEquals(1, result.getResults().getResults().size());
         assertEquals(InstanceStatus.STOPPED, result.getResults().getResults().get(0).getStatus());
-        assertFalse(result.isFailed());
-        assertNull(result.getException());
+        assertFalse(result.getStatus().equals(EventStatus.FAILED));
+        assertNull(result.getErrorDetails());
     }
 
     @Override
