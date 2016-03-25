@@ -85,7 +85,10 @@ docker-check-client-version() {
         echo "  sudo curl -Lo $target https://get.docker.com/builds/$(uname -s)/$(uname -m)/docker-latest ; chmod +x $target" | blue
         _exit 1
     fi
-    info "docker client version ($ver): OK"
+
+    echo-n "docker client version: "
+    docker version -f '{{.Client.Version}}' | green
+
 }
 
 docker-check-server-version() {
