@@ -117,7 +117,7 @@ docker-check-server-version() {
 docker-check-version() {
     declare desc="Checks if docker is at least 1.8.0"
 
-    echo-n "docker command: "
+    echo-n "docker command exists: "
     if command_exists docker; then
         info "OK"
     else
