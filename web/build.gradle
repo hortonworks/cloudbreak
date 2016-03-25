@@ -27,3 +27,7 @@ grunt {
   colors = true
   bufferOutput = false
 }
+
+task jsformatter(type: GruntTask) {
+  args = ["jsbeautifier", "--jsbeautifier.replace", true]
+}
