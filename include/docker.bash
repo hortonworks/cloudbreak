@@ -97,21 +97,24 @@ docker-check-server-version() {
     if docker version --help | grep -q -- '--format'; then
         local serverVer=$(docker version -f "{{.Server.Version}}")
         debug "serverVer=$serverVer"
-        numserver=$(sed "s/\.//g" <<< "${serverVer}")
-
+        if [ $(version-compare "${serverVer}" "1.8.0") -lt 0 ]; then
+            error "Please upgrade your docker version to 1.8.0 or latest"
+            warn "your local docker seems to be fine, only the server version is outdated"
+            _exit 1
+        fi
     else
         local serverVer=$(docker version 2> /dev/null | grep "Server version")
         debug "serverVer=$serverVer"
         numserver=$(docker-getversion $serverVer)
+        if [ $numserver -lt 180 ]; then
+            error "Please upgrade your docker version to 1.8.0 or latest"
+            warn "your local docker seems to be fine, only the server version is outdated"
+            _exit 1
+        fi
     fi
 
-
-    if [ $numserver -lt 180 ]; then
-        error "Please upgrade your docker version to 1.8.0 or latest"
-        warn "your local docker seems to be fine, only the server version is outdated"
-        _exit 1
-    fi
-    info "docker server version ($serverVer): OK"
+    echo-n "docker client version: "
+    docker version -f '{{.Server.Version}}' | green
 }
 
 docker-check-version() {
