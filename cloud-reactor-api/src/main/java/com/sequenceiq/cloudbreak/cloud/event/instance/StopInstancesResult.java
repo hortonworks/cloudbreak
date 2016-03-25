@@ -1,48 +1,29 @@
 package com.sequenceiq.cloudbreak.cloud.event.instance;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class StopInstancesResult {
+public class StopInstancesResult extends CloudPlatformResult<StopInstancesRequest> {
 
-    private final CloudContext cloudContext;
-    private final InstancesStatusResult results;
-    private final Exception exception;
+    private CloudContext cloudContext;
+    private InstancesStatusResult results;
 
-    public StopInstancesResult(CloudContext cloudContext, InstancesStatusResult results) {
+    public StopInstancesResult(StopInstancesRequest request, CloudContext cloudContext, InstancesStatusResult results) {
+        super(request);
         this.cloudContext = cloudContext;
         this.results = results;
-        this.exception = null;
     }
 
-    public StopInstancesResult(CloudContext cloudContext, Exception exception) {
-        this.cloudContext = cloudContext;
-        this.results = null;
-        this.exception = exception;
+    public StopInstancesResult(String statusReason, Exception errorDetails, StopInstancesRequest request) {
+        super(statusReason, errorDetails, request);
     }
 
     public CloudContext getCloudContext() {
         return cloudContext;
     }
 
-    public Exception getException() {
-        return exception;
-    }
-
-    public boolean isFailed() {
-        return exception != null;
-    }
-
     public InstancesStatusResult getResults() {
         return results;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("StopInstancesResult{");
-        sb.append("cloudContext=").append(cloudContext);
-        sb.append(", results=").append(results);
-        sb.append(", exception=").append(exception);
-        sb.append('}');
-        return sb.toString();
-    }
 }

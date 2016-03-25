@@ -22,10 +22,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.CheckPlatformVariantRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.CheckPlatformVariantResult;
@@ -45,9 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -92,68 +86,6 @@ public class ServiceProviderConnectorAdapter {
     private CloudbreakMessagesService cloudbreakMessagesService;
     @Inject
     private InstanceMetadataService instanceMetadataService;
-
-    public void startAll(Stack stack) {
-        LOGGER.info("Assembling start request for stack: {}", stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
-        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        StartInstancesRequest startRequest = new StartInstancesRequest(cloudContext, cloudCredential, resources, instances);
-        LOGGER.info("Triggering event: {}", startRequest);
-        eventBus.notify(startRequest.selector(), Event.wrap(startRequest));
-        try {
-            StartInstancesResult res = startRequest.await();
-            LOGGER.info("Result: {}", res);
-            if (res.isFailed()) {
-                Exception exception = res.getException();
-                LOGGER.error(format("Failed to start the stack: %s", cloudContext), exception);
-                throw new OperationException(exception);
-            } else {
-                for (CloudVmInstanceStatus instanceStatus : res.getResults().getResults()) {
-                    if (instanceStatus.getStatus().equals(InstanceStatus.FAILED)) {
-                        throw new OperationException("Failed to start the following instance: " + instanceStatus.getCloudInstance());
-                    }
-                }
-            }
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while starting the stack", e);
-            throw new OperationException(e);
-        }
-    }
-
-    public void stopAll(Stack stack) {
-        LOGGER.info("Assembling stop request for stack: {}", stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        List<CloudInstance> instances = metadataConverter.convert(stack.getInstanceMetaDataAsList());
-        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        StopInstancesRequest<StopInstancesResult> stopRequest = new StopInstancesRequest<>(cloudContext, cloudCredential, resources, instances);
-        LOGGER.info("Triggering event: {}", stopRequest);
-        eventBus.notify(stopRequest.selector(), Event.wrap(stopRequest));
-        try {
-            StopInstancesResult res = stopRequest.await();
-            LOGGER.info("Result: {}", res);
-            if (res.isFailed()) {
-                Exception exception = res.getException();
-                LOGGER.error("Failed to stop the stack", exception);
-                throw new OperationException(exception);
-            } else {
-                for (CloudVmInstanceStatus instanceStatus : res.getResults().getResults()) {
-                    if (instanceStatus.getStatus().equals(InstanceStatus.FAILED)) {
-                        throw new OperationException("Failed to stop the following instance: " + instanceStatus.getCloudInstance());
-                    }
-                }
-            }
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while stopping the stack", e);
-            throw new OperationException(e);
-        }
-    }
 
     public Set<Resource> addInstances(Stack stack, Integer adjustment, String instanceGroup) {
         LOGGER.debug("Assembling upscale stack event for stack: {}", stack);

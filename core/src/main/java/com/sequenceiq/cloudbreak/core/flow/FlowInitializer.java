@@ -2,10 +2,13 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import static reactor.bus.selector.Selectors.$;
 
+import java.util.Map;
+
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import java.util.Map;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow.handlers.AddClusterContainersHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AddInstancesHandler;
@@ -32,15 +35,12 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.RemoveInstanceHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackDownscaleHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.StackStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopRequestedHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpscaleMetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpscaleStackSyncHandler;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 import reactor.fn.Consumer;
@@ -81,8 +81,6 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_INSTALL.name()), getHandlerForClass(ClusterInstallHandler.class));
         reactor.on($(FlowPhases.CLUSTER_RESET.name()), getHandlerForClass(ClusterResetHandler.class));
-        reactor.on($(FlowPhases.STACK_START.name()), getHandlerForClass(StackStartHandler.class));
-        reactor.on($(FlowPhases.STACK_STOP.name()), getHandlerForClass(StackStopHandler.class));
         reactor.on($(FlowPhases.UPSCALE_STACK_SYNC.name()), getHandlerForClass(UpscaleStackSyncHandler.class));
         reactor.on($(FlowPhases.ADD_INSTANCES.name()), getHandlerForClass(AddInstancesHandler.class));
         reactor.on($(FlowPhases.REMOVE_INSTANCE.name()), getHandlerForClass(RemoveInstanceHandler.class));
@@ -140,9 +138,6 @@ public class FlowInitializer implements InitializingBean {
     }
 
     private void registerStartFlows() {
-        transitionKeyService.registerTransition(StackStartHandler.class, TransitionFactory
-                .createTransition(FlowPhases.STACK_START.name(), FlowPhases.METADATA_COLLECT.name(), FlowPhases.STACK_STATUS_UPDATE_FAILED.name()));
-
         transitionKeyService.registerTransition(MetadataCollectHandler.class, TransitionFactory
                 .createTransition(FlowPhases.METADATA_COLLECT.name(), FlowPhases.CLUSTER_START.name(), FlowPhases.STACK_STATUS_UPDATE_FAILED.name()));
 
@@ -159,12 +154,6 @@ public class FlowInitializer implements InitializingBean {
     private void registerStopFlows() {
         transitionKeyService.registerTransition(ClusterStopHandler.class, TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_STOP.name(), FlowPhases.STACK_STOP.name(), FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()));
-
-        transitionKeyService.registerTransition(StackStopHandler.class, TransitionFactory
-                .createTransition(FlowPhases.STACK_STOP.name(), FlowPhases.NONE.name(), FlowPhases.STACK_STATUS_UPDATE_FAILED.name()));
-
-        transitionKeyService.registerTransition(StackStatusUpdateFailureHandler.class, TransitionFactory
-                .createTransition(FlowPhases.STACK_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
 
         transitionKeyService.registerTransition(ClusterStatusUpdateFailureHandler.class, TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));

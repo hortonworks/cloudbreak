@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class StartStackHandler implements CloudPlatformEventHandler<StartInstancesRequest> {
@@ -36,6 +37,8 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
     private PollTaskFactory statusCheckFactory;
     @Inject
     private SyncPollingScheduler<InstancesStatusResult> syncPollingScheduler;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public Class<StartInstancesRequest> type() {
@@ -58,9 +61,13 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             if (!task.completed(statusResult)) {
                 statusResult = syncPollingScheduler.schedule(task);
             }
-            request.getResult().onNext(new StartInstancesResult(cloudContext, statusResult));
+            StartInstancesResult result = new StartInstancesResult(request, cloudContext, statusResult);
+            request.getResult().onNext(result);
+            eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
         } catch (Exception e) {
-            request.getResult().onNext(new StartInstancesResult(cloudContext, e));
+            StartInstancesResult failure = new StartInstancesResult("Failed to start stack", e, request);
+            request.getResult().onNext(failure);
+            eventBus.notify(failure.selector(), new Event(event.getHeaders(), failure));
         }
     }
 
