@@ -106,7 +106,9 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
             $scope.gcpNetworkForm.$setPristine();
             $scope.azureNetworkForm.$setPristine();
             $scope.openstackNetworkForm.$setPristine();
-            $scope.network = {};
+            $scope.network = {
+                parameters: {}
+            };
         }
 
         $scope.filterByCloudPlatform = function(topology) {
@@ -135,5 +137,24 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
             $scope.showAlert = true;
             $scope.alertMessage = $scope.statusMessage;
         }
+
+        $scope.selectGcpNetworkType1 = function() {
+            delete $scope.network.parameters.networkId;
+            delete $scope.network.parameters.subnetId;
+        }
+
+        $scope.selectGcpNetworkType2 = function() {
+            delete $scope.network.parameters.subnetId;
+        }
+
+        $scope.selectGcpNetworkType3 = function() {
+            delete $scope.network.subnetCIDR;
+        }
+
+        $scope.selectGcpNetworkType4 = function() {
+            delete $scope.network.subnetCIDR;
+            delete $scope.network.parameters.subnetId;
+        }
+
     }
 ]);
