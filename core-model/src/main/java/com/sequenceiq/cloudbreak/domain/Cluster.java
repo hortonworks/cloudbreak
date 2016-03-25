@@ -126,7 +126,6 @@ public class Cluster implements ProvisionEntity {
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Container> containers = new HashSet<>();
 
-
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private AmbariStackDetails ambariStackDetails;
 

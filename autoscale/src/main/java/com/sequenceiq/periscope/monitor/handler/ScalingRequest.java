@@ -13,9 +13,9 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.domain.ScalingStatus;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.service.HistoryService;
 

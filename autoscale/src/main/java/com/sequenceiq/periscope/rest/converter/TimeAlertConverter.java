@@ -2,8 +2,8 @@ package com.sequenceiq.periscope.rest.converter;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.periscope.api.model.TimeAlertJson;
 import com.sequenceiq.periscope.domain.TimeAlert;
-import com.sequenceiq.periscope.rest.json.TimeAlertJson;
 
 @Component
 public class TimeAlertConverter extends AbstractConverter<TimeAlertJson, TimeAlert> {

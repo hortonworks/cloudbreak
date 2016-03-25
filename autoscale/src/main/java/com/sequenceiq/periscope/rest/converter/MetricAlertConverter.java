@@ -2,8 +2,8 @@ package com.sequenceiq.periscope.rest.converter;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.periscope.api.model.MetricAlertJson;
 import com.sequenceiq.periscope.domain.MetricAlert;
-import com.sequenceiq.periscope.rest.json.MetricAlertJson;
 
 @Component
 public class MetricAlertConverter extends AbstractConverter<MetricAlertJson, MetricAlert> {

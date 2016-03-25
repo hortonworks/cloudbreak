@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.sequenceiq.periscope.log.MDCBuilder;
@@ -17,7 +16,7 @@ import com.sequenceiq.periscope.rest.json.IdExceptionMessageJson;
 import com.sequenceiq.periscope.service.NotFoundException;
 import com.sequenceiq.periscope.service.security.TlsConfigurationException;
 
-@ControllerAdvice
+//@ControllerAdvice
 public class ExceptionController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionController.class);

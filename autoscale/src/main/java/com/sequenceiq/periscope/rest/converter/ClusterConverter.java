@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.rest.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.rest.json.ClusterJson;
+import com.sequenceiq.periscope.api.model.ClusterJson;
 
 @Component
 public class ClusterConverter extends AbstractConverter<ClusterJson, Cluster> {

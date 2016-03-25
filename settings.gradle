@@ -21,4 +21,5 @@ include 'auth'
 include 'web'
 
 rootProject.name = 'cloudbreak'
+include 'autoscale-api'
 

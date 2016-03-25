@@ -2,9 +2,9 @@ package com.sequenceiq.periscope.rest.converter;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.periscope.api.model.ScalingPolicyJson;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.rest.json.ScalingPolicyJson;
 
 @Component
 public class ScalingPolicyConverter extends AbstractConverter<ScalingPolicyJson, ScalingPolicy> {

@@ -22,8 +22,10 @@ public class ScalingService {
     public ScalingPolicy createPolicy(long clusterId, long alertId, ScalingPolicy policy) {
         BaseAlert alert = alertService.getBaseAlert(clusterId, alertId);
         policy.setAlert(alert);
-        alert.setScalingPolicy(policy);
-        return policyRepository.save(policy);
+        ScalingPolicy scalingPolicy = policyRepository.save(policy);
+        alert.setScalingPolicy(scalingPolicy);
+        alertService.save(alert);
+        return scalingPolicy;
     }
 
     public ScalingPolicy updatePolicy(long clusterId, long policyId, ScalingPolicy scalingPolicy) {

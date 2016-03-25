@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.model;
 
-import com.sequenceiq.periscope.rest.json.Json;
+import com.sequenceiq.periscope.api.model.Json;
 
 public class Queue implements Json {
 

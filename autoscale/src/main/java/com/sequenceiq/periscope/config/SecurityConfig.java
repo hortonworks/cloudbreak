@@ -97,7 +97,7 @@ public class SecurityConfig {
         public void configure(HttpSecurity http) throws Exception {
             http.addFilterAfter(new ScimAccountGroupReaderFilter(userDetailsService), AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
-                    .antMatchers("/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks') and #oauth2.hasScope('periscope.cluster')")
+                    .antMatchers("/api/v1/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks') and #oauth2.hasScope('periscope.cluster')")
                     .and()
                     .csrf()
                     .disable()

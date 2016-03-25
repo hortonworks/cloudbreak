@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,11 +50,11 @@ public class AlertService {
 
     public MetricAlert createMetricAlert(long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findOneByUser(clusterId);
-        cluster.addMetricAlert(alert);
         alert.setCluster(cluster);
-        alert = metricAlertRepository.save(alert);
+        MetricAlert metricAlert = metricAlertRepository.save(alert);
+        cluster.addMetricAlert(metricAlert);
         clusterRepository.save(cluster);
-        return alert;
+        return metricAlert;
     }
 
     public MetricAlert updateMetricAlert(long clusterId, long alertId, MetricAlert metricAlert) {
@@ -71,20 +72,33 @@ public class AlertService {
     }
 
     public void deleteMetricAlert(long clusterId, long alertId) {
-        MetricAlert alert = metricAlertRepository.findByCluster(alertId, clusterId);
-        metricAlertRepository.delete(alert);
+        metricAlertRepository.findByCluster(alertId, clusterId);
+        Cluster cluster = clusterRepository.find(clusterId);
+        cluster.setMetricAlerts(removeMetricAlert(cluster, alertId));
+        metricAlertRepository.delete(alertId);
+        clusterRepository.save(cluster);
     }
 
-    public List<MetricAlert> getMetricAlerts(long clusterId) {
+    public Set<MetricAlert> removeMetricAlert(Cluster cluster, long alertId) {
+        Set<MetricAlert> metricAlerts = cluster.getMetricAlerts();
+        for (MetricAlert metricAlert : cluster.getMetricAlerts()) {
+            if (metricAlert.getId() == alertId) {
+                metricAlerts.remove(metricAlert);
+            }
+        }
+        return metricAlerts;
+    }
+
+    public Set<MetricAlert> getMetricAlerts(long clusterId) {
         Cluster cluster = clusterService.findOneByUser(clusterId);
         return cluster.getMetricAlerts();
     }
 
     public TimeAlert createTimeAlert(long clusterId, TimeAlert alert) {
         Cluster cluster = clusterService.findOneByUser(clusterId);
-        cluster.addTimeAlert(alert);
         alert.setCluster(cluster);
         alert = timeAlertRepository.save(alert);
+        cluster.addTimeAlert(alert);
         clusterRepository.save(cluster);
         return alert;
     }
@@ -102,14 +116,27 @@ public class AlertService {
         return timeAlertRepository.save(alert);
     }
 
-    public List<TimeAlert> getTimeAlerts(long clusterId) {
+    public Set<TimeAlert> getTimeAlerts(long clusterId) {
         Cluster cluster = clusterService.findOneByUser(clusterId);
         return cluster.getTimeAlerts();
     }
 
     public void deleteTimeAlert(long clusterId, long alertId) {
-        TimeAlert alert = timeAlertRepository.findByCluster(alertId, clusterId);
-        timeAlertRepository.delete(alert);
+        Cluster cluster = clusterService.findOneByUser(clusterId);
+        timeAlertRepository.findByCluster(alertId, clusterId);
+        cluster.setTimeAlerts(removeTimeAlert(cluster, alertId));
+        timeAlertRepository.delete(alertId);
+        clusterRepository.save(cluster);
+    }
+
+    public Set<TimeAlert> removeTimeAlert(Cluster cluster, long alertId) {
+        Set<TimeAlert> timeAlerts = cluster.getTimeAlerts();
+        for (TimeAlert timeAlert : cluster.getTimeAlerts()) {
+            if (timeAlert.getId() == alertId) {
+                timeAlerts.remove(timeAlert);
+            }
+        }
+        return timeAlerts;
     }
 
     public BaseAlert getBaseAlert(long clusterId, long alertId) {

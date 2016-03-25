@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.rest.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.Ambari;
-import com.sequenceiq.periscope.rest.json.AmbariJson;
+import com.sequenceiq.periscope.api.model.AmbariJson;
 
 @Component
 public class AmbariConverter extends AbstractConverter<AmbariJson, Ambari> {

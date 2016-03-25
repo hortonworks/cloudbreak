@@ -2,7 +2,7 @@ package com.sequenceiq.periscope.rest.converter;
 
 import java.util.List;
 
-import com.sequenceiq.periscope.rest.json.Json;
+import com.sequenceiq.periscope.api.model.Json;
 
 public interface Converter<J extends Json, E> {
 

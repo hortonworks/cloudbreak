@@ -12,6 +12,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.periscope.api.model.AdjustmentType;
+
 @Entity
 @NamedQueries({
         @NamedQuery(name = "ScalingPolicy.findByCluster", query = "SELECT c FROM ScalingPolicy c WHERE c.alert.cluster.id= :clusterId AND c.id= :policyId"),
