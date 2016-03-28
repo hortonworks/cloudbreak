@@ -386,7 +386,7 @@ main() {
     cmd-export cbd-update update
     cmd-export doctor doctor
     cmd-export init-profile init
-
+    cmd-export cmd-bash-complete bash-complete
     cmd-export-ns env "Environment namespace"
     cmd-export env-show
     cmd-export env-export
