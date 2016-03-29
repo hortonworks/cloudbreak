@@ -6,7 +6,9 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
     function($scope, $rootScope, $filter, UserNetwork, AccountNetwork, GlobalNetwork) {
 
         $rootScope.networks = AccountNetwork.query();
-        $scope.network = {};
+        $scope.network = {
+            parameters: {}
+        };
         $scope.showAlert = false;
         $scope.alertMessage = "";
         var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "GCP", "OPENSTACK"]);
@@ -156,5 +158,18 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
             delete $scope.network.parameters.subnetId;
         }
 
+        $scope.selectAwsNetworkType1 = function() {
+            delete $scope.network.parameters.vpcId
+            delete $scope.network.parameters.internetGatewayId
+            delete $scope.network.parameters.subnetId
+        }
+
+        $scope.selectAwsNetworkType2 = function() {
+            delete $scope.network.parameters.subnetId
+        }
+
+        $scope.selectAwsNetworkType3 = function() {
+            delete $scope.network.subnetCIDR
+        }
     }
 ]);

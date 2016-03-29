@@ -1,14 +1,14 @@
 </form>
-<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+<div class="panel-group" id="gcp-net-accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingOne">
+        <div class="panel-heading" role="tab" id="gcp-net-headingOne">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" ng-click="selectGcpNetworkType1()">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#gcp-net-accordion" href="#gcp-net-collapseOne" aria-expanded="true" aria-controls="gcp-net-collapseOne" ng-click="selectGcpNetworkType1()">
                 <i class="fa fa-sitemap fa-fw"/><span style="padding-left: 10px">{{msg.network_gcp_form_type1_title}}</span>
                 </a>
             </h4>
         </div>
-        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+        <div id="gcp-net-collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="gcp-net-headingOne">
             <div class="panel-body">
                 <div class="form-group col-sm-12">
                     <i class="fa fa-info-circle" /><small>&nbsp;{{msg.network_gcp_form_type1_info}}</small>
@@ -71,14 +71,14 @@
         </div>
     </div>
     <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingTwo">
+        <div class="panel-heading" role="tab" id="gcp-net-headingTwo">
             <div class="panel-title">
-                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" ng-click="selectGcpNetworkType2()">
+                <a role="button" data-toggle="collapse" data-parent="#gcp-net-accordion" href="#gcp-net-collapseTwo" aria-expanded="false" aria-controls="gcp-net-collapseTwo" ng-click="selectGcpNetworkType2()">
                     <i class="fa fa-sitemap fa-fw" /><span style="padding-left: 10px">{{msg.network_gcp_form_type2_title}}</span>
                 </a>
             </div>
         </div>
-        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+        <div id="gcp-net-collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="gcp-net-headingTwo">
             <div class="panel-body">
                 <div class="form-group col-sm-12">
                     <i class="fa fa-info-circle" /><small>&nbsp;{{msg.network_gcp_form_type2_info}}</small>
@@ -151,14 +151,14 @@
         </div>
     </div>
     <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingThree">
+        <div class="panel-heading" role="tab" id="gcp-net-headingThree">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree" ng-click="selectGcpNetworkType3()">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#gcp-net-accordion" href="#gcp-net-collapseThree" aria-expanded="false" aria-controls="gcp-net-collapseThree" ng-click="selectGcpNetworkType3()">
                 <i class="fa fa-sitemap fa-fw"/><span style="padding-left: 10px">{{msg.network_gcp_form_type3_title}}</span>
                 </a>
             </h4>
         </div>
-        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+        <div id="gcp-net-collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="gcp-net-headingThree">
             <div class="panel-body">
                 <div class="form-group col-sm-12">
                     <i class="fa fa-info-circle" /><small>&nbsp;{{msg.network_gcp_form_type3_info}}</small>
@@ -231,14 +231,14 @@
         </div>
     </div>
     <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingFour">
+        <div class="panel-heading" role="tab" id="gcp-net-headingFour">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour" ng-click="selectGcpNetworkType4()">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#gcp-net-accordion" href="#gcp-net-collapseFour" aria-expanded="false" aria-controls="gcp-net-collapseFour" ng-click="selectGcpNetworkType4()">
                 <i class="fa fa-sitemap fa-fw"/><span style="padding-left: 10px">{{msg.network_gcp_form_type4_title}}</span>
                 </a>
             </h4>
         </div>
-        <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+        <div id="gcp-net-collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="gcp-net-headingFour">
             <div class="panel-body">
                 <div class="form-group col-sm-12">
                     <i class="fa fa-info-circle" /><small>&nbsp;{{msg.network_gcp_form_type4_info}}</small>
