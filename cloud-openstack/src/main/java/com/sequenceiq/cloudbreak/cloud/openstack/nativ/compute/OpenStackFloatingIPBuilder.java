@@ -29,8 +29,8 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
             OSClient osClient = createOSClient(auth);
             List<CloudResource> computeResources = context.getComputeResources(privateId);
             CloudResource instance = getInstance(computeResources);
-            String pool = osClient.compute().floatingIps().getPoolNames().get(0);
-            FloatingIP unusedIp = osClient.compute().floatingIps().allocateIP(pool);
+            String publicNetId = context.getStringParameter(OpenStackConstants.PUBLIC_NET_ID);
+            FloatingIP unusedIp = osClient.compute().floatingIps().allocateIP(publicNetId);
             ActionResponse response = osClient.compute().floatingIps().addFloatingIP(instance.getParameter(OpenStackConstants.SERVER, Server.class),
                     unusedIp.getFloatingIpAddress());
             if (!response.isSuccess()) {
