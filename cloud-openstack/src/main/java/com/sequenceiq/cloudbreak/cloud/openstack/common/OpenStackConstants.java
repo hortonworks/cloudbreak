@@ -16,6 +16,7 @@ public class OpenStackConstants {
     public static final String PORT_ID = "portId";
     public static final String SERVER = "server";
     public static final String FLOATING_IP_IDS = "floatingIpIds";
+    public static final String PUBLIC_NET_ID = "publicNetId";
 
     private OpenStackConstants() {
     }

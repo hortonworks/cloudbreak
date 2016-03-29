@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.view;
 
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 
 public class NeutronNetworkView {
 
@@ -15,7 +16,7 @@ public class NeutronNetworkView {
     }
 
     public String getPublicNetId() {
-        return network.getParameter("publicNetId", String.class);
+        return network.getParameter(OpenStackConstants.PUBLIC_NET_ID, String.class);
     }
 
 }

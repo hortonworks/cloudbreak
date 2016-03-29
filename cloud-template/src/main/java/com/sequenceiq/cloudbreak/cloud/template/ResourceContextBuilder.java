@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
 /**
@@ -21,10 +22,11 @@ public interface ResourceContextBuilder<C extends ResourceBuilderContext> extend
      *
      * @param cloudContext Context for the specific cloud stack.
      * @param auth         Authenticated context is provided to be able to send the requests to the cloud provider.
+     * @param network      Network can provide extra information during compute resource creation time
      * @param resources    The context can be initialized with base resources.
      * @param build        Provides a simple boolean flag used to determine creation/deletion or stop/start
      * @return Returns the initialized context object.
      */
-    C contextInit(CloudContext cloudContext, AuthenticatedContext auth, List<CloudResource> resources, boolean build);
+    C contextInit(CloudContext cloudContext, AuthenticatedContext auth, Network network, List<CloudResource> resources, boolean build);
 
 }
