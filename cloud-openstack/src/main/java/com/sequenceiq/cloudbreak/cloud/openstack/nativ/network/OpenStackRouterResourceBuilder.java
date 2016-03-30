@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
+import com.sequenceiq.cloudbreak.cloud.template.ResourceNotNeededException;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
@@ -28,6 +29,14 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
 
     @Inject
     private OpenStackUtils utils;
+
+    @Override
+    public CloudResource create(OpenStackContext context, AuthenticatedContext auth, Network network) {
+        if (utils.isExistingSubnet(network)) {
+            throw new ResourceNotNeededException("Router isn't needed when a subnet is reused.");
+        }
+        return super.create(context, auth, network);
+    }
 
     @Override
     public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource)

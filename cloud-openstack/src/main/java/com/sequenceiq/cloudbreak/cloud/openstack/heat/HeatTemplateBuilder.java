@@ -73,9 +73,10 @@ public class HeatTemplateBuilder {
         parameters.put("key_name", osCredential.getKeyPairName());
         if (existingNetwork) {
             parameters.put("app_net_id", openStackUtil.getCustomNetworkId(network));
-            parameters.put("router_id", openStackUtil.getCustomRouterId(network));
             if (isNoneEmpty(existingSubnetCidr)) {
                 parameters.put("subnet_id", openStackUtil.getCustomSubnetId(network));
+            } else {
+                parameters.put("router_id", openStackUtil.getCustomRouterId(network));
             }
         }
         parameters.put("app_net_cidr", isBlank(existingSubnetCidr) ? neutronView.getSubnetCIDR() : existingSubnetCidr);

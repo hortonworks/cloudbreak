@@ -76,7 +76,7 @@ public class OpenStackUtils {
     }
 
     public boolean isExistingNetwork(Network network) {
-        return isNoneEmpty(getCustomNetworkId(network)) && isNoneEmpty(getCustomRouterId(network));
+        return isNoneEmpty(getCustomNetworkId(network));
     }
 
     public String getCustomNetworkId(Network network) {
