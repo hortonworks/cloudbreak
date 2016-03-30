@@ -28,7 +28,7 @@
                                         <a id="awsNetworkChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsNetwork, 'btn-default':!awsNetwork}" role="button" ng-click="createAwsNetworkRequest()">{{msg.aws_label}}</a>
                                         <a id="azureNetworkChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureNetwork, 'btn-default':!azureNetwork}" role="button" ng-click="createAzureNetworkRequest()">{{msg.azure_label}}</a>
                                     </div>
-                                    <div class="btn-group btn-group-justified">
+                                    <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
                                         <a id="gcpNetworkChange" ng-if="isVisible('GCP')" ng-class="{'btn':true, 'btn-info':gcpNetwork, 'btn-default':!gcpNetwork}" role="button" ng-click="createGcpNetworkRequest()">{{msg.gcp_label}}</a>
                                         <a id="openstackNetworkChange" ng-if="isVisible('OPENSTACK')" ng-class="{'btn':true, 'btn-info':openstackNetwork, 'btn-default':!openstackNetwork}" role="button" ng-click="createOpenstackNetworkRequest()">{{msg.openstack_label}}</a>
                                     </div>

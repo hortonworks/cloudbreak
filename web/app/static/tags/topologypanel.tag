@@ -29,7 +29,7 @@
                                         <a id="awsTopologyChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsTopology, 'btn-default':!awsTopology}" role="button" ng-click="createAwsTopologyRequest()">{{msg.aws_label}}</a>
                                         <a id="azureTopologyChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureTopology, 'btn-default':!azureTopology}" role="button" ng-click="createAzureTopologyRequest()">{{msg.azure_label}}</a>
                                     </div>
-                                    <div class="btn-group btn-group-justified">
+                                    <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
                                         <a id="gcpTopologyChange" ng-if="isVisible('GCP')" class="btn btn-default" ng-class="{'btn':true, 'btn-info':gcpTopology, 'btn-default':!gcpTopology}" role="button" ng-click="createGcpTopologyRequest()">{{msg.gcp_label}}</a>
                                         <a id="openstackTopologyChange" ng-if="isVisible('OPENSTACK')" ng-class="{'btn':true, 'btn-info':openstackTopology, 'btn-default':!openstackTopology}" role="button" ng-click="createOpenstackTopologyRequest()">{{msg.openstack_label}}</a>
                                     </div>

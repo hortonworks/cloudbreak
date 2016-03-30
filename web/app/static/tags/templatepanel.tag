@@ -29,7 +29,7 @@
                                         <a id="azureTemplateChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureTemplate, 'btn-default':!azureTemplate}" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
                                         <a id="mesosTemplateChange" ng-if="isVisible('BYOS')" ng-class="{'btn':true, 'btn-info':mesosTemplate, 'btn-default':!mesosTemplate}" role="button" ng-click="createMesosTemplateRequest()">{{msg.mesos_label}}</a>
                                     </div>
-                                    <div class="btn-group btn-group-justified">
+                                    <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
                                         <a id="gcpTemplateChange" ng-if="isVisible('GCP')" ng-class="{'btn':true, 'btn-info':gcpTemplate, 'btn-default':!gcpTemplate}" role="button" ng-click="createGcpTemplateRequest()">{{msg.gcp_label}}</a>
                                         <a id="openstackTemplateChange" ng-if="isVisible('OPENSTACK')" ng-class="{'btn':true, 'btn-info':openstackTemplate, 'btn-default':!openstackTemplate}" role="button" ng-click="createOpenstackTemplateRequest()">{{msg.openstack_label}}</a>
                                     </div>
