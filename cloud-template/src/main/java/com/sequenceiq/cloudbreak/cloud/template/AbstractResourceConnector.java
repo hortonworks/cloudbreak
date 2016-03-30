@@ -49,7 +49,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         Platform platform = cloudContext.getPlatform();
 
         //context
-        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, null, true);
+        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), null, true);
 
         //network
         List<CloudResourceStatus> networkStatuses = networkResourceService.buildResources(context, auth, stack.getNetwork(), stack.getSecurity());
@@ -69,7 +69,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         Platform platform = cloudContext.getPlatform();
 
         //context
-        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, cloudResources, false);
+        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), cloudResources, false);
 
         //compute
         List<CloudResourceStatus> computeStatuses = computeResourceService.deleteResources(context, auth, cloudResources, false);
@@ -87,7 +87,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         Platform platform = cloudContext.getPlatform();
 
         //context
-        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, resources, true);
+        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), resources, true);
 
         //network
         context.addNetworkResources(networkResourceService.getNetworkResources(platform, resources));
@@ -105,7 +105,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         Platform platform = cloudContext.getPlatform();
 
         //context
-        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, resources, false);
+        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), resources, false);
 
         //compute
         //TODO we should somehow group the corresponding resources together
@@ -119,7 +119,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         Platform platform = cloudContext.getPlatform();
 
         //context
-        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, resources, true);
+        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), resources, true);
 
         //network
         List<CloudResource> networkResources = networkResourceService.getNetworkResources(platform, resources);

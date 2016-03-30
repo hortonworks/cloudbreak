@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
@@ -31,7 +32,7 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
     private OpenStackClient openStackClient;
 
     @Override
-    public OpenStackContext contextInit(CloudContext cloudContext, AuthenticatedContext auth, List<CloudResource> resources, boolean build) {
+    public OpenStackContext contextInit(CloudContext cloudContext, AuthenticatedContext auth, Network network, List<CloudResource> resources, boolean build) {
         OSClient osClient = openStackClient.createOSClient(auth);
         KeystoneCredentialView credentialView = new KeystoneCredentialView(auth);
 
@@ -58,6 +59,9 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
             }
         }
         openStackContext.putParameter(OpenStackConstants.FLOATING_IP_IDS, Collections.synchronizedList(new ArrayList<String>()));
+        if (network != null) {
+            openStackContext.putParameter(OpenStackConstants.PUBLIC_NET_ID, network.getStringParameter(OpenStackConstants.PUBLIC_NET_ID));
+        }
 
         return openStackContext;
     }
