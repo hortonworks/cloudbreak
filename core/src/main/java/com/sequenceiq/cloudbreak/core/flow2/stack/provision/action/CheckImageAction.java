@@ -10,9 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
+import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToFlowStackEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
@@ -44,8 +46,7 @@ public class CheckImageAction extends AbstractStackCreationAction<FlowStackEvent
                 repeat(context);
                 break;
             case CREATE_FINISHED:
-                sendEvent(context.getFlowId(), StackCreationEvent.IMAGE_COPY_FINISHED_EVENT.stringRepresentation(),
-                        new FlowStackEvent(context.getStack().getId()));
+                sendEvent(context);
                 break;
             case CREATE_FAILED:
                 LOGGER.error("Error during image status check: {}", payload);
@@ -63,6 +64,11 @@ public class CheckImageAction extends AbstractStackCreationAction<FlowStackEvent
                 LOGGER.error("Unknown imagestatus: {}", checkImageResult.getImageStatus());
                 break;
         }
+    }
+
+    @Override
+    protected Selectable createRequest(StackContext context) {
+        return new SelectableFlowStackEvent(context.getStack().getId(), StackCreationEvent.IMAGE_COPY_FINISHED_EVENT.stringRepresentation());
     }
 
     @Override

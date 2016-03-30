@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
@@ -52,6 +54,15 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         }
     }
 
+    protected void sendEvent(C context) {
+        Selectable payload = createRequest(context);
+        sendEvent(context.getFlowId(), payload.selector(), payload);
+    }
+
+    protected void sendEvent(String flowId, Selectable payload) {
+        sendEvent(flowId, payload.selector(), payload);
+    }
+
     protected void sendEvent(String flowId, String selector, Object payload) {
         LOGGER.info("Triggering event: {}", payload);
         Map<String, Object> headers = new HashMap<>();
@@ -66,6 +77,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     protected abstract C createFlowContext(StateContext<S, E> stateContext, P payload);
 
     protected abstract void doExecute(C context, P payload, Map<Object, Object> variables) throws Exception;
+    protected abstract Selectable createRequest(C context);
     protected abstract Object getFailurePayload(C flowContext, Exception ex);
 
     private P convertPayload(Object payload) {

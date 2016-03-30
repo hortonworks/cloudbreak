@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPE
 import static java.lang.String.format;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -93,12 +93,14 @@ public class StackCreationService {
     private TlsSetupService tlsSetupService;
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+    @Inject
+    private FlowMessageService flowMessageService;
 
     public void startProvisioning(StackContext context) {
         Stack stack = context.getStack();
         MDCBuilder.buildMdcContext(stack);
         stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS, "Creating infrastructure");
-        fireEventAndLog(stack.getId(), Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name());
         instanceMetadataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
     }
 
@@ -107,7 +109,7 @@ public class StackCreationService {
         validateResourceResults(context.getCloudContext(), result);
         List<CloudResourceStatus> results = result.getResults();
         updateNodeCount(stack.getId(), context.getCloudStack().getGroups(), results, true);
-        fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
         return stackService.getById(stack.getId());
     }
 
@@ -132,8 +134,8 @@ public class StackCreationService {
     public Stack setupMetadata(StackContext context, CollectMetadataResult collectMetadataResult) {
         Stack stack = context.getStack();
         metadatSetupService.saveInstanceMetaData(stack, collectMetadataResult.getResults(), InstanceStatus.CREATED);
-        fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED, BillingStatus.BILLING_STARTED.name());
-        fireEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, AVAILABLE.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED, BillingStatus.BILLING_STARTED.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, AVAILABLE.name());
         LOGGER.debug("Metadata setup DONE.");
         return stackService.getById(stack.getId());
     }
@@ -154,11 +156,11 @@ public class StackCreationService {
         if (errorDetails instanceof CancellationException || ExceptionUtils.getRootCause(errorDetails) instanceof CancellationException) {
             LOGGER.warn("The flow has been cancelled.");
         } else {
-            fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, UPDATE_IN_PROGRESS.name(), errorReason);
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, UPDATE_IN_PROGRESS.name(), errorReason);
             if (!stack.isStackInDeletionPhase()) {
                 handleFailure(stack, errorReason);
                 stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, errorReason);
-                fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, CREATE_FAILED.name(), errorReason);
+                flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, CREATE_FAILED.name(), errorReason);
             }
         }
     }
@@ -190,19 +192,13 @@ public class StackCreationService {
                 // TODO Only trigger the rollback flow
                 stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
                 connector.rollback(stack, stack.getResources());
-                fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name(), errorReason);
+                flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name(), errorReason);
             }
         } catch (Exception ex) {
             LOGGER.error("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
             stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, String.format("Rollback failed: %s", ex.getMessage()));
-            fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_ROLLBACK_FAILED, CREATE_FAILED.name(), ex.getMessage());
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_ROLLBACK_FAILED, CREATE_FAILED.name(), ex.getMessage());
         }
-    }
-
-    private void fireEventAndLog(Long stackId, Msg msgCode, String eventType, Object... args) {
-        LOGGER.debug("{} [STACK_FLOW_STEP].", msgCode);
-        String message = messagesService.getMessage(msgCode.code(), Arrays.asList(args));
-        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
     }
 
     private long calculateStackCreationTime(Date startDate) {
@@ -237,8 +233,8 @@ public class StackCreationService {
                 InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
                 instanceGroup.setNodeCount(nodeCount - failedCount);
                 instanceGroupRepository.save(instanceGroup);
-                fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE, Status.UPDATE_IN_PROGRESS.name(), failedCount, group.getName(),
-                        failedResources.get(0).getStatusReason());
+                flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE, Status.UPDATE_IN_PROGRESS.name(),
+                        failedCount, group.getName(), failedResources.get(0).getStatusReason());
             }
         }
     }

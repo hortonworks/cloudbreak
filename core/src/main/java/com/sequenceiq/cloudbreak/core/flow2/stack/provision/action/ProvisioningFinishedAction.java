@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -38,9 +39,16 @@ public class ProvisioningFinishedAction extends AbstractStackCreationAction<Laun
     @Override
     protected void doExecute(StackContext context, LaunchStackResult payload, Map<Object, Object> variables) {
         Stack stack = stackCreationService.provisioningFinished(context, payload, getStartDateIfExist(variables));
-        List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);
-        List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        sendEvent(context.getFlowId(), new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances));
+        StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(),
+                context.getCloudCredential(), context.getCloudStack());
+        sendEvent(newContext);
+    }
+
+    @Override
+    protected Selectable createRequest(StackContext context) {
+        List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(context.getStack());
+        List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
+        return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
     }
 
     private Date getStartDateIfExist(Map<Object, Object> variables) {

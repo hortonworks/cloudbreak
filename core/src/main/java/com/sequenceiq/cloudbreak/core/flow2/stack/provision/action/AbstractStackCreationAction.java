@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -52,10 +51,6 @@ public abstract class AbstractStackCreationAction<P> extends AbstractAction<Stac
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackContext(flowId, stack, cloudContext, cloudCredential, cloudStack);
-    }
-
-    protected void sendEvent(String flowId, CloudPlatformRequest request) {
-        sendEvent(flowId, request.selector(), request);
     }
 
     @Override

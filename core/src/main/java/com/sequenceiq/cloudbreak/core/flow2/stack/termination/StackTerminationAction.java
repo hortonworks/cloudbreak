@@ -45,12 +45,16 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Defau
 
     @Override
     protected void doExecute(StackTerminationContext context, DefaultFlowContext payload, Map<Object, Object> variables) {
-        TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(context.getCloudContext(), context.getCloudStack(),
-                context.getCloudCredential(), context.getCloudResources());
-        doExecute(context, terminateRequest);
+        doExecute(context);
     }
 
-    protected void doExecute(StackTerminationContext context, TerminateStackRequest<TerminateStackResult> terminateRequest) {
+    @Override
+    protected TerminateStackRequest createRequest(StackTerminationContext context) {
+        return new TerminateStackRequest<>(context.getCloudContext(), context.getCloudStack(), context.getCloudCredential(), context.getCloudResources());
+    }
+
+    protected void doExecute(StackTerminationContext context) {
+        TerminateStackRequest terminateRequest = createRequest(context);
         Stack stack = context.getStack();
         if (stack == null || stack.getCredential() == null) {
             LOGGER.info("Could not trigger stack event on null", terminateRequest);

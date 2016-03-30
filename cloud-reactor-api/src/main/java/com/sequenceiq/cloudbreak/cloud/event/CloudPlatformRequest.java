@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
 
-public class CloudPlatformRequest<T> {
+public class CloudPlatformRequest<T> implements Selectable {
 
     private CloudContext cloudContext;
     private CloudCredential cloudCredential;

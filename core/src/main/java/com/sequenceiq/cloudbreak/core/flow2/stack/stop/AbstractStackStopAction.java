@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -25,9 +24,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
-import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopContext;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -83,9 +80,4 @@ abstract class AbstractStackStopAction<P> extends AbstractAction<StackStopState,
 
     protected abstract Long getStackId(P payload);
 
-    protected void fireEventAndLog(Long stackId, CommonContext context, Msg msgCode, String eventType, Object... args) {
-        LOGGER.debug("{} [STACK_FLOW_STEP]. Context: {}", msgCode, context);
-        String message = messagesService.getMessage(msgCode.code(), Arrays.asList(args));
-        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
-    }
 }

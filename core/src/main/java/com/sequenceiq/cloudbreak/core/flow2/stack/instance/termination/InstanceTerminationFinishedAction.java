@@ -11,8 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -80,6 +82,11 @@ public class InstanceTerminationFinishedAction extends AbstractInstanceTerminati
         LOGGER.info("Terminate instance result: {}", payload);
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Instance removed");
         cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), messagesService.getMessage(Msg.STACK_REMOVING_INSTANCE_FINISHED.code()));
-        sendEvent(context.getFlowId(), InstanceTerminationEvent.TERMINATION_FINALIZED_EVENT.stringRepresentation(), null);
+        sendEvent(context);
+    }
+
+    @Override
+    protected Selectable createRequest(InstanceTerminationContext context) {
+        return new SelectableEvent(InstanceTerminationEvent.TERMINATION_FINALIZED_EVENT.stringRepresentation());
     }
 }
