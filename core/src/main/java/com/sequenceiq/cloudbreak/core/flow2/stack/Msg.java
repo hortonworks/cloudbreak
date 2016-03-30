@@ -38,7 +38,8 @@ public enum Msg {
     FLOW_STACK_METADATA_COLLECTED("stack.metadata.collected"),
     CLUSTER_DELETE_COMPLETED("ambari.cluster.delete.completed"),
     CLUSTER_EMAIL_SENT("ambari.cluster.notification.email"),
-    CLUSTER_DELETE_FAILED("ambari.cluster.delete.failed");
+    CLUSTER_DELETE_FAILED("ambari.cluster.delete.failed"),
+    STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP("stack.scaling.terminating.host.from.hostgroup");
 
     private String code;
 

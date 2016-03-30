@@ -24,9 +24,10 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
-@Component
-public class DownscaleStackHandler implements CloudPlatformEventHandler<DownscaleStackRequest> {
+@Component("DownscaleStackHandler")
+public class DownscaleStackHandler implements DownscaleStackExecuter, CloudPlatformEventHandler<DownscaleStackRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DownscaleStackHandler.class);
 
     @Inject
@@ -35,6 +36,8 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
     private PollTaskFactory statusCheckFactory;
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public Class<DownscaleStackRequest> type() {
@@ -45,25 +48,32 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
     public void accept(Event<DownscaleStackRequest> downscaleStackRequestEvent) {
         LOGGER.info("Received event: {}", downscaleStackRequestEvent);
         DownscaleStackRequest request = downscaleStackRequestEvent.getData();
-        CloudContext cloudContext = request.getCloudContext();
+        execute(request);
+        LOGGER.info("DownscaleStackRequest finished");
+    }
+
+    @Override
+    public DownscaleStackResult execute(DownscaleStackRequest request) {
+        DownscaleStackResult result;
         try {
+            CloudContext cloudContext = request.getCloudContext();
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            List<CloudResourceStatus> resourceStatus = connector.resources()
-                    .downscale(ac, request.getCloudStack(), request.getCloudResources(), request.getInstances());
+            List<CloudResourceStatus> resourceStatus = connector.resources().downscale(ac, request.getCloudStack(), request.getCloudResources(),
+                    request.getInstances());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task);
             }
-            request.getResult().onNext(new DownscaleStackResult(request, ResourceLists.transform(statePollerResult.getResults())));
             LOGGER.info("Downscale successfully finished for {}", cloudContext);
+            result = new DownscaleStackResult(request, ResourceLists.transform(statePollerResult.getResults()));
         } catch (Exception e) {
             LOGGER.error("Failed to handle DownscaleStackRequest.", e);
-            request.getResult().onNext(new DownscaleStackResult(e.getMessage(), e, request));
+            result = new DownscaleStackResult(e.getMessage(), e, request);
         }
-        LOGGER.info("DownscaleStackRequest finished");
+        request.getResult().onNext(result);
+        return result;
     }
-
 }

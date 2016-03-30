@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.core.flow.context.StackInstanceUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
@@ -151,26 +150,6 @@ public class SimpleStackFacade implements StackFacade {
     }
 
     @Override
-    public FlowContext removeInstance(FlowContext context) throws CloudbreakException {
-        StackInstanceUpdateContext actualContext = (StackInstanceUpdateContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            if (!stack.isDeleteInProgress()) {
-                stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS, "Removing instance");
-                fireEventAndLog(stack.getId(), actualContext, Msg.STACK_REMOVING_INSTANCE, UPDATE_IN_PROGRESS.name());
-                stackScalingService.removeInstance(actualContext.getStackId(), actualContext.getInstanceId());
-                stackUpdater.updateStackStatus(actualContext.getStackId(), AVAILABLE, "Instance removed");
-                fireEventAndLog(stack.getId(), actualContext, Msg.STACK_REMOVING_INSTANCE_FINISHED, AVAILABLE.name());
-            }
-        } catch (Exception e) {
-            LOGGER.error("Exception during the removing instance from the stack: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
     public FlowContext extendMetadata(FlowContext context) throws CloudbreakException {
         StackScalingContext actualCont = (StackScalingContext) context;
         Stack stack = stackService.getById(actualCont.getStackId());
@@ -231,7 +210,8 @@ public class SimpleStackFacade implements StackFacade {
             Stack stack = stackService.getById(actualContext.getStackId());
             MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(), actualContext.getScalingAdjustment());
+            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(),
+                    Math.abs(actualContext.getScalingAdjustment()));
 
             stackScalingService.downscaleStack(stack.getId(), actualContext.getInstanceGroup(), actualContext.getScalingAdjustment());
 

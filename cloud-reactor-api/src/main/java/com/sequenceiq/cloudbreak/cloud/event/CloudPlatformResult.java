@@ -9,13 +9,19 @@ public class CloudPlatformResult<R extends CloudPlatformRequest> {
     private Exception errorDetails;
     private R request;
 
+    protected CloudPlatformResult() {
+    }
+
     public CloudPlatformResult(R request) {
-        this.status = EventStatus.OK;
-        this.request = request;
+        init(EventStatus.OK, null, null, request);
     }
 
     public CloudPlatformResult(String statusReason, Exception errorDetails, R request) {
-        this.status = EventStatus.FAILED;
+        init(EventStatus.FAILED, statusReason, errorDetails, request);
+    }
+
+    protected void init(EventStatus status, String statusReason, Exception errorDetails, R request) {
+        this.status = status;
         this.statusReason = statusReason;
         this.errorDetails = errorDetails;
         this.request = request;

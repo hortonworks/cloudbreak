@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -19,10 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
-import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -79,8 +76,7 @@ public class StackScalingService {
         STACK_SCALING_HOST_DELETED("stack.scaling.host.deleted"),
         STACK_SCALING_HOST_DELETE_FAILED("stack.scaling.host.delete.failed"),
         STACK_SCALING_HOST_NOT_FOUND("stack.scaling.host.not.found"),
-        STACK_SCALING_BILLING_CHANGED("stack.scaling.billing.changed"),
-        STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP("stack.scaling.terminating.host.from.hostgroup");
+        STACK_SCALING_BILLING_CHANGED("stack.scaling.billing.changed");
 
         private String code;
 
@@ -98,27 +94,7 @@ public class StackScalingService {
         return connector.addInstances(stack, scalingAdjustment, instanceGroupName);
     }
 
-    public void removeInstance(Long stackId, String instanceId) throws Exception {
-        Stack stack = stackService.getById(stackId);
-        InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
-        String instanceGroupName = instanceMetaData.getInstanceGroup().getGroupName();
-        String hostName = instanceMetaData.getDiscoveryFQDN();
-        eventService.fireCloudbreakInstanceGroupEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
-                cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP.code(), Arrays.asList(hostName, instanceGroupName)),
-                instanceGroupName);
-        if (stack.getCluster() != null) {
-            HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
-            if (hostMetadata != null && HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
-                throw new ScalingFailedException(String.format("Host (%s) is in HEALTHY state. Cannot be removed.", hostName));
-            }
-            removeInstance(stack, instanceId, instanceGroupName);
-            removeHostmetadataIfExists(stack, instanceMetaData, hostMetadata);
-        } else {
-            removeInstance(stack, instanceId, instanceGroupName);
-        }
-    }
-
-    private void removeHostmetadataIfExists(Stack stack, InstanceMetaData instanceMetaData, HostMetadata hostMetadata) {
+    public void removeHostmetadataIfExists(Stack stack, InstanceMetaData instanceMetaData, HostMetadata hostMetadata) {
         if (hostMetadata != null) {
             try {
                 ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata);
@@ -142,12 +118,6 @@ public class StackScalingService {
         }
     }
 
-    private void removeInstance(Stack stack, String instanceId, String instanceGroupName) throws CloudbreakSecuritySetupException {
-        Set<String> instanceIds = Sets.newHashSet(instanceId);
-        instanceIds = connector.removeInstances(stack, instanceIds, instanceGroupName);
-        updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
-    }
-
     public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
         Stack stack = stackService.getById(stackId);
         Map<String, String> unusedInstanceIds = getUnusedInstanceIds(instanceGroupName, scalingAdjustment, stack);
@@ -156,23 +126,7 @@ public class StackScalingService {
         updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
     }
 
-    private Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
-        Map<String, String> instanceIds = new HashMap<>();
-
-        int i = 0;
-        for (InstanceMetaData metaData : stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData()) {
-            if (!metaData.getAmbariServer() && !metaData.getConsulServer()
-                    && (metaData.isDecommissioned() || metaData.isUnRegistered() || metaData.isCreated() || metaData.isFailed())) {
-                instanceIds.put(metaData.getInstanceId(), metaData.getDiscoveryFQDN());
-                if (++i >= scalingAdjustment * -1) {
-                    break;
-                }
-            }
-        }
-        return instanceIds;
-    }
-
-    private void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) throws CloudbreakSecuritySetupException {
+    public void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) throws CloudbreakSecuritySetupException {
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
         instanceGroup.setNodeCount(nodeCount);
         instanceGroupRepository.save(instanceGroup);
@@ -194,6 +148,22 @@ public class StackScalingService {
         LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
+    }
+
+    private Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
+        Map<String, String> instanceIds = new HashMap<>();
+
+        int i = 0;
+        for (InstanceMetaData metaData : stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData()) {
+            if (!metaData.getAmbariServer() && !metaData.getConsulServer()
+                    && (metaData.isDecommissioned() || metaData.isUnRegistered() || metaData.isCreated() || metaData.isFailed())) {
+                instanceIds.put(metaData.getInstanceId(), metaData.getDiscoveryFQDN());
+                if (++i >= scalingAdjustment * -1) {
+                    break;
+                }
+            }
+        }
+        return instanceIds;
     }
 
     private void removeAgentFromConsul(Stack stack, ConsulClient client, InstanceMetaData metaData) {
