@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.plugin.PromptProvider;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 /**
  * Manages the text of the shell's prompt.
@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 public class CloudbreakPrompt implements PromptProvider {
 
     @Autowired
-    private CloudbreakContext context;
+    private ShellContext context;
 
     @Override
     public String getProviderName() {

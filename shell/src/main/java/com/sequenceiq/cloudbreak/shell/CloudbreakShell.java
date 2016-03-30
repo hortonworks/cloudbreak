@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.NetworkJson;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
@@ -47,7 +47,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
     @Inject
     private JLineShellComponent shell;
     @Inject
-    private CloudbreakContext context;
+    private ShellContext context;
     @Inject
     private CloudbreakClient cloudbreakClient;
     @Inject
@@ -176,11 +176,11 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         }
         Set<NetworkJson> publics = cloudbreakClient.networkEndpoint().getPublics();
         for (NetworkJson network : publics) {
-            context.putNetwork(network.getId(), network.getCloudPlatform());
+            context.putNetwork(Long.valueOf(network.getId()), network.getCloudPlatform());
         }
         Set<SecurityGroupJson> securityGroups = cloudbreakClient.securityGroupEndpoint().getPublics();
         for (SecurityGroupJson securityGroup : securityGroups) {
-            context.putSecurityGroup(securityGroup.getId().toString(), securityGroup.getName());
+            context.putSecurityGroup(securityGroup.getId(), securityGroup.getName());
         }
     }
 

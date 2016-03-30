@@ -25,9 +25,9 @@ public abstract class AbstractConverter<T extends AbstractCompletion> implements
         }
     }
 
-    public boolean getAllPossibleValues(List<Completion> completions, Collection<String> values) {
-        for (String value : values) {
-            completions.add(new Completion(value));
+    public <E extends Object> boolean getAllPossibleValues(List<Completion> completions, Collection<E> values) {
+        for (E value : values) {
+            completions.add(new Completion(value.toString()));
         }
         return true;
     }

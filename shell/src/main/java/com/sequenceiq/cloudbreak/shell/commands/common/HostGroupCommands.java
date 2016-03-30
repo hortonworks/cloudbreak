@@ -1,46 +1,38 @@
-package com.sequenceiq.cloudbreak.shell.commands;
-
-import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderObjectValueMap;
+package com.sequenceiq.cloudbreak.shell.commands.common;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.inject.Inject;
 
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
-import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
-@Component
 public class HostGroupCommands implements CommandMarker {
 
-    @Inject
-    private CloudbreakContext context;
-    @Inject
-    private CloudbreakClient cloudbreakClient;
-    @Inject
-    private ExceptionTransformer exceptionTransformer;
+    private ShellContext shellContext;
+
+    public HostGroupCommands(ShellContext shellContext) {
+        this.shellContext = shellContext;
+    }
 
     @CliAvailabilityIndicator(value = "hostgroup configure")
     public boolean isCreateHostGroupAvailable() {
-        return (context.isBlueprintAvailable() && context.isCredentialAvailable() || context.isStackAvailable()) && !context.isMarathonMode();
+        return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable()
+                || shellContext.isStackAvailable()) && !shellContext.isMarathonMode();
     }
 
     @CliAvailabilityIndicator(value = "hostgroup show")
     public boolean isShowHostGroupAvailable() {
-        return !context.isMarathonMode();
+        return !shellContext.isMarathonMode();
     }
 
     @CliCommand(value = "hostgroup configure", help = "Configure host groups")
@@ -57,17 +49,17 @@ public class HostGroupCommands implements CommandMarker {
             if (recipeNames != null) {
                 recipeIdSet.addAll(getRecipeIds(recipeNames, RecipeParameterType.NAME));
             }
-            context.putHostGroup(hostgroup.getName(),
-                    new HostgroupEntry(context.getInstanceGroups().get(hostgroup.getName()).getNodeCount(), recipeIdSet));
-            return renderObjectValueMap(context.getHostGroups(), "hostgroup");
+            shellContext.putHostGroup(hostgroup.getName(),
+                    new HostgroupEntry(shellContext.getInstanceGroups().get(hostgroup.getName()).getNodeCount(), recipeIdSet));
+            return shellContext.outputTransformer().render(shellContext.getHostGroups(), "hostgroup");
         } catch (Exception ex) {
-            throw exceptionTransformer.transformToRuntimeException(ex);
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
     }
 
     @CliCommand(value = "hostgroup show", help = "Configure host groups")
     public String showHostGroup() throws Exception {
-        return renderObjectValueMap(context.getHostGroups(), "hostgroup");
+        return shellContext.outputTransformer().render(shellContext.getHostGroups(), "hostgroup");
     }
 
     private enum RecipeParameterType {
@@ -82,10 +74,10 @@ public class HostGroupCommands implements CommandMarker {
                     RecipeResponse resp = null;
                     switch (type) {
                         case ID:
-                            resp = cloudbreakClient.recipeEndpoint().get(Long.valueOf(input));
+                            resp = shellContext.cloudbreakClient().recipeEndpoint().get(Long.valueOf(input));
                             break;
                         case NAME:
-                            resp = cloudbreakClient.recipeEndpoint().getPublic(input);
+                            resp = shellContext.cloudbreakClient().recipeEndpoint().getPublic(input);
                             break;
                         default:
                             throw new UnsupportedOperationException();

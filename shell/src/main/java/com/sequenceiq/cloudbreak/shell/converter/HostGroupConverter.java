@@ -7,12 +7,12 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class HostGroupConverter extends AbstractConverter<HostGroup> {
 
     @Autowired
-    private CloudbreakContext context;
+    private ShellContext context;
 
     public HostGroupConverter() {
     }

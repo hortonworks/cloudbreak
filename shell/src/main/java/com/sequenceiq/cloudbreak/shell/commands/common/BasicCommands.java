@@ -1,22 +1,22 @@
-package com.sequenceiq.cloudbreak.shell.commands;
+package com.sequenceiq.cloudbreak.shell.commands.common;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 /**
  * Basic commands used in the shell. Delegating the commands
  * to the Cloudbreak server via a Groovy based client.
  */
-@Component
 public class BasicCommands implements CommandMarker {
 
-    @Autowired
-    private CloudbreakContext context;
+    private ShellContext shellContext;
+
+    public BasicCommands(ShellContext shellContext) {
+        this.shellContext = shellContext;
+    }
 
     /**
      * Checks whether the hint command is available or not.
@@ -35,7 +35,7 @@ public class BasicCommands implements CommandMarker {
      */
     @CliCommand(value = "hint", help = "Shows some hints")
     public String hint() {
-        return context.getHint();
+        return shellContext.getHint();
     }
 
     @CliAvailabilityIndicator("context")
@@ -46,17 +46,17 @@ public class BasicCommands implements CommandMarker {
     @CliCommand(value = "context", help = "Shows some context")
     public String context() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getRow("blueprintId", context.getBlueprintId()));
-        sb.append(getRow("credentialId", context.getCredentialId()));
-        sb.append(getRow("networkId", context.getActiveNetworkId()));
-        sb.append(getRow("securityGroupId", context.getActiveSecurityGroupId()));
-        sb.append(getRow("stackId", context.getStackId()));
-        sb.append(getRow("stackName", context.getStackName()));
-        sb.append(getRow("recipeId", context.getRecipeId()));
+        sb.append(getRow("blueprintId", shellContext.getBlueprintId()));
+        sb.append(getRow("credentialId", shellContext.getCredentialId()));
+        sb.append(getRow("networkId", shellContext.getActiveNetworkId()));
+        sb.append(getRow("securityGroupId", shellContext.getActiveSecurityGroupId()));
+        sb.append(getRow("stackId", shellContext.getStackId()));
+        sb.append(getRow("stackName", shellContext.getStackName()));
+        sb.append(getRow("recipeId", shellContext.getRecipeId()));
         return sb.toString();
     }
 
-    private String getRow(String name, String value) {
-        return String.format("%s: %s\n", name, value);
+    private String getRow(String name, Object value) {
+        return String.format("%s: %s\n", name, value == null ? "" : value.toString());
     }
 }

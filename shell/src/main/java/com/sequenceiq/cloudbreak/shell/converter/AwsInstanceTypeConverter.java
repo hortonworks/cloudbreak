@@ -7,12 +7,12 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
 import com.sequenceiq.cloudbreak.shell.completion.AwsInstanceType;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class AwsInstanceTypeConverter extends AbstractConverter<AwsInstanceType> {
 
     @Autowired
-    private CloudbreakContext context;
+    private ShellContext context;
 
     public AwsInstanceTypeConverter() {
     }

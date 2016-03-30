@@ -1,103 +1,96 @@
-package com.sequenceiq.cloudbreak.shell.commands;
-
-import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderSingleMap;
+package com.sequenceiq.cloudbreak.shell.commands.common;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.inject.Inject;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
 import com.sequenceiq.cloudbreak.shell.completion.SssdProviderType;
 import com.sequenceiq.cloudbreak.shell.completion.SssdSchemaType;
 import com.sequenceiq.cloudbreak.shell.completion.SssdTlsReqcertType;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
-import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
-import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
-@Component
-public class SssdConfigCommands implements CommandMarker {
+public class SssdConfigCommands implements BaseCommands {
 
-    @Inject
-    private CloudbreakContext context;
-    @Inject
-    private CloudbreakClient cloudbreakClient;
-    @Inject
-    private ResponseTransformer responseTransformer;
-    @Inject
-    private ExceptionTransformer exceptionTransformer;
+    private ShellContext shellContext;
+
+    public SssdConfigCommands(ShellContext shellContext) {
+        this.shellContext = shellContext;
+    }
 
     @CliAvailabilityIndicator(value = "sssdconfig list")
-    public boolean isSssdConfigListCommandAvailable() {
-        return true;
-    }
-
-    @CliAvailabilityIndicator(value = "sssdconfig select")
-    public boolean isSssdConfigSelectCommandAvailable() throws Exception {
-        return context.isSssdConfigAccessible();
-    }
-
-    @CliAvailabilityIndicator(value = "sssdconfig add")
-    public boolean isAddCommandAvailable() {
-        return true;
-    }
-
-    @CliAvailabilityIndicator(value = "sssdconfig show")
-    public boolean isShowCommandAvailable() {
-        return true;
-    }
-
-    @CliAvailabilityIndicator(value = "sssdconfig delete")
-    public boolean isDeleteCommandAvailable() {
+    @Override
+    public boolean listAvailable() {
         return true;
     }
 
     @CliCommand(value = "sssdconfig list", help = "Shows the currently available configs")
+    @Override
     public String list() {
         try {
-            return renderSingleMap(responseTransformer.transformToMap(cloudbreakClient.sssdConfigEndpoint().getPublics(), "id", "name"), true, "ID", "INFO");
+            Set<SssdConfigResponse> publics = shellContext.cloudbreakClient().sssdConfigEndpoint().getPublics();
+            return shellContext.outputTransformer().render(shellContext.responseTransformer().transformToMap(publics, "id", "name"), "ID", "INFO");
         } catch (Exception ex) {
-            throw exceptionTransformer.transformToRuntimeException(ex);
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
     }
 
-    @CliCommand(value = "sssdconfig select", help = "Select the config by its id or name")
-    public String select(
-            @CliOption(key = "id", mandatory = false, help = "Id of the config") String id,
-            @CliOption(key = "name", mandatory = false, help = "Name of the config") String name) {
+    @CliAvailabilityIndicator(value = { "sssdconfig select --id", "sssdconfig select --name" })
+    @Override
+    public boolean selectAvailable() {
+        return shellContext.isSssdConfigAccessible();
+    }
+
+    @CliCommand(value = "sssdconfig select --id", help = "Delete the config by its id")
+    @Override
+    public String selectById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+        return select(id, null);
+    }
+
+    @CliCommand(value = "sssdconfig select --name", help = "Delete the config by its name")
+    @Override
+    public String selectByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
+        return select(null, name);
+    }
+
+    @Override
+    public String select(Long id, String name) {
         try {
             if (id != null) {
-                if (cloudbreakClient.sssdConfigEndpoint().get(Long.valueOf(id)) != null) {
-                    context.addSssdConfig(id);
+                if (shellContext.cloudbreakClient().sssdConfigEndpoint().get(id) != null) {
+                    shellContext.addSssdConfig(id.toString());
                     return String.format("SSSD config has been selected, id: %s", id);
                 }
             } else if (name != null) {
-                SssdConfigResponse config = cloudbreakClient.sssdConfigEndpoint().getPublic(name);
+                SssdConfigResponse config = shellContext.cloudbreakClient().sssdConfigEndpoint().getPublic(name);
                 if (config != null) {
-                    context.addSssdConfig(config.getId().toString());
+                    shellContext.addSssdConfig(config.getId().toString());
                     return String.format("SSSD config has been selected, name: %s", name);
                 }
             }
             return "No SSSD config specified (select a config by --id or --name)";
         } catch (Exception ex) {
-            throw exceptionTransformer.transformToRuntimeException(ex);
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
     }
 
-    @CliCommand(value = "sssdconfig add", help = "Add a new config")
-    public String add(
+    @CliAvailabilityIndicator(value = { "sssdconfig create --withParameters", "sssdconfig create --withFile" })
+    public boolean createAvailable() {
+        return true;
+    }
+
+    @CliCommand(value = "sssdconfig create --withParameters", help = "Add a new config")
+    public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the config") String name,
             @CliOption(key = "description", help = "Description of the config") String description,
             @CliOption(key = "providerType", mandatory = true, help = "Type of the provider") SssdProviderType providerType,
@@ -126,17 +119,17 @@ public class SssdConfigCommands implements CommandMarker {
             request.setKerberosRealm(kerberosRealm);
             IdJson id;
             if (publicInAccount) {
-                id = cloudbreakClient.sssdConfigEndpoint().postPublic(request);
+                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPublic(request);
             } else {
-                id = cloudbreakClient.sssdConfigEndpoint().postPrivate(request);
+                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPrivate(request);
             }
             return String.format("SSSD config created with id: '%d' and name: '%s'", id.getId(), request.getName());
         } catch (Exception ex) {
-            throw exceptionTransformer.transformToRuntimeException(ex);
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
     }
 
-    @CliCommand(value = "sssdconfig upload", help = "Upload a new config")
+    @CliCommand(value = "sssdconfig create --withFile", help = "Upload a new config")
     public String upload(
             @CliOption(key = "name", mandatory = true, help = "Name of the config") String name,
             @CliOption(key = "description", help = "Description of the config") String description,
@@ -154,26 +147,30 @@ public class SssdConfigCommands implements CommandMarker {
             request.setConfiguration(config);
             IdJson id;
             if (publicInAccount) {
-                id = cloudbreakClient.sssdConfigEndpoint().postPublic(request);
+                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPublic(request);
             } else {
-                id = cloudbreakClient.sssdConfigEndpoint().postPrivate(request);
+                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPrivate(request);
             }
             return String.format("SSSD config created with id: '%d' and name: '%s'", id.getId(), request.getName());
         } catch (Exception ex) {
-            throw exceptionTransformer.transformToRuntimeException(ex);
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
     }
 
-    @CliCommand(value = "sssdconfig show", help = "Shows the properties of the specified config")
-    public Object show(
-            @CliOption(key = "id", mandatory = false, help = "Id of the config") String id,
-            @CliOption(key = "name", mandatory = false, help = "Name of the config") String name) {
+    @CliAvailabilityIndicator(value = { "sssdconfig show --id", "sssdconfig show --name" })
+    @Override
+    public boolean showAvailable() {
+        return true;
+    }
+
+    @Override
+    public String show(Long id, String name) {
         try {
             SssdConfigResponse response;
             if (id != null) {
-                response = cloudbreakClient.sssdConfigEndpoint().get(Long.valueOf(id));
+                response = shellContext.cloudbreakClient().sssdConfigEndpoint().get(id);
             } else if (name != null) {
-                response = cloudbreakClient.sssdConfigEndpoint().getPublic(name);
+                response = shellContext.cloudbreakClient().sssdConfigEndpoint().getPublic(name);
             } else {
                 return "SSSD config not specified.";
             }
@@ -181,27 +178,62 @@ public class SssdConfigCommands implements CommandMarker {
             map.put("id", response.getId().toString());
             map.put("name", response.getName());
             map.put("description", response.getDescription());
-            return renderSingleMap(map, "FIELD", "INFO");
+            return shellContext.outputTransformer().render(map, "FIELD", "INFO");
         } catch (Exception ex) {
-            throw exceptionTransformer.transformToRuntimeException(ex);
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
     }
 
-    @CliCommand(value = "sssdconfig delete", help = "Delete the config by its id or name")
-    public Object delete(
-            @CliOption(key = "id", mandatory = false, help = "Id of the config") String id,
-            @CliOption(key = "name", mandatory = false, help = "Name of the config") String name) {
+
+    @CliCommand(value = "sssdconfig show --id", help = "Show the config by its id")
+    @Override
+    public String showById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+        return show(id, null);
+    }
+
+    @CliCommand(value = "sssdconfig show --name", help = "Show the config by its name")
+    @Override
+    public String showByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
+        return show(null, name);
+    }
+
+    @CliAvailabilityIndicator(value = { "sssdconfig delete --id", "sssdconfig delete --name" })
+    @Override
+    public boolean deleteAvailable() {
+        return true;
+    }
+
+    @Override
+    public String delete(Long id, String name) {
         try {
             if (id != null) {
-                cloudbreakClient.sssdConfigEndpoint().delete(Long.valueOf(id));
+                shellContext.cloudbreakClient().sssdConfigEndpoint().delete(id);
                 return String.format("SSSD config deleted with %s id", id);
             } else if (name != null) {
-                cloudbreakClient.sssdConfigEndpoint().deletePublic(name);
+                shellContext.cloudbreakClient().sssdConfigEndpoint().deletePublic(name);
                 return String.format("SSSD config deleted with %s name", name);
             }
             return "SSSD config not specified (select sssd by --id or --name)";
         } catch (Exception ex) {
-            throw exceptionTransformer.transformToRuntimeException(ex);
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
     }
+
+    @CliCommand(value = "sssdconfig delete --id", help = "Delete the config by its id")
+    @Override
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+        return delete(id, null);
+    }
+
+    @CliCommand(value = "sssdconfig delete --name", help = "Delete the config by its name")
+    @Override
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
+        return delete(null, name);
+    }
+
+    @Override
+    public ShellContext shellContext() {
+        return shellContext;
+    }
+
 }

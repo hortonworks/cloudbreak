@@ -7,12 +7,12 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
 import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupId;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class SecurityGroupIdConverter extends AbstractConverter<SecurityGroupId> {
 
     @Autowired
-    private CloudbreakContext context;
+    private ShellContext context;
 
     public SecurityGroupIdConverter() {
 

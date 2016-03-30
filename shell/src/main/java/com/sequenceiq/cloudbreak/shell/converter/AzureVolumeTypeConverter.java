@@ -7,12 +7,12 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
 import com.sequenceiq.cloudbreak.shell.completion.AzureVolumeType;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class AzureVolumeTypeConverter extends AbstractConverter<AzureVolumeType> {
 
     @Autowired
-    private CloudbreakContext context;
+    private ShellContext context;
 
     public AzureVolumeTypeConverter() {
     }

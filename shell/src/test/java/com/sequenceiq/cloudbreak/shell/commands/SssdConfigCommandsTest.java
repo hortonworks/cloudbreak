@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doNothing;
 
 import java.io.File;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.io.ClassPathResource;
@@ -24,11 +26,14 @@ import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.commands.common.SssdConfigCommands;
 import com.sequenceiq.cloudbreak.shell.completion.SssdProviderType;
 import com.sequenceiq.cloudbreak.shell.completion.SssdSchemaType;
 import com.sequenceiq.cloudbreak.shell.completion.SssdTlsReqcertType;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
+import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
 public class SssdConfigCommandsTest {
     private static final Long CONFIG_ID = 50L;
@@ -44,7 +49,7 @@ public class SssdConfigCommandsTest {
     private CloudbreakClient cloudbreakClient;
 
     @Mock
-    private CloudbreakContext mockContext;
+    private ShellContext mockContext;
 
     @Mock
     private ExceptionTransformer exceptionTransformer;
@@ -52,13 +57,16 @@ public class SssdConfigCommandsTest {
     @Mock
     private File mockFile;
 
+    @Mock
+    private OutputTransformer outputTransformer;
+
     private SssdConfigResponse dummyResult;
 
     private File dummyFile;
 
     @Before
     public void setUp() throws Exception {
-        underTest = new SssdConfigCommands();
+        underTest = new SssdConfigCommands(mockContext);
         MockitoAnnotations.initMocks(this);
         dummyResult = new SssdConfigResponse();
         dummyResult.setId(CONFIG_ID);
@@ -74,12 +82,16 @@ public class SssdConfigCommandsTest {
         given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
         given(sssdConfigEndpoint.get(anyLong())).willReturn(dummyResult);
         given(sssdConfigEndpoint.getPublic(anyString())).willReturn(dummyResult);
+        given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
+        given(mockContext.outputTransformer()).willReturn(outputTransformer);
+        given(outputTransformer.render(any(OutPutType.class), anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
     }
 
     @Test
     public void testSelectWithId() throws Exception {
-        underTest.select(CONFIG_ID.toString(), null);
+        underTest.select(CONFIG_ID, null);
         verify(sssdConfigEndpoint, times(1)).get(anyLong());
         verify(sssdConfigEndpoint, times(0)).getPublic(anyString());
         verify(mockContext, times(1)).addSssdConfig(anyString());
@@ -103,7 +115,7 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testPublicAdd() {
-        underTest.add("name", "desc", new SssdProviderType("LDAP"), "url", new SssdSchemaType("RFC2307"), "base", new SssdTlsReqcertType("NEVER"), null, null,
+        underTest.create("name", "desc", new SssdProviderType("LDAP"), "url", new SssdSchemaType("RFC2307"), "base", new SssdTlsReqcertType("NEVER"), null, null,
                 null, true);
         verify(sssdConfigEndpoint, times(1)).postPublic(any(SssdConfigRequest.class));
         verify(sssdConfigEndpoint, times(0)).postPrivate(any(SssdConfigRequest.class));
@@ -111,7 +123,7 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testPrivateAdd() {
-        underTest.add("name", "desc", new SssdProviderType("LDAP"), "url", new SssdSchemaType("RFC2307"), "base", new SssdTlsReqcertType("NEVER"), null, null,
+        underTest.create("name", "desc", new SssdProviderType("LDAP"), "url", new SssdSchemaType("RFC2307"), "base", new SssdTlsReqcertType("NEVER"), null, null,
                 null, false);
         verify(sssdConfigEndpoint, times(0)).postPublic(any(SssdConfigRequest.class));
         verify(sssdConfigEndpoint, times(1)).postPrivate(any(SssdConfigRequest.class));
@@ -144,7 +156,7 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testShowSssdConfigById() throws Exception {
-        underTest.show(CONFIG_ID.toString(), null);
+        underTest.show(CONFIG_ID, null);
         verify(sssdConfigEndpoint, times(1)).get(anyLong());
         verify(sssdConfigEndpoint, times(0)).getPublic(anyString());
     }
@@ -166,7 +178,7 @@ public class SssdConfigCommandsTest {
     @Test
     public void testDeleteSssdConfigById() throws Exception {
         doNothing().when(sssdConfigEndpoint).delete(Long.valueOf(CONFIG_ID));
-        underTest.delete(CONFIG_ID.toString(), null);
+        underTest.delete(CONFIG_ID, null);
         verify(sssdConfigEndpoint, times(1)).delete(anyLong());
     }
 
@@ -180,7 +192,7 @@ public class SssdConfigCommandsTest {
     @Test
     public void testDeleteSssdConfigByIdAndName() throws Exception {
         doNothing().when(sssdConfigEndpoint).delete(Long.valueOf(CONFIG_ID));
-        underTest.delete(CONFIG_ID.toString(), CONFIG_NAME);
+        underTest.delete(CONFIG_ID, CONFIG_NAME);
         verify(sssdConfigEndpoint, times(0)).deletePublic(anyString());
         verify(sssdConfigEndpoint, times(1)).delete(anyLong());
     }

@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doNothing;
 
 import java.io.File;
@@ -14,6 +15,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -23,9 +25,12 @@ import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.commands.common.RecipeCommands;
 import com.sequenceiq.cloudbreak.shell.completion.PluginExecutionType;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
+import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
 public class RecipeCommandsTest {
     private static final Long RECIPE_ID = 50L;
@@ -41,7 +46,7 @@ public class RecipeCommandsTest {
     private CloudbreakClient cloudbreakClient;
 
     @Mock
-    private CloudbreakContext mockContext;
+    private ShellContext mockContext;
 
     @Mock
     private ObjectMapper jsonMapper;
@@ -49,11 +54,14 @@ public class RecipeCommandsTest {
     @Mock
     private ExceptionTransformer exceptionTransformer;
 
+    @Mock
+    private OutputTransformer outputTransformer;
+
     private RecipeResponse dummyResult;
 
     @Before
     public void setUp() throws Exception {
-        underTest = new RecipeCommands();
+        underTest = new RecipeCommands(mockContext);
         MockitoAnnotations.initMocks(this);
         dummyResult = new RecipeResponse();
         dummyResult.setId(RECIPE_ID);
@@ -65,54 +73,58 @@ public class RecipeCommandsTest {
         given(recipeEndpoint.postPublic(any(RecipeRequest.class))).willReturn(new IdJson(1L));
         given(recipeEndpoint.get(RECIPE_ID)).willReturn(dummyResult);
         given(recipeEndpoint.getPublic(RECIPE_NAME)).willReturn(dummyResult);
+        given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
+        given(mockContext.outputTransformer()).willReturn(outputTransformer);
+        given(outputTransformer.render(any(OutPutType.class), anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
     }
 
     @Test
     public void testShowRecipeById() throws Exception {
-        underTest.showRecipe(RECIPE_ID.toString(), null);
+        underTest.show(RECIPE_ID, null);
         verify(recipeEndpoint, times(1)).get(anyLong());
         verify(recipeEndpoint, times(0)).getPublic(anyString());
     }
 
     @Test
     public void testShowRecipeByName() throws Exception {
-        underTest.showRecipe(null, RECIPE_NAME);
+        underTest.show(null, RECIPE_NAME);
         verify(recipeEndpoint, times(0)).get(anyLong());
         verify(recipeEndpoint, times(1)).getPublic(anyString());
     }
 
     @Test
     public void testShowRecipeWithoutIdAndName() throws Exception {
-        underTest.showRecipe(null, null);
+        underTest.show(null, null);
         verify(recipeEndpoint, times(0)).get(anyLong());
     }
 
     @Test
     public void testDeleteRecipeById() throws Exception {
         doNothing().when(recipeEndpoint).delete(RECIPE_ID);
-        underTest.deleteRecipe(RECIPE_ID.toString(), null);
+        underTest.delete(RECIPE_ID, null);
         verify(recipeEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteRecipeByName() throws Exception {
         doNothing().when(recipeEndpoint).deletePublic(RECIPE_NAME);
-        underTest.deleteRecipe(null, RECIPE_NAME);
+        underTest.delete(null, RECIPE_NAME);
         verify(recipeEndpoint, times(1)).deletePublic(anyString());
     }
 
     @Test
     public void testDeleteRecipeByIdAndName() throws Exception {
         doNothing().when(recipeEndpoint).delete(RECIPE_ID);
-        underTest.deleteRecipe(RECIPE_ID.toString(), RECIPE_NAME);
+        underTest.delete(RECIPE_ID, RECIPE_NAME);
         verify(recipeEndpoint, times(0)).deletePublic(anyString());
         verify(recipeEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteRecipeWithoutIdAndName() throws Exception {
-        underTest.deleteRecipe(null, null);
+        underTest.delete(null, null);
         verify(recipeEndpoint, times(0)).deletePublic(anyString());
         verify(recipeEndpoint, times(0)).delete(anyLong());
     }
