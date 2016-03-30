@@ -9,8 +9,4 @@ generate-image-yamls:
 	 make -C cloud-common update-ambari-image
 
 beautify:
-	 auth/format.sh
-	 web/format.sh
-
-beautify-deps:
-	 npm install -g js-beautify
+	 ./gradlew jsformatter

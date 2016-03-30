@@ -1,5 +1,7 @@
 module.exports = function(grunt) {
 
+    var jsbeautifierReplace = grunt.option('jsbeautifier.replace') || false;
+
     grunt.initConfig({
         jsbeautifier: {
             files: [
@@ -12,7 +14,7 @@ module.exports = function(grunt) {
             ],
             options: {
                 config: "../config/jsbeautifyrc",
-                mode: "VERIFY_ONLY"
+                mode: jsbeautifierReplace ? "VERIFY_AND_WRITE" : "VERIFY_ONLY"
             }
         }
     });
