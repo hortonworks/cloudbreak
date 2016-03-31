@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.messaging.Message;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.ObjectStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineFactory;
@@ -86,6 +87,11 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                     @Override
                     public void stateChanged(State<S, E> from, State<S, E> to) {
                         LOGGER.info("{} changed from {} to {}", getClass().getSimpleName(), from, to);
+                    }
+
+                    @Override
+                    public void eventNotAccepted(Message<E> event) {
+                        LOGGER.error("{} not accepted event: {}", getClass().getSimpleName(), event.getClass().getSimpleName());
                     }
                 };
         return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener, new SyncTaskExecutor());
