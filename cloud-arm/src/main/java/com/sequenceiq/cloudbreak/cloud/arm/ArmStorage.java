@@ -117,7 +117,7 @@ public class ArmStorage {
 
     private String getPersistentStorageName(String persistentStorageName, ArmCredentialView acv, String region) {
         String subscriptionIdPart = acv.getSubscriptionId().replaceAll("-", "").toLowerCase();
-        String regionInitials = WordUtils.initials(region, '_').toLowerCase();
+        String regionInitials = WordUtils.initials(region, ' ').toLowerCase();
         String result = String.format("%s%s%s", persistentStorageName, regionInitials, subscriptionIdPart);
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
