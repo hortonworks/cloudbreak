@@ -16,8 +16,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.Flow;
-import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.EventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 
 @Component
@@ -31,11 +30,8 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, START_FINISHED_STATE, START_FINALIZED_EVENT, START_FAILED_STATE, START_FAIL_HANDLED_EVENT);
 
     @Override
-    public Flow<StackStartState, StackStartEvent> createFlow(String flowId) {
-        Flow<StackStartState, StackStartEvent> flow = new Flow<>(getStateMachineFactory().getStateMachine(),
-                new MessageFactory<StackStartEvent>(), new StackStartEventConverter());
-        flow.initialize(flowId);
-        return flow;
+    protected EventConverter<StackStartEvent> getEventConverter() {
+        return new StackStartEventConverter();
     }
 
     @Override

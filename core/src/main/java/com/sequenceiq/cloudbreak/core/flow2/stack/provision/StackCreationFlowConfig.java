@@ -27,8 +27,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.Flow;
-import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.EventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 
 @Component
@@ -49,11 +48,8 @@ public final class StackCreationFlowConfig extends AbstractFlowConfiguration<Sta
                     STACK_CREATION_FAILED_EVENT);
 
     @Override
-    public Flow<StackCreationState, StackCreationEvent> createFlow(String flowId) {
-        Flow<StackCreationState, StackCreationEvent> flow = new Flow<>(getStateMachineFactory().getStateMachine(),
-                new MessageFactory<StackCreationEvent>(), new StackCreationEventConverter());
-        flow.initialize(flowId);
-        return flow;
+    protected EventConverter<StackCreationEvent> getEventConverter() {
+        return new StackCreationEventConverter();
     }
 
     @Override
