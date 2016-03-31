@@ -17,8 +17,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.Flow;
-import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.EventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 
 @Component
@@ -35,11 +34,8 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
                     STACK_TERMINATION_FAIL_HANDLED_EVENT);
 
     @Override
-    public Flow<StackTerminationState, StackTerminationEvent> createFlow(String flowId) {
-        Flow<StackTerminationState, StackTerminationEvent> flow = new Flow<>(getStateMachineFactory().getStateMachine(),
-                new MessageFactory<StackTerminationEvent>(), new StackTerminationEventConverter());
-        flow.initialize(flowId);
-        return flow;
+    protected EventConverter<StackTerminationEvent> getEventConverter() {
+        return new StackTerminationEventConverter();
     }
 
     @Override

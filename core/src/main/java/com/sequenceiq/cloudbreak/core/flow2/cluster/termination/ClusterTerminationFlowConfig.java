@@ -17,8 +17,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.Flow;
-import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.EventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 
 @Component
@@ -32,13 +31,9 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, TERMINATION_FINISHED_STATE, TERMINATION_FINALIZED_EVENT, TERMINATION_FAILED_STATE,
                     CLUSTER_TERMINATION_FAIL_HANDLED_EVENT);
 
-
     @Override
-    public Flow<ClusterTerminationState, ClusterTerminationEvent> createFlow(String flowId) {
-        Flow<ClusterTerminationState, ClusterTerminationEvent> flow = new Flow<>(getStateMachineFactory().getStateMachine(),
-                new MessageFactory<ClusterTerminationEvent>(), new ClusterTerminationEventConverter());
-        flow.initialize(flowId);
-        return flow;
+    protected EventConverter<ClusterTerminationEvent> getEventConverter() {
+        return new ClusterTerminationEventConverter();
     }
 
     @Override
