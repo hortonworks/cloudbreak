@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -25,10 +26,13 @@ public class StackSyncAction extends AbstractStackSyncAction<StackStatusUpdateCo
 
     @Override
     protected void doExecute(StackSyncContext context, StackStatusUpdateContext payload, Map<Object, Object> variables) {
+        sendEvent(context);
+    }
+
+    @Override
+    protected Selectable createRequest(StackSyncContext context) {
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(context.getInstanceMetaData());
-        GetInstancesStateRequest<GetInstancesStateResult> stateRequest = new GetInstancesStateRequest<>(context.getCloudContext(), context.getCloudCredential(),
-                cloudInstances);
-        sendEvent(context.getFlowId(), stateRequest.selector(), stateRequest);
+        return new GetInstancesStateRequest<GetInstancesStateResult>(context.getCloudContext(), context.getCloudCredential(), cloudInstances);
     }
 
     @Override

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudPlatformResponseToFlowFailureConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
@@ -36,6 +37,11 @@ public class StackCreationFailureAction extends AbstractStackCreationAction<Flow
     protected void doExecute(StackContext context, FlowFailureEvent payload, Map<Object, Object> variables) {
         stackCreationService.handleStackCreationFailure(context, payload.getException());
         sendEvent(context.getFlowId(), StackCreationEvent.STACK_CREATION_FAILED_EVENT.stringRepresentation(), payload);
+    }
+
+    @Override
+    protected Selectable createRequest(StackContext context) {
+        return null;
     }
 
     @Override

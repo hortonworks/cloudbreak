@@ -11,8 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -58,6 +60,11 @@ public class InstanceTerminationFailureAction extends AbstractInstanceTerminatio
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack update failed. " + payload.getStatusReason());
         cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), messagesService.getMessage(Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED.code(),
                 Arrays.asList(payload.getStatusReason())));
-        sendEvent(context.getFlowId(), InstanceTerminationEvent.TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation(), null);
+        sendEvent(context);
+    }
+
+    @Override
+    protected Selectable createRequest(InstanceTerminationContext context) {
+        return new SelectableEvent(InstanceTerminationEvent.TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation());
     }
 }

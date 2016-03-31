@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -27,6 +28,11 @@ abstract class AbstractClusterTerminationAction<P> extends AbstractAction<Cluste
 
     @Override
     protected Object getFailurePayload(ClusterContext flowContext, Exception ex) {
+        return null;
+    }
+
+    @Override
+    protected Selectable createRequest(ClusterContext context) {
         return null;
     }
 

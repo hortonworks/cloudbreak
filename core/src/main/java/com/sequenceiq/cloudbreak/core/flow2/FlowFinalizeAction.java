@@ -5,6 +5,8 @@ import java.util.Map;
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+
 @Component("FlowFinalizeAction")
 public final class FlowFinalizeAction extends AbstractAction<FlowState, FlowEvent, CommonContext, Object> {
     public FlowFinalizeAction() {
@@ -20,6 +22,11 @@ public final class FlowFinalizeAction extends AbstractAction<FlowState, FlowEven
     @Override
     protected void doExecute(CommonContext context, Object payload, Map<Object, Object> variables) {
         sendEvent(context.getFlowId(), Flow2Handler.FLOW_FINAL, payload);
+    }
+
+    @Override
+    protected Selectable createRequest(CommonContext context) {
+        return null;
     }
 
     @Override

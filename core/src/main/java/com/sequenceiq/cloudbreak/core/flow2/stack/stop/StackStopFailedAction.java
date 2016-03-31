@@ -8,10 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
-import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
@@ -23,6 +24,8 @@ public class StackStopFailedAction extends AbstractStackStopAction<StopInstances
     private CloudbreakEventService eventService;
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+    @Inject
+    private StackStartStopService stackStartStopService;
 
     public StackStopFailedAction() {
         super(StopInstancesResult.class);
@@ -40,10 +43,12 @@ public class StackStopFailedAction extends AbstractStackStopAction<StopInstances
 
     @Override
     protected void doExecute(StackStartStopContext context, StopInstancesResult payload, Map<Object, Object> variables) throws Exception {
-        LOGGER.error("Error during Stack stop flow:", payload.getErrorDetails());
-        eventService.fireCloudbreakEvent(context.getStack().getId(), Status.AVAILABLE.name(),
-                cloudbreakMessagesService.getMessage(Msg.STACK_INFRASTRUCTURE_STOP_FAILED.code()));
-        sendEvent(context.getFlowId(), StackStopEvent.STOP_FAIL_HANDLED_EVENT.stringRepresentation(), null);
+        stackStartStopService.handleStackStopError(context, payload);
+        sendEvent(context);
+    }
 
+    @Override
+    protected Selectable createRequest(StackStartStopContext context) {
+        return new SelectableEvent(StackStopEvent.STOP_FAIL_HANDLED_EVENT.stringRepresentation());
     }
 }

@@ -11,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
+import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -63,6 +65,11 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
             cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_COMPLETED.name(),
                     messagesService.getMessage(Msg.STACK_NOTIFICATION_EMAIL.code()));
         }
-        sendEvent(context.getFlowId(), StackTerminationEvent.TERMINATION_FINALIZED_EVENT.stringRepresentation(), null);
+        sendEvent(context);
+    }
+
+    @Override
+    protected Selectable createRequest(StackTerminationContext context) {
+        return new SelectableEvent(StackTerminationEvent.TERMINATION_FINALIZED_EVENT.stringRepresentation());
     }
 }

@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-public class EventConverterBase<E extends FlowEvent> implements EventConverter<E> {
+public class EventConverterAdapter<E extends FlowEvent> implements EventConverter<E> {
     private Class<E> type;
 
-    public EventConverterBase(Class<E> clazz) {
+    public EventConverterAdapter(Class<E> clazz) {
         type = clazz;
     }
 

@@ -11,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
+import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
@@ -33,7 +35,12 @@ public class StackSyncFailedAction extends AbstractStackSyncAction<GetInstancesS
         LOGGER.error("Error during Stack synchronization flow:", payload.getErrorDetails());
         eventService.fireCloudbreakEvent(context.getStack().getId(), AVAILABLE.name(),
                 cloudbreakMessagesService.getMessage(STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE.code()));
-        sendEvent(context.getFlowId(), StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.stringRepresentation(), null);
+        sendEvent(context);
+    }
+
+    @Override
+    protected Selectable createRequest(StackSyncContext context) {
+        return new SelectableEvent(StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.stringRepresentation());
     }
 
     @Override

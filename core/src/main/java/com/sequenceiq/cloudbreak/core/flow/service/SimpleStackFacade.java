@@ -68,8 +68,6 @@ public class SimpleStackFacade implements StackFacade {
     @Inject
     private CloudbreakEventService cloudbreakEventService;
     @Inject
-    private StackStopService stackStopService;
-    @Inject
     private StackScalingService stackScalingService;
     @Inject
     private MetadataSetupService metadataSetupService;

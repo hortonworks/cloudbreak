@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.EventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 
 @Component
@@ -33,9 +32,8 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, TERMINATION_FINISHED_STATE, TERMINATION_FINALIZED_EVENT, TERMINATION_FAILED_STATE,
                     STACK_TERMINATION_FAIL_HANDLED_EVENT);
 
-    @Override
-    protected EventConverter<StackTerminationEvent> getEventConverter() {
-        return new StackTerminationEventConverter();
+    public StackTerminationFlowConfig() {
+        super(StackTerminationEvent.class);
     }
 
     @Override

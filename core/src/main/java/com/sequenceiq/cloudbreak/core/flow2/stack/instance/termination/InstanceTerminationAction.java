@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.flow.context.StackInstanceUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -74,13 +74,17 @@ public class InstanceTerminationAction extends AbstractInstanceTerminationAction
             String instanceGroupName = instanceMetaData.getInstanceGroup().getGroupName();
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
                     messagesService.getMessage(Msg.STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP.code(), Arrays.asList(hostName, instanceGroupName)));
-            RemoveInstanceRequest<RemoveInstanceResult> removeInstanceRequest = new RemoveInstanceRequest<>(context.getCloudContext(),
-                    context.getCloudCredential(), context.getCloudStack(), context.getCloudResources(), context.getCloudInstance());
-            sendEvent(context.getFlowId(), removeInstanceRequest.selector(), removeInstanceRequest);
+            sendEvent(context);
         } else {
             LOGGER.info("Couldn't remove instance '{}' because other delete in progress", context.getCloudInstance().getInstanceId());
             sendEvent(context.getFlowId(), InstanceTerminationEvent.TERMINATION_FAILED_EVENT.stringRepresentation(),
                     getFailurePayload(context, new IllegalStateException("Other delete operation in progress.")));
         }
+    }
+
+    @Override
+    protected Selectable createRequest(InstanceTerminationContext context) {
+        return new RemoveInstanceRequest<>(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
+                context.getCloudResources(), context.getCloudInstance());
     }
 }

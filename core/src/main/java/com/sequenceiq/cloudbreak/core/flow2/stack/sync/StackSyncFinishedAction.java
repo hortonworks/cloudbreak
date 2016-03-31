@@ -6,8 +6,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 
 @Component("StackSyncFinishedAction")
@@ -22,10 +23,14 @@ public class StackSyncFinishedAction extends AbstractStackSyncAction<GetInstance
 
     @Override
     protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) {
-        Stack stack = context.getStack();
         // TODO !(actualContext instanceof StackScalingContext) requires for sync during upscale      here
-        stackSyncService.updateInstances(stack, context.getInstanceMetaData(), payload.getStatuses(), true);
-        sendEvent(context.getFlowId(), StackSyncEvent.SYNC_FINALIZED_EVENT.stringRepresentation(), null);
+        stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), true);
+        sendEvent(context);
+    }
+
+    @Override
+    protected Selectable createRequest(StackSyncContext context) {
+        return new SelectableEvent(StackSyncEvent.SYNC_FINALIZED_EVENT.stringRepresentation());
     }
 
     @Override

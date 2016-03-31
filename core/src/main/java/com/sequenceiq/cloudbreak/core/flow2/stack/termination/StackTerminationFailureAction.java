@@ -12,8 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -88,6 +90,11 @@ public class StackTerminationFailureAction extends AbstractStackTerminationActio
         } else {
             LOGGER.info("Stack was not found during termination. " + payload.getRequest());
         }
-        sendEvent(context.getFlowId(), StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation(), null);
+        sendEvent(context);
+    }
+
+    @Override
+    protected Selectable createRequest(StackTerminationContext context) {
+        return new SelectableEvent(StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation());
     }
 }

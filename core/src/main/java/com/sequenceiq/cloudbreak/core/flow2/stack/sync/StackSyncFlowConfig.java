@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.EventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 
 @Component
@@ -29,6 +28,10 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
     private static final FlowEdgeConfig<StackSyncState, StackSyncEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SYNC_FINISHED_STATE, SYNC_FINALIZED_EVENT, SYNC_FAILED_STATE, SYNC_FAIL_HANDLED_EVENT);
 
+    public StackSyncFlowConfig() {
+        super(StackSyncEvent.class);
+    }
+
     @Override
     public List<StackSyncEvent> getFlowTriggerEvents() {
         return Collections.singletonList(SYNC_EVENT);
@@ -37,11 +40,6 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
     @Override
     public StackSyncEvent[] getEvents() {
         return StackSyncEvent.values();
-    }
-
-    @Override
-    protected EventConverter<StackSyncEvent> getEventConverter() {
-        return new StackSyncEventConverter();
     }
 
     @Override

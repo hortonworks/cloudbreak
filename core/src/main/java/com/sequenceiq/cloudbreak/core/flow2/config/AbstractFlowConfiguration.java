@@ -28,6 +28,7 @@ import org.springframework.statemachine.state.State;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.core.flow2.EventConverter;
+import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
@@ -39,10 +40,14 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);
 
     private StateMachineFactory<S, E> stateMachineFactory;
+    private Class<E> eventType;
 
     @Inject
     private ApplicationContext applicationContext;
 
+    public AbstractFlowConfiguration(Class<E> eventType) {
+        this.eventType = eventType;
+    }
     @PostConstruct
     public void init() throws Exception {
         MachineConfiguration<S, E> config = getStateMachineConfiguration();
@@ -107,7 +112,9 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         return applicationContext.getBean(clazz.getSimpleName(), clazz);
     }
 
-    protected abstract EventConverter<E> getEventConverter();
+    private EventConverter<E> getEventConverter() {
+        return new EventConverterAdapter<>(eventType);
+    }
 
     protected abstract List<Transition<S, E>> getTransitions();
 
