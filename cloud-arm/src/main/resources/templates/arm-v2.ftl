@@ -69,10 +69,12 @@
             "type": "string",
             "defaultValue": "${stackname}subnet"
         },
+        <#if !existingVPC>
         "subnet1Prefix": {
            "type": "string",
            "defaultValue": "${subnet1Prefix}"
         },
+        </#if>
         "sshIPConfigName": {
             "type": "string",
             "defaultValue": "${stackname}ipcn"
