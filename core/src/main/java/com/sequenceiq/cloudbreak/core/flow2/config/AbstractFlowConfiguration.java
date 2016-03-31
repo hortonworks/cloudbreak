@@ -5,8 +5,12 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.messaging.Message;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.ObjectStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineFactory;
@@ -15,17 +19,22 @@ import org.springframework.statemachine.config.builders.StateMachineStateBuilder
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionBuilder;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
+import org.springframework.statemachine.config.common.annotation.ObjectPostProcessor;
 import org.springframework.statemachine.config.configurers.ExternalTransitionConfigurer;
 import org.springframework.statemachine.config.configurers.StateConfigurer;
 import org.springframework.statemachine.listener.StateMachineListener;
+import org.springframework.statemachine.listener.StateMachineListenerAdapter;
+import org.springframework.statemachine.state.State;
 
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
-import com.sequenceiq.cloudbreak.core.flow2.Flow;
 
 public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<S, E> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);
 
     private StateMachineFactory<S, E> stateMachineFactory;
 
@@ -66,13 +75,33 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         transitionConfigurer.and().withExternal().source(flowEdgeConfig.lastState).target(flowEdgeConfig.finalState).event(flowEdgeConfig.lastEvent);
     }
 
+    protected MachineConfiguration<S, E> getStateMachineConfiguration() {
+        StateMachineConfigurationBuilder<S, E> configurationBuilder =
+                new StateMachineConfigurationBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
+        StateMachineStateBuilder<S, E> stateBuilder =
+                new StateMachineStateBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
+        StateMachineTransitionBuilder<S, E> transitionBuilder =
+                new StateMachineTransitionBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
+        StateMachineListener<S, E> listener =
+                new StateMachineListenerAdapter<S, E>() {
+                    @Override
+                    public void stateChanged(State<S, E> from, State<S, E> to) {
+                        LOGGER.info("{} changed from {} to {}", getClass().getSimpleName(), from, to);
+                    }
+
+                    @Override
+                    public void eventNotAccepted(Message<E> event) {
+                        LOGGER.error("{} not accepted event: {}", getClass().getSimpleName(), event.getClass().getSimpleName());
+                    }
+                };
+        return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener, new SyncTaskExecutor());
+    }
+
     private Action<S, E> getAction(Class<? extends Action> clazz) {
         return applicationContext.getBean(clazz.getSimpleName(), clazz);
     }
 
     public abstract Flow<S, E> createFlow(String flowId);
-
-    protected abstract MachineConfiguration<S, E> getStateMachineConfiguration();
 
     protected abstract List<Transition<S, E>> getTransitions();
 

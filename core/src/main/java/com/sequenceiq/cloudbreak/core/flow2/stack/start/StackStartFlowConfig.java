@@ -14,16 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.statemachine.config.builders.StateMachineConfigurationBuilder;
-import org.springframework.statemachine.config.builders.StateMachineStateBuilder;
-import org.springframework.statemachine.config.builders.StateMachineTransitionBuilder;
-import org.springframework.statemachine.config.common.annotation.ObjectPostProcessor;
-import org.springframework.statemachine.listener.StateMachineListener;
-import org.springframework.statemachine.listener.StateMachineListenerAdapter;
-import org.springframework.statemachine.state.State;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
@@ -32,7 +22,7 @@ import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 
 @Component
 public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartState, StackStartEvent> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackStartFlowConfig.class);
+
     private static final List<Transition<StackStartState, StackStartEvent>> TRANSITIONS = Arrays.asList(
             new Transition<>(INIT_STATE, START_STATE, START_EVENT),
             new Transition<>(START_STATE, START_FINISHED_STATE, START_FINISHED_EVENT)
@@ -56,24 +46,6 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     @Override
     public StackStartEvent[] getEvents() {
         return StackStartEvent.values();
-    }
-
-    @Override
-    protected MachineConfiguration<StackStartState, StackStartEvent> getStateMachineConfiguration() {
-        StateMachineConfigurationBuilder<StackStartState, StackStartEvent> configurationBuilder =
-                new StateMachineConfigurationBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
-        StateMachineStateBuilder<StackStartState, StackStartEvent> stateBuilder =
-                new StateMachineStateBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
-        StateMachineTransitionBuilder<StackStartState, StackStartEvent> transitionBuilder =
-                new StateMachineTransitionBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
-        StateMachineListener<StackStartState, StackStartEvent> listener =
-                new StateMachineListenerAdapter<StackStartState, StackStartEvent>() {
-                    @Override
-                    public void stateChanged(State<StackStartState, StackStartEvent> from, State<StackStartState, StackStartEvent> to) {
-                        LOGGER.info("StackStartFlowConfig changed from {} to {}", from, to);
-                    }
-                };
-        return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener, new SyncTaskExecutor());
     }
 
     @Override
