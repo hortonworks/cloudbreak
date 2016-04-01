@@ -98,7 +98,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
                     @Override
                     public void eventNotAccepted(Message<E> event) {
-                        LOGGER.error("{} not accepted event: {}", getClass().getSimpleName(), event.getClass().getSimpleName());
+                        LOGGER.error("{} not accepted event: {}", getClass().getSimpleName(), event);
                     }
                 };
         return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener, new SyncTaskExecutor());
