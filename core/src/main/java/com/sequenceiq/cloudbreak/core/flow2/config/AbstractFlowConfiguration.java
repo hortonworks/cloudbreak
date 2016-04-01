@@ -28,9 +28,10 @@ import org.springframework.statemachine.state.State;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
-import com.sequenceiq.cloudbreak.core.flow2.Flow;
+import com.sequenceiq.cloudbreak.core.flow2.FlowAdapter;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
+import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
 import com.sequenceiq.cloudbreak.core.flow2.StateConverterAdapter;
@@ -107,8 +108,8 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener, new SyncTaskExecutor());
     }
 
-    public Flow<S, E> createFlow(String flowId) {
-        return new Flow<>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
+    public Flow createFlow(String flowId) {
+        return new FlowAdapter<S, E>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
                 new EventConverterAdapter<>(eventType));
     }
 

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 public enum FlowPhases {
     PROVISIONING_SETUP,
+    STACKANDCLUSTER_PROVISIONING_SETUP,
     PREPARE_IMAGE,
     CHECK_IMAGE,
     PROVISIONING,

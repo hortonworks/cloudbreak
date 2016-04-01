@@ -65,7 +65,7 @@ public class ReactorFlowManager implements FlowManager {
     @Override
     public void triggerProvisioning(Object object) {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
-        reactor.notify(FlowPhases.PROVISIONING_SETUP.name(), Event.wrap(provisionRequest));
+        reactor.notify(FlowPhases.STACKANDCLUSTER_PROVISIONING_SETUP.name(), Event.wrap(provisionRequest));
     }
 
     private boolean isTriggerKey(String key) {

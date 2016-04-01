@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 
 public enum StackCreationEvent implements FlowEvent {
     START_CREATION_EVENT(FlowPhases.PROVISIONING_SETUP.name()),
+    START_STACKANDCLUSTER_CREATION_EVENT(FlowPhases.STACKANDCLUSTER_PROVISIONING_SETUP.name()),
     SETUP_FINISHED_EVENT(SetupResult.selector(SetupResult.class)),
     SETUP_FAILED_EVENT(SetupResult.failureSelector(SetupResult.class)),
     IMAGE_PREPARATION_FINISHED_EVENT(PrepareImageResult.selector(PrepareImageResult.class)),
