@@ -27,27 +27,30 @@ import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 import org.springframework.statemachine.state.State;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.core.flow2.EventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.StateConverterAdapter;
 
 public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<S, E> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);
 
     private StateMachineFactory<S, E> stateMachineFactory;
-    private Class<E> eventType;
+    private final Class<S> stateType;
+    private final Class<E> eventType;
 
     @Inject
     private ApplicationContext applicationContext;
 
-    public AbstractFlowConfiguration(Class<E> eventType) {
+    public AbstractFlowConfiguration(Class<S> stateType, Class<E> eventType) {
+        this.stateType = stateType;
         this.eventType = eventType;
     }
+
     @PostConstruct
     public void init() throws Exception {
         MachineConfiguration<S, E> config = getStateMachineConfiguration();
@@ -105,15 +108,12 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     }
 
     public Flow<S, E> createFlow(String flowId) {
-        return new Flow<>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), getEventConverter());
+        return new Flow<>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
+                new EventConverterAdapter<>(eventType));
     }
 
     private Action<S, E> getAction(Class<? extends Action> clazz) {
         return applicationContext.getBean(clazz.getSimpleName(), clazz);
-    }
-
-    private EventConverter<E> getEventConverter() {
-        return new EventConverterAdapter<>(eventType);
     }
 
     protected abstract List<Transition<S, E>> getTransitions();

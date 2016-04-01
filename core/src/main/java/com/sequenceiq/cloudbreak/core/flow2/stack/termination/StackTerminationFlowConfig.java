@@ -33,7 +33,7 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
                     STACK_TERMINATION_FAIL_HANDLED_EVENT);
 
     public StackTerminationFlowConfig() {
-        super(StackTerminationEvent.class);
+        super(StackTerminationState.class, StackTerminationEvent.class);
     }
 
     @Override
@@ -44,11 +44,6 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     @Override
     protected FlowEdgeConfig<StackTerminationState, StackTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
-    }
-
-    @Override
-    public List<StackTerminationEvent> getFlowTriggerEvents() {
-        return Arrays.asList(TERMINATION_EVENT, FORCE_TERMINATION_EVENT);
     }
 
     @Override

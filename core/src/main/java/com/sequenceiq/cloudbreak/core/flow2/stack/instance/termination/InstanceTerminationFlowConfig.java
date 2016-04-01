@@ -29,7 +29,7 @@ public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<Ins
                     TERMINATION_FAIL_HANDLED_EVENT);
 
     public InstanceTerminationFlowConfig() {
-        super(InstanceTerminationEvent.class);
+        super(InstanceTerminationState.class, InstanceTerminationEvent.class);
     }
 
     @Override
@@ -40,11 +40,6 @@ public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<Ins
     @Override
     protected FlowEdgeConfig<InstanceTerminationState, InstanceTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
-    }
-
-    @Override
-    public List<InstanceTerminationEvent> getFlowTriggerEvents() {
-        return Arrays.asList(TERMINATION_EVENT);
     }
 
     @Override

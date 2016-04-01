@@ -12,7 +12,6 @@ enum StackTerminationState implements FlowState<StackTerminationState, StackTerm
 
     private Class<?> action;
     private StackTerminationEvent failureEvent;
-    private StackTerminationState failureState;
 
     StackTerminationState() {
     }
@@ -24,12 +23,6 @@ enum StackTerminationState implements FlowState<StackTerminationState, StackTerm
     StackTerminationState(Class<?> action, StackTerminationEvent failureEvent) {
         this.action = action;
         this.failureEvent = failureEvent;
-    }
-
-    StackTerminationState(Class<?> action, StackTerminationEvent failureEvent, StackTerminationState failureState) {
-        this.action = action;
-        this.failureEvent = failureEvent;
-        this.failureState = failureState;
     }
 
     @Override
@@ -44,6 +37,6 @@ enum StackTerminationState implements FlowState<StackTerminationState, StackTerm
 
     @Override
     public StackTerminationState failureState() {
-        return failureState;
+        return null;
     }
 }

@@ -11,7 +11,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncState.SYN
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncState.SYNC_STATE;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -29,12 +28,7 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SYNC_FINISHED_STATE, SYNC_FINALIZED_EVENT, SYNC_FAILED_STATE, SYNC_FAIL_HANDLED_EVENT);
 
     public StackSyncFlowConfig() {
-        super(StackSyncEvent.class);
-    }
-
-    @Override
-    public List<StackSyncEvent> getFlowTriggerEvents() {
-        return Collections.singletonList(SYNC_EVENT);
+        super(StackSyncState.class, StackSyncEvent.class);
     }
 
     @Override
