@@ -11,7 +11,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartState.S
 import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartState.START_STATE;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -29,12 +28,7 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, START_FINISHED_STATE, START_FINALIZED_EVENT, START_FAILED_STATE, START_FAIL_HANDLED_EVENT);
 
     public StackStartFlowConfig() {
-        super(StackStartEvent.class);
-    }
-
-    @Override
-    public List<StackStartEvent> getFlowTriggerEvents() {
-        return Collections.singletonList(START_EVENT);
+        super(StackStartState.class, StackStartEvent.class);
     }
 
     @Override

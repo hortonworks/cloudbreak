@@ -12,7 +12,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTe
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationState.TERMINATION_STATE;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -31,7 +30,7 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
                     CLUSTER_TERMINATION_FAIL_HANDLED_EVENT);
 
     public ClusterTerminationFlowConfig() {
-        super(ClusterTerminationEvent.class);
+        super(ClusterTerminationState.class, ClusterTerminationEvent.class);
     }
 
     @Override
@@ -42,11 +41,6 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
     @Override
     protected FlowEdgeConfig<ClusterTerminationState, ClusterTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
-    }
-
-    @Override
-    public List<ClusterTerminationEvent> getFlowTriggerEvents() {
-        return Collections.singletonList(ClusterTerminationEvent.TERMINATION_EVENT);
     }
 
     @Override

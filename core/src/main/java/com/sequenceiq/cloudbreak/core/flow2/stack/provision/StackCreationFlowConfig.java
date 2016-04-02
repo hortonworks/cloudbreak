@@ -22,7 +22,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.TLS_SETUP_STATE;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -47,7 +46,7 @@ public final class StackCreationFlowConfig extends AbstractFlowConfiguration<Sta
                     STACK_CREATION_FAILED_EVENT);
 
     public StackCreationFlowConfig() {
-        super(StackCreationEvent.class);
+        super(StackCreationState.class, StackCreationEvent.class);
     }
 
     @Override
@@ -58,11 +57,6 @@ public final class StackCreationFlowConfig extends AbstractFlowConfiguration<Sta
     @Override
     protected FlowEdgeConfig<StackCreationState, StackCreationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
-    }
-
-    @Override
-    public List<StackCreationEvent> getFlowTriggerEvents() {
-        return Collections.singletonList(START_CREATION_EVENT);
     }
 
     @Override

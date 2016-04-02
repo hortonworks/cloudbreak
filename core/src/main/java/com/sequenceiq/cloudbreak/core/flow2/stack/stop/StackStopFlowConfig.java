@@ -11,7 +11,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopState.STO
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopState.STOP_STATE;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -29,12 +28,7 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STOP_FINISHED_STATE, STOP_FINALIZED_EVENT, STOP_FAILED_STATE, STOP_FAIL_HANDLED_EVENT);
 
     public StackStopFlowConfig() {
-        super(StackStopEvent.class);
-    }
-
-    @Override
-    public List<StackStopEvent> getFlowTriggerEvents() {
-        return Collections.singletonList(STOP_EVENT);
+        super(StackStopState.class, StackStopEvent.class);
     }
 
     @Override
