@@ -171,5 +171,30 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
         $scope.selectAwsNetworkType3 = function() {
             delete $scope.network.subnetCIDR
         }
+
+        $scope.selectAzureNetworkType1 = function() {
+            delete $scope.network.parameters.resourceGroupName
+            delete $scope.network.parameters.networkId
+            delete $scope.network.parameters.subnetId
+        }
+
+        $scope.selectAzureNetworkType2 = function() {
+            delete $scope.network.subnetCIDR
+        }
+
+        $scope.selectOpenstackNetworkType1 = function() {
+            delete $scope.network.parameters.networkId
+            delete $scope.network.parameters.subnetId
+            delete $scope.network.parameters.routerId
+        }
+
+        $scope.selectOpenstackNetworkType2 = function() {
+            delete $scope.network.parameters.subnetId
+        }
+
+        $scope.selectOpenstackNetworkType3 = function() {
+            delete $scope.network.subnetCIDR
+            delete $scope.network.parameters.routerId
+        }
     }
 ]);

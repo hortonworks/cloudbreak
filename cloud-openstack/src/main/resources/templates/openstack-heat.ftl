@@ -22,14 +22,16 @@ parameters:
   app_net_id:
     type: string
     description: ID of the custom network
+  </#if>
+  <#if existingNetwork && !existingSubnet>
   router_id:
     type: string
     description: ID of the custom router which belongs to the custom network
+  </#if>
   <#if existingSubnet>
   subnet_id:
     type: string
     description: ID of the custom subnet which belongs to the custom network
-  </#if>
   </#if>
 
 resources:
