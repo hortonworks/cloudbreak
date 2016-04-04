@@ -121,7 +121,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Disk disk = new Disk();
         disk.setSizeGb((long) volume.getSize());
         disk.setName(resourceName);
-        disk.setKind(GcpDiskType.getUrl(projectId, availabilityZone, volume.getType()));
+        disk.setType(GcpDiskType.getUrl(projectId, availabilityZone, volume.getType()));
         return disk;
     }
 }
