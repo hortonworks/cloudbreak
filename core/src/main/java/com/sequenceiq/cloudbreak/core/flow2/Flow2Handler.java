@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 import reactor.fn.Consumer;
 
 @Component
@@ -28,7 +29,10 @@ public class Flow2Handler implements Consumer<Event<?>> {
     @Resource
     private Map<String, FlowConfiguration<?, ?>> flowConfigurationMap;
 
-    private Map<String, Flow<? extends FlowState, ? extends FlowEvent>> runningFlows = new ConcurrentHashMap<>();
+    private Map<String, Flow> runningFlows = new ConcurrentHashMap<>();
+
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public void accept(Event<?> event) {
@@ -43,7 +47,7 @@ public class Flow2Handler implements Consumer<Event<?>> {
                 // TODO this is needed because we have two flow implementations in the same time and we want to avoid conflicts
                 if (flowConfig != null) {
                     flowId = UUID.randomUUID().toString();
-                    Flow<? extends FlowState, ? extends FlowEvent> flow = flowConfig.createFlow(flowId);
+                    Flow flow = flowConfig.createFlow(flowId);
                     runningFlows.put(flowId, flow);
                     flow.initialize();
                     flowLogService.save(flowId, key, payload, flowConfig.getClass(), flow.getCurrentState());
@@ -51,7 +55,7 @@ public class Flow2Handler implements Consumer<Event<?>> {
                 }
             } else {
                 LOGGER.debug("flow control event arrived: key: {}, flowid: {}, payload: {}", key, flowId, payload);
-                Flow<? extends FlowState, ? extends FlowEvent> flow = runningFlows.get(flowId);
+                Flow flow = runningFlows.get(flowId);
                 if (flow != null) {
                     flowLogService.save(flowId, key, payload, flowConfig.getClass(), flow.getCurrentState());
                     flow.sendEvent(key, payload);
@@ -62,8 +66,17 @@ public class Flow2Handler implements Consumer<Event<?>> {
         } else {
             LOGGER.debug("flow finalizing arrived: id: {}", flowId);
             flowLogService.close(flowId);
-            runningFlows.remove(flowId);
+            Flow flow = runningFlows.remove(flowId);
+            if (flow instanceof ChainFlow) {
+                ChainFlow cf = (ChainFlow) flow;
+                sendEvent(cf.nextSelector(), cf.nextPayload(event));
+            }
         }
+    }
+
+    private void sendEvent(String selector, Object payload) {
+        LOGGER.info("Triggering new flow with event: {}", payload);
+        eventBus.notify(selector, new Event(payload));
     }
 
     private String getFlowId(Event<?> event) {
