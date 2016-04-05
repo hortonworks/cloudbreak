@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariClusterEventHandler;
-import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariClusterEventHandler;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
@@ -26,17 +28,15 @@ public class TerminateClusterHandler implements AmbariClusterEventHandler<Termin
     public void accept(Event<TerminateClusterRequest> terminateClusterRequestEvent) {
         LOGGER.info("Received event: {}", terminateClusterRequestEvent);
         TerminateClusterRequest request = terminateClusterRequestEvent.getData();
+        TerminateClusterResult result;
         try {
             clusterTerminationService.deleteClusterContainers(request.getClusterContext().getClusterId());
+            result = new TerminateClusterResult(request);
         } catch (TerminationFailedException e) {
             LOGGER.error("Failed to delete cluster containers: {}", e);
-            TerminateClusterResult result = new TerminateClusterResult("Cluster termination failed.", e, request);
-            eventBus.notify(result.selector(), new Event(terminateClusterRequestEvent.getHeaders(), result));
+            result = new TerminateClusterResult("Cluster termination failed.", e, request);
         }
-
-        TerminateClusterResult result = new TerminateClusterResult(request);
         eventBus.notify(result.selector(), new Event(terminateClusterRequestEvent.getHeaders(), result));
-
     }
 
     @Override
