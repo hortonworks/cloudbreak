@@ -33,10 +33,6 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         $scope.statusclass = "";
         $http.defaults.headers.common['Content-Type'] = 'application/json';
 
-        $scope.azureTemplate = false;
-        $scope.awsTemplate = true;
-        $scope.azureCredential = false;
-        $scope.awsCredential = true;
         $scope.lastOrderPredicate = 'name';
 
         $scope.statusMessage = "";
