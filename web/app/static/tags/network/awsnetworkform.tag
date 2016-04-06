@@ -220,17 +220,7 @@
                         <!-- .col-sm-9 -->
                     </div>
 
-                    <div class="form-group" ng-class="{ 'has-error': awsNetworkForm_3.aws_networkIGWID.$dirty && awsNetworkForm_3.aws_networkIGWID.$invalid }">
-                        <label class="col-sm-3 control-label" for="aws_networkIGWID">{{msg.network_aws_form_gateway_id_label}}</label>
 
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" name="aws_networkIGWID" ng-model="network.parameters.internetGatewayId" id="aws_networkIGWID" placeholder="{{msg.network_aws_form_gateway_id_placeholder}}" ng-pattern="/^igw-[a-zA-Z0-9]{8}$/" required>
-                            <div class="help-block" ng-show="awsNetworkForm_3.aws_networkIGWID.$dirty && awsNetworkForm_3.aws_networkIGWID.$invalid">
-                                <i class="fa fa-warning"></i> {{msg.network_internetgatewayid_invalid}}
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
 
                     <div class="form-group" ng-class="{ 'has-error': awsNetworkForm_3.aws_networkSubnetId.$dirty && awsNetworkForm_3.aws_networkSubnetId.$invalid }">
                         <label class="col-sm-3 control-label" for="aws_networkSubnetId">{{msg.network_aws_form_subnet_id_label_optional}}</label>
@@ -264,7 +254,7 @@
 
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
-                            <a id="createAwsTemplate" ng-disabled="awsNetworkForm_3.$invalid || !((awsNetworkForm_3.aws_networkVPCId.$viewValue.length>0 && awsNetworkForm_3.aws_networkIGWID.$viewValue.length>0) || (!network.parameters.vpcId && !network.parameters.internetGatewayId && !network.parameters.subnetId))" class="btn btn-success btn-block" ng-click="createAwsNetwork()" role="button"><i class="fa fa-plus fa-fw"></i>
+                            <a id="createAwsTemplate" ng-disabled="awsNetworkForm_3.$invalid || !((awsNetworkForm_3.aws_networkVPCId.$viewValue.length>0) || (!network.parameters.vpcId && !network.parameters.subnetId))" class="btn btn-success btn-block" ng-click="createAwsNetwork()" role="button"><i class="fa fa-plus fa-fw"></i>
                 {{msg.network_form_create}}</a>
                         </div>
                     </div>

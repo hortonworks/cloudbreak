@@ -228,4 +228,12 @@ public class InstanceMetaData implements ProvisionEntity {
     public void setHypervisor(String hypervisor) {
         this.hypervisor = hypervisor;
     }
+
+
+    public String getPublicIpWrapper() {
+        if (publicIp == null) {
+            return privateIp;
+        }
+        return publicIp;
+    }
 }

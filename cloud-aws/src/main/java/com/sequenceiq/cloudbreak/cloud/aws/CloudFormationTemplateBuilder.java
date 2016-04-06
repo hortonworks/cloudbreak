@@ -30,11 +30,14 @@ public class CloudFormationTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String build(AuthenticatedContext ac, CloudStack stack, String snapshotId, boolean existingVPC, String existingSubnetCidr, String templatePath) {
+    public String build(AuthenticatedContext ac, CloudStack stack, String snapshotId, boolean existingVPC, boolean existingIGW,
+            String existingSubnetCidr, String templatePath) {
         Map<String, Object> model = new HashMap<>();
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
         for (Group group : stack.getGroups()) {
             InstanceTemplate instanceTemplate = group.getInstances().get(0).getTemplate();
+            Boolean encrypted = instanceTemplate.getParameter("encrypted", Boolean.class);
+            encrypted = encrypted == null ? Boolean.FALSE : encrypted;
             awsGroupViews.add(
                     new AwsGroupView(
                             group.getInstances().size(),
@@ -42,7 +45,7 @@ public class CloudFormationTemplateBuilder {
                             instanceTemplate.getFlavor(),
                             group.getName(),
                             instanceTemplate.getVolumes().size(),
-                            instanceTemplate.getParameter("encrypted", Boolean.class).equals(Boolean.TRUE),
+                            encrypted.equals(Boolean.TRUE),
                             instanceTemplate.getVolumeSize(),
                             instanceTemplate.getVolumeType(),
                             instanceTemplate.getParameter("spotPrice", Double.class)
@@ -51,6 +54,7 @@ public class CloudFormationTemplateBuilder {
         }
         model.put("instanceGroups", awsGroupViews);
         model.put("existingVPC", existingVPC);
+        model.put("existingIGW", existingIGW);
         model.put("existingSubnet", isNoneEmpty(existingSubnetCidr));
         model.put("securityRules", stack.getSecurity());
         model.put("cbSubnet", isBlank(existingSubnetCidr) ? stack.getNetwork().getSubnet().getCidr() : existingSubnetCidr);

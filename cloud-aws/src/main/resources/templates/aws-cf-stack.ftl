@@ -41,13 +41,16 @@
     },
     </#if>
 
+    <#if existingIGW>
     "InternetGatewayId" : {
-      "Description" : "Id of the internet gateway used by the VPC",
-      "Type" : "String",
-      "MinLength": "12",
-      "MaxLength": "12",
-      "AllowedPattern" : "igw-[a-z0-9]{8}"
+       "Description" : "Id of the internet gateway used by the VPC",
+       "Type" : "String",
+       "MinLength": "12",
+       "MaxLength": "12",
+       "AllowedPattern" : "igw-[a-z0-9]{8}"
     },
+    </#if>
+
     </#if>
 
     <#if availabilitySetNeeded>
@@ -147,6 +150,7 @@
         <#if availabilitySetNeeded>
         "AvailabilityZone" : {"Fn::Join" : ["",[ { "Ref" : "AvailabilitySet" } ] ]} ,
         </#if>
+        "MapPublicIpOnLaunch" : true,
         "VpcId" : { "Ref" : "VPC" },
         "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]},
         </#if>
@@ -169,6 +173,7 @@
       }
     },
 
+    <#if !existingIGW>
     "AttachGateway" : {
        "Type" : "AWS::EC2::VPCGatewayAttachment",
        "Properties" : {
@@ -176,6 +181,8 @@
          "InternetGatewayId" : { "Ref" : "InternetGateway" }
        }
     },
+    </#if>
+
     </#if>
 
 	<#if !existingSubnet>
@@ -194,23 +201,26 @@
       }
     },
 
+    <#if !existingIGW>
     "PublicRoute" : {
-      "Type" : "AWS::EC2::Route",
-      <#if existingVPC>
-      "DependsOn" : "PublicRouteTable",
-      <#else>
-      "DependsOn" : [ "PublicRouteTable", "AttachGateway" ],
-      </#if>
-      "Properties" : {
-        "RouteTableId" : { "Ref" : "PublicRouteTable" },
-        "DestinationCidrBlock" : "0.0.0.0/0",
-        <#if existingVPC>
-        "GatewayId" : { "Ref" : "InternetGatewayId" }
-        <#else>
-        "GatewayId" : { "Ref" : "InternetGateway" }
-        </#if>
-      }
+          "Type" : "AWS::EC2::Route",
+          <#if existingVPC>
+          "DependsOn" : "PublicRouteTable",
+          <#else>
+          "DependsOn" : [ "PublicRouteTable", "AttachGateway" ],
+          </#if>
+          "Properties" : {
+            "RouteTableId" : { "Ref" : "PublicRouteTable" },
+            "DestinationCidrBlock" : "0.0.0.0/0",
+            <#if existingVPC>
+            "GatewayId" : { "Ref" : "InternetGatewayId" }
+            <#else>
+            "GatewayId" : { "Ref" : "InternetGateway" }
+            </#if>
+          }
     },
+    </#if>
+
 
     "PublicSubnetRouteTableAssociation" : {
       "Type" : "AWS::EC2::SubnetRouteTableAssociation",
@@ -278,7 +288,6 @@
         "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
         "InstanceType"   : "${group.flavor}",
         "KeyName"        : { "Ref" : "KeyName" },
-        "AssociatePublicIpAddress" : "true",
         <#if group.spotPrice??>
         "SpotPrice"      : ${group.spotPrice},
         </#if>

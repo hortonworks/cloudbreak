@@ -67,7 +67,7 @@ public class RecipeEngine {
                     if (clientConfig == null) {
                         InstanceGroup gateway = stack.getGatewayInstanceGroup();
                         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-                        clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+                        clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
                     }
                     pluginManager.prepareKeyValues(clientConfig, keyValues);
                 }
@@ -129,7 +129,7 @@ public class RecipeEngine {
         LOGGER.info("Setting up recipe properties.");
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
         pluginManager.prepareKeyValues(clientConfig, getAllPropertiesFromRecipes(hostGroups));
     }
 
@@ -144,7 +144,7 @@ public class RecipeEngine {
             boolean existingHostGroup) throws CloudbreakSecuritySetupException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
         for (Recipe recipe : recipes) {
             Map<String, PluginExecutionType> plugins = new HashMap<>();
             for (Map.Entry<String, PluginExecutionType> entry : recipe.getPlugins().entrySet()) {
@@ -166,7 +166,7 @@ public class RecipeEngine {
     private void cleanupPluginsOnHosts(Stack stack, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances) throws CloudbreakSecuritySetupException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
         Map<String, Set<String>> eventIdMap = pluginManager.cleanupPlugins(clientConfig, getHostnames(hostMetadata));
         pluginManager.waitForEventFinish(stack, instances, eventIdMap, DEFAULT_RECIPE_TIMEOUT);
     }

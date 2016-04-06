@@ -173,7 +173,7 @@ public class ClusterBootstrapperErrorHandlerTest {
     private Set<Node> prepareNodes(Stack stack) {
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp()));
+            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
         }
         return nodes;
     }
