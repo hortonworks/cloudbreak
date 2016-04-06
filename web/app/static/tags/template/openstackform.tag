@@ -42,7 +42,7 @@
     <div class="col-sm-9">
         <input type="number" name="openstack_tvolumecount" class="form-control" ng-model="openstackTemp.volumeCount" id="openstack_tvolumecount" min="1" max="12" placeholder="{{msg.template_form_volume_count_placeholder}}" required>
 
-        <div class="help-block" ng-show="openstackTemplateForm.openstack_tvolumecount.$dirty && openstackTemplateForm.openstack_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid}}
+        <div class="help-block" ng-show="openstackTemplateForm.openstack_tvolumecount.$dirty && openstackTemplateForm.openstack_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format : 12}}
         </div>
         <!-- .col-sm-9 -->
     </div>
