@@ -238,7 +238,12 @@ angular.module('uluwatuControllers').controller('templateController', [
         $scope.filterByVolumetype = function(volume) {
             try {
                 if ((isAwsVolumeEncryptable(volume) && isAwsEncryptionSet()) || !isAwsEncryptionSet()) {
-                    return true;
+                    var instanceTypeParams = $filter('filter')($rootScope.params.vmTypes.AWS, {
+                        value: $scope.awsTemp.instanceType
+                    }, true)[0];
+                    if (volume !== 'ephemeral' || instanceTypeParams.maxEphemeralVolumeCount !== 0) {
+                        return true;
+                    }
                 }
                 return false;
             } catch (err) {
@@ -255,12 +260,16 @@ angular.module('uluwatuControllers').controller('templateController', [
         }
 
         $scope.changeAwsInstanceType = function() {
-            var instanceType = $scope.awsTemp.parameters.instanceType;
+            var instanceType = $scope.awsTemp.instanceType;
             $scope.awsInstanceType = $filter('filter')($rootScope.params.vmTypes.AWS, {
                 value: instanceType
             }, true)[0];
             if ($scope.awsTemp.volumeType == 'ephemeral') {
                 $scope.awsTemp.parameters.encrypted = false;
+                $scope.awsTemp.maxEphemeralVolumeCount = $scope.awsInstanceType.maxEphemeralVolumeCount
+                $scope.awsTemp.volumeCount = $scope.awsInstanceType.maxEphemeralVolumeCount
+            } else {
+                delete $scope.awsTemp.maxEphemeralVolumeCount;
             }
         }
 

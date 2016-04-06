@@ -46,9 +46,9 @@
     <label class="col-sm-3 control-label" for="aws_tvolumecount">{{msg.template_form_volume_count_label}}</label>
 
     <div class="col-sm-9">
-        <input type="number" name="aws_tvolumecount" class="form-control" ng-model="awsTemp.volumeCount" id="aws_tvolumecount" min="1" max="12" placeholder="{{msg.template_form_volume_count_placeholder}}" required>
+        <input type="number" name="aws_tvolumecount" class="form-control" ng-model="awsTemp.volumeCount" id="aws_tvolumecount" min="1" max="{{awsTemp.maxEphemeralVolumeCount === undefined ? 12 : awsTemp.maxEphemeralVolumeCount}}" placeholder="{{msg.template_form_volume_count_placeholder}}" required>
 
-        <div class="help-block" ng-show="awsTemplateForm.aws_tvolumecount.$dirty && awsTemplateForm.aws_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid}}
+        <div class="help-block" ng-show="awsTemplateForm.aws_tvolumecount.$dirty && awsTemplateForm.aws_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format: awsTemp.maxEphemeralVolumeCount === undefined ? 12 : awsTemp.maxEphemeralVolumeCount}}
         </div>
         <!-- .col-sm-9 -->
     </div>
