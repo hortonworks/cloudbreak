@@ -131,6 +131,17 @@ task buildInfo(type: BuildInfoTask) {
   buildVersion = version
 }
 
+springBoot {
+  mainClass = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
+}
+
+task execute(type: JavaExec) {
+  if (project.hasProperty('mainClass')) {
+    main = mainClass
+    classpath = sourceSets.main.runtimeClasspath
+  }
+}
+
 compileJava.dependsOn buildInfo
 
 class BuildInfoTask extends DefaultTask {
