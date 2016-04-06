@@ -40,7 +40,7 @@ public class TemplateCommands implements CommandMarker {
     public static final int VOLUME_COUNT_MIN = 1;
     public static final int VOLUME_COUNT_MAX = 12;
     // TODO needs a proper validation
-    public static final int AWS_VOLUME_COUNT_MAX = 20;
+    public static final int AWS_VOLUME_COUNT_MAX = 24;
     public static final int AWS_VOLUME_SIZE_MAX = 2048;
     public static final int VOLUME_SIZE_MIN = 1;
     public static final int VOLUME_SIZE_MAX = 1024;
