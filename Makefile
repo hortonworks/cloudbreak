@@ -10,3 +10,6 @@ generate-image-yamls:
 
 beautify:
 	 ./gradlew jsformatter
+
+generate-flow-transitions:
+	 ./gradlew -PmainClass=com.sequenceiq.cloudbreak.core.flow2.config.OfflineStateGenerator -q execute | grep '::'
