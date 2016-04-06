@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.config;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -28,10 +30,10 @@ import org.springframework.statemachine.state.State;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
+import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowAdapter;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
-import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
 import com.sequenceiq.cloudbreak.core.flow2.StateConverterAdapter;
@@ -71,6 +73,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 .initial(flowEdgeConfig.initState, flowEdgeConfig.initState.action() != null ? getAction(flowEdgeConfig.initState.action()) : null)
                 .end(flowEdgeConfig.finalState);
         ExternalTransitionConfigurer<S, E> transitionConfigurer = null;
+        Set<S> failHandled = new HashSet<>();
         for (Transition<S, E> transition : transitions) {
             transitionConfigurer = transitionConfigurer == null ? transitionConfig.withExternal() : transitionConfigurer.and().withExternal();
             stateConfigurer.state(transition.target, getAction(transition.target.action()), null);
@@ -79,7 +82,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 S failureState = Optional.fromNullable((S) transition.target.failureState()).or(flowEdgeConfig.defaultFailureState);
                 stateConfigurer.state(failureState, getAction(failureState.action()), null);
                 transitionConfigurer.and().withExternal().source(transition.target).target(failureState).event((E) transition.target.failureEvent());
-                transitionConfigurer.and().withExternal().source(failureState).target(flowEdgeConfig.finalState).event(flowEdgeConfig.failureHandled);
+                if (!failHandled.contains(failureState)) {
+                    failHandled.add(failureState);
+                    transitionConfigurer.and().withExternal().source(failureState).target(flowEdgeConfig.finalState).event(flowEdgeConfig.failureHandled);
+                }
             }
         }
         stateConfigurer.state(flowEdgeConfig.finalState, getAction(FlowFinalizeAction.class), null);
