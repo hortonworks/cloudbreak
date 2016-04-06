@@ -8,11 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -41,12 +38,10 @@ public class TlsSetupAction extends AbstractStackCreationAction<GetSSHFingerprin
         this.variables = variables;
         Stack stack = stackCreationService.setupTls(context, payload);
         sendEvent(context);
-        sendEvent(context.getFlowId(), FlowPhases.BOOTSTRAP_CLUSTER.name(), new ProvisioningContext.Builder()
-                .setDefaultParams(stack.getId(), Platform.platform(stack.cloudPlatform())).build());
     }
 
     @Override
     protected Selectable createRequest(StackContext context) {
-        return new SelectableEvent(StackCreationEvent.STACK_CREATION_FINISHED_EVENT.stringRepresentation());
+        return new SelectableFlowStackEvent(context.getStack().getId(), StackCreationEvent.STACK_CREATION_FINISHED_EVENT.stringRepresentation());
     }
 }
