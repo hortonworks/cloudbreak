@@ -34,7 +34,7 @@
     <label class="col-sm-3 control-label" for="gcp_tvolumecount">{{msg.template_form_volume_count_label}}</label>
     <div class="col-sm-9">
         <input type="number" name="gcp_tvolumecount" class="form-control" id="gcp_tvolumecount" min="1" ng-model="gcpTemp.volumeCount" placeholder="{{msg.template_form_volume_count_placeholder}}" max="12" required>
-        <div class="help-block" ng-show="gcpTemplateForm.gcp_tvolumecount.$dirty && gcpTemplateForm.gcp_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid}}
+        <div class="help-block" ng-show="gcpTemplateForm.gcp_tvolumecount.$dirty && gcpTemplateForm.gcp_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format : 12}}
         </div>
     </div>
 </div>
