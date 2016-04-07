@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.config;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +31,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFl
 
 public class OfflineStateGenerator {
 
+    private static final String OUT_PATH = "build/diagrams/flow";
+
     private static final List<FlowConfiguration<? extends FlowState, ? extends FlowEvent>> CONFIGS =
             Arrays.<FlowConfiguration<? extends FlowState, ? extends FlowEvent>>asList(
                 new ClusterTerminationFlowConfig(),
@@ -40,57 +46,97 @@ public class OfflineStateGenerator {
 
     private static final ApplicationContext APP_CONTEXT = new CustomApplicationContext();
 
-    private OfflineStateGenerator() {
+    private final FlowConfiguration flowConfiguration;
 
+    private OfflineStateGenerator(FlowConfiguration flowConfiguration) {
+        this.flowConfiguration = flowConfiguration;
     }
 
     public static void main(String[] args) throws Exception {
-        new OfflineStateGenerator().generate();
+        for (FlowConfiguration flowConfiguration : CONFIGS) {
+            new OfflineStateGenerator(flowConfiguration).generate();
+        }
     }
 
     private void generate() throws Exception {
-        for (FlowConfiguration flowConfiguration : CONFIGS) {
-            Field applicationContext = flowConfiguration.getClass().getSuperclass().getDeclaredField("applicationContext");
-            applicationContext.setAccessible(true);
-            applicationContext.set(flowConfiguration, APP_CONTEXT);
-            ((AbstractFlowConfiguration) flowConfiguration).init();
-            Flow flow = flowConfiguration.createFlow("");
-            flow.initialize();
-            Field flowMachine = flow.getClass().getDeclaredField("flowMachine");
-            flowMachine.setAccessible(true);
-            StateMachine<FlowState, FlowEvent> stateMachine = (StateMachine) flowMachine.get(flow);
-            FlowState init = stateMachine.getInitialState().getId();
-            echo(":::::: " + flowConfiguration.getClass().getSimpleName());
-            List<Transition<FlowState, FlowEvent>> transitions = (List<Transition<FlowState, FlowEvent>>) stateMachine.getTransitions();
-            Map<FlowState, Integer> stateLevels = new HashMap<>();
-            stateLevels.put(init, 1);
-            while (!transitions.isEmpty()) {
-                for (Transition<FlowState, FlowEvent> transition : new ArrayList<>(transitions)) {
-                        FlowState source = transition.getSource().getId();
-                        FlowState target = transition.getTarget().getId();
-                        Integer parentLevel = stateLevels.get(source);
-                        if (parentLevel != null) {
-                            transitions.remove(transition);
-                            Integer level = parentLevel + 1;
-                            stateLevels.put(target, level);
-                            echo(getLevelRepresentation(level) + source + " -(" + transition.getTrigger().getEvent() + ")-> " + target
-                                    + (target.action() != null ? " : " + target.action().getSimpleName() : ""));
+        StringBuilder builder = new StringBuilder("digraph {\n");
+        injectAppContext(flowConfiguration);
+        Flow flow = initializeFlow();
+        StateMachine<FlowState, FlowEvent> stateMachine = getStateMachine(flow);
+        FlowState init = stateMachine.getInitialState().getId();
+        builder.append(generateStartPoint(init, flowConfiguration.getClass().getSimpleName())).append("\n");
+        List<Transition<FlowState, FlowEvent>> transitions = (List<Transition<FlowState, FlowEvent>>) stateMachine.getTransitions();
+        Map<String, FlowState> transitionsAlreadyDefined = new HashMap<>();
+        transitionsAlreadyDefined.put(init.toString(), init);
+        while (!transitions.isEmpty()) {
+            for (Transition<FlowState, FlowEvent> transition : new ArrayList<>(transitions)) {
+                FlowState source = transition.getSource().getId();
+                FlowState target = transition.getTarget().getId();
+                if (transitionsAlreadyDefined.values().contains(source)) {
+                    String id = generateTransitionId(source, target, transition.getTrigger().getEvent());
+                    if (!transitionsAlreadyDefined.keySet().contains(id)) {
+                        if (target.action() != null && !transitionsAlreadyDefined.values().contains(target)) {
+                            builder.append(generateState(target, target.action().getSimpleName())).append("\n");
                         }
+                        builder.append(generateTransition(source, target, transition.getTrigger().getEvent())).append("\n");
+                        transitionsAlreadyDefined.put(id, target);
+                    }
+                    transitions.remove(transition);
                 }
             }
         }
+        saveToFile(builder.append("}").toString());
     }
 
-    private void echo(String output) {
-        System.out.println(":: " + output);
+    private String generateTransitionId(FlowState source, FlowState target, FlowEvent event) {
+        return source.toString() + target.toString() + event.toString();
     }
 
-    private String getLevelRepresentation(Integer level) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 1; i < level; i++) {
-            builder.append("-");
+    private String generateStartPoint(FlowState name, String label) {
+        return String.format("%s [label=\"%s\" shape=ellipse color=green];", name, label);
+    }
+
+    private String generateState(FlowState state, String action) {
+        return String.format("%s [label=\"%s\\n%s\" shape=rect color=black];", state, state, action);
+    }
+
+    private String generateTransition(FlowState source, FlowState target, FlowEvent event) {
+        String color = "black";
+        String style = "solid";
+        if (source == target) {
+            color = "blue";
+        } else if (event.name().indexOf("FAIL") != -1 || event.name().indexOf("ERROR") != -1) {
+            color = "red";
+            style = "dashed";
         }
-        return builder.append(" ").toString();
+        return String.format("%s -> %s [label=\"%s\" color=%s style=%s];", source, target, event, color, style);
+    }
+
+    private StateMachine<FlowState, FlowEvent> getStateMachine(Flow flow) throws NoSuchFieldException, IllegalAccessException {
+        Field flowMachine = flow.getClass().getDeclaredField("flowMachine");
+        flowMachine.setAccessible(true);
+        return (StateMachine) flowMachine.get(flow);
+    }
+
+    private Flow initializeFlow() throws Exception {
+        ((AbstractFlowConfiguration) flowConfiguration).init();
+        Flow flow = flowConfiguration.createFlow("");
+        flow.initialize();
+        return flow;
+    }
+
+    private  void saveToFile(String content) throws IOException {
+        File destinationDir = new File(OUT_PATH);
+        if (!destinationDir.exists()) {
+            destinationDir.mkdirs();
+        }
+        Files.write(Paths.get(String.format("%s/%s.dot", OUT_PATH, flowConfiguration.getClass().getSimpleName())), content.getBytes());
+    }
+
+    private static void injectAppContext(FlowConfiguration flowConfiguration) throws IllegalAccessException, NoSuchFieldException {
+        Field applicationContext = flowConfiguration.getClass().getSuperclass().getDeclaredField("applicationContext");
+        applicationContext.setAccessible(true);
+        applicationContext.set(flowConfiguration, APP_CONTEXT);
     }
 
     static class CustomApplicationContext extends AbstractApplicationContext {
