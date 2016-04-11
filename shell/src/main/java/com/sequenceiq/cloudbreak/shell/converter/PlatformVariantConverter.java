@@ -7,12 +7,12 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
 import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class PlatformVariantConverter extends AbstractConverter<PlatformVariant> {
 
     @Autowired
-    private CloudbreakContext context;
+    private ShellContext context;
 
     public PlatformVariantConverter() {
     }

@@ -1,54 +1,45 @@
-package com.sequenceiq.cloudbreak.shell.commands;
-
-import static com.sequenceiq.cloudbreak.shell.support.TableRenderer.renderObjectValueMap;
+package com.sequenceiq.cloudbreak.shell.commands.common;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.stereotype.Component;
 
 import com.google.common.primitives.Longs;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
-import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
-@Component
 public class InstanceGroupCommands implements CommandMarker {
 
-    @Inject
-    private CloudbreakContext context;
-    @Inject
-    private CloudbreakClient cloudbreakClient;
-    @Inject
-    private ExceptionTransformer exceptionTransformer;
+    private ShellContext shellContext;
+
+    public InstanceGroupCommands(ShellContext shellContext) {
+        this.shellContext = shellContext;
+    }
 
     @CliAvailabilityIndicator(value = "instancegroup configure")
-    public boolean isCreateInstanceGroupAvailable() {
-        return (context.isBlueprintAvailable() && context.isCredentialAvailable())  && !context.isMarathonMode();
+    public boolean createAvailable() {
+        return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable())  && !shellContext.isMarathonMode();
     }
 
 
     @CliAvailabilityIndicator(value = "instancegroup show")
-    public boolean isShowInstanceGroupAvailable() {
-        return !context.isMarathonMode();
+    public boolean showAvailable() {
+        return !shellContext.isMarathonMode();
     }
 
     @CliCommand(value = "instancegroup configure", help = "Configure instance groups")
-    public String createInstanceGroup(
+    public String create(
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "nodecount", mandatory = true, help = "Nodecount for instanceGroup") Integer nodeCount,
             @CliOption(key = "templateId", mandatory = false, help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
@@ -59,7 +50,7 @@ public class InstanceGroupCommands implements CommandMarker {
             if (instanceGroupTemplateId != null) {
                 templateId = instanceGroupTemplateId.getName();
             } else if (instanceGroupTemplateName != null) {
-                TemplateResponse aPublic = cloudbreakClient.templateEndpoint().getPublic(instanceGroupTemplateName.getName());
+                TemplateResponse aPublic = shellContext.cloudbreakClient().templateEndpoint().getPublic(instanceGroupTemplateName.getName());
                 if (aPublic != null) {
                     templateId = aPublic.getId().toString();
                 } else {
@@ -73,31 +64,32 @@ public class InstanceGroupCommands implements CommandMarker {
                 Map<Long, Integer> map = new HashMap<>();
                 map.put(parsedTemplateId, nodeCount);
                 if (!"cbgateway".equals(instanceGroup.getName())) {
-                    context.putHostGroup(instanceGroup.getName(), new HostgroupEntry(nodeCount, new HashSet<Long>()));
-                    context.putInstanceGroup(instanceGroup.getName(), new InstanceGroupEntry(parsedTemplateId, nodeCount, "CORE"));
+                    shellContext.putHostGroup(instanceGroup.getName(), new HostgroupEntry(nodeCount, new HashSet<Long>()));
+                    shellContext.putInstanceGroup(instanceGroup.getName(), new InstanceGroupEntry(parsedTemplateId, nodeCount, "CORE"));
                 } else {
-                    context.putInstanceGroup(instanceGroup.getName(), new InstanceGroupEntry(parsedTemplateId, nodeCount, "GATEWAY"));
+                    shellContext.putInstanceGroup(instanceGroup.getName(), new InstanceGroupEntry(parsedTemplateId, nodeCount, "GATEWAY"));
                 }
-                if (context.getActiveHostGroups().size() == context.getInstanceGroups().size() - 1 && context.getActiveHostGroups().size() != 0) {
-                    context.setHint(Hints.SELECT_NETWORK);
+                if (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size() - 1
+                        && shellContext.getActiveHostGroups().size() != 0) {
+                    shellContext.setHint(Hints.SELECT_NETWORK);
                 } else {
-                    context.setHint(Hints.CONFIGURE_HOSTGROUP);
+                    shellContext.setHint(Hints.CONFIGURE_HOSTGROUP);
                 }
-                return renderObjectValueMap(context.getInstanceGroups(), "instanceGroup");
+                return shellContext.outputTransformer().render(shellContext.getInstanceGroups(), "instanceGroup");
             } else {
                 return "TemplateId is not a number.";
             }
         } catch (Exception ex) {
-            throw exceptionTransformer.transformToRuntimeException(ex);
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
     }
 
     @CliCommand(value = "instancegroup show", help = "Configure instance groups")
-    public String showInstanceGroup() throws Exception {
-        if (context.getInstanceGroups().isEmpty()) {
+    public String show() throws Exception {
+        if (shellContext.getInstanceGroups().isEmpty()) {
             return "List of instance groups is empty currently.";
         } else {
-            return renderObjectValueMap(context.getInstanceGroups(), "instanceGroup");
+            return shellContext.outputTransformer().render(shellContext.getInstanceGroups(), "instanceGroup");
         }
     }
 }

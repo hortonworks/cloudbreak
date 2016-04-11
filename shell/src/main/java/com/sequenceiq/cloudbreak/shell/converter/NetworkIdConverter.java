@@ -7,12 +7,12 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
 import com.sequenceiq.cloudbreak.shell.completion.NetworkId;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class NetworkIdConverter extends AbstractConverter<NetworkId> {
 
     @Autowired
-    private CloudbreakContext context;
+    private ShellContext context;
 
     public NetworkIdConverter() {
     }

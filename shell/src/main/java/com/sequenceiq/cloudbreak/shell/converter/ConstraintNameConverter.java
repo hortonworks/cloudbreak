@@ -7,12 +7,12 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
 import com.sequenceiq.cloudbreak.shell.completion.ConstraintName;
-import com.sequenceiq.cloudbreak.shell.model.MarathonContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class ConstraintNameConverter extends AbstractConverter<ConstraintName> {
 
     @Autowired
-    private MarathonContext marathonContext;
+    private ShellContext shellContext;
 
     public ConstraintNameConverter() {
     }
@@ -25,7 +25,7 @@ public class ConstraintNameConverter extends AbstractConverter<ConstraintName> {
     @Override
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
-            return getAllPossibleValues(completions, marathonContext.getConstraints());
+            return getAllPossibleValues(completions, shellContext.getConstraints());
         } catch (Exception e) {
             return false;
         }

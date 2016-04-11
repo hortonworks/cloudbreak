@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.anyString;
 
 import java.io.File;
@@ -13,28 +14,28 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.commands.base.BaseCredentialCommands;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
+import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
-public class CredentialCommandsTest {
-
-    private static final String DUMMY_DESCRIPTION = "dummyDescription";
+public class BaseCredentialCommandsTest {
     private static final String DUMMY_NAME = "dummyName";
-    private static final String DUMMY_ID = "60";
-    private static final String DUMMY_SUBSCRIPTION_ID = "dummySubscriptionId";
-    private static final String DUMMY_SSH_KEY_PATH = "dummy";
+    private static final Long DUMMY_ID = 60L;
 
     @InjectMocks
-    private CredentialCommands underTest;
+    private BaseCredentialCommands underTest;
 
     @Mock(answer = Answers.RETURNS_MOCKS)
-    private CloudbreakContext context;
+    private ShellContext context;
 
     @Mock
     private CloudbreakClient cloudbreakClient;
@@ -45,57 +46,64 @@ public class CredentialCommandsTest {
     @Mock
     private ExceptionTransformer exceptionTransformer;
 
+    @Mock
+    private OutputTransformer outputTransformer;
+
     private CredentialResponse dummyResult;
 
     @Before
     public void setUp() throws Exception {
-        underTest = new CredentialCommands();
+        underTest = new BaseCredentialCommands(context);
         MockitoAnnotations.initMocks(this);
         dummyResult = new CredentialResponse();
         dummyResult.setId(Long.valueOf(DUMMY_ID));
         given(cloudbreakClient.credentialEndpoint()).willReturn(credentialEndpoint);
+        given(context.outputTransformer()).willReturn(outputTransformer);
+        given(outputTransformer.render(any(OutPutType.class), anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
+        given(context.cloudbreakClient()).willReturn(cloudbreakClient);
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
     }
 
     @Test
     public void testSelectCredentialById() throws Exception {
         given(credentialEndpoint.get(Long.valueOf(DUMMY_ID))).willReturn(dummyResult);
-        underTest.selectCredential(DUMMY_ID, null);
+        underTest.select(DUMMY_ID, null);
         verify(context, times(1)).setCredential(anyString());
     }
 
     @Test
     public void testSelectCredentialByName() throws Exception {
         given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(dummyResult);
-        underTest.selectCredential(null, DUMMY_NAME);
+        underTest.select(null, DUMMY_NAME);
         verify(context, times(1)).setCredential(anyString());
     }
 
     @Test(expected = RuntimeException.class)
     public void testSelectCredentialByNameNotFound() throws Exception {
         given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(null);
-        underTest.selectCredential(null, DUMMY_NAME);
+        underTest.select(null, DUMMY_NAME);
         verify(context, times(0)).setCredential(anyString());
     }
 
     @Test
     public void testSelectCredentialWithoutIdAndName() throws Exception {
-        underTest.selectCredential(null, null);
+        underTest.select(null, null);
         verify(context, times(0)).setCredential(anyString());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testShowCredentialById() throws Exception {
         given(credentialEndpoint.get(Long.valueOf(DUMMY_ID))).willReturn(dummyResult);
-        underTest.showCredential(DUMMY_ID, null);
+        underTest.show(DUMMY_ID, null);
         verify(credentialEndpoint, times(1)).get(anyLong());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testShowCredentialByName() throws Exception {
         given(credentialEndpoint.get(Long.valueOf(DUMMY_ID))).willReturn(dummyResult);
         given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(dummyResult);
-        underTest.showCredential(null, DUMMY_NAME);
+        underTest.show(null, DUMMY_NAME);
         verify(credentialEndpoint, times(0)).get(anyLong());
         verify(credentialEndpoint, times(1)).getPublic(anyString());
     }
@@ -103,31 +111,31 @@ public class CredentialCommandsTest {
     @Test
     public void testShowCredentialByNameNotFound() throws Exception {
         given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(null);
-        underTest.showCredential(null, DUMMY_NAME);
+        underTest.show(null, DUMMY_NAME);
         verify(credentialEndpoint, times(1)).getPublic(anyString());
     }
 
     @Test
     public void testShowCredentialWithoutIdAndName() throws Exception {
-        underTest.showCredential(null, null);
+        underTest.show(null, null);
         verify(credentialEndpoint, times(0)).get(anyLong());
     }
 
     @Test
     public void testDeleteCredentialById() throws Exception {
-        underTest.deleteCredential(DUMMY_ID, null);
+        underTest.delete(DUMMY_ID, null);
         verify(credentialEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteCredentialByName() throws Exception {
-        underTest.deleteCredential(null, DUMMY_NAME);
+        underTest.delete(null, DUMMY_NAME);
         verify(credentialEndpoint, times(1)).deletePublic(anyString());
     }
 
     @Test
     public void testDeleteCredentialWithoutIdAndName() throws Exception {
-        underTest.deleteCredential(null, null);
+        underTest.delete(null, null);
         verify(credentialEndpoint, times(0)).delete(anyLong());
         verify(credentialEndpoint, times(0)).deletePublic(anyString());
     }

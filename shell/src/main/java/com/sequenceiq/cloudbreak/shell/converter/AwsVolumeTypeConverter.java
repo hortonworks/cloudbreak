@@ -7,12 +7,12 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
 import com.sequenceiq.cloudbreak.shell.completion.AwsVolumeType;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class AwsVolumeTypeConverter extends AbstractConverter<AwsVolumeType> {
 
     @Autowired
-    private CloudbreakContext context;
+    private ShellContext context;
 
     public AwsVolumeTypeConverter() {
     }

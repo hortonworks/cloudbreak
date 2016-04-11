@@ -5,21 +5,26 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.commands.common.InstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
+import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
 public class InstanceGroupCommandsTest {
 
@@ -40,37 +45,44 @@ public class InstanceGroupCommandsTest {
     private TemplateEndpoint mockClient;
 
     @Mock
-    private CloudbreakContext mockContext;
+    private ShellContext mockContext;
+
+    @Mock
+    private OutputTransformer outputTransformer;
 
     private TemplateResponse dummyResult;
 
     @Before
     public void setUp() throws Exception {
-        underTest = new InstanceGroupCommands();
+        underTest = new InstanceGroupCommands(mockContext);
         hostGroup = new InstanceGroup("master");
         MockitoAnnotations.initMocks(this);
         dummyResult = new TemplateResponse();
         dummyResult.setId(Long.valueOf(DUMMY_TEMPLATE_ID));
+        given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
         given(cloudbreakClient.templateEndpoint()).willReturn(mockClient);
+        given(mockContext.outputTransformer()).willReturn(outputTransformer);
+        given(outputTransformer.render(any(OutPutType.class), anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
     }
 
     @Test
     public void testConfigureByTemplateId() throws Exception {
-        underTest.createInstanceGroup(hostGroup, DUMMY_NODE_COUNT, dummyTemplateId, null);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, dummyTemplateId, null);
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }
 
     @Test
     public void testConfigureByTemplateName() throws Exception {
         given(mockClient.getPublic(DUMMY_TEMPLATE)).willReturn(dummyResult);
-        underTest.createInstanceGroup(hostGroup, DUMMY_NODE_COUNT, null, dummyTemplateName);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, null, dummyTemplateName);
         verify(mockClient, times(1)).getPublic(anyString());
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }
 
     @Test
     public void testConfigureByTemplateIdAndName() throws Exception {
-        underTest.createInstanceGroup(hostGroup, DUMMY_NODE_COUNT, dummyTemplateId, dummyTemplateName);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, dummyTemplateId, dummyTemplateName);
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
         verify(mockClient, times(0)).getPublic(anyString());
     }
@@ -78,7 +90,7 @@ public class InstanceGroupCommandsTest {
     @Test
     public void testConfigureByTemplateNameWhenTemplateNotFound() throws Exception {
         given(mockClient.getPublic(DUMMY_TEMPLATE)).willReturn(null);
-        underTest.createInstanceGroup(hostGroup, DUMMY_NODE_COUNT, null, dummyTemplateName);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, null, dummyTemplateName);
         verify(mockClient, times(1)).getPublic(anyString());
         verify(mockContext, times(0)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }

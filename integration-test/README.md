@@ -277,7 +277,7 @@ com.sequenceiq.it.IntegrationTestApp
 
 *com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer*
 * Initialize cloudbreak test context for the suites
-* Store named resources in the context if given on applcication or suite level: blueprint, network, securitygroup, stack, credential, instancegroups, hostgroups
+* Store named resources in the context if given on applcication or suite level: blueprint, network, securitygroup, stack, credential, instancegroups, marathonHostgroups
 * Cleanup after the testsuite finished
 
 All the suite have to be started with these classes:

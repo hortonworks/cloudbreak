@@ -7,11 +7,11 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
 import com.sequenceiq.cloudbreak.shell.completion.GcpInstanceType;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class GcpInstanceTypeConverter extends AbstractConverter<GcpInstanceType> {
     @Autowired
-    private CloudbreakContext context;
+    private ShellContext context;
 
     public GcpInstanceTypeConverter() {
     }

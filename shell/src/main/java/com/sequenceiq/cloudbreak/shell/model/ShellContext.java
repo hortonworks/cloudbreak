@@ -16,19 +16,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.commands.provider.AzureCommands;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
+import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
-/**
- * Holds information about the connected Cloudbreak server.
- */
 @Component
-public class CloudbreakContext {
+public class ShellContext {
 
     private static final String ACCESSIBLE = "accessible";
     private Map<String, Collection<String>> platformToVariants;
@@ -46,15 +47,17 @@ public class CloudbreakContext {
     private Set<String> activeTemplates = new HashSet<>();
     private Set<String> activeTemplateNames = new HashSet<>();
     private String activeCloudPlatform;
-    private Map<String, String> networksByProvider = new HashMap<>();
-    private Map<String, String> securityGroups = new HashMap<>();
-    private String activeNetworkId;
-    private String activeSecurityGroupId;
+    private Map<Long, String> networksByProvider = new HashMap<>();
+    private Map<Long, String> securityGroups = new HashMap<>();
+    private Long activeNetworkId;
+    private Long activeSecurityGroupId;
     private FileSystemType fileSystemType;
-
     private Map<String, Object> fileSystemParameters = new HashMap<>();
     private Boolean defaultFileSystem;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private Long selectedMarathonStackId;
+    private String selectedMarathonStackName;
+    private Set<String> constraintTemplates = new HashSet<>();
+    private Map<String, MarathonHostgroupEntry> marathonHostgroups = new HashMap<>();
 
     @Inject
     private CloudbreakClient cloudbreakClient;
@@ -62,13 +65,44 @@ public class CloudbreakContext {
     @Inject
     private ResponseTransformer responseTransformer;
 
-    public CloudbreakContext() {
+    @Inject
+    private ExceptionTransformer exceptionTransformer;
+
+    @Inject
+    private ObjectMapper objectMapper;
+
+    @Inject
+    private OutputTransformer outputTransformer;
+
+    public ShellContext() {
         this.focus = getRootFocus();
         this.hint = Hints.NONE;
         this.instanceGroups = new HashMap<>();
         this.hostGroups = new HashMap<>();
         this.activeHostGroups = new HashSet<>();
         this.activeInstanceGroups = new HashSet<>();
+        constraintTemplates = new HashSet<>();
+        marathonHostgroups = new HashMap<>();
+    }
+
+    public ResponseTransformer responseTransformer() {
+        return responseTransformer;
+    }
+
+    public ExceptionTransformer exceptionTransformer() {
+        return exceptionTransformer;
+    }
+
+    public CloudbreakClient cloudbreakClient() {
+        return cloudbreakClient;
+    }
+
+    public OutputTransformer outputTransformer() {
+        return outputTransformer;
+    }
+
+    public ObjectMapper objectMapper() {
+        return objectMapper;
     }
 
     public boolean isStackAvailable() {
@@ -92,23 +126,15 @@ public class CloudbreakContext {
     }
 
     public boolean isAzureActiveCredential() {
-        return "AZURE_RM".equals(getActiveCloudPlatform());
+        return AzureCommands.PLATFORM.equals(getActiveCloudPlatform());
     }
 
     public void removeStack(String id) {
         removeProperty(PropertyKey.STACK_ID, id);
     }
 
-    public void setInstanceGroups(Map<String, InstanceGroupEntry> instanceGroups) {
-        this.instanceGroups = instanceGroups;
-    }
-
     public Map<String, InstanceGroupEntry> getInstanceGroups() {
         return this.instanceGroups;
-    }
-
-    public void setHostGroups(Map<String, HostgroupEntry> hostGroups) {
-        this.hostGroups = hostGroups;
     }
 
     public Map<String, HostgroupEntry> getHostGroups() {
@@ -141,8 +167,10 @@ public class CloudbreakContext {
         BlueprintResponse bp = cloudbreakClient.blueprintEndpoint().get(Long.valueOf(id));
         this.instanceGroups = new HashMap<>();
         this.hostGroups = new HashMap<>();
+        this.activeInstanceGroups = new HashSet<>();
+        this.activeHostGroups = new HashSet<>();
 
-        JsonNode hostGroups = mapper.readTree(bp.getAmbariBlueprint().getBytes()).get("host_groups");
+        JsonNode hostGroups = objectMapper.readTree(bp.getAmbariBlueprint().getBytes()).get("host_groups");
         for (JsonNode hostGroup : hostGroups) {
             activeHostGroups.add(hostGroup.get("name").asText());
             activeInstanceGroups.add(hostGroup.get("name").asText());
@@ -169,6 +197,54 @@ public class CloudbreakContext {
         }
     }
 
+    public Long getSelectedMarathonStackId() {
+        return selectedMarathonStackId;
+    }
+
+    public String getSelectedMarathonStackName() {
+        return selectedMarathonStackName;
+    }
+
+    public void setSelectedMarathonStackName(String selectedMarathonStackName) {
+        this.selectedMarathonStackName = selectedMarathonStackName;
+    }
+
+    public boolean isSelectedMarathonStackAvailable() {
+        return selectedMarathonStackId != null;
+    }
+
+    public void resetSelectedMarathonStackId() {
+        selectedMarathonStackId = null;
+    }
+
+    public void setSelectedMarathonStackId(Long selectedMarathonStackId) {
+        this.selectedMarathonStackId = selectedMarathonStackId;
+    }
+
+    public void resetMarathonHostGroups() {
+        this.marathonHostgroups = new HashMap<>();
+    }
+
+    public Set<String> getConstraints() {
+        return constraintTemplates;
+    }
+
+    public void setConstraints(Set<ConstraintTemplateResponse> constraintTemplateResponses) {
+        constraintTemplates = new HashSet<>();
+        for (ConstraintTemplateResponse constraintTemplateResponse : constraintTemplateResponses) {
+            constraintTemplates.add(constraintTemplateResponse.getName());
+        }
+    }
+
+    public Map<String, MarathonHostgroupEntry> putMarathonHostGroup(String name, MarathonHostgroupEntry hostgroupEntry) {
+        this.marathonHostgroups.put(name, hostgroupEntry);
+        return this.marathonHostgroups;
+    }
+
+    public Map<String, MarathonHostgroupEntry> getMarathonHostGroups() {
+        return marathonHostgroups;
+    }
+
     public boolean isCredentialAvailable() {
         return isPropertyAvailable(PropertyKey.CREDENTIAL_ID);
     }
@@ -189,7 +265,8 @@ public class CloudbreakContext {
 
     private void fillTemplates(List<TemplateResponse> templateList) {
         for (TemplateResponse t : templateList) {
-            this.activeTemplateNames.add(t.getId().toString());
+            this.activeTemplateNames.add(t.getName());
+            this.activeTemplates.add(t.getId().toString());
         }
     }
 
@@ -220,7 +297,6 @@ public class CloudbreakContext {
     public void setPlatformToVariantsMap(Map<String, Collection<String>> platformToVariants) {
         this.platformToVariants = platformToVariants;
     }
-
 
     public Collection<String> getVariantsByPlatform(String platform) {
         return platformToVariants.get(platform);
@@ -320,7 +396,7 @@ public class CloudbreakContext {
         return getLastPropertyValue(PropertyKey.CREDENTIAL_ID);
     }
 
-    public Map<String, String> getNetworksByProvider() {
+    public Map<Long, String> getNetworksByProvider() {
         return networksByProvider;
     }
 
@@ -341,39 +417,39 @@ public class CloudbreakContext {
         return getLastPropertyValue(PropertyKey.SSSDCONFIG_ID);
     }
 
-    public void putNetwork(String id, String provider) {
+    public void putNetwork(Long id, String provider) {
         networksByProvider.put(id, provider);
     }
 
-    public void putNetworks(Map<String, String> networksByProvider) {
+    public void putNetworks(Map<Long, String> networksByProvider) {
         this.networksByProvider.putAll(networksByProvider);
     }
 
-    public void putSecurityGroup(String id, String name) {
+    public void putSecurityGroup(Long id, String name) {
         this.securityGroups.put(id, name);
     }
 
-    public Map<String, String> getSecurityGroups() {
+    public Map<Long, String> getSecurityGroups() {
         return securityGroups;
     }
 
-    public void setSecurityGroups(Map<String, String> securityGroups) {
+    public void setSecurityGroups(Map<Long, String> securityGroups) {
         this.securityGroups = securityGroups;
     }
 
-    public String getActiveNetworkId() {
+    public Long getActiveNetworkId() {
         return activeNetworkId;
     }
 
-    public void setActiveNetworkId(String activeNetworkId) {
+    public void setActiveNetworkId(Long activeNetworkId) {
         this.activeNetworkId = activeNetworkId;
     }
 
-    public String getActiveSecurityGroupId() {
+    public Long getActiveSecurityGroupId() {
         return activeSecurityGroupId;
     }
 
-    public void setActiveSecurityGroupId(String id) {
+    public void setActiveSecurityGroupId(Long id) {
         this.activeSecurityGroupId = id;
     }
 
@@ -392,15 +468,6 @@ public class CloudbreakContext {
      */
     public void setFocus(String id, FocusType type) {
         this.focus = new Focus(id, type);
-    }
-
-    /**
-     * Returns the target of the focus.
-     *
-     * @return target
-     */
-    public String getFocusValue() {
-        return focus.getValue();
     }
 
     public FocusType getFocusType() {
@@ -432,10 +499,6 @@ public class CloudbreakContext {
      */
     public String getHint() {
         return "Hint: " + hint.message();
-    }
-
-    private boolean isFocusOn(FocusType type) {
-        return focus.isType(type);
     }
 
     private Focus getRootFocus() {
@@ -484,7 +547,16 @@ public class CloudbreakContext {
     }
 
     private enum PropertyKey {
-        CREDENTIAL_ID, BLUEPRINT_ID, RECIPE_ID, TEMPLATE_ID, STACK_ID, STACK_NAME,
-        CREDENTIAL_ACCESSIBLE, BLUEPRINT_ACCESSIBLE, TEMPLATE_ACCESSIBLE, STACK_ACCESSIBLE, RECIPE_ACCESSIBLE, SSSDCONFIG_ACCESSIBLE, SSSDCONFIG_ID
+        CREDENTIAL_ID,
+        BLUEPRINT_ID,
+        RECIPE_ID,
+        STACK_ID,
+        STACK_NAME,
+        CREDENTIAL_ACCESSIBLE,
+        BLUEPRINT_ACCESSIBLE,
+        STACK_ACCESSIBLE,
+        RECIPE_ACCESSIBLE,
+        SSSDCONFIG_ACCESSIBLE,
+        SSSDCONFIG_ID
     }
 }

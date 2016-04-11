@@ -7,11 +7,11 @@ import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
 import com.sequenceiq.cloudbreak.shell.completion.GcpVolumeType;
-import com.sequenceiq.cloudbreak.shell.model.CloudbreakContext;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class GcpVolumeTypeConverter extends AbstractConverter<GcpVolumeType> {
     @Autowired
-    private CloudbreakContext context;
+    private ShellContext context;
 
     public GcpVolumeTypeConverter() {
     }
