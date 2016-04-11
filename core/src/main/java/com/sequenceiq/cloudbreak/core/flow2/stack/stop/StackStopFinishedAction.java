@@ -31,11 +31,6 @@ public class StackStopFinishedAction extends AbstractStackStopAction<StopInstanc
     }
 
     @Override
-    protected Long getStackId(StopInstancesResult payload) {
-        return payload.getCloudContext().getId();
-    }
-
-    @Override
     protected void doExecute(StackStartStopContext context, StopInstancesResult payload, Map<Object, Object> variables) throws Exception {
         stackStartStopService.finishStackStop(context);
         sendEvent(context);

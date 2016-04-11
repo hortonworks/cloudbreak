@@ -4,8 +4,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow.context.AmbariClusterContext;
@@ -13,9 +11,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariClusterRequest;
 
 @Component("ClusterTerminationAction")
 public class ClusterTerminationAction extends AbstractClusterTerminationAction<DefaultClusterFlowContext> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTerminationAction.class);
-
     @Inject
     private ClusterTerminationFlowService clusterTerminationFlowService;
 
@@ -37,8 +32,4 @@ public class ClusterTerminationAction extends AbstractClusterTerminationAction<D
         sendEvent(context.getFlowId(), AmbariClusterRequest.selector(TerminateClusterRequest.class), terminateRequest);
     }
 
-    @Override
-    protected Long getClusterId(DefaultClusterFlowContext payload) {
-        return payload.getClusterId();
-    }
 }

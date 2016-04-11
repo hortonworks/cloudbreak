@@ -25,6 +25,7 @@ import org.springframework.statemachine.config.builders.StateMachineStateBuilder
 import org.springframework.statemachine.config.builders.StateMachineTransitionBuilder;
 import org.springframework.statemachine.config.common.annotation.ObjectPostProcessor;
 
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 
 import reactor.bus.EventBus;
@@ -61,8 +62,8 @@ public class AbstractActionTest {
     @Test
     public void testExecute() throws Exception {
         stateMachine.sendEvent(Event.DOIT);
-        verify(underTest, times(1)).createFlowContext(any(StateContext.class), any(Map.class));
-        verify(underTest, times(1)).doExecute(any(CommonContext.class), any(Map.class), any(Map.class));
+        verify(underTest, times(1)).createFlowContext(any(StateContext.class), any(Payload.class));
+        verify(underTest, times(1)).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
         verify(underTest, times(0)).sendEvent(any(CommonContext.class));
         verify(underTest, times(0)).sendEvent(anyString(), anyString(), any());
         verify(underTest, times(0)).sendEvent(anyString(), any(Selectable.class));
@@ -72,10 +73,10 @@ public class AbstractActionTest {
     @Test
     public void testFailedExecute() throws Exception {
         RuntimeException exception = new UnsupportedOperationException();
-        Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), any(Map.class), any(Map.class));
+        Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
         stateMachine.sendEvent(Event.DOIT);
-        verify(underTest, times(1)).createFlowContext(any(StateContext.class), any(Map.class));
-        verify(underTest, times(1)).doExecute(any(CommonContext.class), any(Map.class), any(Map.class));
+        verify(underTest, times(1)).createFlowContext(any(StateContext.class), any(Payload.class));
+        verify(underTest, times(1)).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
         verify(underTest, times(1)).getFailurePayload(any(CommonContext.class), eq(exception));
         verify(underTest, times(1)).sendEvent(eq(FLOW_ID), eq(Event.FAILURE.name()), eq(Collections.emptyMap()));
     }
@@ -107,19 +108,19 @@ public class AbstractActionTest {
         }
     }
 
-    class TestAction extends AbstractAction<State, Event, CommonContext, Map> {
+    class TestAction extends AbstractAction<State, Event, CommonContext, Payload> {
 
         protected TestAction() {
-            super(Map.class);
+            super(Payload.class);
         }
 
         @Override
-        public CommonContext createFlowContext(StateContext<State, Event> stateContext, Map payload) {
+        public CommonContext createFlowContext(StateContext<State, Event> stateContext, Payload payload) {
             return new CommonContext(FLOW_ID);
         }
 
         @Override
-        public void doExecute(CommonContext context, Map payload, Map<Object, Object> variables) throws Exception {
+        public void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) throws Exception {
         }
 
         @Override

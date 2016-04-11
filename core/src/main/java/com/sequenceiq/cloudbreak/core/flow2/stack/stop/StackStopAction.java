@@ -36,11 +36,6 @@ public class StackStopAction extends AbstractStackStopAction<StackStatusUpdateCo
     }
 
     @Override
-    protected Long getStackId(StackStatusUpdateContext payload) {
-        return payload.getStackId();
-    }
-
-    @Override
     protected void doExecute(StackStartStopContext context, StackStatusUpdateContext payload, Map<Object, Object> variables) throws Exception {
         stackStartStopService.startStackStop(context);
         sendEvent(context);

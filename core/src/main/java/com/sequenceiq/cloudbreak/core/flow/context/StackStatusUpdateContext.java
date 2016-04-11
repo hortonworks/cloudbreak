@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow.context;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 
-public class StackStatusUpdateContext extends DefaultFlowContext implements FlowContext {
+public class StackStatusUpdateContext extends DefaultFlowContext implements FlowContext, Payload {
     private boolean start;
 
     public StackStatusUpdateContext(Long stackId, Platform cloudPlatform, boolean start) {

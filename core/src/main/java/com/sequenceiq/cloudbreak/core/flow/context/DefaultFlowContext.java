@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow.context;
 
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
-public class DefaultFlowContext implements FlowContext {
+public class DefaultFlowContext implements FlowContext, Payload {
     private Long stackId;
     private Platform cloudPlatform;
     private String errorReason;

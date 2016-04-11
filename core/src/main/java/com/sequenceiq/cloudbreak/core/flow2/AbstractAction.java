@@ -13,12 +13,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
-public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P> implements Action<S, E> {
+public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload> implements Action<S, E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAction.class);
 
     @Inject

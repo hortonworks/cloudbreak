@@ -7,11 +7,10 @@ import static com.sequenceiq.cloudbreak.core.flow2.MessageFactory.HEADERS;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -26,9 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-public abstract class AbstractStackCreationAction<P> extends AbstractAction<StackCreationState, StackCreationEvent, StackContext, P> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackCreationAction.class);
-
+public abstract class AbstractStackCreationAction<P extends Payload> extends AbstractAction<StackCreationState, StackCreationEvent, StackContext, P> {
     @Inject
     private StackService stackService;
     @Inject
@@ -42,7 +39,7 @@ public abstract class AbstractStackCreationAction<P> extends AbstractAction<Stac
 
     protected StackContext createFlowContext(StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
         String flowId = (String) stateContext.getMessageHeader(HEADERS.FLOW_ID.name());
-        Stack stack = stackService.getById(getStackId(payload));
+        Stack stack = stackService.getById(payload.getStackId());
         // TODO LogAspect!!
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -58,5 +55,4 @@ public abstract class AbstractStackCreationAction<P> extends AbstractAction<Stac
         return new FlowFailureEvent(flowContext.getStack().getId(), ex);
     }
 
-    protected abstract Long getStackId(P payload);
 }

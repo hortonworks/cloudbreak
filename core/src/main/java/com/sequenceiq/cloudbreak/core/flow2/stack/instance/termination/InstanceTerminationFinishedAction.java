@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 
 @Component("InstanceTerminationFinishedAction")
@@ -18,17 +17,6 @@ public class InstanceTerminationFinishedAction extends AbstractInstanceTerminati
 
     public InstanceTerminationFinishedAction() {
         super(RemoveInstanceResult.class);
-    }
-
-    @Override
-    protected Long getStackId(RemoveInstanceResult payload) {
-        return payload.getRequest().getCloudContext().getId();
-    }
-
-    @Override
-    protected String getInstanceId(RemoveInstanceResult payload) {
-        CloudInstance cloudInstance = payload.getCloudInstance();
-        return cloudInstance == null ? null : cloudInstance.getInstanceId();
     }
 
     @Override

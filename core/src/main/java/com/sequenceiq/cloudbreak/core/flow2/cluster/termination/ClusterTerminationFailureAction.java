@@ -29,8 +29,4 @@ public class ClusterTerminationFailureAction extends AbstractClusterTerminationA
         return new SelectableEvent(ClusterTerminationEvent.CLUSTER_TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation());
     }
 
-    @Override
-    protected Long getClusterId(TerminateClusterResult payload) {
-        return payload.getRequest().getClusterContext().getClusterId();
-    }
 }

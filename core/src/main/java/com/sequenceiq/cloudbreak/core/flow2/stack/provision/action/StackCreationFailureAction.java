@@ -5,14 +5,12 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudPlatformResponseToFlowFailureConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
-import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -20,8 +18,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 
 @Component("StackCreationFailureAction")
 public class StackCreationFailureAction extends AbstractStackCreationAction<FlowFailureEvent> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationFailureAction.class);
-
     @Inject
     private StackCreationService stackCreationService;
     @Inject
@@ -42,11 +38,6 @@ public class StackCreationFailureAction extends AbstractStackCreationAction<Flow
     @Override
     protected Selectable createRequest(StackContext context) {
         return null;
-    }
-
-    @Override
-    protected Long getStackId(FlowFailureEvent payload) {
-        return payload.getStackId();
     }
 
     protected void initPayloadConverterMap(List<PayloadConverter<FlowFailureEvent>> payloadConverters) {

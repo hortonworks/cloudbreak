@@ -8,10 +8,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 
 @Component("StackForceTerminationAction")
 public class StackForceTerminationAction extends StackTerminationAction {
-    @Override
-    protected Long getStackId(DefaultFlowContext payload) {
-        return payload.getStackId();
-    }
 
     @Override
     protected void doExecute(StackTerminationContext context, DefaultFlowContext payload, Map<Object, Object> variables) {

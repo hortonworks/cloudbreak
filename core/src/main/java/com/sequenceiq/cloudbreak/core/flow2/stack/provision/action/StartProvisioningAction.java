@@ -38,8 +38,4 @@ public class StartProvisioningAction  extends AbstractStackCreationAction<FlowSt
                 policy.getAdjustmentType(), policy.getThreshold());
     }
 
-    @Override
-    protected Long getStackId(FlowStackEvent payload) {
-        return payload.getStackId();
-    }
 }

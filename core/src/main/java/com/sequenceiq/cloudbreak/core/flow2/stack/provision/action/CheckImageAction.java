@@ -76,11 +76,6 @@ public class CheckImageAction extends AbstractStackCreationAction<FlowStackEvent
         payloadConverters.add(new PrepareImageResultToFlowStackEventConverter());
     }
 
-    @Override
-    protected Long getStackId(FlowStackEvent payload) {
-        return payload.getStackId();
-    }
-
     private void repeat(final StackContext context) {
         timer.submit(new Consumer<Long>() {
             @Override

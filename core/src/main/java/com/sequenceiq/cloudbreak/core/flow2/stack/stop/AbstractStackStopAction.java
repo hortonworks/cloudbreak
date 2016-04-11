@@ -9,11 +9,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -30,12 +29,9 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-abstract class AbstractStackStopAction<P> extends AbstractAction<StackStopState, StackStopEvent, StackStartStopContext, P> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackStopAction.class);
+abstract class AbstractStackStopAction<P extends Payload> extends AbstractAction<StackStopState, StackStopEvent, StackStartStopContext, P> {
     @Inject
     private StackService stackService;
     @Inject
@@ -46,10 +42,6 @@ abstract class AbstractStackStopAction<P> extends AbstractAction<StackStopState,
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
-    @Inject
-    private CloudbreakMessagesService messagesService;
-    @Inject
-    private CloudbreakEventService cloudbreakEventService;
 
     protected AbstractStackStopAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -58,7 +50,7 @@ abstract class AbstractStackStopAction<P> extends AbstractAction<StackStopState,
     @Override
     protected StackStartStopContext createFlowContext(StateContext<StackStopState, StackStopEvent> stateContext, P payload) {
         String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
-        Long stackId = getStackId(payload);
+        Long stackId = payload.getStackId();
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataRepository.findNotTerminatedForStack(stackId));
@@ -77,7 +69,5 @@ abstract class AbstractStackStopAction<P> extends AbstractAction<StackStopState,
                 cloudResources, cloudInstances);
         return new StopInstancesResult(ex.getMessage(), ex, stopRequest);
     }
-
-    protected abstract Long getStackId(P payload);
 
 }

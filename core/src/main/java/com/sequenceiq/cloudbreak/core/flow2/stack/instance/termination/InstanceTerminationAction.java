@@ -24,16 +24,6 @@ public class InstanceTerminationAction extends AbstractInstanceTerminationAction
     }
 
     @Override
-    protected Long getStackId(StackInstanceUpdateContext payload) {
-        return payload.getStackId();
-    }
-
-    @Override
-    protected String getInstanceId(StackInstanceUpdateContext payload) {
-        return payload.getInstanceId();
-    }
-
-    @Override
     protected void doExecute(InstanceTerminationContext context, StackInstanceUpdateContext payload, Map<Object, Object> variables) throws Exception {
         Stack stack = context.getStack();
         if (!stack.isDeleteInProgress()) {
