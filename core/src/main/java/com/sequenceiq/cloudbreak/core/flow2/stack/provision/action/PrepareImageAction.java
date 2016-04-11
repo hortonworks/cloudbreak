@@ -38,8 +38,4 @@ public class PrepareImageAction extends AbstractStackCreationAction<SetupResult>
         return new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
     }
 
-    @Override
-    protected Long getStackId(SetupResult payload) {
-        return payload.getRequest().getCloudContext().getId();
-    }
 }

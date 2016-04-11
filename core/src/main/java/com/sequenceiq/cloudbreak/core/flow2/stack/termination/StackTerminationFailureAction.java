@@ -23,11 +23,6 @@ public class StackTerminationFailureAction extends AbstractStackTerminationActio
     }
 
     @Override
-    protected Long getStackId(TerminateStackResult payload) {
-        return payload.getRequest().getCloudContext().getId();
-    }
-
-    @Override
     protected void doExecute(StackTerminationContext context, TerminateStackResult payload, Map<Object, Object> variables) {
         stackTerminationService.handleStackTerminationError(context, payload, variables);
         sendEvent(context);

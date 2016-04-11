@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.event.instance;
 
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 
-public class StartInstancesResult extends CloudPlatformResult<StartInstancesRequest> {
+public class StartInstancesResult extends CloudPlatformResult<StartInstancesRequest> implements Payload {
 
     private CloudContext cloudContext;
     private InstancesStatusResult results;
@@ -24,6 +26,11 @@ public class StartInstancesResult extends CloudPlatformResult<StartInstancesRequ
 
     public InstancesStatusResult getResults() {
         return results;
+    }
+
+    @Override
+    public Long getStackId() {
+        return cloudContext.getId();
     }
 
 }

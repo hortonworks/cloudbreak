@@ -23,11 +23,6 @@ public class StackStartFailedAction extends AbstractStackStartAction<StartInstan
     }
 
     @Override
-    protected Long getStackId(StartInstancesResult payload) {
-        return payload.getCloudContext().getId();
-    }
-
-    @Override
     protected Object getFailurePayload(StackStartStopContext flowContext, Exception ex) {
         return null;
     }

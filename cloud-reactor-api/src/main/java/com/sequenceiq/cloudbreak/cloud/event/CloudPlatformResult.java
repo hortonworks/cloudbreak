@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.event;
 
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 
-public class CloudPlatformResult<R extends CloudPlatformRequest> {
+public class CloudPlatformResult<R extends CloudPlatformRequest> implements Payload {
 
     private EventStatus status;
     private String statusReason;
@@ -63,5 +63,10 @@ public class CloudPlatformResult<R extends CloudPlatformRequest> {
                 + ", errorDetails=" + errorDetails
                 + ", request=" + request
                 + '}';
+    }
+
+    @Override
+    public Long getStackId() {
+        return request.getCloudContext().getId();
     }
 }

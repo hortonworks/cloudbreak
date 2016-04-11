@@ -4,13 +4,15 @@ import javax.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 
+import com.sequenceiq.cloudbreak.cloud.event.ClusterPayload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
-abstract class AbstractClusterTerminationAction<P> extends AbstractAction<ClusterTerminationState, ClusterTerminationEvent, ClusterContext, P> {
+abstract class AbstractClusterTerminationAction<P extends ClusterPayload>
+        extends AbstractAction<ClusterTerminationState, ClusterTerminationEvent, ClusterContext, P> {
 
     @Inject
     private ClusterService clusterService;
@@ -22,7 +24,7 @@ abstract class AbstractClusterTerminationAction<P> extends AbstractAction<Cluste
     @Override
     protected ClusterContext createFlowContext(StateContext<ClusterTerminationState, ClusterTerminationEvent> stateContext, P payload) {
         String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
-        Cluster cluster = clusterService.getById(getClusterId(payload));
+        Cluster cluster = clusterService.getById(payload.getClusterId());
         return new ClusterContext(flowId, cluster);
     }
 
@@ -36,5 +38,4 @@ abstract class AbstractClusterTerminationAction<P> extends AbstractAction<Cluste
         return null;
     }
 
-    protected abstract Long getClusterId(P payload);
 }

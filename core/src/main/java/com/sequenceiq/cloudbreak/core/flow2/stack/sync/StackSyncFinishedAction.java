@@ -33,8 +33,4 @@ public class StackSyncFinishedAction extends AbstractStackSyncAction<GetInstance
         return new SelectableEvent(StackSyncEvent.SYNC_FINALIZED_EVENT.stringRepresentation());
     }
 
-    @Override
-    protected Long getStackId(GetInstancesStateResult payload) {
-        return payload.getCloudContext().getId();
-    }
 }

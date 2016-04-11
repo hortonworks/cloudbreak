@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.event;
 
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
-public class ProvisionEvent {
+public class ProvisionEvent implements Payload {
 
     private Platform cloudPlatform;
     private Long stackId;
@@ -23,6 +24,7 @@ public class ProvisionEvent {
         this.cloudPlatform = cloudPlatform;
     }
 
+    @Override
     public Long getStackId() {
         return stackId;
     }

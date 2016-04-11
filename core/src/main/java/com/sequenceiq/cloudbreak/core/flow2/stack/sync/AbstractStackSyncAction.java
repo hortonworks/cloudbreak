@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -27,7 +28,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-abstract class AbstractStackSyncAction<P> extends AbstractAction<StackSyncState, StackSyncEvent, StackSyncContext, P> {
+abstract class AbstractStackSyncAction<P extends Payload> extends AbstractAction<StackSyncState, StackSyncEvent, StackSyncContext, P> {
 
     @Inject
     private StackService stackService;
@@ -45,7 +46,7 @@ abstract class AbstractStackSyncAction<P> extends AbstractAction<StackSyncState,
     @Override
     protected StackSyncContext createFlowContext(StateContext<StackSyncState, StackSyncEvent> stateContext, P payload) {
         String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
-        Long stackId = getStackId(payload);
+        Long stackId = payload.getStackId();
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataRepository.findNotTerminatedForStack(stackId));
@@ -64,5 +65,4 @@ abstract class AbstractStackSyncAction<P> extends AbstractAction<StackSyncState,
         return new GetInstancesStateResult(ex.getMessage(), ex, stateRequest);
     }
 
-    protected abstract Long getStackId(P payload);
 }

@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow.handlers;
 
+import com.sequenceiq.cloudbreak.cloud.event.ClusterPayload;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 
-public class AmbariClusterResult<R extends AmbariClusterRequest> {
+public class AmbariClusterResult<R extends AmbariClusterRequest> implements ClusterPayload {
 
     private EventStatus status;
     private String statusReason;
@@ -54,5 +55,15 @@ public class AmbariClusterResult<R extends AmbariClusterRequest> {
         return "CloudPlatformResult{"
                 + "request=" + request
                 + '}';
+    }
+
+    @Override
+    public Long getStackId() {
+        return request.getClusterContext().getStackId();
+    }
+
+    @Override
+    public Long getClusterId() {
+        return request.getClusterContext().getClusterId();
     }
 }

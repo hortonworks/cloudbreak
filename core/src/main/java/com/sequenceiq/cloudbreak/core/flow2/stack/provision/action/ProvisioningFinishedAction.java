@@ -6,8 +6,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
@@ -23,8 +21,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Component("ProvisioningFinishedAction")
 public class ProvisioningFinishedAction extends AbstractStackCreationAction<LaunchStackResult> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProvisioningFinishedAction.class);
-
     @Inject
     private StackCreationService stackCreationService;
     @Inject
@@ -60,8 +56,4 @@ public class ProvisioningFinishedAction extends AbstractStackCreationAction<Laun
         return result;
     }
 
-    @Override
-    protected Long getStackId(LaunchStackResult payload) {
-        return payload.getRequest().getCloudContext().getId();
-    }
 }

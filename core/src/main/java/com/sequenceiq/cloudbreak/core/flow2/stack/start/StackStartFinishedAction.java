@@ -24,11 +24,6 @@ public class StackStartFinishedAction extends AbstractStackStartAction<StartInst
     }
 
     @Override
-    protected Long getStackId(StartInstancesResult payload) {
-        return payload.getCloudContext().getId();
-    }
-
-    @Override
     protected void doExecute(StackStartStopContext context, StartInstancesResult payload, Map<Object, Object> variables) throws Exception {
         stackStartStopService.finishStackStart(context);
         sendEvent(context);

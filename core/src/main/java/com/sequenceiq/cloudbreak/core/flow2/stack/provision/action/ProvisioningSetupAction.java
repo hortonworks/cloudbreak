@@ -24,9 +24,4 @@ public class ProvisioningSetupAction extends AbstractStackCreationAction<Provisi
     protected Selectable createRequest(StackContext context) {
         return new SetupRequest<SetupResult>(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
     }
-
-    @Override
-    protected Long getStackId(ProvisionRequest payload) {
-        return payload.getStackId();
-    }
 }

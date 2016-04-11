@@ -44,11 +44,6 @@ public class StackSyncFailedAction extends AbstractStackSyncAction<GetInstancesS
     }
 
     @Override
-    protected Long getStackId(GetInstancesStateResult payload) {
-        return payload.getCloudContext().getId();
-    }
-
-    @Override
     protected Object getFailurePayload(StackSyncContext flowContext, Exception ex) {
         return null;
     }

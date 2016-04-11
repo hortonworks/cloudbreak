@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow.context;
 
+import com.sequenceiq.cloudbreak.cloud.event.InstancePayload;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 
-public class StackInstanceUpdateContext extends DefaultFlowContext {
+public class StackInstanceUpdateContext extends DefaultFlowContext implements InstancePayload {
 
     private final String instanceId;
 
@@ -11,6 +12,7 @@ public class StackInstanceUpdateContext extends DefaultFlowContext {
         this.instanceId = removeInstanceRequest.getInstanceId();
     }
 
+    @Override
     public String getInstanceId() {
         return instanceId;
     }

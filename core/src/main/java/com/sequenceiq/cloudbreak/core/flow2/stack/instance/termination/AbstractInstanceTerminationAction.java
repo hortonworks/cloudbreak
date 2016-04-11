@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.InstancePayload;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -31,7 +32,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-abstract class AbstractInstanceTerminationAction<P> extends AbstractAction<InstanceTerminationState, InstanceTerminationEvent, InstanceTerminationContext, P> {
+abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
+        extends AbstractAction<InstanceTerminationState, InstanceTerminationEvent, InstanceTerminationContext, P> {
 
     @Inject
     private StackService stackService;
@@ -58,15 +60,15 @@ abstract class AbstractInstanceTerminationAction<P> extends AbstractAction<Insta
     @Override
     protected InstanceTerminationContext createFlowContext(StateContext<InstanceTerminationState, InstanceTerminationEvent> stateContext, P payload) {
         String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
-        Stack stack = stackService.getById(getStackId(payload));
+        Stack stack = stackService.getById(payload.getStackId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        CloudStack cloudStack = cloudStackConverter.convert(stack, Collections.singleton(getInstanceId(payload)));
+        String instanceId = payload.getInstanceId();
+        CloudStack cloudStack = cloudStackConverter.convert(stack, Collections.singleton(instanceId));
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        String instanceId = getInstanceId(payload);
         InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
         CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData);
         return new InstanceTerminationContext(flowId, stack, cloudContext, cloudCredential, cloudStack, cloudResources, cloudInstance, instanceMetaData);
@@ -79,7 +81,4 @@ abstract class AbstractInstanceTerminationAction<P> extends AbstractAction<Insta
         return new RemoveInstanceResult(ex.getMessage(), ex, downscaleStackRequest);
     }
 
-    protected abstract Long getStackId(P payload);
-
-    protected abstract String getInstanceId(P payload);
 }

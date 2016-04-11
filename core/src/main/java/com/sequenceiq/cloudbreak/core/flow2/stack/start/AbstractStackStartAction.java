@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceCo
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -33,7 +34,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-public abstract class AbstractStackStartAction<P> extends AbstractAction<StackStartState, StackStartEvent, StackStartStopContext, P> {
+public abstract class AbstractStackStartAction<P extends Payload> extends AbstractAction<StackStartState, StackStartEvent, StackStartStopContext, P> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackStartAction.class);
     @Inject
     private StackService stackService;
@@ -57,7 +58,7 @@ public abstract class AbstractStackStartAction<P> extends AbstractAction<StackSt
     @Override
     protected StackStartStopContext createFlowContext(StateContext<StackStartState, StackStartEvent> stateContext, P payload) {
         String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
-        Long stackId = getStackId(payload);
+        Long stackId = payload.getStackId();
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataRepository.findNotTerminatedForStack(stackId));
@@ -76,6 +77,4 @@ public abstract class AbstractStackStartAction<P> extends AbstractAction<StackSt
                 cloudResources, cloudInstances);
         return new StartInstancesResult(ex.getMessage(), ex, startRequest);
     }
-
-    protected abstract Long getStackId(P payload);
 }

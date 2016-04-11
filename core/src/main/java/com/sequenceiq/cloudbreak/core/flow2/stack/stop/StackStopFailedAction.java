@@ -32,11 +32,6 @@ public class StackStopFailedAction extends AbstractStackStopAction<StopInstances
     }
 
     @Override
-    protected Long getStackId(StopInstancesResult payload) {
-        return payload.getCloudContext().getId();
-    }
-
-    @Override
     protected Object getFailurePayload(StackStartStopContext flowContext, Exception ex) {
         return null;
     }

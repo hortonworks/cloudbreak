@@ -28,11 +28,6 @@ public class CollectMetadataAction extends AbstractStackCreationAction<CollectMe
     }
 
     @Override
-    protected Long getStackId(CollectMetadataResult payload) {
-        return payload.getRequest().getCloudContext().getId();
-    }
-
-    @Override
     protected void doExecute(StackContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
         Stack stack = stackCreationService.setupMetadata(context, payload);
         StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),

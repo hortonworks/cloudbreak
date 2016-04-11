@@ -34,9 +34,4 @@ public class StackSyncAction extends AbstractStackSyncAction<StackStatusUpdateCo
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(context.getInstanceMetaData());
         return new GetInstancesStateRequest<GetInstancesStateResult>(context.getCloudContext(), context.getCloudCredential(), cloudInstances);
     }
-
-    @Override
-    protected Long getStackId(StackStatusUpdateContext payload) {
-        return payload.getStackId();
-    }
 }

@@ -27,11 +27,6 @@ public class TlsSetupAction extends AbstractStackCreationAction<GetSSHFingerprin
     }
 
     @Override
-    protected Long getStackId(GetSSHFingerprintsResult payload) {
-        return payload.getRequest().getCloudContext().getId();
-    }
-
-    @Override
     protected void doExecute(StackContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws CloudbreakException {
         this.context = context;
         this.payload = payload;

@@ -39,11 +39,6 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Defau
     }
 
     @Override
-    protected Long getStackId(DefaultFlowContext payload) {
-        return payload.getStackId();
-    }
-
-    @Override
     protected void doExecute(StackTerminationContext context, DefaultFlowContext payload, Map<Object, Object> variables) {
         doExecute(context);
     }
