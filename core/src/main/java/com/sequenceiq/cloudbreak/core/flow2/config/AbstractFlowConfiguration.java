@@ -70,17 +70,17 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     private void configure(StateMachineStateConfigurer<S, E> stateConfig, StateMachineTransitionConfigurer<S, E> transitionConfig,
             FlowEdgeConfig<S, E> flowEdgeConfig, List<Transition<S, E>> transitions) throws Exception {
         StateConfigurer<S, E> stateConfigurer = stateConfig.withStates()
-                .initial(flowEdgeConfig.initState, flowEdgeConfig.initState.action() != null ? getAction(flowEdgeConfig.initState.action()) : null)
+                .initial(flowEdgeConfig.initState, flowEdgeConfig.initState.action() != null ? getAction(flowEdgeConfig.initState) : null)
                 .end(flowEdgeConfig.finalState);
         ExternalTransitionConfigurer<S, E> transitionConfigurer = null;
         Set<S> failHandled = new HashSet<>();
         for (Transition<S, E> transition : transitions) {
             transitionConfigurer = transitionConfigurer == null ? transitionConfig.withExternal() : transitionConfigurer.and().withExternal();
-            stateConfigurer.state(transition.target, getAction(transition.target.action()), null);
+            stateConfigurer.state(transition.target, getAction(transition.target), null);
             transitionConfigurer.source(transition.source).target(transition.target).event(transition.event);
             if (transition.target.failureEvent() != null && transition.target != flowEdgeConfig.defaultFailureState) {
                 S failureState = Optional.fromNullable((S) transition.target.failureState()).or(flowEdgeConfig.defaultFailureState);
-                stateConfigurer.state(failureState, getAction(failureState.action()), null);
+                stateConfigurer.state(failureState, getAction(failureState), null);
                 transitionConfigurer.and().withExternal().source(transition.target).target(failureState).event((E) transition.target.failureEvent());
                 if (!failHandled.contains(failureState)) {
                     failHandled.add(failureState);
@@ -119,8 +119,16 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 new EventConverterAdapter<>(eventType));
     }
 
+    protected Action<S, E> getAction(FlowState state) {
+        return state.action() == null ? getAction(state.name()) : getAction(state.action());
+    }
+
     private Action<S, E> getAction(Class<? extends Action> clazz) {
         return applicationContext.getBean(clazz.getSimpleName(), clazz);
+    }
+
+    private Action<S, E> getAction(String name) {
+        return applicationContext.getBean(name, Action.class);
     }
 
     protected abstract List<Transition<S, E>> getTransitions();
