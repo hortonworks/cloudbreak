@@ -88,7 +88,7 @@ public final class GcpStackUtil {
     }
 
     public static String getProjectId(CloudCredential credential) {
-        return credential.getParameter(PROJECT_ID, String.class);
+        return credential.getParameter(PROJECT_ID, String.class).toLowerCase().replaceAll("[^A-Za-z0-9 ]", "-");
     }
 
     public static boolean analyzeOperation(Operation operation) throws Exception {
