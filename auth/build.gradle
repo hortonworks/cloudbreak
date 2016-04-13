@@ -16,8 +16,6 @@ apply plugin: 'com.moowork.grunt'
 grunt_jsbeautifier.dependsOn 'npmInstall'
 grunt_jsbeautifier.dependsOn 'installGrunt'
 
-build.dependsOn grunt_jsbeautifier
-
 node {
   version = '5.7.0'
   download = true
