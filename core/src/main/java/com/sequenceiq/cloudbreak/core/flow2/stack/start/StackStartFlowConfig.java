@@ -24,6 +24,7 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
             new Transition<>(INIT_STATE, START_STATE, START_EVENT),
             new Transition<>(START_STATE, START_FINISHED_STATE, START_FINISHED_EVENT)
     );
+
     private static final FlowEdgeConfig<StackStartState, StackStartEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, START_FINISHED_STATE, START_FINALIZED_EVENT, START_FAILED_STATE, START_FAIL_HANDLED_EVENT);
 
