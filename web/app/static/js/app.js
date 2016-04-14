@@ -5,7 +5,7 @@
 var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'blockUI', 'ui.bootstrap', 'uluwatuControllers', 'uluwatuServices']);
 
 (function() {
-    fetchAccountPreferences().then(fetchOptions()).then(fetchConfigData()).then(fetchLocalConfigData).then(bootstrapApplication);
+    fetchAccountPreferences().then(fetchOptions).then(fetchConfigData).then(fetchLocalConfigData).then(bootstrapApplication);
 
     function fetchAccountPreferences() {
         var initInjector = angular.injector(["ng"]);
@@ -22,7 +22,6 @@ var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'block
     function fetchOptions() {
         var initInjector = angular.injector(["ng"]);
         var $http = initInjector.get("$http");
-
         return $http.get("/settings/all").then(function(response) {
             cloudbreakApp.constant("settings", response.data);
         }, function(errorResponse) {
@@ -34,7 +33,6 @@ var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'block
     function fetchConfigData() {
         var initInjector = angular.injector(["ng"]);
         var $http = initInjector.get("$http");
-
         return $http.get("/connectors").then(function(response) {
             cloudbreakApp.constant("initconf", response.data);
         }, function(errorResponse) {
@@ -46,7 +44,6 @@ var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'block
     function fetchLocalConfigData() {
         var initInjector = angular.injector(["ng"]);
         var $http = initInjector.get("$http");
-
         return $http.get("config/displaynames.json").then(function(response) {
             function Config(data) {
                 angular.extend(this, data);
