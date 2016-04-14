@@ -7,8 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VmTypeJson {
     private String value;
-    private Integer maxEphemeralVolumeCount;
-    private String ephemeralVolumeSize;
+    private VmTypeMetaJson vmTypeMetaJson;
 
     public VmTypeJson() {
 
@@ -18,21 +17,24 @@ public class VmTypeJson {
         this.value = value;
     }
 
-    public VmTypeJson(String value, Integer maxEphemeralVolumeCount, String ephemeralVolumeSize) {
+    public VmTypeJson(String value, VmTypeMetaJson vmTypeMetaJson) {
         this.value = value;
-        this.maxEphemeralVolumeCount = maxEphemeralVolumeCount;
-        this.ephemeralVolumeSize = ephemeralVolumeSize;
+        this.vmTypeMetaJson = vmTypeMetaJson;
     }
 
     public String getValue() {
         return value;
     }
 
-    public Integer getMaxEphemeralVolumeCount() {
-        return maxEphemeralVolumeCount;
+    public void setValue(String value) {
+        this.value = value;
     }
 
-    public String getEphemeralVolumeSize() {
-        return ephemeralVolumeSize;
+    public VmTypeMetaJson getVmTypeMetaJson() {
+        return vmTypeMetaJson;
+    }
+
+    public void setVmTypeMetaJson(VmTypeMetaJson vmTypeMetaJson) {
+        this.vmTypeMetaJson = vmTypeMetaJson;
     }
 }

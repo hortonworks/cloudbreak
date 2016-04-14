@@ -247,6 +247,7 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.params.defaultRegions = initconf.regions.defaultRegions;
                 $rootScope.params.zones = initconf.regions.availabilityZones;
                 $rootScope.params.diskTypes = initconf.disks.diskTypes;
+                $rootScope.params.diskMappings = initconf.disks.diskMappings;
                 $rootScope.params.defaultDisks = initconf.disks.defaultDisks;
                 $rootScope.params.vmTypes = initconf.virtualMachines.virtualMachines;
                 $rootScope.params.defaultVmTypes = initconf.virtualMachines.defaultVirtualMachines;
@@ -258,6 +259,7 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.params.defaultRegions = {};
                 $rootScope.params.zones = {};
                 $rootScope.params.diskTypes = {};
+                $rootScope.params.diskMappings = {};
                 $rootScope.params.defaultDisks = {};
                 $rootScope.params.vmTypes = {};
                 $rootScope.params.defaultVmTypes = {};

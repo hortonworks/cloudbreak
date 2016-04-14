@@ -1,0 +1,79 @@
+{
+  "items": [
+    {
+      "name": "eu-central-1",
+      "zones": [
+        "eu-central-1a",
+        "eu-central-1b"
+      ]
+    },
+    {
+      "name": "sa-east-1",
+      "zones": [
+        "sa-east-1a",
+        "sa-east-1b",
+        "sa-east-1c"
+      ]
+    },
+    {
+      "name": "ap-northeast-1",
+      "zones": [
+        "ap-northeast-1a",
+        "ap-northeast-1c"
+      ]
+    },
+    {
+      "name": "eu-west-1",
+      "zones": [
+        "eu-west-1a",
+        "eu-west-1b",
+        "eu-west-1c"
+      ]
+    },
+    {
+      "name": "ap-northeast-2",
+      "zones": [
+        "ap-northeast-2a",
+        "ap-northeast-2c"
+      ]
+    },
+    {
+      "name": "us-east-1",
+      "zones": [
+        "us-east-1a",
+        "us-east-1b",
+        "us-east-1d",
+        "us-east-1e"
+      ]
+    },
+    {
+      "name": "us-west-1",
+      "zones": [
+        "us-west-1a",
+        "us-west-1b"
+      ]
+    },
+    {
+      "name": "us-west-2",
+      "zones": [
+        "us-west-2a",
+        "us-west-2b",
+        "us-west-2c"
+      ]
+    },
+    {
+      "name": "ap-southeast-2",
+      "zones": [
+        "ap-southeast-2a",
+        "ap-southeast-2b"
+      ]
+    },
+    {
+      "name": "ap-southeast-1",
+      "zones": [
+        "ap-southeast-1a",
+        "ap-southeast-1b"
+      ]
+    }
+  ]
+}

@@ -13,11 +13,6 @@ angular.module('uluwatuControllers').controller('templateController', [
         $scope.openstackTemplateForm = {};
         $scope.mesosTemplateForm = {};
         $scope.awsInstanceType = {};
-        initializeAzureTemp();
-        initializeAwsTemp();
-        initializeGcpTemp();
-        initializeOpenstackTemp();
-        initializeMesosTemp();
         $scope.showAlert = false;
         $scope.alertMessage = "";
         var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "BYOS", "GCP", "OPENSTACK"]);
@@ -241,7 +236,10 @@ angular.module('uluwatuControllers').controller('templateController', [
                     var instanceTypeParams = $filter('filter')($rootScope.params.vmTypes.AWS, {
                         value: $scope.awsTemp.instanceType
                     }, true)[0];
-                    if (volume !== 'ephemeral' || instanceTypeParams.maxEphemeralVolumeCount !== 0) {
+                    var ephemeralVolumeConfig = $filter('filter')(instanceTypeParams.vmTypeMetaJson.configs, {
+                        volumeParameterType: 'EPHEMERAL'
+                    }, true)[0];
+                    if (volume !== 'ephemeral' || (ephemeralVolumeConfig !== null && ephemeralVolumeConfig.maximumNumber !== 0)) {
                         return true;
                     }
                 }
@@ -259,17 +257,42 @@ angular.module('uluwatuControllers').controller('templateController', [
             return volume !== 'ephemeral';
         }
 
-        $scope.changeAwsInstanceType = function() {
-            var instanceType = $scope.awsTemp.instanceType;
-            $scope.awsInstanceType = $filter('filter')($rootScope.params.vmTypes.AWS, {
+        $scope.changeInstanceType = function(instanceType, volumeType, platform, templateTemp) {
+            var actualInstanceType = $filter('filter')($rootScope.params.vmTypes[platform], {
                 value: instanceType
             }, true)[0];
-            if ($scope.awsTemp.volumeType == 'ephemeral') {
-                $scope.awsTemp.parameters.encrypted = false;
-                $scope.awsTemp.maxEphemeralVolumeCount = $scope.awsInstanceType.maxEphemeralVolumeCount
-                $scope.awsTemp.volumeCount = $scope.awsInstanceType.maxEphemeralVolumeCount
+            var diskMapping = $rootScope.params.diskMappings[platform][volumeType];
+            if (diskMapping !== null && diskMapping !== undefined && actualInstanceType !== null && actualInstanceType !== undefined) {
+                var diskConfig = $filter('filter')(actualInstanceType.vmTypeMetaJson.configs, {
+                    volumeParameterType: diskMapping
+                }, true)[0];
+                templateTemp.maxDiskNumber = diskConfig.maximumNumber;
+                templateTemp.minDiskNumber = diskConfig.minimumNumber;
+                templateTemp.minDiskSize = diskConfig.minimumSize;
+                templateTemp.maxDiskSize = diskConfig.maximumSize;
+                templateTemp.CPUs = actualInstanceType.vmTypeMetaJson.properties.Cpu;
+                templateTemp.RAMs = actualInstanceType.vmTypeMetaJson.properties.Memory;
+                if (templateTemp.maxDiskNumber === templateTemp.minDiskNumber) {
+                    templateTemp.volumeCount = templateTemp.maxDiskNumber;
+                } else if (templateTemp.volumeCount < templateTemp.minDiskNumber) {
+                    templateTemp.volumeCount = templateTemp.minDiskNumber;
+                } else if (templateTemp.volumeCount > templateTemp.maxDiskNumber) {
+                    templateTemp.volumeCount = templateTemp.maxDiskNumber;
+                }
+                if (templateTemp.minDiskSize === templateTemp.maxDiskSize) {
+                    templateTemp.volumeSize = templateTemp.maxDiskSize;
+                } else if (templateTemp.volumeSize < templateTemp.minDiskSize) {
+                    templateTemp.volumeSize = templateTemp.minDiskSize;
+                } else if (templateTemp.volumeSize > templateTemp.maxDiskSize) {
+                    templateTemp.volumeSize = templateTemp.maxDiskSize;
+                }
             } else {
-                delete $scope.awsTemp.maxEphemeralVolumeCount;
+                templateTemp.maxDiskNumber = 24;
+                templateTemp.minDiskNumber = 1;
+                templateTemp.minDiskSize = 10;
+                templateTemp.maxDiskSize = 10000;
+                templateTemp.CPUs = null;
+                templateTemp.RAMs = null;
             }
         }
 
@@ -287,7 +310,8 @@ angular.module('uluwatuControllers').controller('templateController', [
                     sshLocation: "0.0.0.0/0",
                     encrypted: false
                 }
-            }
+            };
+            $scope.changeInstanceType($scope.awsTemp.instanceType, $scope.awsTemp.volumeType, "AWS", $scope.awsTemp);
         }
 
         function initializeAzureTemp() {
@@ -298,6 +322,7 @@ angular.module('uluwatuControllers').controller('templateController', [
                 instanceType: $rootScope.params.defaultVmTypes.AZURE_RM,
                 parameters: {}
             }
+            $scope.changeInstanceType($scope.azureTemp.instanceType, $scope.azureTemp.volumeType, "AZURE_RM", $scope.azureTemp);
         }
 
         function initializeMesosTemp() {
@@ -315,6 +340,7 @@ angular.module('uluwatuControllers').controller('templateController', [
                 volumeType: "HDD",
                 parameters: {}
             }
+            $scope.changeInstanceType($scope.openstackTemp.instanceType, $scope.openstackTemp.volumeType, "OPENSTACK", $scope.openstackTemp);
         }
 
         function initializeGcpTemp() {
@@ -325,6 +351,7 @@ angular.module('uluwatuControllers').controller('templateController', [
                 volumeType: $rootScope.params.defaultDisks.GCP,
                 parameters: {}
             }
+            $scope.changeInstanceType($scope.gcpTemp.instanceType, $scope.gcpTemp.volumeType, "GCP", $scope.gcpTemp);
         }
 
         $scope.filterByCloudPlatform = function(topology) {
@@ -353,5 +380,11 @@ angular.module('uluwatuControllers').controller('templateController', [
             $scope.showAlert = true;
             $scope.alertMessage = $scope.statusMessage;
         }
+
+         initializeAzureTemp();
+         initializeAwsTemp();
+         initializeGcpTemp();
+         initializeOpenstackTemp();
+         initializeMesosTemp();
     }
 ]);

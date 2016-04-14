@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.byos;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 
 @Service
 public class BYOSPlatformParameters implements PlatformParameters {
@@ -27,7 +30,11 @@ public class BYOSPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(Collections.<DiskType>emptyList(), DiskType.diskType(""));
+        return new DiskTypes(Collections.<DiskType>emptyList(), DiskType.diskType(""), diskMappings());
+    }
+
+    private Map<String, VolumeParameterType> diskMappings() {
+        return new HashMap<>();
     }
 
     @Override

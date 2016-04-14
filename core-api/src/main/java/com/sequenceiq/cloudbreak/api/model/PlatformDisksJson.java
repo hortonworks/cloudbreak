@@ -11,10 +11,12 @@ public class PlatformDisksJson implements JsonEntity {
 
     private Map<String, Collection<String>> diskTypes;
     private Map<String, String> defaultDisks;
+    private Map<String, Map<String, String>> diskMappings;
 
     public PlatformDisksJson() {
         this.diskTypes = new HashMap<>();
         this.defaultDisks = new HashMap<>();
+        this.diskMappings = new HashMap<>();
     }
 
     public Map<String, Collection<String>> getDiskTypes() {
@@ -31,5 +33,13 @@ public class PlatformDisksJson implements JsonEntity {
 
     public void setDefaultDisks(Map<String, String> defaultDisks) {
         this.defaultDisks = defaultDisks;
+    }
+
+    public Map<String, Map<String, String>> getDiskMappings() {
+        return diskMappings;
+    }
+
+    public void setDiskMappings(Map<String, Map<String, String>> diskMappings) {
+        this.diskMappings = diskMappings;
     }
 }

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import freemarker.template.Configuration;
@@ -68,7 +69,7 @@ public class UserDataBuilderTest {
 
             @Override
             public DiskTypes diskTypes() {
-                return new DiskTypes(new ArrayList<DiskType>(), DiskType.diskType(""));
+                return new DiskTypes(new ArrayList<DiskType>(), DiskType.diskType(""), new HashMap<String, VolumeParameterType>());
             }
 
             @Override

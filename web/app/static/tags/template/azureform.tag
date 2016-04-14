@@ -26,8 +26,9 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="azure_tvmType">{{msg.template_form_instance_type_label}}</label>
     <div class="col-sm-9">
-        <select class="form-control" id="azure_tvmType" ng-options="vmType.value as vmType.value for vmType in $root.params.vmTypes.AZURE_RM" ng-model="azureTemp.instanceType" required>
+        <select class="form-control" id="azure_tvmType" ng-options="vmType.value as vmType.value for vmType in $root.params.vmTypes.AZURE_RM" ng-model="azureTemp.instanceType" ng-change="changeInstanceType(azureTemp.instanceType, azureTemp.volumeType, 'AZURE_RM', azureTemp)" required>
         </select>
+        <div class="help-block ng-binding" ng-show="azureTemp.CPUs && azureTemp.RAMs">{{msg.template_form_vm_info | format: azureTemp.CPUs:azureTemp.RAMs}}</p>
     </div>
     <!-- .col-sm-9 -->
 </div>
@@ -36,7 +37,7 @@
     <label class="col-sm-3 control-label" for="azure_tvolumetype">{{msg.template_form_volume_type_label}}</label>
 
     <div class="col-sm-9">
-        <select class="form-control" id="azure_tvolumetype" name="azure_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AZURE_RM', volumeType) for volumeType in $root.params.diskTypes.AZURE_RM | filter:filterByVolumetype" ng-model="azureTemp.volumeType" required>
+        <select class="form-control" id="azure_tvolumetype" name="azure_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AZURE_RM', volumeType) for volumeType in $root.params.diskTypes.AZURE_RM | filter:filterByVolumetype" ng-model="azureTemp.volumeType" ng-change="changeInstanceType(azureTemp.instanceType, azureTemp.volumeType, 'AZURE_RM', azureTemp)" required>
         </select>
     </div>
     <!-- .col-sm-9 -->
@@ -46,9 +47,9 @@
     <label class="col-sm-3 control-label" for="azure_tvolumescount">{{msg.template_form_volume_count_label}}</label>
 
     <div class="col-sm-9">
-        <input type="number" class="form-control" id="azure_tvolumescount" name="azure_tvolumescount" ng-model="azureTemp.volumeCount" placeholder="{{msg.template_form_volume_count_placeholder}}" min="1" max="12" required>
+        <input type="number" class="form-control" id="azure_tvolumescount" name="azure_tvolumescount" ng-model="azureTemp.volumeCount" placeholder="{{msg.template_form_volume_count_placeholder | format: azureTemp.minDiskNumber:(azureTemp.maxDiskNumber)}}" min="{{azureTemp.minDiskNumber}}" max="{{azureTemp.maxDiskNumber}}" required>
         <div class="help-block" ng-show="azureTemplateForm.azure_tvolumescount.$dirty && azureTemplateForm.azure_tvolumescount.$invalid">
-            <i class="fa fa-warning"></i> {{msg.volume_count_invalid | format : 12}}
+            <i class="fa fa-warning"></i> {{msg.volume_count_invalid | format: azureTemp.minDiskNumber:(azureTemp.maxDiskNumber)}}
         </div>
     </div>
     <!-- .col-sm-9 -->
@@ -59,9 +60,9 @@
     <label class="col-sm-3 control-label" for="azure_tvolumesize">{{msg.template_form_volume_size_label}}</label>
 
     <div class="col-sm-9">
-        <input type="number" class="form-control" id="azure_tvolumesize" name="azure_tvolumesize" ng-model="azureTemp.volumeSize" placeholder="{{msg.template_form_volume_size_placeholder}}" min="10" max="1000" required>
+        <input type="number" class="form-control" id="azure_tvolumesize" name="azure_tvolumesize" ng-model="azureTemp.volumeSize" placeholder="{{msg.template_form_volume_size_placeholder | format: azureTemp.minDiskSize:(azureTemp.maxDiskSize)}}" min="{{azureTemp.minDiskSize}}" max="{{azureTemp.maxDiskSize}}" ng-required="azureTemp.maxDiskSize !== azureTemp.minDiskSize" ng-hide="azureTemp.maxDiskSize == azureTemp.minDiskSize">
         <div class="help-block" ng-show="azureTemplateForm.azure_tvolumesize.$dirty && azureTemplateForm.azure_tvolumesize.$invalid">
-            <i class="fa fa-warning"></i> {{msg.volume_size_invalid}}
+            <i class="fa fa-warning"></i> {{msg.volume_size_invalid | format: azureTemp.minDiskSize:(azureTemp.maxDiskSize)}}
         </div>
     </div>
     <!-- .col-sm-9 -->

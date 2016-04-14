@@ -23,8 +23,16 @@ public class VmType extends StringType {
         return new VmType(vmType, meta);
     }
 
+    public VolumeParameterConfig getVolumeParameterbyVolumeParameterType(VolumeParameterType volumeParameterType) {
+        return volumeParameterType.getVolumeParameterbyType(this.metaData);
+    }
+
     public VmTypeMeta getMetaData() {
         return metaData;
+    }
+
+    public String getMetaDataValue(String key) {
+        return metaData.getProperties().get(key);
     }
 
     public boolean isMetaSet() {

@@ -19,30 +19,32 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcp_tinstanceType">{{msg.template_form_instance_type_label}}</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcp_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.GCP" ng-model="gcpTemp.instanceType">
+        <select class="form-control" id="gcp_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.GCP" ng-model="gcpTemp.instanceType" ng-change="changeInstanceType(gcpTemp.instanceType, gcpTemp.volumeType, 'GCP', gcpTemp)">
         </select>
+       <div class="help-block ng-binding" ng-show="gcpTemp.CPUs && gcpTemp.RAMs">{{msg.template_form_vm_info | format: gcpTemp.CPUs:gcpTemp.RAMs}}</p>
     </div>
+
 </div>
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcp_tvolumetype">{{msg.template_form_volume_type_label}}</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcp_tvolumetype" ng-options="diskType as $root.displayNames.getDisk('GCP', diskType) for diskType in $root.params.diskTypes.GCP" ng-model="gcpTemp.volumeType">
+        <select class="form-control" id="gcp_tvolumetype" ng-options="diskType as $root.displayNames.getDisk('GCP', diskType) for diskType in $root.params.diskTypes.GCP" ng-model="gcpTemp.volumeType" ng-change="changeInstanceType(gcpTemp.instanceType, gcpTemp.volumeType, 'GCP', gcpTemp)">
         </select>
     </div>
 </div>
 <div class="form-group" ng-class="{ 'has-error': gcpTemplateForm.gcp_tvolumecount.$dirty && gcpTemplateForm.gcp_tvolumecount.$invalid }">
     <label class="col-sm-3 control-label" for="gcp_tvolumecount">{{msg.template_form_volume_count_label}}</label>
     <div class="col-sm-9">
-        <input type="number" name="gcp_tvolumecount" class="form-control" id="gcp_tvolumecount" min="1" ng-model="gcpTemp.volumeCount" placeholder="{{msg.template_form_volume_count_placeholder}}" max="12" required>
-        <div class="help-block" ng-show="gcpTemplateForm.gcp_tvolumecount.$dirty && gcpTemplateForm.gcp_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format : 12}}
+        <input type="number" name="gcp_tvolumecount" class="form-control" id="gcp_tvolumecount" ng-model="gcpTemp.volumeCount" placeholder="{{msg.template_form_volume_count_placeholder | format: gcpTemp.minDiskNumber:(gcpTemp.maxDiskNumber)}}" min="{{gcpTemp.minDiskNumber}}" max="{{gcpTemp.maxDiskNumber}}">
+        <div class="help-block" ng-show="gcpTemplateForm.gcp_tvolumecount.$dirty && gcpTemplateForm.gcp_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format: gcpTemp.minDiskNumber:(gcpTemp.maxDiskNumber)}}
         </div>
     </div>
 </div>
 <div class="form-group" ng-class="{ 'has-error': gcpTemplateForm.gcp_tvolumesize.$dirty && gcpTemplateForm.gcp_tvolumesize.$invalid }">
     <label class="col-sm-3 control-label" for="gcp_tvolumesize">{{msg.template_form_volume_size_label}}</label>
     <div class="col-sm-9">
-        <input type="number" name="gcp_tvolumesize" class="form-control" ng-model="gcpTemp.volumeSize" id="gcp_tvolumesize" min="10" max="1000" placeholder="{{msg.template_form_volume_size_placeholder}}" required>
-        <div class="help-block" ng-show="gcpTemplateForm.gcp_tvolumesize.$dirty && gcpTemplateForm.gcp_tvolumesize.$invalid"><i class="fa fa-warning"></i> {{msg.volume_size_invalid}}
+        <input type="number" name="gcp_tvolumesize" class="form-control" ng-model="gcpTemp.volumeSize" id="gcp_tvolumesize" min="{{gcpTemp.minDiskSize}}" max="{{gcpTemp.maxDiskSize}}" placeholder="{{msg.template_form_volume_size_placeholder | format: gcpTemp.minDiskSize:(gcpTemp.maxDiskSize)}}" ng-required="gcpTemp.maxDiskSize !== gcpTemp.minDiskSize" ng-hide="gcpTemp.maxDiskSize == gcpTemp.minDiskSize">
+        <div class="help-block" ng-show="gcpTemplateForm.gcp_tvolumesize.$dirty && gcpTemplateForm.gcp_tvolumesize.$invalid"><i class="fa fa-warning"></i> {{msg.volume_size_invalid | format: gcpTemp.minDiskSize:(gcpTemp.maxDiskSize)}}
         </div>
     </div>
 </div>

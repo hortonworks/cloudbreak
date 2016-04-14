@@ -1,0 +1,56 @@
+{
+  "items": [
+    {
+      "name": "Central US",
+      "zones": []
+    },
+    {
+      "name": "North Europe",
+      "zones": []
+    },
+    {
+      "name": "East Asia",
+      "zones": []
+    },
+    {
+      "name": "West Europe",
+      "zones": []
+    },
+    {
+      "name": "North Central US",
+      "zones": []
+    },
+    {
+      "name": "West US",
+      "zones": []
+    },
+    {
+      "name": "East US 2",
+      "zones": []
+    },
+    {
+      "name": "Brazil South",
+      "zones": []
+    },
+    {
+      "name": "South Central US",
+      "zones": []
+    },
+    {
+      "name": "Japan East",
+      "zones": []
+    },
+    {
+      "name": "East US",
+      "zones": []
+    },
+    {
+      "name": "Southeast Asia",
+      "zones": []
+    },
+    {
+      "name": "Japan West",
+      "zones": []
+    }
+  ]
+}
