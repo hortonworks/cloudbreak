@@ -18,6 +18,7 @@ public class StartInstancesResult extends CloudPlatformResult<StartInstancesRequ
 
     public StartInstancesResult(String statusReason, Exception errorDetails, StartInstancesRequest request) {
         super(statusReason, errorDetails, request);
+        this.cloudContext = request.getCloudContext();
     }
 
     public CloudContext getCloudContext() {

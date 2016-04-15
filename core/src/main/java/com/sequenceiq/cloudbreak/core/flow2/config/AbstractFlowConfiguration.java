@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.config;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -78,10 +79,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             transitionConfigurer = transitionConfigurer == null ? transitionConfig.withExternal() : transitionConfigurer.and().withExternal();
             stateConfigurer.state(transition.target, getAction(transition.target), null);
             transitionConfigurer.source(transition.source).target(transition.target).event(transition.event);
-            if (transition.target.failureEvent() != null && transition.target != flowEdgeConfig.defaultFailureState) {
+            if (transition.getFailureEvent() != null && transition.target != flowEdgeConfig.defaultFailureState) {
                 S failureState = Optional.fromNullable((S) transition.target.failureState()).or(flowEdgeConfig.defaultFailureState);
                 stateConfigurer.state(failureState, getAction(failureState), null);
-                transitionConfigurer.and().withExternal().source(transition.target).target(failureState).event((E) transition.target.failureEvent());
+                transitionConfigurer.and().withExternal().source(transition.target).target(failureState).event((E) transition.getFailureEvent());
                 if (!failHandled.contains(failureState)) {
                     failHandled.add(failureState);
                     transitionConfigurer.and().withExternal().source(failureState).target(flowEdgeConfig.finalState).event(flowEdgeConfig.failureHandled);
@@ -152,16 +153,114 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         }
     }
 
-    protected static class Transition<S, E> {
+    protected static class Transition<S extends FlowState, E extends FlowEvent> {
         private final S source;
         private final S target;
         private final E event;
+        private final Optional<E> failureEvent;
 
         public Transition(S source, S target, E event) {
             this.source = source;
             this.target = target;
             this.event = event;
+            this.failureEvent = Optional.absent();
         }
+
+        public Transition(S source, S target, E event, E failureEvent) {
+            this.source = source;
+            this.target = target;
+            this.event = event;
+            this.failureEvent = Optional.of(failureEvent);
+        }
+
+        public E getFailureEvent() {
+            return failureEvent.isPresent() ? failureEvent.get() : (E) target.failureEvent();
+        }
+
+        public static class Builder<S extends FlowState, E extends FlowEvent> {
+            private List<Transition<S, E>> transitions = new ArrayList<>();
+            private Optional<E> defaultFailureEvent = Optional.absent();
+
+            public ToBuilder<S, E> from(S from) {
+                return new ToBuilder<>(from, this);
+            }
+
+            public void addTransition(S from, S to, E with) {
+                if (defaultFailureEvent.isPresent()) {
+                    addTransition(from, to, with, defaultFailureEvent.get());
+                }
+                transitions.add(new Transition<>(from, to, with));
+            }
+
+            public void addTransition(S from, S to, E with, E withFailure) {
+                to.setFailureEvent(withFailure);
+                transitions.add(new Transition<>(from, to, with, withFailure));
+            }
+
+            public List<Transition<S, E>> build() {
+                return transitions;
+            }
+
+            public Builder<S, E> defaultFailureEvent(E defaultFailureEvent) {
+                this.defaultFailureEvent = Optional.of(defaultFailureEvent);
+                return this;
+            }
+        }
+
+        public static class ToBuilder<S extends FlowState, E extends FlowEvent> {
+            private final S from;
+            private final Builder<S, E> builder;
+
+            public ToBuilder(S from, Builder<S, E> b) {
+                this.from = from;
+                this.builder = b;
+            }
+
+            public WithBuilder<S, E> to(S to) {
+                return new WithBuilder<>(from, to, builder);
+            }
+        }
+
+        public static class WithBuilder<S extends FlowState, E extends FlowEvent> {
+            private final S from;
+            private final S to;
+            private final Builder<S, E> builder;
+
+            public WithBuilder(S from, S to, Builder<S, E> b) {
+                this.from = from;
+                this.to = to;
+                this.builder = b;
+            }
+
+            public FailureBuilder<S, E> event(E with) {
+                return new FailureBuilder<>(from, to, with, builder);
+            }
+        }
+
+        public static class FailureBuilder<S extends FlowState, E extends FlowEvent> {
+            private final S from;
+            private final S to;
+            private final E with;
+            private final Builder<S, E> builder;
+
+            public FailureBuilder(S from, S to, E with, Builder<S, E> b) {
+                this.from = from;
+                this.to = to;
+                this.with = with;
+                this.builder = b;
+            }
+
+            public Builder<S, E> failure(E withFailure) {
+                builder.addTransition(from, to, with, withFailure);
+                return builder;
+            }
+
+            public Builder<S, E> defaultFailure() {
+                builder.addTransition(from, to, with);
+                return builder;
+            }
+        }
+
     }
 
     protected static class FlowEdgeConfig<S, E> {

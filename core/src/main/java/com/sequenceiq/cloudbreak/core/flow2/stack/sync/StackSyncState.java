@@ -5,19 +5,11 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 public enum StackSyncState implements FlowState<StackSyncState, StackSyncEvent> {
     INIT_STATE,
     SYNC_FAILED_STATE,
-    SYNC_STATE(StackSyncEvent.SYNC_FAILURE_EVENT),
-    SYNC_FINISHED_STATE(StackSyncEvent.SYNC_FAILURE_EVENT),
+    SYNC_STATE,
+    SYNC_FINISHED_STATE,
     FINAL_STATE;
 
     private StackSyncEvent failureEvent;
-    private StackSyncState failureState;
-
-    StackSyncState() {
-    }
-
-    StackSyncState(StackSyncEvent failureEvent) {
-        this.failureEvent = failureEvent;
-    }
 
     @Override
     public Class<?> action() {
@@ -26,11 +18,16 @@ public enum StackSyncState implements FlowState<StackSyncState, StackSyncEvent> 
 
     @Override
     public StackSyncState failureState() {
-        return failureState;
+        return null;
     }
 
     @Override
     public StackSyncEvent failureEvent() {
         return failureEvent;
+    }
+
+    @Override
+    public void setFailureEvent(StackSyncEvent failureEvent) {
+        this.failureEvent = failureEvent;
     }
 }

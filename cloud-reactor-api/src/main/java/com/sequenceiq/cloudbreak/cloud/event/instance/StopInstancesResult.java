@@ -17,6 +17,7 @@ public class StopInstancesResult extends CloudPlatformResult<StopInstancesReques
 
     public StopInstancesResult(String statusReason, Exception errorDetails, StopInstancesRequest request) {
         super(statusReason, errorDetails, request);
+        this.cloudContext = request.getCloudContext();
     }
 
     public CloudContext getCloudContext() {

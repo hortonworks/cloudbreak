@@ -58,4 +58,9 @@ public enum StackCreationState implements FlowState<StackCreationState, StackCre
     public StackCreationState failureState() {
         return failureState;
     }
+
+    @Override
+    public void setFailureEvent(StackCreationEvent failureEvent) {
+        this.failureEvent = failureEvent;
+    }
 }

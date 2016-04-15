@@ -98,6 +98,10 @@ public class AbstractActionTest {
         public Event failureEvent() {
             return Event.FAILURE;
         }
+
+        @Override
+        public void setFailureEvent(Event failureEvent) {
+        }
     }
 
     enum Event implements FlowEvent {

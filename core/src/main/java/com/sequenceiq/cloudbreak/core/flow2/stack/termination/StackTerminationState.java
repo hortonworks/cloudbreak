@@ -39,4 +39,9 @@ enum StackTerminationState implements FlowState<StackTerminationState, StackTerm
     public StackTerminationState failureState() {
         return null;
     }
+
+    @Override
+    public void setFailureEvent(StackTerminationEvent failureEvent) {
+        this.failureEvent = failureEvent;
+    }
 }

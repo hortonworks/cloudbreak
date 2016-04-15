@@ -46,4 +46,9 @@ public enum ClusterTerminationState implements FlowState<ClusterTerminationState
     public ClusterTerminationEvent failureEvent() {
         return failureEvent;
     }
+
+    @Override
+    public void setFailureEvent(ClusterTerminationEvent failureEvent) {
+        this.failureEvent = failureEvent;
+    }
 }

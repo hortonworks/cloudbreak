@@ -39,4 +39,9 @@ enum InstanceTerminationState implements FlowState<InstanceTerminationState, Ins
     public InstanceTerminationState failureState() {
         return null;
     }
+
+    @Override
+    public void setFailureEvent(InstanceTerminationEvent failureEvent) {
+        this.failureEvent = failureEvent;
+    }
 }
