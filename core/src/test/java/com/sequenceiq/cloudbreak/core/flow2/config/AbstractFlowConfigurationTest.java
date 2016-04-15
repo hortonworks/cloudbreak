@@ -122,6 +122,10 @@ public class AbstractFlowConfigurationTest {
         public Event failureEvent() {
             return this == DO2 ? Event.FAILURE2 : Event.FAILURE;
         }
+
+        @Override
+        public void setFailureEvent(Event failureEvent) {
+        }
     }
 
     enum Event implements FlowEvent {

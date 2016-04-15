@@ -5,19 +5,11 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 public enum StackStopState implements FlowState<StackStopState, StackStopEvent> {
     INIT_STATE,
     STOP_FAILED_STATE,
-    STOP_STATE(StackStopEvent.STOP_FAILURE_EVENT),
-    STOP_FINISHED_STATE(StackStopEvent.STOP_FAILURE_EVENT),
+    STOP_STATE,
+    STOP_FINISHED_STATE,
     FINAL_STATE;
 
     private StackStopEvent failureEvent;
-    private StackStopState failureState;
-
-    StackStopState() {
-    }
-
-    StackStopState(StackStopEvent failureEvent) {
-        this.failureEvent = failureEvent;
-    }
 
     @Override
     public Class<?> action() {
@@ -26,7 +18,7 @@ public enum StackStopState implements FlowState<StackStopState, StackStopEvent> 
 
     @Override
     public StackStopState failureState() {
-        return failureState;
+        return null;
     }
 
     @Override
@@ -34,4 +26,8 @@ public enum StackStopState implements FlowState<StackStopState, StackStopEvent> 
         return failureEvent;
     }
 
+    @Override
+    public void setFailureEvent(StackStopEvent failureEvent) {
+        this.failureEvent = failureEvent;
+    }
 }

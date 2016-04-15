@@ -5,4 +5,5 @@ public interface FlowState<S extends FlowState, E extends FlowEvent> {
     String name();
     S failureState();
     E failureEvent();
+    void setFailureEvent(E failureEvent);
 }
