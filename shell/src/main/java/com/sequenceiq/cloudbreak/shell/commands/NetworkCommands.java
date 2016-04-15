@@ -79,15 +79,19 @@ public class NetworkCommands implements CommandMarker {
             networkJson.setCloudPlatform(cloudPlatform);
 
             Map<String, Object> parameters = new HashMap<>();
-            if (vpcId != null && internetGatewayId != null) {
+            if (vpcId != null) {
                 parameters.put("vpcId", vpcId);
-                parameters.put("internetGatewayId", internetGatewayId);
+                if (internetGatewayId != null) {
+                    parameters.put("internetGatewayId", internetGatewayId);
+                }
                 if (subnetId != null) {
                     parameters.put("subnetId", subnetId);
                 }
             }
             networkJson.setParameters(parameters);
-            networkJson.setSubnetCIDR(subnet);
+            if (subnetId == null) {
+                networkJson.setSubnetCIDR(subnet);
+            }
             if (platformId != null) {
                 checkTopologyForResource(cloudbreakClient.topologyEndpoint().getPublics(), platformId, cloudPlatform);
             }

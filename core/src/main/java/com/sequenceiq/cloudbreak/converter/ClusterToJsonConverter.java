@@ -106,7 +106,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 String serviceAddress;
                 if (actualHostgroup.getConstraint().getInstanceGroup() != null) {
                     InstanceMetaData next = actualHostgroup.getConstraint().getInstanceGroup().getInstanceMetaData().iterator().next();
-                    serviceAddress = next.getPublicIp();
+                    serviceAddress = next.getPublicIpWrapper();
                 } else {
                     serviceAddress = actualHostgroup.getHostMetadata().iterator().next().getHostName();
                 }
