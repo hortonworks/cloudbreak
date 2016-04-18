@@ -33,36 +33,36 @@ angular.module('uluwatuControllers')
                 'RECIPE_TYPE': {
                     content_types: [{
                         key: 'SCRIPT',
-                        value: 'SCRIPT'
+                        value: 'Script'
                     }, {
                         key: 'FILE',
-                        value: 'FILE'
+                        value: 'File'
                     }, {
                         key: 'URL',
-                        value: 'URL'
+                        value: 'Url'
                     }]
                 },
                 'SSSDCONFIG_TYPE': {
                     content_types: [{
                         key: 'TEXT',
-                        value: 'TEXT'
+                        value: 'Text'
                     }, {
                         key: 'FILE',
-                        value: 'FILE'
+                        value: 'File'
                     }, {
                         key: 'PARAMS',
-                        value: 'PARAMETERS'
+                        value: 'Parameters'
                     }]
                 },
                 'BLUEPRINT_TYPE': [{
                     key: 'TEXT',
-                    value: 'TEXT'
+                    value: 'Text'
                 }, {
                     key: 'FILE',
-                    value: 'FILE'
+                    value: 'File'
                 }, {
                     key: 'URL',
-                    value: 'URL'
+                    value: 'Url'
                 }],
                 'EVENT_TYPE': {
                     "REQUESTED": "requested",

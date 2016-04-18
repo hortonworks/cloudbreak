@@ -71,8 +71,8 @@ var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'block
             Config.prototype.getDisk = function(provider, nameId) {
                 return this.getValue(this.disk, provider, nameId);
             };
-            Config.prototype.getPropertyName = function(nameId) {
-                var names = this.properties
+            Config.prototype.getPropertyName = function(category, nameId) {
+                var names = this[category]
                 if (nameId !== undefined && names[nameId] !== undefined) {
                     return names[nameId];
                 }
