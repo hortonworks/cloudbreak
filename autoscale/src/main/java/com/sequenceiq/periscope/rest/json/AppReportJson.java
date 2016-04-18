@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.rest.json;
 
+import com.sequenceiq.periscope.api.model.Json;
+
 public class AppReportJson implements Json {
 
     private String appId;

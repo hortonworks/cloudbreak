@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.rest.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.History;
-import com.sequenceiq.periscope.rest.json.HistoryJson;
+import com.sequenceiq.periscope.api.model.HistoryJson;
 
 @Component
 public class HistoryConverter extends AbstractConverter<HistoryJson, History> {

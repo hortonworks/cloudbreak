@@ -1,7 +1,7 @@
 package com.sequenceiq.periscope.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -20,6 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.model.AmbariStack;
 
 @Entity
@@ -52,11 +53,11 @@ public class Cluster {
     @Enumerated(EnumType.STRING)
     private ClusterState state = ClusterState.RUNNING;
 
-    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MetricAlert> metricAlerts = new ArrayList<>();
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<MetricAlert> metricAlerts = new HashSet<>();
 
-    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TimeAlert> timeAlerts = new ArrayList<>();
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<TimeAlert> timeAlerts = new HashSet<>();
 
     @Column(name = "min_size")
     private int minSize = DEFAULT_MIN_SIZE;
@@ -130,19 +131,19 @@ public class Cluster {
         this.state = state;
     }
 
-    public List<MetricAlert> getMetricAlerts() {
+    public Set<MetricAlert> getMetricAlerts() {
         return metricAlerts;
     }
 
-    public void setMetricAlerts(List<MetricAlert> metricAlerts) {
+    public void setMetricAlerts(Set<MetricAlert> metricAlerts) {
         this.metricAlerts = metricAlerts;
     }
 
-    public List<TimeAlert> getTimeAlerts() {
+    public Set<TimeAlert> getTimeAlerts() {
         return timeAlerts;
     }
 
-    public void setTimeAlerts(List<TimeAlert> timeAlerts) {
+    public void setTimeAlerts(Set<TimeAlert> timeAlerts) {
         this.timeAlerts = timeAlerts;
     }
 

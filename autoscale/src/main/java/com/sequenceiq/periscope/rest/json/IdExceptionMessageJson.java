@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.rest.json;
 
+import com.sequenceiq.periscope.api.model.Json;
+
 public class IdExceptionMessageJson extends ExceptionMessageJson implements Json {
 
     private long id;

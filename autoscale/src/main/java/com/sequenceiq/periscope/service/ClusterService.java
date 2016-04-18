@@ -5,15 +5,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.api.model.ScalingConfigurationJson;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.domain.ClusterState;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.repository.UserRepository;
-import com.sequenceiq.periscope.rest.json.ScalingConfigurationJson;
 
 @Service
 public class ClusterService {

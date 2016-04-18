@@ -17,6 +17,10 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.periscope.api.model.AdjustmentType;
+import com.sequenceiq.periscope.api.model.AlertType;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
+
 @Entity
 @NamedQueries({
         @NamedQuery(name = "History.findAllByCluster", query = "SELECT c FROM History c WHERE c.clusterId= :id"),

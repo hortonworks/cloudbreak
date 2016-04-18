@@ -2,7 +2,7 @@ package com.sequenceiq.periscope.model;
 
 import java.util.List;
 
-import com.sequenceiq.periscope.rest.json.Json;
+import com.sequenceiq.periscope.api.model.Json;
 
 public class QueueSetup implements Json {
 

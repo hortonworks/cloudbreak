@@ -2,10 +2,15 @@ package com.sequenceiq.periscope.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "periscope_user")
+@NamedQuery(
+        name = "PeriscopeUser.findOneByName",
+        query = "SELECT b FROM PeriscopeUser b "
+                + "WHERE b.email= :email")
 public class PeriscopeUser {
 
     @Id

@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.rest.converter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sequenceiq.periscope.rest.json.Json;
+import com.sequenceiq.periscope.api.model.Json;
 
 public abstract class AbstractConverter<J extends Json, E> implements Converter<J, E> {
 

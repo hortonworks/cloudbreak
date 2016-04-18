@@ -87,7 +87,8 @@ var config = {
     sultansAddress: null,
     cloudbreakAddress: null,
     periscopeAddress: null,
-    cloudbreakApiRootContext: '/api/v1'
+    cloudbreakApiRootContext: '/api/v1',
+    periscopeApiRootContext: '/api/v1'
 }
 
 if (config.addressResolvingRetryCount <= 0) {
@@ -420,8 +421,10 @@ function continueInit() {
         }
         cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
         var req_url = req.url.replace("/periscope/", "");
-        console.log("Periscope request to: " + config.periscopeAddress + req_url);
-        method(config.periscopeAddress + req_url, cbRequestArgs, function(data, response) {
+        var periscopeApi = concatAndResolveUrl(config.periscopeAddress) + config.periscopeApiRootContext + "/" + req_url;
+
+        console.log("Periscope request to: " + periscopeApi);
+        method(periscopeApi, cbRequestArgs, function(data, response) {
             res.status(response.statusCode).send(data);
         }).on('error', function(err) {
             res.status(500).send("Uluwatu could not connect to Periscope.");

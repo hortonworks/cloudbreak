@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
-import com.sequenceiq.periscope.monitor.evaluator.AlertState;
+import com.sequenceiq.periscope.api.model.AlertState;
 
 @Entity
 @DiscriminatorValue("METRIC")

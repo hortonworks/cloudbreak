@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.rest.json;
 
+import com.sequenceiq.periscope.api.model.Json;
 import com.sequenceiq.periscope.domain.NotificationType;
 
 public class NotificationJson implements Json {
