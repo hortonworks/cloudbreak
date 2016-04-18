@@ -30,7 +30,7 @@
         <label class="col-sm-3 control-label" for="openstackendpoint">{{getParameterLabel(key)}}</label>
 
         <div class="col-sm-9">
-            <p id="openstackendpoint" class="form-control-static">{{$root.displayNames.getPropertyName(value)}}</p>
+            <p id="openstackendpoint" class="form-control-static">{{$root.displayNames.getPropertyName('credentials', value)}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>

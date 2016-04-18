@@ -25,7 +25,7 @@
     <div class="form-group" ng-show="sssdConfig.providerType">
         <label class="col-sm-3 control-label" for="sssdconfigprovidertypefield">{{msg.sssdconfig_providertype_label}}</label>
         <div class="col-sm-9">
-            <p id="sssdconfigprovidertypefield" class="form-control-static">{{sssdConfig.providerType}}</p>
+            <p id="sssdconfigprovidertypefield" class="form-control-static">{{$root.displayNames.getPropertyName('sssd', sssdConfig.providerType)}}</p>
         </div>
     </div>
 
@@ -39,7 +39,7 @@
     <div class="form-group" ng-show="sssdConfig.schema">
         <label class="col-sm-3 control-label" for="sssdconfigschemafield">{{msg.sssdconfig_shema_label}}</label>
         <div class="col-sm-9">
-            <p id="sssdconfigschemafield" class="form-control-static">{{sssdConfig.schema}}</p>
+            <p id="sssdconfigschemafield" class="form-control-static">{{$root.displayNames.getPropertyName('sssd', sssdConfig.schema)}}</p>
         </div>
     </div>
 
@@ -53,7 +53,7 @@
     <div class="form-group" ng-show="sssdConfig.tlsReqcert">
         <label class="col-sm-3 control-label" for="sssdconfigreqcertfield">{{msg.sssdconfig_reqcert_label}}</label>
         <div class="col-sm-9">
-            <p id="sssdconfigreqcertfield" class="form-control-static">{{sssdConfig.tlsReqcert}}</p>
+            <p id="sssdconfigreqcertfield" class="form-control-static">{{$root.displayNames.getPropertyName('sssd', sssdConfig.tlsReqcert)}}</p>
         </div>
     </div>
 

@@ -57,7 +57,7 @@
                             </ul>
                             <a ng-if="!recipe.pluginContents[key]" href="{{key}}" target="_blank">{{key}}</a>
                         </td>
-                        <td data-title="'pluginValue'" class="col-md-3 text-center" style="width: 1%;">{{value}}</td>
+                        <td data-title="'pluginValue'" class="col-md-3 text-center" style="width: 1%;">{{$root.displayNames.getPropertyName('recipes', value)}}</td>
                     </tr>
                 </tbody>
             </table>

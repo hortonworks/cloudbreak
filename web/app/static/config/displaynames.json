@@ -35,11 +35,24 @@
             "Premium_LRS": "Premium locally-redundant storage"
         }
     },
-    "properties" : {
+    "credentials" : {
         "cb-keystone-v2": "v2",
         "cb-keystone-v3": "v3",
         "cb-keystone-v3-project-scope": "Project",
         "cb-keystone-v3-default-scope": "Default",
         "cb-keystone-v3-domain-scope": "Domain"
+    },
+    "sssd" : {
+        "ACTIVE_DIRECTORY": "Active Directory",
+        "AD": "Active Directory",
+        "NEVER": "Never",
+        "ALLOW": "Allow",
+        "TRY": "Try",
+        "DEMAND": "Demand",
+        "HARD": "Hard"
+    },
+    "recipes" : {
+        "ONE_NODE": "One Node",
+        "ALL_NODES": "All Nodes"
     }
 }
