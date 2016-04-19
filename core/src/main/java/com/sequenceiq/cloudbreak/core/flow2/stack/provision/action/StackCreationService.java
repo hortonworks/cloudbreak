@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackProvisionConstants.START_DATE;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -104,13 +105,23 @@ public class StackCreationService {
         instanceMetadataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
     }
 
-    public Stack provisioningFinished(StackContext context, LaunchStackResult result, Date startDate) {
+    public Stack provisioningFinished(StackContext context, LaunchStackResult result, Map<Object, Object> variables) {
+        Date startDate = getStartDateIfExist(variables);
         Stack stack = context.getStack();
         validateResourceResults(context.getCloudContext(), result);
         List<CloudResourceStatus> results = result.getResults();
         updateNodeCount(stack.getId(), context.getCloudStack().getGroups(), results, true);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
         return stackService.getById(stack.getId());
+    }
+
+    private Date getStartDateIfExist(Map<Object, Object> variables) {
+        Date result = null;
+        Object startDateObj = variables.get(START_DATE);
+        if (startDateObj != null && startDateObj instanceof Date) {
+            result = (Date) startDateObj;
+        }
+        return result;
     }
 
     public CheckImageResult checkImage(StackContext context) {

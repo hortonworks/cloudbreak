@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_COPY_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_PREPARATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.LAUNCH_STACK_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.SETUP_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.SETUP_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.SSHFINGERPRINTS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.STACK_CREATION_FAILED_EVENT;
@@ -22,7 +23,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.START_PROVISIONING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.TLS_SETUP_STATE;
 
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -34,17 +34,20 @@ import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 @Component
 public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCreationState, StackCreationEvent> {
 
-    private static final List<Transition<StackCreationState, StackCreationEvent>> TRANSITIONS = Arrays.asList(
-            new Transition<>(INIT_STATE, SETUP_STATE, START_CREATION_EVENT),
-            new Transition<>(INIT_STATE, SETUP_STATE, START_STACKANDCLUSTER_CREATION_EVENT),
-            new Transition<>(SETUP_STATE, IMAGESETUP_STATE, SETUP_FINISHED_EVENT),
-            new Transition<>(IMAGESETUP_STATE, IMAGE_CHECK_STATE, IMAGE_PREPARATION_FINISHED_EVENT),
-            new Transition<>(IMAGE_CHECK_STATE, IMAGE_CHECK_STATE, IMAGE_COPY_CHECK_EVENT),
-            new Transition<>(IMAGE_CHECK_STATE, START_PROVISIONING_STATE, IMAGE_COPY_FINISHED_EVENT),
-            new Transition<>(START_PROVISIONING_STATE, PROVISIONING_FINISHED_STATE, LAUNCH_STACK_FINISHED_EVENT),
-            new Transition<>(PROVISIONING_FINISHED_STATE, COLLECTMETADATA_STATE, COLLECT_METADATA_FINISHED_EVENT),
-            new Transition<>(COLLECTMETADATA_STATE, TLS_SETUP_STATE, SSHFINGERPRINTS_EVENT)
-    );
+    private static final List<Transition<StackCreationState, StackCreationEvent>> TRANSITIONS = new Transition.Builder<StackCreationState, StackCreationEvent>()
+            .from(INIT_STATE).to(SETUP_STATE).event(START_CREATION_EVENT).failure(SETUP_FAILED_EVENT)
+            .from(INIT_STATE).to(SETUP_STATE).event(START_STACKANDCLUSTER_CREATION_EVENT).failure(SETUP_FAILED_EVENT)
+            .from(SETUP_STATE).to(IMAGESETUP_STATE).event(SETUP_FINISHED_EVENT).failure(StackCreationEvent.IMAGE_PREPARATION_FAILED_EVENT)
+            .from(IMAGESETUP_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failure(StackCreationEvent.IMAGE_COPY_FAILED_EVENT)
+            .from(IMAGE_CHECK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_COPY_CHECK_EVENT).failure(StackCreationEvent.IMAGE_COPY_FAILED_EVENT)
+            .from(IMAGE_CHECK_STATE).to(START_PROVISIONING_STATE).event(IMAGE_COPY_FINISHED_EVENT).failure(StackCreationEvent.LAUNCH_STACK_FAILED_EVENT)
+            .from(START_PROVISIONING_STATE).to(PROVISIONING_FINISHED_STATE)
+                    .event(LAUNCH_STACK_FINISHED_EVENT).failure(StackCreationEvent.COLLECT_METADATA_FAILED_EVENT)
+            .from(PROVISIONING_FINISHED_STATE).to(COLLECTMETADATA_STATE)
+                    .event(COLLECT_METADATA_FINISHED_EVENT).failure(StackCreationEvent.SSHFINGERPRINTS_FAILED_EVENT)
+            .from(COLLECTMETADATA_STATE).to(TLS_SETUP_STATE).event(SSHFINGERPRINTS_EVENT).failure(StackCreationEvent.SSHFINGERPRINTS_FAILED_EVENT)
+            .build();
+
     private static final FlowEdgeConfig<StackCreationState, StackCreationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, TLS_SETUP_STATE, STACK_CREATION_FINISHED_EVENT, STACK_CREATION_FAILED_STATE,
                     STACK_CREATION_FAILED_EVENT);
