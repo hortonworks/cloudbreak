@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 
 public class AvailabilityZone extends StringType {
 
-    private AvailabilityZone(String value) {
+    public AvailabilityZone(String value) {
         super(value);
     }
 

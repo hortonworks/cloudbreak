@@ -1,20 +1,29 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
-import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Lists;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.model.MachineDefinitionView;
+import com.sequenceiq.cloudbreak.cloud.gcp.model.MachineDefinitionWrapper;
+import com.sequenceiq.cloudbreak.cloud.gcp.model.ZoneDefinitionView;
+import com.sequenceiq.cloudbreak.cloud.gcp.model.ZoneDefinitionWrapper;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -24,13 +33,103 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class GcpPlatformParameters implements PlatformParameters {
+    public static final int INDEX = 14;
+    public static final float THOUSAND = 1000.0f;
+    public static final int TEN = 10;
     private static final Integer START_LABEL = Integer.valueOf(97);
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
+
+    @Value("${cb.gcp.vm.parameter.definition.path:}")
+    private String gcpVmParameterDefinitionPath;
+
+    @Value("${cb.gcp.zone.parameter.definition.path:}")
+    private String gcpZoneParameterDefinitionPath;
+
+    private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+    private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
+    private Region defaultRegion;
+    private VmType defaultVmType;
+
+    @PostConstruct
+    public void init() {
+        this.regions = readRegions();
+        this.vmTypes = readVmTypes();
+
+        this.defaultRegion = this.regions.keySet().iterator().next();
+        this.defaultVmType = this.vmTypes.get(this.vmTypes.keySet().iterator().next()).get(INDEX);
+    }
+
+    private Map<AvailabilityZone, List<VmType>> readVmTypes() {
+        Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
+        String vm = getDefinition(gcpVmParameterDefinitionPath, "vm");
+        try {
+            MachineDefinitionWrapper machineDefinitionWrapper = JsonUtil.readValue(vm, MachineDefinitionWrapper.class);
+            for (Map.Entry<String, Object> object : machineDefinitionWrapper.getItems().entrySet()) {
+                Map value = (Map) object.getValue();
+                List<Object> machineTpes = (List<Object>) value.get("machineTypes");
+                for (Object machineType : machineTpes) {
+                    MachineDefinitionView machineDefinitionView = new MachineDefinitionView((Map) machineType);
+                    AvailabilityZone availabilityZone = new AvailabilityZone(machineDefinitionView.getZone());
+                    if (!vmTypes.containsKey(availabilityZone)) {
+                        List<VmType> vmTypeList = new ArrayList<>();
+                        vmTypes.put(availabilityZone, vmTypeList);
+                    }
+                    VmTypeMeta vmTypeMeta = VmTypeMeta.VmTypeMetaBuilder.builder()
+                            .withCpuAndMemory(Integer.valueOf(machineDefinitionView.getGuestCpus()),
+                                    Float.valueOf(machineDefinitionView.getMemoryMb()) / THOUSAND)
+                            .withMagneticConfig(TEN, Integer.valueOf(machineDefinitionView.getMaximumPersistentDisksSizeGb()),
+                                    1, machineDefinitionView.getMaximumNumberWithLimit())
+                            .withSsdConfig(TEN, Integer.valueOf(machineDefinitionView.getMaximumPersistentDisksSizeGb()),
+                                    1, machineDefinitionView.getMaximumNumberWithLimit())
+                            .withMaximumPersistentDisksSizeGb(machineDefinitionView.getMaximumPersistentDisksSizeGb())
+                            .create();
+
+                    VmType vmType  = VmType.vmTypeWithMeta(machineDefinitionView.getName(), vmTypeMeta);
+                    vmTypes.get(availabilityZone).add(vmType);
+                }
+
+
+            }
+        } catch (IOException e) {
+            return vmTypes;
+        }
+        return vmTypes;
+    }
+
+    private Map<Region, List<AvailabilityZone>> readRegions() {
+        Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+        String zone = getDefinition(gcpZoneParameterDefinitionPath, "zone");
+        try {
+            ZoneDefinitionWrapper zoneDefinitionWrapper = JsonUtil.readValue(zone, ZoneDefinitionWrapper.class);
+            for (ZoneDefinitionView object : zoneDefinitionWrapper.getItems()) {
+                String region = object.getRegion();
+                String avZone = object.getSelfLink();
+
+                String[] splitRegion = region.split("/");
+                String[] splitZone = avZone.split("/");
+
+                Region regionObject = Region.region(splitRegion[splitRegion.length - 1]);
+                AvailabilityZone availabilityZoneObject = AvailabilityZone.availabilityZone(splitZone[splitZone.length - 1]);
+                if (!regions.keySet().contains(regionObject)) {
+                    List<AvailabilityZone> availabilityZones = new ArrayList<>();
+                    regions.put(regionObject, availabilityZones);
+                }
+                regions.get(regionObject).add(availabilityZoneObject);
+
+            }
+        } catch (IOException e) {
+            return regions;
+        }
+        return regions;
+    }
 
     @Override
     public ScriptParams scriptParams() {
@@ -39,7 +138,15 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType());
+        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings());
+    }
+
+    private Map<String, VolumeParameterType> diskMappings() {
+        Map<String, VolumeParameterType> map = new HashMap<>();
+        map.put(GcpDiskType.HDD.value(), VolumeParameterType.MAGNETIC);
+        map.put(GcpDiskType.SSD.value(), VolumeParameterType.SSD);
+
+        return map;
     }
 
     private Collection<DiskType> getDiskTypes() {
@@ -56,33 +163,25 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public Regions regions() {
-        return new Regions(getRegions(), defaultRegion());
-    }
-
-    private Collection<Region> getRegions() {
-        Collection<Region> regions = Lists.newArrayList();
-        for (GcpRegion region : GcpRegion.values()) {
-            regions.add(region.region());
-        }
-        return regions;
-    }
-
-    private Region defaultRegion() {
-        return GcpRegion.US_CENTRAL.region();
+        return new Regions(regions.keySet(), defaultRegion);
     }
 
     @Override
     public AvailabilityZones availabilityZones() {
-        Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
-        for (GcpRegion region : GcpRegion.values()) {
-            regions.put(region.region(), region.availabilityZones());
-        }
         return new AvailabilityZones(regions);
     }
 
     @Override
     public String resourceDefinition(String resource) {
         return FileReaderUtils.readFileFromClasspathQuietly("definitions/gcp-" + resource + ".json");
+    }
+
+    private String getDefinition(String parameter, String type) {
+        if (Strings.isNullOrEmpty(parameter)) {
+            return resourceDefinition(type);
+        } else {
+            return FileReaderUtils.readFileFromClasspathQuietly(parameter);
+        }
     }
 
     @Override
@@ -92,19 +191,15 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public VmTypes vmTypes() {
-        return new VmTypes(virtualMachines(), defaultVirtualMachine());
-    }
-
-    private Collection<VmType> virtualMachines() {
-        Collection<VmType> vmTypes = Lists.newArrayList();
-        for (GcpVmType vmType : GcpVmType.values()) {
-            vmTypes.add(vmType(vmType.value));
+        Set<VmType> lists = new LinkedHashSet<>();
+        for (List<VmType> vmTypeList : vmTypes.values()) {
+            lists.addAll(vmTypeList);
         }
-        return vmTypes;
+        return new VmTypes(lists, defaultVirtualMachine());
     }
 
     private VmType defaultVirtualMachine() {
-        return vmType(GcpVmType.N1_STANDARD_2.value);
+        return defaultVmType;
     }
 
     public enum GcpDiskType {
@@ -127,61 +222,5 @@ public class GcpPlatformParameters implements PlatformParameters {
         public static String getUrl(String projectId, AvailabilityZone zone, String volumeId) {
             return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone.value(), volumeId);
         }
-    }
-
-    private enum GcpVmType {
-
-        N1_STANDARD_1("n1-standard-1"),
-        N1_STANDARD_2("n1-standard-2"),
-        N1_STANDARD_4("n1-standard-4"),
-        N1_STANDARD_8("n1-standard-8"),
-        N1_STANDARD_16("n1-standard-16"),
-        N1_HIGHMEM_2("n1-highmem-2"),
-        N1_HIGHMEM_4("n1-highmem-4"),
-        N1_HIGHMEM_8("n1-highmem-8"),
-        N1_HIGHMEM_16("n1-highmem-16"),
-        N1_HIGHCPU_2("n1-highcpu-2"),
-        N1_HIGHCPU_4("n1-highcpu-4"),
-        N1_HIGHCPU_8("n1-highcpu-8"),
-        N1_HIGHCPU_16("n1-highcpu-16");
-
-        private final String value;
-
-        private GcpVmType(String value) {
-            this.value = value;
-        }
-    }
-
-    private enum GcpRegion {
-        US_CENTRAL(Region.region("us-central1"), Arrays.asList(availabilityZone("us-central1-a"),
-                availabilityZone("us-central1-b"),
-                availabilityZone("us-central1-c"),
-                availabilityZone("us-central1-f"))),
-        US_EAST(Region.region("us-east1"), Arrays.asList(availabilityZone("us-east1-b"),
-                availabilityZone("us-east1-c"),
-                availabilityZone("us-east1-d"))),
-        EUROPE_WEST(Region.region("europe-west1"), Arrays.asList(availabilityZone("europe-west1-b"),
-                availabilityZone("europe-west1-c"),
-                availabilityZone("europe-west1-d"))),
-        ASIA_EAST1(Region.region("asia-east1"), Arrays.asList(availabilityZone("asia-east1-a"),
-                availabilityZone("asia-east1-b"),
-                availabilityZone("asia-east1-c")));
-
-        private final Region region;
-        private final List<AvailabilityZone> availabilityZones;
-
-        private GcpRegion(Region region, List<AvailabilityZone> availabilityZones) {
-            this.region = region;
-            this.availabilityZones = availabilityZones;
-        }
-
-        public Region region() {
-            return this.region;
-        }
-
-        public List<AvailabilityZone> availabilityZones() {
-            return this.availabilityZones;
-        }
-
     }
 }

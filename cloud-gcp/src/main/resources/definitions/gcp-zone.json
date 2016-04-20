@@ -1,0 +1,137 @@
+{
+  "kind": "compute#zoneList",
+  "selfLink": "https://www.googleapis.com/compute/beta/projects/siq-haas/zones",
+  "id": "projects/siq-haas/zones",
+  "items": [
+    {
+      "kind": "compute#zone",
+      "id": "2221",
+      "creationTimestamp": "2014-05-30T18:35:16.575-07:00",
+      "name": "asia-east1-b",
+      "description": "asia-east1-b",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/asia-east1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/asia-east1-b"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2220",
+      "creationTimestamp": "2014-05-30T18:35:16.575-07:00",
+      "name": "asia-east1-a",
+      "description": "asia-east1-a",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/asia-east1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/asia-east1-a"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2222",
+      "creationTimestamp": "2014-07-15T10:44:08.663-07:00",
+      "name": "asia-east1-c",
+      "description": "asia-east1-c",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/asia-east1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/asia-east1-c"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2104",
+      "creationTimestamp": "2014-12-15T13:42:35.748-08:00",
+      "name": "europe-west1-d",
+      "description": "europe-west1-d",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/europe-west1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/europe-west1-d"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2101",
+      "creationTimestamp": "2014-05-30T18:35:16.447-07:00",
+      "name": "europe-west1-b",
+      "description": "europe-west1-b",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/europe-west1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/europe-west1-b"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2103",
+      "creationTimestamp": "2014-09-02T15:52:35.238-07:00",
+      "name": "europe-west1-c",
+      "description": "europe-west1-c",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/europe-west1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/europe-west1-c"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2001",
+      "creationTimestamp": "2014-05-30T18:35:16.514-07:00",
+      "name": "us-central1-b",
+      "description": "us-central1-b",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/us-central1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/us-central1-b"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2000",
+      "creationTimestamp": "2014-05-30T18:35:16.514-07:00",
+      "name": "us-central1-a",
+      "description": "us-central1-a",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/us-central1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/us-central1-a"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2004",
+      "creationTimestamp": "2014-05-30T18:35:16.447-07:00",
+      "name": "us-central1-f",
+      "description": "us-central1-f",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/us-central1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/us-central1-f"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2002",
+      "creationTimestamp": "2014-10-29T11:20:06.229-07:00",
+      "name": "us-central1-c",
+      "description": "us-central1-c",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/us-central1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/us-central1-c"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2234",
+      "creationTimestamp": "2015-09-03T15:15:02.330-07:00",
+      "name": "us-east1-d",
+      "description": "us-east1-d",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/us-east1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/us-east1-d"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2231",
+      "creationTimestamp": "2015-09-08T16:57:06.746-07:00",
+      "name": "us-east1-b",
+      "description": "us-east1-b",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/us-east1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/us-east1-b"
+    },
+    {
+      "kind": "compute#zone",
+      "id": "2233",
+      "creationTimestamp": "2015-09-08T10:59:59.040-07:00",
+      "name": "us-east1-c",
+      "description": "us-east1-c",
+      "status": "UP",
+      "region": "https://content.googleapis.com/compute/beta/projects/siq-haas/regions/us-east1",
+      "selfLink": "https://content.googleapis.com/compute/beta/projects/siq-haas/zones/us-east1-c"
+    }
+  ]
+}

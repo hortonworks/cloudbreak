@@ -27,9 +27,11 @@
     <label class="col-sm-3 control-label" for="aws_tinstanceType">{{msg.template_form_instance_type_label}}</label>
 
     <div class="col-sm-9">
-        <select class="form-control" id="aws_tinstanceType" name="aws_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.AWS" ng-model="awsTemp.instanceType" ng-change="changeAwsInstanceType()" required>
+        <select class="form-control" id="aws_tinstanceType" name="aws_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.AWS" ng-model="awsTemp.instanceType" ng-change="changeInstanceType(awsTemp.instanceType, awsTemp.volumeType, 'AWS', awsTemp)" required>
         </select>
+        <div class="help-block ng-binding" ng-show="awsTemp.CPUs && awsTemp.RAMs">{{msg.template_form_vm_info | format: awsTemp.CPUs:awsTemp.RAMs}}</div>
     </div>
+
     <!-- .col-sm-9 -->
 
 </div>
@@ -37,7 +39,7 @@
     <label class="col-sm-3 control-label" for="aws_tvolumetype">{{msg.template_form_volume_type_label}}</label>
 
     <div class="col-sm-9">
-        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AWS', volumeType) for volumeType in $root.params.diskTypes.AWS | filter:filterByVolumetype" ng-model="awsTemp.volumeType" ng-change="changeAwsInstanceType()" required>
+        <select class="form-control" id="aws_tvolumetype" name="aws_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AWS', volumeType) for volumeType in $root.params.diskTypes.AWS | filter:filterByVolumetype" ng-model="awsTemp.volumeType" ng-change="changeInstanceType(awsTemp.instanceType, awsTemp.volumeType, 'AWS', awsTemp)" required>
         </select>
     </div>
     <!-- .col-sm-9 -->
@@ -46,9 +48,9 @@
     <label class="col-sm-3 control-label" for="aws_tvolumecount">{{msg.template_form_volume_count_label}}</label>
 
     <div class="col-sm-9">
-        <input type="number" name="aws_tvolumecount" class="form-control" ng-model="awsTemp.volumeCount" id="aws_tvolumecount" min="1" max="{{awsTemp.maxEphemeralVolumeCount === undefined ? 12 : awsTemp.maxEphemeralVolumeCount}}" placeholder="{{msg.template_form_volume_count_placeholder}}" required>
+        <input type="number" name="aws_tvolumecount" class="form-control" ng-model="awsTemp.volumeCount" id="aws_tvolumecount" min="{{awsTemp.minDiskNumber}}" max="{{awsTemp.maxDiskNumber}}" placeholder="{{msg.template_form_volume_count_placeholder | format: awsTemp.minDiskNumber:(awsTemp.maxDiskNumber)}}" required>
 
-        <div class="help-block" ng-show="awsTemplateForm.aws_tvolumecount.$dirty && awsTemplateForm.aws_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format: awsTemp.maxEphemeralVolumeCount === undefined ? 12 : awsTemp.maxEphemeralVolumeCount}}
+        <div class="help-block" ng-show="awsTemplateForm.aws_tvolumecount.$dirty && awsTemplateForm.aws_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format: awsTemp.minDiskNumber:(awsTemp.maxDiskNumber)}}
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -58,11 +60,10 @@
     <label class="col-sm-3 control-label" for="aws_tvolumesize">{{msg.template_form_volume_size_label}}</label>
 
     <div class="col-sm-9">
+        <input type="number" name="aws_tvolumesize" class="form-control" ng-model="awsTemp.volumeSize" id="aws_tvolumesize" min="{{awsTemp.minDiskSize}}" max="{{awsTemp.maxDiskSize}}" placeholder="{{msg.template_form_volume_size_placeholder | format: awsTemp.minDiskSize:(awsTemp.maxDiskSize)}}" ng-required="awsTemp.maxDiskSize !== awsTemp.minDiskSize" ng-hide="awsTemp.maxDiskSize == awsTemp.minDiskSize">
 
-        <input type="number" name="aws_tvolumesize" class="form-control" ng-model="awsTemp.volumeSize" id="aws_tvolumesize" min="10" max="1000" placeholder="{{msg.template_form_volume_size_placeholder}}" ng-required="awsTemp.volumeType !== 'ephemeral'" ng-hide="awsTemp.volumeType == 'ephemeral'">
-
-        <input type="text" class="form-control" name="aws_ephemeral_volumesize" id="aws_ephemeral_volumesize" ng-disabled="true" ng-hide="awsTemp.volumeType !== 'ephemeral'" value="{{awsInstanceType.ephemeralVolumeSize}}">
-        <div class="help-block" ng-show="awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid"><i class="fa fa-warning"></i> {{msg.volume_size_invalid}}
+        <input type="text" class="form-control" name="aws_ephemeral_volumesize" id="aws_ephemeral_volumesize" ng-disabled="true" ng-hide="awsTemp.volumeType !== 'ephemeral'" value="{{awsTemp.maxDiskSize}}">
+        <div class="help-block" ng-show="awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid"><i class="fa fa-warning"></i> {{msg.volume_size_invalid | format: awsTemp.minDiskSize:(awsTemp.maxDiskSize)}}
         </div>
         <!-- .col-sm-9 -->
     </div>

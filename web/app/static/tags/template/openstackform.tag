@@ -40,9 +40,9 @@
     <label class="col-sm-3 control-label" for="openstack_tvolumecount">{{msg.template_form_volume_count_label}}</label>
 
     <div class="col-sm-9">
-        <input type="number" name="openstack_tvolumecount" class="form-control" ng-model="openstackTemp.volumeCount" id="openstack_tvolumecount" min="1" max="12" placeholder="{{msg.template_form_volume_count_placeholder}}" required>
+        <input type="number" name="openstack_tvolumecount" class="form-control" ng-model="openstackTemp.volumeCount" id="openstack_tvolumecount" placeholder="{{msg.template_form_volume_count_placeholder | format: openstackTemp.minDiskNumber:(openstackTemp.maxDiskNumber)}}" min="{{openstackTemp.minDiskNumber}}" max="{{openstackTemp.maxDiskNumber}}" required>
 
-        <div class="help-block" ng-show="openstackTemplateForm.openstack_tvolumecount.$dirty && openstackTemplateForm.openstack_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format : 12}}
+        <div class="help-block" ng-show="openstackTemplateForm.openstack_tvolumecount.$dirty && openstackTemplateForm.openstack_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format: openstackTemp.minDiskNumber:(openstackTemp.maxDiskNumber)}}
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -52,9 +52,9 @@
     <label class="col-sm-3 control-label" for="openstack_tvolumesize">{{msg.template_form_volume_size_label}}</label>
 
     <div class="col-sm-9">
-        <input type="number" name="openstack_tvolumesize" class="form-control" ng-model="openstackTemp.volumeSize" id="openstack_tvolumesize" min="10" max="1000" placeholder="{{msg.template_form_volume_size_placeholder}}" required>
+        <input type="number" name="openstack_tvolumesize" class="form-control" ng-model="openstackTemp.volumeSize" id="openstack_tvolumesize" min="{{openstackTemp.minDiskSize}}" max="{{openstackTemp.maxDiskSize}}" placeholder="{{msg.template_form_volume_size_placeholder | format: openstackTemp.minDiskSize:(openstackTemp.maxDiskSize)}}" required>
 
-        <div class="help-block" ng-show="openstackTemplateForm.openstack_tvolumesize.$dirty && openstackTemplateForm.openstack_tvolumesize.$invalid"><i class="fa fa-warning"></i> {{msg.volume_size_invalid}}
+        <div class="help-block" ng-show="openstackTemplateForm.openstack_tvolumesize.$dirty && openstackTemplateForm.openstack_tvolumesize.$invalid"><i class="fa fa-warning"></i> {{msg.volume_size_invalid | format: openstackTemp.minDiskSize:(openstackTemp.maxDiskSize)}}
         </div>
         <!-- .col-sm-9 -->
     </div>

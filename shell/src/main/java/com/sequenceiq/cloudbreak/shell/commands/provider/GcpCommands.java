@@ -32,10 +32,6 @@ public class GcpCommands implements CommandMarker {
 
     public static final String PLATFORM = "GCP";
     private static final String P12_FILE_NOT_FOUND = "File not found with service account private key (p12) file.";
-    private static final int VOLUME_COUNT_MIN = 1;
-    private static final int VOLUME_COUNT_MAX = 12;
-    private static final int VOLUME_SIZE_MIN = 1;
-    private static final int VOLUME_SIZE_MAX = 1024;
 
     private ShellContext shellContext;
     private CredentialCommands baseCredentialCommands;
@@ -142,13 +138,6 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the template belongs to") Long platformId
     ) {
-        publicInAccount = publicInAccount == null ? false : publicInAccount;
-        if (volumeCount < VOLUME_COUNT_MIN || volumeCount > VOLUME_COUNT_MAX) {
-            return "volumeCount has to be between 1 and 8.";
-        }
-        if (volumeSize < VOLUME_SIZE_MIN || volumeSize > VOLUME_SIZE_MAX) {
-            return "VolumeSize has to be between 1 and 1024.";
-        }
         Map<String, Object> parameters = new HashMap<>();
         return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volumeType == null ? "pd-standard" : volumeType.getName(),
                 publicInAccount, description, parameters, platformId, PLATFORM);

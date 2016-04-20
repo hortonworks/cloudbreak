@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
@@ -38,7 +39,7 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType());
+        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings());
     }
 
     private Collection<DiskType> getDiskTypes() {
@@ -47,6 +48,12 @@ public class OpenStackParameters implements PlatformParameters {
 
     private DiskType defaultDiskType() {
         return diskType("HDD");
+    }
+
+    private Map<String, VolumeParameterType> diskMappings() {
+        Map<String, VolumeParameterType> map = new HashMap<>();
+        map.put("HDD", VolumeParameterType.MAGNETIC);
+        return map;
     }
 
     @Override
