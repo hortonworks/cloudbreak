@@ -67,14 +67,16 @@ public class OpenStackNativeMetaDataCollector implements MetadataCollector {
             if (resource.getType() == ResourceType.OPENSTACK_INSTANCE) {
                 String instanceUUID = resource.getReference();
                 Server server = client.compute().servers().get(instanceUUID);
-                Map<String, String> metadata = server.getMetadata();
-                String privateInstanceId = utils.getPrivateInstanceId(metadata);
-                InstanceTemplate template = templateMap.get(privateInstanceId);
-                if (template != null) {
-                    CloudInstanceMetaData md = cloudInstanceMetaDataExtractor.extractMetadata(client, server, instanceUUID);
-                    CloudInstance cloudInstance = new CloudInstance(instanceUUID, template);
-                    CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
-                    results.add(new CloudVmMetaDataStatus(status, md));
+                if (server != null) {
+                    Map<String, String> metadata = server.getMetadata();
+                    String privateInstanceId = utils.getPrivateInstanceId(metadata);
+                    InstanceTemplate template = templateMap.get(privateInstanceId);
+                    if (template != null) {
+                        CloudInstanceMetaData md = cloudInstanceMetaDataExtractor.extractMetadata(client, server, instanceUUID);
+                        CloudInstance cloudInstance = new CloudInstance(instanceUUID, template);
+                        CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
+                        results.add(new CloudVmMetaDataStatus(status, md));
+                    }
                 }
             }
         }
