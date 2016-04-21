@@ -11,6 +11,7 @@ import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Server;
 import org.openstack4j.model.heat.Stack;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -70,20 +71,20 @@ public class OpenStackMetadataCollector implements MetadataCollector {
         List<Map<String, Object>> outputs = heatStack.getOutputs();
         for (Map<String, Object> map : outputs) {
             String instanceUUID = (String) map.get("output_value");
-            Server server = client.compute().servers().get(instanceUUID);
-            Map<String, String> metadata = server.getMetadata();
-            String privateInstanceId = utils.getPrivateInstanceId(metadata);
-            InstanceTemplate template = templateMap.get(privateInstanceId);
-            if (template != null) {
-                CloudInstanceMetaData md = cloudInstanceMetaDataExtractor.extractMetadata(client, server, instanceUUID);
-                CloudInstance cloudInstance = new CloudInstance(instanceUUID, template);
-                CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
-                results.add(new CloudVmMetaDataStatus(status, md));
+            if (!StringUtils.isEmpty(instanceUUID)) {
+                Server server = client.compute().servers().get(instanceUUID);
+                Map<String, String> metadata = server.getMetadata();
+                String privateInstanceId = utils.getPrivateInstanceId(metadata);
+                InstanceTemplate template = templateMap.get(privateInstanceId);
+                if (template != null) {
+                    CloudInstanceMetaData md = cloudInstanceMetaDataExtractor.extractMetadata(client, server, instanceUUID);
+                    CloudInstance cloudInstance = new CloudInstance(instanceUUID, template);
+                    CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
+                    results.add(new CloudVmMetaDataStatus(status, md));
+                }
             }
         }
 
         return results;
     }
-
-
 }

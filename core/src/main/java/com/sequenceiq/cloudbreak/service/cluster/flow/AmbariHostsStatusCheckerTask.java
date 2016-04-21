@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 
 @Component
 public class AmbariHostsStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariHostsCheckerContext> {
@@ -18,7 +19,8 @@ public class AmbariHostsStatusCheckerTask extends ClusterBasedStatusCheckerTask<
         Map<String, String> healthyHostNames = t.getAmbariClient().getHostNamesByState("HEALTHY");
         Map<String, String> unHealthyHostNames = t.getAmbariClient().getHostNamesByState("UNHEALTHY");
         Map<String, String> alertHostNames = t.getAmbariClient().getHostNamesByState("ALERT");
-        int totalNodes = healthyHostNames.size() + unHealthyHostNames.size() + alertHostNames.size();
+        Map<String, String> unknownHostNames = t.getAmbariClient().getHostNamesByState("UNKNOWN");
+        int totalNodes = healthyHostNames.size() + unHealthyHostNames.size() + alertHostNames.size() + unknownHostNames.size();
         LOGGER.info("Ambari client found {} hosts ({} needed). [Stack: '{}']", totalNodes, t.getHostsInCluster().size(), t.getStack().getId());
         if (totalNodes >= t.getHostsInCluster().size()) {
             return true;
