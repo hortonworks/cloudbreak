@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
-import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 
 @Component("InstanceTerminationFailureAction")
 public class InstanceTerminationFailureAction extends AbstractInstanceTerminationAction<RemoveInstanceResult> {
@@ -27,6 +27,6 @@ public class InstanceTerminationFailureAction extends AbstractInstanceTerminatio
 
     @Override
     protected Selectable createRequest(InstanceTerminationContext context) {
-        return new SelectableEvent(InstanceTerminationEvent.TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation());
+        return new SelectableFlowStackEvent(context.getStack().getId(), InstanceTerminationEvent.TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation());
     }
 }

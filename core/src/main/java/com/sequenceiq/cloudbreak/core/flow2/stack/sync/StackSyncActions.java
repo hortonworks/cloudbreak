@@ -31,9 +31,9 @@ import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceCo
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
-import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -81,7 +81,7 @@ public class StackSyncActions {
 
             @Override
             protected Selectable createRequest(StackSyncContext context) {
-                return new SelectableEvent(StackSyncEvent.SYNC_FINALIZED_EVENT.stringRepresentation());
+                return new SelectableFlowStackEvent(context.getStack().getId(), StackSyncEvent.SYNC_FINALIZED_EVENT.stringRepresentation());
             }
         };
     }
@@ -98,7 +98,7 @@ public class StackSyncActions {
 
             @Override
             protected Selectable createRequest(StackSyncContext context) {
-                return new SelectableEvent(StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.stringRepresentation());
+                return new SelectableFlowStackEvent(context.getStack().getId(), StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.stringRepresentation());
             }
 
             @Override

@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
-import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -87,7 +86,7 @@ public class StackStartActions {
 
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
-                return new SelectableEvent(StackStartEvent.START_FINALIZED_EVENT.stringRepresentation());
+                return new SelectableFlowStackEvent(context.getStack().getId(), StackStartEvent.START_FINALIZED_EVENT.stringRepresentation());
             }
         };
     }
