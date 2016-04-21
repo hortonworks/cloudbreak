@@ -24,8 +24,14 @@ public class CloudPlatformRequest<T> implements Selectable {
         return clazz.getSimpleName().toUpperCase();
     }
 
+    @Override
     public String selector() {
         return selector(getClass());
+    }
+
+    @Override
+    public Long getStackId() {
+        return cloudContext.getId();
     }
 
     public CloudContext getCloudContext() {

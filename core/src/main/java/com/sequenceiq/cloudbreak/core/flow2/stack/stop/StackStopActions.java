@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
-import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopService;
@@ -86,7 +85,7 @@ public class StackStopActions {
 
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
-                return new SelectableEvent(StackStopEvent.STOP_FINALIZED_EVENT.stringRepresentation());
+                return new SelectableFlowStackEvent(context.getStack().getId(), StackStopEvent.STOP_FINALIZED_EVENT.stringRepresentation());
             }
         };
     }
@@ -102,7 +101,7 @@ public class StackStopActions {
 
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
-                return new SelectableEvent(StackStopEvent.STOP_FAIL_HANDLED_EVENT.stringRepresentation());
+                return new SelectableFlowStackEvent(context.getStack().getId(), StackStopEvent.STOP_FAIL_HANDLED_EVENT.stringRepresentation());
             }
         };
     }

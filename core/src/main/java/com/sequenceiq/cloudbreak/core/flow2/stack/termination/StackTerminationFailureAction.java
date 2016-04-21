@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
-import com.sequenceiq.cloudbreak.core.flow2.SelectableEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 
 @Component("StackTerminationFailureAction")
 public class StackTerminationFailureAction extends AbstractStackTerminationAction<TerminateStackResult> {
@@ -30,6 +30,6 @@ public class StackTerminationFailureAction extends AbstractStackTerminationActio
 
     @Override
     protected Selectable createRequest(StackTerminationContext context) {
-        return new SelectableEvent(StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation());
+        return new SelectableFlowStackEvent(context.getStack().getId(), StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation());
     }
 }
