@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -106,6 +107,8 @@ public class ClusterBootstrapperErrorHandler {
                 eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
                 deleteResourceAndDependencies(stack, instanceMetaData);
                 deleteInstanceResourceFromDatabase(stack, instanceMetaData);
+                long timeInMillis = Calendar.getInstance().getTimeInMillis();
+                instanceMetaData.setTerminationDate(timeInMillis);
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
                 instanceMetaDataRepository.save(instanceMetaData);
                 LOGGER.info("InstanceMetadata [name: {}, id: {}] status set to {}.", instanceMetaData.getId(), instanceMetaData.getInstanceId(),

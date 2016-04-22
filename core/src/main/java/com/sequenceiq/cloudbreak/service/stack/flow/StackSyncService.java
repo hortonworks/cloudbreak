@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -292,6 +293,8 @@ public class StackSyncService {
     private void updateMetaDataToTerminated(Stack stack, InstanceMetaData instanceMetaData) {
         InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
         instanceGroup.setNodeCount(instanceGroup.getNodeCount() - 1);
+        long timeInMillis = Calendar.getInstance().getTimeInMillis();
+        instanceMetaData.setTerminationDate(timeInMillis);
         instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
         instanceMetaDataRepository.save(instanceMetaData);
         instanceGroupRepository.save(instanceGroup);
