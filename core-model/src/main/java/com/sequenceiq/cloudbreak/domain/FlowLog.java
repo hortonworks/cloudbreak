@@ -17,6 +17,8 @@ public class FlowLog {
     @SequenceGenerator(name = "flowlog_generator", sequenceName = "flowlog_id_seq", allocationSize = 1)
     private Long id;
 
+    private Long stackId;
+
     private Long created = new Date().getTime();
 
     private String flowId;
@@ -32,12 +34,21 @@ public class FlowLog {
 
     private String currentState;
 
-    public FlowLog(String flowId, String currentState) {
-        this.flowId = flowId;
-        this.currentState = currentState;
+    private Boolean finalized = false;
+
+    public FlowLog() {
+
     }
 
-    public FlowLog(String flowId, String nextEvent, String payload, Class<?> payloadType, Class<?> flowType, String currentState) {
+    public FlowLog(Long stackId, String flowId, String currentState, Boolean finalized) {
+        this.stackId = stackId;
+        this.flowId = flowId;
+        this.currentState = currentState;
+        this.finalized = finalized;
+    }
+
+    public FlowLog(Long stackId, String flowId, String nextEvent, String payload, Class<?> payloadType, Class<?> flowType, String currentState) {
+        this.stackId = stackId;
         this.flowId = flowId;
         this.nextEvent = nextEvent;
         this.payload = payload;
@@ -52,6 +63,14 @@ public class FlowLog {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getStackId() {
+        return stackId;
+    }
+
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
     }
 
     public Long getCreated() {
@@ -108,5 +127,13 @@ public class FlowLog {
 
     public void setCurrentState(String currentState) {
         this.currentState = currentState;
+    }
+
+    public Boolean getFinalized() {
+        return finalized;
+    }
+
+    public void setFinalized(Boolean finalized) {
+        this.finalized = finalized;
     }
 }

@@ -16,12 +16,12 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 public class Flow2Config {
 
     @Resource
-    private List<FlowConfiguration<?, ?>> flowConfigs;
+    private List<FlowConfiguration<?>> flowConfigs;
 
     @Bean
-    public Map<String, FlowConfiguration<?, ?>> flowConfigurationMap() {
-        Map<String, FlowConfiguration<?, ?>> flowConfigMap = new HashMap<>();
-        for (FlowConfiguration<?, ?> flowConfig : flowConfigs) {
+    public Map<String, FlowConfiguration<?>> flowConfigurationMap() {
+        Map<String, FlowConfiguration<?>> flowConfigMap = new HashMap<>();
+        for (FlowConfiguration<?> flowConfig : flowConfigs) {
             for (FlowEvent event : flowConfig.getEvents()) {
                 final String key = event.stringRepresentation();
                 if (flowConfigMap.get(key) != null) {

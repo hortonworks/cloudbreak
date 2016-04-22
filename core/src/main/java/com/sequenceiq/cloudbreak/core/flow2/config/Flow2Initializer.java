@@ -29,13 +29,13 @@ public class Flow2Initializer {
     private Flow2Handler flow2Handler;
 
     @Resource
-    private List<FlowConfiguration<?, ?>> flowConfigs;
+    private List<FlowConfiguration<?>> flowConfigs;
 
     @PostConstruct
     public void init() {
-        reactor.on(Selectors.regex(Flow2Handler.FLOW_FINAL), flow2Handler);
         Joiner joiner = Joiner.on("|");
-        for (FlowConfiguration<?, ?> flowConfig : flowConfigs) {
+        reactor.on(Selectors.regex(joiner.join(Flow2Handler.FLOW_FINAL, Flow2Handler.FLOW_CANCEL)), flow2Handler);
+        for (FlowConfiguration<?> flowConfig : flowConfigs) {
             Collection<String> representations = Collections2.transform(Arrays.asList(flowConfig.getEvents()), new Function<FlowEvent, String>() {
                 @Nullable @Override
                 public String apply(@Nullable FlowEvent input) {

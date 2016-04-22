@@ -22,7 +22,7 @@ public class Flow2ConfigTest {
     private Flow2Config underTest;
 
     @Mock
-    private List<FlowConfiguration<?, ?>> flowConfigs;
+    private List<FlowConfiguration<?>> flowConfigs;
 
     @Before
     public void setUp() {
@@ -32,17 +32,17 @@ public class Flow2ConfigTest {
 
     @Test
     public void testFlowConfigurationMapInit() {
-        List<FlowConfiguration<?, ?>> flowConfigs = new ArrayList<>();
+        List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
         flowConfigs.add(new StackSyncFlowConfig());
         flowConfigs.add(new StackTerminationFlowConfig());
         given(this.flowConfigs.iterator()).willReturn(flowConfigs.iterator());
-        Map<String, FlowConfiguration<?, ?>> flowConfigMap = underTest.flowConfigurationMap();
+        Map<String, FlowConfiguration<?>> flowConfigMap = underTest.flowConfigurationMap();
         assertEquals("Not all event type appeared in map!", 11, flowConfigMap.size());
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testFlowConfigurationMapInitIfAlreadyExists() {
-        List<FlowConfiguration<?, ?>> flowConfigs = new ArrayList<>();
+        List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
         StackSyncFlowConfig stackSyncFlowConfig = new StackSyncFlowConfig();
         flowConfigs.add(stackSyncFlowConfig);
         flowConfigs.add(stackSyncFlowConfig);

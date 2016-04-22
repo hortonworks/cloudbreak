@@ -125,6 +125,8 @@ public class ReactorFlowManagerTest {
                 count++;
             }
         }
+        // Termination triggers flow cancellation
+        count += 2;
         verify(reactor, times(count)).notify(anyObject(), any(Event.class));
     }
 

@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow2.ChainFlow;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -43,7 +42,7 @@ public class StackAndClusterCreationFlowConfig extends StackCreationFlowConfig {
     }
 
     @Override
-    public FlowEvent[] getEvents() {
-        return OWNEVENTS.toArray(new FlowEvent[]{});
+    public StackCreationEvent[] getEvents() {
+        return OWNEVENTS.toArray(new StackCreationEvent[]{});
     }
 }

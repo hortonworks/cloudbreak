@@ -20,13 +20,15 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 @Component
-public class CloudbreakInitStates {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakInitStates.class);
+public class CloudbreakCleanupAction {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakCleanupAction.class);
 
     @Inject
     private StackRepository stackRepository;
@@ -40,11 +42,18 @@ public class CloudbreakInitStates {
     @Inject
     private CloudbreakEventService eventService;
 
+    @Inject
+    private FlowLogRepository flowLogRepository;
+
+    @Inject
+    private FlowLogService flowLogService;
+
     @PostConstruct
     public void resetInProgressStates() {
         resetStackStatus();
         resetCloudStatus();
         setDeleteFailedStatus();
+        terminateRunningFlows();
     }
 
     private void resetCloudStatus() {
@@ -83,6 +92,15 @@ public class CloudbreakInitStates {
             loggingStatusChange("Stack", stack.getId(), stack.getStatus(), Status.DELETE_FAILED);
             stack.setStatus(Status.DELETE_FAILED);
             stackRepository.save(stack);
+        }
+    }
+
+    private void terminateRunningFlows() {
+        List<Object[]> runningFlows = flowLogRepository.findAllNonFinalized();
+        String logMessage = "Terminating flow {}";
+        for (Object[] flow : runningFlows) {
+            LOGGER.info(logMessage, flow[0]);
+            flowLogService.terminate((Long) flow[1], (String) flow[0]);
         }
     }
 

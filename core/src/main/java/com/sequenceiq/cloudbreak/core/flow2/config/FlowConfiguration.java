@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.config;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 
-public interface FlowConfiguration<S extends FlowState, E extends FlowEvent> {
+public interface FlowConfiguration<E extends FlowEvent> {
     Flow createFlow(String flowId);
 
-    FlowEvent[] getEvents();
+    E[] getEvents();
 }
