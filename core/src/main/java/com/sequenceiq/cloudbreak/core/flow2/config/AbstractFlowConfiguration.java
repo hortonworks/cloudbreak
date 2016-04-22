@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
 import com.sequenceiq.cloudbreak.core.flow2.StateConverterAdapter;
 
-public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<S, E> {
+public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<E> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);
 

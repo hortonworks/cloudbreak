@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackInstanceUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
+import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.DefaultClusterFlowContext;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
@@ -135,6 +136,7 @@ public class ReactorFlowManager implements FlowManager {
         StackDeleteRequest deleteRequest = (StackDeleteRequest) object;
         DefaultFlowContext context = new DefaultFlowContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
         reactor.notify(FlowPhases.TERMINATION.name(), eventFactory.createEvent(context, FlowPhases.TERMINATION.name()));
+        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEvent(context, Flow2Handler.FLOW_CANCEL));
     }
 
     @Override
@@ -142,6 +144,7 @@ public class ReactorFlowManager implements FlowManager {
         StackDeleteRequest deleteRequest = (StackForcedDeleteRequest) object;
         DefaultFlowContext context = new DefaultFlowContext(deleteRequest.getStackId(), deleteRequest.getCloudPlatform());
         reactor.notify(FlowPhases.FORCED_TERMINATION.name(), eventFactory.createEvent(context, FlowPhases.FORCED_TERMINATION.name()));
+        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEvent(context, Flow2Handler.FLOW_CANCEL));
     }
 
     @Override

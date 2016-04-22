@@ -28,7 +28,7 @@ public class Flow2InitializerTest {
     private Flow2Initializer underTest;
 
     @Mock
-    private List<FlowConfiguration<?, ?>> flowConfigs;
+    private List<FlowConfiguration<?>> flowConfigs;
 
     @Mock
     private EventBus reactor;
@@ -44,7 +44,7 @@ public class Flow2InitializerTest {
 
     @Test
     public void testInitialize() {
-        List<FlowConfiguration<?, ?>> flowConfigs = new ArrayList<>();
+        List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
         flowConfigs.add(new StackSyncFlowConfig());
         flowConfigs.add(new StackTerminationFlowConfig());
         given(this.flowConfigs.iterator()).willReturn(flowConfigs.iterator());

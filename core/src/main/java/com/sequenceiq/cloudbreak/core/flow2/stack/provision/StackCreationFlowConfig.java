@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 
 @Component
@@ -69,7 +68,7 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
     }
 
     @Override
-    public FlowEvent[] getEvents() {
-        return OWNEVENTS.toArray(new FlowEvent[]{});
+    public StackCreationEvent[] getEvents() {
+        return OWNEVENTS.toArray(new StackCreationEvent[]{});
     }
 }
