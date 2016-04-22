@@ -1,71 +1,79 @@
 buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    }
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+  }
 }
 
 jar {
-    baseName = 'cloudbreak-integration-test'
+  baseName = 'cloudbreak-integration-test'
 }
 
 apply plugin: 'spring-boot'
 
 dependencies {
-    compile project(':core-api')
-    compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
-        exclude group: 'org.slf4j';
-    }
-    compile group:  'org.springframework.boot',     name: 'spring-boot-starter',      version: springBootVersion
-    compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test', version: springBootVersion
-    compile group:  'org.springframework',          name: 'spring-web',               version: springFrameworkVersion
-    compile group:  'org.springframework',          name: 'spring-context-support',   version: springFrameworkVersion
-    compile group:  'org.apache.velocity',          name: 'velocity',                 version: '1.7'
-    compile group:  'com.jcraft',                   name: 'jsch',                     version: jschVersion
-    compile group:  'org.testng',                   name: 'testng',                   version: '6.9.10'
-    compile group:  'javax.el',                     name: 'javax.el-api',             version: '3.0.0'
+  compile project(':core-api')
+  compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+    exclude group: 'org.slf4j';
+  }
+  compile group:  'org.springframework.boot',     name: 'spring-boot-starter',      version: springBootVersion
+  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test', version: springBootVersion
+  compile group:  'org.springframework',          name: 'spring-web',               version: springFrameworkVersion
+  compile group:  'org.springframework',          name: 'spring-context-support',   version: springFrameworkVersion
+  compile group:  'org.apache.velocity',          name: 'velocity',                 version: '1.7'
+  compile group:  'com.jcraft',                   name: 'jsch',                     version: jschVersion
+  compile group:  'org.testng',                   name: 'testng',                   version: '6.9.10'
+  compile group:  'javax.el',                     name: 'javax.el-api',             version: '3.0.0'
+  compile(group:  'org.apache.sshd',              name: 'sshd-core',                version: '1.2.0') {
+    exclude group: 'ch.qos.logback'
+  }
+  compile group: 'com.github.docker-java',        name: 'docker-java',              version: '2.1.2'
+  compile group: 'com.sequenceiq',                name: 'consul-api',               version: '1.10'
+  compile(group: 'com.xebialabs.restito',         name: 'restito',                  version: '0.8.1') {
+    exclude group: 'com.sun.jersey'
+  }
 
-    compile ("org.uncommons:reportng:1.1.4") {
-        exclude group: "velocity"
-    }
-    runtime group: 'com.google.inject',             name: 'guice',                    version: '3.0'
-    runtime group: 'org.hibernate',                 name: 'hibernate-validator',      version: hibernateValidatorVersion
+  compile ("org.uncommons:reportng:1.1.4") {
+    exclude group: "velocity"
+  }
+  runtime group: 'com.google.inject',             name: 'guice',                    version: '3.0'
+  runtime group: 'org.hibernate',                 name: 'hibernate-validator',      version: hibernateValidatorVersion
 }
 
 task buildInfo(type: BuildInfoTask) {
-    destination = file("$buildDir")
-    applicationPropertiesPath = "$buildDir"
-    basename = jar.baseName
-    buildVersion = version
+  destination = file("$buildDir")
+  applicationPropertiesPath = "$buildDir"
+  basename = jar.baseName
+  buildVersion = version
 }
 
 compileJava.dependsOn buildInfo
 
 class BuildInfoTask extends DefaultTask {
-    File destination = new File("build.info")
-    String applicationPropertiesPath
-    String basename
-    String buildVersion
+  File destination = new File("build.info")
+  String applicationPropertiesPath
+  String basename
+  String buildVersion
 
-    @TaskAction
-    def writeBuildInfo() {
-        destination.mkdirs()
-        File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
-        applicationDestination.mkdirs()
-        new File(destination, "build.info").withWriter { out ->
-            [
-                    "ARTIFACT_BASENAME=" + basename,
-                    "ARTIFACT_VERSION=" + buildVersion,
-            ].each { out.println it }
-        }
-        new File(applicationDestination, "application.properties").withWriter { out ->
-            [
-                    "info.app.name=" + basename,
-                    "info.app.version=" + buildVersion
-            ].each { out.println it }
-        }
+  @TaskAction
+  def writeBuildInfo() {
+    destination.mkdirs()
+    File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
+    applicationDestination.mkdirs()
+    new File(destination, "build.info").withWriter { out ->
+      [
+              "ARTIFACT_BASENAME=" + basename,
+              "ARTIFACT_VERSION=" + buildVersion,
+      ].each { out.println it }
     }
+    new File(applicationDestination, "application.properties").withWriter { out ->
+      [
+              "info.app.name=" + basename,
+              "info.app.version=" + buildVersion
+      ].each { out.println it }
+    }
+  }
 }

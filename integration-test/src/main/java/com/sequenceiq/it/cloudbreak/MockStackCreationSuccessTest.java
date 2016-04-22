@@ -16,14 +16,16 @@ import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
-import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.mock.restito.RestitoStub;
+import com.sequenceiq.it.mock.restito.consul.ConsulMembersStub;
+import com.sequenceiq.it.mock.restito.docker.DockerContainersGetStub;
+import com.sequenceiq.it.mock.restito.docker.DockerContainersStartPostStub;
+import com.sequenceiq.it.mock.restito.docker.DockerInfoGetStub;
+import com.sequenceiq.it.mock.restito.docker.SwarmInfoStub;
+import com.xebialabs.restito.server.StubServer;
 
-public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
-
-    private Map<RestitoStub, Integer> stubsWithCallTimes;
+public class MockStackCreationSuccessTest extends AbstractCloudbreakIntegrationTest {
 
     @BeforeMethod
     public void setContextParams() {
@@ -35,11 +37,10 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage", "orchestrator" })
+    @Parameters({"stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage", "mockPort"})
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
-            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage,  @Optional("SALT") String orchestrator)
-            throws Exception {
+            @Optional("") String variant, @Optional() String availabilityZone, @Optional() String persistentStorage, @Optional("443") int mockPort) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
@@ -70,15 +71,16 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         stackRequest.setAvailabilityZone(availabilityZone);
         stackRequest.setInstanceGroups(igMap);
 
-        OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
-        orchestratorRequest.setType(orchestrator);
-        stackRequest.setOrchestrator(orchestratorRequest);
-
         Map<String, String> map = new HashMap<>();
         if (persistentStorage != null && !persistentStorage.isEmpty()) {
             map.put("persistentStorage", persistentStorage);
         }
         stackRequest.setParameters(map);
+
+        int numberOfServers = getNumberOfServers(instanceGroups);
+
+        StubServer stubServer = startMockServer(mockPort);
+        addStubs(stubServer, numberOfServers);
 
         // WHEN
         String stackId = getCloudbreakClient().stackEndpoint().postPrivate(stackRequest).getId().toString();
@@ -87,5 +89,27 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId);
+
+        stubServer.stop();
+    }
+
+    private void addStubs(StubServer stubServer, int numberOfServers) {
+        stubServer.addStub(new DockerInfoGetStub());
+        stubServer.addStub(new DockerContainersGetStub());
+        stubServer.addStub(new DockerContainersStartPostStub());
+        stubServer.addStub(new SwarmInfoStub(numberOfServers));
+        stubServer.addStub(new ConsulMembersStub(numberOfServers));
+    }
+
+    private int getNumberOfServers(List<InstanceGroup> instanceGroups) {
+        int numberOfServers = 0;
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            numberOfServers += instanceGroup.getNodeCount();
+        }
+        return numberOfServers;
+    }
+
+    private StubServer startMockServer(int mockPort) {
+        return new StubServer(mockPort).secured().run();
     }
 }

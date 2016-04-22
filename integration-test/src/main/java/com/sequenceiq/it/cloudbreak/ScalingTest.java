@@ -71,7 +71,7 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
         // THEN
         CloudbreakUtil.checkClusterAvailability(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint(),
-                stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
-                itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID));
+                "8080", stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
+                itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), true);
     }
 }

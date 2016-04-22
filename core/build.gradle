@@ -79,6 +79,7 @@ dependencies {
     runtime project(':cloud-gcp')
     runtime project(':cloud-aws')
     runtime project(':cloud-byos')
+    runtime project(':cloud-mock')
 
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
