@@ -165,7 +165,7 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the template belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
-        return baseTemplateCommands.create(name, instanceType, volumeCount, volumeSize, null, publicInAccount, description, parameters, platformId, PLATFORM);
+        return baseTemplateCommands.create(name, instanceType, volumeCount, volumeSize, "HDD", publicInAccount, description, parameters, platformId, PLATFORM);
     }
 
     @CliCommand(value = "platform create --OPENSTACK", help = "Create a new Openstack platform configuration")
