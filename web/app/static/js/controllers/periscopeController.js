@@ -33,6 +33,15 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             }
         }, false);
 
+        $rootScope.$watch("activeCluster.cluster.status == 'AVAILABLE' && activeCluster.status == 'AVAILABLE'", function(newValue, oldValue) {
+            if ($rootScope.activeCluster.cluster != undefined && $rootScope.activeCluster.cluster.ambariServerIp != undefined) {
+                var periCluster = selectPeriscopeClusterByAmbariIp($rootScope.activeCluster.cluster.ambariServerIp);
+                if (newValue && !oldValue && isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster)) {
+                    setActivePeriClusterWithResources(periCluster);
+                }
+            }
+        });
+
         function isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster) {
             return periCluster != undefined && $rootScope.activeCluster.cluster.ambariServerIp != undefined && $rootScope.activeCluster.cluster.ambariServerIp == periCluster.host && periCluster.state == 'RUNNING';
         }
@@ -40,11 +49,13 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         function setActivePeriClusterWithResources(periscopeCluster) {
             $scope.actPeriscopeCluster = periscopeCluster;
             $scope.autoScalingSLAPoliciesEnabled = true;
-            getAlertDefinitions(periscopeCluster.id);
-            getAlarms(periscopeCluster.id);
-            getScalingConfigurations(periscopeCluster.id);
-            getScalingHistory(periscopeCluster.id);
-            getScalingPolicies(periscopeCluster.id);
+            if ($rootScope.activeCluster.cluster.status == 'AVAILABLE' && $rootScope.activeCluster.status == 'AVAILABLE') {
+                getAlertDefinitions(periscopeCluster.id);
+                getAlarms(periscopeCluster.id);
+                getScalingConfigurations(periscopeCluster.id);
+                getScalingHistory(periscopeCluster.id);
+                getScalingPolicies(periscopeCluster.id);
+            }
         }
 
         function disableAutoScalingPolicies() {
