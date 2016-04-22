@@ -250,6 +250,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             IdJson id;
             StackRequest stackRequest = new StackRequest();
             stackRequest.setName(name);
+            stackRequest.setRegion(region.getName());
             stackRequest.setRelocateDocker(relocateDocker);
             if (availabilityZone != null) {
                 stackRequest.setAvailabilityZone(availabilityZone.getName());
