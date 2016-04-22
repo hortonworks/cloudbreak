@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
@@ -19,7 +20,7 @@ import reactor.bus.EventBus;
 import reactor.fn.Consumer;
 
 @Component
-public class Flow2Handler implements Consumer<Event<?>> {
+public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     public static final String FLOW_FINAL = "FLOWFINAL";
     private static final Logger LOGGER = LoggerFactory.getLogger(Flow2Handler.class);
 
@@ -35,7 +36,7 @@ public class Flow2Handler implements Consumer<Event<?>> {
     private EventBus eventBus;
 
     @Override
-    public void accept(Event<?> event) {
+    public void accept(Event<? extends Payload> event) {
         String key = (String) event.getKey();
         Object payload = event.getData();
         String flowId = getFlowId(event);

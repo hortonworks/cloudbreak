@@ -18,6 +18,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncState;
@@ -47,7 +48,14 @@ public class Flow2HandlerTest {
     @Mock
     private Flow flow;
 
-    private Event<?> dummyEvent;
+    private Event<Payload> dummyEvent;
+
+    private Payload payload = new Payload() {
+        @Override
+        public Long getStackId() {
+            return 1L;
+        }
+    };
 
     @Before
     public void setUp() {
@@ -55,7 +63,7 @@ public class Flow2HandlerTest {
         MockitoAnnotations.initMocks(this);
         Map<String, Object> headers = new HashMap<>();
         headers.put("FLOW_ID", FLOW_ID);
-        dummyEvent = new Event<Object>(new Event.Headers(headers), null);
+        dummyEvent = new Event<>(new Event.Headers(headers), payload);
     }
 
     @Test
@@ -63,7 +71,7 @@ public class Flow2HandlerTest {
         BDDMockito.<FlowConfiguration>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(StackSyncState.INIT_STATE);
-        Event<?> event = new Event<>(null);
+        Event<Payload> event = new Event<>(payload);
         event.setKey(FlowPhases.STACK_SYNC.name());
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
@@ -74,7 +82,7 @@ public class Flow2HandlerTest {
 
     @Test
     public void testNewFlowButNotHandled() {
-        Event<?> event = new Event<>(null);
+        Event<Payload> event = new Event<>(payload);
         event.setKey(FlowPhases.STACK_SYNC.name());
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
