@@ -8,7 +8,7 @@
             <div class="panel-body">
                 <ul class="nav nav-pills nav-justified" role="tablist">
                     <li class="active"><a ng-click="showDetails()" role="tab" data-toggle="tab">{{msg.active_cluster_details_title}}</a></li>
-                    <li><a role="tab" ng-click="showPeriscope()" role="tab" data-toggle="tab">{{msg.active_cluster_periscope_title}}</a></li>
+                    <li><a role="tab" ng-click="showPeriscope()" role="tab" data-toggle="tab" ng-show="activeCluster.cluster.status == 'AVAILABLE' && activeCluster.status == 'AVAILABLE'">{{msg.active_cluster_periscope_title}}</a></li>
                 </ul>
                 <div class="tab-content">
                     <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">
