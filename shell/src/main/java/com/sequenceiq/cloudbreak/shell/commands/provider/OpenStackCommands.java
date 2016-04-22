@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 public class OpenStackCommands implements CommandMarker {
 
     public static final String PLATFORM = "OPENSTACK";
+    private static final int TEN = 10;
 
     private ShellContext shellContext;
     private CredentialCommands baseCredentialCommands;
@@ -165,6 +166,12 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the template belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
+        if (volumeCount < 1) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Count of volumes could not be smaller than 1.");
+        }
+        if (volumeSize < TEN) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Size of volumes could not be smaller than 10 Gb.");
+        }
         return baseTemplateCommands.create(name, instanceType, volumeCount, volumeSize, "HDD", publicInAccount, description, parameters, platformId, PLATFORM);
     }
 
