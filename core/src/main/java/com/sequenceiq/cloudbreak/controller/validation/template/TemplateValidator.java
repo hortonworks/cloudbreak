@@ -97,7 +97,7 @@ public class TemplateValidator {
                     throw new BadRequestException(String.format("Min allowed volume count for '%s': %s", vmType.value(), config.minimumNumber()));
                 }
                 if (value.getVolumeSize() > config.maximumSize()) {
-                    throw new BadRequestException(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
+                    throw new BadRequestException(String.format("Max allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
                 } else if (value.getVolumeSize() < config.minimumSize()) {
                     throw new BadRequestException(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.minimumSize()));
                 }

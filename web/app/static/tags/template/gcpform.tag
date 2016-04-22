@@ -35,7 +35,7 @@
 <div class="form-group" ng-class="{ 'has-error': gcpTemplateForm.gcp_tvolumecount.$dirty && gcpTemplateForm.gcp_tvolumecount.$invalid }">
     <label class="col-sm-3 control-label" for="gcp_tvolumecount">{{msg.template_form_volume_count_label}}</label>
     <div class="col-sm-9">
-        <input type="number" name="gcp_tvolumecount" class="form-control" id="gcp_tvolumecount" ng-model="gcpTemp.volumeCount" placeholder="{{msg.template_form_volume_count_placeholder | format: gcpTemp.minDiskNumber:(gcpTemp.maxDiskNumber)}}" min="{{gcpTemp.minDiskNumber}}" max="{{gcpTemp.maxDiskNumber}}">
+        <input type="number" name="gcp_tvolumecount" class="form-control" id="gcp_tvolumecount" ng-model="gcpTemp.volumeCount" placeholder="{{msg.template_form_volume_count_placeholder | format: gcpTemp.minDiskNumber:(gcpTemp.maxDiskNumber)}}" min="{{gcpTemp.minDiskNumber}}" max="{{gcpTemp.maxDiskNumber}}" required>
         <div class="help-block" ng-show="gcpTemplateForm.gcp_tvolumecount.$dirty && gcpTemplateForm.gcp_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format: gcpTemp.minDiskNumber:(gcpTemp.maxDiskNumber)}}
         </div>
     </div>
