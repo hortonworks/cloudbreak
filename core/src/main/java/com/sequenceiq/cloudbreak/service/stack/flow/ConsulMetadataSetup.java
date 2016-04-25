@@ -61,7 +61,7 @@ public class ConsulMetadataSetup {
         Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIpWrapper());
         PollingResult pollingResult = waitForConsulAgents(stack, clientConfig, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
         if (!isSuccess(pollingResult)) {
             throw new WrongMetadataException("Connecting to consul hosts is interrupted.");
@@ -75,7 +75,7 @@ public class ConsulMetadataSetup {
         Stack stack = stackService.getById(stackId);
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIpWrapper());
         Set<InstanceMetaData> newInstanceMetadata = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             if (newAddresses.contains(instanceMetaData.getPrivateIp())) {

@@ -170,6 +170,7 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
 
         $scope.selectAwsNetworkType3 = function() {
             delete $scope.network.subnetCIDR
+            delete $scope.network.parameters.internetGatewayId
         }
 
         $scope.selectAzureNetworkType1 = function() {

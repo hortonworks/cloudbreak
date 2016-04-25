@@ -337,7 +337,7 @@ public class AmbariClusterConnector {
                 keyValues.put(configName, config.getConfiguration());
                 InstanceGroup gateway = stack.getGatewayInstanceGroup();
                 InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-                HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+                HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
                 pluginManager.prepareKeyValues(httpClientConfig, keyValues);
                 payload = Arrays.asList(configName);
             } else {

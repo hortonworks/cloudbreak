@@ -1,5 +1,21 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.MUNCHAUSEN;
+import static com.sequenceiq.cloudbreak.service.PollingResult.EXIT;
+import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.BootstrapApiContext;
@@ -20,20 +36,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.MUNCHAUSEN;
-import static com.sequenceiq.cloudbreak.service.PollingResult.EXIT;
-import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
 
 @Component
 public class ClusterBootstrapper {
@@ -81,11 +83,11 @@ public class ClusterBootstrapper {
 
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp()));
+            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
         }
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
-                    gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
+                    gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get("SWARM");
             PollingResult bootstrapApiPolling = bootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     bootstrapApiCheckerTask,
@@ -94,7 +96,7 @@ public class ClusterBootstrapper {
                     MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
 
-            List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
+            List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIpWrapper());
             containerOrchestrator.bootstrap(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(0), stack.getConsulServers(),
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
             if (nodeMap.size() > 1) {
@@ -121,7 +123,7 @@ public class ClusterBootstrapper {
             validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
             // TODO: put it in orchestrator api
             Orchestrator orchestrator = new Orchestrator();
-            orchestrator.setApiEndpoint(gatewayInstance.getPublicIp() + ":443");
+            orchestrator.setApiEndpoint(gatewayInstance.getPublicIpWrapper() + ":443");
             orchestrator.setType("SWARM");
             orchestratorRepository.save(orchestrator);
             stack.setOrchestrator(orchestrator);
@@ -144,14 +146,14 @@ public class ClusterBootstrapper {
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             if (stackScalingContext.getUpscaleCandidateAddresses().contains(instanceMetaData.getPrivateIp())) {
-                nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp()));
+                nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
             }
         }
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
-                    gatewayInstance.getPublicIp(), gatewayInstance.getPrivateIp());
+                    gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get("SWARM");
-            List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIp());
+            List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIpWrapper());
             for (int i = 0; i < nodeMap.size(); i++) {
                 containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i),
                         clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
