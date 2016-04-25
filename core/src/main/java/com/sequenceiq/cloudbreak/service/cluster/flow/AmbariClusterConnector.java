@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.client.RestClient;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -204,16 +205,16 @@ public class AmbariClusterConnector {
             setBaseRepoURL(cluster, ambariClient);
             addBlueprint(stack, ambariClient, blueprintText);
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
-            Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
+            Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(ambariClient, hostGroups);
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
             int nodeCount = hostsInCluster.size();
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
-            executeSssdRecipe(stack, null, cluster.getSssdConfig());
+//            executeSssdRecipe(stack, null, cluster.getSssdConfig());
 
-            final boolean recipesFound = recipesPreInstall(stack, cluster, blueprintText, fs, hostGroups);
+//            final boolean recipesFound = recipesPreInstall(stack, cluster, blueprintText, fs, hostGroups);
             String clusterName = cluster.getName();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
             String configStrategy = cluster.getConfigStrategy().name();
@@ -228,7 +229,7 @@ public class AmbariClusterConnector {
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
             pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
-            recipesPostInstall(stack, recipesFound);
+//            recipesPostInstall(stack, recipesFound);
             executeSmokeTest(stack, ambariClient);
             //TODO https://hortonworks.jira.com/browse/BUG-51920
             startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
@@ -874,9 +875,10 @@ public class AmbariClusterConnector {
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private Map<String, List<Map<String, String>>> buildHostGroupAssociations(Set<HostGroup> hostGroups) throws InvalidHostGroupHostAssociation {
+    private Map<String, List<Map<String, String>>> buildHostGroupAssociations(AmbariClient ambariClient, Set<HostGroup> hostGroups) throws InvalidHostGroupHostAssociation {
         Map<String, List<Map<String, String>>> hostGroupMappings = new HashMap<>();
         LOGGER.info("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
+        Map<String, String> hostNames = ambariClient.getHostNames();
         for (HostGroup hostGroup : hostGroups) {
             List<Map<String, String>> hostInfoForHostGroup = new ArrayList<>();
             if (hostGroup.getConstraint().getInstanceGroup() != null) {
@@ -885,7 +887,7 @@ public class AmbariClusterConnector {
                 List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroupId);
                 for (InstanceMetaData meta : metas) {
                     Map<String, String> hostInfo = new HashMap<>();
-                    hostInfo.put(FQDN, meta.getDiscoveryFQDN());
+                    hostInfo.put(FQDN, hostNames.get(meta.getPrivateIp()));
                     if (meta.getHypervisor() != null) {
                         hostInfo.put("hypervisor", meta.getHypervisor());
                         hostInfo.put("rack", topologyMapping.get(meta.getHypervisor()));

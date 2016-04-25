@@ -8,6 +8,11 @@ import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -16,6 +21,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.model.CbBootResponse;
+import com.sequenceiq.cloudbreak.api.model.CbBootResponses;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.BootstrapApiContext;
@@ -36,6 +54,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class ClusterBootstrapper {
@@ -75,6 +94,67 @@ public class ClusterBootstrapper {
 
     @Inject
     private ContainerConfigService containerConfigService;
+
+    @SuppressWarnings("unchecked")
+    public void bootstrapOnHost(ProvisioningContext provisioningContext) throws CloudbreakException {
+        Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        Set<Node> nodes = new HashSet<>();
+        Set<String> targets = new HashSet<>(Arrays.asList(gatewayInstance.getPrivateIp()));
+        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+            targets.add(instanceMetaData.getPrivateIp());
+            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp()));
+        }
+        try {
+            // TODO replace it with object
+            Map<String, Object> configMap = new HashMap<>();
+            configMap.put("data_dir", "/etc/cloudbreak/consul");
+            // TODO multiple servers
+            configMap.put("servers", Arrays.asList(gatewayInstance.getPrivateIp()));
+            configMap.put("targets", targets);
+
+            String plainCreds = "cbadmin:cbadmin";
+            byte[] plainCredsBytes = plainCreds.getBytes();
+            byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
+            String base64Creds = new String(base64CredsBytes);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Basic " + base64Creds);
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity req = new HttpEntity<>(JsonUtil.writeValueAsString(configMap), headers);
+
+            Set<String> missingTargets = new HashSet<>(targets);
+            while (!missingTargets.isEmpty()) {
+                LOGGER.info("Sending consul config save request to {}", missingTargets);
+                ResponseEntity<CbBootResponses> response = restTemplate.exchange(
+                        "http://" + gatewayInstance.getPublicIp() + ":8088/cbboot/consul/config/distribute", HttpMethod.POST, req, CbBootResponses.class);
+                CbBootResponses responseBody = response.getBody();
+                for (CbBootResponse cbBootResponse : responseBody.getResponses()) {
+                    if (cbBootResponse.getStatusCode() == org.apache.http.HttpStatus.SC_OK) {
+                        LOGGER.info("Successfully distributed consul config to: " + cbBootResponse.getAddress());
+                        missingTargets.remove(cbBootResponse.getAddress().split(":")[0]);
+                    }
+                }
+                configMap.put("targets", missingTargets);
+                req = new HttpEntity<>(JsonUtil.writeValueAsString(configMap), headers);
+                if (!missingTargets.isEmpty()) {
+                    LOGGER.info("Missing nodes to save consul config: %s", missingTargets);
+                }
+                Thread.sleep(5000);
+            }
+
+            Map<String, Object> consulRunMap = new HashMap<>();
+            consulRunMap.put("targets", targets);
+            HttpEntity req2 = new HttpEntity<>(JsonUtil.writeValueAsString(consulRunMap), headers);
+            ResponseEntity<CbBootResponses> response = restTemplate.exchange(
+                    "http://" + gatewayInstance.getPublicIp() + ":8088/cbboot/consul/run/distribute", HttpMethod.POST, req2, CbBootResponses.class);
+            CbBootResponses responseBody = response.getBody();
+            LOGGER.info("Consul run response: %s", responseBody);
+        } catch (Exception e) {
+            throw new CloudbreakException(e);
+        }
+    }
 
     public void bootstrapCluster(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
