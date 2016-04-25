@@ -18,6 +18,7 @@ apply plugin: 'spring-boot'
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
   systemProperty 'spring.config.location', System.properties['spring.config.location']
+  jvmArgs = ['-XX:MaxPermSize=1024m']
 }
 
 jar {
