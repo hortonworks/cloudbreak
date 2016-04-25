@@ -453,7 +453,6 @@ public class SimpleStackFacade implements StackFacade {
         STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
         STACK_STOP_REQUESTED("stack.stop.requested"),
         STACK_PROVISIONING("stack.provisioning"),
-        STACK_INFRASTRUCTURE_TIME("stack.infrastructure.time"),
         STACK_INFRASTRUCTURE_SUBNETS_UPDATING("stack.infrastructure.subnets.updating"),
         STACK_INFRASTRUCTURE_SUBNETS_UPDATED("stack.infrastructure.subnets.updated"),
         STACK_INFRASTRUCTURE_UPDATE_FAILED("stack.infrastructure.update.failed"),

@@ -112,7 +112,8 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<LaunchStackResult>(LaunchStackResult.class) {
             @Override
             protected void doExecute(StackContext context, LaunchStackResult payload, Map<Object, Object> variables) throws Exception {
-                Stack stack = stackCreationService.provisioningFinished(context, payload, variables);
+                variables.put(LaunchStackResult.class, payload);
+                Stack stack = stackCreationService.provisioningFinished(context, payload);
                 StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack());
                 sendEvent(newContext);
@@ -127,11 +128,12 @@ public class StackCreationActions {
         };
     }
 
-    @Bean(name = "COLLECTMETADATA_STATE")
-    public Action collectMetadataAction() {
+    @Bean(name = "SAVE_COLLECTEDMETADATA_STATE")
+    public Action saveCollectEdMetadataAction() {
         return new AbstractStackCreationAction<CollectMetadataResult>(CollectMetadataResult.class) {
             @Override
             protected void doExecute(StackContext context, CollectMetadataResult payload, Map<Object, Object> variables) throws Exception {
+                stackCreationService.sendStackCreationTime(context, variables);
                 Stack stack = stackCreationService.setupMetadata(context, payload);
                 StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),
                         context.getCloudStack());
@@ -169,7 +171,7 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.handleStackCreationFailure(context, payload.getException());
-                sendEvent(context.getFlowId(), StackCreationEvent.STACK_CREATION_FAILED_EVENT.stringRepresentation(), payload);
+                sendEvent(context.getFlowId(), StackCreationEvent.STACK_CREATION_FAILE_HANDLED_EVENT.stringRepresentation(), payload);
             }
 
             @Override

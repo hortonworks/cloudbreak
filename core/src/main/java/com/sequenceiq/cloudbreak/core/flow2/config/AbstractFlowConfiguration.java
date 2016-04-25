@@ -82,7 +82,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             if (transition.getFailureEvent() != null && transition.target != flowEdgeConfig.defaultFailureState) {
                 S failureState = Optional.fromNullable((S) transition.target.failureState()).or(flowEdgeConfig.defaultFailureState);
                 stateConfigurer.state(failureState, getAction(failureState), null);
-                transitionConfigurer.and().withExternal().source(transition.target).target(failureState).event((E) transition.getFailureEvent());
+                transitionConfigurer.and().withExternal().source(transition.target).target(failureState).event(transition.getFailureEvent());
                 if (!failHandled.contains(failureState)) {
                     failHandled.add(failureState);
                     transitionConfigurer.and().withExternal().source(failureState).target(flowEdgeConfig.finalState).event(flowEdgeConfig.failureHandled);
@@ -116,7 +116,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     }
 
     public Flow createFlow(String flowId) {
-        return new FlowAdapter<S, E>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
+        return new FlowAdapter<>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
                 new EventConverterAdapter<>(eventType));
     }
 
