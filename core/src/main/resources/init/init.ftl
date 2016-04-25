@@ -29,7 +29,7 @@ prepend domain-name-servers 127.0.0.1;
 append domain-search "node.dc1.consul";
 EOF
 
-dhclient -q eth0
+systemctl restart network
 
 cat>/etc/systemd/system/consul.service<<EOF
 [Install]
