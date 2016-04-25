@@ -212,6 +212,13 @@ public class ReactorFlowManager implements FlowManager {
     }
 
     @Override
+    public void triggerFullSync(Object object) {
+        StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
+        StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), false);
+        reactor.notify(FlowPhases.STACK_AND_CLUSTER_SYNC.name(), eventFactory.createEvent(context, FlowPhases.STACK_AND_CLUSTER_SYNC.name()));
+    }
+
+    @Override
     public void triggerClusterUserNamePasswordUpdate(Object object) {
         ClusterUserNamePasswordUpdateRequest request = (ClusterUserNamePasswordUpdateRequest) object;
         ClusterAuthenticationContext context = new ClusterAuthenticationContext(request.getStackId(), request.getCloudPlatform(),

@@ -116,6 +116,7 @@ public class ReactorFlowManagerTest {
         flowManager.triggerUpdateAllowedSubnets(updateAllowedSubnetsRequest);
         flowManager.triggerClusterSync(clusterStatusUpdateRequest);
         flowManager.triggerStackSync(stackStatusUpdateRequest);
+        flowManager.triggerFullSync(stackStatusUpdateRequest);
         flowManager.triggerClusterUserNamePasswordUpdate(clusterUserNamePasswordUpdateRequest);
         flowManager.triggerClusterTermination(clusterDeleteRequest);
 
