@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.sync;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.FULL_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.SYNC_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.SYNC_FINALIZED_EVENT;
@@ -10,6 +11,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncState.SYN
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncState.SYNC_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncState.SYNC_STATE;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -22,11 +24,14 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
     private static final List<Transition<StackSyncState, StackSyncEvent>> TRANSITIONS = new Transition.Builder<StackSyncState, StackSyncEvent>()
             .defaultFailureEvent(StackSyncEvent.SYNC_FAILURE_EVENT)
             .from(INIT_STATE).to(SYNC_STATE).event(SYNC_EVENT).defaultFailure()
+            .from(INIT_STATE).to(SYNC_STATE).event(FULL_SYNC_EVENT).defaultFailure()
             .from(SYNC_STATE).to(SYNC_FINISHED_STATE).event(SYNC_FINISHED_EVENT).defaultFailure()
             .build();
 
     private static final FlowEdgeConfig<StackSyncState, StackSyncEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SYNC_FINISHED_STATE, SYNC_FINALIZED_EVENT, SYNC_FAILED_STATE, SYNC_FAIL_HANDLED_EVENT);
+
+    private static final EnumSet<StackSyncEvent> EVENTS = EnumSet.complementOf(EnumSet.of(StackSyncEvent.FULL_SYNC_EVENT));
 
     public StackSyncFlowConfig() {
         super(StackSyncState.class, StackSyncEvent.class);
@@ -34,7 +39,7 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
 
     @Override
     public StackSyncEvent[] getEvents() {
-        return StackSyncEvent.values();
+        return EVENTS.toArray(new StackSyncEvent[]{});
     }
 
     @Override

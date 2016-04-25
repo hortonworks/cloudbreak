@@ -334,7 +334,10 @@ public class StackService {
         }
         switch (status) {
             case SYNC:
-                sync(stack, status);
+                sync(stack, status, false);
+                break;
+            case FULL_SYNC:
+                sync(stack, status, true);
                 break;
             case STOPPED:
                 stop(stack, cluster, status);
@@ -347,9 +350,13 @@ public class StackService {
         }
     }
 
-    private void sync(Stack stack, StatusRequest statusRequest) {
+    private void sync(Stack stack, StatusRequest statusRequest, boolean full) {
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
-            flowManager.triggerStackSync(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
+            if (full) {
+                flowManager.triggerFullSync(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
+            } else {
+                flowManager.triggerStackSync(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
+            }
         } else {
             LOGGER.warn("Stack could not be synchronized in {} state!", stack.getStatus());
         }

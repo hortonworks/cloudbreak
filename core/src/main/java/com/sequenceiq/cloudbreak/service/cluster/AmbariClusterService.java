@@ -1,5 +1,28 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -51,28 +74,8 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+
 import groovyx.net.http.HttpResponseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 @Service
 @Transactional
