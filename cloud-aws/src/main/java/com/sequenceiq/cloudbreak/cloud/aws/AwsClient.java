@@ -5,10 +5,14 @@ import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -23,12 +27,16 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 @Component
 public class AwsClient {
     private static final String DEFAULT_REGION_NAME = "us-west-1";
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsClient.class);
 
     @Inject
     private AwsPlatformParameters awsPlatformParameters;
 
     @Inject
     private AwsSessionCredentialClient credentialClient;
+
+    @Inject
+    private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
 
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
@@ -80,8 +88,20 @@ public class AwsClient {
     public void checkAwsEnvironmentVariables(CloudCredential credential) {
         AwsCredentialView awsCredential = new AwsCredentialView(credential);
         if (isRoleAssumeRequired(awsCredential)) {
-            if (isEmpty(System.getenv("AWS_ACCESS_KEY_ID")) || isEmpty(System.getenv("AWS_SECRET_ACCESS_KEY"))) {
-                throw new CloudConnectorException("For this operation the 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be set!");
+            if (awsEnvironmentVariableChecker.isAwsAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable()) {
+                throw new CloudConnectorException("If 'AWS_ACCESS_KEY_ID' available then 'AWS_SECRET_ACCESS_KEY' must be set!");
+            } else if (awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsAccessKeyAvailable()) {
+                throw new CloudConnectorException("If 'AWS_SECRET_ACCESS_KEY' available then 'AWS_ACCESS_KEY_ID' must be set!");
+            } else if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable()) {
+                try {
+                    new InstanceProfileCredentialsProvider().getCredentials();
+                } catch (AmazonClientException e) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("The 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be set ");
+                    sb.append("or an instance profile role should be available.");
+                    LOGGER.info(sb.toString());
+                    throw new CloudConnectorException(sb.toString());
+                }
             }
         }
     }
