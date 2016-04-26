@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -154,8 +155,9 @@ public class StackCreationService {
     public Stack setupTls(StackContext context, GetSSHFingerprintsResult sshFingerprints) throws CloudbreakException {
         LOGGER.info("Fingerprint has been determined: {}", sshFingerprints.getSshFingerprints());
         Stack stack = context.getStack();
+        InstanceMetaData firstInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         tlsSetupService.setupTls(stack, stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next().getPublicIpWrapper(),
-                stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
+                firstInstance.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
         return stackService.getById(stack.getId());
     }
 

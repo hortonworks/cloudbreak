@@ -13,6 +13,8 @@ public class InstanceMetaDataJson implements JsonEntity {
     private String privateIp;
     @ApiModelProperty(InstanceMetaDataModelDescription.PUBLIC_IP)
     private String publicIp;
+    @ApiModelProperty
+    private Integer sshPort;
     @ApiModelProperty(InstanceMetaDataModelDescription.INSTANCE_ID)
     private String instanceId;
     @ApiModelProperty(InstanceMetaDataModelDescription.AMBARI_SERVER)
@@ -50,6 +52,14 @@ public class InstanceMetaDataJson implements JsonEntity {
 
     public void setPublicIp(String publicIp) {
         this.publicIp = publicIp;
+    }
+
+    public Integer getSshPort() {
+        return sshPort;
+    }
+
+    public void setSshPort(Integer sshPort) {
+        this.sshPort = sshPort;
     }
 
     public String getInstanceId() {

@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class CloudInstanceMetaData {
 
+    private static final int DEFAULT_SSH_PORT = 22;
     public static final CloudInstanceMetaData EMPTY_METADATA = new CloudInstanceMetaData(null, null, null);
 
     private final String privateIp;
     private final String publicIp;
+    private final int sshPort;
     private final String hypervisor;
 
     public CloudInstanceMetaData(String privateIp, String publicIp) {
@@ -13,9 +15,14 @@ public class CloudInstanceMetaData {
     }
 
     public CloudInstanceMetaData(String privateIp, String publicIp, String hypervisor) {
+        this(privateIp, publicIp, DEFAULT_SSH_PORT, hypervisor);
+    }
+
+    public CloudInstanceMetaData(String privateIp, String publicIp, int sshPort, String hypervisor) {
         this.privateIp = privateIp;
         this.publicIp = publicIp;
         this.hypervisor = hypervisor;
+        this.sshPort = sshPort;
     }
 
     public String getPrivateIp() {
@@ -24,6 +31,10 @@ public class CloudInstanceMetaData {
 
     public String getPublicIp() {
         return publicIp;
+    }
+
+    public int getSshPort() {
+        return sshPort;
     }
 
     public String getHypervisor() {

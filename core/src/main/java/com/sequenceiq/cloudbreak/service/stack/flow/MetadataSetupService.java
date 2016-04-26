@@ -110,6 +110,7 @@ public class MetadataSetupService {
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), group);
             instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
             instanceMetaDataEntry.setPublicIp(md.getPublicIp());
+            instanceMetaDataEntry.setSshPort(md.getSshPort());
             instanceMetaDataEntry.setHypervisor(md.getHypervisor());
             instanceMetaDataEntry.setInstanceGroup(instanceGroup);
             instanceMetaDataEntry.setInstanceId(instanceId);
