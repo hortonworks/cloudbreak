@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon.poller;
 
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.model.v2.App;
 
-public class MarathonAppBootstrap implements ContainerBootstrap {
+public class MarathonAppBootstrap implements OrchestratorBootstrap {
 
     private final Marathon client;
     private final App app;

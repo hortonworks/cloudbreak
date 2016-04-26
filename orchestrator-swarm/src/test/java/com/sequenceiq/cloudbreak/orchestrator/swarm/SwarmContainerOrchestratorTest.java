@@ -25,7 +25,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
@@ -59,16 +59,16 @@ public class SwarmContainerOrchestratorTest {
         underTest.init(parallelContainerRunner(), exitCriteria());
         underTestSpy = spy(underTest);
         doReturn(parallelContainerRunner()).when(underTestSpy).getParallelContainerRunner();
-        when(underTestSpy.runner(any(ContainerBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyMap())).thenAnswer(
+        when(underTestSpy.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyMap())).thenAnswer(
                 new Answer<Callable<Boolean>>() {
                     @Override
                     public Callable<Boolean> answer(InvocationOnMock invocation) {
                         Object[] arguments = invocation.getArguments();
-                        ContainerBootstrap containerBootstrap = (ContainerBootstrap) arguments[ZERO];
+                        OrchestratorBootstrap orchestratorBootstrap = (OrchestratorBootstrap) arguments[ZERO];
                         ExitCriteria exitCriteria = (ExitCriteria) arguments[ONE];
                         ExitCriteriaModel exitCriteriaModel = (ExitCriteriaModel) arguments[TWO];
                         Map<String, String> map = (Map<String, String>) arguments[THREE];
-                        return createRunner(containerBootstrap, exitCriteria, exitCriteriaModel, map);
+                        return createRunner(orchestratorBootstrap, exitCriteria, exitCriteriaModel, map);
                     }
                 }
         );

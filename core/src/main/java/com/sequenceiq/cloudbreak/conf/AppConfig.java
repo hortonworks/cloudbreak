@@ -37,9 +37,10 @@ import com.sequenceiq.cloudbreak.client.RestClient;
 import com.sequenceiq.cloudbreak.client.config.ConfigKey;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ExecutorBasedParallelContainerRunner;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -85,6 +86,9 @@ public class AppConfig implements ResourceLoaderAware {
     private List<ContainerOrchestrator> containerOrchestrators;
 
     @Inject
+    private List<HostOrchestrator> hostOrchestrators;
+
+    @Inject
     private List<FileSystemConfigurator> fileSystemConfigurators;
 
     @Inject
@@ -126,6 +130,16 @@ public class AppConfig implements ResourceLoaderAware {
         for (ContainerOrchestrator containerOrchestrator : containerOrchestrators) {
             containerOrchestrator.init(simpleParallelContainerRunnerExecutor(), clusterDeletionBasedExitCriteria());
             map.put(containerOrchestrator.name(), containerOrchestrator);
+        }
+        return map;
+    }
+
+    @Bean
+    public Map<String, HostOrchestrator> hostOrchestrators() {
+        Map<String, HostOrchestrator> map = new HashMap<>();
+        for (HostOrchestrator hostOrchestrator : hostOrchestrators) {
+            hostOrchestrator.init(simpleParallelContainerRunnerExecutor(), clusterDeletionBasedExitCriteria());
+            map.put(hostOrchestrator.name(), hostOrchestrator);
         }
         return map;
     }

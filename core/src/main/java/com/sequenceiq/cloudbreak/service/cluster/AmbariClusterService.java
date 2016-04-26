@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATHON;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -462,7 +463,7 @@ public class AmbariClusterService implements ClusterService {
             blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stack.getInstanceGroups());
         }
 
-        if ("MARATHON".equals(stack.getOrchestrator().getType())) {
+        if (MARATHON.equals(stack.getOrchestrator().getType())) {
             clusterTerminationService.deleteClusterContainers(cluster.getId());
             cluster = clusterRepository.findById(stack.getCluster().getId());
         }

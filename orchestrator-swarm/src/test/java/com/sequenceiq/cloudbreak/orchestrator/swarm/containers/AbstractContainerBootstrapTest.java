@@ -28,7 +28,7 @@ import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.RestartPolicy;
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 
 import jersey.repackaged.com.google.common.collect.Sets;
@@ -42,7 +42,7 @@ public abstract class AbstractContainerBootstrapTest {
     protected static final String[] CMD = new String[]{"cmd1", "cmd2"};
     protected static final LogVolumePath DUMMY_LOG_VOLUME = new LogVolumePath("/var/path1", "/var/path2");
 
-    private ContainerBootstrap underTest;
+    private OrchestratorBootstrap underTest;
 
     @Mock
     private DockerClient mockedDockerClient;
@@ -136,5 +136,5 @@ public abstract class AbstractContainerBootstrapTest {
     }
 
 
-    public abstract ContainerBootstrap getTestInstance();
+    public abstract OrchestratorBootstrap getTestInstance();
 }

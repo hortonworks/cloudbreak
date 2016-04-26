@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -266,6 +267,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setPlatformVariant(platformVariant == null ? "" : platformVariant.getName());
             stackRequest.setCloudPlatform(platform);
             stackRequest.setParameters(params);
+            OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
+            orchestratorRequest.setType("ON_HOST");
+            stackRequest.setOrchestrator(orchestratorRequest);
             List<InstanceGroupJson> instanceGroupJsonList = new ArrayList<>();
             for (Map.Entry<String, InstanceGroupEntry> stringObjectEntry : shellContext.getInstanceGroups().entrySet()) {
                 InstanceGroupEntry instanceGroupEntry = stringObjectEntry.getValue();

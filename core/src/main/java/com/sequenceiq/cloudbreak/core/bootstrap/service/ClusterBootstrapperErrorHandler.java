@@ -19,8 +19,9 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -82,9 +83,15 @@ public class ClusterBootstrapperErrorHandler {
         }
     }
 
-    public void terminateFailedNodes(ContainerOrchestrator orchestrator, Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)
+    public void terminateFailedNodes(HostOrchestrator hostOrchestrator, ContainerOrchestrator containerOrchestrator,
+            Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)
             throws CloudbreakOrchestratorFailedException {
-        List<String> allAvailableNode = orchestrator.getAvailableNodes(gatewayConfig, nodes);
+        List<String> allAvailableNode;
+        if (hostOrchestrator != null) {
+            allAvailableNode = hostOrchestrator.getAvailableNodes(gatewayConfig, nodes);
+        } else {
+            allAvailableNode = containerOrchestrator.getAvailableNodes(gatewayConfig, nodes);
+        }
         List<Node> missingNodes = selectMissingNodes(nodes, allAvailableNode);
         if (missingNodes.size() > 0) {
             String message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES.code(), Arrays.asList(missingNodes.size()));
