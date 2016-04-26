@@ -37,6 +37,7 @@ public class ShellContext {
     private Map<String, Map<String, Collection<String>>> availabilityZones;
     private Map<String, Collection<String>> volumeTypes;
     private Map<String, List<Map<String, String>>> instanceTypes;
+    private Map<String, Collection<String>> orchestrators;
     private Focus focus;
     private Hints hint;
     private Map<PropertyKey, String> properties = new HashMap<>();
@@ -336,6 +337,11 @@ public class ShellContext {
         return result;
     }
 
+    public Collection<String> getOrchestratorNamesByPlatform(String platform) {
+        Collection<String> result = Lists.newArrayList();
+        return orchestrators.get(platform);
+    }
+
     public Set<String> getActiveHostGroups() {
         return activeHostGroups;
     }
@@ -544,6 +550,10 @@ public class ShellContext {
 
     public void setInstanceTypes(Map<String, List<Map<String, String>>> instanceTypes) {
         this.instanceTypes = instanceTypes;
+    }
+
+    public void setOrchestrators(Map<String, Collection<String>> orchestrators) {
+        this.orchestrators = orchestrators;
     }
 
     private enum PropertyKey {

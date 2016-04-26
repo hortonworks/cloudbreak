@@ -61,6 +61,24 @@
     </div>
 </div>
 
+<div class="form-group" ng-show="activeCredential && showAdvancedOptionForm">
+    <label class="col-sm-3 control-label" for="provisionCluster">Provision cluster </label>
+    <div class="col-sm-8">
+        <select class="form-control" id="provisionCluster" ng-model="cluster.orchestrator.type" ng-required="activeCredential !== undefined" ng-show="activeCredential.cloudPlatform == 'AWS'">
+            <option ng-repeat="orchestrator in $root.params.orchestrators.AWS" value="{{orchestrator}}">{{$root.displayNames.getPropertyName('orchestrators', orchestrator)}}</option>
+        </select>
+        <select class="form-control" id="provisionCluster" ng-model="cluster.orchestrator.type" ng-show="activeCredential.cloudPlatform == 'GCP'">
+            <option ng-repeat="orchestrator in $root.params.orchestrators.GCP" value="{{orchestrator}}">{{$root.displayNames.getPropertyName('orchestrators', orchestrator)}}</option>
+        </select>
+        <select class="form-control" id="provisionCluster" ng-model="cluster.orchestrator.type" ng-show="activeCredential.cloudPlatform == 'OPENSTACK'">
+            <option ng-repeat="orchestrator in $root.params.orchestrators.OPENSTACK" value="{{orchestrator}}">{{$root.displayNames.getPropertyName('orchestrators', orchestrator)}}</option>
+        </select>
+        <select class="form-control" id="provisionCluster" ng-model="cluster.orchestrator.type" ng-show="activeCredential.cloudPlatform == 'AZURE_RM'">
+            <option ng-repeat="orchestrator in $root.params.orchestrators.AZURE_RM" value="{{orchestrator}}">{{$root.displayNames.getOrchestrator('orchestrators', orchestrator)}}</option>
+        </select>
+    </div>
+</div>
+
 <div class="form-group">
     <label class="col-sm-3 control-label" for="enableShipyard">{{msg.shipyard_enabled_label}}</label>
     <div class="col-sm-8">
@@ -80,6 +98,9 @@
         <input type="checkbox" name="cluster_publicInAccount" id="cluster_publicInAccount" ng-model="cluster.public">
     </div>
 </div>
+
+
+
 <div class="form-group">
     <div class="col-sm-11">
         <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">

@@ -21,11 +21,14 @@ import org.springframework.shell.converters.StringConverter;
 import org.springframework.shell.core.Converter;
 
 import com.sequenceiq.cloudbreak.shell.converter.AwsInstanceTypeConverter;
+import com.sequenceiq.cloudbreak.shell.converter.AwsOrchestratorTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.AwsVolumeTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.AzureInstanceTypeConverter;
+import com.sequenceiq.cloudbreak.shell.converter.AzureOrchestratorTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.AzureVolumeTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.ConstraintNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.GcpInstanceTypeConverter;
+import com.sequenceiq.cloudbreak.shell.converter.GcpOrchestratorTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.GcpVolumeTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.HostGroupConverter;
 import com.sequenceiq.cloudbreak.shell.converter.InstanceGroupConverter;
@@ -34,6 +37,7 @@ import com.sequenceiq.cloudbreak.shell.converter.InstanceGroupTemplateNameConver
 import com.sequenceiq.cloudbreak.shell.converter.NetworkIdConverter;
 import com.sequenceiq.cloudbreak.shell.converter.NetworkNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.OpenStackFacingConverter;
+import com.sequenceiq.cloudbreak.shell.converter.OpenStackOrchestratorTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.PlatformVariantConverter;
 import com.sequenceiq.cloudbreak.shell.converter.PluginExecutionTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityGroupIdConverter;
@@ -249,5 +253,25 @@ public class ConverterConfiguration {
     @Bean
     Converter constraintNameConverter() {
         return new ConstraintNameConverter();
+    }
+
+    @Bean
+    Converter openStackOrchestratorTypeConverter() {
+        return new OpenStackOrchestratorTypeConverter();
+    }
+
+    @Bean
+    Converter gcpOrchestratorTypeConverter() {
+        return new GcpOrchestratorTypeConverter();
+    }
+
+    @Bean
+    Converter awsOrchestratorTypeConverter() {
+        return new AwsOrchestratorTypeConverter();
+    }
+
+    @Bean
+    Converter azureOrchestratorTypeConverter() {
+        return new AzureOrchestratorTypeConverter();
     }
 }

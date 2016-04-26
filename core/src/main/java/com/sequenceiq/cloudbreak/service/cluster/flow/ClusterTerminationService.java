@@ -25,14 +25,14 @@ import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorResolver;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
@@ -68,6 +68,7 @@ public class ClusterTerminationService {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
+    //TODO check orchestrators
     public void deleteClusterContainers(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
         try {
@@ -128,6 +129,7 @@ public class ClusterTerminationService {
         constraintRepository.delete(constraintsToDelete);
         cluster.getHostGroups().clear();
         cluster.getContainers().clear();
+        cluster.getHostServices().clear();
         clusterRepository.save(cluster);
     }
 

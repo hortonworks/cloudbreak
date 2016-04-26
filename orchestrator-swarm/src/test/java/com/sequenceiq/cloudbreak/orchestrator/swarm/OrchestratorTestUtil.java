@@ -8,14 +8,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestratorCluster;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestratorCluster;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 
 public class OrchestratorTestUtil {
 
@@ -51,16 +51,16 @@ public class OrchestratorTestUtil {
         return new LogVolumePath("/hadoopfs/logs", "/var/log");
     }
 
-    public static Callable<Boolean> createRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
+    public static Callable<Boolean> createRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
             Map<String, String> mdcReplica) {
         class TestContainerBootstrapRunner implements Callable<Boolean> {
 
-            private final ContainerBootstrap containerBootstrap;
+            private final OrchestratorBootstrap containerBootstrap;
             private final Map<String, String> mdcMap;
             private final ExitCriteria exitCriteria;
             private final ExitCriteriaModel exitCriteriaModel;
 
-            private TestContainerBootstrapRunner(ContainerBootstrap containerBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
+            private TestContainerBootstrapRunner(OrchestratorBootstrap containerBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
                     Map<String, String> mdcReplica) {
                 this.containerBootstrap = containerBootstrap;
                 this.mdcMap = mdcReplica;
@@ -73,22 +73,22 @@ public class OrchestratorTestUtil {
                 return containerBootstrap.call();
             }
         }
-        return new TestContainerBootstrapRunner(containerBootstrap, exitCriteria, exitCriteriaModel, mdcReplica);
+        return new TestContainerBootstrapRunner(orchestratorBootstrap, exitCriteria, exitCriteriaModel, mdcReplica);
     }
 
-    public static ContainerBootstrap containerBootstrap() {
-        class TestContainerBootstrap implements ContainerBootstrap {
+    public static OrchestratorBootstrap containerBootstrap() {
+        class TestOrchestratorBootstrap implements OrchestratorBootstrap {
 
             @Override
             public Boolean call() throws Exception {
                 return containerBootstrap().call();
             }
         }
-        return new TestContainerBootstrap();
+        return new TestOrchestratorBootstrap();
     }
 
-    public static ParallelContainerRunner parallelContainerRunner() {
-        class TestParallelContainerRunner implements ParallelContainerRunner {
+    public static ParallelOrchestratorComponentRunner parallelContainerRunner() {
+        class TestParallelOrchestratorComponentRunner implements ParallelOrchestratorComponentRunner {
 
             @Override
             public Future<Boolean> submit(Callable<Boolean> callable) {
@@ -96,7 +96,7 @@ public class OrchestratorTestUtil {
                 return executorService.submit(callable);
             }
         }
-        return new TestParallelContainerRunner();
+        return new TestParallelOrchestratorComponentRunner();
     }
 
     public static ExitCriteria exitCriteria() {

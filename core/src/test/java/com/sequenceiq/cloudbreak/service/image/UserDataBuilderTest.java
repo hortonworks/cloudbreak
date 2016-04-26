@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
@@ -26,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import freemarker.template.Configuration;
@@ -90,6 +95,12 @@ public class UserDataBuilderTest {
             @Override
             public List<StackParamValidation> additionalStackParameters() {
                 return new ArrayList<>();
+            }
+
+            @Override
+            public PlatformOrchestrator orchestratorParams() {
+                return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.ON_HOST), orchestrator(OrchestratorConstants.SWARM)),
+                        orchestrator(OrchestratorConstants.ON_HOST));
             }
 
             @Override

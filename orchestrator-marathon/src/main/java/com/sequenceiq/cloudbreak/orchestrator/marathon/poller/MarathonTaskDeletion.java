@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon.poller;
 
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.model.v2.Task;
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Set;
 
-public class MarathonTaskDeletion implements ContainerBootstrap {
+public class MarathonTaskDeletion implements OrchestratorBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarathonAppDeletion.class);
     private static final Integer STATUS_NOT_FOUND = 404;
 

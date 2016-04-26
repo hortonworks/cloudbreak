@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
@@ -44,6 +45,16 @@ public interface ConnectorEndpoint {
     @Path(value = "disktypes/{type}")
     @Produces(MediaType.APPLICATION_JSON)
     Collection<String> getDisktypeByType(@PathParam(value = "type") String type);
+
+    @GET
+    @Path(value = "ochestrators")
+    @Produces(MediaType.APPLICATION_JSON)
+    PlatformOrchestratorsJson getOrchestratortypes();
+
+    @GET
+    @Path(value = "ochestrators/{type}")
+    @Produces(MediaType.APPLICATION_JSON)
+    Collection<String> getOchestratorsByType(@PathParam(value = "type") String type);
 
     @GET
     @Path(value = "connectors/vmtypes")

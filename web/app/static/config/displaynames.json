@@ -54,5 +54,10 @@
     "recipes" : {
         "ONE_NODE": "One Node",
         "ALL_NODES": "All Nodes"
+    },
+    "orchestrators" : {
+        "SWARM": "in docker containers with swarm",
+        "ON_HOST": "on host",
+        "MARATHON": "in docker containers with marathon"
     }
 }
