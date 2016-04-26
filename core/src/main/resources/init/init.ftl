@@ -61,7 +61,6 @@ chkconfig haveged on
 
 if $IS_GATEWAY; then
   yum install -y ambari-server
-  ambari-server setup --silent
 #  ambari-server start
 else
   yum install -y ambari-agent
