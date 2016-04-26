@@ -1,12 +1,28 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon;
 
 
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATHON;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerBootstrapRunner;
-import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
+import com.sequenceiq.cloudbreak.orchestrator.container.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.marathon.poller.MarathonAppBootstrap;
@@ -20,6 +36,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.MarathonClient;
 import mesosphere.marathon.client.model.v2.App;
@@ -28,19 +45,6 @@ import mesosphere.marathon.client.model.v2.Docker;
 import mesosphere.marathon.client.model.v2.GetAppResponse;
 import mesosphere.marathon.client.model.v2.Task;
 import mesosphere.marathon.client.utils.MarathonException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 @Component
 public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
@@ -88,7 +92,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
             MarathonAppBootstrap bootstrap = new MarathonAppBootstrap(client, app);
             Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel);
-            Future<Boolean> appFuture = getParallelContainerRunner().submit(runner);
+            Future<Boolean> appFuture = getParallelOrchestratorComponentRunner().submit(runner);
             appFuture.get();
 
             App appResponse = client.getApp(app.getId()).getApp();
@@ -185,7 +189,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public String name() {
-        return "MARATHON";
+        return MARATHON;
     }
 
     @Override
@@ -259,7 +263,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             client.deleteApp(appName);
             MarathonAppDeletion appDeletion = new MarathonAppDeletion(client, appName);
             Callable<Boolean> runner = runner(appDeletion, getExitCriteria(), null);
-            futures.add(getParallelContainerRunner().submit(runner));
+            futures.add(getParallelOrchestratorComponentRunner().submit(runner));
         } catch (MarathonException me) {
             if (STATUS_NOT_FOUND.equals(me.getStatus())) {
                 LOGGER.info("Marathon app '{}' has already been deleted.", appName);
@@ -277,7 +281,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
                 client.deleteAppTask(appName, taskId, "true");
                 MarathonTaskDeletion taskDeletion = new MarathonTaskDeletion(client, appName, taskIds);
                 Callable<Boolean> runner = runner(taskDeletion, getExitCriteria(), null);
-                futures.add(getParallelContainerRunner().submit(runner));
+                futures.add(getParallelOrchestratorComponentRunner().submit(runner));
             } catch (MarathonException me) {
                 if (STATUS_NOT_FOUND.equals(me.getStatus())) {
                     LOGGER.info("Marathon task '{}' has already been deleted from app '{}'.", taskId, appName);
@@ -339,7 +343,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
         return taskFound;
     }
 
-    private Callable<Boolean> runner(ContainerBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
-        return new ContainerBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap());
+    private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
+        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap());
     }
 }

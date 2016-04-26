@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.byos;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
@@ -60,5 +65,10 @@ public class BYOSPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public PlatformOrchestrator orchestratorParams() {
+        return new PlatformOrchestrator(Arrays.<Orchestrator>asList(), orchestrator(""));
     }
 }

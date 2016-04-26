@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
@@ -63,4 +64,11 @@ public interface PlatformParameters {
      * @return the {@link StackParamValidation} of a platform
      */
     List<StackParamValidation> additionalStackParameters();
+
+    /**
+     * Return the supported orchestrator types for a platform
+     *
+     * @return the {@link PlatformOrchestrator} of a platform
+     */
+    PlatformOrchestrator orchestratorParams();
 }

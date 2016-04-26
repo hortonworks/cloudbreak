@@ -372,6 +372,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         relocateDocker: cluster.relocateDocker,
                         securityGroupId: cluster.securityGroupId,
                         availabilityZone: cluster.availabilityZone || null,
+                        orchestrator: cluster.orchestrator || null,
                         platformVariant: cluster.platformVariant
                     }
                     if (cluster.public) {

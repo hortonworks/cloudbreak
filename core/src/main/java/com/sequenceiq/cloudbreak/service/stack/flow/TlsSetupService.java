@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +22,10 @@ import org.springframework.stereotype.Component;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
@@ -29,6 +33,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -49,24 +54,20 @@ public class TlsSetupService {
 
     @Inject
     private ServiceProviderConnectorAdapter connector;
-
     @Inject
     private SecurityConfigRepository securityConfigRepository;
-
     @Inject
     private TlsSecurityService tlsSecurityService;
-
     @Inject
     private StackRepository stackRepository;
-
     @Inject
     private PollingService<SshCheckerTaskContext> sshCheckerTaskContextPollingService;
-
     @Inject
     private SshCheckerTask sshCheckerTask;
-
     @Inject
     private Configuration freemarkerConfiguration;
+    @Inject
+    private ContainerOrchestratorTypeResolver containerOrchestratorTypeResolver;
 
     @Value("#{'${cb.cert.dir:}/${cb.tls.cert.file:}'}")
     private String tlsCertificatePath;
@@ -77,12 +78,14 @@ public class TlsSetupService {
             throw new CloudbreakException("Failed to connect to host, IP address not defined.");
         }
         SSHClient ssh = new SSHClient();
+        Orchestrator orchestrator = stack.getOrchestrator();
         String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
         HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
         try {
             waitForSsh(stack, publicIp, hostKeyVerifier, user, privateKeyLocation);
             setupTemporarySsh(ssh, publicIp, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
-            uploadTlsSetupScript(ssh, publicIp, stack.getGatewayPort(), stack.getCredential());
+            uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getGatewayPort(), stack.getCredential());
+            uploadSaltConfig(orchestrator, ssh);
             executeTlsSetupScript(ssh);
             removeTemporarySShKey(ssh, user, stack.getCredential());
             downloadAndSavePrivateKey(stack, ssh);
@@ -108,7 +111,7 @@ public class TlsSetupService {
     }
 
     private void setupTemporarySsh(SSHClient ssh, String ip, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation, Credential credential)
-        throws IOException {
+            throws IOException {
         LOGGER.info("Setting up temporary ssh...");
         ssh.addHostKeyVerifier(hostKeyVerifier);
         ssh.connect(ip, SSH_PORT);
@@ -122,7 +125,8 @@ public class TlsSetupService {
         LOGGER.info("Temporary ssh setup finished succesfully, public key is uploaded to {}", remoteTlsCertificatePath);
     }
 
-    private void uploadTlsSetupScript(SSHClient ssh, String publicIp, Integer sslPort, Credential credential) throws IOException, TemplateException {
+    private void uploadTlsSetupScript(Orchestrator orchestrator, SSHClient ssh, String publicIp, Integer sslPort, Credential credential)
+            throws IOException, TemplateException, CloudbreakException {
         LOGGER.info("Uploading tls-setup.sh to the gateway...");
         Map<String, Object> model = new HashMap<>();
         model.put("publicIp", publicIp);
@@ -131,13 +135,59 @@ public class TlsSetupService {
         model.put("sudocheck", credential.passwordAuthenticationRequired() ? "-S" : "");
         model.put("sslPort", sslPort.toString());
 
-        String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate("init/tls-setup.sh", "UTF-8"), model);
 
+        ContainerOrchestratorType type = containerOrchestratorTypeResolver.resolveType(orchestrator.getType());
+
+        String tls = processTemplateIntoString(
+                freemarkerConfiguration.getTemplate(String.format("init/%s/tls-setup.sh", type.name().toLowerCase()), "UTF-8"), model);
+        InMemorySourceFile tlsFile = uploadParameterFile(tls, "tls-setup.sh");
+        ssh.newSCPFileTransfer().upload(tlsFile, "/tmp/tls-setup.sh");
+        LOGGER.info("tls-setup.sh uploaded to /tmp/tls-setup.sh. Content: {}", tls);
+
+        if (type.hostOrchestrator()) {
+            String nginxConf = FileReaderUtils.readFileFromClasspath("init/host/nginx.conf");
+            InMemorySourceFile nginxConfFile = uploadParameterFile(nginxConf, "nginx.conf");
+            ssh.newSCPFileTransfer().upload(nginxConfFile, "/tmp/nginx.conf");
+            LOGGER.info("nginx conf uploaded to /tmp/nginx.conf. Content: {}", nginxConf);
+
+            String notAv = FileReaderUtils.readFileFromClasspath("init/host/50x.json");
+            InMemorySourceFile notAvFile = uploadParameterFile(notAv, "50x.json");
+            ssh.newSCPFileTransfer().upload(notAvFile, "/tmp/50x.json");
+            LOGGER.info("ngingx error page uploaded to /tmp/50x.json. Content: {}", notAv);
+        }
+    }
+
+    private void uploadSaltConfig(Orchestrator orchestrator, SSHClient ssh) throws CloudbreakException, IOException {
+        if (containerOrchestratorTypeResolver.resolveType(orchestrator.getType()).hostOrchestrator()) {
+            // TODO generate tar or zip on-the-fly
+            ByteArrayOutputStream byteArrayOutputStream = IOUtils.readFully(getClass().getResourceAsStream("/salt/salt.tar.gz"));
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            LOGGER.info("Upload salt.tar.gz to /tmp/salt.tar.gz");
+            ssh.newSCPFileTransfer().upload(new InMemorySourceFile() {
+                @Override
+                public String getName() {
+                    return "salt.tar.gz";
+                }
+
+                @Override
+                public long getLength() {
+                    return byteArray.length;
+                }
+
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    return new ByteArrayInputStream(byteArray);
+                }
+            }, "/tmp/salt.tar.gz");
+        }
+    }
+
+    private InMemorySourceFile uploadParameterFile(String generatedTemplate, final String name) {
         final byte[] tlsScriptBytes = generatedTemplate.getBytes(StandardCharsets.UTF_8);
-        InMemorySourceFile scriptFile = new InMemorySourceFile() {
+        return new InMemorySourceFile() {
             @Override
             public String getName() {
-                return "tls-setup.sh";
+                return name;
             }
 
             @Override
@@ -150,8 +200,6 @@ public class TlsSetupService {
                 return new ByteArrayInputStream(tlsScriptBytes);
             }
         };
-        ssh.newSCPFileTransfer().upload(scriptFile, "/tmp/tls-setup.sh");
-        LOGGER.info("tls-setup.sh uploaded to /tmp/tls-setup.sh. Content: {}", generatedTemplate);
     }
 
     private void executeTlsSetupScript(SSHClient ssh) throws IOException, CloudbreakException {

@@ -10,7 +10,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -100,7 +100,7 @@ public class BootstrapManTest {
     }
 
 
-    private static class SingleContainerRunner implements ParallelContainerRunner {
+    private static class SingleContainerRunner implements ParallelOrchestratorComponentRunner {
 
         private ExecutorService es = Executors.newFixedThreadPool(PARALLELISM);
 

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsRequest;
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesResult;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
@@ -99,6 +102,24 @@ public class CloudParameterService {
             return res.getPlatformRegions();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform regions", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public PlatformOrchestrators getOrchestrators() {
+        LOGGER.debug("Get platform orchestrators");
+        GetPlatformOrchestratorsRequest getPlatformOrchestratorsRequest = new GetPlatformOrchestratorsRequest();
+        eventBus.notify(getPlatformOrchestratorsRequest.selector(), Event.wrap(getPlatformOrchestratorsRequest));
+        try {
+            GetPlatformOrchestratorsResult res = getPlatformOrchestratorsRequest.await();
+            LOGGER.info("Platform orchestrators result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform orchestrators", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getPlatformOrchestrators();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform orchestrators", e);
             throw new OperationException(e);
         }
     }

@@ -58,7 +58,7 @@ public class StackDecorator implements Decorator<Stack> {
             subject.setConsulServers(consulServers);
 
             subject.setNetwork(networkService.getById((Long) networkId));
-            if (subject.getOrchestrator() != null) {
+            if (subject.getOrchestrator() != null && (subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)) {
                 throw new BadRequestException("Orchestrator cannot be configured for the stack!");
             }
             if (subject.getFailurePolicy() != null) {

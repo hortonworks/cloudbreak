@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    baseName = 'orchestrator-onhost'
+}
+
+dependencies {
+    compile project(':orchestrator-api')
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
+    compile group: 'com.suse.salt',                 name: 'salt-netapi-client',             version: '0.7.0'
+
+
+    compile project(':cloud-common')
+    testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
+    testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+}

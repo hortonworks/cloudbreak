@@ -150,11 +150,15 @@ In the example `cleanUp` is a suite level parameter and all the tests will get w
 
 ### Test suite example with existing credential, blueprint resources:
 ```
-# GCP credential name must be specified
-name: Gcp_full_smoketest
-parameters: {
-  cloudProvider: GCP
-}
+name: OpenStack_full_smoketest_cred
+parameters:
+  cloudProvider: OPENSTACK
+  blueprintName: testbp
+  credentialName: openstack
+  securityGroupName: all-services-port
+  networkName: testosnetwork
+  instanceGroups: osxlarge,cbgateway,1,GATEWAY;osxlarge,master,1,CORE;osxlarge,slave_1,3,CORE
+  hostGroups: master,master,1;slave_1,slave_1,3
 
 tests:
   - name: init
@@ -162,81 +166,41 @@ tests:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
 
-  - name: create gateway template
-    parameters: {
-      gcpName: it-gcp-smoke-gateway-ssud,
-      gcpInstanceType: n1-standard-4,
-      volumeType: pd-standard,
-      volumeCount: 1,
-      volumeSize: 30,
-      templateAdditions: "cbgateway,1,GATEWAY"
-    }
-    classes:
-      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
-
-  - name: create master template
-    parameters: {
-      gcpName: it-gcp-smoke-master-ssud,
-      gcpInstanceType: n1-highmem-8,
-      volumeType: pd-standard,
-      volumeCount: 2,
-      volumeSize: 100,
-      templateAdditions: "master,1"
-    }
-    classes:
-      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
-
-  - name: create slave template
-    parameters: {
-      gcpName: it-gcp-smoke-slave-ssud,
-      gcpInstanceType: n1-highcpu-4,
-      volumeType: pd-ssd,
-      volumeCount: 3,
-      volumeSize: 500,
-      templateAdditions: "slave_1,3"
-    }
-    classes:
-      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
-
   - name: create cluster
-    parameters: {
-      stackName: it-gcp-stack-ssud,
-      region: EUROPE_WEST1_B,
-      clusterName: it-gcp-cluster-ssud
-    }
+    parameters:
+      stackName: it-openstack-cred-ssud
+      region: local
+      clusterName: it-openstack-cred-ssud
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
 
   - name: stop cluster
-    parameters: {
+    parameters:
       newStatus: STOPPED
-    }
     classes:
       - com.sequenceiq.it.cloudbreak.StatusUpdateTest
 
   - name: start cluster
-    parameters: {
+    parameters:
       newStatus: STARTED
-    }
     classes:
       - com.sequenceiq.it.cloudbreak.StatusUpdateTest
 
   - name: upscale
-    parameters: {
-      instanceGroup: slave_1,
-      scalingAdjustment: 3
-    }
+    parameters:
+      instanceGroup: slave_1
+      scalingAdjustment: 4
     classes:
       - com.sequenceiq.it.cloudbreak.ScalingTest
 
   - name: downscale
-    parameters: {
-      instanceGroup: slave_1,
+    parameters:
+      instanceGroup: slave_1
       scalingAdjustment: -2
-    }
     classes:
       - com.sequenceiq.it.cloudbreak.ScalingTest
+
 ```
 
 In the example `cloudProvider` is a suite level parameter and `CloudbreakTestSuiteInitializer` will initialize the test context based on the application level `gcp` parameters.
