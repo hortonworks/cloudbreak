@@ -62,10 +62,13 @@ chkconfig haveged on
 
 if $IS_GATEWAY; then
   yum install -y ambari-server
+  # make service redirect to systemctl
+  rm -f /etc/init.d/ambari-server
   find /etc/rc.d/rc* -name "*ambari-server" | xargs rm -v
 #  ambari-server start
 else
   yum install -y ambari-agent
+  # make service redirect to systemctl
   find /etc/rc.d/rc* -name "*ambari-agent" | xargs rm -v
   sed -i 's/^hostname=localhost/hostname=ambari-8080.service.consul/' /etc/ambari-agent/conf/ambari-agent.ini
 #  ambari-agent start
