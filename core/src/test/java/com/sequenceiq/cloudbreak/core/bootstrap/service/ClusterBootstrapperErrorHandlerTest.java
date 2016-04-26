@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -115,7 +115,7 @@ public class ClusterBootstrapperErrorHandlerTest {
             }
         });
 
-        underTest.terminateFailedNodes(orchestrator, TestUtil.stack(), new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"), prepareNodes(stack));
+        underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(), new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"), prepareNodes(stack));
     }
 
     @Test
@@ -158,7 +158,7 @@ public class ClusterBootstrapperErrorHandlerTest {
                 return null;
             }
         });
-        underTest.terminateFailedNodes(orchestrator, TestUtil.stack(), new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"), prepareNodes(stack));
+        underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(), new GatewayConfig("10.0.0.1", "10.0.0.1", "/cert/1"), prepareNodes(stack));
 
         verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         verify(instanceGroupRepository, times(3)).save(any(InstanceGroup.class));
