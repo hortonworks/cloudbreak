@@ -105,7 +105,7 @@ public class OnHostClient {
         return false;
     }
 
-    public Set<String> distributeConsuleConfig(Set<String> targetIps) throws CloudbreakOrchestratorException {
+    public Set<String> distributeConsulConfig(Set<String> targetIps) throws CloudbreakOrchestratorException {
         Set<String> missingTargets = new HashSet<>();
         // TODO replace it with object
         Map<String, Object> configMap = new HashMap<>();
@@ -140,8 +140,7 @@ public class OnHostClient {
         map.put("agents", agents);
         map.put("server", gatewayPrivateIp);
         try {
-            ResponseEntity<CbBootResponses> response = exchange(map, HttpMethod.POST, port, OnHostClientEndpoint.AMBARI_RUN_DISTRIBUTE,
-                    CbBootResponses.class);
+            ResponseEntity<CbBootResponses> response = exchange(map, HttpMethod.POST, port, OnHostClientEndpoint.AMBARI_RUN_DISTRIBUTE, CbBootResponses.class);
             CbBootResponses responseBody = response.getBody();
             LOGGER.info("Ambari run response: %s", responseBody);
         } catch (Exception e) {
@@ -151,12 +150,12 @@ public class OnHostClient {
     }
 
 
-    public void runConsule() throws CloudbreakOrchestratorException {
+    public void runConsul() throws CloudbreakOrchestratorException {
         try {
             Map<String, Object> consulRunMap = new HashMap<>();
             consulRunMap.put("targets", targets);
-            ResponseEntity<CbBootResponses> response = exchange(consulRunMap, HttpMethod.POST, port, OnHostClientEndpoint.CONSUL_RUN_DISTRIBUTE,
-                    CbBootResponses.class);
+            ResponseEntity<CbBootResponses> response =
+                    exchange(consulRunMap, HttpMethod.POST, port, OnHostClientEndpoint.CONSUL_RUN_DISTRIBUTE, CbBootResponses.class);
             CbBootResponses responseBody = response.getBody();
             LOGGER.info("Consul run response: %s", responseBody);
         } catch (Exception e) {

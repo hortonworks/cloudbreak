@@ -17,7 +17,7 @@ public class ConsulConfigDistributeBootstrap implements OrchestratorBootstrap {
 
     @Override
     public Boolean call() throws Exception {
-        missingTargets = client.distributeConsuleConfig(missingTargets);
+        missingTargets = client.distributeConsulConfig(missingTargets);
         if (missingTargets.isEmpty()) {
             return true;
         }
