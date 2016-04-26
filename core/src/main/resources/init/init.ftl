@@ -59,6 +59,11 @@ yum install -y epel-release
 yum install -y haveged
 chkconfig haveged on
 
+#install java 7
+export JDK_ARTIFACT=jdk-7u67-linux-x64.tar.gz
+mkdir -p /usr/jdk64 && cd /usr/jdk64 && wget http://public-repo-1.hortonworks.com/ARTIFACTS/$JDK_ARTIFACT && \
+    tar -xf $JDK_ARTIFACT && rm -f $JDK_ARTIFACT
+
 if $IS_GATEWAY; then
   yum install -y ambari-server
   # make service redirect to systemctl
