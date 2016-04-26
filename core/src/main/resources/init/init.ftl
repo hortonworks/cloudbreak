@@ -57,6 +57,7 @@ EOF
 # increase entropy
 yum install -y epel-release
 yum install -y haveged
+haveged
 chkconfig haveged on
 
 #install java 7
