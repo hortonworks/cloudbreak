@@ -11,16 +11,18 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
 @Component
@@ -39,6 +41,7 @@ public class CloudConnectorController implements ConnectorEndpoint {
         PlatformDisks diskTypes = cloudParameterService.getDiskTypes();
         PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes();
         PlatformRegions regions = cloudParameterService.getRegions();
+        PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
 
         Map<String, JsonEntity> map = new HashMap<>();
 
@@ -46,6 +49,8 @@ public class CloudConnectorController implements ConnectorEndpoint {
         map.put("disks", conversionService.convert(diskTypes, PlatformDisksJson.class));
         map.put("virtualMachines", conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class));
         map.put("regions", conversionService.convert(regions, PlatformRegionsJson.class));
+        map.put("variants", conversionService.convert(pv, PlatformVariantsJson.class));
+        map.put("orchestrators", conversionService.convert(orchestrators, PlatformOrchestratorsJson.class));
 
         return map;
     }
