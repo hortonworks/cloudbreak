@@ -1,6 +1,27 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm;
 
 
+import static com.github.dockerjava.api.model.RestartPolicy.alwaysRestart;
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SWARM;
+import static java.lang.String.format;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.Bind;
@@ -12,9 +33,9 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerBootstrapRunner;
-import com.sequenceiq.cloudbreak.orchestrator.SimpleContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
+import com.sequenceiq.cloudbreak.orchestrator.container.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -29,27 +50,8 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.MunchausenBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.SwarmContainerBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.SwarmContainerDeletion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
-import static com.github.dockerjava.api.model.RestartPolicy.alwaysRestart;
-import static java.lang.String.format;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.SwarmOrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.SwarmOrchestratorDeletion;
 
 @Component
 public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
@@ -128,7 +130,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                 DockerClient dockerApiClient = swarmClient(cred);
                 String name = createSwarmContainerName(constraint, i++);
                 CreateContainerCmd createCmd = decorateCreateContainerCmd(image, constraint, nodeName, dockerApiClient, name);
-                ContainerBootstrap bootstrap = new SwarmContainerBootstrap(dockerApiClient, nodeName, createCmd);
+                OrchestratorBootstrap bootstrap = new SwarmOrchestratorBootstrap(dockerApiClient, nodeName, createCmd);
                 Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
                 futures.add(getParallelContainerRunner().submit(runner));
                 containerInfos.add(new ContainerInfo(name, name, fqdn, image));
@@ -161,7 +163,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
             for (ContainerInfo info : containerInfo) {
                 try {
                     String hostName = info.getHost().split("\\.")[0];
-                    SwarmContainerDeletion containerRemover = new SwarmContainerDeletion(dockerApiClient, hostName, info.getName());
+                    SwarmOrchestratorDeletion containerRemover = new SwarmOrchestratorDeletion(dockerApiClient, hostName, info.getName());
                     Callable<Boolean> runner = runner(containerRemover, getExitCriteria(), null, MDC.getCopyOfContextMap());
                     futures.add(getParallelContainerRunner().submit(runner));
                 } catch (Exception me) {
@@ -249,7 +251,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public String name() {
-        return "SWARM";
+        return SWARM;
     }
 
     private String createSwarmContainerName(ContainerConstraint constraint, int index) {
@@ -426,9 +428,9 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @VisibleForTesting
-    public Callable<Boolean> runner(ContainerBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
+    public Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
             Map<String, String> mdcMap) {
-        return new ContainerBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, mdcMap);
+        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, mdcMap);
     }
 
     private String getConsulJoinIp(String privateIp) {

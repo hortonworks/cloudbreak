@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon.poller;
 
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.utils.MarathonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MarathonAppDeletion implements ContainerBootstrap {
+public class MarathonAppDeletion implements OrchestratorBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarathonAppDeletion.class);
     private static final Integer STATUS_NOT_FOUND = 404;
 

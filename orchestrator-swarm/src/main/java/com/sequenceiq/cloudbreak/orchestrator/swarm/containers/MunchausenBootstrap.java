@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm.containers;
 
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.MUNCHAUSEN;
+import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.MUNCHAUSEN;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.createContainer;
 import static com.sequenceiq.cloudbreak.orchestrator.swarm.DockerClientUtil.startContainer;
 
@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Bind;
-import com.sequenceiq.cloudbreak.orchestrator.containers.ContainerBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
 
-public class MunchausenBootstrap implements ContainerBootstrap {
+public class MunchausenBootstrap implements OrchestratorBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MunchausenBootstrap.class);
 

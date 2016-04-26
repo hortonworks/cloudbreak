@@ -74,6 +74,7 @@ dependencies {
 
     runtime project(':orchestrator-swarm')
     runtime project(':orchestrator-marathon')
+    runtime project(':orchestrator-onhost')
     runtime project(':cloud-reactor')
     runtime project(':cloud-openstack')
     runtime project(':cloud-gcp')

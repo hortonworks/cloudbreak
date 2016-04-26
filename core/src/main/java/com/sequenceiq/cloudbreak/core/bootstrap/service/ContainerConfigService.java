@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.config.GenericConfig;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer;
+import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;

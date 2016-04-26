@@ -998,6 +998,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 failurePolicy: {
                     adjustmentType: "BEST_EFFORT",
                 },
+                orchestrator: {
+                    type: "ON_HOST"
+                },
                 configStrategy: $scope.configStrategies[1],
                 ldapRequired: false,
                 sssdConfigId: null,
