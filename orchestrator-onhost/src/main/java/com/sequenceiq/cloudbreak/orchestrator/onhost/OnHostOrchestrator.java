@@ -79,7 +79,7 @@ public class OnHostOrchestrator extends SimpleHostOrchestrator {
             Callable<Boolean> runner = runner(consulConfigDistributeBootstrap, getExitCriteria(), exitCriteriaModel);
             Future<Boolean> appFuture = getParallelContainerRunner().submit(runner);
             appFuture.get();
-            onHostClient.runConsule();
+            onHostClient.runConsul();
         } catch (Exception e) {
             LOGGER.error("Error occured under the consul bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
