@@ -34,7 +34,7 @@ prepend domain-name-servers 127.0.0.1;
 append domain-search "node.dc1.consul";
 append domain-search "service.consul";
 EOF
-systemctl restart network
+service network restart
 
 # create consul systemd unit file
 cat>/etc/systemd/system/consul.service<<EOF
@@ -53,6 +53,11 @@ KillMode=process
 GuessMainPID=no
 ExecStart=/usr/sbin/consul agent -config-dir=/etc/cloudbreak/consul/
 EOF
+
+# increase entropy
+yum install -y epel-release
+yum install -y haveged
+chkconfig haveged on
 
 if $IS_GATEWAY; then
   yum install -y ambari-server
