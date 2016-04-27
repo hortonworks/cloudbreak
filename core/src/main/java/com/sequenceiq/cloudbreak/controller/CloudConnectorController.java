@@ -49,7 +49,6 @@ public class CloudConnectorController implements ConnectorEndpoint {
         map.put("disks", conversionService.convert(diskTypes, PlatformDisksJson.class));
         map.put("virtualMachines", conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class));
         map.put("regions", conversionService.convert(regions, PlatformRegionsJson.class));
-        map.put("variants", conversionService.convert(pv, PlatformVariantsJson.class));
         map.put("orchestrators", conversionService.convert(orchestrators, PlatformOrchestratorsJson.class));
 
         return map;

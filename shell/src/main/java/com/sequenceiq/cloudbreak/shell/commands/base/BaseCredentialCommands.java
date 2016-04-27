@@ -192,6 +192,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
             sshKey = sshKeyString;
         }
         try {
+
             CredentialRequest credentialRequest = new CredentialRequest();
             credentialRequest.setName(name);
             credentialRequest.setDescription(description);
