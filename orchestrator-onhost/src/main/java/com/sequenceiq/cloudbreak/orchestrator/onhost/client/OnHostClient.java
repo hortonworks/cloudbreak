@@ -120,7 +120,7 @@ public class OnHostClient {
             CbBootResponses responseBody = response.getBody();
             for (CbBootResponse cbBootResponse : responseBody.getResponses()) {
                 if (cbBootResponse.getStatusCode() != HttpStatus.OK.value()) {
-                    LOGGER.info("Successfully distributed consul config to: " + cbBootResponse.getAddress());
+                    LOGGER.info("Failed to distributed consul config to: " + cbBootResponse.getAddress());
                     missingTargets.add(cbBootResponse.getAddress().split(":")[0]);
                 }
             }

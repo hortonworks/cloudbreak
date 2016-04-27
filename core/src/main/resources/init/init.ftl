@@ -15,7 +15,7 @@ ${customUserData}
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
 
 curl -Lo /etc/yum.repos.d/ambari.repo https://raw.githubusercontent.com/sequenceiq/docker-ambari/master/ambari-agent/ambari.repo
-curl -Lo /etc/systemd/system/ambari-server.service https://raw.githubusercontent.com/sequenceiq/docker-ambari/master/ambari-server/init/ambari-server.service
+curl -Lo /etc/systemd/system/ambari-server.service https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/ambari-server.service
 mkdir /opt/ambari-server && curl -Lo /opt/ambari-server/init-server.sh https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/ambari-server-init.sh && chmod +x /opt/ambari-server/init-server.sh
 curl -Lo /etc/systemd/system/ambari-agent.service https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/ambari-agent.service
 mkdir /opt/ambari-agent && curl -Lo /opt/ambari-agent/init-agent.sh https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/ambari-agent-init.sh && chmod +x /opt/ambari-agent/init-agent.sh
@@ -36,8 +36,8 @@ systemctl enable consul
 
 cat>/etc/dhcp/dhclient.conf<<EOF
 prepend domain-name-servers 127.0.0.1;
-append domain-search "node.dc1.consul";
-append domain-search "service.consul";
+prepend domain-search "service.consul";
+prepend domain-search "node.dc1.consul";
 EOF
 service network restart
 
@@ -45,6 +45,8 @@ yum install -y epel-release
 yum install -y haveged
 haveged
 chkconfig haveged on
+
+sed -i "/^hosts:/ s/ *files dns/ dns files/" /etc/nsswitch.conf
 
 export JDK_ARTIFACT=jdk-7u67-linux-x64.tar.gz
 mkdir -p /usr/jdk64 && cd /usr/jdk64 && wget http://public-repo-1.hortonworks.com/ARTIFACTS/$JDK_ARTIFACT && \
