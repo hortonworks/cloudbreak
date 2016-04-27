@@ -68,7 +68,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 "REQUESTED", "CREATE_IN_PROGRESS", "UPDATE_IN_PROGRESS", "DELETE_IN_PROGRESS", "START_REQUESTED", "START_IN_PROGRESS"
             ],
             $scope.terminatableStatuses = [
-                'CREATED', 'FAILED', 'UNREGISTERED', 'DECOMMISSIONED'
+                'CREATED', 'FAILED', 'DECOMMISSIONED'
             ];
         getUluwatuClusters();
         initCluster();

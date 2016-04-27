@@ -14,8 +14,6 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
@@ -32,8 +30,6 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
     private CloudPlatformConnectors cloudPlatformConnectors;
     @Inject
     private PollTaskFactory statusCheckFactory;
-    @Inject
-    private SyncPollingScheduler<ResourceStatus> syncPollingScheduler;
     @Inject
     private EventBus eventBus;
 

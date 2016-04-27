@@ -22,15 +22,10 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
                         + "AND i.discoveryFQDN= :hostName "
                         + "AND i.instanceStatus <> 'TERMINATED' "),
         @NamedQuery(
-                name = "InstanceMetaData.findUnregisteredHostsInInstanceGroup",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.id= :instanceGroupId "
-                        + "AND i.instanceStatus = 'UNREGISTERED'"),
-        @NamedQuery(
                 name = "InstanceMetaData.findUnusedHostsInInstanceGroup",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.id= :instanceGroupId "
-                        + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED')"),
+                        + "AND i.instanceStatus = 'CREATED'"),
 
         @NamedQuery(
                 name = "InstanceMetaData.findNotTerminatedForStack",
@@ -60,7 +55,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
                         + "AND i.instanceGroup.groupName= :groupName "
-                        + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED', 'DECOMMISSIONED', 'FAILED', 'STOPPED')"),
+                        + "AND i.instanceStatus in ('CREATED', 'DECOMMISSIONED', 'FAILED', 'STOPPED')"),
         @NamedQuery(
                 name = "InstanceMetaData.findNotTerminatedByPrivateAddress",
                 query = "SELECT i FROM InstanceMetaData i "
@@ -205,20 +200,12 @@ public class InstanceMetaData implements ProvisionEntity {
         return InstanceStatus.DECOMMISSIONED.equals(instanceStatus);
     }
 
-    public boolean isUnRegistered() {
-        return InstanceStatus.UNREGISTERED.equals(instanceStatus);
-    }
-
     public boolean isTerminated() {
         return InstanceStatus.TERMINATED.equals(instanceStatus);
     }
 
     public boolean isRegistered() {
         return InstanceStatus.REGISTERED.equals(instanceStatus);
-    }
-
-    public boolean isRunning() {
-        return InstanceStatus.REGISTERED.equals(instanceStatus) || InstanceStatus.UNREGISTERED.equals(instanceStatus);
     }
 
     public String getHypervisor() {

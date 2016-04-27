@@ -35,7 +35,6 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
                 return InstanceStatus.CREATE_REQUESTED;
             case CREATED:
                 return InstanceStatus.CREATED;
-            case UNREGISTERED:
             case REGISTERED:
                 return InstanceStatus.STARTED;
             case DECOMMISSIONED:

@@ -136,10 +136,12 @@ public class ClusterContainerRunnerTest {
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<InstanceMetaData>());
         when(containerService.save(anyList())).thenReturn(new ArrayList<Container>());
+        HostGroupAdjustmentJson hostGroupAdjustment = context.getHostGroupAdjustment();
         when(constraintFactory.getAmbariAgentConstraint(ambariServer.getHost(), null, stack.cloudPlatform(),
-                TestUtil.hostGroup(), context.getHostGroupAdjustment().getScalingAdjustment(), new ArrayList<String>()))
+                TestUtil.hostGroup(), hostGroupAdjustment.getScalingAdjustment(), new ArrayList<String>()))
                 .thenReturn(new ContainerConstraint.Builder().build());
-        underTest.addClusterContainers(context);
+        underTest.addClusterContainers(context.getStackId(), context.getCloudPlatform().value(), hostGroupAdjustment.getHostGroup(),
+                hostGroupAdjustment.getScalingAdjustment());
     }
 
     @Test(expected = CancellationException.class)
@@ -177,7 +179,9 @@ public class ClusterContainerRunnerTest {
 
         when(containerService.findContainersInCluster(anyLong())).thenReturn(containers);
 
-        underTest.addClusterContainers(context);
+        HostGroupAdjustmentJson hostGroupAdjustment = context.getHostGroupAdjustment();
+        underTest.addClusterContainers(context.getStackId(), context.getCloudPlatform().value(), hostGroupAdjustment.getHostGroup(),
+                hostGroupAdjustment.getScalingAdjustment());
     }
 
     private Set<String> getPrivateIps(Stack stack) {

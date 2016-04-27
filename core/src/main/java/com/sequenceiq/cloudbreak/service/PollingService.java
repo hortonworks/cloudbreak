@@ -55,8 +55,7 @@ public class PollingService<T> {
             LOGGER.info("Poller timeout.");
             statusCheckerTask.handleTimeout(t);
             return PollingResult.TIMEOUT;
-        }
-        if (exit) {
+        } else if (exit) {
             LOGGER.info("Poller exiting.");
             return PollingResult.EXIT;
         }
@@ -75,5 +74,4 @@ public class PollingService<T> {
             Thread.currentThread().interrupt();
         }
     }
-
 }
