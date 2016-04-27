@@ -37,9 +37,9 @@ import com.sequenceiq.cloudbreak.client.RestClient;
 import com.sequenceiq.cloudbreak.client.config.ConfigKey;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelContainerRunner;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
@@ -145,8 +145,8 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    public ParallelContainerRunner simpleParallelContainerRunnerExecutor() {
-        return new ExecutorBasedParallelContainerRunner(containerBootstrapBuilderExecutor());
+    public ParallelOrchestratorComponentRunner simpleParallelContainerRunnerExecutor() {
+        return new ExecutorBasedParallelOrchestratorComponentRunner(containerBootstrapBuilderExecutor());
     }
 
     @Bean

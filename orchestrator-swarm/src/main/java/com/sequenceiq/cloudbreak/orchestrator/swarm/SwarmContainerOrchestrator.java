@@ -132,7 +132,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                 CreateContainerCmd createCmd = decorateCreateContainerCmd(image, constraint, nodeName, dockerApiClient, name);
                 OrchestratorBootstrap bootstrap = new SwarmOrchestratorBootstrap(dockerApiClient, nodeName, createCmd);
                 Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel, MDC.getCopyOfContextMap());
-                futures.add(getParallelContainerRunner().submit(runner));
+                futures.add(getParallelOrchestratorComponentRunner().submit(runner));
                 containerInfos.add(new ContainerInfo(name, name, fqdn, image));
             }
             for (Future<Boolean> future : futures) {
@@ -165,7 +165,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                     String hostName = info.getHost().split("\\.")[0];
                     SwarmOrchestratorDeletion containerRemover = new SwarmOrchestratorDeletion(dockerApiClient, hostName, info.getName());
                     Callable<Boolean> runner = runner(containerRemover, getExitCriteria(), null, MDC.getCopyOfContextMap());
-                    futures.add(getParallelContainerRunner().submit(runner));
+                    futures.add(getParallelOrchestratorComponentRunner().submit(runner));
                 } catch (Exception me) {
                     throw new CloudbreakOrchestratorFailedException(me);
                 }
