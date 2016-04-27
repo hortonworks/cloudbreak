@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator.onhost.poller;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.client.OnHostClient;
 
 public class ConsulConfigDistributeBootstrap implements OrchestratorBootstrap {
@@ -18,9 +19,9 @@ public class ConsulConfigDistributeBootstrap implements OrchestratorBootstrap {
     @Override
     public Boolean call() throws Exception {
         missingTargets = client.distributeConsulConfig(missingTargets);
-        if (missingTargets.isEmpty()) {
-            return true;
+        if (!missingTargets.isEmpty()) {
+            throw new CloudbreakOrchestratorFailedException("There are missing nodes to distribute the consul config to: " + missingTargets);
         }
-        return false;
+        return true;
     }
 }
