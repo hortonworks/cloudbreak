@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.shell.commands.PlatformCommands;
 import com.sequenceiq.cloudbreak.shell.commands.StackCommands;
 import com.sequenceiq.cloudbreak.shell.commands.TemplateCommands;
 import com.sequenceiq.cloudbreak.shell.completion.AzureInstanceType;
+import com.sequenceiq.cloudbreak.shell.completion.ArmOrchestratorType;
 import com.sequenceiq.cloudbreak.shell.completion.AzureVolumeType;
 import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
@@ -190,6 +191,7 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "diskPerStorage", mandatory = false, help = "disk per Storage Account on Azure") Integer diskPerStorage,
             @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
             @CliOption(key = "relocateDocker", mandatory = false, help = "relocate docker in startup time") Boolean relocateDocker,
+            @CliOption(key = "orchestrator", mandatory = false, help = "select orchestrator variant version") ArmOrchestratorType orchestratorType,
             @CliOption(key = "attachedStorageType", mandatory = false, help = "type of the storage creation") ArmAttachedStorageOption attachedStorageOption,
             @CliOption(key = "persistentStorage", mandatory = false, help = "name of the persistent storage")
             String persistentStorage,
@@ -214,6 +216,6 @@ public class AzureCommands implements CommandMarker {
             }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
                 relocateDocker == null ? true : relocateDocker,
-                wait, platformVariant, PLATFORM, params);
+                wait, platformVariant, orchestratorType == null ? "ON_HOST" : orchestratorType.getName(), PLATFORM, params);
     }
 }

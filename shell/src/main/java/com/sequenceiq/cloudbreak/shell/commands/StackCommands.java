@@ -20,6 +20,7 @@ public interface StackCommands {
             Boolean relocateDocker,
             Boolean wait,
             PlatformVariant platformVariant,
+            String orchestrator,
             String platform,
             Map<String, String> params);
 

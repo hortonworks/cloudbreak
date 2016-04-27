@@ -239,8 +239,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @Override
     public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, Boolean publicInAccount, OnFailureAction onFailureAction,
-            AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, Boolean wait, PlatformVariant platformVariant, String platform,
-            Map<String, String> params) {
+            AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, Boolean wait, PlatformVariant platformVariant, String orchestrator,
+            String platform, Map<String, String> params) {
         try {
             validateNetwork();
             validateSecurityGroup();
@@ -268,7 +268,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setCloudPlatform(platform);
             stackRequest.setParameters(params);
             OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
-            orchestratorRequest.setType("ON_HOST");
+            orchestratorRequest.setType(orchestrator);
             stackRequest.setOrchestrator(orchestratorRequest);
             List<InstanceGroupJson> instanceGroupJsonList = new ArrayList<>();
             for (Map.Entry<String, InstanceGroupEntry> stringObjectEntry : shellContext.getInstanceGroups().entrySet()) {
