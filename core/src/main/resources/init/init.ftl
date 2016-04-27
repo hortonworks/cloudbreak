@@ -32,6 +32,7 @@ service cloudbreak-bootstrap start
 systemctl enable cloudbreak-bootstrap
 
 curl -Lo /etc/systemd/system/consul.service https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/consul.service
+mkdir /opt/consul && curl -Lo /opt/consul/post.sh https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/consul-post.sh && chmod +x /opt/consul/post.sh
 systemctl enable consul
 
 cat>/etc/dhcp/dhclient.conf<<EOF
