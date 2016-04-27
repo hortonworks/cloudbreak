@@ -136,7 +136,7 @@ public class OnHostClient {
     public Set<String> startAmbariServiceOnTargetMachines(Set<String> targetIps) throws CloudbreakOrchestratorException {
         Set<String> missingTargets = new HashSet<>();
         Map<String, Object> map = new HashMap<>();
-        Set<String> agents = new HashSet<>(targets);
+        Set<String> agents = new HashSet<>(targetIps);
         if (agents.contains(gatewayPrivateIp)) {
             map.put("server", gatewayPrivateIp);
         }
