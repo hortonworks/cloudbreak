@@ -23,13 +23,4 @@ public enum StackSyncEvent implements FlowEvent {
     public String stringRepresentation() {
         return stringRepresentation;
     }
-
-    public static StackSyncEvent fromString(String stringRepresentiation) {
-        for (StackSyncEvent event : StackSyncEvent.values()) {
-            if (stringRepresentiation.equalsIgnoreCase(event.stringRepresentation)) {
-                return event;
-            }
-        }
-        return null;
-    }
 }

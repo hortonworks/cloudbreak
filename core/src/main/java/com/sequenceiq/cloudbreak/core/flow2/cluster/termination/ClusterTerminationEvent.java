@@ -21,13 +21,4 @@ public enum ClusterTerminationEvent implements FlowEvent {
     public String stringRepresentation() {
         return stringRepresentation;
     }
-
-    public static ClusterTerminationEvent fromString(String stringRepresentiation) {
-        for (ClusterTerminationEvent event : ClusterTerminationEvent.values()) {
-            if (stringRepresentiation.equalsIgnoreCase(event.stringRepresentation)) {
-                return event;
-            }
-        }
-        return null;
-    }
 }
