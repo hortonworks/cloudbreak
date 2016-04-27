@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleStackRequest> {
@@ -39,6 +40,8 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
     private PollTaskFactory statusCheckFactory;
     @Inject
     private PersistenceNotifier persistenceNotifier;
+    @Inject
+    private EventBus eventBus;
 
     @Override
     public Class<UpscaleStackRequest> type() {
@@ -60,10 +63,14 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task);
             }
-            request.getResult().onNext(ResourcesStatePollerResults.transformToUpscaleStackResult(statePollerResult));
+            UpscaleStackResult result = ResourcesStatePollerResults.transformToUpscaleStackResult(statePollerResult, request);
+            request.getResult().onNext(result);
+            eventBus.notify(result.selector(), new Event(upscaleStackRequestEvent.getHeaders(), result));
             LOGGER.info("Upscale successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            request.getResult().onNext(new UpscaleStackResult(cloudContext, e));
+            UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request);
+            request.getResult().onNext(result);
+            eventBus.notify(result.failureSelector(UpscaleStackResult.class), new Event(upscaleStackRequestEvent.getHeaders(), result));
         }
     }
 

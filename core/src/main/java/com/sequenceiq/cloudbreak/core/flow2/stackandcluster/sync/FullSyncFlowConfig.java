@@ -46,4 +46,11 @@ public class FullSyncFlowConfig extends StackSyncFlowConfig {
     public StackSyncEvent[] getEvents() {
         return OWNEVENTS.toArray(new StackSyncEvent[]{});
     }
+
+    @Override
+    public StackSyncEvent[] getInitEvents() {
+        return new StackSyncEvent[] {
+                StackSyncEvent.FULL_SYNC_EVENT
+        };
+    }
 }

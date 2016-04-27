@@ -120,7 +120,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     @Override
     public Flow createFlow(String flowId) {
         return new FlowAdapter<>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
-                new EventConverterAdapter<>(eventType));
+                new EventConverterAdapter<>(eventType), getClass());
     }
 
     private AbstractAction getAction(FlowState state) {

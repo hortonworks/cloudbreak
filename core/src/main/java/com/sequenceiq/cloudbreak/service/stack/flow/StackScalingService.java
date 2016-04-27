@@ -1,13 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
-
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -18,13 +16,13 @@ import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
@@ -88,29 +86,24 @@ public class StackScalingService {
         }
     }
 
-    public Set<Resource> addInstances(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
-        Stack stack = stackService.getById(stackId);
-        return connector.addInstances(stack, scalingAdjustment, instanceGroupName);
-    }
-
     public void removeHostmetadataIfExists(Stack stack, InstanceMetaData instanceMetaData, HostMetadata hostMetadata) {
         if (hostMetadata != null) {
             try {
                 ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata);
                 hostMetadataRepository.delete(hostMetadata);
-                eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
                                 Arrays.asList(instanceMetaData.getInstanceId())));
             } catch (Exception e) {
                 LOGGER.error("Host cannot be deleted from cluster: ", e);
-                eventService.fireCloudbreakEvent(stack.getId(), DELETE_FAILED.name(),
+                eventService.fireCloudbreakEvent(stack.getId(), Status.DELETE_FAILED.name(),
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETE_FAILED.code(),
                                 Arrays.asList(instanceMetaData.getInstanceId())));
 
             }
         } else {
             LOGGER.info("Host cannot be deleted because it is not exist: ", instanceMetaData.getInstanceId());
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+            eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_NOT_FOUND.code(),
                             Arrays.asList(instanceMetaData.getInstanceId())));
 
@@ -158,11 +151,14 @@ public class StackScalingService {
     }
 
     private void removeAgentFromConsul(Stack stack, ConsulClient client, InstanceMetaData metaData) {
-        String nodeName = metaData.getDiscoveryFQDN().replace(ConsulUtils.CONSUL_DOMAIN, "");
-        consulPollingService.pollWithTimeoutSingleFailure(
-                consulAgentLeaveCheckerTask,
-                new ConsulContext(stack, client, Collections.singletonList(nodeName)),
-                POLLING_INTERVAL,
-                MAX_POLLING_ATTEMPTS);
+        Optional<String> nodeName = Optional.ofNullable(metaData.getDiscoveryFQDN())
+                                            .map(fqdn -> fqdn.replace(ConsulUtils.CONSUL_DOMAIN, ""));
+        if (nodeName.isPresent()) {
+            consulPollingService.pollWithTimeoutSingleFailure(
+                    consulAgentLeaveCheckerTask,
+                    new ConsulContext(stack, client, Collections.singletonList(nodeName.get())),
+                    POLLING_INTERVAL,
+                    MAX_POLLING_ATTEMPTS);
+        }
     }
 }

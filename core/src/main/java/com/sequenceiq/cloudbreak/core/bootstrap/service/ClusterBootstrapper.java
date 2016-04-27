@@ -228,13 +228,17 @@ public class ClusterBootstrapper {
     }
 
     public void bootstrapNewNodes(StackScalingContext stackScalingContext) throws CloudbreakException {
-        Stack stack = stackRepository.findOneWithLists(stackScalingContext.getStackId());
+        bootstrapNewNodes(stackScalingContext.getStackId(), stackScalingContext.getUpscaleCandidateAddresses());
+    }
+
+    public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {
+        Stack stack = stackRepository.findOneWithLists(stackId);
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
 
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            if (stackScalingContext.getUpscaleCandidateAddresses().contains(instanceMetaData.getPrivateIp())) {
+            if (upscaleCandidateAddresses.contains(instanceMetaData.getPrivateIp())) {
                 nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
             }
         }

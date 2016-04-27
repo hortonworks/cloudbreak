@@ -90,4 +90,9 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
     public ClusterUpscaleEvent[] getEvents() {
         return ClusterUpscaleEvent.values();
     }
+
+    @Override
+    public ClusterUpscaleEvent[] getInitEvents() {
+        return new ClusterUpscaleEvent[]{ ClusterUpscaleEvent.ADD_CONTAINERS_EVENT };
+    }
 }

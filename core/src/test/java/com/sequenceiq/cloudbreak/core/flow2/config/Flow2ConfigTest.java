@@ -37,7 +37,7 @@ public class Flow2ConfigTest {
         flowConfigs.add(new StackTerminationFlowConfig());
         given(this.flowConfigs.iterator()).willReturn(flowConfigs.iterator());
         Map<String, FlowConfiguration<?>> flowConfigMap = underTest.flowConfigurationMap();
-        assertEquals("Not all event type appeared in map!", 11, flowConfigMap.size());
+        assertEquals("Not all flow type appeared in map!", countEvents(flowConfigs), flowConfigMap.size());
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -48,5 +48,11 @@ public class Flow2ConfigTest {
         flowConfigs.add(stackSyncFlowConfig);
         given(this.flowConfigs.iterator()).willReturn(flowConfigs.iterator());
         underTest.flowConfigurationMap();
+    }
+
+    private int countEvents(List<FlowConfiguration<?>> flowConfigs) {
+        return flowConfigs.stream()
+                .mapToInt(c -> c.getInitEvents().length)
+                .sum();
     }
 }

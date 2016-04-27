@@ -99,7 +99,7 @@ public class Flow2HandlerTest {
         given(flow.getCurrentState()).willReturn(StackSyncState.SYNC_STATE);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).save(eq(FLOW_ID), eq("KEY"), any(Payload.class), eq(flowConfig.getClass()), eq(StackSyncState.SYNC_STATE));
+        verify(flowLogService, times(1)).save(eq(FLOW_ID), eq("KEY"), any(Payload.class), any(Class.class), eq(StackSyncState.SYNC_STATE));
         verify(flow, times(1)).sendEvent(eq("KEY"), any());
     }
 

@@ -18,11 +18,11 @@ public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStac
         UpscaleStackResult result = sendCloudRequest();
 
 
-        assertEquals(ResourceStatus.UPDATED, result.getStatus());
+        assertEquals(ResourceStatus.UPDATED, result.getResourceStatus());
         assertEquals(1, result.getResults().size());
         assertEquals(ResourceStatus.UPDATED, result.getResults().get(0).getStatus());
         assertFalse(result.isFailed());
-        assertNull(result.getException());
+        assertNull(result.getErrorDetails());
     }
 
     @Override

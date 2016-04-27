@@ -13,16 +13,6 @@ public interface StackFacade {
 
     FlowContext handleStatusUpdateFailure(FlowContext context) throws CloudbreakException;
 
-    FlowContext addInstances(FlowContext context) throws CloudbreakException;
-
-    FlowContext extendMetadata(FlowContext context) throws CloudbreakException;
-
-    FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException;
-
-    FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException;
-
-    FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException;
-
     FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException;
 
     FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException;
