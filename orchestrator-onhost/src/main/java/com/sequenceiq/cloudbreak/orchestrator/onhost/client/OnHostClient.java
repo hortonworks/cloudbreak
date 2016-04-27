@@ -125,7 +125,7 @@ public class OnHostClient {
                 }
             }
             if (!missingTargets.isEmpty()) {
-                LOGGER.info("Missing nodes to save consul config: %s", missingTargets);
+                LOGGER.info("Missing nodes to save consul config: {}", missingTargets);
             }
         } catch (Exception e) {
             throw new CloudbreakOrchestratorFailedException(e);
@@ -142,9 +142,9 @@ public class OnHostClient {
         try {
             ResponseEntity<CbBootResponses> response = exchange(map, HttpMethod.POST, port, OnHostClientEndpoint.AMBARI_RUN_DISTRIBUTE, CbBootResponses.class);
             CbBootResponses responseBody = response.getBody();
-            LOGGER.info("Ambari run response: %s", responseBody);
+            LOGGER.info("Ambari run response: {}", responseBody);
         } catch (Exception e) {
-            LOGGER.info("Error occured when ran consul on hosts: ", e);
+            LOGGER.info("Error occurred when ran consul on hosts: ", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -157,7 +157,7 @@ public class OnHostClient {
             ResponseEntity<CbBootResponses> response =
                     exchange(consulRunMap, HttpMethod.POST, port, OnHostClientEndpoint.CONSUL_RUN_DISTRIBUTE, CbBootResponses.class);
             CbBootResponses responseBody = response.getBody();
-            LOGGER.info("Consul run response: %s", responseBody);
+            LOGGER.info("Consul run response: {}", responseBody);
         } catch (Exception e) {
             LOGGER.info("Error occured when ran consul on hosts: ", e);
             throw new CloudbreakOrchestratorFailedException(e);

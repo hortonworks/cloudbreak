@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.orchestrator.onhost;
 
-
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.ON_HOST;
 
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 @Component
 public class OnHostOrchestrator extends SimpleHostOrchestrator {
-    public static final String PORT = "8088";
+    public static final String PORT = "7070";
     public static final int MAX_NODES = 5000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OnHostOrchestrator.class);
@@ -81,7 +80,7 @@ public class OnHostOrchestrator extends SimpleHostOrchestrator {
             appFuture.get();
             onHostClient.runConsul();
         } catch (Exception e) {
-            LOGGER.error("Error occured under the consul bootstrap", e);
+            LOGGER.error("Error occurred under the consul bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
