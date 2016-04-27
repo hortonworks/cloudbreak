@@ -1,6 +1,6 @@
 <!-- .... TOPOLOGIES PANEL ................................................. -->
 
-<div id="panel-topoligies" ng-controller="topologyController" class="col-md-12 col-lg-11" ng-if="isWriteScope('platforms', userDetails.groups)">
+<div id="panel-topoligies" ng-controller="topologyController" class="col-md-12 col-lg-11">
 
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
@@ -11,8 +11,8 @@
         <div id="panel-topologies-collapse" class="panel-btn-in-header-collapse collapse">
             <div class="panel-body">
 
-                <p class="btn-row-over-panel">
-                    <a href="" id="panel-create-topoligies-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-topologies-collapse" ng-click="cleanupScope()">
+                <p class="btn-row-over-panel" ng-if="isWriteScope('platforms', userDetails.groups)">
+                    <a href="" id="panel-create-topologies-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-topologies-collapse" >
                         <i class="fa fa-plus fa-fw"></i><span> {{msg.topology_form_create}}</span>
                     </a>
                 </p>
@@ -75,7 +75,7 @@
                         </div>
                         <div id="panel-topoligies-collapse{{topology.id}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel">
+                            <p class="btn-row-over-panel" ng-if="isWriteScope('platforms', userDetails.groups)">
                                 <a style="width: 90px" href="" class="btn btn-danger" role="button" ng-click="deleteTopology(topology)">
                                     <i class="fa fa-times fa-fw"></i><span> {{msg.topology_list_delete}}</span>
                                 </a>
