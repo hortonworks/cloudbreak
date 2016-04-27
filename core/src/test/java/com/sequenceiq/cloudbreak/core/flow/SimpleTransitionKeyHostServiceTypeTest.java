@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.core.flow.service.SimpleTransitionKeyService;
 
-public class SimpleTransitionKeyServiceTest {
+public class SimpleTransitionKeyHostServiceTypeTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleTransitionKeyService.class);
     private TransitionKeyService transitionKeyService;
 

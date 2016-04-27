@@ -102,6 +102,9 @@ public class ClusterBootstrapper {
     private ContainerConfigService containerConfigService;
 
     @Inject
+    private HostServiceConfigService hostServiceConfigService;
+
+    @Inject
     private ContainerOrchestratorTypeResolver containerOrchestratorTypeResolver;
 
     public void bootstrapMachines(ProvisioningContext provisioningContext) throws CloudbreakException {

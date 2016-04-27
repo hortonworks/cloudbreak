@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostRunner;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterAuthenticationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
@@ -114,7 +114,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Inject
     private ClusterContainerRunner containerRunner;
     @Inject
-    private ClusterHostRunner hostRunner;
+    private ClusterHostServiceRunner hostRunner;
     @Inject
     private TlsSecurityService tlsSecurityService;
     @Inject

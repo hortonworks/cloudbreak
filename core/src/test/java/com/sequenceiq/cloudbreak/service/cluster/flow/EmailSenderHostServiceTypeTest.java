@@ -42,7 +42,7 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EmailSenderServiceTest {
+public class EmailSenderHostServiceTypeTest {
     private static final String NAME_OF_THE_CLUSTER = "name-of-the-cluster";
     private GreenMail greenMail;
 
