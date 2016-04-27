@@ -18,7 +18,7 @@ public class HostServiceConfig {
     public HostServiceConfig(@JsonProperty("name") String name, @JsonProperty("version") String version, @JsonProperty("repoUrl") String repoUrl) {
         this.name = name;
         this.version = version;
-        this.repoUrl =repoUrl;
+        this.repoUrl = repoUrl;
     }
 
     public String getName() {

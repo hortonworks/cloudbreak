@@ -552,7 +552,7 @@ public class ShellContext {
         this.instanceTypes = instanceTypes;
     }
 
-    public void setOrchestrators(Map<String,Collection<String>> orchestrators) {
+    public void setOrchestrators(Map<String, Collection<String>> orchestrators) {
         this.orchestrators = orchestrators;
     }
 

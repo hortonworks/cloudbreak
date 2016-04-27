@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.orchestrator.onhost.client;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -68,6 +67,10 @@ public class OnHostClient {
         return targets;
     }
 
+    public String getGatewayPrivateIp() {
+        return gatewayPrivateIp;
+    }
+
     private HttpHeaders httpHeaders() {
         String plainCreds = "cbadmin:cbadmin";
         byte[] plainCredsBytes = plainCreds.getBytes();
@@ -106,12 +109,20 @@ public class OnHostClient {
     }
 
     public Set<String> distributeConsulConfig(Set<String> targetIps) throws CloudbreakOrchestratorException {
+        Set<String> servers = new HashSet<>();
+        servers.add(gatewayPrivateIp);
+        return distributeConsulConfig(servers, targetIps);
+    }
+
+    public Set<String> distributeConsulConfig(Set<String> servers, Set<String> targetIps) throws CloudbreakOrchestratorException {
         Set<String> missingTargets = new HashSet<>();
         // TODO replace it with object
         Map<String, Object> configMap = new HashMap<>();
         configMap.put("data_dir", "/etc/cloudbreak/consul");
         // TODO multiple servers
-        configMap.put("servers", Arrays.asList(gatewayPrivateIp));
+        if (!servers.isEmpty()) {
+            configMap.put("servers", servers);
+        }
         configMap.put("targets", targetIps);
         try {
             LOGGER.info("Sending consul config save request to {}", targetIps);
