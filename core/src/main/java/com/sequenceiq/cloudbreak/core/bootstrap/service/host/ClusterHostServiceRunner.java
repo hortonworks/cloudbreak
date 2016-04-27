@@ -15,12 +15,15 @@ import javax.inject.Inject;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.HostServiceConfigService;
+import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostService;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -32,6 +35,8 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.model.ServiceInfo;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -54,6 +59,10 @@ public class ClusterHostServiceRunner {
     private ConversionService conversionService;
     @Inject
     private ClusterService clusterService;
+    @Inject
+    private HostGroupRepository hostGroupRepository;
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     public void runAmbariServices(ProvisioningContext context) throws CloudbreakException {
         try {
@@ -73,10 +82,63 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private Set<String> initializeAmbariAgentServices(Stack stack)
-            throws CloudbreakException, CloudbreakOrchestratorException {
+    public Map<String, String> addAmbariServices(ClusterScalingContext context) throws CloudbreakException {
+        Map<String, String> candidates;
+        try {
+            Stack stack = stackRepository.findOneWithLists(context.getStackId());
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            HostGroupAdjustmentJson hostGroupAdjustment = context.getHostGroupAdjustment();
+            candidates = collectUpscaleCandidates(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup(),
+                    hostGroupAdjustment.getScalingAdjustment());
+            Set<String> agents = initializeNewAmbariAgentServices(stack, candidates);
+            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
+                    gatewayInstance.getPrivateIp());
+            OrchestrationCredential credential = new OrchestrationCredential(stack.getOrchestrator().getApiEndpoint(), new HashMap<String, Object>());
+            hostOrchestrator.runService(gatewayConfig, agents, credential, clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorCancelledException e) {
+            throw new CancellationException(e.getMessage());
+        } catch (CloudbreakOrchestratorException e) {
+            throw new CloudbreakException(e);
+        }
+        return candidates;
+    }
+
+    private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
+        HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
+        if (hostGroup.getConstraint().getInstanceGroup() != null) {
+            Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
+            Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetaDataRepository.findUnusedHostsInInstanceGroup(instanceGroupId);
+            Map<String, String> hostNames = new HashMap<>();
+            for (InstanceMetaData instanceMetaData : unusedHostsInInstanceGroup) {
+                hostNames.put(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getPrivateIp());
+                if (hostNames.size() >= adjustment) {
+                    break;
+                }
+            }
+            return hostNames;
+        }
+        return null;
+    }
+
+    private Set<String> initializeNewAmbariAgentServices(Stack stack, Map<String, String> candidates) throws CloudbreakException,
+            CloudbreakOrchestratorException {
         Set<String> agents = new HashSet<>();
-        HashMap<String, List<ServiceInfo>> serviceInfos = new HashMap<>();
+        Map<String, List<ServiceInfo>> serviceInfos = new HashMap<>();
+        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+        for (Map.Entry<String, String> entry : candidates.entrySet()) {
+            agents.add(entry.getValue());
+            ServiceInfo agentServiceInfo = new ServiceInfo(HostServiceType.AMBARI_AGENT.getName(), entry.getKey());
+            serviceInfos.put(entry.getKey(), Arrays.asList(agentServiceInfo));
+        }
+        saveHostServices(serviceInfos, cluster);
+        return agents;
+    }
+
+    private Set<String> initializeAmbariAgentServices(Stack stack) throws CloudbreakException, CloudbreakOrchestratorException {
+        Set<String> agents = new HashSet<>();
+        Map<String, List<ServiceInfo>> serviceInfos = new HashMap<>();
         InstanceGroup gatewayInstanceGroup = stack.getGatewayInstanceGroup();
         InstanceMetaData next = gatewayInstanceGroup.getInstanceMetaData().iterator().next();
         ServiceInfo serverServiceInfo = new ServiceInfo(HostServiceType.AMBARI_SERVER.getName(), next.getDiscoveryFQDN());

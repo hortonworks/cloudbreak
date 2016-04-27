@@ -274,14 +274,22 @@ public class AmbariClusterFacade implements ClusterFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
-        Map<String, List<Container>> containers = containerRunner.addClusterContainers(actualContext);
+        ContainerOrchestratorType containerOrchestratorType = containerOrchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
         Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-        for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
-            List<String> hostNames = new ArrayList<>();
-            for (Container container : containersEntry.getValue()) {
-                hostNames.add(container.getHost());
+        if (containerOrchestratorType.containerOrchestrator()) {
+            Map<String, List<Container>> containers = containerRunner.addClusterContainers(actualContext);
+            for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
+                List<String> hostNames = new ArrayList<>();
+                for (Container container : containersEntry.getValue()) {
+                    hostNames.add(container.getHost());
+                }
+                hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
             }
-            hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
+        } else if (containerOrchestratorType.hostOrchestrator()) {
+            Map<String, String> candidates = hostRunner.addAmbariServices(actualContext);
+            for (Map.Entry<String, String> entry : candidates.entrySet()) {
+                hostsPerHostGroup.put(entry.getKey(), Arrays.asList(entry.getKey()));
+            }
         }
         clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup);
         Set<String> allHosts = new HashSet<>();

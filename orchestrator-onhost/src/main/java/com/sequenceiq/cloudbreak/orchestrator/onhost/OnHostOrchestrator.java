@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.orchestrator.onhost.client.OnHostClient;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.AmbariRunBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.ConsulConfigDistributeBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.ConsulRunBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.ConsulRunUpscale;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -85,7 +86,7 @@ public class OnHostOrchestrator extends SimpleHostOrchestrator {
                 prepareTargets(gatewayConfig, targets), port());
 
         try {
-            ConsulConfigDistributeBootstrap consulConfigDistributeBootstrap = new ConsulConfigDistributeBootstrap(onHostClient);
+            ConsulConfigDistributeBootstrap consulConfigDistributeBootstrap = new ConsulConfigDistributeBootstrap(onHostClient, onHostClient.getTargets());
             Callable<Boolean> consulConfigDistributeBootstrapRunner = runner(consulConfigDistributeBootstrap, getExitCriteria(), exitCriteriaModel);
             Future<Boolean> consulConfigDistributeBootstrapAppFuture = getParallelOrchestratorComponentRunner().submit(consulConfigDistributeBootstrapRunner);
             consulConfigDistributeBootstrapAppFuture.get();
@@ -111,8 +112,25 @@ public class OnHostOrchestrator extends SimpleHostOrchestrator {
     }
 
     @Override
-    public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+    public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+        Set<String> strings = prepareTargets(gatewayConfig, targets);
+        OnHostClient onHostClient = new OnHostClient(gatewayConfig.getPublicAddress(), gatewayConfig.getPrivateAddress(),
+                strings, port());
+        try {
+            ConsulConfigDistributeBootstrap consulConfigDistributeUpscale = new ConsulConfigDistributeBootstrap(onHostClient, strings);
+            Callable<Boolean> consulConfigDistributeUpscaleRunner = runner(consulConfigDistributeUpscale, getExitCriteria(), exitCriteriaModel);
+            Future<Boolean> consulConfigDistributeUpscaleAppFuture = getParallelOrchestratorComponentRunner().submit(consulConfigDistributeUpscaleRunner);
+            consulConfigDistributeUpscaleAppFuture.get();
 
+            ConsulRunUpscale consulRunUpscale = new ConsulRunUpscale(onHostClient, strings);
+            Callable<Boolean> consulRunUpscaleRunner = runner(consulRunUpscale, getExitCriteria(), exitCriteriaModel);
+            Future<Boolean> consulRunUpscaleRunnerAppFuture = getParallelOrchestratorComponentRunner().submit(consulRunUpscaleRunner);
+            consulRunUpscaleRunnerAppFuture.get();
+
+        } catch (Exception e) {
+            LOGGER.error("Error occurred under the consul bootstrap", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
     }
 
     @Override

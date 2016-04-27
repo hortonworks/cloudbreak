@@ -11,9 +11,9 @@ public class ConsulConfigDistributeBootstrap implements OrchestratorBootstrap {
     private final OnHostClient client;
     private Set<String> missingTargets;
 
-    public ConsulConfigDistributeBootstrap(OnHostClient client) {
+    public ConsulConfigDistributeBootstrap(OnHostClient client, Set<String> missingTargets) {
         this.client = client;
-        this.missingTargets = client.getTargets();
+        this.missingTargets = missingTargets;
     }
 
     @Override
