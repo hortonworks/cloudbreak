@@ -453,9 +453,9 @@ public class AmbariClusterConnector {
     public void startCluster(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getAmbariClient(stack);
         waitForAmbariToStart(stack);
-//        if (!"BYOS".equals(stack.cloudPlatform())) {
-//            startAmbariAgents(stack);
-//        }
+        if (!"BYOS".equals(stack.cloudPlatform())) {
+            startAmbariAgents(stack);
+        }
         startAllServices(stack, ambariClient);
     }
 
@@ -660,17 +660,17 @@ public class AmbariClusterConnector {
 
     private void startAmbariAgents(Stack stack) throws CloudbreakException {
         LOGGER.info("Starting Ambari agents on the hosts.");
-        try {
-            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
-        } catch (PluginFailureException e) {
-            LOGGER.warn("Ambari agent start event couldn't finish in time, safely ignoring it", e);
-        }
+//        try {
+//            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+//        } catch (PluginFailureException e) {
+//            LOGGER.warn("Ambari agent start event couldn't finish in time, safely ignoring it", e);
+//        }
         PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
         if (PollingResult.EXIT.equals(hostsJoinedResult)) {
             throw new CancellationException("Cluster was terminated while starting Ambari agents.");
         } else if (PollingResult.TIMEOUT.equals(hostsJoinedResult)) {
             LOGGER.info("Ambari agents couldn't join. Restarting ambari agents...");
-            restartAmbariAgents(stack);
+//            restartAmbariAgents(stack);
         }
     }
 

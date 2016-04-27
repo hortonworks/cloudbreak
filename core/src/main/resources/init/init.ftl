@@ -74,12 +74,14 @@ if $IS_GATEWAY; then
   # make service redirect to systemctl
   rm -f /etc/init.d/ambari-server
   find /etc/rc.d/rc* -name "*ambari-server" | xargs rm -v
+  systemctl enable ambari-server
 else
   curl -Lo /etc/ambari-agent/conf/public-hostname.sh https://raw.githubusercontent.com/sequenceiq/docker-ambari/master/ambari-agent/public-hostname.sh && chmod +x /etc/ambari-agent/conf/public-hostname.sh
   sed -i "/\[agent\]/ a public_hostname_script=\/etc\/ambari-agent\/conf\/public-hostname.sh" /etc/ambari-agent/conf/ambari-agent.ini
   # make service redirect to systemctl
   rm -f /etc/init.d/ambari-agent
   find /etc/rc.d/rc* -name "*ambari-agent" | xargs rm -v
+  systemctl enable ambari-agent
 fi
 
 
