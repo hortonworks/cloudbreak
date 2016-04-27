@@ -82,6 +82,20 @@ public class CloudConnectorController implements ConnectorEndpoint {
     }
 
     @Override
+    public PlatformOrchestratorsJson getOrchestratortypes() {
+        PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
+        return conversionService.convert(orchestrators, PlatformOrchestratorsJson.class);
+    }
+
+    @Override
+    public Collection<String> getOchestratorsByType(String type) {
+        PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
+        Collection<String> strings = conversionService.convert(orchestrators, PlatformOrchestratorsJson.class)
+                .getOrchestrators().get(type.toUpperCase());
+        return strings == null ? new ArrayList<String>() : strings;
+    }
+
+    @Override
     public PlatformVirtualMachinesJson getVmTypes() {
         PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes();
         return conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class);
