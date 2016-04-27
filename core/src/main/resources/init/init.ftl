@@ -24,6 +24,7 @@ fi
 
 yum install -y salt-minion
 
+
 #curl -Lo /etc/yum.repos.d/ambari.repo https://raw.githubusercontent.com/sequenceiq/docker-ambari/master/ambari-agent/ambari.repo
 #curl -Lo /etc/systemd/system/ambari-server.service https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/ambari-server.service
 #mkdir /opt/ambari-server && curl -Lo /opt/ambari-server/init-server.sh https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/ambari-server-init.sh && chmod +x /opt/ambari-server/init-server.sh
