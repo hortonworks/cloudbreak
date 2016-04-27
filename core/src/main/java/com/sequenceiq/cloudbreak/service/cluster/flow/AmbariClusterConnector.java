@@ -442,9 +442,9 @@ public class AmbariClusterConnector {
                 stopAllServices(stack, ambariClient);
             }
             // TODO: ambari agent containers should be stopped through the orchestrator API
-            if (!"BYOS".equals(stack.cloudPlatform())) {
-                stopAmbariAgents(stack, null);
-            }
+//            if (!"BYOS".equals(stack.cloudPlatform())) {
+//                stopAmbariAgents(stack, null);
+//            }
         } catch (AmbariConnectionException ex) {
             LOGGER.debug("Ambari not running on the gateway machine, no need to stop it.");
         }
