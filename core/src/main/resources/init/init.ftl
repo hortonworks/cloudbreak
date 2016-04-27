@@ -25,10 +25,26 @@ chmod 555 /
 curl -Lo /usr/sbin/cloudbreak-bootstrap https://dl.dropboxusercontent.com/u/13919958/cloudbreak-bootstrap && chmod +x /usr/sbin/cloudbreak-bootstrap
 curl -Lo /usr/sbin/consul https://dl.dropboxusercontent.com/u/13919958/consul && chmod +x /usr/sbin/consul
 
-export CBBOOT_PORT=8088
-nohup /usr/sbin/cloudbreak-bootstrap > /var/log/cbboot.log &
+cat>/etc/systemd/system/cloudbreak-bootstrap.service<<EOF
+[Install]
+WantedBy=multi-user.target
 
-# add consul config permanently to /etc/resolv.conf
+[Unit]
+Description=CB bootstrap Service
+After=network-online.target network.service
+
+[Service]
+Restart=on-failure
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+Environment='CBBOOT_PORT=8088'
+ExecStart=/sbin/cloudbreak-bootstrap
+EOF
+service cloudbreak-bootstrap start
+systemctl enable cloudbreak-bootstrap
+
 cat>/etc/dhcp/dhclient.conf<<EOF
 prepend domain-name-servers 127.0.0.1;
 append domain-search "node.dc1.consul";
@@ -36,7 +52,6 @@ append domain-search "service.consul";
 EOF
 service network restart
 
-# create consul systemd unit file
 cat>/etc/systemd/system/consul.service<<EOF
 [Install]
 WantedBy=multi-user.target
@@ -54,13 +69,11 @@ GuessMainPID=no
 ExecStart=/usr/sbin/consul agent -config-dir=/etc/cloudbreak/consul/
 EOF
 
-# increase entropy
 yum install -y epel-release
 yum install -y haveged
 haveged
 chkconfig haveged on
 
-#install java 7
 export JDK_ARTIFACT=jdk-7u67-linux-x64.tar.gz
 mkdir -p /usr/jdk64 && cd /usr/jdk64 && wget http://public-repo-1.hortonworks.com/ARTIFACTS/$JDK_ARTIFACT && \
     tar -xf $JDK_ARTIFACT && rm -f $JDK_ARTIFACT
@@ -70,11 +83,9 @@ if $IS_GATEWAY; then
   # make service redirect to systemctl
   rm -f /etc/init.d/ambari-server
   find /etc/rc.d/rc* -name "*ambari-server" | xargs rm -v
-#  ambari-server start
 else
   yum install -y ambari-agent
   # make service redirect to systemctl
   find /etc/rc.d/rc* -name "*ambari-agent" | xargs rm -v
   sed -i 's/^hostname=localhost/hostname=ambari-8080.service.consul/' /etc/ambari-agent/conf/ambari-agent.ini
-#  ambari-agent start
 fi
