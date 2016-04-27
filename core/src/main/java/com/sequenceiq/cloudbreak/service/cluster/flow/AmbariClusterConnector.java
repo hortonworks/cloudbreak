@@ -453,9 +453,9 @@ public class AmbariClusterConnector {
     public void startCluster(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getAmbariClient(stack);
         waitForAmbariToStart(stack);
-        if (!"BYOS".equals(stack.cloudPlatform())) {
-            startAmbariAgents(stack);
-        }
+//        if (!"BYOS".equals(stack.cloudPlatform())) {
+//            startAmbariAgents(stack);
+//        }
         startAllServices(stack, ambariClient);
     }
 
