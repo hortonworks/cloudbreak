@@ -58,7 +58,7 @@ public class SwarmContainerOrchestratorTest {
     public void before() {
         underTest.init(parallelContainerRunner(), exitCriteria());
         underTestSpy = spy(underTest);
-        doReturn(parallelContainerRunner()).when(underTestSpy).getParallelContainerRunner();
+        doReturn(parallelContainerRunner()).when(underTestSpy).getParallelOrchestratorComponentRunner();
         when(underTestSpy.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyMap())).thenAnswer(
                 new Answer<Callable<Boolean>>() {
                     @Override

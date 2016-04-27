@@ -1,21 +1,21 @@
 package com.sequenceiq.cloudbreak.orchestrator.container;
 
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 
 public abstract class SimpleContainerOrchestrator implements ContainerOrchestrator {
 
-    private ParallelContainerRunner parallelContainerRunner;
+    private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
     private ExitCriteria exitCriteria;
 
     @Override
-    public void init(ParallelContainerRunner parallelContainerRunner, ExitCriteria exitCriteria) {
-        this.parallelContainerRunner = parallelContainerRunner;
+    public void init(ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner, ExitCriteria exitCriteria) {
+        this.parallelOrchestratorComponentRunner = parallelOrchestratorComponentRunner;
         this.exitCriteria = exitCriteria;
     }
 
-    public ParallelContainerRunner getParallelContainerRunner() {
-        return parallelContainerRunner;
+    public ParallelOrchestratorComponentRunner getParallelOrchestratorComponentRunner() {
+        return parallelOrchestratorComponentRunner;
     }
 
     protected ExitCriteria getExitCriteria() {

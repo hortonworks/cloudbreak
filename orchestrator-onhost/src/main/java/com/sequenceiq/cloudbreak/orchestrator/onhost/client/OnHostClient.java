@@ -119,9 +119,9 @@ public class OnHostClient {
                     CbBootResponses.class);
             CbBootResponses responseBody = response.getBody();
             for (CbBootResponse cbBootResponse : responseBody.getResponses()) {
-                if (cbBootResponse.getStatusCode() == HttpStatus.OK.value()) {
+                if (cbBootResponse.getStatusCode() != HttpStatus.OK.value()) {
                     LOGGER.info("Successfully distributed consul config to: " + cbBootResponse.getAddress());
-                    missingTargets.remove(cbBootResponse.getAddress().split(":")[0]);
+                    missingTargets.add(cbBootResponse.getAddress().split(":")[0]);
                 }
             }
             if (!missingTargets.isEmpty()) {
@@ -133,35 +133,59 @@ public class OnHostClient {
         return missingTargets;
     }
 
-    public void runAmbari() throws CloudbreakOrchestratorException {
+    public Set<String> startAmbariServiceOnTargetMachines(Set<String> targetIps) throws CloudbreakOrchestratorException {
+        Set<String> missingTargets = new HashSet<>();
         Map<String, Object> map = new HashMap<>();
         Set<String> agents = new HashSet<>(targets);
+        if (agents.contains(gatewayPrivateIp)) {
+            map.put("server", gatewayPrivateIp);
+        }
         agents.remove(gatewayPrivateIp);
         map.put("agents", agents);
-        map.put("server", gatewayPrivateIp);
         try {
             ResponseEntity<CbBootResponses> response = exchange(map, HttpMethod.POST, port, OnHostClientEndpoint.AMBARI_RUN_DISTRIBUTE, CbBootResponses.class);
             CbBootResponses responseBody = response.getBody();
             LOGGER.info("Ambari run response: {}", responseBody);
+            for (CbBootResponse cbBootResponse : responseBody.getResponses()) {
+                if (cbBootResponse.getStatusCode() != HttpStatus.OK.value()) {
+                    LOGGER.info("Successfully distributed ambari run to: " + cbBootResponse.getAddress());
+                    missingTargets.add(cbBootResponse.getAddress().split(":")[0]);
+                }
+            }
+            if (!missingTargets.isEmpty()) {
+                LOGGER.info("Missing nodes to run ambari: %s", missingTargets);
+            }
         } catch (Exception e) {
-            LOGGER.info("Error occurred when ran consul on hosts: ", e);
+            LOGGER.info("Error occured when ran ambari on hosts: ", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+        return missingTargets;
     }
 
 
-    public void runConsul() throws CloudbreakOrchestratorException {
+    public Set<String> startConsulServiceOnTargetMachines(Set<String> targetIps) throws CloudbreakOrchestratorException {
+        Set<String> missingTargets = new HashSet<>();
         try {
             Map<String, Object> consulRunMap = new HashMap<>();
-            consulRunMap.put("targets", targets);
+            consulRunMap.put("targets", targetIps);
             ResponseEntity<CbBootResponses> response =
                     exchange(consulRunMap, HttpMethod.POST, port, OnHostClientEndpoint.CONSUL_RUN_DISTRIBUTE, CbBootResponses.class);
             CbBootResponses responseBody = response.getBody();
             LOGGER.info("Consul run response: {}", responseBody);
+            for (CbBootResponse cbBootResponse : responseBody.getResponses()) {
+                if (cbBootResponse.getStatusCode() != HttpStatus.OK.value()) {
+                    LOGGER.info("Successfully distributed consul run to: " + cbBootResponse.getAddress());
+                    missingTargets.add(cbBootResponse.getAddress().split(":")[0]);
+                }
+            }
+            if (!missingTargets.isEmpty()) {
+                LOGGER.info("Missing nodes to run consul: %s", missingTargets);
+            }
         } catch (Exception e) {
             LOGGER.info("Error occured when ran consul on hosts: ", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+        return missingTargets;
     }
 
 }

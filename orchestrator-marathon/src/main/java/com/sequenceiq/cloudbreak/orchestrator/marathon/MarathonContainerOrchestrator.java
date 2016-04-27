@@ -92,7 +92,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
             MarathonAppBootstrap bootstrap = new MarathonAppBootstrap(client, app);
             Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel);
-            Future<Boolean> appFuture = getParallelContainerRunner().submit(runner);
+            Future<Boolean> appFuture = getParallelOrchestratorComponentRunner().submit(runner);
             appFuture.get();
 
             App appResponse = client.getApp(app.getId()).getApp();
@@ -263,7 +263,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             client.deleteApp(appName);
             MarathonAppDeletion appDeletion = new MarathonAppDeletion(client, appName);
             Callable<Boolean> runner = runner(appDeletion, getExitCriteria(), null);
-            futures.add(getParallelContainerRunner().submit(runner));
+            futures.add(getParallelOrchestratorComponentRunner().submit(runner));
         } catch (MarathonException me) {
             if (STATUS_NOT_FOUND.equals(me.getStatus())) {
                 LOGGER.info("Marathon app '{}' has already been deleted.", appName);
@@ -281,7 +281,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
                 client.deleteAppTask(appName, taskId, "true");
                 MarathonTaskDeletion taskDeletion = new MarathonTaskDeletion(client, appName, taskIds);
                 Callable<Boolean> runner = runner(taskDeletion, getExitCriteria(), null);
-                futures.add(getParallelContainerRunner().submit(runner));
+                futures.add(getParallelOrchestratorComponentRunner().submit(runner));
             } catch (MarathonException me) {
                 if (STATUS_NOT_FOUND.equals(me.getStatus())) {
                     LOGGER.info("Marathon task '{}' has already been deleted from app '{}'.", taskId, appName);

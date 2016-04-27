@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 
 public class OrchestratorTestUtil {
 
@@ -87,8 +87,8 @@ public class OrchestratorTestUtil {
         return new TestOrchestratorBootstrap();
     }
 
-    public static ParallelContainerRunner parallelContainerRunner() {
-        class TestParallelContainerRunner implements ParallelContainerRunner {
+    public static ParallelOrchestratorComponentRunner parallelContainerRunner() {
+        class TestParallelOrchestratorComponentRunner implements ParallelOrchestratorComponentRunner {
 
             @Override
             public Future<Boolean> submit(Callable<Boolean> callable) {
@@ -96,7 +96,7 @@ public class OrchestratorTestUtil {
                 return executorService.submit(callable);
             }
         }
-        return new TestParallelContainerRunner();
+        return new TestParallelOrchestratorComponentRunner();
     }
 
     public static ExitCriteria exitCriteria() {

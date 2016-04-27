@@ -5,13 +5,13 @@ import java.util.concurrent.Future;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 
-public class ExecutorBasedParallelContainerRunner implements ParallelContainerRunner {
+public class ExecutorBasedParallelOrchestratorComponentRunner implements ParallelOrchestratorComponentRunner {
 
     private AsyncTaskExecutor asyncTaskExecutor;
 
-    public ExecutorBasedParallelContainerRunner(AsyncTaskExecutor asyncTaskExecutor) {
+    public ExecutorBasedParallelOrchestratorComponentRunner(AsyncTaskExecutor asyncTaskExecutor) {
         this.asyncTaskExecutor = asyncTaskExecutor;
     }
 
