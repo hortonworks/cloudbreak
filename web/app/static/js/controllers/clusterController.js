@@ -707,6 +707,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.failurePolicy.adjustmentType = "BEST_EFFORT";
                 $scope.cluster.failurePolicy.threshold = null;
                 $scope.cluster.parameters = {};
+                $scope.cluster.orchestrator = {};
                 $scope.cluster.availabilityZone = null;
                 $scope.cluster.region = null;
                 delete $scope.cluster.hostGroups;
@@ -718,6 +719,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 setRegion();
                 initWizard();
                 setPlatformVariant();
+                setOrchestrator();
             }
         });
 
@@ -784,6 +786,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.platformVariant = $rootScope.params.defaultVariants[$rootScope.activeCredential.cloudPlatform];
             }
         }
+
+         function setOrchestrator() {
+            if ($rootScope.activeCredential !== undefined) {
+                $scope.cluster.orchestrator.type = $rootScope.params.defaultOrchestrators[$rootScope.activeCredential.cloudPlatform];
+            }
+         }
 
         function setSecurityGroup() {
             if ($rootScope.securitygroups && $rootScope.securitygroups.length != 0) {
@@ -998,9 +1006,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 failurePolicy: {
                     adjustmentType: "BEST_EFFORT",
                 },
-                orchestrator: {
-                    type: "ON_HOST"
-                },
+                orchestrator: {},
                 configStrategy: $scope.configStrategies[1],
                 ldapRequired: false,
                 sssdConfigId: null,
@@ -1015,6 +1021,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             setSecurityGroup();
             setRegion();
             setPlatformVariant();
+            setOrchestrator();
         }
 
         $scope.getPlatformVariants = function() {
