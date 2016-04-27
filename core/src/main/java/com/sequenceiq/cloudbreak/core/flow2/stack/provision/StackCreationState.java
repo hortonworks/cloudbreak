@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.CheckImageAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.MetadataCollectionFailedAction;
 
 public enum StackCreationState implements FlowState<StackCreationState, StackCreationEvent> {
     INIT_STATE,
@@ -10,8 +11,9 @@ public enum StackCreationState implements FlowState<StackCreationState, StackCre
     IMAGESETUP_STATE,
     IMAGE_CHECK_STATE(CheckImageAction.class),
     START_PROVISIONING_STATE,
-    PROVISIONING_FINISHED_STATE,
-    COLLECTMETADATA_STATE,
+    PROVISIONING_FINISHED_FAILED_STATE(MetadataCollectionFailedAction.class),
+    PROVISIONING_FINISHED_STATE(PROVISIONING_FINISHED_FAILED_STATE),
+    SAVE_COLLECTEDMETADATA_STATE,
     TLS_SETUP_STATE,
     FINAL_STATE;
 
@@ -24,6 +26,10 @@ public enum StackCreationState implements FlowState<StackCreationState, StackCre
 
     StackCreationState(Class<?> action) {
         this.action = action;
+    }
+
+    StackCreationState(StackCreationState failureState) {
+        this.failureState = failureState;
     }
 
     @Override

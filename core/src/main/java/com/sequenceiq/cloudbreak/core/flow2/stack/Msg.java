@@ -24,6 +24,7 @@ public enum Msg {
     STACK_STOP_REQUESTED("stack.stop.requested"),
     STACK_PROVISIONING("stack.provisioning"),
     STACK_INFRASTRUCTURE_TIME("stack.infrastructure.time"),
+    STACK_INFRASTRUCTURE_METADATA_COLLECTION_FAILED("stack.infrastructure.metadata.collection.failed"),
     STACK_INFRASTRUCTURE_SUBNETS_UPDATING("stack.infrastructure.subnets.updating"),
     STACK_INFRASTRUCTURE_SUBNETS_UPDATED("stack.infrastructure.subnets.updated"),
     STACK_INFRASTRUCTURE_UPDATE_FAILED("stack.infrastructure.update.failed"),

@@ -105,13 +105,17 @@ public class StackCreationService {
         instanceMetadataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
     }
 
-    public Stack provisioningFinished(StackContext context, LaunchStackResult result, Map<Object, Object> variables) {
+    public void sendStackCreationTime(StackContext context, Map<Object, Object> variables) {
         Date startDate = getStartDateIfExist(variables);
+        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(),
+                calculateStackCreationTime(startDate));
+    }
+
+    public Stack provisioningFinished(StackContext context, LaunchStackResult result) {
         Stack stack = context.getStack();
         validateResourceResults(context.getCloudContext(), result);
         List<CloudResourceStatus> results = result.getResults();
         updateNodeCount(stack.getId(), context.getCloudStack().getGroups(), results, true);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
         return stackService.getById(stack.getId());
     }
 

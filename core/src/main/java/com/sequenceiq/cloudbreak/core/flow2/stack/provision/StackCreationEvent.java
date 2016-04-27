@@ -25,7 +25,7 @@ public enum StackCreationEvent implements FlowEvent {
     SSHFINGERPRINTS_EVENT(GetSSHFingerprintsResult.selector(GetSSHFingerprintsResult.class)),
     SSHFINGERPRINTS_FAILED_EVENT(GetSSHFingerprintsResult.failureSelector(GetSSHFingerprintsResult.class)),
     STACK_CREATION_FINISHED_EVENT("LAUNCHSTACKFINISHED"),
-    STACK_CREATION_FAILED_EVENT("FAILHANDLED");
+    STACK_CREATION_FAILE_HANDLED_EVENT("FAILHANDLED");
 
     private String stringRepresentation;
 
