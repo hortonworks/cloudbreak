@@ -219,20 +219,6 @@ public class SimpleFlowFacade implements FlowFacade {
         }
     }
 
-    public FlowContext downscaleStack(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Downscaling of stack. Context: {}", context);
-        try {
-            context = stackFacade.downscaleStack(context);
-            LOGGER.debug("Downscaling of stack is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the downscaling of stack: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
     public FlowContext addInstances(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Adding new instances to the stack. Context: {}", context);
         try {

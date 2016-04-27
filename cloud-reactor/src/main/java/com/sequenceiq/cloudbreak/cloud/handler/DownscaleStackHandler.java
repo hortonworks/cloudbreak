@@ -48,8 +48,9 @@ public class DownscaleStackHandler implements DownscaleStackExecuter, CloudPlatf
     public void accept(Event<DownscaleStackRequest> downscaleStackRequestEvent) {
         LOGGER.info("Received event: {}", downscaleStackRequestEvent);
         DownscaleStackRequest request = downscaleStackRequestEvent.getData();
-        execute(request);
+        DownscaleStackResult result = execute(request);
         LOGGER.info("DownscaleStackRequest finished");
+        eventBus.notify(result.selector(), new Event(downscaleStackRequestEvent.getHeaders(), result));
     }
 
     @Override

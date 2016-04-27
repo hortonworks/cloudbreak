@@ -43,7 +43,15 @@ public class StackToCloudStackConverter {
         return convert(stack, Collections.<String>emptySet());
     }
 
-    public CloudStack convert(Stack stack, Set<String> deleteRequestedInstances) {
+    public CloudStack convertForDownscale(Stack stack, Set<String> deleteRequestedInstances) {
+        return convert(stack, deleteRequestedInstances);
+    }
+
+    public CloudStack convertForTermination(Stack stack, String instanceId) {
+        return convert(stack, Collections.singleton(instanceId));
+    }
+
+    private CloudStack convert(Stack stack, Set<String> deleteRequestedInstances) {
         List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), deleteRequestedInstances);
         Image image = imageService.getImage(stack.getId());
         Network network = buildNetwork(stack);

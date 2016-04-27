@@ -133,7 +133,7 @@ public class ServiceProviderConnectorAdapter {
                 instances.add(cloudInstance);
             }
         }
-        CloudStack cloudStack = cloudStackConverter.convert(stack, instanceIds);
+        CloudStack cloudStack = cloudStackConverter.convertForDownscale(stack, instanceIds);
         DownscaleStackRequest<DownscaleStackResult> downscaleRequest = new DownscaleStackRequest<>(cloudContext,
                 cloudCredential, cloudStack, resources, instances);
         LOGGER.info("Triggering downscale stack event: {}", downscaleRequest);

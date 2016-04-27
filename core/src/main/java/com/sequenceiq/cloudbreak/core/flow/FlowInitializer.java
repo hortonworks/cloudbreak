@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendConsulMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.StackDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStopRequestedHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.UpdateAllowedSubnetsHandler;
@@ -86,7 +85,6 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.BOOTSTRAP_NEW_NODES.name()), getHandlerForClass(BootstrapNewNodesHandler.class));
         reactor.on($(FlowPhases.EXTEND_CONSUL_METADATA.name()), getHandlerForClass(ExtendConsulMetadataHandler.class));
         reactor.on($(FlowPhases.ADD_CLUSTER_CONTAINERS.name()), getHandlerForClass(AddClusterContainersHandler.class));
-        reactor.on($(FlowPhases.STACK_DOWNSCALE.name()), getHandlerForClass(StackDownscaleHandler.class));
         reactor.on($(FlowPhases.CLUSTER_START.name()), getHandlerForClass(ClusterStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
         reactor.on($(FlowPhases.CLUSTER_UPSCALE.name()), getHandlerForClass(ClusterUpscaleHandler.class));
@@ -199,9 +197,6 @@ public class FlowInitializer implements InitializingBean {
 
         transitionKeyService.registerTransition(ClusterDownscaleHandler.class, TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name()));
-
-        transitionKeyService.registerTransition(StackDownscaleHandler.class, TransitionFactory
-                .createTransition(FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerResetFlows() {
