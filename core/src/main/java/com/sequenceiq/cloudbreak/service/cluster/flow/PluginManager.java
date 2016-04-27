@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 public interface PluginManager {
@@ -21,11 +20,17 @@ public interface PluginManager {
 
     Map<String, Set<String>> cleanupPlugins(HttpClientConfig clientConfig, Set<String> hosts);
 
-    void waitForEventFinish(Stack stack, Collection<InstanceMetaData> instanceMetaData, Map<String, Set<String>> eventIds, Integer timeout)
+    void waitForEventFinish(Stack stack, Map<String, Set<String>> eventIds, Integer timeout)
+            throws CloudbreakSecuritySetupException;
+
+    void reckForEventFinish(Stack stack, Map<String, Set<String>> eventIds, Integer timeout, PollingService.Callback callback)
             throws CloudbreakSecuritySetupException;
 
     void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container) throws CloudbreakSecuritySetupException;
 
     void triggerAndWaitForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container, List<String> payload, Set<String> hosts)
             throws CloudbreakSecuritySetupException;
+
+    void triggerAndReckForPlugins(Stack stack, ConsulPluginEvent event, Integer timeout, DockerContainer container, List<String> payload, Set<String> hosts,
+            PollingService.Callback callback) throws CloudbreakSecuritySetupException;
 }

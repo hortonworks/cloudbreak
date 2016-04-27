@@ -22,13 +22,4 @@ enum InstanceTerminationEvent implements FlowEvent {
     public String stringRepresentation() {
         return stringRepresentation;
     }
-
-    public static InstanceTerminationEvent fromString(String stringRepresentiation) {
-        for (InstanceTerminationEvent event : InstanceTerminationEvent.values()) {
-            if (stringRepresentiation.equalsIgnoreCase(event.stringRepresentation)) {
-                return event;
-            }
-        }
-        return null;
-    }
 }

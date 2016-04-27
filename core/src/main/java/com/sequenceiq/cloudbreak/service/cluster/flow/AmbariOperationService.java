@@ -40,6 +40,13 @@ public class AmbariOperationService {
         return waitForOperations(stack, ambariClient, ambariOperationsStatusCheckerTask, operationRequests, ambariOperationType);
     }
 
+    public void reckForOperations(Stack stack, AmbariClient ambariClient,
+            Map<String, Integer> operationRequests, AmbariOperationType ambariOperationType, PollingService.Callback callback) {
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Recking for Ambari operations to finish. [Operation requests: {}]", operationRequests);
+        reckForOperations(stack, ambariClient, ambariOperationsStatusCheckerTask, operationRequests, ambariOperationType, callback);
+    }
+
     public PollingResult waitForOperationsToStart(Stack stack, AmbariClient ambariClient,
             Map<String, Integer> operationRequests, AmbariOperationType ambariOperationType) {
         MDCBuilder.buildMdcContext(stack);
@@ -52,13 +59,18 @@ public class AmbariOperationService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for Ambari operation with context {} to reach status: {}", requestContext, desiredOperationStatus);
         return operationsPollingService.pollWithTimeout(requestCheckerTask, new AmbariOperations(stack, ambariClient, requestContext,
-                desiredOperationStatus, ambariOperationType), AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_OPS, MAX_FAILURE_COUNT);
+                desiredOperationStatus, ambariOperationType, Boolean.FALSE), AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_OPS, MAX_FAILURE_COUNT);
     }
 
-    public PollingResult waitForOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask task,
+    public PollingResult waitForOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask<AmbariOperations> task,
             Map<String, Integer> operationRequests, AmbariOperationType ambariOperationType) {
-        return operationsPollingService.pollWithTimeout(task, new AmbariOperations(stack, ambariClient, operationRequests, ambariOperationType),
+        return operationsPollingService.pollWithTimeout(task, new AmbariOperations(stack, ambariClient, operationRequests, ambariOperationType, Boolean.FALSE),
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_OPS, MAX_FAILURE_COUNT);
     }
 
+    public void reckForOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask<AmbariOperations> task,
+            Map<String, Integer> operationRequests, AmbariOperationType ambariOperationType, PollingService.Callback callback) {
+        operationsPollingService.pollAsyncWithTimeout(task, new AmbariOperations(stack, ambariClient, operationRequests, ambariOperationType, Boolean.TRUE),
+                AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_OPS, MAX_FAILURE_COUNT, callback);
+    }
 }

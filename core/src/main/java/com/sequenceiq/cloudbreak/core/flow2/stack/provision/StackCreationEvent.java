@@ -37,13 +37,4 @@ public enum StackCreationEvent implements FlowEvent {
     public String stringRepresentation() {
         return stringRepresentation;
     }
-
-    public static StackCreationEvent fromString(String stringRepresentiation) {
-        for (StackCreationEvent event : StackCreationEvent.values()) {
-            if (stringRepresentiation.equalsIgnoreCase(event.stringRepresentation)) {
-                return event;
-            }
-        }
-        return null;
-    }
 }

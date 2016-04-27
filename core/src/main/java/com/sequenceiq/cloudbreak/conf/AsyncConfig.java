@@ -39,7 +39,7 @@ public class AsyncConfig implements AsyncConfigurer, SchedulingConfigurer {
         return new SimpleAsyncUncaughtExceptionHandler();
     }
 
-    @Bean
+    @Bean(name = "ThreadPoolTaskScheduler")
     public ThreadPoolTaskScheduler taskScheduler() {
         return new ThreadPoolTaskScheduler();
     }

@@ -1,13 +1,31 @@
 package com.sequenceiq.cloudbreak.service;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PollingService<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PollingService.class);
+
+    @Inject
+    @Qualifier("ThreadPoolTaskScheduler")
+    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
+    public void pollAsyncWithTimeout(final StatusCheckerTask<T> statusCheckerTask, final T t, final int interval, final int maxAttempts,
+            final int maxFailure, final Callback callback) {
+        threadPoolTaskScheduler.execute(new Runnable() {
+            @Override
+            public void run() {
+                callback.call(pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, maxFailure));
+            }
+        });
+    }
 
     /**
      * Executes a {@link StatusCheckerTask} until it signals success, or the
@@ -55,8 +73,7 @@ public class PollingService<T> {
             LOGGER.info("Poller timeout.");
             statusCheckerTask.handleTimeout(t);
             return PollingResult.TIMEOUT;
-        }
-        if (exit) {
+        } else if (exit) {
             LOGGER.info("Poller exiting.");
             return PollingResult.EXIT;
         }
@@ -76,4 +93,7 @@ public class PollingService<T> {
         }
     }
 
+    public interface Callback {
+        void call(PollingResult result);
+    }
 }
