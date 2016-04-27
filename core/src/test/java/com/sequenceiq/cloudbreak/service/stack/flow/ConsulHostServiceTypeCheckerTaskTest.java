@@ -21,7 +21,7 @@ import com.ecwid.consul.v1.QueryParams;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ConsulServiceCheckerTaskTest {
+public class ConsulHostServiceTypeCheckerTaskTest {
 
     private static final String AMBARI_SERVICE = "ambari-8080";
     private static final String SERVICE_ENDPOINT = "/v1/catalog/service/";

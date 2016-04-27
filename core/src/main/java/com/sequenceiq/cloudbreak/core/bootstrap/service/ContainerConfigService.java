@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.core.bootstrap.config.GenericConfig;
+import com.sequenceiq.cloudbreak.core.bootstrap.config.ContainerConfigBuilder;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -83,40 +83,40 @@ public class ContainerConfigService {
             ContainerConfig config;
             switch (dc) {
                 case AMBARI_SERVER:
-                    config = new GenericConfig.Builder(ambariServer).build();
+                    config = new ContainerConfigBuilder.Builder(ambariServer).build();
                     break;
                 case AMBARI_AGENT:
-                    config = new GenericConfig.Builder(ambariAgent).build();
+                    config = new ContainerConfigBuilder.Builder(ambariAgent).build();
                     break;
                 case AMBARI_DB:
-                    config = new GenericConfig.Builder(postgresDockerImageName).build();
+                    config = new ContainerConfigBuilder.Builder(postgresDockerImageName).build();
                     break;
                 case KERBEROS:
-                    config = new GenericConfig.Builder(kerberosDockerImageName).build();
+                    config = new ContainerConfigBuilder.Builder(kerberosDockerImageName).build();
                     break;
                 case REGISTRATOR:
-                    config = new GenericConfig.Builder(registratorDockerImageName).build();
+                    config = new ContainerConfigBuilder.Builder(registratorDockerImageName).build();
                     break;
                 case MUNCHAUSEN:
-                    config = new GenericConfig.Builder(munchausenImageName).build();
+                    config = new ContainerConfigBuilder.Builder(munchausenImageName).build();
                     break;
                 case CONSUL_WATCH:
-                    config = new GenericConfig.Builder(consulWatchPlugnDockerImageName).build();
+                    config = new ContainerConfigBuilder.Builder(consulWatchPlugnDockerImageName).build();
                     break;
                 case LOGROTATE:
-                    config = new GenericConfig.Builder(logrotateDockerImageName).build();
+                    config = new ContainerConfigBuilder.Builder(logrotateDockerImageName).build();
                     break;
                 case HAVEGED:
-                    config = new GenericConfig.Builder(havegedImageName).build();
+                    config = new ContainerConfigBuilder.Builder(havegedImageName).build();
                     break;
                 case LDAP:
-                    config = new GenericConfig.Builder(ldapImageName).build();
+                    config = new ContainerConfigBuilder.Builder(ldapImageName).build();
                     break;
                 case SHIPYARD:
-                    config = new GenericConfig.Builder(shipyardImageName).build();
+                    config = new ContainerConfigBuilder.Builder(shipyardImageName).build();
                     break;
                 case SHIPYARD_DB:
-                    config = new GenericConfig.Builder(rethinkDbImageName).build();
+                    config = new ContainerConfigBuilder.Builder(rethinkDbImageName).build();
                     break;
                 default:
                     throw new CloudbreakServiceException(String.format("No configuration exist for %s", dc));

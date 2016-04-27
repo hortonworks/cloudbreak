@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
-public class DefaultCloudbreakUsageGeneratorServiceTest {
+public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
 
     @InjectMocks
     private DefaultCloudbreakUsageGeneratorService underTest;

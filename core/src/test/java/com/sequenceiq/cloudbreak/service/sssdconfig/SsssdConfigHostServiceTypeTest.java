@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.repository.SssdConfigRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SsssdConfigServiceTest {
+public class SsssdConfigHostServiceTypeTest {
 
     @InjectMocks
     private SssdConfigService underTest;

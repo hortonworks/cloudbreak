@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.core.bootstrap.config;
 
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 
-public class GenericConfig {
+public class ContainerConfigBuilder {
 
     private final ContainerConfig containerConfig;
 
-    private GenericConfig(Builder builder) {
+    private ContainerConfigBuilder(Builder builder) {
         this.containerConfig = new ContainerConfig(builder.name, builder.version);
     }
 
@@ -27,7 +27,7 @@ public class GenericConfig {
         }
 
         public ContainerConfig build() {
-            return new GenericConfig(this).getContainerConfig();
+            return new ContainerConfigBuilder(this).getContainerConfig();
         }
 
     }

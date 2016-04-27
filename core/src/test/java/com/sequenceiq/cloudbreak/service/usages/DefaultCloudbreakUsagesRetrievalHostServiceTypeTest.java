@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 
-public class DefaultCloudbreakUsagesRetrievalServiceTest {
+public class DefaultCloudbreakUsagesRetrievalHostServiceTypeTest {
     private static final String DUMMY_ACCOUNT = "account";
     private static final Long DUMMY_SINCE = new Date().getTime();
     private static final Long DUMMY_END_DATE = new Date().getTime();

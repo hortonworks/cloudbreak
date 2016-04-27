@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultStackServiceTest {
+public class DefaultStackHostServiceTypeTest {
 
     @InjectMocks
     private StackService underTest;

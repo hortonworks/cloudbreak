@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 
-public class DefaultCloudbreakEventServiceTest {
+public class DefaultCloudbreakEventHostServiceTypeTest {
 
     @InjectMocks
     private DefaultCloudbreakEventService eventService;
