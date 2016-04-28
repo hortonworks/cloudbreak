@@ -23,9 +23,9 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
 
     private static final List<Transition<StackSyncState, StackSyncEvent>> TRANSITIONS = new Transition.Builder<StackSyncState, StackSyncEvent>()
             .defaultFailureEvent(StackSyncEvent.SYNC_FAILURE_EVENT)
-            .from(INIT_STATE).to(SYNC_STATE).event(SYNC_EVENT).defaultFailure()
-            .from(INIT_STATE).to(SYNC_STATE).event(FULL_SYNC_EVENT).defaultFailure()
-            .from(SYNC_STATE).to(SYNC_FINISHED_STATE).event(SYNC_FINISHED_EVENT).defaultFailure()
+            .from(INIT_STATE).to(SYNC_STATE).event(SYNC_EVENT).defaultFailureEvent()
+            .from(INIT_STATE).to(SYNC_STATE).event(FULL_SYNC_EVENT).defaultFailureEvent()
+            .from(SYNC_STATE).to(SYNC_FINISHED_STATE).event(SYNC_FINISHED_EVENT).defaultFailureEvent()
             .build();
 
     private static final FlowEdgeConfig<StackSyncState, StackSyncEvent> EDGE_CONFIG =

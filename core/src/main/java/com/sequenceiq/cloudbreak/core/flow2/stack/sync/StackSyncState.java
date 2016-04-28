@@ -9,25 +9,8 @@ public enum StackSyncState implements FlowState<StackSyncState, StackSyncEvent> 
     SYNC_FINISHED_STATE,
     FINAL_STATE;
 
-    private StackSyncEvent failureEvent;
-
     @Override
     public Class<?> action() {
         return null;
-    }
-
-    @Override
-    public StackSyncState failureState() {
-        return null;
-    }
-
-    @Override
-    public StackSyncEvent failureEvent() {
-        return failureEvent;
-    }
-
-    @Override
-    public void setFailureEvent(StackSyncEvent failureEvent) {
-        this.failureEvent = failureEvent;
     }
 }

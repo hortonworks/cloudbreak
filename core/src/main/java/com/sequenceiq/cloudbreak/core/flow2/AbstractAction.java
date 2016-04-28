@@ -27,6 +27,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     private Class<P> payloadClass;
     private List<PayloadConverter<P>> payloadConverters;
+    private E failureEvent;
 
     protected AbstractAction(Class<P> payloadClass) {
         this.payloadClass = payloadClass;
@@ -45,7 +46,6 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         try {
             doExecute(flowContext, payload, context.getExtendedState().getVariables());
         } catch (Exception ex) {
-            FlowEvent failureEvent = context.getStateMachine().getState().getId().failureEvent();
             LOGGER.error("Error during execution of " + getClass().getSimpleName(), ex);
             if (failureEvent != null) {
                 sendEvent(flowContext.getFlowId(), failureEvent.stringRepresentation(), getFailurePayload(flowContext, ex));
@@ -53,6 +53,13 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 LOGGER.error("Missing error handling for " + getClass().getSimpleName());
             }
         }
+    }
+
+    public void setFailureEvent(E failureEvent) {
+        if (this.failureEvent != null && !this.failureEvent.equals(failureEvent)) {
+            throw new UnsupportedOperationException("Failure event already configured. Actions reusable not allowed!");
+        }
+        this.failureEvent = failureEvent;
     }
 
     protected void sendEvent(C context) {

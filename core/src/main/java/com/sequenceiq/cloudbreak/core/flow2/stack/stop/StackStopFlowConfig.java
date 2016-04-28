@@ -21,8 +21,8 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
 
     private static final List<Transition<StackStopState, StackStopEvent>> TRANSITIONS = new Transition.Builder<StackStopState, StackStopEvent>()
             .defaultFailureEvent(StackStopEvent.STOP_FAILURE_EVENT)
-            .from(INIT_STATE).to(STOP_STATE).event(STOP_EVENT).defaultFailure()
-            .from(STOP_STATE).to(STOP_FINISHED_STATE).event(STOP_FINISHED_EVENT).defaultFailure()
+            .from(INIT_STATE).to(STOP_STATE).event(STOP_EVENT).defaultFailureEvent()
+            .from(STOP_STATE).to(STOP_FINISHED_STATE).event(STOP_FINISHED_EVENT).defaultFailureEvent()
             .build();
 
     private static final FlowEdgeConfig<StackStopState, StackStopEvent> EDGE_CONFIG =

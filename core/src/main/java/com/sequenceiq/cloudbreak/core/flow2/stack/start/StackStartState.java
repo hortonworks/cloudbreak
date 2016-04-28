@@ -9,25 +9,8 @@ public enum StackStartState implements FlowState<StackStartState, StackStartEven
     START_FINISHED_STATE,
     FINAL_STATE;
 
-    private StackStartEvent failureEvent;
-
     @Override
     public Class<?> action() {
         return null;
-    }
-
-    @Override
-    public StackStartState failureState() {
-        return null;
-    }
-
-    @Override
-    public StackStartEvent failureEvent() {
-        return failureEvent;
-    }
-
-    @Override
-    public void setFailureEvent(StackStartEvent failureEvent) {
-        this.failureEvent = failureEvent;
     }
 }

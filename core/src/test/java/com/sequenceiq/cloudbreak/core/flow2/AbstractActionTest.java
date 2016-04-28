@@ -45,6 +45,7 @@ public class AbstractActionTest {
     @Before
     public void setup() throws Exception {
         underTest = spy(new TestAction());
+        underTest.setFailureEvent(Event.FAILURE);
         MockitoAnnotations.initMocks(this);
         StateMachineConfigurationBuilder<State, Event> configurationBuilder =
                 new StateMachineConfigurationBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
@@ -82,25 +83,11 @@ public class AbstractActionTest {
     }
 
     enum State implements FlowState<State, Event> {
-        INIT, DOING, FAILED;
+        INIT, DOING;
 
         @Override
         public Class<?> action() {
             return TestAction.class;
-        }
-
-        @Override
-        public State failureState() {
-            return FAILED;
-        }
-
-        @Override
-        public Event failureEvent() {
-            return Event.FAILURE;
-        }
-
-        @Override
-        public void setFailureEvent(Event failureEvent) {
         }
     }
 
