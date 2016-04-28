@@ -1,27 +1,27 @@
 package com.sequenceiq.cloudbreak.orchestrator.onhost.poller;
 
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.client.OnHostClient;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.salt.SaltConnection;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.salt.SaltStates;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.salt.target.Compound;
+import com.suse.salt.netapi.client.SaltClient;
+import com.suse.salt.netapi.exception.SaltException;
 
 public class AmbariRunBootstrap implements OrchestratorBootstrap {
 
     private final OnHostClient client;
-    private Set<String> missingTargets;
+    private final SaltClient saltClient;
 
-    public AmbariRunBootstrap(OnHostClient client) {
+    public AmbariRunBootstrap(OnHostClient client) throws SaltException {
         this.client = client;
-        this.missingTargets = client.getTargets();
+        this.saltClient = new SaltConnection().get(client.getGatewayPublicIp());
     }
 
     @Override
     public Boolean call() throws Exception {
-        missingTargets = client.startAmbariServiceOnTargetMachines(missingTargets);
-        if (!missingTargets.isEmpty()) {
-            throw new CloudbreakOrchestratorFailedException("There are missing nodes to start the ambari: " + missingTargets);
-        }
+        SaltStates.ambariServer().callAsync(saltClient, new Compound("S@" + client.getGatewayPrivateIp()));
+        SaltStates.ambariAgent().callAsync(saltClient, new Compound("* and not S@" + client.getGatewayPrivateIp()));
         return true;
     }
 }
