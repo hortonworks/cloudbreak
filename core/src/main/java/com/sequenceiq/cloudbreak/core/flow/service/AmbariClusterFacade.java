@@ -288,7 +288,10 @@ public class AmbariClusterFacade implements ClusterFacade {
         } else if (containerOrchestratorType.hostOrchestrator()) {
             Map<String, String> candidates = hostRunner.addAmbariServices(actualContext);
             for (Map.Entry<String, String> entry : candidates.entrySet()) {
-                hostsPerHostGroup.put(actualContext.getHostGroupAdjustment().getHostGroup(), Arrays.asList(entry.getKey()));
+                if (!hostsPerHostGroup.keySet().contains(actualContext.getHostGroupAdjustment().getHostGroup())) {
+                    hostsPerHostGroup.put(actualContext.getHostGroupAdjustment().getHostGroup(), new ArrayList<String>());
+                }
+                hostsPerHostGroup.get(actualContext.getHostGroupAdjustment().getHostGroup()).add(entry.getKey());
             }
         }
         clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup);

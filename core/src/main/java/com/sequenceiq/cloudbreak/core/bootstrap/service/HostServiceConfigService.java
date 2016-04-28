@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.config.HostServiceConfigBuilder;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.orchestrator.container.HostServiceType;
 import com.sequenceiq.cloudbreak.orchestrator.model.HostServiceConfig;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
@@ -37,11 +36,11 @@ public class HostServiceConfigService {
     @Inject
     private ComponentRepository componentRepository;
 
-    public HostServiceConfig get(Stack stack, DockerContainer dc) {
+    public HostServiceConfig get(Stack stack, HostServiceType ht) {
         try {
-            Component component = componentRepository.findComponentByStackIdComponentTypeName(stack.getId(), ComponentType.SERVICE, dc.name());
+            Component component = componentRepository.findComponentByStackIdComponentTypeName(stack.getId(), ComponentType.SERVICE, ht.name());
             if (component == null) {
-                component = create(stack, dc);
+                component = create(stack, ht);
                 LOGGER.info("Host service component definition created: {}", component);
             } else {
                 LOGGER.info("Host service component definition found in database: {}", component);
@@ -52,10 +51,10 @@ public class HostServiceConfigService {
         }
     }
 
-    private Component create(Stack stack, DockerContainer dc) {
+    private Component create(Stack stack, HostServiceType ht) {
         try {
             HostServiceConfig config;
-            switch (dc) {
+            switch (ht) {
                 case AMBARI_SERVER:
                     config = new HostServiceConfigBuilder().builder()
                             .withName(HostServiceType.AMBARI_SERVER.getName())
@@ -71,10 +70,10 @@ public class HostServiceConfigService {
                             .build();
                     break;
                 default:
-                    throw new CloudbreakServiceException(String.format("No configuration exist for %s", dc));
+                    throw new CloudbreakServiceException(String.format("No configuration exist for %s", ht));
             }
 
-            Component component = new Component(ComponentType.SERVICE, dc.name(), new Json(config), stack);
+            Component component = new Component(ComponentType.SERVICE, ht.name(), new Json(config), stack);
             return componentRepository.save(component);
         } catch (IOException e) {
             throw new CloudbreakServiceException(String.format("Failed to parse component HostServiceConfig for stack: %d, service: %s"));

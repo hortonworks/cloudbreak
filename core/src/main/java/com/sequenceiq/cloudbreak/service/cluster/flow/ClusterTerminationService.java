@@ -68,6 +68,7 @@ public class ClusterTerminationService {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
+    //TODO check orchestrators
     public void deleteClusterContainers(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
         try {

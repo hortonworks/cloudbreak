@@ -190,7 +190,7 @@ public class OnHostClient {
                 }
             }
             if (!missingTargets.isEmpty()) {
-                LOGGER.info("Missing nodes to run consul: %s", missingTargets);
+                LOGGER.info("Missing nodes to run consul: {}", missingTargets);
             }
         } catch (Exception e) {
             LOGGER.info("Error occured when ran consul on hosts: ", e);
