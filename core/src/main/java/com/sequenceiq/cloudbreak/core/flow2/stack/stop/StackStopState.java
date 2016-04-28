@@ -13,9 +13,4 @@ public enum StackStopState implements FlowState<StackStopState, StackStopEvent> 
     public Class<?> action() {
         return null;
     }
-
-    @Override
-    public StackStopState failureState() {
-        return null;
-    }
 }

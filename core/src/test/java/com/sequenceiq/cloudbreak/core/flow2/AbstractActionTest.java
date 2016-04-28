@@ -83,16 +83,11 @@ public class AbstractActionTest {
     }
 
     enum State implements FlowState<State, Event> {
-        INIT, DOING, FAILED;
+        INIT, DOING;
 
         @Override
         public Class<?> action() {
             return TestAction.class;
-        }
-
-        @Override
-        public State failureState() {
-            return FAILED;
         }
     }
 

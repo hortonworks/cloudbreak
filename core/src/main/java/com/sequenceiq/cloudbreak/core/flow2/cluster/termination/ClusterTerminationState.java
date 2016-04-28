@@ -23,9 +23,4 @@ public enum ClusterTerminationState implements FlowState<ClusterTerminationState
     public Class<?> action() {
         return action;
     }
-
-    @Override
-    public ClusterTerminationState failureState() {
-        return null;
-    }
 }

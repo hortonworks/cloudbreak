@@ -25,10 +25,10 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     private static final List<Transition<StackTerminationState, StackTerminationEvent>> TRANSITIONS =
             new Transition.Builder<StackTerminationState, StackTerminationEvent>()
                     .defaultFailureEvent(TERMINATION_FAILED_EVENT)
-                    .from(INIT_STATE).to(TERMINATION_STATE).event(TERMINATION_EVENT).defaultFailure()
-                    .from(INIT_STATE).to(FORCE_TERMINATION_STATE).event(FORCE_TERMINATION_EVENT).defaultFailure()
-                    .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailure()
-                    .from(FORCE_TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailure()
+                    .from(INIT_STATE).to(TERMINATION_STATE).event(TERMINATION_EVENT).defaultFailureEvent()
+                    .from(INIT_STATE).to(FORCE_TERMINATION_STATE).event(FORCE_TERMINATION_EVENT).defaultFailureEvent()
+                    .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailureEvent()
+                    .from(FORCE_TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailureEvent()
                     .build();
 
     private static final FlowEdgeConfig<StackTerminationState, StackTerminationEvent> EDGE_CONFIG =

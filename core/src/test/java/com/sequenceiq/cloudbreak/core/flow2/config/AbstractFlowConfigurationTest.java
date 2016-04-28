@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.config;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -51,9 +52,9 @@ public class AbstractFlowConfigurationTest {
         given(applicationContext.getBean(anyString(), any(Class.class))).willReturn(action);
         transitions = new AbstractFlowConfiguration.Transition.Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
-                .from(State.INIT).to(State.DO).event(Event.START).defaultFailure()
-                .from(State.DO).to(State.DO2).event(Event.CONTINUE).failure(Event.FAILURE2)
-                .from(State.DO2).to(State.FINISH).event(Event.FINISHED).defaultFailure()
+                .from(State.INIT).to(State.DO).event(Event.START).defaultFailureEvent()
+                .from(State.DO).to(State.DO2).event(Event.CONTINUE).failureState(State.FAILED2).failureEvent(Event.FAILURE2)
+                .from(State.DO2).to(State.FINISH).event(Event.FINISHED).defaultFailureEvent()
                 .build();
         edgeConfig = new FlowConfiguration.FlowEdgeConfig(State.INIT, State.FINAL, State.FINISH, Event.FINALIZED, State.FAILED, Event.FAIL_HANDLED);
         underTest.init();
@@ -82,6 +83,7 @@ public class AbstractFlowConfigurationTest {
         flow.sendEvent(Event.START.name(), null);
         flow.sendEvent(Event.CONTINUE.name(), null);
         flow.sendEvent(Event.FAILURE2.name(), null);
+        assertEquals("Must be on the FAILED2 state", State.FAILED2, flow.getCurrentState());
         flow.sendEvent(Event.FAIL_HANDLED.name(), null);
     }
 
@@ -117,11 +119,6 @@ public class AbstractFlowConfigurationTest {
         @Override
         public Class<?> action() {
             return FlowFinalizeAction.class;
-        }
-
-        @Override
-        public State failureState() {
-            return this == DO2 ? FAILED2 : FAILED;
         }
     }
 

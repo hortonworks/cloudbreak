@@ -13,9 +13,4 @@ public enum StackSyncState implements FlowState<StackSyncState, StackSyncEvent> 
     public Class<?> action() {
         return null;
     }
-
-    @Override
-    public StackSyncState failureState() {
-        return null;
-    }
 }

@@ -24,8 +24,8 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
     private static final List<Transition<ClusterTerminationState, ClusterTerminationEvent>> TRANSITIONS =
             new Transition.Builder<ClusterTerminationState, ClusterTerminationEvent>()
                     .defaultFailureEvent(TERMINATION_FAILED_EVENT)
-                    .from(INIT_STATE).to(TERMINATION_STATE).event(TERMINATION_EVENT).defaultFailure()
-                    .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailure()
+                    .from(INIT_STATE).to(TERMINATION_STATE).event(TERMINATION_EVENT).defaultFailureEvent()
+                    .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailureEvent()
                     .build();
 
     private static final FlowEdgeConfig<ClusterTerminationState, ClusterTerminationEvent> EDGE_CONFIG =

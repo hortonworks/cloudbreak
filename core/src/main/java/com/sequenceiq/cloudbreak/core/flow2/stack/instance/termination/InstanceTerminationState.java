@@ -25,9 +25,4 @@ enum InstanceTerminationState implements FlowState<InstanceTerminationState, Ins
     public Class<?> action() {
         return action;
     }
-
-    @Override
-    public InstanceTerminationState failureState() {
-        return null;
-    }
 }

@@ -28,9 +28,4 @@ public enum StackCreationState implements FlowState<StackCreationState, StackCre
     public Class<?> action() {
         return action;
     }
-
-    @Override
-    public StackCreationState failureState() {
-        return null;
-    }
 }

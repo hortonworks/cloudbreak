@@ -82,7 +82,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             transitionConfigurer.source(transition.source).target(transition.target).event(transition.event);
             if (transition.getFailureEvent() != null && transition.target != flowEdgeConfig.defaultFailureState) {
                 action.setFailureEvent(transition.getFailureEvent());
-                S failureState = Optional.fromNullable((S) transition.target.failureState()).or(flowEdgeConfig.defaultFailureState);
+                S failureState = Optional.fromNullable(transition.getFailureState()).or(flowEdgeConfig.defaultFailureState);
                 stateConfigurer.state(failureState, getAction(failureState), null);
                 transitionConfigurer.and().withExternal().source(transition.target).target(failureState).event(transition.getFailureEvent());
                 if (!failHandled.contains(failureState)) {
@@ -160,13 +160,19 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         private final S source;
         private final S target;
         private final E event;
+        private final S failureState;
         private final E failureEvent;
 
-        private Transition(S source, S target, E event, E failureEvent) {
+        private Transition(S source, S target, E event, S failureState, E failureEvent) {
             this.source = source;
             this.target = target;
             this.event = event;
+            this.failureState = failureState;
             this.failureEvent = failureEvent;
+        }
+
+        private S getFailureState() {
+            return failureState;
         }
 
         private E getFailureEvent() {
@@ -181,15 +187,15 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 return new ToBuilder<>(from, this);
             }
 
-            public void addTransition(S from, S to, E with) {
+            public void addTransition(S from, S to, E with, S fail) {
                 if (!defaultFailureEvent.isPresent()) {
-                    throw new UnsupportedOperationException("Default failure event must specified!");
+                    throw new UnsupportedOperationException("Default failureEvent event must specified!");
                 }
-                addTransition(from, to, with, defaultFailureEvent.get());
+                addTransition(from, to, with, fail, defaultFailureEvent.get());
             }
 
-            public void addTransition(S from, S to, E with, E withFailure) {
-                transitions.add(new Transition<>(from, to, with, withFailure));
+            public void addTransition(S from, S to, E with, S fail, E withFailure) {
+                transitions.add(new Transition<>(from, to, with, fail, withFailure));
             }
 
             public List<Transition<S, E>> build() {
@@ -237,6 +243,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             private final S to;
             private final E with;
             private final Builder<S, E> builder;
+            private S failure;
 
             public FailureBuilder(S from, S to, E with, Builder<S, E> b) {
                 this.from = from;
@@ -245,13 +252,18 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 this.builder = b;
             }
 
-            public Builder<S, E> failure(E withFailure) {
-                builder.addTransition(from, to, with, withFailure);
+            public FailureBuilder<S, E> failureState(S toFailure) {
+                failure = toFailure;
+                return this;
+            }
+
+            public Builder<S, E> failureEvent(E withFailure) {
+                builder.addTransition(from, to, with, failure, withFailure);
                 return builder;
             }
 
-            public Builder<S, E> defaultFailure() {
-                builder.addTransition(from, to, with);
+            public Builder<S, E> defaultFailureEvent() {
+                builder.addTransition(from, to, with, failure);
                 return builder;
             }
         }

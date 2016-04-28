@@ -23,8 +23,8 @@ public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<Ins
     private static final List<Transition<InstanceTerminationState, InstanceTerminationEvent>> TRANSITIONS =
             new Transition.Builder<InstanceTerminationState, InstanceTerminationEvent>()
                     .defaultFailureEvent(TERMINATION_FAILED_EVENT)
-                    .from(INIT_STATE).to(TERMINATION_STATE).event(TERMINATION_EVENT).defaultFailure()
-                    .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailure()
+                    .from(INIT_STATE).to(TERMINATION_STATE).event(TERMINATION_EVENT).defaultFailureEvent()
+                    .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailureEvent()
                     .build();
 
     private static final FlowEdgeConfig<InstanceTerminationState, InstanceTerminationEvent> EDGE_CONFIG =

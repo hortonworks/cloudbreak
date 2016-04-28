@@ -23,9 +23,4 @@ enum StackTerminationState implements FlowState<StackTerminationState, StackTerm
     public Class<?> action() {
         return action;
     }
-
-    @Override
-    public StackTerminationState failureState() {
-        return null;
-    }
 }
