@@ -145,6 +145,9 @@ public class AwsInstanceConnector implements InstanceConnector {
                     } else if ("Running".equalsIgnoreCase(instance.getState().getName())) {
                         LOGGER.info("AWS instance is in Started state, polling stack.");
                         cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STARTED));
+                    } else if ("Terminated".equalsIgnoreCase(instance.getState().getName())) {
+                        LOGGER.info("AWS instance is in Terminated state, polling stack.");
+                        cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
                     } else {
                         cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.IN_PROGRESS));
                     }
