@@ -20,6 +20,7 @@ import org.springframework.statemachine.transition.Transition;
 
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationFlowConfig;
@@ -143,7 +144,7 @@ public class OfflineStateGenerator {
 
         @Override
         public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
-            return null;
+            return (T) new FlowFinalizeAction();
         }
 
         @Override

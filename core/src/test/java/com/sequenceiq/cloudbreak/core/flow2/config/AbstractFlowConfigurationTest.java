@@ -6,7 +6,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -24,6 +23,7 @@ import org.springframework.statemachine.config.common.annotation.ObjectPostProce
 import org.springframework.statemachine.listener.StateMachineListener;
 import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
@@ -37,6 +37,9 @@ public class AbstractFlowConfigurationTest {
     @Mock
     private ApplicationContext applicationContext;
 
+    @Mock
+    private AbstractAction<State, Event, ?, ?> action;
+
     private Flow flow;
     private List<FlowConfiguration.Transition<State, Event>> transitions;
     private FlowConfiguration.FlowEdgeConfig<State, Event> edgeConfig;
@@ -45,10 +48,13 @@ public class AbstractFlowConfigurationTest {
     public void setup() throws Exception {
         underTest = new FlowConfiguration();
         MockitoAnnotations.initMocks(this);
-        given(applicationContext.getBean(any(Class.class))).willReturn(new FlowFinalizeAction());
-        transitions = Arrays.asList(new FlowConfiguration.Transition<>(State.INIT, State.DO, Event.START),
-                new FlowConfiguration.Transition<>(State.DO, State.DO2, Event.CONTINUE),
-                new FlowConfiguration.Transition<>(State.DO2, State.FINISH, Event.FINISHED));
+        given(applicationContext.getBean(anyString(), any(Class.class))).willReturn(action);
+        transitions = new AbstractFlowConfiguration.Transition.Builder<State, Event>()
+                .defaultFailureEvent(Event.FAILURE)
+                .from(State.INIT).to(State.DO).event(Event.START).defaultFailure()
+                .from(State.DO).to(State.DO2).event(Event.CONTINUE).failure(Event.FAILURE2)
+                .from(State.DO2).to(State.FINISH).event(Event.FINISHED).defaultFailure()
+                .build();
         edgeConfig = new FlowConfiguration.FlowEdgeConfig(State.INIT, State.FINAL, State.FINISH, Event.FINALIZED, State.FAILED, Event.FAIL_HANDLED);
         underTest.init();
         verify(applicationContext, times(8)).getBean(anyString(), any(Class.class));
@@ -79,26 +85,26 @@ public class AbstractFlowConfigurationTest {
         flow.sendEvent(Event.FAIL_HANDLED.name(), null);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = FlowConfiguration.NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration1() {
         flow.sendEvent(Event.START.name(), null);
         flow.sendEvent(Event.FINISHED.name(), null);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = FlowConfiguration.NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration2() {
         flow.sendEvent(Event.START.name(), null);
         flow.sendEvent(Event.FAILURE2.name(), null);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = FlowConfiguration.NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration3() {
         flow.sendEvent(Event.START.name(), null);
         flow.sendEvent(Event.CONTINUE.name(), null);
         flow.sendEvent(Event.FAIL_HANDLED.name(), null);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = FlowConfiguration.NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration4() {
         flow.sendEvent(Event.START.name(), null);
         flow.sendEvent(Event.CONTINUE.name(), null);
@@ -116,15 +122,6 @@ public class AbstractFlowConfigurationTest {
         @Override
         public State failureState() {
             return this == DO2 ? FAILED2 : FAILED;
-        }
-
-        @Override
-        public Event failureEvent() {
-            return this == DO2 ? Event.FAILURE2 : Event.FAILURE;
-        }
-
-        @Override
-        public void setFailureEvent(Event failureEvent) {
         }
     }
 
@@ -154,7 +151,7 @@ public class AbstractFlowConfigurationTest {
                     new StateMachineListenerAdapter<State, Event>() {
                         @Override
                         public void eventNotAccepted(Message<Event> event) {
-                            throw new UnsupportedOperationException();
+                            throw new NotAcceptedException();
                         }
                     };
             return new FlowConfiguration.MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener, new SyncTaskExecutor());
@@ -173,6 +170,10 @@ public class AbstractFlowConfigurationTest {
         @Override
         public Event[] getEvents() {
             return new Event[0];
+        }
+
+        class NotAcceptedException extends RuntimeException {
+
         }
     }
 }

@@ -9,8 +9,6 @@ public enum StackStopState implements FlowState<StackStopState, StackStopEvent> 
     STOP_FINISHED_STATE,
     FINAL_STATE;
 
-    private StackStopEvent failureEvent;
-
     @Override
     public Class<?> action() {
         return null;
@@ -19,15 +17,5 @@ public enum StackStopState implements FlowState<StackStopState, StackStopEvent> 
     @Override
     public StackStopState failureState() {
         return null;
-    }
-
-    @Override
-    public StackStopEvent failureEvent() {
-        return failureEvent;
-    }
-
-    @Override
-    public void setFailureEvent(StackStopEvent failureEvent) {
-        this.failureEvent = failureEvent;
     }
 }

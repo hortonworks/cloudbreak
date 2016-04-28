@@ -16,8 +16,6 @@ public enum StackCreationState implements FlowState<StackCreationState, StackCre
     FINAL_STATE;
 
     private Class<?> action;
-    private StackCreationEvent failureEvent;
-    private StackCreationState failureState;
 
     StackCreationState() {
     }
@@ -32,17 +30,7 @@ public enum StackCreationState implements FlowState<StackCreationState, StackCre
     }
 
     @Override
-    public StackCreationEvent failureEvent() {
-        return failureEvent;
-    }
-
-    @Override
     public StackCreationState failureState() {
-        return failureState;
-    }
-
-    @Override
-    public void setFailureEvent(StackCreationEvent failureEvent) {
-        this.failureEvent = failureEvent;
+        return null;
     }
 }

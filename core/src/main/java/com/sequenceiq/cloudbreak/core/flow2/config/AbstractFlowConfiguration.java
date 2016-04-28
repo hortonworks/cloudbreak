@@ -14,7 +14,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.Message;
-import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.ObjectStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.config.builders.StateMachineConfigurationBuilder;
@@ -30,6 +29,7 @@ import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 import org.springframework.statemachine.state.State;
 
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowAdapter;
@@ -77,12 +77,14 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         Set<S> failHandled = new HashSet<>();
         for (Transition<S, E> transition : transitions) {
             transitionConfigurer = transitionConfigurer == null ? transitionConfig.withExternal() : transitionConfigurer.and().withExternal();
-            stateConfigurer.state(transition.target, getAction(transition.target), null);
+            AbstractAction<S, E, ?, ?> action = getAction(transition.target);
+            stateConfigurer.state(transition.target, action, null);
             transitionConfigurer.source(transition.source).target(transition.target).event(transition.event);
             if (transition.getFailureEvent() != null && transition.target != flowEdgeConfig.defaultFailureState) {
+                action.setFailureEvent(transition.getFailureEvent());
                 S failureState = Optional.fromNullable((S) transition.target.failureState()).or(flowEdgeConfig.defaultFailureState);
                 stateConfigurer.state(failureState, getAction(failureState), null);
-                transitionConfigurer.and().withExternal().source(transition.target).target(failureState).event((E) transition.getFailureEvent());
+                transitionConfigurer.and().withExternal().source(transition.target).target(failureState).event(transition.getFailureEvent());
                 if (!failHandled.contains(failureState)) {
                     failHandled.add(failureState);
                     transitionConfigurer.and().withExternal().source(failureState).target(flowEdgeConfig.finalState).event(flowEdgeConfig.failureHandled);
@@ -115,35 +117,36 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener, new SyncTaskExecutor());
     }
 
+    @Override
     public Flow createFlow(String flowId) {
-        return new FlowAdapter<S, E>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
+        return new FlowAdapter<>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
                 new EventConverterAdapter<>(eventType));
     }
 
-    protected Action<S, E> getAction(FlowState state) {
+    private AbstractAction getAction(FlowState state) {
         return state.action() == null ? getAction(state.name()) : getAction(state.action());
     }
 
-    private Action<S, E> getAction(Class<? extends Action> clazz) {
+    private AbstractAction getAction(Class<? extends AbstractAction> clazz) {
         return applicationContext.getBean(clazz.getSimpleName(), clazz);
     }
 
-    private Action<S, E> getAction(String name) {
-        return applicationContext.getBean(name, Action.class);
+    private AbstractAction getAction(String name) {
+        return applicationContext.getBean(name, AbstractAction.class);
     }
 
     protected abstract List<Transition<S, E>> getTransitions();
 
     protected abstract FlowEdgeConfig<S, E> getEdgeConfig();
 
-    protected static class MachineConfiguration<S, E> {
+    static class MachineConfiguration<S, E> {
         private final StateMachineConfigurationBuilder<S, E> configurationBuilder;
         private final StateMachineStateBuilder<S, E> stateBuilder;
         private final StateMachineTransitionBuilder<S, E> transitionBuilder;
         private final StateMachineListener<S, E> listener;
         private final TaskExecutor executor;
 
-        public MachineConfiguration(StateMachineConfigurationBuilder<S, E> configurationBuilder, StateMachineStateBuilder<S, E> stateBuilder,
+        MachineConfiguration(StateMachineConfigurationBuilder<S, E> configurationBuilder, StateMachineStateBuilder<S, E> stateBuilder,
                 StateMachineTransitionBuilder<S, E> transitionBuilder, StateMachineListener<S, E> listener, TaskExecutor executor) {
             this.configurationBuilder = configurationBuilder;
             this.stateBuilder = stateBuilder;
@@ -157,24 +160,17 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         private final S source;
         private final S target;
         private final E event;
-        private final Optional<E> failureEvent;
+        private final E failureEvent;
 
-        public Transition(S source, S target, E event) {
+        private Transition(S source, S target, E event, E failureEvent) {
             this.source = source;
             this.target = target;
             this.event = event;
-            this.failureEvent = Optional.absent();
+            this.failureEvent = failureEvent;
         }
 
-        public Transition(S source, S target, E event, E failureEvent) {
-            this.source = source;
-            this.target = target;
-            this.event = event;
-            this.failureEvent = Optional.of(failureEvent);
-        }
-
-        public E getFailureEvent() {
-            return failureEvent.isPresent() ? failureEvent.get() : (E) target.failureEvent();
+        private E getFailureEvent() {
+            return failureEvent;
         }
 
         public static class Builder<S extends FlowState, E extends FlowEvent> {
@@ -186,14 +182,13 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             }
 
             public void addTransition(S from, S to, E with) {
-                if (defaultFailureEvent.isPresent()) {
-                    addTransition(from, to, with, defaultFailureEvent.get());
+                if (!defaultFailureEvent.isPresent()) {
+                    throw new UnsupportedOperationException("Default failure event must specified!");
                 }
-                transitions.add(new Transition<>(from, to, with));
+                addTransition(from, to, with, defaultFailureEvent.get());
             }
 
             public void addTransition(S from, S to, E with, E withFailure) {
-                to.setFailureEvent(withFailure);
                 transitions.add(new Transition<>(from, to, with, withFailure));
             }
 
@@ -260,7 +255,6 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 return builder;
             }
         }
-
     }
 
     protected static class FlowEdgeConfig<S, E> {

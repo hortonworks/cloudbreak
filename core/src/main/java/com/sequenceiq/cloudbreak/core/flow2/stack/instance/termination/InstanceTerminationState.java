@@ -4,11 +4,11 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
 enum InstanceTerminationState implements FlowState<InstanceTerminationState, InstanceTerminationEvent> {
 
-    INIT_STATE(),
+    INIT_STATE,
     TERMINATION_FAILED_STATE(InstanceTerminationFailureAction.class),
-    TERMINATION_STATE(InstanceTerminationAction.class, InstanceTerminationEvent.TERMINATION_FAILED_EVENT),
-    TERMINATION_FINISHED_STATE(InstanceTerminationFinishedAction.class, InstanceTerminationEvent.TERMINATION_FAILED_EVENT),
-    FINAL_STATE();
+    TERMINATION_STATE(InstanceTerminationAction.class),
+    TERMINATION_FINISHED_STATE(InstanceTerminationFinishedAction.class),
+    FINAL_STATE;
 
     private Class<?> action;
     private InstanceTerminationEvent failureEvent;
@@ -20,10 +20,6 @@ enum InstanceTerminationState implements FlowState<InstanceTerminationState, Ins
         this.action = action;
     }
 
-    InstanceTerminationState(Class<?> action, InstanceTerminationEvent failureEvent) {
-        this.action = action;
-        this.failureEvent = failureEvent;
-    }
 
     @Override
     public Class<?> action() {
@@ -31,17 +27,7 @@ enum InstanceTerminationState implements FlowState<InstanceTerminationState, Ins
     }
 
     @Override
-    public InstanceTerminationEvent failureEvent() {
-        return failureEvent;
-    }
-
-    @Override
     public InstanceTerminationState failureState() {
         return null;
-    }
-
-    @Override
-    public void setFailureEvent(InstanceTerminationEvent failureEvent) {
-        this.failureEvent = failureEvent;
     }
 }
