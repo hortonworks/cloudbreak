@@ -25,7 +25,7 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.ON_HOS
 
 @Component
 public class OnHostOrchestrator extends SimpleHostOrchestrator {
-    public static final String PORT = "7070";
+    public static final String PORT = "443";
     public static final int MAX_NODES = 5000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OnHostOrchestrator.class);
@@ -43,7 +43,7 @@ public class OnHostOrchestrator extends SimpleHostOrchestrator {
         targets.add(gatewayConfig.getPrivateAddress());
 
         try {
-            OnHostClient onHostClient = new OnHostClient(gatewayConfig.getPublicAddress(), gatewayConfig.getPrivateAddress(), targets, port());
+            OnHostClient onHostClient = new OnHostClient(gatewayConfig, targets, port());
             SaltBootstrap saltBootstrap = new SaltBootstrap(onHostClient);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, getExitCriteria(), exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
@@ -85,8 +85,7 @@ public class OnHostOrchestrator extends SimpleHostOrchestrator {
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, Set<Node> targets, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
-        OnHostClient onHostClient = new OnHostClient(gatewayConfig.getPublicAddress(), gatewayConfig.getPrivateAddress(),
-                prepareTargets(gatewayConfig, targets), port());
+        OnHostClient onHostClient = new OnHostClient(gatewayConfig, prepareTargets(gatewayConfig, targets), port());
 
         try {
             ConsulConfigDistributeBootstrap consulConfigDistributeBootstrap = new ConsulConfigDistributeBootstrap(onHostClient, onHostClient.getTargets());
@@ -117,8 +116,7 @@ public class OnHostOrchestrator extends SimpleHostOrchestrator {
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         Set<String> strings = prepareTargets(gatewayConfig, targets);
-        OnHostClient onHostClient = new OnHostClient(gatewayConfig.getPublicAddress(), gatewayConfig.getPrivateAddress(),
-                strings, port());
+        OnHostClient onHostClient = new OnHostClient(gatewayConfig, strings, port());
         try {
             ConsulConfigDistributeBootstrap consulConfigDistributeUpscale = new ConsulConfigDistributeBootstrap(onHostClient, strings);
             Callable<Boolean> consulConfigDistributeUpscaleRunner = runner(consulConfigDistributeUpscale, getExitCriteria(), exitCriteriaModel);
@@ -138,7 +136,7 @@ public class OnHostOrchestrator extends SimpleHostOrchestrator {
 
     @Override
     public boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig) {
-        OnHostClient onHostClient = new OnHostClient(gatewayConfig.getPublicAddress(), gatewayConfig.getPrivateAddress(), port());
+        OnHostClient onHostClient = new OnHostClient(gatewayConfig, port());
         return onHostClient.info();
     }
 
