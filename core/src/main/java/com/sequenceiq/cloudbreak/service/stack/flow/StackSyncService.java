@@ -192,7 +192,7 @@ public class StackSyncService {
     }
 
     private void deleteResourceIfNeeded(Stack stack, InstanceMetaData instance) {
-        Resource resource = resourceRepository.findByStackIdAndNameAndType(stack.getId(), instance.getInstanceId(), null);
+        Resource resource = resourceRepository.findByStackIdAndResourceNameOrReference(stack.getId(), instance.getInstanceId());
         if (resource != null) {
             resourceRepository.delete(resource);
         }

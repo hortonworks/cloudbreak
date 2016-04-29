@@ -20,7 +20,11 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
         @NamedQuery(
                 name = "Resource.findByStackIdAndNameAndType",
                 query = "SELECT r FROM Resource r "
-                        + "WHERE r.stack.id = :stackId AND r.resourceName = :name AND r.resourceType = :type")
+                        + "WHERE r.stack.id = :stackId AND r.resourceName = :name AND r.resourceType = :type"),
+        @NamedQuery(
+                name = "Resource.findByStackIdAndResourceNameOrReference",
+                query = "SELECT r FROM Resource r "
+                        + "WHERE r.stack.id = :stackId AND (r.resourceName = :resource OR r.resourceReference = :resource)")
 })
 public class Resource implements ProvisionEntity {
 
