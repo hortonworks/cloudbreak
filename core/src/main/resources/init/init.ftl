@@ -4,6 +4,7 @@ set -x
 export CLOUD_PLATFORM="${cloudPlatform}"
 export START_LABEL=${platformDiskStartLabel}
 export PLATFORM_DISK_PREFIX=${platformDiskPrefix}
+export LAZY_FORMAT_DISK_LIMIT=12
 export IS_GATEWAY=${gateway?c}
 export TMP_SSH_KEY="${tmpSshKey}"
 export PUBLIC_SSH_KEY="${publicSshKey}"
