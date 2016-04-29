@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyVararg;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,8 +63,8 @@ public class InstanceGroupCommandsTest {
         given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
         given(cloudbreakClient.templateEndpoint()).willReturn(mockClient);
         given(mockContext.outputTransformer()).willReturn(outputTransformer);
-        given(outputTransformer.render(any(OutPutType.class), anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
-        given(outputTransformer.render(anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
     }
 
     @Test

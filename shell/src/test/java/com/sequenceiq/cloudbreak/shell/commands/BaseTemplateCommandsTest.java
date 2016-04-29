@@ -9,6 +9,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyVararg;
 
 import javax.ws.rs.NotFoundException;
 
@@ -56,8 +57,8 @@ public class BaseTemplateCommandsTest {
         given(cloudbreakClient.templateEndpoint()).willReturn(templateEndpoint);
         given(shellContext.responseTransformer()).willReturn(responseTransformer);
         given(shellContext.outputTransformer()).willReturn(outputTransformer);
-        given(outputTransformer.render(any(OutPutType.class), anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
-        given(outputTransformer.render(anyObject(), Matchers.<String>anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
     }
 
     @Test(expected = MethodNotSupportedException.class)

@@ -1,18 +1,42 @@
 package com.sequenceiq.cloudbreak.orchestrator.onhost.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponse;
-import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponses;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import static java.util.Collections.EMPTY_SET;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.net.ssl.SSLContext;
+
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponse;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponses;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.util.KeyStoreUtil;
+
 
 public class OnHostClient {
 
@@ -36,24 +60,40 @@ public class OnHostClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OnHostClient.class);
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private RestTemplate restTemplate;
 
-    private String gatewayPublicIp;
-    private String gatewayPrivateIp;
+    private GatewayConfig gatewayConfig;
     private Set<String> targets = new HashSet<>();
     private String port;
 
-    public OnHostClient(String gatewayPublicIp, String gatewayPrivateIp, Set<String> targets, String port) {
-        this.gatewayPrivateIp = gatewayPrivateIp;
-        this.gatewayPublicIp = gatewayPublicIp;
-        this.targets = targets;
-        this.port = port;
+    public OnHostClient(GatewayConfig gatewayConfig, String port) {
+        this(gatewayConfig, EMPTY_SET, port);
     }
 
-    public OnHostClient(String gatewayPublicIp, String gatewayPrivateIp, String port) {
-        this.gatewayPrivateIp = gatewayPrivateIp;
-        this.gatewayPublicIp = gatewayPublicIp;
+    public OnHostClient(GatewayConfig gatewayConfig, Set<String> targets, String port) {
+        this.gatewayConfig = gatewayConfig;
+        this.targets = targets;
         this.port = port;
+        try {
+            SSLContext sslContext = SSLContexts.custom()
+                    .loadTrustMaterial(KeyStoreUtil.createTrustStore(gatewayConfig.getServerCert()), null)
+                    .loadKeyMaterial(KeyStoreUtil.createKeyStore(gatewayConfig.getClientCert(), gatewayConfig.getClientKey()), "consul".toCharArray())
+                    .build();
+
+            RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
+            registryBuilder.register("http", PlainConnectionSocketFactory.getSocketFactory());
+            if (sslContext != null) {
+                registryBuilder.register("https", new SSLConnectionSocketFactory(sslContext));
+            }
+            PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(registryBuilder.build());
+            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).setConnectionManager(connectionManager).build();
+            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+            requestFactory.setHttpClient(httpClient);
+            this.restTemplate = new RestTemplate(requestFactory);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
+        }
     }
 
     public Set<String> getTargets() {
@@ -61,11 +101,11 @@ public class OnHostClient {
     }
 
     public String getGatewayPrivateIp() {
-        return gatewayPrivateIp;
+        return gatewayConfig.getPrivateAddress();
     }
 
     public String getGatewayPublicIp() {
-        return gatewayPublicIp;
+        return gatewayConfig.getPublicAddress();
     }
 
     private HttpHeaders httpHeaders() {
@@ -84,12 +124,12 @@ public class OnHostClient {
 
     private <T extends Class> ResponseEntity exchange(Map<String, Object> entity, HttpMethod method, String port,
             OnHostClientEndpoint onHostClientEndpoint, T clazz) throws Exception {
-        String endpoint = String.format("http://%s:%s/cbboot/%s", gatewayPublicIp, port, onHostClientEndpoint.url());
+        String endpoint = String.format("https://%s:%s/cbboot/%s", gatewayConfig.getPublicAddress(), port, onHostClientEndpoint.url());
         return restTemplate.exchange(endpoint, method, httpEntity(entity), clazz);
     }
 
     private <T extends Class> ResponseEntity exchange(HttpMethod method, String port, OnHostClientEndpoint onHostClientEndpoint, T clazz) throws Exception {
-        return exchange(new HashMap<String, Object>(), method, port, onHostClientEndpoint, clazz);
+        return exchange(new HashMap<>(), method, port, onHostClientEndpoint, clazz);
     }
 
 
@@ -107,7 +147,7 @@ public class OnHostClient {
 
     public Set<String> distributeConsulConfig(Set<String> targetIps) throws CloudbreakOrchestratorException {
         Set<String> servers = new HashSet<>();
-        servers.add(gatewayPrivateIp);
+        servers.add(getGatewayPrivateIp());
         return distributeConsulConfig(servers, targetIps);
     }
 
@@ -145,8 +185,8 @@ public class OnHostClient {
         Set<String> missingTargets = new HashSet<>();
         Map<String, Object> map = new HashMap<>();
         Set<String> minions = new HashSet<>(targetIps);
-        if (minions.contains(gatewayPrivateIp)) {
-            map.put("server", gatewayPrivateIp);
+        if (minions.contains(getGatewayPrivateIp())) {
+            map.put("server", getGatewayPrivateIp());
         }
         map.put("minions", minions);
         try {

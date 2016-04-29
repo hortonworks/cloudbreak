@@ -62,7 +62,7 @@ public class ReactorFlowManagerTest {
     public void setUp() throws Exception {
         reset(reactor);
         reset(eventFactory);
-        when(reactor.notify(anyObject(), any(Event.class))).thenReturn(new EventBus(new ThreadPoolExecutorDispatcher(1, 1)));
+        when(reactor.notify((Object) anyObject(), any(Event.class))).thenReturn(new EventBus(new ThreadPoolExecutorDispatcher(1, 1)));
         when(eventFactory.createEvent(anyObject(), anyString())).thenReturn(new Event<Object>(String.class));
     }
 
@@ -128,7 +128,7 @@ public class ReactorFlowManagerTest {
         }
         // Termination triggers flow cancellation
         count += 2;
-        verify(reactor, times(count)).notify(anyObject(), any(Event.class));
+        verify(reactor, times(count)).notify((Object) anyObject(), any(Event.class));
     }
 
 }
