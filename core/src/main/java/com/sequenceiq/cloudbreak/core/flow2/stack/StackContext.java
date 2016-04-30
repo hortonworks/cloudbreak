@@ -35,4 +35,5 @@ public class StackContext extends CommonContext {
     public CloudStack getCloudStack() {
         return cloudStack;
     }
+
 }

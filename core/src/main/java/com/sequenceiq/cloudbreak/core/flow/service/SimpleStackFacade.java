@@ -202,32 +202,6 @@ public class SimpleStackFacade implements StackFacade {
     }
 
     @Override
-    public FlowContext downscaleStack(FlowContext context) throws CloudbreakException {
-        StackScalingContext actualContext = (StackScalingContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(),
-                    Math.abs(actualContext.getScalingAdjustment()));
-
-            stackScalingService.downscaleStack(stack.getId(), actualContext.getInstanceGroup(), actualContext.getScalingAdjustment());
-
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Downscale of the cluster infrastructure finished successfully.");
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name());
-
-            if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-                emailSenderService.sendDownScaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
-                fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_NOTIFICATION_EMAIL, AVAILABLE.name());
-            }
-        } catch (Exception e) {
-            LOGGER.error("Exception during the downscaling of stack: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
     public FlowContext stopRequested(FlowContext context) throws CloudbreakException {
         StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
         try {

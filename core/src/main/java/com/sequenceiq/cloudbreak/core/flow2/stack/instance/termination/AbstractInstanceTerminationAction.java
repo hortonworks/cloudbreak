@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -67,7 +66,7 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         String instanceId = payload.getInstanceId();
-        CloudStack cloudStack = cloudStackConverter.convert(stack, Collections.singleton(instanceId));
+        CloudStack cloudStack = cloudStackConverter.convertForTermination(stack, instanceId);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
         InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
         CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData);

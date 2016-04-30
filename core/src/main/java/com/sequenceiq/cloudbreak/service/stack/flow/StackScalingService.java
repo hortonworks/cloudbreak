@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -118,14 +117,6 @@ public class StackScalingService {
         }
     }
 
-    public void downscaleStack(Long stackId, String instanceGroupName, Integer scalingAdjustment) throws Exception {
-        Stack stack = stackService.getById(stackId);
-        Map<String, String> unusedInstanceIds = getUnusedInstanceIds(instanceGroupName, scalingAdjustment, stack);
-        Set<String> instanceIds = new HashSet<>(unusedInstanceIds.keySet());
-        instanceIds = connector.removeInstances(stack, instanceIds, instanceGroupName);
-        updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
-    }
-
     public void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) throws CloudbreakSecuritySetupException {
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
         instanceGroup.setNodeCount(nodeCount);
@@ -150,7 +141,7 @@ public class StackScalingService {
                 cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
     }
 
-    private Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
+    public Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
         Map<String, String> instanceIds = new HashMap<>();
 
         int i = 0;
