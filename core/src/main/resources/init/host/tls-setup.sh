@@ -21,10 +21,17 @@ start_nginx() {
   ${sudopre} sudo ${sudocheck} systemctl enable nginx
 }
 
+untar_salt() {
+  ${sudopre} sudo ${sudocheck} tar -zxvf /tmp/salt.tar.gz -C /tmp
+  ${sudopre} sudo ${sudocheck} cp -r /tmp/salt/salt/ /srv
+  ${sudopre} sudo ${sudocheck} cp -r /tmp/salt/pillar/ /srv
+}
+
 setup_tls() {
   setup_cbclient_cert
   create_certificates
   start_nginx
+  untar_salt
 }
 
 main() {

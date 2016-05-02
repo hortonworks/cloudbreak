@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.orchestrator.onhost.poller;
 
+import java.util.Map;
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.client.OnHostClient;
@@ -7,25 +10,22 @@ import com.sequenceiq.cloudbreak.orchestrator.onhost.salt.SaltConnection;
 import com.suse.salt.netapi.calls.modules.Test;
 import com.suse.salt.netapi.client.SaltClient;
 import com.suse.salt.netapi.datatypes.target.Glob;
-import com.suse.salt.netapi.exception.SaltException;
-
-import java.util.Map;
-import java.util.Set;
 
 public class SaltBootstrap implements OrchestratorBootstrap {
 
     private final OnHostClient client;
     private Set<String> missingTargets;
+    private final Set<String> consulServers;
 
-    public SaltBootstrap(OnHostClient client) throws SaltException {
+    public SaltBootstrap(OnHostClient client, Set<String> consulServers) {
         this.client = client;
         this.missingTargets = client.getTargets();
-
+        this.consulServers = consulServers;
     }
 
     @Override
     public Boolean call() throws Exception {
-        missingTargets = client.startSaltServiceOnTargetMachines(missingTargets);
+        missingTargets = client.startSaltServiceOnTargetMachines(missingTargets, consulServers);
         if (!missingTargets.isEmpty()) {
             throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt: " + missingTargets);
         }
