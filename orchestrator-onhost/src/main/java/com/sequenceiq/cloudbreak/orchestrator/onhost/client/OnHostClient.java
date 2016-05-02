@@ -124,7 +124,7 @@ public class OnHostClient {
 
     private <T extends Class> ResponseEntity exchange(Map<String, Object> entity, HttpMethod method, String port,
             OnHostClientEndpoint onHostClientEndpoint, T clazz) throws Exception {
-        String endpoint = String.format("http://%s:%s/cbboot/%s", gatewayConfig.getPublicAddress(), port, onHostClientEndpoint.url());
+        String endpoint = String.format("https://%s:%s/cbboot/%s", gatewayConfig.getPublicAddress(), port, onHostClientEndpoint.url());
         return restTemplate.exchange(endpoint, method, httpEntity(entity), clazz);
     }
 
