@@ -56,6 +56,6 @@ public class StackDownscaleService {
     }
 
     public void handleStackDownscaleError(Exception errorDetails) {
-        LOGGER.error("Exception during the downscaling of stack: {}", errorDetails);
+        LOGGER.error("Exception during the downscaling of stack", errorDetails);
     }
 }

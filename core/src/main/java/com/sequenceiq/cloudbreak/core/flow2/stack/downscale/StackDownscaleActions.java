@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
@@ -41,8 +42,14 @@ public class StackDownscaleActions {
         return new AbstractStackDownscaleAction<StackScalingContext>(StackScalingContext.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, StackScalingContext payload, Map<Object, Object> variables) throws Exception {
-                stackDownscaleService.startStackDownscale(context, payload);
-                sendEvent(context);
+                if (ScalingType.isStackDownScale(payload.getScalingType())) {
+                    stackDownscaleService.startStackDownscale(context, payload);
+                    sendEvent(context);
+                } else {
+                    sendEvent(context.getFlowId(),
+                            StackDownscaleEvent.DOWNSCALE_FAILURE_EVENT.stringRepresentation(),
+                            getFailurePayload(context, new Exception("Stack downscale wasn't requested.")));
+                }
             }
 
             @Override
