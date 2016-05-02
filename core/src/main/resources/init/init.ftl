@@ -17,27 +17,35 @@ ${customUserData}
 
 yum install -y epel-release
 
+adduser saltuser && usermod -G wheel saltuser && echo "saltuser:saltpass"| chpasswd
+
 if $IS_GATEWAY; then
   yum install -y salt-master salt-api
-  cd /etc/salt/ && curl -O https://raw.githubusercontent.com/akanto/salt-demo/master/salt-master/config/master
+  mkdir -p /etc/salt/master.d/
+  cd /etc/salt/master.d/ && curl -O https://raw.githubusercontent.com/akanto/salt-demo/master/salt-master/config/custom.conf
 fi
 
 yum install -y salt-minion
+
+git clone https://github.com/akanto/salt-demo.git /root/salt-demo
+cd /root/salt-demo && git checkout properconf
+cp -r /root/salt-demo/salt-master/pillar /srv/
+cp -r /root/salt-demo/salt-master/salt /srv/
 
 
 #curl -Lo /etc/yum.repos.d/ambari.repo https://raw.githubusercontent.com/sequenceiq/docker-ambari/master/ambari-agent/ambari.repo
 #curl -Lo /etc/systemd/system/ambari-server.service https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/ambari-server.service
 #mkdir /opt/ambari-server && curl -Lo /opt/ambari-server/init-server.sh https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/ambari-server-init.sh && chmod +x /opt/ambari-server/init-server.sh
 
-curl -Lo /etc/systemd/system/salt-master.service https://dl.dropboxusercontent.com/u/16444381/salt-master.service
-mkdir /opt/salt-master && curl -Lo /opt/salt-master/init-server.sh https://dl.dropboxusercontent.com/u/16444381/init-server.sh && chmod +x /opt/salt-master/init-server.sh
+#curl -Lo /etc/systemd/system/salt-master.service https://dl.dropboxusercontent.com/u/16444381/salt-master.service
+#mkdir /opt/salt-master && curl -Lo /opt/salt-master/init-server.sh https://dl.dropboxusercontent.com/u/16444381/init-server.sh && chmod +x /opt/salt-master/init-server.sh
 
 #curl -Lo /etc/systemd/system/ambari-agent.service https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/ambari-agent.service
 #mkdir /opt/ambari-agent && curl -Lo /opt/ambari-agent/init-agent.sh https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/ambari-agent-init.sh && chmod +x /opt/ambari-agent/init-agent.sh
 usermod -a -G root centos || :
 chmod 555 /
 
-curl -Lo /usr/sbin/cloudbreak-bootstrap https://dl.dropboxusercontent.com/u/13919958/cloudbreak-bootstrap && chmod +x /usr/sbin/cloudbreak-bootstrap
+curl -Lo /usr/sbin/cloudbreak-bootstrap https://dl.dropboxusercontent.com/u/16444381/cloudbreak-bootstrap && chmod +x /usr/sbin/cloudbreak-bootstrap
 curl -Lo /usr/sbin/consul https://dl.dropboxusercontent.com/u/13919958/consul && chmod +x /usr/sbin/consul
 
 curl -Lo /etc/systemd/system/cloudbreak-bootstrap.service https://gist.githubusercontent.com/keyki/1760f6c9b4e00829a18c7876fe4b2fc5/raw/cloudbreak-bootstrap.service
@@ -83,8 +91,4 @@ else
 fi
 
 
-git clone https://github.com/akanto/salt-demo.git /root/salt-demo
-cp -r /root/salt-demo/salt-master/pillar /srv/
-cp -r /root/salt-demo/salt-master/salt /srv/
 
-adduser saltuser && usermod -G wheel saltuser && echo "saltuser:saltpass"| chpasswd

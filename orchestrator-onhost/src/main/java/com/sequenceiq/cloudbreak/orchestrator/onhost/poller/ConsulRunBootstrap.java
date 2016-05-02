@@ -1,27 +1,24 @@
 package com.sequenceiq.cloudbreak.orchestrator.onhost.poller;
 
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.client.OnHostClient;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.salt.SaltConnection;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.salt.SaltStates;
+import com.suse.salt.netapi.client.SaltClient;
+import com.suse.salt.netapi.datatypes.target.Glob;
+import com.suse.salt.netapi.exception.SaltException;
 
 public class ConsulRunBootstrap implements OrchestratorBootstrap {
 
-    private final OnHostClient client;
-    private Set<String> missingTargets;
+    private final SaltClient saltClient;
 
-    public ConsulRunBootstrap(OnHostClient client) {
-        this.client = client;
-        this.missingTargets = client.getTargets();
+    public ConsulRunBootstrap(OnHostClient client) throws SaltException {
+        this.saltClient = new SaltConnection().get(client.getGatewayPublicIp());
     }
 
     @Override
     public Boolean call() throws Exception {
-        missingTargets = client.startConsulServiceOnTargetMachines(missingTargets);
-        if (!missingTargets.isEmpty()) {
-            throw new CloudbreakOrchestratorFailedException("There are missing nodes to start the consul: " + missingTargets);
-        }
+        SaltStates.consul().callAsync(saltClient, Glob.ALL);
         return true;
     }
 }

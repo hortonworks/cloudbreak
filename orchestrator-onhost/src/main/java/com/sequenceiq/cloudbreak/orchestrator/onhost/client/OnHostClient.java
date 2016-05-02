@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.orchestrator.onhost.client;
 
-import static java.util.Collections.EMPTY_SET;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.net.ssl.SSLContext;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponse;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponses;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.util.KeyStoreUtil;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -20,32 +19,21 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponse;
-import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponses;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
-import com.sequenceiq.cloudbreak.util.KeyStoreUtil;
+import javax.net.ssl.SSLContext;
+import java.util.*;
+
+import static java.util.Collections.EMPTY_SET;
 
 
 public class OnHostClient {
 
     private enum OnHostClientEndpoint {
         INFO("health"),
-        AMBARI_RUN_DISTRIBUTE("ambari/run/distribute"),
-        SALT_RUN_DISTRIBUTE("salt/run/distribute"),
-        CONSUL_RUN_DISTRIBUTE("consul/run/distribute"),
-        CONSUL_CONFIG_DISTRIBUTE("consul/config/distribute");
+        SALT_RUN_DISTRIBUTE("salt/run/distribute");
 
         private String url;
 
@@ -145,50 +133,26 @@ public class OnHostClient {
         return false;
     }
 
-    public Set<String> distributeConsulConfig(Set<String> targetIps) throws CloudbreakOrchestratorException {
-        Set<String> servers = new HashSet<>();
-        servers.add(getGatewayPrivateIp());
-        return distributeConsulConfig(servers, targetIps);
-    }
-
-    public Set<String> distributeConsulConfig(Set<String> servers, Set<String> targetIps) throws CloudbreakOrchestratorException {
-        Set<String> missingTargets = new HashSet<>();
-        // TODO replace it with object
-        Map<String, Object> configMap = new HashMap<>();
-        configMap.put("data_dir", "/etc/cloudbreak/consul");
-        // TODO multiple servers
-        if (!servers.isEmpty()) {
-            configMap.put("servers", servers);
-        }
-        configMap.put("targets", targetIps);
-        try {
-            LOGGER.info("Sending consul config save request to {}", targetIps);
-            ResponseEntity<CbBootResponses> response = exchange(configMap, HttpMethod.POST, port, OnHostClientEndpoint.CONSUL_CONFIG_DISTRIBUTE,
-                    CbBootResponses.class);
-            CbBootResponses responseBody = response.getBody();
-            for (CbBootResponse cbBootResponse : responseBody.getResponses()) {
-                if (cbBootResponse.getStatusCode() != HttpStatus.OK.value()) {
-                    LOGGER.info("Failed to distributed consul config to: " + cbBootResponse.getAddress());
-                    missingTargets.add(cbBootResponse.getAddress().split(":")[0]);
-                }
-            }
-            if (!missingTargets.isEmpty()) {
-                LOGGER.info("Missing nodes to save consul config: {}", missingTargets);
-            }
-        } catch (Exception e) {
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
-        return missingTargets;
-    }
 
     public Set<String> startSaltServiceOnTargetMachines(Set<String> targetIps) throws CloudbreakOrchestratorException {
         Set<String> missingTargets = new HashSet<>();
         Map<String, Object> map = new HashMap<>();
-        Set<String> minions = new HashSet<>(targetIps);
-        if (minions.contains(getGatewayPrivateIp())) {
+        Set<String> minionsTargets = new HashSet<>(targetIps);
+        ArrayList<Map<String, Object>> minions = new ArrayList<>();
+        if (minionsTargets.contains(getGatewayPrivateIp())) {
             map.put("server", getGatewayPrivateIp());
+            String[] roles = {"consul_server", "ambari_server", "ambari_agent"};
+            minions.add(minionConfig(getGatewayPrivateIp(), roles));
         }
+        for (String minionIp : targetIps) {
+            if(!minionIp.equals(getGatewayPrivateIp())) {
+                String[] roles = {"consul_agent", "ambari_agent"};
+                minions.add(minionConfig(minionIp, roles));
+            }
+        }
+
         map.put("minions", minions);
+
         try {
             ResponseEntity<CbBootResponses> response = exchange(map, HttpMethod.POST, port, OnHostClientEndpoint.SALT_RUN_DISTRIBUTE, CbBootResponses.class);
             CbBootResponses responseBody = response.getBody();
@@ -209,30 +173,12 @@ public class OnHostClient {
         return missingTargets;
     }
 
-
-    public Set<String> startConsulServiceOnTargetMachines(Set<String> targetIps) throws CloudbreakOrchestratorException {
-        Set<String> missingTargets = new HashSet<>();
-        try {
-            Map<String, Object> consulRunMap = new HashMap<>();
-            consulRunMap.put("targets", targetIps);
-            ResponseEntity<CbBootResponses> response =
-                    exchange(consulRunMap, HttpMethod.POST, port, OnHostClientEndpoint.CONSUL_RUN_DISTRIBUTE, CbBootResponses.class);
-            CbBootResponses responseBody = response.getBody();
-            LOGGER.info("Consul run response: {}", responseBody);
-            for (CbBootResponse cbBootResponse : responseBody.getResponses()) {
-                if (cbBootResponse.getStatusCode() != HttpStatus.OK.value()) {
-                    LOGGER.info("Successfully distributed consul run to: " + cbBootResponse.getAddress());
-                    missingTargets.add(cbBootResponse.getAddress().split(":")[0]);
-                }
-            }
-            if (!missingTargets.isEmpty()) {
-                LOGGER.info("Missing nodes to run consul: {}", missingTargets);
-            }
-        } catch (Exception e) {
-            LOGGER.info("Error occured when ran consul on hosts: ", e);
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
-        return missingTargets;
+    private Map<String, Object> minionConfig(String address, String[] roles) {
+        Map<String, Object> minion = new HashMap<>();
+        minion.put("address", address);
+        minion.put("roles", roles);
+        return minion;
     }
+
 
 }

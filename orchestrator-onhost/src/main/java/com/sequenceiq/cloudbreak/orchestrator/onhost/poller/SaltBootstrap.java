@@ -27,14 +27,14 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     public Boolean call() throws Exception {
         missingTargets = client.startSaltServiceOnTargetMachines(missingTargets);
         if (!missingTargets.isEmpty()) {
-            throw new CloudbreakOrchestratorFailedException("There are missing nodes to start the ambari: " + missingTargets);
+            throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt: " + missingTargets);
         }
 
         SaltClient saltClient = new SaltConnection().get(client.getGatewayPublicIp());
         Map<String, Boolean> results = Test.ping().callSync(saltClient, Glob.ALL);
-        if (client.getTargets().size() <= results.size()) {
-            return true;
+        if (client.getTargets().size() > results.size()) {
+            throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt: " + missingTargets);
         }
-        return false;
+        return true;
     }
 }
