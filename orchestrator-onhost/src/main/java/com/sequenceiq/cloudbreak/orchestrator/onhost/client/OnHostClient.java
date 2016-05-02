@@ -7,6 +7,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.net.ssl.SSLContext;
+
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,6 +35,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponse;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponses;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.util.KeyStoreUtil;
+
 
 public class OnHostClient {
 
@@ -61,8 +74,26 @@ public class OnHostClient {
         this.gatewayConfig = gatewayConfig;
         this.targets = targets;
         this.port = port;
+        try {
+            SSLContext sslContext = SSLContexts.custom()
+                    .loadTrustMaterial(KeyStoreUtil.createTrustStore(gatewayConfig.getServerCert()), null)
+                    .loadKeyMaterial(KeyStoreUtil.createKeyStore(gatewayConfig.getClientCert(), gatewayConfig.getClientKey()), "consul".toCharArray())
+                    .build();
 
-        this.restTemplate = new RestTemplate();
+            RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
+            registryBuilder.register("http", PlainConnectionSocketFactory.getSocketFactory());
+            if (sslContext != null) {
+                registryBuilder.register("https", new SSLConnectionSocketFactory(sslContext));
+            }
+            PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(registryBuilder.build());
+            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).setConnectionManager(connectionManager).build();
+            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+            requestFactory.setHttpClient(httpClient);
+            this.restTemplate = new RestTemplate(requestFactory);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
+        }
     }
 
     public Set<String> getTargets() {
@@ -98,7 +129,7 @@ public class OnHostClient {
     }
 
     private <T extends Class> ResponseEntity exchange(HttpMethod method, String port, OnHostClientEndpoint onHostClientEndpoint, T clazz) throws Exception {
-        return exchange(new HashMap<String, Object>(), method, port, onHostClientEndpoint, clazz);
+        return exchange(new HashMap<>(), method, port, onHostClientEndpoint, clazz);
     }
 
 
