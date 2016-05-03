@@ -1,5 +1,16 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -7,15 +18,6 @@ import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Map;
-import java.util.Map.Entry;
 
 @Component
 public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariOperations> {
@@ -65,7 +67,7 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
         notification.setEventMessage(String.valueOf(progressValue));
         notification.setOwner(stack.getOwner());
         notification.setAccount(stack.getAccount());
-        notification.setCloud(stack.cloudPlatform().toString());
+        notification.setCloud(stack.cloudPlatform());
         notification.setRegion(stack.getRegion());
         notification.setStackId(stack.getId());
         notification.setStackName(stack.getName());
@@ -79,7 +81,12 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
 
     @Override
     public void handleTimeout(AmbariOperations t) {
-        throw new IllegalStateException(String.format("Ambari operations timed out: %s", t.getRequests()));
+        String errorMessage = String.format("Ambari operations timed out: %s", t.getRequests());
+        if (t.isAsync()) {
+            LOGGER.error(errorMessage);
+        } else {
+            throw new IllegalStateException(errorMessage);
+        }
     }
 
     @Override

@@ -48,11 +48,7 @@ public interface FlowFacade {
 
     FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException;
 
-    FlowContext addClusterContainers(FlowContext context) throws CloudbreakException;
-
     FlowContext handleStackScalingFailure(FlowContext context) throws CloudbreakException;
-
-    FlowContext upscaleCluster(FlowContext context) throws CloudbreakException;
 
     FlowContext downscaleCluster(FlowContext context) throws CloudbreakException;
 
