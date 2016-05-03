@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.ON_HOS
 import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,6 @@ import com.sequenceiq.cloudbreak.orchestrator.onhost.client.OnHostClient;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.AmbariRunBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.ConsulPillarBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.ConsulRunBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.ConsulRunUpscale;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -37,11 +37,10 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 @Component
 public class OnHostOrchestrator implements HostOrchestrator {
 
-    public static final String PORT = "443";
-    public static final int MAX_NODES = 5000;
+    private static final String PORT = "443";
+    private static final int MAX_NODES = 5000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OnHostOrchestrator.class);
-
 
     private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
     private ExitCriteria exitCriteria;
@@ -52,28 +51,24 @@ public class OnHostOrchestrator implements HostOrchestrator {
         this.exitCriteria = exitCriteria;
     }
 
-    public ParallelOrchestratorComponentRunner getParallelOrchestratorComponentRunner() {
+    private ParallelOrchestratorComponentRunner getParallelOrchestratorComponentRunner() {
         return parallelOrchestratorComponentRunner;
     }
 
-    protected ExitCriteria getExitCriteria() {
+    private ExitCriteria getExitCriteria() {
         return exitCriteria;
     }
-
 
     @Override
     public void runService(GatewayConfig gatewayConfig, Set<String> agents,
             OrchestrationCredential cred, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-
         try {
             AmbariRunBootstrap ambariRunBootstrap = new AmbariRunBootstrap(gatewayConfig.getPublicAddress());
-
             Callable<Boolean> ambariRunBootstrapRunner = runner(ambariRunBootstrap, getExitCriteria(), exitCriteriaModel);
             Future<Boolean> ambariRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(ambariRunBootstrapRunner);
             ambariRunBootstrapFuture.get();
-
         } catch (Exception e) {
-            LOGGER.error("Error occured under the ambari bootstrap", e);
+            LOGGER.error("Error occurred during ambari bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -145,12 +140,17 @@ public class OnHostOrchestrator implements HostOrchestrator {
         Set<String> strings = prepareTargets(gatewayConfig, targets);
         OnHostClient onHostClient = new OnHostClient(gatewayConfig, strings, port());
         try {
-            ConsulRunUpscale consulRunUpscale = new ConsulRunUpscale(onHostClient, strings);
-            Callable<Boolean> consulRunUpscaleRunner = runner(consulRunUpscale, getExitCriteria(), exitCriteriaModel);
-            Future<Boolean> consulRunUpscaleRunnerAppFuture = getParallelOrchestratorComponentRunner().submit(consulRunUpscaleRunner);
-            consulRunUpscaleRunnerAppFuture.get();
+            SaltBootstrap saltBootstrap = new SaltBootstrap(onHostClient, Collections.EMPTY_SET);
+            Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, getExitCriteria(), exitCriteriaModel);
+            Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
+            saltBootstrapRunnerFuture.get();
+
+            ConsulRunBootstrap consulRunBootstrap = new ConsulRunBootstrap(onHostClient);
+            Callable<Boolean> consulRunBootstrapRunner = runner(consulRunBootstrap, getExitCriteria(), exitCriteriaModel);
+            Future<Boolean> consulRunBootstrapRunnerAppFuture = getParallelOrchestratorComponentRunner().submit(consulRunBootstrapRunner);
+            consulRunBootstrapRunnerAppFuture.get();
         } catch (Exception e) {
-            LOGGER.error("Error occurred under the consul bootstrap", e);
+            LOGGER.error("Error occurred during salt upscale", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }

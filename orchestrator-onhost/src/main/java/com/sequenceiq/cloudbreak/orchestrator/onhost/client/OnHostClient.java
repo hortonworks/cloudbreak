@@ -159,9 +159,9 @@ public class OnHostClient {
         Map<String, Object> map = new HashMap<>();
         Set<String> minionsTargets = new HashSet<>(targetIps);
         ArrayList<Map<String, Object>> minions = new ArrayList<>();
-        if (minionsTargets.contains(getGatewayPrivateIp())) {
+        if (minionsTargets.contains(getGatewayPrivateIp()) && !consulServers.isEmpty()) {
             map.put("server", getGatewayPrivateIp());
-            String[] roles = {"consul_server", "ambari_server", "ambari_agent"};
+            String[] roles = {"consul_server", "ambari_server"};
             minions.add(minionConfig(getGatewayPrivateIp(), roles));
         }
         for (String minionIp : targetIps) {
@@ -202,6 +202,7 @@ public class OnHostClient {
         Map<String, Object> minion = new HashMap<>();
         minion.put("address", address);
         minion.put("roles", roles);
+        minion.put("server", getGatewayPrivateIp());
         return minion;
     }
 
