@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
@@ -30,10 +31,11 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage" })
+    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage", "orchestrator" })
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
-            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage) throws Exception {
+            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage,  @Optional("ON_HOST") String orchestrator)
+            throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
@@ -63,6 +65,10 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         stackRequest.setPlatformVariant(variant);
         stackRequest.setAvailabilityZone(availabilityZone);
         stackRequest.setInstanceGroups(igMap);
+
+        OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
+        orchestratorRequest.setType(orchestrator);
+        stackRequest.setOrchestrator(orchestratorRequest);
 
         Map<String, String> map = new HashMap<>();
         if (persistentStorage != null && !persistentStorage.isEmpty()) {
