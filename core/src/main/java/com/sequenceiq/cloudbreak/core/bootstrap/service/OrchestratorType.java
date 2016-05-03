@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-public enum ContainerOrchestratorType {
+public enum OrchestratorType {
     HOST, CONTAINER;
 
     public boolean hostOrchestrator() {

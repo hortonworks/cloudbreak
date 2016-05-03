@@ -4,7 +4,7 @@ set -x
 
 : ${CLOUD_PLATFORM:="none"}
 : ${USE_CONSUL_DNS:="true"}
-: ${AMBARI_SERVER_ADDR:="ambari-8080.service.consul"}
+: ${AMBARI_SERVER_ADDR:="ambari-server.service.consul"}
 
 debug() {
   [[ "DEBUG" ]]  && echo "[DEBUG] $@" 1>&2
@@ -26,17 +26,8 @@ ambari_server_addr() {
   sed -i "s/^hostname=.*/hostname=${AMBARI_SERVER_ADDR}/" /etc/ambari-agent/conf/ambari-agent.ini
 }
 
-wait_for_consul() {
-  echo -n Waiting for consul
-  while [[ -z "$(hostname -f | grep node.dc1.consul)" ]]; do
-    echo -n .
-    sleep 1
-  done
-}
-
 main() {
   ambari_server_addr
-  wait_for_consul
 }
 
 main "$@"

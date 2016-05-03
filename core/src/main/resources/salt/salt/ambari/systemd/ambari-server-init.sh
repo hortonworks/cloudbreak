@@ -19,19 +19,19 @@ get_nameserver_addr() {
 }
 
 consul-register-service() {
-  while [[ -z "$(curl -s localhost:8500/v1/catalog/services | grep ambari-8080)" ]]; do
-    echo Trying to register ambari-8080 service
+  while [[ -z "$(curl -s localhost:8500/v1/catalog/services | grep $1)" ]]; do
+    echo Trying to register $1 service
     curl -X PUT -d "{
       \"Node\": \"$1\",
       \"Address\": \"$2\",
       \"Service\": {
       \"Service\": \"$1\"
       }
-    }" http://localhost:8500/v1/catalog/register 
+    }" http://localhost:8500/v1/catalog/register
     sleep 1
   done
-  echo Registered ambari-8080 service to $2
- }
+  echo Registered $1 service to $2
+}
 
 wait_for_db() {
   while : ; do
@@ -71,7 +71,7 @@ silent_security_setup() {
 }
 
 main() {
-  consul-register-service ambari-8080 $(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+  consul-register-service ambari-server $(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
   if [ ! -f "/var/ambari-init-executed" ]; then
     config_remote_jdbc
     silent_security_setup

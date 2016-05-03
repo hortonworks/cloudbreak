@@ -13,9 +13,9 @@ import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 
 @Component
-public class ContainerOrchestratorTypeResolver {
+public class OrchestratorTypeResolver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContainerOrchestratorTypeResolver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrchestratorTypeResolver.class);
 
     @Resource
     private Map<String, HostOrchestrator> hostOrchestrators;
@@ -23,11 +23,11 @@ public class ContainerOrchestratorTypeResolver {
     @Resource
     private Map<String, ContainerOrchestrator> containerOrchestrators;
 
-    public ContainerOrchestratorType resolveType(String name) throws CloudbreakException {
+    public OrchestratorType resolveType(String name) throws CloudbreakException {
         if (hostOrchestrators.keySet().contains(name)) {
-            return ContainerOrchestratorType.HOST;
+            return OrchestratorType.HOST;
         } else if (containerOrchestrators.keySet().contains(name)) {
-            return ContainerOrchestratorType.CONTAINER;
+            return OrchestratorType.CONTAINER;
         } else {
             LOGGER.error("Orchestrator not found: {}", name);
             throw new CloudbreakException("Orchestrator not found: " + name);

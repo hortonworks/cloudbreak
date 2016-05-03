@@ -106,15 +106,15 @@ public class ClusterBootstrapper {
     private HostServiceConfigService hostServiceConfigService;
 
     @Inject
-    private ContainerOrchestratorTypeResolver containerOrchestratorTypeResolver;
+    private OrchestratorTypeResolver orchestratorTypeResolver;
 
     public void bootstrapMachines(ProvisioningContext provisioningContext) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
-        ContainerOrchestratorType containerOrchestratorType = containerOrchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
 
-        if (containerOrchestratorType.hostOrchestrator()) {
+        if (orchestratorType.hostOrchestrator()) {
             bootstrapOnHost(provisioningContext);
-        } else if (containerOrchestratorType.containerOrchestrator()) {
+        } else if (orchestratorType.containerOrchestrator()) {
             bootstrapContainers(provisioningContext);
         } else {
             LOGGER.error("Orchestrator not found: {}", stack.getOrchestrator().getType());
@@ -241,10 +241,10 @@ public class ClusterBootstrapper {
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
                     stack.getGatewayPort(), gatewayInstance.getPrivateIp());
-            ContainerOrchestratorType containerOrchestratorType = containerOrchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
-            if (containerOrchestratorType.hostOrchestrator()) {
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
+            if (orchestratorType.hostOrchestrator()) {
                 bootstrapNewNodesOnHost(stack, gatewayInstance, nodes, gatewayConfig);
-            } else if (containerOrchestratorType.containerOrchestrator()) {
+            } else if (orchestratorType.containerOrchestrator()) {
                 bootstrapNewNodesInContainer(stack, gatewayInstance, nodes, gatewayConfig);
             }
         } catch (CloudbreakOrchestratorCancelledException e) {

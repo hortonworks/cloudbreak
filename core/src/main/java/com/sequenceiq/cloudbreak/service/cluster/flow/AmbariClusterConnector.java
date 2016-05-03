@@ -66,8 +66,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakRecipeSetupException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorType;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -163,7 +163,7 @@ public class AmbariClusterConnector {
     @Inject
     private TlsSecurityService tlsSecurityService;
     @Inject
-    private ContainerOrchestratorTypeResolver containerOrchestratorTypeResolver;
+    private OrchestratorTypeResolver orchestratorTypeResolver;
 
     private enum Msg {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
@@ -192,7 +192,7 @@ public class AmbariClusterConnector {
     public Cluster buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
         try {
-            ContainerOrchestratorType containerOrchestratorType = containerOrchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
 
@@ -216,7 +216,7 @@ public class AmbariClusterConnector {
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
             boolean recipesFound = false;
-            if (containerOrchestratorType.containerOrchestrator()) {
+            if (orchestratorType.containerOrchestrator()) {
                 executeSssdRecipe(stack, null, cluster.getSssdConfig());
                 recipesFound = recipesPreInstall(stack, cluster, blueprintText, fs, hostGroups);
             }
@@ -234,7 +234,7 @@ public class AmbariClusterConnector {
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
             pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
-            if (containerOrchestratorType.containerOrchestrator()) {
+            if (orchestratorType.containerOrchestrator()) {
                 recipesPostInstall(stack, recipesFound);
             }
             executeSmokeTest(stack, ambariClient);

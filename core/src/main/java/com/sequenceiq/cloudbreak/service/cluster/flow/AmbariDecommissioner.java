@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -41,8 +42,8 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorType;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
@@ -51,11 +52,15 @@ import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.HostService;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
@@ -123,7 +128,7 @@ public class AmbariDecommissioner {
     @Inject
     private TlsSecurityService tlsSecurityService;
     @Inject
-    private ContainerOrchestratorTypeResolver containerOrchestratorTypeResolver;
+    private OrchestratorTypeResolver orchestratorTypeResolver;
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
     @Inject
@@ -341,10 +346,9 @@ public class AmbariDecommissioner {
         Map<String, Object> map = new HashMap<>();
         map.putAll(orchestrator.getAttributes().getMap());
         map.put("certificateDir", tlsSecurityService.prepareCertDir(stack.getId()));
-        ContainerOrchestratorType containerOrchestratorType = containerOrchestratorTypeResolver.resolveType(orchestrator.getType());
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         try {
-            if(containerOrchestratorType.containerOrchestrator()) {
-
+            if (orchestratorType.containerOrchestrator()) {
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
                 ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
                 Set<Container> containers = containerRepository.findContainersInCluster(stack.getCluster().getId());
@@ -373,20 +377,21 @@ public class AmbariDecommissioner {
                 if (!isExited(pollingResult)) {
                     deleteHosts(stack, hostList, components);
                 }
-            } else if (containerOrchestratorType.hostOrchestrator()) {
+            } else if (orchestratorType.hostOrchestrator()) {
                 Set<HostService> hostServices = hostServiceRepository.findServicesInCluster(stack.getCluster().getId());
-                Set<HostService> hostServicesToDelete = new HashSet<>();
-                for (String hostName : hostList) {
-                    for (HostService hostService : hostServices) {
-                        if (hostService.getHost().equals(hostName)) {
-                            hostServicesToDelete.add(hostService);
-                        }
-                    }
-                }
+                Set<HostService> hostServicesToDelete = hostServices
+                        .stream().parallel()
+                        .filter(service -> hostList.contains(service.getHost()))
+                        .collect(Collectors.toSet());
+                HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+                InstanceGroup gateway = stack.getGatewayInstanceGroup();
+                InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+                GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
+                        gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp());
+                hostOrchestrator.tearDown(gatewayConfig, hostList);
                 hostServiceRepository.delete(hostServicesToDelete);
                 deleteHosts(stack, hostList, components);
             }
-
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.error("Failed to delete containers while decommissioning: ", e);
             throw new CloudbreakException("Failed to delete containers while decommissioning: ", e);

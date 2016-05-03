@@ -1,2 +1,2 @@
 openstack:
-  default: cloudbreak-2016-04-06
+  default: docker-centos5-2016-05-04

@@ -36,7 +36,7 @@ public class SaltStates {
 
 
     private static LocalCall<Object> applyState(String state) {
-        Optional<List<?>> arg = Optional.<List<?>>of(Arrays.asList(state));
+        Optional<List<?>> arg = Optional.of(Arrays.asList(state));
         Optional<Map<String, ?>> kwarg = Optional.empty();
 
         LocalCall<Object> ambariAgent =
