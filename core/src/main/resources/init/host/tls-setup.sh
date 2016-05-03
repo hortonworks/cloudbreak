@@ -22,9 +22,15 @@ start_nginx() {
 }
 
 untar_salt() {
-  ${sudopre} sudo ${sudocheck} tar -zxvf /tmp/salt.tar.gz -C /tmp
-  ${sudopre} sudo ${sudocheck} cp -r /tmp/salt/salt/ /srv
-  ${sudopre} sudo ${sudocheck} cp -r /tmp/salt/pillar/ /srv
+  MAX_RETRIES=60
+  retries=0
+  while ((retries++ < MAX_RETRIES)) && [ ! -d "/tmp/salt" ]; do
+    echo Trying to unzip salt.zip
+    cd /tmp && unzip salt.zip &> /dev/null
+    sleep 2
+  done
+  ${sudopre} sudo ${sudocheck} cp -r /tmp/salt/ /srv
+  ${sudopre} sudo ${sudocheck} cp -r /tmp/pillar/ /srv
 }
 
 setup_tls() {

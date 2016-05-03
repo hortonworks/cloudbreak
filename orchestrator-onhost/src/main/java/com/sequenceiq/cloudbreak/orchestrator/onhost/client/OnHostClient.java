@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.orchestrator.onhost.domain.CbBootResponses;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.cloudbreak.util.KeyStoreUtil;
 
-
 public class OnHostClient {
 
     private enum OnHostClientEndpoint {
@@ -193,7 +192,7 @@ public class OnHostClient {
                 LOGGER.info("Missing nodes to run salt: %s", missingTargets);
             }
         } catch (Exception e) {
-            LOGGER.info("Error occured when ran salt on hosts: ", e);
+            LOGGER.info("Error occurred when ran salt on hosts: ", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
         return missingTargets;

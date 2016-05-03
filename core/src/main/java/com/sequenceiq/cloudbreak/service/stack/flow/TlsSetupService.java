@@ -4,19 +4,28 @@ import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processT
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
@@ -84,8 +93,8 @@ public class TlsSetupService {
         try {
             waitForSsh(stack, publicIp, hostKeyVerifier, user, privateKeyLocation);
             setupTemporarySsh(ssh, publicIp, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
-            uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getCredential());
             uploadSaltConfig(orchestrator, ssh);
+            uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getCredential());
             executeTlsSetupScript(ssh);
             removeTemporarySShKey(ssh, user, stack.getCredential());
             downloadAndSavePrivateKey(stack, ssh);
@@ -158,14 +167,12 @@ public class TlsSetupService {
 
     private void uploadSaltConfig(Orchestrator orchestrator, SSHClient ssh) throws CloudbreakException, IOException {
         if (containerOrchestratorTypeResolver.resolveType(orchestrator.getType()).hostOrchestrator()) {
-            // TODO generate tar or zip on-the-fly
-            ByteArrayOutputStream byteArrayOutputStream = IOUtils.readFully(getClass().getResourceAsStream("/salt/salt.tar.gz"));
-            byte[] byteArray = byteArrayOutputStream.toByteArray();
-            LOGGER.info("Upload salt.tar.gz to /tmp/salt.tar.gz");
+            byte[] byteArray = zipSaltConfig();
+            LOGGER.info("Upload salt.zip to /tmp/salt.zip");
             ssh.newSCPFileTransfer().upload(new InMemorySourceFile() {
                 @Override
                 public String getName() {
-                    return "salt.tar.gz";
+                    return "salt.zip";
                 }
 
                 @Override
@@ -177,8 +184,49 @@ public class TlsSetupService {
                 public InputStream getInputStream() throws IOException {
                     return new ByteArrayInputStream(byteArray);
                 }
-            }, "/tmp/salt.tar.gz");
+            }, "/tmp/salt.zip");
         }
+    }
+
+    private byte[] zipSaltConfig() throws CloudbreakException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ZipOutputStream zout = new ZipOutputStream(baos);
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Map<String, List<File>> structure = new TreeMap<>();
+            for (Resource resource : resolver.getResources("classpath*:salt/**")) {
+                File file = resource.getFile();
+                String path = file.getPath();
+                String dir = path.substring(path.indexOf("/salt") + "/salt".length(), path.lastIndexOf("/") + 1);
+                List<File> list = structure.get(dir);
+                if (list == null) {
+                    list = new ArrayList<>();
+                }
+                structure.put(dir, list);
+                if (!file.isDirectory()) {
+                    list.add(file);
+                }
+            }
+            for (String dir : structure.keySet()) {
+                zout.putNextEntry(new ZipEntry(dir));
+                for (File file : structure.get(dir)) {
+                    LOGGER.info("Zip salt entry: {}", file.getName());
+                    zout.putNextEntry(new ZipEntry(dir + file.getName()));
+                    FileInputStream fis = new FileInputStream(file);
+                    ByteArrayOutputStream outputStream = IOUtils.readFully(fis);
+                    byte[] bytes = outputStream.toByteArray();
+                    zout.write(bytes);
+                    zout.closeEntry();
+                    fis.close();
+                }
+            }
+            zout.close();
+            baos.close();
+        } catch (IOException e) {
+            LOGGER.error("Failed to zip salt configurations", e);
+            throw new CloudbreakException("Failed to zip salt configurations");
+        }
+        return baos.toByteArray();
     }
 
     private InMemorySourceFile uploadParameterFile(String generatedTemplate, final String name) {
