@@ -409,7 +409,8 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     DockerClient swarmClient(OrchestrationCredential cred) {
-        return DockerClientBuilder.getInstance(getSwarmClientConfig(cred.getApiEndpoint(), (String) cred.getProperties().get("certificateDir")))
+        String gatewayUrl = "https://" + cred.getApiEndpoint();
+        return DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayUrl, (String) cred.getProperties().get("certificateDir")))
                 .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl().withReadTimeout(READ_TIMEOUT))
                 .build();
     }
