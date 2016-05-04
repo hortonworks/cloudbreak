@@ -30,7 +30,7 @@ create_certificates() {
 }
 
 start_nginx_container() {
-  ${sudopre} sudo ${sudocheck} docker run --name gateway -d --net=host --restart=always -v /etc/certs:/certs sequenceiq/cb-gateway-nginx:0.3
+  ${sudopre} sudo ${sudocheck} docker run --name gateway -d --net=host --restart=always -v /etc/certs:/certs sequenceiq/cb-gateway-nginx:0.6
 }
 
 setup_tls() {
