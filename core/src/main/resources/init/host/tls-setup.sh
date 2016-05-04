@@ -6,7 +6,7 @@ setup_cbclient_cert() {
 }
 
 create_certificates() {
-  ${sudopre} sudo ${sudocheck} cert-tool -d=/etc/certs -s localhost -s 127.0.0.1 -s ${publicIp}
+  ${sudopre} sudo ${sudocheck} cert-tool -d=/etc/certs -o=gateway -s localhost -s 127.0.0.1 -s ${publicIp}
   ${sudopre} sudo ${sudocheck} mv /etc/certs/server-key.pem /etc/certs/server.key
   ${sudopre} sudo ${sudocheck} sh -c 'cat /etc/certs/ca.pem >> /etc/certs/server.pem'
   ${sudopre} sudo ${sudocheck} rm /etc/certs/client-key.pem /etc/certs/client.pem /etc/certs/ca-key.pem
