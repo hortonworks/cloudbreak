@@ -86,8 +86,8 @@ public class ClusterBootstrapper {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
         }
         try {
-            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
-                    gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp());
+            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
+                    stack.getGatewayPort(), gatewayInstance.getPrivateIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get("SWARM");
             PollingResult bootstrapApiPolling = bootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     bootstrapApiCheckerTask,
@@ -123,7 +123,7 @@ public class ClusterBootstrapper {
             validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
             // TODO: put it in orchestrator api
             Orchestrator orchestrator = new Orchestrator();
-            orchestrator.setApiEndpoint(gatewayInstance.getPublicIpWrapper() + ":443");
+            orchestrator.setApiEndpoint(gatewayInstance.getPublicIpWrapper() + ":" + stack.getGatewayPort());
             orchestrator.setType("SWARM");
             orchestratorRepository.save(orchestrator);
             stack.setOrchestrator(orchestrator);
@@ -151,7 +151,7 @@ public class ClusterBootstrapper {
         }
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
-                    gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp());
+                    gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get("SWARM");
             List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator, gatewayInstance.getPublicIpWrapper());
             for (int i = 0; i < nodeMap.size(); i++) {

@@ -43,7 +43,8 @@ public class HostFilterService {
         List<HostMetadata> filteredList = new ArrayList<>(hosts);
         try {
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(cluster.getStack().getId(), cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getStack().getGatewayPort(), cluster.getUserName(),
+                    cluster.getPassword());
             Map<String, String> config = configurationService.getConfiguration(ambariClient, hostGroup);
             for (HostFilter hostFilter : hostFilters) {
                 try {

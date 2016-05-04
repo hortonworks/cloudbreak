@@ -104,3 +104,6 @@ cb:
 
   gcp:
     hostkey.verify: false
+
+  nginx:
+    port: 9443

@@ -26,7 +26,7 @@ public class AmbariHostsRemover {
     public void deleteHosts(Stack stack, List<String> hosts, List<String> components) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
         for (String hostName : hosts) {
             ambariClient.deleteHostComponents(hostName, components);
             ambariClient.deleteHost(hostName);

@@ -138,10 +138,10 @@ public class AmbariClusterConnectorTest {
         when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn(blueprint.getBlueprintText());
         when(ambariClient.addBlueprint(anyString())).thenReturn("");
         when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<String, Map<String, Map<String, String>>>());
-        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyString(), anyString())).thenReturn(ambariClient);
-        when(ambariClientProvider.getDefaultAmbariClient(any(HttpClientConfig.class))).thenReturn(ambariClient);
-        when(hostsPollingService.pollWithTimeoutSingleFailure(any(AmbariHostsStatusCheckerTask.class), any(AmbariHostsCheckerContext.class), anyInt(), anyInt()))
-                .thenReturn(PollingResult.SUCCESS);
+        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), anyString(), anyString())).thenReturn(ambariClient);
+        when(ambariClientProvider.getDefaultAmbariClient(any(HttpClientConfig.class), anyInt())).thenReturn(ambariClient);
+        when(hostsPollingService.pollWithTimeoutSingleFailure(any(AmbariHostsStatusCheckerTask.class), any(AmbariHostsCheckerContext.class), anyInt(),
+                anyInt())).thenReturn(PollingResult.SUCCESS);
         when(hostGroupRepository.findHostGroupsInCluster(anyLong())).thenReturn(cluster.getHostGroups());
         when(ambariOperationService.waitForOperations(any(Stack.class), any(AmbariClient.class), anyMap(), any(AmbariOperationType.class)))
                 .thenReturn(PollingResult.SUCCESS);
@@ -153,7 +153,7 @@ public class AmbariClusterConnectorTest {
         when(ambariClient.deleteUser(anyString())).thenReturn("");
         when(ambariClient.createUser(anyString(), anyString(), anyBoolean())).thenReturn("");
         when(ambariClient.changePassword(anyString(), anyString(), anyString(), anyBoolean())).thenReturn("");
-        when(ambariClientProvider.getSecureAmbariClient(any(HttpClientConfig.class), any(Cluster.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getSecureAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class))).thenReturn(ambariClient);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(clusterRepository.findOneWithLists(anyLong())).thenReturn(cluster);
     }

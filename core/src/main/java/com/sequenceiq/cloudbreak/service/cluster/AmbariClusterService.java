@@ -259,7 +259,8 @@ public class AmbariClusterService implements ClusterService {
         Cluster cluster = stack.getCluster();
         try {
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(),
+                    cluster.getPassword());
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
                 throw new BadRequestException(String.format("Cluster response coming from Ambari server was null. [Ambari Server IP: '%s']", ambariIp));
@@ -435,7 +436,8 @@ public class AmbariClusterService implements ClusterService {
         }
         try {
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getCluster().getUserName(), stack.getCluster().getPassword());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), stack.getCluster().getUserName(),
+                    stack.getCluster().getPassword());
             Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
             Map<String, String> hostStatuses = ambariClient.getHostStatuses();
             for (HostMetadata host : hosts) {
@@ -509,7 +511,7 @@ public class AmbariClusterService implements ClusterService {
     private void validateComponentsCategory(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
         String hostGroup = hostGroupAdjustment.getHostGroup();
         Blueprint blueprint = cluster.getBlueprint();
         try {

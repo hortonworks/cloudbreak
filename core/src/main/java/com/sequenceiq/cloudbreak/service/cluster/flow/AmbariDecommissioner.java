@@ -1,5 +1,37 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
+import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
+import static com.sequenceiq.cloudbreak.service.cluster.DataNodeUtils.sortByUsedSpace;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.DECOMMISSION_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.START_SERVICES_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.STOP_SERVICES_AMBARI_PROGRESS_STATE;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
+
+import java.net.ConnectException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -39,36 +71,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 
 import groovyx.net.http.HttpResponseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import java.net.ConnectException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
-import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
-import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
-import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
-import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
-import static com.sequenceiq.cloudbreak.service.cluster.DataNodeUtils.sortByUsedSpace;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.DECOMMISSION_AMBARI_PROGRESS_STATE;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.START_SERVICES_AMBARI_PROGRESS_STATE;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.STOP_SERVICES_AMBARI_PROGRESS_STATE;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonMap;
 
 @Component
 public class AmbariDecommissioner {
@@ -142,7 +144,7 @@ public class AmbariDecommissioner {
         eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP.code(), asList(adjustment, hostGroupName)), hostGroupName);
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
         PollingResult pollingResult = startServicesIfNeeded(stack, ambariClient, blueprintName);
         if (isSuccess(pollingResult)) {
@@ -177,7 +179,7 @@ public class AmbariDecommissioner {
     public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
         boolean hostDeleted = false;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getCluster());
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig,  stack.getGatewayPort(), stack.getCluster());
         Set<String> components = getHadoopComponents(ambariClient, data.getHostGroup().getName(), stack.getCluster().getBlueprint().getBlueprintName());
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());
@@ -200,7 +202,7 @@ public class AmbariDecommissioner {
             throws CloudbreakSecuritySetupException {
         List<HostMetadata> downScaleCandidates;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
         int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), adjustmentJson.getHostGroup());
         Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();

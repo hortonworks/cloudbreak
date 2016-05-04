@@ -225,6 +225,8 @@ public class Stack implements ProvisionEntity {
     private boolean publicInAccount;
     private String region;
     private String availabilityZone;
+    @Column(nullable = false)
+    private Integer gatewayPort;
     private int consulServers;
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
@@ -425,6 +427,14 @@ public class Stack implements ProvisionEntity {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
+    }
+
+    public Integer getGatewayPort() {
+        return gatewayPort;
+    }
+
+    public void setGatewayPort(Integer gatewayPort) {
+        this.gatewayPort = gatewayPort;
     }
 
     public String getPlatformVariant() {

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.service.securitygroup;
 
+import static com.sequenceiq.cloudbreak.service.network.ExposedService.GATEWAY;
+import static com.sequenceiq.cloudbreak.service.network.ExposedService.SSH;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,6 +14,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
@@ -31,6 +36,9 @@ public class DefaultSecurityGroupCreator {
     @Inject
     private SecurityGroupRepository groupRepository;
 
+    @Value("${cb.nginx.port:9443}")
+    private int nginxPort;
+
     public Set<SecurityGroup> createDefaultSecurityGroups(CbUser user) {
         Set<SecurityGroup> securityGroups = new HashSet<>();
         Set<SecurityGroup> defaultNetworks = groupRepository.findAllDefaultInAccount(user.getAccount());
@@ -43,25 +51,45 @@ public class DefaultSecurityGroupCreator {
 
     private Set<SecurityGroup> createDefaultSecurityGroupInstances(CbUser user) {
         Set<SecurityGroup> securityGroups = new HashSet<>();
-
         //create default strict security group
-        SecurityGroup onlySshAndSsl = createSecurityGroup(user, "only-ssh-and-ssl", "Open ports: 22 (SSH) 2022 (SSH) 443 (HTTPS)");
-        SecurityRule sshAndSslRule = createSecurityRule("22,2022,443", onlySshAndSsl);
+        createDefaultStringSecurityGroup(user, securityGroups);
+        //create default security group which opens all of the known services' ports
+        createDefaultAllKnownServicesSecurityGroup(user, securityGroups);
+        return securityGroups;
+    }
+
+    private void createDefaultStringSecurityGroup(CbUser user, Set<SecurityGroup> securityGroups) {
+        List<Port> strictSecurityGroupPorts = new ArrayList<>();
+        strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp"));
+        strictSecurityGroupPorts.add(new Port(SSH, "2022", "tcp"));
+        strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
+        String strictSecurityGroupDesc = getPortsOpenDesc(strictSecurityGroupPorts);
+
+        addSecurityGroup(user, securityGroups, "only-ssh-and-ssl", strictSecurityGroupPorts, strictSecurityGroupDesc);
+    }
+
+    private void createDefaultAllKnownServicesSecurityGroup(CbUser user, Set<SecurityGroup> securityGroups) {
+        //new ArrayList -> otherwise the list will be the static 'ports' list from NetworkUtils and we don't want to add nginx port to 'ports' static list.
+        List<Port> portsWithoutAclRules = new ArrayList<>(NetworkUtils.getPortsWithoutAclRules());
+        portsWithoutAclRules.add(0, new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
+        String allPortsOpenDesc = getPortsOpenDesc(portsWithoutAclRules);
+        addSecurityGroup(user, securityGroups, "all-services-port", portsWithoutAclRules, allPortsOpenDesc);
+    }
+
+    private void addSecurityGroup(CbUser user, Set<SecurityGroup> securityGroups, String name, List<Port> securityGroupPorts, String securityGroupDesc) {
+        SecurityGroup onlySshAndSsl = createSecurityGroup(user, name, securityGroupDesc);
+        SecurityRule sshAndSslRule = createSecurityRule(concatenatePorts(securityGroupPorts), onlySshAndSsl);
         onlySshAndSsl.setSecurityRules(new HashSet<>(Arrays.asList(sshAndSslRule)));
         securityGroups.add(securityGroupService.create(user, onlySshAndSsl));
+    }
 
-        //create default security group which opens all of the known services' ports
-        String allPortsOpenDesc = "Open ports: 22 (SSH) 2022 (SSH) 443 (HTTPS) 8080 (Ambari) 8500 (Consul) 50070 (NN) 8088 (RM Web) 8030 (RM Scheduler) "
-                + "8050 (RM IPC) 19888 (Job history server) 60000 (HBase master) 60010 (HBase master web) 16020 (HBase RS) 60030 (HBase RS info) "
-                + "15000 (Falcon) 8744 (Storm) 9083 (Hive metastore) 10000 (Hive server) 10001 (Hive server HTTP) 9999 (Accumulo master) "
-                + "9997 (Accumulo Tserver) 21000 (Atlas) 8443 (KNOX) 11000 (Oozie) 18080 (Spark HS) 8042 (NM Web) 9996 (Zeppelin WebSocket) "
-                + "9995 (Zeppelin UI) 3080 (Kibana) 9200 (Elasticsearch) 7070 (Shipyard)";
-        SecurityGroup allServicesPort = createSecurityGroup(user, "all-services-port", allPortsOpenDesc);
-        SecurityRule allPortsRule = createSecurityRule(concatenateAllPortsKnownByCloudbreak(), allServicesPort);
-        allServicesPort.setSecurityRules(new HashSet<>(Arrays.asList(allPortsRule)));
-        securityGroups.add(securityGroupService.create(user, allServicesPort));
-
-        return securityGroups;
+    private String getPortsOpenDesc(List<Port> portsWithoutAclRules) {
+        StringBuilder allPortsOpenDescBuilder = new StringBuilder();
+        allPortsOpenDescBuilder.append("Open ports:");
+        for (Port port : portsWithoutAclRules) {
+            allPortsOpenDescBuilder.append(" ").append(port.getPort()).append(" (").append(port.getName()).append(")");
+        }
+        return allPortsOpenDescBuilder.toString();
     }
 
     private SecurityGroup createSecurityGroup(CbUser user, String name, String description) {
@@ -85,9 +113,8 @@ public class DefaultSecurityGroupCreator {
         return securityRule;
     }
 
-    private String concatenateAllPortsKnownByCloudbreak() {
+    private String concatenatePorts(List<Port> ports) {
         StringBuilder builder = new StringBuilder("");
-        List<Port> ports = NetworkUtils.getPortsWithoutAclRules();
         Iterator<Port> portsIterator = ports.iterator();
         while (portsIterator.hasNext()) {
             Port port = portsIterator.next();

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.network;
 
 public enum ExposedService {
     SSH("SSH"),
+    HTTPS("HTTPS"),
     GATEWAY("Gateway"),
     AMBARI("Ambari"),
     CONSUL("Consul"),

@@ -82,7 +82,7 @@ public class TlsSetupService {
         try {
             waitForSsh(stack, publicIp, hostKeyVerifier, user, privateKeyLocation);
             setupTemporarySsh(ssh, publicIp, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
-            uploadTlsSetupScript(ssh, publicIp, stack.getCredential());
+            uploadTlsSetupScript(ssh, publicIp, stack.getGatewayPort(), stack.getCredential());
             executeTlsSetupScript(ssh);
             removeTemporarySShKey(ssh, user, stack.getCredential());
             downloadAndSavePrivateKey(stack, ssh);
@@ -122,13 +122,14 @@ public class TlsSetupService {
         LOGGER.info("Temporary ssh setup finished succesfully, public key is uploaded to {}", remoteTlsCertificatePath);
     }
 
-    private void uploadTlsSetupScript(SSHClient ssh, String publicIp, Credential credential) throws IOException, TemplateException {
+    private void uploadTlsSetupScript(SSHClient ssh, String publicIp, Integer sslPort, Credential credential) throws IOException, TemplateException {
         LOGGER.info("Uploading tls-setup.sh to the gateway...");
         Map<String, Object> model = new HashMap<>();
         model.put("publicIp", publicIp);
         model.put("username", credential.getLoginUserName());
         model.put("sudopre", credential.passwordAuthenticationRequired() ? String.format("echo '%s'|", credential.getLoginPassword()) : "");
         model.put("sudocheck", credential.passwordAuthenticationRequired() ? "-S" : "");
+        model.put("sslPort", sslPort.toString());
 
         String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate("init/tls-setup.sh", "UTF-8"), model);
 
