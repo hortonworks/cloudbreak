@@ -64,7 +64,7 @@ public class ClusterTerminationService {
     @Inject
     private ContainerRepository containerRepository;
     @Inject
-    private ContainerOrchestratorResolver orchestratorResolver;
+    private ContainerOrchestratorResolver containerOrchestratorResolver;
     @Inject
     private TlsSecurityService tlsSecurityService;
 
@@ -78,7 +78,7 @@ public class ClusterTerminationService {
                 map.putAll(orchestrator.getAttributes().getMap());
                 map.put("certificateDir", tlsSecurityService.prepareCertDir(cluster.getStack().getId()));
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
-                ContainerOrchestrator containerOrchestrator = orchestratorResolver.get(orchestrator.getType());
+                ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
                 Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
                 List<ContainerInfo> containerInfo = FluentIterable.from(containers).transform(new Function<Container, ContainerInfo>() {
                     @Nullable

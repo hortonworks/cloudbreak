@@ -31,8 +31,11 @@ import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.AmbariRunBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.ConsulPillarBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.ConsulRunBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.onhost.poller.SaltBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.onhost.salt.SaltConnection;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.suse.salt.netapi.client.SaltClient;
+import com.suse.salt.netapi.exception.SaltException;
 
 @Component
 public class OnHostOrchestrator implements HostOrchestrator {
@@ -49,48 +52,6 @@ public class OnHostOrchestrator implements HostOrchestrator {
     public void init(ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner, ExitCriteria exitCriteria) {
         this.parallelOrchestratorComponentRunner = parallelOrchestratorComponentRunner;
         this.exitCriteria = exitCriteria;
-    }
-
-    private ParallelOrchestratorComponentRunner getParallelOrchestratorComponentRunner() {
-        return parallelOrchestratorComponentRunner;
-    }
-
-    private ExitCriteria getExitCriteria() {
-        return exitCriteria;
-    }
-
-    @Override
-    public void runService(GatewayConfig gatewayConfig, Set<String> agents,
-            OrchestrationCredential cred, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-        try {
-            AmbariRunBootstrap ambariRunBootstrap = new AmbariRunBootstrap(gatewayConfig.getPublicAddress());
-            Callable<Boolean> ambariRunBootstrapRunner = runner(ambariRunBootstrap, getExitCriteria(), exitCriteriaModel);
-            Future<Boolean> ambariRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(ambariRunBootstrapRunner);
-            ambariRunBootstrapFuture.get();
-        } catch (Exception e) {
-            LOGGER.error("Error occurred during ambari bootstrap", e);
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
-    }
-
-    @Override
-    public List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public String name() {
-        return ON_HOST;
-    }
-
-    @Override
-    public String port() {
-        return PORT;
     }
 
     @Override
@@ -127,14 +88,6 @@ public class OnHostOrchestrator implements HostOrchestrator {
         }
     }
 
-    private Set<String> prepareTargets(GatewayConfig gatewayConfig, Set<Node> targets) {
-        Set<String> targetList = new HashSet<>(asList(gatewayConfig.getPrivateAddress()));
-        for (Node node : targets) {
-            targetList.add(node.getPrivateIp());
-        }
-        return targetList;
-    }
-
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         Set<String> strings = prepareTargets(gatewayConfig, targets);
@@ -156,14 +109,68 @@ public class OnHostOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public void runService(GatewayConfig gatewayConfig, Set<String> agents, OrchestrationCredential cred, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        try {
+            AmbariRunBootstrap ambariRunBootstrap = new AmbariRunBootstrap(gatewayConfig.getPublicAddress());
+            Callable<Boolean> ambariRunBootstrapRunner = runner(ambariRunBootstrap, getExitCriteria(), exitCriteriaModel);
+            Future<Boolean> ambariRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(ambariRunBootstrapRunner);
+            ambariRunBootstrapFuture.get();
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during ambari bootstrap", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
+    public void tearDown(GatewayConfig gatewayConfig, List<String> hosts) throws CloudbreakOrchestratorException {
+    }
+
+    @Override
+    public List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
+        return new ArrayList<>();
+    }
+
+    @Override
     public boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig) {
         OnHostClient onHostClient = new OnHostClient(gatewayConfig, port());
         return onHostClient.info();
     }
 
     @Override
+    public String name() {
+        return ON_HOST;
+    }
+
+    @Override
     public int getMaxBootstrapNodes() {
         return MAX_NODES;
+    }
+
+    @Override
+    public String port() {
+        return PORT;
+    }
+
+    private Set<String> prepareTargets(GatewayConfig gatewayConfig, Set<Node> targets) {
+        Set<String> targetList = new HashSet<>(asList(gatewayConfig.getPrivateAddress()));
+        for (Node node : targets) {
+            targetList.add(node.getPrivateIp());
+        }
+        return targetList;
+    }
+
+    private ParallelOrchestratorComponentRunner getParallelOrchestratorComponentRunner() {
+        return parallelOrchestratorComponentRunner;
+    }
+
+    private ExitCriteria getExitCriteria() {
+        return exitCriteria;
     }
 
     private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {

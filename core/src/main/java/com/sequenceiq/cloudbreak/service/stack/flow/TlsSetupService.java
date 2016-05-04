@@ -31,8 +31,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorType;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -76,7 +76,7 @@ public class TlsSetupService {
     @Inject
     private Configuration freemarkerConfiguration;
     @Inject
-    private ContainerOrchestratorTypeResolver containerOrchestratorTypeResolver;
+    private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Value("#{'${cb.cert.dir:}/${cb.tls.cert.file:}'}")
     private String tlsCertificatePath;
@@ -144,7 +144,7 @@ public class TlsSetupService {
         model.put("sudocheck", credential.passwordAuthenticationRequired() ? "-S" : "");
 
 
-        ContainerOrchestratorType type = containerOrchestratorTypeResolver.resolveType(orchestrator.getType());
+        OrchestratorType type = orchestratorTypeResolver.resolveType(orchestrator.getType());
 
         String tls = processTemplateIntoString(
                 freemarkerConfiguration.getTemplate(String.format("init/%s/tls-setup.sh", type.name().toLowerCase()), "UTF-8"), model);
@@ -166,7 +166,7 @@ public class TlsSetupService {
     }
 
     private void uploadSaltConfig(Orchestrator orchestrator, SSHClient ssh) throws CloudbreakException, IOException {
-        if (containerOrchestratorTypeResolver.resolveType(orchestrator.getType()).hostOrchestrator()) {
+        if (orchestratorTypeResolver.resolveType(orchestrator.getType()).hostOrchestrator()) {
             byte[] byteArray = zipSaltConfig();
             LOGGER.info("Upload salt.zip to /tmp/salt.zip");
             ssh.newSCPFileTransfer().upload(new InMemorySourceFile() {

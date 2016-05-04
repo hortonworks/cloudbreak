@@ -28,6 +28,6 @@ public class HostClusterAvailabilityCheckerTask extends StackBasedStatusCheckerT
 
     @Override
     public String successMessage(HostOrchestratorClusterContext t) {
-        return "Container orchestration API is available and the agents are registered.";
+        return "Host orchestration API is available and the agents are registered.";
     }
 }
