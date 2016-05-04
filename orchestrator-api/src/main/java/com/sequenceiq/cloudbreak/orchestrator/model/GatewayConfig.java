@@ -55,4 +55,16 @@ public class GatewayConfig {
     public String getClientKey() {
         return clientKey;
     }
+
+    @Override
+    public String toString() {
+        return "GatewayConfig{" +
+                "publicAddress='" + publicAddress + '\'' +
+                ", privateAddress='" + privateAddress + '\'' +
+                ", certificateDir='" + certificateDir + '\'' +
+                ", serverCert='" + serverCert + '\'' +
+                ", clientCert='" + clientCert + '\'' +
+                ", clientKey='" + clientKey + '\'' +
+                '}';
+    }
 }

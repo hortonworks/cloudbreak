@@ -71,8 +71,8 @@ public class ClusterHostServiceRunner {
             Set<String> agents = initializeAmbariAgentServices(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
-                    gatewayInstance.getPrivateIp());
+            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
+                    gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp());
             OrchestrationCredential credential = new OrchestrationCredential(stack.getOrchestrator().getApiEndpoint(), new HashMap<String, Object>());
             hostOrchestrator.runService(gatewayConfig, agents, credential, clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
@@ -93,9 +93,9 @@ public class ClusterHostServiceRunner {
             Set<String> agents = initializeNewAmbariAgentServices(stack, candidates);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
-                    gatewayInstance.getPrivateIp());
-            OrchestrationCredential credential = new OrchestrationCredential(stack.getOrchestrator().getApiEndpoint(), new HashMap<String, Object>());
+            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
+                    gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp());
+            OrchestrationCredential credential = new OrchestrationCredential(stack.getOrchestrator().getApiEndpoint(), new HashMap<>());
             hostOrchestrator.runService(gatewayConfig, agents, credential, clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());

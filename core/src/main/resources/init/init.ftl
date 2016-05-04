@@ -18,8 +18,10 @@ ${customUserData}
 
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
 
-service cloudbreak-bootstrap stop
+rm -f /etc/salt/master.d/custom.conf
+curl -Lo /etc/salt/master.d/custom.conf https://gist.githubusercontent.com/akanto/f127908b94e45101b9dc07cd00793383/raw/f539e4bf82cb7c500482d265e2842892418244a2/custom.conf
+
+systemctl stop cloudbreak-bootstrap
 rm -rf /usr/sbin/cloudbreak-bootstrap
-curl -Lo /usr/sbin/cloudbreak-bootstrap https://dl.dropboxusercontent.com/u/13919958/cloudbreak-bootstrap && chmod +x /usr/sbin/cloudbreak-bootstrap
-systemctl daemon-reload
+curl -Lo /usr/sbin/cloudbreak-bootstrap https://dl.dropboxusercontent.com/u/16444381/cloudbreak-bootstrap && chmod +x /usr/sbin/cloudbreak-bootstrap
 systemctl start cloudbreak-bootstrap

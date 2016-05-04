@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.orchestrator.host;
 
-import java.util.List;
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -11,11 +8,12 @@ import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
+import java.util.List;
+import java.util.Set;
+
 public interface HostOrchestrator {
 
     String name();
-
-    String port();
 
     void init(ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner, ExitCriteria exitCriteria);
 
@@ -35,5 +33,5 @@ public interface HostOrchestrator {
 
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
-    void tearDown(GatewayConfig gatewayConfig, List<String> hosts) throws CloudbreakOrchestratorException;
+    void tearDown(GatewayConfig gatewayConfig, List<String> ips) throws CloudbreakOrchestratorException;
 }

@@ -152,7 +152,7 @@ public class ClusterBootstrapper {
                     MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
             Orchestrator orchestrator = stack.getOrchestrator();
-            orchestrator.setApiEndpoint(gatewayInstance.getPublicIpWrapper() + ":" + hostOrchestrator.port());
+            orchestrator.setApiEndpoint(gatewayInstance.getPublicIpWrapper() + ":" + stack.getGatewayPort());
             orchestrator.setType(hostOrchestrator.name());
             orchestratorRepository.save(orchestrator);
             if (TIMEOUT.equals(allNodesAvailabilityPolling)) {

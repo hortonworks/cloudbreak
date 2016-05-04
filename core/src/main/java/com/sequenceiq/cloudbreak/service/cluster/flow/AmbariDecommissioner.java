@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -58,7 +59,6 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
@@ -195,7 +195,7 @@ public class AmbariDecommissioner {
     public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
         boolean hostDeleted = false;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig,  stack.getGatewayPort(), stack.getCluster());
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), stack.getCluster());
         Set<String> components = getHadoopComponents(ambariClient, data.getHostGroup().getName(), stack.getCluster().getBlueprint().getBlueprintName());
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());
@@ -386,8 +386,8 @@ public class AmbariDecommissioner {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 InstanceGroup gateway = stack.getGatewayInstanceGroup();
                 InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-                GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
-                        gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp());
+                GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
+                        stack.getGatewayPort(), gatewayInstance.getPrivateIp());
                 hostOrchestrator.tearDown(gatewayConfig, hostList);
                 hostServiceRepository.delete(hostServicesToDelete);
                 deleteHosts(stack, hostList, components);
