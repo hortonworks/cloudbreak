@@ -1,0 +1,16 @@
+test:
+  dns: 172.17.0.1
+  ports:
+    - 2020:2020
+    - 9443:9443
+  volumes:
+    - ./:/it
+  command: bash -c "chmod +x /it/start-integration-test.sh && ./it/start-integration-test.sh"
+  environment:
+    - SERVICE_NAME=test
+    - INTEGRATIONTEST_UAA_SERVER=http://identity.service.consul:8089
+    - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://cloudbreak.service.consul:8080
+    - INTEGRATIONTEST_UAA_USER=admin@example.com
+    - INTEGRATIONTEST_UAA_PASSWORD=cloudbreak
+    - CLOUDBREAK_URL=cloudbreak.service.consul:8080
+  image: java:8

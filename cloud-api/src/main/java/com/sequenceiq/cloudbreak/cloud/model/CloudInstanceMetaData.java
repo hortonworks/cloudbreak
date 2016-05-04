@@ -2,9 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class CloudInstanceMetaData {
 
-    private static final int DEFAULT_SSH_PORT = 22;
     public static final CloudInstanceMetaData EMPTY_METADATA = new CloudInstanceMetaData(null, null, null);
-
+    private static final int DEFAULT_SSH_PORT = 22;
     private final String privateIp;
     private final String publicIp;
     private final int sshPort;

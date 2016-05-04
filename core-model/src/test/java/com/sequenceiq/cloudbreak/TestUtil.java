@@ -252,6 +252,7 @@ public class TestUtil {
         instanceMetaData.setInstanceStatus(instanceStatus);
         instanceMetaData.setAmbariServer(ambariServer);
         instanceMetaData.setConsulServer(true);
+        instanceMetaData.setSshPort(22);
         instanceMetaData.setDiscoveryFQDN("test");
         instanceMetaData.setInstanceId("test");
         instanceMetaData.setPrivateIp("1.1.1." + (id + Math.abs(new Random().nextInt(255))));

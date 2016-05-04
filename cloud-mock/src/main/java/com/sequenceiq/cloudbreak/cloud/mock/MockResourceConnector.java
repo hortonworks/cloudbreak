@@ -17,7 +17,8 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 @Service
 public class MockResourceConnector implements ResourceConnector {
     @Override
-    public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier, AdjustmentType adjustmentType, Long threshold) throws Exception {
+    public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
+            AdjustmentType adjustmentType, Long threshold) throws Exception {
         return new ArrayList<>();
     }
 
@@ -27,7 +28,8 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources) throws Exception {
+    public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources)
+            throws Exception {
         return new ArrayList<>();
     }
 
@@ -42,7 +44,8 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) throws Exception {
+    public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            List<CloudInstance> vms) throws Exception {
         return new ArrayList<>();
     }
 }

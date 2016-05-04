@@ -40,7 +40,8 @@ public class MockStackCreationFailedTest extends AbstractCloudbreakIntegrationTe
     @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage", "mockPort" })
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
-            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage, @Optional("false") boolean useMockServer, @Optional("443") int mockPort) throws Exception {
+            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage, @Optional("false") boolean useMockServer,
+            @Optional("443") int mockPort) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);

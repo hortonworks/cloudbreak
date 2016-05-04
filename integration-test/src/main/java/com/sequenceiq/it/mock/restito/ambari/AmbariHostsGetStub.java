@@ -22,7 +22,7 @@ public class AmbariHostsGetStub extends RestitoStub {
         this.serverNumber = serverNumber;
     }
 
-    private Map<String,?> getHostResponse() {
+    private Map<String, ?> getHostResponse() {
 
         List<Map<String, ?>> itemList = new ArrayList<>();
         for (int i = 1; i <= serverNumber; i++) {

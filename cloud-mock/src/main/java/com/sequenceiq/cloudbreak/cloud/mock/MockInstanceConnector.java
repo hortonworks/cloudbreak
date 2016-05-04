@@ -18,7 +18,8 @@ public class MockInstanceConnector implements InstanceConnector {
     private static final String CB_FINGERPRINT = "ce:50:66:23:96:08:04:ea:01:62:9b:18:f9:ee:ac:aa (RSA)";
 
     @Override
-    public List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) throws Exception {
+    public List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms)
+            throws Exception {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
         for (CloudInstance instance : vms) {
             CloudVmInstanceStatus instanceStatus = new CloudVmInstanceStatus(instance, InstanceStatus.CREATED);
@@ -28,7 +29,8 @@ public class MockInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) throws Exception {
+    public List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms)
+            throws Exception {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
         for (CloudInstance instance : vms) {
             CloudVmInstanceStatus instanceStatus = new CloudVmInstanceStatus(instance, InstanceStatus.STOPPED);

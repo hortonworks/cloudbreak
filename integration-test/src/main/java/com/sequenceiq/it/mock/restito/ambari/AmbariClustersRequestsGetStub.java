@@ -14,14 +14,16 @@ import com.xebialabs.restito.semantics.Condition;
 
 public class AmbariClustersRequestsGetStub extends RestitoStub {
 
+    public static final String PATH = "/clusters/.*/requests/.*";
+
     private enum AmbariClusterStatus {
         STOPPED,
         IN_PROGRESS,
         STARTED
+
     }
 
     private AmbariClusterStatus status = AmbariClusterStatus.STOPPED;
-    public static final String PATH = "/clusters/.*/requests/.*";
 
     @Override
     public Condition getCondition() {

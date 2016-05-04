@@ -21,7 +21,7 @@ public class MockCredentialCreationTest extends AbstractCloudbreakIntegrationTes
     private String defaultPublicKeyFile;
 
     @Test
-    @Parameters({"credentialName", "publicKeyFile" })
+    @Parameters({ "credentialName", "publicKeyFile" })
     public void testMockCredentialCreation(@Optional("") String credentialName, @Optional("") String publicKeyFile) throws Exception {
         // GIVEN
         credentialName = StringUtils.hasLength(credentialName) ? credentialName : defaultName;

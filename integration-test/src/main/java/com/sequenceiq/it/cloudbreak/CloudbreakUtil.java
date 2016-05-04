@@ -52,7 +52,8 @@ public class CloudbreakUtil {
         return waitForStatus(cloudbreakClient, stackId, desiredStatus, "clusterStatus");
     }
 
-    public static void checkClusterAvailability(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassowrd, boolean checkAmbari) throws Exception {
+    public static void checkClusterAvailability(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
+            boolean checkAmbari) throws Exception {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
 
         Assert.assertEquals(stackResponse.getCluster().getStatus(), "AVAILABLE", "The cluster hasn't been started!");
@@ -104,7 +105,7 @@ public class CloudbreakUtil {
         }
     }
 
-    private static WaitResult  waitForStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus, String statusPath) throws Exception {
+    private static WaitResult waitForStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus, String statusPath) throws Exception {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         String stackStatus = null;
         int retryCount = 0;

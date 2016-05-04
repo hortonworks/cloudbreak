@@ -98,12 +98,12 @@ public class MockPlatformParameters implements PlatformParameters {
     }
 
     private Map<AvailabilityZone, List<VmType>> readVmTypes() {
-        HashMap<AvailabilityZone, List<VmType>> availabilityZoneListHashMap = new HashMap<>();
+        Map<AvailabilityZone, List<VmType>> availabilityZoneListHashMap = new HashMap<>();
         List<AvailabilityZone> availabilityZoneList = new ArrayList<>();
         availabilityZoneList.addAll(getAvailabilityZones(USA_AVAILABILITY_ZONES));
         availabilityZoneList.addAll(getAvailabilityZones(EUROPE_AVAILABILITY_ZONES));
 
-        ArrayList<VmType> vmTypeList = new ArrayList<>();
+        List<VmType> vmTypeList = new ArrayList<>();
         for (MockedVmTypes vmType : MockedVmTypes.values()) {
             vmTypeList.add(VmType.vmTypeWithMeta(vmType.value, vmType.getVmTypeMeta()));
         }

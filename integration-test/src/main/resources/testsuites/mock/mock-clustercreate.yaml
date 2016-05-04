@@ -1,6 +1,7 @@
 name: Mock_simple_smoketest
 parameters: {
-  cloudProvider: MOCK
+  cloudProvider: MOCK,
+  blueprintName: hdp-small-default
 }
 
 tests:
@@ -18,6 +19,7 @@ tests:
   - name: create mock credential
     parameters:
       credentialName: it-mock-credential
+      publicKeyFile: raw:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3JiQtcQT48nn7Ax+yJLJqaWKRzczeJAda6x4JHFRqJW15pAmrSG7ld33V89yHeizAziLfhYYhw6uwN4aDKixS/XreQxZWyK2k/namyr8crFC83n6NNxlDa9DGujg61X8JoE2SyPHSVwhizfyoEmnkeyXJlsn6YtEnKfq23P4Di+p6I9xj7Ay52EzRHKMRMH8Q4kscKfp0taQKdOD2rCO1eOJ7vwCdMLjZc4H6TISk+lwnAJlDfbIdy6SO2jKIJvwoSjehfitWgGp8dGIEcV59GmO2aGlSwCqAwF6S9qP7O++5B5irFKc0TxuIplDSPL/yuCycWvz81FJKLTaUdJ6l
     classes:
       - com.sequenceiq.it.cloudbreak.MockCredentialCreationTest
 
@@ -68,7 +70,7 @@ tests:
       availabilityZone: europe-b,
       clusterName: it-mock-cluster,
       checkAmbari: false,
-      mockPort: 7654
+      mockPort: 9443
     }
     classes:
       - com.sequenceiq.it.cloudbreak.MockStackCreationSuccessTest

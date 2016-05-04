@@ -19,8 +19,7 @@ public class MockAuthenticator implements Authenticator {
     @Override
     public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
         LOGGER.info("Authenticating to mock ...");
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
-        return authenticatedContext;
+        return new AuthenticatedContext(cloudContext, cloudCredential);
     }
 
     @Override

@@ -8,7 +8,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
  */
 public class MockConstants {
 
-    private static final String MOCK = "MOCK";
+    public static final String MOCK = "MOCK";
     public static final Platform MOCK_PLATFORM = Platform.platform(MOCK);
     public static final Variant MOCK_VARIANT = Variant.variant(MOCK);
+
+    private MockConstants() {
+    }
 }

@@ -14,7 +14,6 @@ public class SwarmInfoStub extends RestitoStub {
     private final int serverNumber;
 
     public SwarmInfoStub(int serverNumber) {
-        super();
         this.serverNumber = serverNumber;
     }
 

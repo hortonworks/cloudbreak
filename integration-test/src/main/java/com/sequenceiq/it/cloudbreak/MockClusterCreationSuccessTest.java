@@ -55,8 +55,8 @@ public class MockClusterCreationSuccessTest extends AbstractCloudbreakIntegratio
     }
 
     @Test
-    @Parameters({ "clusterName", "ambariPort", "ambariUser", "ambariPassword", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin", "kerberosPassword",
-            "runRecipesOnHosts", "checkAmbari", "mockPort" })
+    @Parameters({ "clusterName", "ambariPort", "ambariUser", "ambariPassword", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
+            "kerberosPassword", "runRecipesOnHosts", "checkAmbari", "mockPort" })
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("8080") String ambariPort, @Optional("admin") String ambariUser,
             @Optional("admin123!@#") String ambariPassword, @Optional("false") boolean emailNeeded,
             @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword,

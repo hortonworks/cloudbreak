@@ -1,13 +1,17 @@
 package com.sequenceiq.it.ssh;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.PublicKey;
 import java.util.Collections;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.sshd.common.config.keys.FilePasswordProvider;
 import org.apache.sshd.common.keyprovider.AbstractFileKeyPairProvider;
 import org.apache.sshd.common.util.SecurityUtils;
@@ -26,7 +30,7 @@ public class MockSshServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockSshServer.class);
 
     private SshServer sshServer;
-    private boolean started = false;
+    private boolean started;
 
     @Inject
     private ResourceLoader resourceLoader;
@@ -64,10 +68,15 @@ public class MockSshServer {
     }
 
     private File getHostkey() {
-        File hostkey;
         try {
-            hostkey = resourceLoader.getResource("classpath:ssh.pem").getFile();
-            return hostkey;
+            InputStream sshPemInputStream = resourceLoader.getResource("classpath:ssh.pem").getInputStream();
+            File tempFile = new File("ssh.pem");
+            try (OutputStream outputStream = new FileOutputStream(tempFile)) {
+                IOUtils.copy(sshPemInputStream, outputStream);
+            } catch (IOException e) {
+                LOGGER.error("can't write ssh.pem", e);
+            }
+            return tempFile;
         } catch (IOException e) {
             throw new RuntimeException("hostkey not found", e);
         }

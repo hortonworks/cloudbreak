@@ -13,16 +13,15 @@ public abstract class RestitoStub extends Stub {
     public static final String SWARM_API_ROOT = "/swarm/v1.18";
     public static final String CONSUL_API_ROOT = "/v1";
     public static final String AMBARI_API_ROOT = "/api/v1";
-    private boolean initialized = false;
-
     private static ObjectMapper objectMapper = new ObjectMapper();
-
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
+    private boolean initialized;
 
     public RestitoStub() {
         super(Condition.alwaysTrue(), Action.noop());
+    }
+
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 
     public String convertToJson(Object object) {
