@@ -1,6 +1,26 @@
 package com.sequenceiq.cloudbreak.orchestrator.swarm;
 
 
+import static com.github.dockerjava.api.model.RestartPolicy.alwaysRestart;
+import static java.lang.String.format;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.Bind;
@@ -31,25 +51,6 @@ import com.sequenceiq.cloudbreak.orchestrator.swarm.builder.BindsBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.MunchausenBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.SwarmContainerBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.SwarmContainerDeletion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
-import static com.github.dockerjava.api.model.RestartPolicy.alwaysRestart;
-import static java.lang.String.format;
 
 @Component
 public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
@@ -200,7 +201,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         LOGGER.info("Checking if Swarm manager is available and if the agents are registered.");
         List<String> privateAddresses = new ArrayList<>();
         try {
-            DockerClientConfig swarmClientConfig = getSwarmClientConfig(gatewayConfig.getPublicAddress(), gatewayConfig.getCertificateDir());
+            DockerClientConfig swarmClientConfig = getSwarmClientConfig(gatewayConfig.getGatewayUrl(), gatewayConfig.getCertificateDir());
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(swarmClientConfig)
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
                     .build();
@@ -379,11 +380,11 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return nodeResult;
     }
 
-    private DockerClientConfig getSwarmClientConfig(String publicAddress, String certificateDir) {
+    private DockerClientConfig getSwarmClientConfig(String gatewayUrl, String certificateDir) {
         return DockerClientConfig.createDefaultConfigBuilder()
                 .withDockerCertPath(certificateDir)
                 .withVersion("1.18")
-                .withUri("https://" + publicAddress + "/swarm")
+                .withUri(gatewayUrl + "/swarm")
                 .build();
     }
 
@@ -391,7 +392,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         return DockerClientConfig.createDefaultConfigBuilder()
                 .withDockerCertPath(gatewayConfig.getCertificateDir())
                 .withVersion("1.18")
-                .withUri("https://" + gatewayConfig.getPublicAddress() + "/docker")
+                .withUri(gatewayConfig.getGatewayUrl() + "/docker")
                 .build();
     }
 
@@ -403,7 +404,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @VisibleForTesting
     DockerClient swarmClient(GatewayConfig gatewayConfig) {
-        return DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayConfig.getPublicAddress(), gatewayConfig.getCertificateDir()))
+        return DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayConfig.getGatewayUrl(), gatewayConfig.getCertificateDir()))
                 .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl().withReadTimeout(READ_TIMEOUT)).build();
     }
 

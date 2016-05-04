@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -122,6 +123,9 @@ public class StackService {
     private ImageNameUtil imageNameUtil;
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
+
+    @Value("${cb.nginx.port:8443}")
+    private int nginxPort;
 
     @Autowired
     @Qualifier("conversionService")
@@ -261,6 +265,7 @@ public class StackService {
         Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
+        stack.setGatewayPort(nginxPort);
         setPlatformVariant(stack);
         MDCBuilder.buildMdcContext(stack);
         try {

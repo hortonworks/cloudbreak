@@ -521,7 +521,7 @@ public class AmbariClusterFacade implements ClusterFacade {
                     return input.getImage().contains(AMBARI_SERVER.getName());
                 }
             }).get().getHost();
-            ambariClientConfig = new HttpClientConfig(ambariServerAddress);
+            ambariClientConfig = new HttpClientConfig(ambariServerAddress, stack.getGatewayPort());
         }
         return ambariClientConfig;
     }
