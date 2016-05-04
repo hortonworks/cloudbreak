@@ -186,6 +186,9 @@ haveged:
 
 consul:
     privileged: true
+    environment:
+        - http_proxy=$CB_HTTP_PROXY
+        - https_proxy=$CB_HTTPS_PROXY
     volumes:
         - "/var/run/docker.sock:/var/run/docker.sock"
         - "$CB_DB_ROOT_PATH/consul-data:/data"
@@ -248,6 +251,8 @@ identity:
     ports:
         - 8089:8080
     environment:
+        - http_proxy=$CB_HTTP_PROXY
+        - https_proxy=$CB_HTTPS_PROXY
         - SERVICE_NAME=identity
         # - SERVICE_CHECK_HTTP=/login
         - IDENTITY_DB_URL=uaadb.service.consul:5434
@@ -272,6 +277,8 @@ cloudbreak:
         - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
         - SERVICE_NAME=cloudbreak
           #- SERVICE_CHECK_HTTP=/info
+        - http_proxy=$CB_HTTP_PROXY
+        - https_proxy=$CB_HTTPS_PROXY
         - CB_JAVA_OPTS=$CB_JAVA_OPTS
         - CB_CLIENT_ID=$UAA_CLOUDBREAK_ID
         - CB_CLIENT_SECRET=$UAA_CLOUDBREAK_SECRET
@@ -322,6 +329,8 @@ cloudbreak:
 
 sultans:
     environment:
+        - http_proxy=$CB_HTTP_PROXY
+        - https_proxy=$CB_HTTPS_PROXY
         - SL_CLIENT_ID=$UAA_SULTANS_ID
         - SL_CLIENT_SECRET=$UAA_SULTANS_SECRET
         - SERVICE_NAME=sultans
@@ -345,6 +354,8 @@ sultans:
 
 uluwatu:
     environment:
+        - http_proxy=$CB_HTTP_PROXY
+        - https_proxy=$CB_HTTPS_PROXY
         - SERVICE_NAME=uluwatu
           #- SERVICE_CHECK_HTTP=/
         - ULU_OAUTH_REDIRECT_URI=$ULU_OAUTH_REDIRECT_URI
@@ -378,6 +389,8 @@ pcdb:
 
 periscope:
     environment:
+        - http_proxy=$CB_HTTP_PROXY
+        - https_proxy=$CB_HTTPS_PROXY
         - PERISCOPE_DB_HBM2DDL_STRATEGY=$PERISCOPE_DB_HBM2DDL_STRATEGY
         - SERVICE_NAME=periscope
           #- SERVICE_CHECK_HTTP=/info

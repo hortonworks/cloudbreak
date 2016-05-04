@@ -200,6 +200,8 @@ cloudbreak-conf-ui() {
 
 cloudbreak-conf-java() {
     env-import CB_JAVA_OPTS ""
+    env-inport CB_HTTP_PROXY ""
+    env-inport CB_HTTPS_PROXY ""
 }
 
 cloudbreak-conf-baywatch() {
