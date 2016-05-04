@@ -60,7 +60,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
                         + "AND i.instanceGroup.groupName= :groupName "
-                        + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED', 'DECOMMISSIONED', 'FAILED')"),
+                        + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED', 'DECOMMISSIONED', 'FAILED', 'STOPPED')"),
         @NamedQuery(
                 name = "InstanceMetaData.findNotTerminatedByPrivateAddress",
                 query = "SELECT i FROM InstanceMetaData i "

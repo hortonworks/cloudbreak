@@ -22,11 +22,11 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -161,8 +161,8 @@ public class StackSyncService {
         instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
         if (!instance.isTerminated() && !stack.isStopped()) {
             LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
-            deleteResourceIfNeeded(stack, instance);
-            updateMetaDataToTerminated(stack, instance);
+            instance.setInstanceStatus(InstanceStatus.STOPPED);
+            instanceMetaDataRepository.save(instance);
         }
     }
 
@@ -199,6 +199,7 @@ public class StackSyncService {
     }
 
     private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, boolean stackStatusUpdateEnabled) {
+        Set<InstanceMetaData> instances = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         if (instanceStateCounts.get(InstanceSyncState.UNKNOWN) > 0) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE.code()));
@@ -206,13 +207,13 @@ public class StackSyncService {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0 && instanceStateCounts.get(InstanceSyncState.STOPPED) > 0) {
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_DELETED.code()));
+            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(),
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STOPPED_ON_PROVIDER.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
             updateStackStatusIfEnabled(stack.getId(), AVAILABLE, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
-        } else if (instanceStateCounts.get(InstanceSyncState.STOPPED) > 0) {
+        } else if (instanceStateCounts.get(InstanceSyncState.STOPPED).equals(instances.size())) {
             updateStackStatusIfEnabled(stack.getId(), STOPPED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
@@ -304,7 +305,9 @@ public class StackSyncService {
 
     private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData) {
         InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
-        instanceGroup.setNodeCount(instanceGroup.getNodeCount() + 1);
+        if (InstanceStatus.TERMINATED.equals(instanceMetaData.getInstanceStatus())) {
+            instanceGroup.setNodeCount(instanceGroup.getNodeCount() + 1);
+        }
         HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), instanceMetaData.getDiscoveryFQDN());
         if (hostMetadata != null) {
             LOGGER.info("Instance '{}' was found in the cluster metadata, setting it's state to REGISTERED.", instanceMetaData.getInstanceId());

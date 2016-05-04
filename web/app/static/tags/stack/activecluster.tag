@@ -294,18 +294,21 @@
                                                 <td class="col-md-2 text-center" data-title="'host group'"><span class="label label-default">{{instance.instanceGroup}}</span></td>
                                                 <td class="col-md-1 text-center" data-title="'state'">
                                                     <div ng-if="activeCluster.status != 'WAIT_FOR_SYNC' && activeCluster.cluster.status != 'WAIT_FOR_SYNC'">
-                                                        <span ng-if="instance.instanceStatus === 'FAILED' || instance.state === 'UNHEALTHY' || instance.instanceStatus === 'DECOMMISSIONED'" class="label label-danger" style="font-size: 12px;">
-                                                            {{msg.active_cluster_stack_description_hostgroup_unhealthy_label}}
+                                                        <span ng-if="instance.instanceStatus !== 'STOPPED' && (instance.instanceStatus === 'FAILED' || instance.state === 'UNHEALTHY' || instance.instanceStatus === 'DECOMMISSIONED')" class="label label-danger" style="font-size: 12px;">
+                                                                {{msg.active_cluster_stack_description_hostgroup_unhealthy_label}}
                                                         </span>
                                                         <span ng-if="activeCluster.status != 'AVAILABLE' && (instance.instanceStatus == 'REQUESTED' || instance.instanceStatus == 'CREATED' || instance.instanceStatus == 'UNREGISTERED')" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-warning" style="font-size: 12px;">
-                                                        {{msg.active_cluster_stack_description_hostgroup_in_progress_label}}
-                                                      </span>
+                                                            {{msg.active_cluster_stack_description_hostgroup_in_progress_label}}
+                                                        </span>
                                                         <span ng-if="activeCluster.status == 'AVAILABLE' && (instance.instanceStatus == 'CREATED' || instance.instanceStatus == 'UNREGISTERED')" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-warning" style="font-size: 12px;">
-                                                        {{msg.active_cluster_stack_description_hostgroup_unused_label}}
-                                                      </span>
+                                                            {{msg.active_cluster_stack_description_hostgroup_unused_label}}
+                                                        </span>
                                                         <span ng-if="instance.state !== 'UNHEALTHY' && instance.instanceStatus == 'REGISTERED'" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-info" style="font-size: 12px;">
-                                                        {{msg.active_cluster_stack_description_hostgroup_healthy_label}}
-                                                      </span>
+                                                            {{msg.active_cluster_stack_description_hostgroup_healthy_label}}
+                                                        </span>
+                                                        <span ng-if="instance.instanceStatus == 'STOPPED'" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-warning" style="font-size: 12px;">
+                                                            {{msg.active_cluster_stack_description_hostgroup_stopped_label}}
+                                                        </span>
                                                     </div>
                                                     <span ng-if="activeCluster.status == 'WAIT_FOR_SYNC' || activeCluster.cluster.status == 'WAIT_FOR_SYNC'" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-danger" style="font-size: 12px;">
                                                       {{msg.active_cluster_stack_description_hostgroup_unknown_label}}
