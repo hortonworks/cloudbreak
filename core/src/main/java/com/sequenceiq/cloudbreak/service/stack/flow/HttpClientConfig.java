@@ -6,16 +6,19 @@ public class HttpClientConfig {
     private static final String DEFAULT_SERVER_CERT_NAME = "/ca.pem";
 
     private String apiAddress;
+    private Integer apiPort;
     private String serverCert;
     private String clientCert;
     private String clientKey;
 
-    public HttpClientConfig(String apiAddress) {
+    public HttpClientConfig(String apiAddress, Integer apiPort) {
         this.apiAddress = apiAddress;
+        this.apiPort = apiPort;
     }
 
-    public HttpClientConfig(String apiAddress, String certDir) {
+    public HttpClientConfig(String apiAddress, Integer apiPort, String certDir) {
         this.apiAddress = apiAddress;
+        this.apiPort = apiPort;
         if (certDir != null) {
             this.serverCert = certDir + DEFAULT_SERVER_CERT_NAME;
             this.clientCert = certDir + DEFAULT_CLIENT_CERT_NAME;
@@ -25,6 +28,10 @@ public class HttpClientConfig {
 
     public String getApiAddress() {
         return apiAddress;
+    }
+
+    public Integer getApiPort() {
+        return apiPort;
     }
 
     public String getClientCert() {

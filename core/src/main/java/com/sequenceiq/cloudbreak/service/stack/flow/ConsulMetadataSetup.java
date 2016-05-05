@@ -66,7 +66,7 @@ public class ConsulMetadataSetup {
         if (!isSuccess(pollingResult)) {
             throw new WrongMetadataException("Connecting to consul hosts is interrupted.");
         }
-        updateWithConsulData(clientConfig, allInstanceMetaData, Collections.<InstanceMetaData>emptySet());
+        updateWithConsulData(clientConfig, stack, Collections.<InstanceMetaData>emptySet());
         instanceMetaDataRepository.save(allInstanceMetaData);
     }
 
@@ -86,7 +86,7 @@ public class ConsulMetadataSetup {
         if (!isSuccess(pollingResult)) {
             throw new WrongMetadataException("Connecting to consul hosts is interrupted.");
         }
-        updateWithConsulData(clientConfig, stack.getRunningInstanceMetaData(), newInstanceMetadata);
+        updateWithConsulData(clientConfig, stack, newInstanceMetadata);
         instanceMetaDataRepository.save(newInstanceMetadata);
     }
 
@@ -97,7 +97,7 @@ public class ConsulMetadataSetup {
         if (newInstanceMetadata != null) {
             copy.removeAll(newInstanceMetadata);
         }
-        ConsulClient client = createClient(clientConfig);
+        ConsulClient client = createClient(clientConfig, stack.getGatewayPort());
         List<String> privateIps = new ArrayList<>();
         if (newInstanceMetadata == null || newInstanceMetadata.isEmpty()) {
             for (InstanceMetaData instance : originalMetaData) {
@@ -116,14 +116,14 @@ public class ConsulMetadataSetup {
     }
 
     @VisibleForTesting
-    protected void updateWithConsulData(HttpClientConfig clientConfig, Set<InstanceMetaData> originalMetadata,
+    protected void updateWithConsulData(HttpClientConfig clientConfig, Stack stack,
             Set<InstanceMetaData> newInstanceMetadata) {
-        ConsulClient client = createClient(clientConfig);
+        ConsulClient client = createClient(clientConfig, stack.getGatewayPort());
         Map<String, String> members = getAliveMembers(Arrays.asList(client));
         Set<String> consulServers = getConsulServers(Arrays.asList(client));
         Set<InstanceMetaData> metadataToUpdate = new HashSet<>();
         if (newInstanceMetadata == null || newInstanceMetadata.isEmpty()) {
-            metadataToUpdate = originalMetadata;
+            metadataToUpdate = stack.getRunningInstanceMetaData();
         } else {
             metadataToUpdate = newInstanceMetadata;
         }

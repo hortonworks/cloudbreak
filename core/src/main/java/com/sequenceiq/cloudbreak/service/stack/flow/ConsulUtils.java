@@ -27,7 +27,6 @@ public final class ConsulUtils {
     private static final int DEFAULT_TIMEOUT_MS = 5000;
     private static final int ALIVE_STATUS = 1;
     private static final int LEFT_STATUS = 3;
-    private static final int GATEWAY_PORT = 443;
 
     private ConsulUtils() {
         throw new IllegalStateException();
@@ -157,7 +156,7 @@ public final class ConsulUtils {
     }
 
     public static ConsulClient createClient(HttpClientConfig httpClientConfig, int timeout) {
-        return new ConsulClient("https://" + httpClientConfig.getApiAddress(), GATEWAY_PORT,
+        return new ConsulClient("https://" + httpClientConfig.getApiAddress(), httpClientConfig.getApiPort(),
                 httpClientConfig.getClientCert(),
                 httpClientConfig.getClientKey(),
                 httpClientConfig.getServerCert(),

@@ -376,13 +376,13 @@ public class AmbariClusterConnector {
     private AmbariClient getAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        return ambariClientProvider.getAmbariClient(clientConfig, cluster.getUserName(), cluster.getPassword());
+        return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
     }
 
     private AmbariClient getSecureAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        return ambariClientProvider.getSecureAmbariClient(clientConfig, cluster);
+        return ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
     }
 
     public Cluster resetAmbariCluster(Long stackId) throws CloudbreakException {

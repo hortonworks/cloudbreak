@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.service.network.ExposedService.CONSUL;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.CONTAINER_LOGS;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.ELASTIC_SEARCH;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.FALCON;
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.GATEWAY;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.HBASE_MASTER;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.HBASE_MASTER_WEB;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.HBASE_REGION;
@@ -16,11 +15,13 @@ import static com.sequenceiq.cloudbreak.service.network.ExposedService.HBASE_REG
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.HIVE_METASTORE;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.HIVE_SERVER;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.HIVE_SERVER_HTTP;
+import static com.sequenceiq.cloudbreak.service.network.ExposedService.HTTPS;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.JOB_HISTORY_SERVER;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.KIBANA;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.KNOX_GW;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.NAMENODE;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.OOZIE;
+import static com.sequenceiq.cloudbreak.service.network.ExposedService.RANGER;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.RESOURCEMANAGER_IPC;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.RESOURCEMANAGER_SCHEDULER;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.RESOURCEMANAGER_WEB;
@@ -29,7 +30,6 @@ import static com.sequenceiq.cloudbreak.service.network.ExposedService.SPARK_HIS
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SSH;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.STORM;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SWARM;
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.RANGER;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.ZEPPELIN_UI;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.ZEPPELIN_WEB_SOCKET;
 
@@ -49,7 +49,7 @@ public final class NetworkUtils {
     static {
         ports.add(new Port(SSH, "22", "tcp"));
         ports.add(new Port(SSH, "2022", "tcp"));
-        ports.add(new Port(GATEWAY, "443", "tcp"));
+        ports.add(new Port(HTTPS, "443", "tcp"));
         ports.add(new Port(AMBARI, "8080", "tcp"));
         ports.add(new Port(CONSUL, "8500", "tcp"));
         ports.add(new Port(NAMENODE, "50070", "tcp"));
@@ -104,6 +104,7 @@ public final class NetworkUtils {
                     }
                 }
             }
+
         } else {
             result.addAll(ports);
         }
