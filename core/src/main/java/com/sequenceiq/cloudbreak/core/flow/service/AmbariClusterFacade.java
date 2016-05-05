@@ -169,7 +169,7 @@ public class AmbariClusterFacade implements ClusterFacade {
             fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_STARTING, UPDATE_IN_PROGRESS.name());
             clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig);
+            AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(clientConfig, stack.getGatewayPort());
             AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, clientConfig.getApiAddress(), ambariClient);
             PollingResult pollingResult = ambariStartupPollerObjectPollingService
                     .pollWithTimeoutSingleFailure(ambariStartupListenerTask, ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -521,7 +521,7 @@ public class AmbariClusterFacade implements ClusterFacade {
                     return input.getImage().contains(AMBARI_SERVER.getName());
                 }
             }).get().getHost();
-            ambariClientConfig = new HttpClientConfig(ambariServerAddress);
+            ambariClientConfig = new HttpClientConfig(ambariServerAddress, stack.getGatewayPort());
         }
         return ambariClientConfig;
     }
@@ -531,7 +531,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), ambariClientConfig.getApiAddress());
         String userName = cluster.getUserName();
         String password = cluster.getPassword();
-        AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariClientConfig);
+        AmbariClient ambariClient = ambariClientProvider.getDefaultAmbariClient(ambariClientConfig, stack.getGatewayPort());
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {
                 ambariClient.changePassword(ADMIN, ADMIN, password, true);

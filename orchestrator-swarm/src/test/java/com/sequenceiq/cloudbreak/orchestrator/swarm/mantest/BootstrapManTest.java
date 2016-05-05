@@ -7,14 +7,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelContainerRunner;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.swarm.SwarmContainerOrchestrator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BootstrapManTest {
 
@@ -40,7 +41,7 @@ public class BootstrapManTest {
         SwarmContainerOrchestrator o = new SwarmContainerOrchestrator();
         o.init(new SingleContainerRunner(), new NoExit());
 
-        GatewayConfig gatewayConfig = new GatewayConfig("104.41.154.195", "10.0.0.8", "/Users/akanto/prj/cbd-test/certs/stack-4100");
+        GatewayConfig gatewayConfig = new GatewayConfig("104.41.154.195", "10.0.0.8", 8443, "/Users/akanto/prj/cbd-test/certs/stack-4100");
 
         add("10.0.0.8", "104.41.154.195", "cbgateway-3-geza2-20150817160005");
         /*add("10.0.0.7", "23.96.84.101", "hostgroupclient1-2-geza2-20150817155818");
