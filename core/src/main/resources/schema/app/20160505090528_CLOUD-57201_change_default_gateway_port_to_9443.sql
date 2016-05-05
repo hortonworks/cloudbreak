@@ -16,14 +16,14 @@ WHERE name = 'all-services-port';
 UPDATE securityrule SET ports = CONCAT('9443,22,2022,443,8080,8500,50070,8088,8030,8050,',
 '19888,60010,60000,16020,60030,9083,10000,10001,9999,9997,21000,8443,15000,8744,11000,',
 '18080,8042,9996,9995,6080,3080,9200,3376,7070')
-WHERE securitygroup_id = (SELECT id FROM securitygroup WHERE name = 'all-services-port');
+WHERE securitygroup_id IN (SELECT id FROM securitygroup WHERE name = 'all-services-port' AND status='DEFAULT');
 
 UPDATE securitygroup
 SET description = 'Open ports: 22 (SSH) 2022 (SSH) 9443 (Gateway)'
 WHERE name = 'only-ssh-and-ssl';
 
 UPDATE securityrule SET ports = '22,2022,9443'
-WHERE securitygroup_id = (SELECT id FROM securitygroup WHERE name = 'only-ssh-and-ssl');
+WHERE securitygroup_id IN (SELECT id FROM securitygroup WHERE name = 'only-ssh-and-ssl' AND status='DEFAULT');
 
 -- //@UNDO
 -- SQL to undo the change goes here.
@@ -43,11 +43,11 @@ WHERE name = 'all-services-port';
 UPDATE securityrule SET ports = CONCAT('22,2022,443,8080,8500,50070,8088,8030,8050,'
 '19888,60010,60000,16020,60030,9083,10000,10001,9999,9997,21000,8443,15000,8744,11000,'
 '18080,8042,9996,9995,6080,3080,9200,3376,7070')
-WHERE securitygroup_id = (SELECT id FROM securitygroup WHERE name = 'all-services-port');
+WHERE securitygroup_id IN (SELECT id FROM securitygroup WHERE name = 'all-services-port' AND status='DEFAULT');
 
 UPDATE securitygroup
 SET description = 'Open ports: 22 (SSH) 2022 (SSH) 443 (HTTPS)'
 WHERE name = 'only-ssh-and-ssl';
 
 UPDATE securityrule SET ports = '22,2022,443'
-WHERE securitygroup_id = (SELECT id FROM securitygroup WHERE name = 'only-ssh-and-ssl');
+WHERE securitygroup_id IN (SELECT id FROM securitygroup WHERE name = 'only-ssh-and-ssl' AND status='DEFAULT');
