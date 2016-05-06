@@ -86,7 +86,7 @@ public class StackSyncService {
         STACK_SYNC_HOST_UPDATED("stack.sync.host.updated"),
         STACK_SYNC_INSTANCE_TERMINATED("stack.sync.instance.terminated"),
         STACK_SYNC_INSTANCE_DELETED_CBMETADATA("stack.sync.instance.deleted.cbmetadata"),
-        STACK_SYNC_INSTANCE_RUNNING("stack.sync.instance.running"),
+        STACK_SYNC_INSTANCE_UPDATED("stack.sync.instance.updated"),
         STACK_SYNC_INSTANCE_FAILED("stack.sync.instance.failed");
 
         private String code;
@@ -163,6 +163,8 @@ public class StackSyncService {
             LOGGER.info("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.STOPPED);
             instanceMetaDataRepository.save(instance);
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_UPDATED.code(), Arrays.asList(instance.getInstanceId(), "stopped")));
         }
     }
 
@@ -319,7 +321,7 @@ public class StackSyncService {
         instanceMetaDataRepository.save(instanceMetaData);
         instanceGroupRepository.save(instanceGroup);
         eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
-                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_RUNNING.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
+                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_UPDATED.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN(), "running")));
     }
 
 
