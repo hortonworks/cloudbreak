@@ -101,9 +101,9 @@ public class SaltConnectorTest {
         List<String> targets = Arrays.asList("10.0.0.5");
         String targetIps = "S@" + targets.stream().collect(Collectors.joining(" or S@"));
         NetworkInterfaceResponse response = SaltStates.networkInterfaceIP(client, new Compound(targetIps));
-        System.out.println(response.getResult().size());
-        System.out.println(response.getResult());
-        Assert.assertNotNull(response.getResult());
+        System.out.println(response.getResultGroupByHost().size());
+        System.out.println(response.getResultGroupByHost());
+        Assert.assertNotNull(response.getResultGroupByHost());
     }
 
     @Test

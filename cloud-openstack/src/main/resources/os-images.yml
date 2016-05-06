@@ -1,2 +1,2 @@
 openstack:
-  default: docker-centos5-2016-05-04
+  default: host-centos-2016-05-07

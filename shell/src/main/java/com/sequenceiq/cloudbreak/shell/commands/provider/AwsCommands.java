@@ -195,6 +195,6 @@ public class AwsCommands implements CommandMarker {
             params.put("dedicatedInstances", dedicatedInstances.toString());
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold, false,
-                wait, platformVariant, orchestratorType == null ? "ON_HOST" : orchestratorType.getName(), PLATFORM, params);
+                wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, params);
     }
 }

@@ -17,6 +17,14 @@ ambari-server:
     - source: salt://ambari/systemd/ambari-server-init.sh
     - mode: 744
 
+set_install_timeout:
+  file.replace:
+    - name: /etc/ambari-server/conf/ambari.properties
+    - pattern: "agent.package.install.task.timeout=1800"
+    - repl: "agent.package.install.task.timeout=3600"
+    - watch:
+      - pkg: ambari-server
+
 /etc/systemd/system/ambari-server.service:
   file.managed:
     - source: salt://ambari/systemd/ambari-server.service

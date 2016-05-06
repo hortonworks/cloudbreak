@@ -48,7 +48,7 @@ tests:
       stackName: it-azurerm-stack-ss,
       region: North Europe,
       clusterName: it-azurerm-cluster-ss,
-      persistentStorage: cbstore
+      persistentStorage: cbstore,
       sleepTime: 60000
     }
     classes:

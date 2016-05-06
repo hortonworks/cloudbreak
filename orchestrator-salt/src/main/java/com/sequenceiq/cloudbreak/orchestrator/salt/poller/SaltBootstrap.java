@@ -1,24 +1,29 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltBootResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltBootResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-
-import java.util.*;
 
 public class SaltBootstrap implements OrchestratorBootstrap {
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltBootstrap.class);
 
@@ -28,8 +33,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     private final Set<String> originalTargets;
     private Set<String> targets;
 
-    public SaltBootstrap(SaltConnector sc, GatewayConfig gatewayConfig,
-                         Set<String> targets, Set<String> consulServers) {
+    public SaltBootstrap(SaltConnector sc, GatewayConfig gatewayConfig, Set<String> targets, Set<String> consulServers) {
         this.sc = sc;
         this.gatewayConfig = gatewayConfig;
         this.originalTargets = Collections.unmodifiableSet(targets);
@@ -39,9 +43,8 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     @Override
     public Boolean call() throws Exception {
-
         if (!targets.isEmpty()) {
-            LOGGER.info("No missing targets for SaltBootstrap");
+            LOGGER.info("Missing targets for SaltBootstrap: {}", targets);
 
             SaltAction saltAction = createBootstrap();
             SaltBootResponses responses = sc.action(saltAction);
@@ -63,11 +66,15 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             }
         }
 
-
-        Map<String, Boolean> results = SaltStates.ping(sc, Glob.ALL).getResult().get(0);
-        // TODO This is not correct in case of upscale
-        if (originalTargets.size() > results.size()) {
-            throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt: " + results);
+        Map<String, String> networkResult = SaltStates.networkInterfaceIP(sc, Glob.ALL).getResultGroupByIP();
+        originalTargets.forEach(ip -> {
+            if (!networkResult.containsKey(ip)) {
+                LOGGER.info("Salt-minion is not responding on host: {}, yet", ip);
+                targets.add(ip);
+            }
+        });
+        if (!targets.isEmpty()) {
+            throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt: " + targets);
         }
         return true;
     }
@@ -86,7 +93,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             if (!minionIp.equals(getGatewayPrivateIp())) {
                 List<String> roles = new ArrayList<>();
                 roles.add("ambari_agent");
-                roles = appendConsulRole(getGatewayPrivateIp(), roles);
+                roles = appendConsulRole(minionIp, roles);
                 saltAction.addMinion(createMinion(minionIp, roles));
             }
         }
@@ -114,7 +121,4 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         return gatewayConfig.getPrivateAddress();
     }
 
-    public String getGatewayPublicIp() {
-        return gatewayConfig.getPublicAddress();
-    }
 }

@@ -57,7 +57,7 @@
     },
     "orchestrators" : {
         "SWARM": "in docker containers with swarm",
-        "ON_HOST": "on host",
+        "SALT": "on host with salt",
         "MARATHON": "in docker containers with marathon"
     }
 }

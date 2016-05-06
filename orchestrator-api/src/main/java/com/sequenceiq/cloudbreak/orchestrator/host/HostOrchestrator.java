@@ -33,5 +33,5 @@ public interface HostOrchestrator {
 
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
-    void tearDown(GatewayConfig gatewayConfig, List<String> ips) throws CloudbreakOrchestratorException;
+    void tearDown(GatewayConfig gatewayConfig, List<String> hostnames) throws CloudbreakOrchestratorException;
 }

@@ -197,7 +197,7 @@ public class ArmPlatformParameters implements PlatformParameters {
 
     @Override
     public PlatformOrchestrator orchestratorParams() {
-        return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.ON_HOST), orchestrator(OrchestratorConstants.SWARM)),
-                orchestrator(OrchestratorConstants.ON_HOST));
+        return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT), orchestrator(OrchestratorConstants.SWARM)),
+                orchestrator(OrchestratorConstants.SALT));
     }
 }

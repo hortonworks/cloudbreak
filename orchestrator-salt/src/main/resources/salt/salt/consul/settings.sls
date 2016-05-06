@@ -5,7 +5,7 @@
 {% else %}
     {% set is_server = False %}
 {% endif %}
-{% set node_name = salt['grains.get']('host') %}
+{% set node_name = salt['grains.get']('nodename') %}
 {% set recursors = salt['grains.get']('consul:recursors', '8.8.8.8') %}
 {% set bootstrap_expect = salt['pillar.get']('consul:bootstrap_expect', 1) %}
 {% set retry_join = salt['pillar.get']('consul:retry_join') %}

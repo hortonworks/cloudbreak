@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import org.springframework.http.HttpStatus;
+
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 
 public class SaltBootResponse {
 
     private String status;
     private String address;
     private int statusCode;
+    private String version;
 
     public String getStatus() {
         return status;
@@ -33,6 +35,14 @@ public class SaltBootResponse {
         this.statusCode = statusCode;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
     public void assertError() throws CloudbreakOrchestratorFailedException {
         if (this.getStatusCode() != HttpStatus.OK.value()) {
             throw new CloudbreakOrchestratorFailedException(this.toString());
@@ -45,6 +55,7 @@ public class SaltBootResponse {
         sb.append("status='").append(status).append('\'');
         sb.append(", address='").append(address).append('\'');
         sb.append(", statusCode=").append(statusCode);
+        sb.append(", version='").append(version).append('\'');
         sb.append('}');
         return sb.toString();
     }

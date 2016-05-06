@@ -98,7 +98,7 @@ public class SaltConnector implements Closeable {
         }
 
         Client client = builder.build();
-        LOGGER.warn("SaltConnector has been constructed client: {}, sslContext: {}", client, sslContext);
+        LOGGER.info("SaltConnector has been constructed client: {}, sslContext: {}", client, sslContext);
         return client;
     }
 

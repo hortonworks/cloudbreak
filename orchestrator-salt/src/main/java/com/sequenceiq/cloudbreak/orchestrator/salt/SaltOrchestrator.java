@@ -1,5 +1,24 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
+import static java.util.Arrays.asList;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -17,19 +36,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
-import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.ON_HOST;
-import static java.util.Arrays.asList;
 
 @Component
 public class SaltOrchestrator implements HostOrchestrator {
@@ -84,7 +90,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-        Set<String> newAddresses = prepareTargets(gatewayConfig, targets);
+        Set<String> newAddresses = prepareTargets(null, targets);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, newAddresses, Collections.EMPTY_SET);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
@@ -116,9 +122,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void tearDown(GatewayConfig gatewayConfig, List<String> ips) throws CloudbreakOrchestratorException {
+    public void tearDown(GatewayConfig gatewayConfig, List<String> hostnames) throws CloudbreakOrchestratorException {
         try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
-            SaltStates.removeMinions(saltConnector, ips);
+            SaltStates.removeMinions(saltConnector, hostnames);
         } catch (Exception e) {
             LOGGER.error("Error occurred during salt minion tear down", e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -138,15 +144,19 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig) {
         SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug);
-        if (saltConnector.health().getStatusCode() == HttpStatus.OK.value()) {
-            return true;
+        try {
+            if (saltConnector.health().getStatusCode() == HttpStatus.OK.value()) {
+                return true;
+            }
+        } catch (Exception e) {
+            LOGGER.info("Failed to connect to bootstrap app {}", e.getMessage());
         }
         return false;
     }
 
     @Override
     public String name() {
-        return ON_HOST;
+        return SALT;
     }
 
     @Override
@@ -155,7 +165,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private Set<String> prepareTargets(GatewayConfig gatewayConfig, Set<Node> targets) {
-        Set<String> targetList = new HashSet<>(asList(gatewayConfig.getPrivateAddress()));
+        Set<String> targetList = new HashSet<>();
+        if (gatewayConfig != null) {
+            targetList.add(gatewayConfig.getPrivateAddress());
+        }
         for (Node node : targets) {
             targetList.add(node.getPrivateIp());
         }
