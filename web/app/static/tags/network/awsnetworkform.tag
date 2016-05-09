@@ -40,7 +40,7 @@
                         <label class="col-sm-3 control-label" for="aws_networkSubnet">{{msg.network_form_subnet_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="aws_networkSubnet" ng-model="network.subnetCIDR" ng-maxlength="30" id="aws_networkSubnet" placeholder="{{msg.network_form_subnet_placeholder}}" ng-pattern="/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/" required>
+                            <input type="text" class="form-control" name="aws_networkSubnet" ng-model="network.subnetCIDR" ng-maxlength="30" id="aws_networkSubnet" placeholder="{{msg.network_form_subnet_placeholder}}" subnetrvalidation required>
                             <div class="help-block" ng-show="awsNetworkForm_1.aws_networkSubnet.$dirty && awsNetworkForm_1.aws_networkSubnet.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_subnet_invalid}}
                             </div>
@@ -138,7 +138,7 @@
                         <label class="col-sm-3 control-label" for="aws_networkSubnet">{{msg.network_form_subnet_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="aws_networkSubnet" ng-model="network.subnetCIDR" ng-maxlength="30" id="aws_networkSubnet" placeholder="{{msg.network_form_subnet_placeholder}}" ng-pattern="/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/" required>
+                            <input type="text" class="form-control" name="aws_networkSubnet" ng-model="network.subnetCIDR" ng-maxlength="30" id="aws_networkSubnet" placeholder="{{msg.network_form_subnet_placeholder}}" subnetrvalidation required>
                             <div class="help-block" ng-show="awsNetworkForm_2.aws_networkSubnet.$dirty && awsNetworkForm_2.aws_networkSubnet.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_subnet_invalid}}
                             </div>

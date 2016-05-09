@@ -39,7 +39,7 @@
                         <label class="col-sm-3 control-label" for="azure_networkSubnet">{{msg.network_form_subnet_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="azure_networkSubnet" ng-model="network.subnetCIDR" ng-maxlength="30" id="azure_networkSubnet" placeholder="{{msg.network_form_subnet_placeholder}}" ng-pattern="/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/" required>
+                            <input type="text" class="form-control" name="azure_networkSubnet" ng-model="network.subnetCIDR" ng-maxlength="30" id="azure_networkSubnet" placeholder="{{msg.network_form_subnet_placeholder}}" subnetrvalidation required>
                             <div class="help-block" ng-show="azureNetworkForm_1.azure_networkSubnet.$dirty && azureNetworkForm_1.azure_networkSubnet.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_subnet_invalid}}
                             </div>
