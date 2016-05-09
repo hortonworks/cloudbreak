@@ -4,8 +4,11 @@ import static com.sequenceiq.cloudbreak.VersionedApplication.versionedApplicatio
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+
+import com.sequenceiq.cloudbreak.core.init.CloudbreakCleanupAction;
 
 @EnableAutoConfiguration
 @ComponentScan(basePackages = "com.sequenceiq.cloudbreak")
@@ -14,12 +17,18 @@ public class CloudbreakApplication {
 
     public static void main(String[] args) {
         if (!versionedApplication().showVersionInfo(args)) {
+            ConfigurableApplicationContext context = null;
             if (args.length == 0) {
-                SpringApplication.run(CloudbreakApplication.class);
+                context = SpringApplication.run(CloudbreakApplication.class);
             } else {
-                SpringApplication.run(CloudbreakApplication.class, args);
+                context = SpringApplication.run(CloudbreakApplication.class, args);
             }
+            resetStackAndClusterStates(context);
         }
+    }
+
+    private static void resetStackAndClusterStates(ConfigurableApplicationContext context) {
+        context.getBean(CloudbreakCleanupAction.class).resetStates();
     }
 
 }
