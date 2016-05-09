@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
@@ -138,6 +139,9 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private StatusToPollGroupConverter statusToPollGroupConverter;
+
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     private enum Msg {
         AMBARI_CLUSTER_START_IGNORED("ambari.cluster.start.ignored"),
@@ -441,12 +445,27 @@ public class AmbariClusterService implements ClusterService {
             Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
             Map<String, String> hostStatuses = ambariClient.getHostStatuses();
             for (HostMetadata host : hosts) {
-                updateHostMetadataByHostState(stack, host.getHostName(), hostStatuses);
+                if (hostStatuses.containsKey(host.getHostName())) {
+                    HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostStatuses.get(host.getHostName()))
+                            ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
+                    boolean stateChanged = updateHostMetadataByHostState(stack, host.getHostName(), newState);
+                    if (stateChanged && HostMetadataState.HEALTHY == newState) {
+                        updateInstanceMetadataStateToRegistered(stackId, host);
+                    }
+                }
             }
         } catch (CloudbreakSecuritySetupException e) {
             throw new CloudbreakServiceException(e);
         }
         return cluster;
+    }
+
+    private void updateInstanceMetadataStateToRegistered(Long stackId, HostMetadata host) {
+        InstanceMetaData instanceMetaData = instanceMetaDataRepository.findHostInStack(stackId, host.getHostName());
+        if (instanceMetaData != null) {
+            instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
+            instanceMetadataRepository.save(instanceMetaData);
+        }
     }
 
     @Override
@@ -560,19 +579,18 @@ public class AmbariClusterService implements ClusterService {
         return hostGroup;
     }
 
-    private void updateHostMetadataByHostState(Stack stack, String hostName, Map<String, String> hostStatuses) {
-        if (hostStatuses.containsKey(hostName)) {
-            String hostState = hostStatuses.get(hostName);
-            HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
-            HostMetadataState oldState = hostMetadata.getHostMetadataState();
-            HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostState) ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
-            if (!oldState.equals(newState)) {
-                hostMetadata.setHostMetadataState(newState);
-                hostMetadataRepository.save(hostMetadata);
-                eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                        cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
-            }
+    private boolean updateHostMetadataByHostState(Stack stack, String hostName, HostMetadataState newState) {
+        boolean stateChanged = false;
+        HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
+        HostMetadataState oldState = hostMetadata.getHostMetadataState();
+        if (!oldState.equals(newState)) {
+            stateChanged = true;
+            hostMetadata.setHostMetadataState(newState);
+            hostMetadataRepository.save(hostMetadata);
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                    cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
         }
+        return stateChanged;
     }
 
     public ClusterResponse getClusterResponse(ClusterResponse response, String clusterJson) {
