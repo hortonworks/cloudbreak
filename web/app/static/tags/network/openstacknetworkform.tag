@@ -40,7 +40,7 @@
                         <label class="col-sm-3 control-label" for="openstack_networkSubnet">{{msg.network_form_subnet_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="openstack_networkSubnet" ng-model="network.subnetCIDR" ng-maxlength="30" ng-pattern="/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/" id="openstack_networkSubnet" placeholder="{{msg.network_form_subnet_placeholder}}" required>
+                            <input type="text" class="form-control" name="openstack_networkSubnet" ng-model="network.subnetCIDR" ng-maxlength="30" subnetrvalidation id="openstack_networkSubnet" placeholder="{{msg.network_form_subnet_placeholder}}" required>
                             <div class="help-block" ng-show="openStackNetworkForm_1.openstack_networkSubnet.$dirty && openStackNetworkForm_1.openstack_networkSubnet.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_subnet_invalid}}
                             </div>
@@ -127,7 +127,7 @@
                         <label class="col-sm-3 control-label" for="openstack_networkSubnet">{{msg.network_form_subnet_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="openstack_networkSubnet" ng-model="network.subnetCIDR" ng-maxlength="30" ng-pattern="/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/" id="openstack_networkSubnet" placeholder="{{msg.network_form_subnet_placeholder}}" required>
+                            <input type="text" class="form-control" name="openstack_networkSubnet" ng-model="network.subnetCIDR" ng-maxlength="30" subnetrvalidation id="openstack_networkSubnet" placeholder="{{msg.network_form_subnet_placeholder}}" required>
                             <div class="help-block" ng-show="openStackNetworkForm_2.openstack_networkSubnet.$dirty && openStackNetworkForm_2.openstack_networkSubnet.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_subnet_invalid}}
                             </div>
