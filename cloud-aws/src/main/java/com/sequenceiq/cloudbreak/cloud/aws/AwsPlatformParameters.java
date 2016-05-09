@@ -218,7 +218,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
         private final String value;
 
-        private AwsDiskType(String value) {
+        AwsDiskType(String value) {
             this.value = value;
         }
 

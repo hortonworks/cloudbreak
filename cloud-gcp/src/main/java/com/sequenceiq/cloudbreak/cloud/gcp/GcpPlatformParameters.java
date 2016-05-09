@@ -217,7 +217,7 @@ public class GcpPlatformParameters implements PlatformParameters {
 
         private final String value;
 
-        private GcpDiskType(String value) {
+        GcpDiskType(String value) {
             this.value = value;
         }
 

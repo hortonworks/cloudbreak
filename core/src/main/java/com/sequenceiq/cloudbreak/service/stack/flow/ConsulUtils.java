@@ -195,7 +195,7 @@ public final class ConsulUtils {
         private final int max;
         private final int consulServerCount;
 
-        private ConsulServers(int min, int max, int consulServerCount) {
+        ConsulServers(int min, int max, int consulServerCount) {
             this.min = min;
             this.max = max;
             this.consulServerCount = consulServerCount;

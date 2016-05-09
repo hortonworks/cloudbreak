@@ -212,7 +212,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             private final S from;
             private final Builder<S, E> builder;
 
-            public ToBuilder(S from, Builder<S, E> b) {
+            ToBuilder(S from, Builder<S, E> b) {
                 this.from = from;
                 this.builder = b;
             }
@@ -227,7 +227,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             private final S to;
             private final Builder<S, E> builder;
 
-            public WithBuilder(S from, S to, Builder<S, E> b) {
+            WithBuilder(S from, S to, Builder<S, E> b) {
                 this.from = from;
                 this.to = to;
                 this.builder = b;
@@ -245,7 +245,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             private final Builder<S, E> builder;
             private S failure;
 
-            public FailureBuilder(S from, S to, E with, Builder<S, E> b) {
+            FailureBuilder(S from, S to, E with, Builder<S, E> b) {
                 this.from = from;
                 this.to = to;
                 this.with = with;

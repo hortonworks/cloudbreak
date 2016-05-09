@@ -22,7 +22,7 @@
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java"/>
 
     <!-- suppress test classes in generated code -->
-    <suppress checks="IllegalTypeImpl|IllegalCatch|AbstractClassName|EmptyBlock|RedundantThrows|MagicNumberCheck|ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="test|Dummy|Mock"/>
+    <suppress checks="IllegalTypeImpl|IllegalCatch|AbstractClassName|EmptyBlock|MagicNumberCheck|ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="test|Dummy|Mock"/>
 
     <!-- suppress everything in generated code -->
     <suppress checks=".*" files="generated"/>

@@ -13,7 +13,7 @@ tests:
   - name: create gateway template
     parameters: {
       azureTemplateName: it-azurerm-smoke-gateway,
-      azureVmType: Standard_D3,
+      azureVmType: Standard_D4,
       azureVolumeCount: 1,
       azureVolumeSize: 50,
       templateAdditions: "cbgateway,1,GATEWAY"

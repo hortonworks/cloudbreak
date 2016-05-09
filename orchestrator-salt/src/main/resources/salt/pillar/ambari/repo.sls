@@ -1,4 +1,4 @@
 ambari:
-  version: 2.2.2.0-353
-  baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS
-  gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+  version: 2.2.2.0
+  baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates
+  gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins

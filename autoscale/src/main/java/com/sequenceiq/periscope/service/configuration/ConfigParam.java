@@ -12,7 +12,7 @@ public enum ConfigParam {
 
     private final String key;
 
-    private ConfigParam(String key) {
+    ConfigParam(String key) {
         this.key = key;
     }
 

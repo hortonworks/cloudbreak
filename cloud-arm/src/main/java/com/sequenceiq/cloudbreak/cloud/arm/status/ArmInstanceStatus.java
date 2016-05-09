@@ -9,7 +9,7 @@ public enum ArmInstanceStatus {
 
     private final String status;
 
-    private ArmInstanceStatus(String status) {
+    ArmInstanceStatus(String status) {
         this.status = status;
     }
 

@@ -6,7 +6,7 @@ public enum HostResolution {
 
     private String name;
 
-    private HostResolution(String name) {
+    HostResolution(String name) {
         this.name = name;
     }
 

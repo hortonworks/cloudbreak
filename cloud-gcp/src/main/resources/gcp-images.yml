@@ -1,2 +1,2 @@
 gcp:
-  default: sequenceiqimage/cloudbreak-2016-05-08.tar.gz
+  default: sequenceiqimage/cloudbreak-2016-05-10-08-05.tar.gz

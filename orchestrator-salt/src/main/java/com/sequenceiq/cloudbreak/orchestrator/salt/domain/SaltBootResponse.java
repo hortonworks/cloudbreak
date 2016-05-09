@@ -44,8 +44,8 @@ public class SaltBootResponse {
     }
 
     public void assertError() throws CloudbreakOrchestratorFailedException {
-        if (this.getStatusCode() != HttpStatus.OK.value()) {
-            throw new CloudbreakOrchestratorFailedException(this.toString());
+        if (getStatusCode() != HttpStatus.OK.value()) {
+            throw new CloudbreakOrchestratorFailedException(toString());
         }
     }
 

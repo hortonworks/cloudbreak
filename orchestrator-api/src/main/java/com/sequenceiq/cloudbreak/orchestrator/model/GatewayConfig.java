@@ -14,7 +14,8 @@ public class GatewayConfig {
         this(publicAddress, privateAddress, gatewayPort, certificateDir, null, null, null);
     }
 
-    public GatewayConfig(String publicAddress, String privateAddress, Integer gatewayPort, String certificateDir, String serverCert, String clientCert, String clientKey) {
+    public GatewayConfig(String publicAddress, String privateAddress, Integer gatewayPort, String certificateDir, String serverCert, String clientCert,
+            String clientKey) {
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
         this.certificateDir = certificateDir;
@@ -58,13 +59,13 @@ public class GatewayConfig {
 
     @Override
     public String toString() {
-        return "GatewayConfig{" +
-                "publicAddress='" + publicAddress + '\'' +
-                ", privateAddress='" + privateAddress + '\'' +
-                ", certificateDir='" + certificateDir + '\'' +
-                ", serverCert='" + serverCert + '\'' +
-                ", clientCert='" + clientCert + '\'' +
-                ", clientKey='" + clientKey + '\'' +
-                '}';
+        return "GatewayConfig{"
+                + "publicAddress='" + publicAddress + '\''
+                + ", privateAddress='" + privateAddress + '\''
+                + ", certificateDir='" + certificateDir + '\''
+                + ", serverCert='" + serverCert + '\''
+                + ", clientCert='" + clientCert + '\''
+                + ", clientKey='" + clientKey + '\''
+                + '}';
     }
 }

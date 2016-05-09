@@ -158,7 +158,7 @@ public class SecurityConfig {
 
         private UserDetailsService userDetailsService;
 
-        public ScimAccountGroupReaderFilter(UserDetailsService userDetailsService) {
+        ScimAccountGroupReaderFilter(UserDetailsService userDetailsService) {
             this.userDetailsService = userDetailsService;
         }
 

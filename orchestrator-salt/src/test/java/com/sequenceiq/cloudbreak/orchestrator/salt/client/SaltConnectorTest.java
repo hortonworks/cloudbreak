@@ -1,16 +1,24 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.client;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.junit.Assert;
+import org.junit.Before;
+
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.*;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class SaltConnectorTest {
 
@@ -27,7 +35,7 @@ public class SaltConnectorTest {
         client = new SaltConnector(gatewayConfig, true);
     }
 
-   // @Test
+    //@Test
     public void testHealth() {
         client.health();
     }
@@ -70,7 +78,7 @@ public class SaltConnectorTest {
         client.action(saltAction);
     }
 
-    private List<String> appendConsulRole( List<String> consulServers, String minionIp, List<String> roles) {
+    private List<String> appendConsulRole(List<String> consulServers, String minionIp, List<String> roles) {
         if (consulServers.contains(minionIp)) {
             roles.add("consul_server");
         } else {
@@ -88,9 +96,7 @@ public class SaltConnectorTest {
     }
 
 
-
-
-   //@Test
+    //@Test
     public void testRunPing() {
         PingResponse pingResponse = SaltStates.ping(client, Glob.ALL);
         Assert.assertNotNull(pingResponse.getResult());
@@ -101,12 +107,10 @@ public class SaltConnectorTest {
         List<String> targets = Arrays.asList("10.0.0.5");
         String targetIps = "S@" + targets.stream().collect(Collectors.joining(" or S@"));
         NetworkInterfaceResponse response = SaltStates.networkInterfaceIP(client, new Compound(targetIps));
-        System.out.println(response.getResultGroupByHost().size());
-        System.out.println(response.getResultGroupByHost());
         Assert.assertNotNull(response.getResultGroupByHost());
     }
 
-    @Test
+    //@Test
     public void testRunDeleteMinions() {
         List<String> targets = Arrays.asList("10.0.0.5");
         Object object = SaltStates.removeMinions(client, targets);

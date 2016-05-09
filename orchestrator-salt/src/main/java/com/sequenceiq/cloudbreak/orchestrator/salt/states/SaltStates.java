@@ -18,18 +18,19 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 
 public class SaltStates {
 
+    private SaltStates() {
+    }
+
     public static PingResponse ping(SaltConnector sc, Target<String> target) {
         return sc.run(target, "test.ping", LOCAL, null, PingResponse.class);
     }
 
     public static Object highstate(SaltConnector sc, Target<String> target) {
-        Object response = sc.run(target, "state.highstate", LOCAL_ASYNC, null, Object.class);
-        return response;
+        return sc.run(target, "state.highstate", LOCAL_ASYNC, null, Object.class);
     }
 
     public static Object consul(SaltConnector sc, Target<String> target) {
-        Object response = sc.run(target, "state.apply", LOCAL_ASYNC, "consul", Object.class);
-        return response;
+        return sc.run(target, "state.apply", LOCAL_ASYNC, "consul", Object.class);
     }
 
     public static NetworkInterfaceResponse networkInterfaceIP(SaltConnector sc, Target<String> target) {
@@ -54,8 +55,7 @@ public class SaltStates {
         }
         sc.action(saltAction);
 
-        Object response = sc.wheel("key.delete", minionIds, Object.class);
-        return response;
+        return sc.wheel("key.delete", minionIds, Object.class);
     }
 
 }

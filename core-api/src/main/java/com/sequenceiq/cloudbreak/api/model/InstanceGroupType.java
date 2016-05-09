@@ -5,7 +5,7 @@ public enum InstanceGroupType {
 
     private Integer fixedNodeCount;
 
-    private InstanceGroupType(Integer fixedNodeCount) {
+    InstanceGroupType(Integer fixedNodeCount) {
         this.fixedNodeCount = fixedNodeCount;
     }
 

@@ -9,7 +9,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -84,7 +84,7 @@ public class ClusterBootstrapperErrorHandler {
     }
 
     public void terminateFailedNodes(HostOrchestrator hostOrchestrator, ContainerOrchestrator containerOrchestrator,
-                                     Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)
+            Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)
             throws CloudbreakOrchestratorFailedException {
         List<String> allAvailableNode;
         if (hostOrchestrator != null) {

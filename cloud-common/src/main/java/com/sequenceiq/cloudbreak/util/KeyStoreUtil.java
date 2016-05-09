@@ -1,22 +1,31 @@
 package com.sequenceiq.cloudbreak.util;
 
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+
 public class KeyStoreUtil {
+
+    private KeyStoreUtil() throws IllegalAccessException {
+        throw new IllegalAccessException("KeyStoreUtil could not be initalized");
+    }
 
     public static KeyStore createKeyStore(final String clientCertPath, String clientKeyPath) throws Exception {
         KeyPair keyPair = loadPrivateKey(clientKeyPath);
@@ -77,7 +86,7 @@ public class KeyStoreUtil {
 
     }
 
-    private static KeyPair loadPrivateKey(final String clientKeyPath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private static KeyPair loadPrivateKey(final String clientKeyPath) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         File privateKeyFile = new File(clientKeyPath);
         BufferedReader reader = new BufferedReader(new FileReader(privateKeyFile));
 

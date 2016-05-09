@@ -14,7 +14,7 @@ public enum InstanceStatus {
 
     private StatusGroup statusGroup;
 
-    private InstanceStatus(StatusGroup statusGroup) {
+    InstanceStatus(StatusGroup statusGroup) {
         this.statusGroup = statusGroup;
     }
 
