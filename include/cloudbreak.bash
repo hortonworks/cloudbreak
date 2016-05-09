@@ -2,6 +2,7 @@
 cloudbreak-config() {
   : ${BRIDGE_IP:=$(docker run --label cbreak.sidekick=true alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
   env-import PRIVATE_IP $BRIDGE_IP
+  env-import DOCKER_MACHINE ""
   cloudbreak-conf-tags
   cloudbreak-conf-images
   cloudbreak-conf-cert
@@ -126,7 +127,11 @@ cloudbreak-delete-dbs() {
     if is_linux; then
         rm -rf /var/lib/cloudbreak/*
     else
-        boot2docker ssh 'sudo rm -rf /var/lib/boot2docker/cloudbreak/*'
+        local sshcommand='boot2docker ssh'
+        if [[ -n "$DOCKER_MACHINE" ]]; then
+          sshcommand='docker-machine ssh '$DOCKER_MACHINE
+        fi
+        $sshcommand ' sudo rm -rf '${CB_DB_ROOT_PATH}'/*'
     fi
 }
 
