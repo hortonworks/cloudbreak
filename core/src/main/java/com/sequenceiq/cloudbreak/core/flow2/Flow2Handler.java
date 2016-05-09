@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.flow2;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -33,7 +32,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     @Resource
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
 
-    private Map<String, Flow> runningFlows = new ConcurrentHashMap<>();
+    @Inject
+    private FlowRegister runningFlows;
 
     @Inject
     private EventBus eventBus;
@@ -57,7 +57,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             LOGGER.debug("flow finalizing arrived: id: {}", flowId);
             flowLogService.close(payload.getStackId(), flowId);
             Flow flow = runningFlows.remove(flowId);
-            if (flow instanceof ChainFlow) {
+            if (flow instanceof ChainFlow && !flow.isFlowFailed()) {
                 ChainFlow cf = (ChainFlow) flow;
                 sendEvent(cf.nextSelector(), cf.nextPayload(event));
             }
@@ -69,7 +69,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 if (flowConfig != null) {
                     flowId = UUID.randomUUID().toString();
                     Flow flow = flowConfig.createFlow(flowId);
-                    runningFlows.put(flowId, flow);
+                    runningFlows.put(flow);
                     flow.initialize();
                     flowLogService.save(flowId, key, payload, flowConfig.getClass(), flow.getCurrentState());
                     flow.sendEvent(key, payload);
@@ -89,7 +89,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     private void sendEvent(String selector, Object payload) {
         LOGGER.info("Triggering new flow with event: {}", payload);
-        eventBus.notify(selector, new Event(payload));
+        eventBus.notify(selector, new Event<>(payload));
     }
 
     private String getFlowId(Event<?> event) {

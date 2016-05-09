@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
 
 import javax.inject.Inject;
 
@@ -9,14 +12,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 
 @Service
@@ -28,6 +31,8 @@ public class StackStartStopService {
     private FlowMessageService flowMessageService;
     @Inject
     private EmailSenderService emailSenderService;
+    @Inject
+    private ClusterService clusterService;
 
     public void startStackStart(StackStartStopContext context) {
         Stack stack = context.getStack();
@@ -43,9 +48,8 @@ public class StackStartStopService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STARTED, BillingStatus.BILLING_STARTED.name());
     }
 
-    public void handleStackStartError(StackStartStopContext context, StartInstancesResult payload) {
-        LOGGER.error("Error during Stack start flow:", payload.getErrorDetails());
-        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_INFRASTRUCTURE_START_FAILED, Status.AVAILABLE.name());
+    public void handleStackStartError(Stack stack, FlowFailureEvent payload) {
+        handleError(stack, payload.getException(), START_FAILED, Msg.STACK_INFRASTRUCTURE_START_FAILED, "Stack start failed: ");
     }
 
     public void startStackStop(StackStartStopContext context) {
@@ -70,9 +74,8 @@ public class StackStartStopService {
         }
     }
 
-    public void handleStackStopError(StackStartStopContext context, StopInstancesResult payload) {
-        LOGGER.error("Error during Stack stop flow:", payload.getErrorDetails());
-        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_INFRASTRUCTURE_STOP_FAILED, Status.AVAILABLE.name());
+    public void handleStackStopError(Stack stack, FlowFailureEvent payload) {
+        handleError(stack, payload.getException(), STOP_FAILED, Msg.STACK_INFRASTRUCTURE_STOP_FAILED, "Stack stop failed: ");
     }
 
     public boolean isStopPossible(Stack stack) {
@@ -81,6 +84,19 @@ public class StackStartStopService {
         } else {
             LOGGER.info("Stack stop has not been requested, stop stack later.");
             return false;
+        }
+    }
+
+    private void handleError(Stack stack, Exception exception, Status stackStatus, Msg msg, String logMessage) {
+        LOGGER.error(logMessage, exception);
+        stackUpdater.updateStackStatus(stack.getId(), stackStatus, logMessage + exception.getMessage());
+        flowMessageService.fireEventAndLog(stack.getId(), msg, stackStatus.name(), exception.getMessage());
+        if (stack.getCluster() != null) {
+            clusterService.updateClusterStatusByStackId(stack.getId(), STOPPED);
+            if (stack.getCluster().getEmailNeeded()) {
+                emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
+                flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, stackStatus.name());
+            }
         }
     }
 }

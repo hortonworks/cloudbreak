@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -24,6 +25,8 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     @Inject
     private EventBus eventBus;
+    @Inject
+    private FlowRegister runningFlows;
 
     private Class<P> payloadClass;
     private List<PayloadConverter<P>> payloadConverters;
@@ -40,15 +43,18 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     }
 
     @Override
-    public final void execute(StateContext<S, E> context) {
+    public void execute(StateContext<S, E> context) {
+        String flowId = (String) context.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
         P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
-        C flowContext = createFlowContext(context, payload);
+        C flowContext = null;
         try {
+            prepareExecution(context.getExtendedState().getVariables());
+            flowContext = createFlowContext(flowId, context, payload);
             doExecute(flowContext, payload, context.getExtendedState().getVariables());
         } catch (Exception ex) {
             LOGGER.error("Error during execution of " + getClass().getSimpleName(), ex);
             if (failureEvent != null) {
-                sendEvent(flowContext.getFlowId(), failureEvent.stringRepresentation(), getFailurePayload(flowContext, ex));
+                sendEvent(flowId, failureEvent.stringRepresentation(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex));
             } else {
                 LOGGER.error("Missing error handling for " + getClass().getSimpleName());
             }
@@ -75,30 +81,37 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         LOGGER.info("Triggering event: {}", payload);
         Map<String, Object> headers = new HashMap<>();
         headers.put("FLOW_ID", flowId);
-        eventBus.notify(selector, new Event(new Event.Headers(headers), payload));
+        eventBus.notify(selector, new Event<>(new Event.Headers(headers), payload));
     }
 
     protected void initPayloadConverterMap(List<PayloadConverter<P>> payloadConverters) {
         // By default payloadconvertermap is empty.
     }
 
-    protected abstract C createFlowContext(StateContext<S, E> stateContext, P payload);
+    protected void prepareExecution(Map<Object, Object> variables) {
+    }
+
+    protected abstract C createFlowContext(String flowId, StateContext<S, E> stateContext, P payload);
 
     protected abstract void doExecute(C context, P payload, Map<Object, Object> variables) throws Exception;
     protected abstract Selectable createRequest(C context);
-    protected abstract Object getFailurePayload(C flowContext, Exception ex);
+    protected abstract Object getFailurePayload(P payload, Optional<C> flowContext, Exception ex);
 
     private P convertPayload(Object payload) {
         P result = null;
-        if (payload == null || payloadClass.isAssignableFrom(payload.getClass())) {
-            result = (P) payload;
-        } else {
-            for (PayloadConverter<P> payloadConverter : payloadConverters) {
-                if (payloadConverter.canConvert(payload.getClass())) {
-                    result = payloadConverter.convert(payload);
-                    break;
+        try {
+            if (payload == null || payloadClass.isAssignableFrom(payload.getClass())) {
+                result = (P) payload;
+            } else {
+                for (PayloadConverter<P> payloadConverter : payloadConverters) {
+                    if (payloadConverter.canConvert(payload.getClass())) {
+                        result = payloadConverter.convert(payload);
+                        break;
+                    }
                 }
             }
+        } catch (Exception ex) {
+            LOGGER.error("Error happened during payload conversion, converted payload will be null! ", ex);
         }
         return result;
     }

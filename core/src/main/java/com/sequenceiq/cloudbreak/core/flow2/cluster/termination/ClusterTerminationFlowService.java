@@ -67,5 +67,4 @@ public class ClusterTerminationFlowService {
             flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
         }
     }
-
 }

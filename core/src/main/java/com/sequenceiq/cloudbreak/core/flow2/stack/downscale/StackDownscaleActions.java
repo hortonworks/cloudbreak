@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -21,7 +22,10 @@ import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -46,9 +50,8 @@ public class StackDownscaleActions {
                     stackDownscaleService.startStackDownscale(context, payload);
                     sendEvent(context);
                 } else {
-                    sendEvent(context.getFlowId(),
-                            StackDownscaleEvent.DOWNSCALE_FAILURE_EVENT.stringRepresentation(),
-                            getFailurePayload(context, new Exception("Stack downscale wasn't requested.")));
+                    sendEvent(context.getFlowId(), StackDownscaleEvent.DOWNSCALE_FAILURE_EVENT.stringRepresentation(),
+                            getFailurePayload(payload, Optional.ofNullable(context), new Exception("Stack downscale wasn't requested.")));
                 }
             }
 
@@ -87,20 +90,18 @@ public class StackDownscaleActions {
     }
 
     @Bean(name = "DOWNSCALE_FAILED_STATE")
-    public Action stackStartFailedAction() {
-        return new AbstractStackDownscaleAction<DownscaleStackResult>(DownscaleStackResult.class) {
+    public Action stackDownscaleFailedAction() {
+        return new AbstractStackFailureAction<StackDownscaleState, StackDownscaleEvent>() {
             @Override
-            protected void doExecute(StackScalingFlowContext context, DownscaleStackResult payload, Map<Object, Object> variables) throws Exception {
-                stackDownscaleService.handleStackDownscaleError(payload.getErrorDetails());
+            protected void doExecute(StackFailureContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
+                stackDownscaleService.handleStackDownscaleError(payload.getException());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackScalingFlowContext context) {
+            protected Selectable createRequest(StackFailureContext context) {
                 return new SelectableFlowStackEvent(context.getStack().getId(), StackDownscaleEvent.DOWNSCALE_FAIL_HANDLED_EVENT.stringRepresentation());
             }
         };
     }
-
-
 }

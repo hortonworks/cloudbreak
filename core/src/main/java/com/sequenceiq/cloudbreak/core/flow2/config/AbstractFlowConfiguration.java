@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -70,21 +71,21 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     private void configure(StateMachineStateConfigurer<S, E> stateConfig, StateMachineTransitionConfigurer<S, E> transitionConfig,
             FlowEdgeConfig<S, E> flowEdgeConfig, List<Transition<S, E>> transitions) throws Exception {
-        StateConfigurer<S, E> stateConfigurer = stateConfig.withStates()
-                .initial(flowEdgeConfig.initState, flowEdgeConfig.initState.action() != null ? getAction(flowEdgeConfig.initState) : null)
-                .end(flowEdgeConfig.finalState);
+        StateConfigurer<S, E> stateConfigurer = stateConfig.withStates().initial(flowEdgeConfig.initState).end(flowEdgeConfig.finalState);
         ExternalTransitionConfigurer<S, E> transitionConfigurer = null;
         Set<S> failHandled = new HashSet<>();
         for (Transition<S, E> transition : transitions) {
             transitionConfigurer = transitionConfigurer == null ? transitionConfig.withExternal() : transitionConfigurer.and().withExternal();
-            AbstractAction<S, E, ?, ?> action = getAction(transition.target);
-            stateConfigurer.state(transition.target, action, null);
+            AbstractAction<S, E, ?, ?> action = getAction(transition.source);
+            if (action != null) {
+                stateConfigurer.state(transition.source, action, null);
+            }
             transitionConfigurer.source(transition.source).target(transition.target).event(transition.event);
-            if (transition.getFailureEvent() != null && transition.target != flowEdgeConfig.defaultFailureState) {
+            if (action != null && transition.getFailureEvent() != null && transition.target != flowEdgeConfig.defaultFailureState) {
                 action.setFailureEvent(transition.getFailureEvent());
                 S failureState = Optional.fromNullable(transition.getFailureState()).or(flowEdgeConfig.defaultFailureState);
                 stateConfigurer.state(failureState, getAction(failureState), null);
-                transitionConfigurer.and().withExternal().source(transition.target).target(failureState).event(transition.getFailureEvent());
+                transitionConfigurer.and().withExternal().source(transition.source).target(failureState).event(transition.getFailureEvent());
                 if (!failHandled.contains(failureState)) {
                     failHandled.add(failureState);
                     transitionConfigurer.and().withExternal().source(failureState).target(flowEdgeConfig.finalState).event(flowEdgeConfig.failureHandled);
@@ -92,7 +93,6 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             }
         }
         stateConfigurer.state(flowEdgeConfig.finalState, getAction(FlowFinalizeAction.class), null);
-        transitionConfigurer.and().withExternal().source(flowEdgeConfig.lastState).target(flowEdgeConfig.finalState).event(flowEdgeConfig.lastEvent);
     }
 
     protected MachineConfiguration<S, E> getStateMachineConfiguration() {
@@ -132,7 +132,11 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     }
 
     private AbstractAction getAction(String name) {
-        return applicationContext.getBean(name, AbstractAction.class);
+        try {
+            return applicationContext.getBean(name, AbstractAction.class);
+        } catch (NoSuchBeanDefinitionException ex) {
+            return null;
+        }
     }
 
     protected abstract List<Transition<S, E>> getTransitions();
@@ -196,6 +200,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
             public void addTransition(S from, S to, E with, S fail, E withFailure) {
                 transitions.add(new Transition<>(from, to, with, fail, withFailure));
+            }
+
+            public void addTransition(S from, S to, E with) {
+                transitions.add(new Transition<>(from, to, with, null, null));
             }
 
             public List<Transition<S, E>> build() {
@@ -266,22 +274,23 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 builder.addTransition(from, to, with, failure);
                 return builder;
             }
+
+            public Builder<S, E> noFailureEvent() {
+                builder.addTransition(from, to, with);
+                return builder;
+            }
         }
     }
 
     protected static class FlowEdgeConfig<S, E> {
         private final S initState;
         private final S finalState;
-        private final S lastState;
-        private final E lastEvent;
         private final S defaultFailureState;
         private final E failureHandled;
 
-        public FlowEdgeConfig(S initState, S finalState, S lastState, E lastEvent, S defaultFailureState, E failureHandled) {
+        public FlowEdgeConfig(S initState, S finalState, S defaultFailureState, E failureHandled) {
             this.initState = initState;
             this.finalState = finalState;
-            this.lastState = lastState;
-            this.lastEvent = lastEvent;
             this.defaultFailureState = defaultFailureState;
             this.failureHandled = failureHandled;
         }

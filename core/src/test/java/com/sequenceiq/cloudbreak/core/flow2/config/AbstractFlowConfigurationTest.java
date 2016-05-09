@@ -52,11 +52,12 @@ public class AbstractFlowConfigurationTest {
         given(applicationContext.getBean(anyString(), any(Class.class))).willReturn(action);
         transitions = new AbstractFlowConfiguration.Transition.Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
-                .from(State.INIT).to(State.DO).event(Event.START).defaultFailureEvent()
-                .from(State.DO).to(State.DO2).event(Event.CONTINUE).failureState(State.FAILED2).failureEvent(Event.FAILURE2)
-                .from(State.DO2).to(State.FINISH).event(Event.FINISHED).defaultFailureEvent()
+                .from(State.INIT).to(State.DO).event(Event.START).noFailureEvent()
+                .from(State.DO).to(State.DO2).event(Event.CONTINUE).defaultFailureEvent()
+                .from(State.DO2).to(State.FINISH).event(Event.FINISHED).failureState(State.FAILED2).failureEvent(Event.FAILURE2)
+                .from(State.FINISH).to(State.FINAL).event(Event.FINALIZED).defaultFailureEvent()
                 .build();
-        edgeConfig = new FlowConfiguration.FlowEdgeConfig(State.INIT, State.FINAL, State.FINISH, Event.FINALIZED, State.FAILED, Event.FAIL_HANDLED);
+        edgeConfig = new FlowConfiguration.FlowEdgeConfig(State.INIT, State.FINAL, State.FAILED, Event.FAIL_HANDLED);
         underTest.init();
         verify(applicationContext, times(8)).getBean(anyString(), any(Class.class));
         flow = underTest.createFlow("flowId");

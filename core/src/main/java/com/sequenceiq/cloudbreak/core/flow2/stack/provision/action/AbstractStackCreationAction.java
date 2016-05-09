@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.cloudbreak.core.flow2.MessageFactory.HEADERS;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -37,8 +38,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
         super(payloadClass);
     }
 
-    protected StackContext createFlowContext(StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
-        String flowId = (String) stateContext.getMessageHeader(HEADERS.FLOW_ID.name());
+    protected StackContext createFlowContext(String flowId, StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
         Stack stack = stackService.getById(payload.getStackId());
         // TODO LogAspect!!
         MDCBuilder.buildMdcContext(stack);
@@ -51,8 +51,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
     }
 
     @Override
-    protected Object getFailurePayload(StackContext flowContext, Exception ex) {
-        return new FlowFailureEvent(flowContext.getStack().getId(), ex);
+    protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
+        return new FlowFailureEvent(payload.getStackId(), ex);
     }
-
 }

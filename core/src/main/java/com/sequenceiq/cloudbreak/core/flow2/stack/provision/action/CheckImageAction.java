@@ -12,8 +12,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowStackEvent;
+import com.sequenceiq.cloudbreak.core.flow.CloudbreakFlowException;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToFlowStackEventConverter;
@@ -53,7 +54,7 @@ public class CheckImageAction extends AbstractStackCreationAction<FlowStackEvent
                 int faultNum = getFaultNum(variables) + 1;
                 if (faultNum == FAULT_TOLERANCE) {
                     removeFaultNum(variables);
-                    sendEvent(context.getFlowId(), StackCreationEvent.IMAGE_COPY_FAILED_EVENT.stringRepresentation(), payload);
+                    throw new CloudbreakFlowException("Image copy failed.");
                 } else {
                     setFaultNum(variables, faultNum);
                     repeat(context);

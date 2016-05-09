@@ -159,8 +159,7 @@ public class StackCreationService {
         return stackService.getById(stack.getId());
     }
 
-    public void handleStackCreationFailure(StackContext context, Exception errorDetails) {
-        final Stack stack = context.getStack();
+    public void handleStackCreationFailure(Stack stack, Exception errorDetails) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.error("Error during stack creation flow:", errorDetails);
         String errorReason = errorDetails == null ? "Unknown error" : errorDetails.getMessage();

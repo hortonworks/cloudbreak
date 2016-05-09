@@ -22,12 +22,13 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
 
     private static final List<Transition<StackStartState, StackStartEvent>> TRANSITIONS = new Transition.Builder<StackStartState, StackStartEvent>()
             .defaultFailureEvent(START_FAILURE_EVENT)
-            .from(INIT_STATE).to(START_STATE).event(START_EVENT).defaultFailureEvent()
+            .from(INIT_STATE).to(START_STATE).event(START_EVENT).noFailureEvent()
             .from(START_STATE).to(START_FINISHED_STATE).event(START_FINISHED_EVENT).defaultFailureEvent()
+            .from(START_FINISHED_STATE).to(FINAL_STATE).event(START_FINALIZED_EVENT).defaultFailureEvent()
             .build();
 
     private static final FlowEdgeConfig<StackStartState, StackStartEvent> EDGE_CONFIG =
-            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, START_FINISHED_STATE, START_FINALIZED_EVENT, START_FAILED_STATE, START_FAIL_HANDLED_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, START_FAILED_STATE, START_FAIL_HANDLED_EVENT);
 
     public StackStartFlowConfig() {
         super(StackStartState.class, StackStartEvent.class);

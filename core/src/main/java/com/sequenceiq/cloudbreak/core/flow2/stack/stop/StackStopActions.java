@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -31,8 +32,10 @@ import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceCo
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopService;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -92,15 +95,15 @@ public class StackStopActions {
 
     @Bean(name = "STOP_FAILED_STATE")
     public Action stackStopFailedAction() {
-        return new AbstractStackStopAction<StopInstancesResult>(StopInstancesResult.class) {
+        return new AbstractStackFailureAction<StackStopState, StackStopEvent>() {
             @Override
-            protected void doExecute(StackStartStopContext context, StopInstancesResult payload, Map<Object, Object> variables) throws Exception {
-                stackStartStopService.handleStackStopError(context, payload);
+            protected void doExecute(StackFailureContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
+                stackStartStopService.handleStackStopError(context.getStack(), payload);
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackStartStopContext context) {
+            protected Selectable createRequest(StackFailureContext context) {
                 return new SelectableFlowStackEvent(context.getStack().getId(), StackStopEvent.STOP_FAIL_HANDLED_EVENT.stringRepresentation());
             }
         };
@@ -123,8 +126,7 @@ public class StackStopActions {
         }
 
         @Override
-        protected StackStartStopContext createFlowContext(StateContext<StackStopState, StackStopEvent> stateContext, P payload) {
-            String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
+        protected StackStartStopContext createFlowContext(String flowId, StateContext<StackStopState, StackStopEvent> stateContext, P payload) {
             Long stackId = payload.getStackId();
             Stack stack = stackService.getById(stackId);
             MDCBuilder.buildMdcContext(stack);
@@ -137,13 +139,8 @@ public class StackStopActions {
         }
 
         @Override
-        protected Object getFailurePayload(StackStartStopContext flowContext, Exception ex) {
-            List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(flowContext.getInstanceMetaData());
-            List<CloudResource> cloudResources = cloudResourceConverter.convert(flowContext.getStack().getResources());
-            StopInstancesRequest<StopInstancesResult> stopRequest = new StopInstancesRequest<>(flowContext.getCloudContext(), flowContext.getCloudCredential(),
-                    cloudResources, cloudInstances);
-            return new StopInstancesResult(ex.getMessage(), ex, stopRequest);
+        protected Object getFailurePayload(P payload, Optional<StackStartStopContext> flowContext, Exception ex) {
+            return new FlowFailureEvent(payload.getStackId(), ex);
         }
-
     }
 }

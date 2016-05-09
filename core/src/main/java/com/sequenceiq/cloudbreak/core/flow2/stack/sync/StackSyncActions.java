@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -30,17 +31,18 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
-
 
 @Configuration
 public class StackSyncActions {
@@ -88,22 +90,17 @@ public class StackSyncActions {
 
     @Bean(name = "SYNC_FAILED_STATE")
     public  Action stackSyncFailedAction() {
-        return new AbstractStackSyncAction<GetInstancesStateResult>(GetInstancesStateResult.class) {
+        return new AbstractStackFailureAction<StackSyncState, StackSyncEvent>() {
             @Override
-            protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.error("Error during Stack synchronization flow:", payload.getErrorDetails());
+            protected void doExecute(StackFailureContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
+                LOGGER.error("Error during Stack synchronization flow:", payload.getException());
                 flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE, Status.AVAILABLE.name());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackSyncContext context) {
+            protected Selectable createRequest(StackFailureContext context) {
                 return new SelectableFlowStackEvent(context.getStack().getId(), StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.stringRepresentation());
-            }
-
-            @Override
-            protected Object getFailurePayload(StackSyncContext flowContext, Exception ex) {
-                return null;
             }
         };
     }
@@ -123,8 +120,7 @@ public class StackSyncActions {
         }
 
         @Override
-        protected StackSyncContext createFlowContext(StateContext<StackSyncState, StackSyncEvent> stateContext, P payload) {
-            String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
+        protected StackSyncContext createFlowContext(String flowId, StateContext<StackSyncState, StackSyncEvent> stateContext, P payload) {
             Long stackId = payload.getStackId();
             Stack stack = stackService.getById(stackId);
             MDCBuilder.buildMdcContext(stack);
@@ -137,11 +133,8 @@ public class StackSyncActions {
         }
 
         @Override
-        protected Object getFailurePayload(StackSyncContext flowContext, Exception ex) {
-            List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(flowContext.getInstanceMetaData());
-            GetInstancesStateRequest<GetInstancesStateResult> stateRequest =
-                    new GetInstancesStateRequest<>(flowContext.getCloudContext(), flowContext.getCloudCredential(), cloudInstances);
-            return new GetInstancesStateResult(ex.getMessage(), ex, stateRequest);
+        protected Object getFailurePayload(P payload, Optional<StackSyncContext> flowContext, Exception ex) {
+            return new FlowFailureEvent(payload.getStackId(), ex);
         }
     }
 }
