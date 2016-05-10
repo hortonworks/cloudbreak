@@ -22,19 +22,39 @@ public class SaltStates {
     }
 
     public static PingResponse ping(SaltConnector sc, Target<String> target) {
-        return sc.run(target, "test.ping", LOCAL, null, PingResponse.class);
+        return sc.run(target, "test.ping", LOCAL, PingResponse.class);
     }
 
-    public static Object highstate(SaltConnector sc, Target<String> target) {
-        return sc.run(target, "state.highstate", LOCAL_ASYNC, null, Object.class);
+    public static Object ambariServer(SaltConnector sc, Target<String> target) {
+        return applyState(sc, "ambari.server", target);
+    }
+
+    public static Object ambariAgent(SaltConnector sc, Target<String> target) {
+        return applyState(sc, "ambari.agent", target);
+    }
+
+    public static Object kerberos(SaltConnector sc, Target<String> target) {
+        return applyState(sc, "kerberos.server", target);
+    }
+
+    public static Object addRole(SaltConnector sc, Target<String> target, String role) {
+        return sc.run(target, "grains.append", LOCAL, Object.class, "roles", role);
+    }
+
+    public static Object syncGrains(SaltConnector sc) {
+        return sc.run(Glob.ALL, "saltutil.sync_grains", LOCAL, Object.class);
+    }
+
+    public static Object highstate(SaltConnector sc) {
+        return sc.run(Glob.ALL, "state.highstate", LOCAL_ASYNC, Object.class);
     }
 
     public static Object consul(SaltConnector sc, Target<String> target) {
-        return sc.run(target, "state.apply", LOCAL_ASYNC, "consul", Object.class);
+        return applyState(sc, "consul", target);
     }
 
     public static NetworkInterfaceResponse networkInterfaceIP(SaltConnector sc, Target<String> target) {
-        return sc.run(target, "network.interface_ip", LOCAL, "eth0", NetworkInterfaceResponse.class);
+        return sc.run(target, "network.interface_ip", LOCAL, NetworkInterfaceResponse.class, "eth0");
     }
 
     public static Object removeMinions(SaltConnector sc, List<String> hostnames) {
@@ -56,6 +76,10 @@ public class SaltStates {
         sc.action(saltAction);
 
         return sc.wheel("key.delete", minionIds, Object.class);
+    }
+
+    private static Object applyState(SaltConnector sc, String service, Target<String> target) {
+        return sc.run(target, "state.apply", LOCAL_ASYNC, Object.class, service);
     }
 
 }

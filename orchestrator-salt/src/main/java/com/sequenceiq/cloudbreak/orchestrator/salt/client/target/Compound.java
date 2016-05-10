@@ -1,17 +1,24 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.client.target;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 public class Compound implements Target<String> {
 
-    private final String compound;
+    private final Collection<String> nodeIPs;
 
-    public Compound(String compound) {
-        this.compound = compound;
+    public Compound(String nodeIP) {
+        this(Collections.singletonList(nodeIP));
     }
 
+    public Compound(Collection<String> nodeIPs) {
+        this.nodeIPs = nodeIPs;
+    }
 
     @Override
     public String getTarget() {
-        return compound;
+        return "S@" + nodeIPs.stream().collect(Collectors.joining(" or S@"));
     }
 
     @Override

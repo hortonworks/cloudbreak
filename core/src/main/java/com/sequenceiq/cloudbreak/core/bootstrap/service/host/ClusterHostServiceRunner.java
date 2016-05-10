@@ -15,10 +15,12 @@ import javax.inject.Inject;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.HostServiceConfigService;
+import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -31,7 +33,8 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCa
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.ServiceInfo;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -71,8 +74,21 @@ public class ClusterHostServiceRunner {
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp());
-            OrchestrationCredential credential = new OrchestrationCredential(stack.getOrchestrator().getApiEndpoint(), new HashMap<String, Object>());
-            hostOrchestrator.runService(gatewayConfig, agents, credential, clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+            Cluster cluster = stack.getCluster();
+            Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+            if (cluster.isSecure()) {
+                Map<String, Object> krb = new HashMap<>();
+                Map<String, String> kerberosConf = new HashMap<>();
+                kerberosConf.put("masterKey", cluster.getKerberosMasterKey());
+                kerberosConf.put("user", cluster.getKerberosAdmin());
+                kerberosConf.put("password", cluster.getKerberosPassword());
+                kerberosConf.put("realm", "NODE.DC1.CONSUL");
+                kerberosConf.put("domain", "node.dc1.consul");
+                krb.put("kerberos", kerberosConf);
+                servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
+            }
+            SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
+            hostOrchestrator.runService(gatewayConfig, agents, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -80,19 +96,21 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
+    public Map<String, String> addAmbariServices(ClusterScalingContext context) throws CloudbreakException {
         Map<String, String> candidates;
         try {
-            Stack stack = stackRepository.findOneWithLists(stackId);
+            Stack stack = stackRepository.findOneWithLists(context.getStackId());
+            Cluster cluster = stack.getCluster();
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            candidates = collectUpscaleCandidates(stack.getCluster().getId(), hostGroupName, scalingAdjustment);
+            HostGroupAdjustmentJson hostGroupAdjustment = context.getHostGroupAdjustment();
+            candidates = collectUpscaleCandidates(cluster.getId(), hostGroupAdjustment.getHostGroup(),
+                    hostGroupAdjustment.getScalingAdjustment());
             Set<String> agents = initializeNewAmbariAgentServices(stack, candidates);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp());
-            OrchestrationCredential credential = new OrchestrationCredential(stack.getOrchestrator().getApiEndpoint(), new HashMap<>());
-            hostOrchestrator.runService(gatewayConfig, agents, credential, clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+            hostOrchestrator.runService(gatewayConfig, agents, new SaltPillarConfig(), clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {

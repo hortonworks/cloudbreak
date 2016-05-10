@@ -10,3 +10,6 @@ base:
     - match: grain
     - ambari.agent
 
+  'roles:kerberos_server':
+    - match: grain
+    - kerberos.server

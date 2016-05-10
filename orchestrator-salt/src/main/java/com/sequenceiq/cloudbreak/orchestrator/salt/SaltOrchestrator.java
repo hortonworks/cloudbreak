@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -27,11 +28,13 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorCompo
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.AmbariRunBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.ConsulPillarBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.ConsulRunBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -68,8 +71,8 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
 
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            ConsulPillarBootstrap pillarBootstrap = new ConsulPillarBootstrap(sc, consulServers);
-            Callable<Boolean> saltPillarRunner = runner(pillarBootstrap, exitCriteria, exitCriteriaModel);
+            PillarSave consulPillarSave = new PillarSave(sc, consulServers);
+            Callable<Boolean> saltPillarRunner = runner(consulPillarSave, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
@@ -108,9 +111,41 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void runService(GatewayConfig gatewayConfig, Set<String> agents, OrchestrationCredential cred, ExitCriteriaModel exitCriteriaModel)
+    public void runService(GatewayConfig gatewayConfig, Set<String> nodeIPs, SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+            for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
+                PillarSave pillarSave = new PillarSave(sc, propertiesEntry.getValue());
+                Callable<Boolean> saltPillarRunner = runner(pillarSave, exitCriteria, exitCriteriaModel);
+                Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
+                saltPillarRunnerFuture.get();
+            }
+
+            Compound gwTarget = new Compound(gatewayConfig.getPrivateAddress());
+            Compound agentNodes = new Compound(nodeIPs);
+
+            // ambari server
+            SaltStates.addRole(sc, gwTarget, "ambari_server");
+
+            // ambari agent
+            SaltStates.addRole(sc, agentNodes, "ambari_agent");
+
+            // kerberos
+            if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
+                SaltStates.addRole(sc, gwTarget, "kerberos_server");
+            }
+
+            SaltStates.syncGrains(sc);
+            SaltStates.highstate(sc);
+
+
+
+            SaltStates.ambariServer(sc, new Compound(gatewayConfig.getPrivateAddress()));
+            SaltStates.ambariAgent(sc, new Compound(nodeIPs));
+            if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
+                SaltStates.kerberos(sc, new Compound(gatewayConfig.getPrivateAddress()));
+            }
+
             AmbariRunBootstrap ambariRunBootstrap = new AmbariRunBootstrap(sc);
             Callable<Boolean> ambariRunBootstrapRunner = runner(ambariRunBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> ambariRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(ambariRunBootstrapRunner);
