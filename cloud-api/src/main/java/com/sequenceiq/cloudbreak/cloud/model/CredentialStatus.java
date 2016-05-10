@@ -10,7 +10,7 @@ public enum CredentialStatus {
 
     private StatusGroup statusGroup;
 
-    private CredentialStatus(StatusGroup statusGroup) {
+    CredentialStatus(StatusGroup statusGroup) {
         this.statusGroup = statusGroup;
     }
 

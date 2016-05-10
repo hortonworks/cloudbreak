@@ -19,7 +19,7 @@ tests:
   - name: create gateway template
     parameters: {
       azureTemplateName: it-azurerm-smoke-gateway-ssud,
-      azureVmType: Standard_D3,
+      azureVmType: Standard_D4,
       azureVolumeCount: 1,
       azureVolumeSize: 50,
       templateAdditions: "cbgateway,1,GATEWAY"
@@ -54,7 +54,7 @@ tests:
       stackName: it-azurerm-stack-ssud,
       region: North Europe,
       clusterName: it-azurerm-cluster-ssud,
-      persistentStorage: cbstore
+      persistentStorage: cbstore,
       sleepTime: 60000
     }
     classes:

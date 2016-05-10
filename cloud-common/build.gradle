@@ -1,6 +1,6 @@
 apply plugin: 'java'
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 
 repositories {
     maven { url 'http://repo.spring.io/libs-release' }
@@ -20,6 +20,8 @@ dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
     compile group: 'com.google.guava', name: 'guava', version: guavaVersion
     compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
+    compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
+    compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
 
     runtime ('org.springframework.cloud:spring-cloud-starter-consul-config:1.0.0.M6-v3'){
       exclude group: 'com.ecwid.consul';

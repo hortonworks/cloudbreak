@@ -107,3 +107,10 @@ cb:
 
   nginx:
     port: 9443
+
+  host:
+    service:
+        ambari:
+            agent.version: 2.2.1
+            server.version: 2.2.1
+            repo.url: https://raw.githubusercontent.com/sequenceiq/docker-ambari/master/ambari-agent/ambari.repo

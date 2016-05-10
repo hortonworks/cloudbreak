@@ -27,7 +27,7 @@ public enum Hints {
 
     private final String message;
 
-    private Hints(String message) {
+    Hints(String message) {
         this.message = message;
     }
 

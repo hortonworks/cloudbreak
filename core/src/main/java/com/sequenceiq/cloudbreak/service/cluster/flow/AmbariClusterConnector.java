@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_DB;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SWARM;
+import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
+import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_DB;
+import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isFailure;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
@@ -65,6 +66,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakRecipeSetupException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -112,8 +115,6 @@ public class AmbariClusterConnector {
     private static final String UPSCALE_REQUEST_CONTEXT = "Logical Request: Scale Cluster";
     private static final String UPSCALE_REQUEST_STATUS = "IN_PROGRESS";
     private static final String SSSD_CONFIG = "sssd-config-";
-    private static final String SWARM = "SWARM";
-
 
     @Inject
     private StackRepository stackRepository;
@@ -161,6 +162,8 @@ public class AmbariClusterConnector {
     private DefaultConfigProvider defaultConfigProvider;
     @Inject
     private TlsSecurityService tlsSecurityService;
+    @Inject
+    private OrchestratorTypeResolver orchestratorTypeResolver;
 
     private enum Msg {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
@@ -189,6 +192,7 @@ public class AmbariClusterConnector {
     public Cluster buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
         try {
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
 
@@ -211,9 +215,11 @@ public class AmbariClusterConnector {
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
-            executeSssdRecipe(stack, null, cluster.getSssdConfig());
-
-            final boolean recipesFound = recipesPreInstall(stack, cluster, blueprintText, fs, hostGroups);
+            boolean recipesFound = false;
+            if (orchestratorType.containerOrchestrator()) {
+                executeSssdRecipe(stack, null, cluster.getSssdConfig());
+                recipesFound = recipesPreInstall(stack, cluster, blueprintText, fs, hostGroups);
+            }
             String clusterName = cluster.getName();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
             String configStrategy = cluster.getConfigStrategy().name();
@@ -228,7 +234,9 @@ public class AmbariClusterConnector {
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
             pollingResult = waitForClusterInstall(stack, ambariClient);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
-            recipesPostInstall(stack, recipesFound);
+            if (orchestratorType.containerOrchestrator()) {
+                recipesPostInstall(stack, recipesFound);
+            }
             executeSmokeTest(stack, ambariClient);
             //TODO https://hortonworks.jira.com/browse/BUG-51920
             startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
@@ -434,9 +442,9 @@ public class AmbariClusterConnector {
                 stopAllServices(stack, ambariClient);
             }
             // TODO: ambari agent containers should be stopped through the orchestrator API
-            if (!"BYOS".equals(stack.cloudPlatform())) {
-                stopAmbariAgents(stack, null);
-            }
+//            if (!"BYOS".equals(stack.cloudPlatform())) {
+//                stopAmbariAgents(stack, null);
+//            }
         } catch (AmbariConnectionException ex) {
             LOGGER.debug("Ambari not running on the gateway machine, no need to stop it.");
         }
@@ -652,17 +660,17 @@ public class AmbariClusterConnector {
 
     private void startAmbariAgents(Stack stack) throws CloudbreakException {
         LOGGER.info("Starting Ambari agents on the hosts.");
-        try {
-            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
-        } catch (PluginFailureException e) {
-            LOGGER.warn("Ambari agent start event couldn't finish in time, safely ignoring it", e);
-        }
+//        try {
+//            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
+//        } catch (PluginFailureException e) {
+//            LOGGER.warn("Ambari agent start event couldn't finish in time, safely ignoring it", e);
+//        }
         PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
         if (PollingResult.EXIT.equals(hostsJoinedResult)) {
             throw new CancellationException("Cluster was terminated while starting Ambari agents.");
         } else if (PollingResult.TIMEOUT.equals(hostsJoinedResult)) {
             LOGGER.info("Ambari agents couldn't join. Restarting ambari agents...");
-            restartAmbariAgents(stack);
+//            restartAmbariAgents(stack);
         }
     }
 
@@ -874,7 +882,8 @@ public class AmbariClusterConnector {
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private Map<String, List<Map<String, String>>> buildHostGroupAssociations(Set<HostGroup> hostGroups) throws InvalidHostGroupHostAssociation {
+    private Map<String, List<Map<String, String>>> buildHostGroupAssociations(Set<HostGroup> hostGroups)
+            throws InvalidHostGroupHostAssociation {
         Map<String, List<Map<String, String>>> hostGroupMappings = new HashMap<>();
         LOGGER.info("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (HostGroup hostGroup : hostGroups) {

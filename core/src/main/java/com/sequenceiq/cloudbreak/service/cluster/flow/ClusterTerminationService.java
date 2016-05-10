@@ -25,14 +25,14 @@ import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorResolver;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
@@ -64,10 +64,11 @@ public class ClusterTerminationService {
     @Inject
     private ContainerRepository containerRepository;
     @Inject
-    private ContainerOrchestratorResolver orchestratorResolver;
+    private ContainerOrchestratorResolver containerOrchestratorResolver;
     @Inject
     private TlsSecurityService tlsSecurityService;
 
+    //TODO check orchestrators
     public void deleteClusterContainers(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
         try {
@@ -77,7 +78,7 @@ public class ClusterTerminationService {
                 map.putAll(orchestrator.getAttributes().getMap());
                 map.put("certificateDir", tlsSecurityService.prepareCertDir(cluster.getStack().getId()));
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
-                ContainerOrchestrator containerOrchestrator = orchestratorResolver.get(orchestrator.getType());
+                ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
                 Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
                 List<ContainerInfo> containerInfo = FluentIterable.from(containers).transform(new Function<Container, ContainerInfo>() {
                     @Nullable
@@ -128,6 +129,7 @@ public class ClusterTerminationService {
         constraintRepository.delete(constraintsToDelete);
         cluster.getHostGroups().clear();
         cluster.getContainers().clear();
+        cluster.getHostServices().clear();
         clusterRepository.save(cluster);
     }
 

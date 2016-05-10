@@ -7,7 +7,7 @@ public enum CbUserRole {
 
     private final String value;
 
-    private CbUserRole(String value) {
+    CbUserRole(String value) {
         this.value = value;
     }
 

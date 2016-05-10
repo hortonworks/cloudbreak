@@ -119,9 +119,6 @@
         <module name="EmptyBlock" />
         <module name="EmptyStatement" />
         <module name="RedundantModifier" />
-        <module name="RedundantThrows">
-            <property name="suppressLoadErrors" value="true" />
-        </module>
         <module name="ExplicitInitialization" />
         <module name="Regexp">
             <property name="format" value="\bsuper\(\);" />

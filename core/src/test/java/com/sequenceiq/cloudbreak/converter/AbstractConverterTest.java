@@ -29,7 +29,7 @@ public class AbstractConverterTest {
         try {
             field.setAccessible(true);
             assertFalse("Field '" + field.getName() + "' is null.", field.get(obj) == null);
-        } catch (IllegalAccessException|IllegalArgumentException e) {
+        } catch (IllegalAccessException | IllegalArgumentException e) {
             throw new TestException(e.getMessage());
         }
     }

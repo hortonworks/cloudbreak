@@ -204,8 +204,8 @@ subprojects {
   apply plugin: 'maven'
   apply plugin: 'checkstyle'
 
-  sourceCompatibility = 1.7
-  targetCompatibility = 1.7
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
 
   configurations {
     deployerJars
@@ -231,6 +231,10 @@ subprojects {
     }
   }
 
+  checkstyle {
+    toolVersion = "6.0"
+  }
+
   checkstyleMain {
     ignoreFailures = false
     configFile = rootProject.file('config/checkstyle/checkstyle.xml')
@@ -244,10 +248,10 @@ subprojects {
   }
 
   dependencies {
-    checkstyle('com.puppycrawl.tools:checkstyle:5.7') {
+    checkstyle('com.puppycrawl.tools:checkstyle:6.11.1') {
       exclude group: 'com.google.guava'
     }
-    checkstyle("com.google.guava:guava:16.0.1") { force = true }
+    checkstyle("com.google.guava:guava:19.0") { force = true }
   }
 
   repositories {

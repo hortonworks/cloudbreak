@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
+import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
@@ -38,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -201,6 +205,12 @@ public class AwsPlatformParameters implements PlatformParameters {
         return new VmTypes(lists, defaultVmType);
     }
 
+    @Override
+    public PlatformOrchestrator orchestratorParams() {
+        return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT), orchestrator(OrchestratorConstants.SWARM)),
+                orchestrator(OrchestratorConstants.SALT));
+    }
+
     private enum AwsDiskType {
         Standard("standard"),
         Ephemeral("ephemeral"),
@@ -208,7 +218,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
         private final String value;
 
-        private AwsDiskType(String value) {
+        AwsDiskType(String value) {
             this.value = value;
         }
 

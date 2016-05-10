@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.shell.commands.PlatformCommands;
 import com.sequenceiq.cloudbreak.shell.commands.StackCommands;
 import com.sequenceiq.cloudbreak.shell.commands.TemplateCommands;
 import com.sequenceiq.cloudbreak.shell.completion.GcpInstanceType;
+import com.sequenceiq.cloudbreak.shell.completion.GcpOrchestratorType;
 import com.sequenceiq.cloudbreak.shell.completion.GcpVolumeType;
 import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
@@ -182,11 +183,12 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "onFailureAction", mandatory = false, help = "onFailureAction which is ROLLBACK or DO_NOTHING.") OnFailureAction onFailureAction,
             @CliOption(key = "adjustmentType", mandatory = false, help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
             @CliOption(key = "threshold", mandatory = false, help = "threshold of failure") Long threshold,
+            @CliOption(key = "orchestrator", mandatory = false, help = "select orchestrator variant version") GcpOrchestratorType orchestratorType,
             @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         Map<String, String> params = new HashMap<>();
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                false, wait, platformVariant, PLATFORM, params);
+                false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, params);
     }
 
 }

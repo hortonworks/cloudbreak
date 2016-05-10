@@ -1,6 +1,9 @@
 #!/bin/bash
 set -x
 
+# warming up yum in the background
+yum -y install wget &
+
 export CLOUD_PLATFORM="AZURE_RM"
 export START_LABEL=98
 export PLATFORM_DISK_PREFIX=sd

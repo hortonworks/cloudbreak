@@ -32,7 +32,7 @@ public class EndpointRule {
 
         private final String text;
 
-        private Action(String value) {
+        Action(String value) {
             this.text = value;
         }
 

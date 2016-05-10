@@ -1,0 +1,7 @@
+[AMBARI.{{ salt['pillar.get']('ambari:version') }}]
+name=Ambari {{ salt['pillar.get']('ambari:version') }}
+baseurl={{ salt['pillar.get']('ambari:baseurl') }}/{{ salt['pillar.get']('ambari:version') }}/
+gpgcheck=1
+gpgkey={{ salt['pillar.get']('ambari:gpgkey') }}
+enabled=1
+priority=1

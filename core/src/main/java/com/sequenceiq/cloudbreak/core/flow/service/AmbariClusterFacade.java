@@ -11,7 +11,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
@@ -30,17 +29,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterContainerRunner;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterAuthenticationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
@@ -53,8 +54,10 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -111,6 +114,8 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Inject
     private ClusterContainerRunner containerRunner;
     @Inject
+    private ClusterHostServiceRunner hostRunner;
+    @Inject
     private TlsSecurityService tlsSecurityService;
     @Inject
     private AmbariClusterStatusUpdater ambariClusterStatusUpdater;
@@ -120,6 +125,10 @@ public class AmbariClusterFacade implements ClusterFacade {
     private InstanceMetadataService instanceMetadataService;
     @Inject
     private ClusterTerminationService clusterTerminationService;
+    @Inject
+    private HostGroupRepository hostGroupRepository;
+    @Inject
+    private OrchestratorTypeResolver orchestratorTypeResolver;
 
     private enum Msg {
         AMBARI_CLUSTER_BUILDING("ambari.cluster.building"),
@@ -136,6 +145,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         AMBARI_CLUSTER_SCALED_DOWN("ambari.cluster.scaled.down"),
         AMBARI_CLUSTER_RESET("ambari.cluster.reset"),
         AMBARI_CLUSTER_RUN_CONTAINERS("ambari.cluster.run.containers"),
+        AMBARI_CLUSTER_RUN_SERVICES("ambari.cluster.run.services"),
         AMBARI_CLUSTER_CHANGING_CREDENTIAL("ambari.cluster.changing.credential"),
         AMBARI_CLUSTER_CHANGED_CREDENTIAL("ambari.cluster.changed.credential"),
         AMBARI_CLUSTER_START_REQUESTED("ambari.cluster.start.requested"),
@@ -264,14 +274,25 @@ public class AmbariClusterFacade implements ClusterFacade {
         Stack stack = stackService.getById(actualContext.getStackId());
         MDCBuilder.buildMdcContext(stack);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
-        Map<String, List<Container>> containers = containerRunner.addClusterContainers(actualContext);
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
         Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-        for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
-            List<String> hostNames = new ArrayList<>();
-            for (Container container : containersEntry.getValue()) {
-                hostNames.add(container.getHost());
+        if (orchestratorType.containerOrchestrator()) {
+            Map<String, List<Container>> containers = containerRunner.addClusterContainers(actualContext);
+            for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
+                List<String> hostNames = new ArrayList<>();
+                for (Container container : containersEntry.getValue()) {
+                    hostNames.add(container.getHost());
+                }
+                hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
             }
-            hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
+        } else if (orchestratorType.hostOrchestrator()) {
+            Map<String, String> candidates = hostRunner.addAmbariServices(actualContext);
+            for (Map.Entry<String, String> entry : candidates.entrySet()) {
+                if (!hostsPerHostGroup.keySet().contains(actualContext.getHostGroupAdjustment().getHostGroup())) {
+                    hostsPerHostGroup.put(actualContext.getHostGroupAdjustment().getHostGroup(), new ArrayList<String>());
+                }
+                hostsPerHostGroup.get(actualContext.getHostGroupAdjustment().getHostGroup()).add(entry.getKey());
+            }
         }
         clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup);
         Set<String> allHosts = new HashSet<>();
@@ -327,24 +348,45 @@ public class AmbariClusterFacade implements ClusterFacade {
     public FlowContext runClusterContainers(FlowContext context) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
+        Orchestrator orchestrator = stack.getOrchestrator();
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         MDCBuilder.buildMdcContext(stack);
         if (stack.getCluster() != null && cluster.isRequested()) {
             MDCBuilder.buildMdcContext(cluster);
-            stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Running cluster containers.");
-            fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RUN_CONTAINERS, UPDATE_IN_PROGRESS.name());
-            Map<String, List<Container>> containers = containerRunner.runClusterContainers(actualContext);
-            HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, containers.get(AMBARI_SERVER.name()));
-            clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
-            Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-            for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
-                List<String> hostNames = new ArrayList<>();
-                for (Container container : containersEntry.getValue()) {
-                    hostNames.add(container.getHost());
+            stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Running cluster services.");
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
+            if (orchestratorType.containerOrchestrator()) {
+                fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RUN_CONTAINERS, UPDATE_IN_PROGRESS.name());
+                Map<String, List<Container>> containers = containerRunner.runClusterContainers(actualContext);
+                HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack);
+                clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
+                Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
+                for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
+                    List<String> hostNames = new ArrayList<>();
+                    for (Container container : containersEntry.getValue()) {
+                        hostNames.add(container.getHost());
+                    }
+                    hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
                 }
-                hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
+                clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup);
+            } else if (orchestratorType.hostOrchestrator()) {
+                fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RUN_SERVICES, UPDATE_IN_PROGRESS.name());
+                hostRunner.runAmbariServices(actualContext);
+                HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack);
+                clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
+                Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
+                for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+                    String groupName = instanceMetaData.getInstanceGroup().getGroupName();
+                    if (!hostsPerHostGroup.keySet().contains(groupName)) {
+                        hostsPerHostGroup.put(groupName, new ArrayList<String>());
+                    }
+                    hostsPerHostGroup.get(groupName).add(instanceMetaData.getDiscoveryFQDN());
+                }
+                clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup);
+            } else {
+                LOGGER.info(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
+                throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
             }
-            clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup);
             context = new ProvisioningContext.Builder()
                     .setDefaultParams(stack.getId(), actualContext.getCloudPlatform())
                     .build();
@@ -504,26 +546,14 @@ public class AmbariClusterFacade implements ClusterFacade {
         return actualContext;
     }
 
-    private HttpClientConfig buildAmbariClientConfig(Stack stack, List<Container> containers) throws CloudbreakSecuritySetupException {
-        HttpClientConfig ambariClientConfig;
-        if (stack.isInstanceGroupsSpecified()) {
-            Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
-            newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
-            newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
-            instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
-            InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-            ambariClientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
-        } else {
-            String ambariServerAddress = FluentIterable.from(containers).firstMatch(new Predicate<Container>() {
-                @Override
-                public boolean apply(Container input) {
-                    return input.getImage().contains(AMBARI_SERVER.getName());
-                }
-            }).get().getHost();
-            ambariClientConfig = new HttpClientConfig(ambariServerAddress, stack.getGatewayPort());
-        }
-        return ambariClientConfig;
+    private HttpClientConfig buildAmbariClientConfig(Stack stack) throws CloudbreakSecuritySetupException {
+        Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
+        newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
+        newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
+        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
+        InstanceGroup gateway = stack.getGatewayInstanceGroup();
+        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        return tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
     }
 
     private void changeAmbariCredentials(HttpClientConfig ambariClientConfig, Stack stack) throws CloudbreakSecuritySetupException {
@@ -543,7 +573,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     private void updateInstanceMetadataAfterScaling(boolean decommission, String hostName, Stack stack) {
-        if (!"BYOS".equals(stack.cloudPlatform())) {
+        if (!CloudConstants.BYOS.equals(stack.cloudPlatform())) {
             if (decommission) {
                 stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
             } else {

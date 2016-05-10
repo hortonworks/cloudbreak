@@ -1,0 +1,16 @@
+[Install]
+WantedBy=multi-user.target
+
+[Unit]
+Description=Consul Service
+Wants=network-online.target
+After=network.service network.target network-online.target
+
+[Service]
+Restart=on-failure
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+ExecStart=/usr/sbin/consul agent -config-dir=/etc/cloudbreak/consul/
+ExecStop=/opt/consul/stop.sh

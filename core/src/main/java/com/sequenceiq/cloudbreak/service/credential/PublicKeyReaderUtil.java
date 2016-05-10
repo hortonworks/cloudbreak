@@ -168,7 +168,7 @@ public final class PublicKeyReaderUtil {
 
         private int pos;
 
-        public SSH2DataBuffer(final byte[] data) {
+        SSH2DataBuffer(final byte[] data) {
             this.data = data;
         }
 

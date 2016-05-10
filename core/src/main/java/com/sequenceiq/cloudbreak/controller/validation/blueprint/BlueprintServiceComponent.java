@@ -5,12 +5,12 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 
-class BlueprintServiceComponent {
+public class BlueprintServiceComponent {
     private String name;
     private int nodeCount;
     private List<String> hostgroups;
 
-    public BlueprintServiceComponent(String name, String hostgroup, int nodeCount) {
+    BlueprintServiceComponent(String name, String hostgroup, int nodeCount) {
         this.name = name;
         this.nodeCount = nodeCount;
         this.hostgroups = Lists.newArrayList(hostgroup);

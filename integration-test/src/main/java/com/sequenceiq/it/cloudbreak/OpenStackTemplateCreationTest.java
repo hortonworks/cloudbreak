@@ -35,6 +35,7 @@ public class OpenStackTemplateCreationTest extends AbstractCloudbreakIntegration
         templateRequest.setName(templateName);
         templateRequest.setDescription("OpenStack template for integration testing");
         templateRequest.setCloudPlatform("OPENSTACK");
+        templateRequest.setVolumeType("HDD");
         templateRequest.setInstanceType(instanceType);
         templateRequest.setVolumeCount(Integer.valueOf(volumeCount));
         templateRequest.setVolumeSize(Integer.valueOf(volumeSize));

@@ -58,6 +58,9 @@ var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'block
             Config.prototype.getRegion = function(provider, nameId) {
                 return this.getValue(this.region, provider, nameId);
             };
+            Config.prototype.getOrchestrator = function(provider, nameId) {
+                return this.getValue(this.orchestrators, provider, nameId);
+            };
             Config.prototype.getRegionById = function(nameId) {
                 var self = this,
                     result = nameId;
@@ -253,6 +256,8 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.params.defaultVmTypes = initconf.virtualMachines.defaultVirtualMachines;
                 $rootScope.params.platformVariants = initconf.variants.platformToVariants;
                 $rootScope.params.defaultVariants = initconf.variants.defaultVariants;
+                $rootScope.params.orchestrators = initconf.orchestrators.orchestrators;
+                $rootScope.params.defaultOrchestrators = initconf.orchestrators.defaults;
             } else {
                 $rootScope.params = {};
                 $rootScope.params.regions = {};
@@ -265,6 +270,8 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.params.defaultVmTypes = {};
                 $rootScope.params.platformVariants = {};
                 $rootScope.params.defaultVariants = {};
+                $rootScope.params.orchestrators = {};
+                $rootScope.params.defaultOrchestrators = {};
             }
         }
     ])

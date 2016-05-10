@@ -1,0 +1,28 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    baseName = 'orchestrator-salt'
+}
+
+dependencies {
+    compile project(':orchestrator-api')
+    compile project(':cloud-common')
+
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
+    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
+
+    compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
+
+    compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+    compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+    compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+    compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
+    compile group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: '4.5.1'
+
+    testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
+    testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+}

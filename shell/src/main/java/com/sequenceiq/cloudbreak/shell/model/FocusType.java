@@ -7,7 +7,7 @@ public enum FocusType {
 
     private final String prefix;
 
-    private FocusType(String prefix) {
+    FocusType(String prefix) {
         this.prefix = prefix;
     }
 

@@ -1,6 +1,9 @@
 #!/bin/bash
 set -x
 
+# warming up yum in the background
+yum -y install wget &
+
 export CLOUD_PLATFORM="${cloudPlatform}"
 export START_LABEL=${platformDiskStartLabel}
 export PLATFORM_DISK_PREFIX=${platformDiskPrefix}

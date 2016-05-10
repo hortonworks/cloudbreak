@@ -102,7 +102,7 @@ public class SimpleStackFacade implements StackFacade {
             MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
             fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_INFRASTRUCTURE_BOOTSTRAP, UPDATE_IN_PROGRESS.name());
-            clusterBootstrapper.bootstrapCluster(actualContext);
+            clusterBootstrapper.bootstrapMachines(actualContext);
         } catch (Exception e) {
             LOGGER.error("Error occurred while bootstrapping container orchestrator: {}", e.getMessage());
             throw new CloudbreakException(e);

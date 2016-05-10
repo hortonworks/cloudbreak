@@ -13,7 +13,7 @@ public enum NovaInstanceStatus {
 
     private final String status;
 
-    private NovaInstanceStatus(String status) {
+    NovaInstanceStatus(String status) {
         this.status = status;
     }
 

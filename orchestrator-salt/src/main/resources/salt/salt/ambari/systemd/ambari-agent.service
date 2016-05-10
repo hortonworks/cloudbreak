@@ -1,0 +1,19 @@
+[Install]
+WantedBy=multi-user.target
+
+[Unit]
+Description=Ambari Agent Service
+After=network.target network.service consul.service
+
+[Service]
+Type=forking
+PIDFile=/var/run/ambari-agent/ambari-agent.pid
+Restart=no
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+RemainAfterExit=yes
+ExecStartPre=/opt/ambari-agent/ambari-agent-init.sh
+ExecStart=/usr/sbin/ambari-agent start
+ExecStop=/usr/sbin/ambari-agent stop

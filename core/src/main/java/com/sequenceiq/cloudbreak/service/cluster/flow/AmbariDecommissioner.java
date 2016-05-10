@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.orchestrator.containers.DockerContainer.AMBARI_AGENT;
+import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
@@ -24,10 +24,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,20 +43,28 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerOrchestratorResolver;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.HostService;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.orchestrator.ContainerOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
+import com.sequenceiq.cloudbreak.repository.HostServiceRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -112,11 +122,17 @@ public class AmbariDecommissioner {
     @Inject
     private HostFilterService hostFilterService;
     @Inject
-    private ContainerOrchestratorResolver orchestratorResolver;
+    private ContainerOrchestratorResolver containerOrchestratorResolver;
     @Inject
     private ContainerRepository containerRepository;
     @Inject
     private TlsSecurityService tlsSecurityService;
+    @Inject
+    private OrchestratorTypeResolver orchestratorTypeResolver;
+    @Inject
+    private HostOrchestratorResolver hostOrchestratorResolver;
+    @Inject
+    private HostServiceRepository hostServiceRepository;
 
     private enum Msg {
         AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup");
@@ -179,7 +195,7 @@ public class AmbariDecommissioner {
     public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
         boolean hostDeleted = false;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig,  stack.getGatewayPort(), stack.getCluster());
+        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), stack.getCluster());
         Set<String> components = getHadoopComponents(ambariClient, data.getHostGroup().getName(), stack.getCluster().getBlueprint().getBlueprintName());
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());
@@ -330,32 +346,50 @@ public class AmbariDecommissioner {
         Map<String, Object> map = new HashMap<>();
         map.putAll(orchestrator.getAttributes().getMap());
         map.put("certificateDir", tlsSecurityService.prepareCertDir(stack.getId()));
-        OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
-        ContainerOrchestrator containerOrchestrator = orchestratorResolver.get(orchestrator.getType());
-        Set<Container> containers = containerRepository.findContainersInCluster(stack.getCluster().getId());
-
-        List<ContainerInfo> containersToDelete = FluentIterable.from(containers)
-                .filter(new Predicate<Container>() {
-                    @Override
-                    public boolean apply(Container input) {
-                        return hostList.contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName());
-                    }
-                }).transform(new Function<Container, ContainerInfo>() {
-                    @Nullable
-                    @Override
-                    public ContainerInfo apply(Container input) {
-                        return new ContainerInfo(input.getContainerId(), input.getName(), input.getHost(), input.getImage());
-                    }
-                }).toList();
-
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         try {
-            containerOrchestrator.deleteContainer(containersToDelete, credential);
-            containerRepository.delete(containers);
-            PollingResult pollingResult = waitForHostsToLeave(stack, ambariClient, hostList);
-            if (isTimeout(pollingResult)) {
-                LOGGER.warn("Ambari agent stop timed out, delete the hosts anyway, hosts: {}", hostList);
-            }
-            if (!isExited(pollingResult)) {
+            if (orchestratorType.containerOrchestrator()) {
+                OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
+                ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
+                Set<Container> containers = containerRepository.findContainersInCluster(stack.getCluster().getId());
+
+                List<ContainerInfo> containersToDelete = FluentIterable.from(containers)
+                        .filter(new Predicate<Container>() {
+                            @Override
+                            public boolean apply(Container input) {
+                                return hostList.contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName());
+                            }
+                        }).transform(new Function<Container, ContainerInfo>() {
+                            @Nullable
+                            @Override
+                            public ContainerInfo apply(Container input) {
+                                return new ContainerInfo(input.getContainerId(), input.getName(), input.getHost(), input.getImage());
+                            }
+                        }).toList();
+
+
+                containerOrchestrator.deleteContainer(containersToDelete, credential);
+                containerRepository.delete(containers);
+                PollingResult pollingResult = waitForHostsToLeave(stack, ambariClient, hostList);
+                if (isTimeout(pollingResult)) {
+                    LOGGER.warn("Ambari agent stop timed out, delete the hosts anyway, hosts: {}", hostList);
+                }
+                if (!isExited(pollingResult)) {
+                    deleteHosts(stack, hostList, components);
+                }
+            } else if (orchestratorType.hostOrchestrator()) {
+                Set<HostService> hostServices = hostServiceRepository.findServicesInCluster(stack.getCluster().getId());
+                Set<HostService> hostServicesToDelete = hostServices
+                        .stream().parallel()
+                        .filter(service -> hostList.contains(service.getHost()))
+                        .collect(Collectors.toSet());
+                HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+                InstanceGroup gateway = stack.getGatewayInstanceGroup();
+                InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+                GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
+                        stack.getGatewayPort(), gatewayInstance.getPrivateIp());
+                hostOrchestrator.tearDown(gatewayConfig, hostList);
+                hostServiceRepository.delete(hostServicesToDelete);
                 deleteHosts(stack, hostList, components);
             }
         } catch (CloudbreakOrchestratorException e) {
