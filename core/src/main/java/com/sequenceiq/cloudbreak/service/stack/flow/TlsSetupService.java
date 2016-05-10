@@ -4,8 +4,6 @@ import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processT
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -194,31 +192,30 @@ public class TlsSetupService {
         try {
             ZipOutputStream zout = new ZipOutputStream(baos);
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Map<String, List<File>> structure = new TreeMap<>();
+            Map<String, List<Resource>> structure = new TreeMap<>();
             for (Resource resource : resolver.getResources("classpath*:salt/**")) {
-                File file = resource.getFile();
-                String path = file.getPath();
+                String path = resource.getURL().getPath();
                 String dir = path.substring(path.indexOf("/salt") + "/salt".length(), path.lastIndexOf("/") + 1);
-                List<File> list = structure.get(dir);
+                List<Resource> list = structure.get(dir);
                 if (list == null) {
                     list = new ArrayList<>();
                 }
                 structure.put(dir, list);
-                if (!file.isDirectory()) {
-                    list.add(file);
+                if (!path.endsWith("/")) {
+                    list.add(resource);
                 }
             }
             for (String dir : structure.keySet()) {
                 zout.putNextEntry(new ZipEntry(dir));
-                for (File file : structure.get(dir)) {
-                    LOGGER.info("Zip salt entry: {}", file.getName());
-                    zout.putNextEntry(new ZipEntry(dir + file.getName()));
-                    FileInputStream fis = new FileInputStream(file);
-                    ByteArrayOutputStream outputStream = IOUtils.readFully(fis);
+                for (Resource resource : structure.get(dir)) {
+                    LOGGER.info("Zip salt entry: {}", resource.getFilename());
+                    zout.putNextEntry(new ZipEntry(dir + resource.getFilename()));
+                    InputStream inputStream = resource.getInputStream();
+                    ByteArrayOutputStream outputStream = IOUtils.readFully(inputStream);
                     byte[] bytes = outputStream.toByteArray();
                     zout.write(bytes);
                     zout.closeEntry();
-                    fis.close();
+                    outputStream.close();
                 }
             }
             zout.close();
