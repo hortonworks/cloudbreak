@@ -22,13 +22,4 @@ enum StackTerminationEvent implements FlowEvent {
     public String stringRepresentation() {
         return stringRepresentation;
     }
-
-    public static StackTerminationEvent fromString(String stringRepresentiation) {
-        for (StackTerminationEvent event : StackTerminationEvent.values()) {
-            if (stringRepresentiation.equalsIgnoreCase(event.stringRepresentation)) {
-                return event;
-            }
-        }
-        return null;
-    }
 }

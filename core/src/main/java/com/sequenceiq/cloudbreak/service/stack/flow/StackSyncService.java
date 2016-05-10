@@ -177,7 +177,7 @@ public class StackSyncService {
             instanceMetaDataRepository.save(instance);
             eventService.fireCloudbreakEvent(stack.getId(), CREATE_FAILED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_FAILED.code(), Arrays.asList(instance.getDiscoveryFQDN())));
-        } else if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated() && !instance.isFailed()) {
+        } else if (!instance.isRegistered() && !instance.isDecommissioned() && !instance.isCreated() && !instance.isFailed()) {
             LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
             updateMetaDataToRunning(stack.getId(), stack.getCluster(), instance);
         }
@@ -315,8 +315,8 @@ public class StackSyncService {
             LOGGER.info("Instance '{}' was found in the cluster metadata, setting it's state to REGISTERED.", instanceMetaData.getInstanceId());
             instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
         } else {
-            LOGGER.info("Instance '{}' was not found in the cluster metadata, setting it's state to UNREGISTERED.", instanceMetaData.getInstanceId());
-            instanceMetaData.setInstanceStatus(InstanceStatus.UNREGISTERED);
+            LOGGER.info("Instance '{}' was not found in the cluster metadata, setting it's state to CREATED.", instanceMetaData.getInstanceId());
+            instanceMetaData.setInstanceStatus(InstanceStatus.CREATED);
         }
         instanceMetaDataRepository.save(instanceMetaData);
         instanceGroupRepository.save(instanceGroup);

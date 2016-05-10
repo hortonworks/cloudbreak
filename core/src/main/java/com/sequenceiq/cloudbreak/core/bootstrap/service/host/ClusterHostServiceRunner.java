@@ -15,12 +15,10 @@ import javax.inject.Inject;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.HostServiceConfigService;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -82,14 +80,12 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public Map<String, String> addAmbariServices(ClusterScalingContext context) throws CloudbreakException {
+    public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
         Map<String, String> candidates;
         try {
-            Stack stack = stackRepository.findOneWithLists(context.getStackId());
+            Stack stack = stackRepository.findOneWithLists(stackId);
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            HostGroupAdjustmentJson hostGroupAdjustment = context.getHostGroupAdjustment();
-            candidates = collectUpscaleCandidates(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup(),
-                    hostGroupAdjustment.getScalingAdjustment());
+            candidates = collectUpscaleCandidates(stack.getCluster().getId(), hostGroupName, scalingAdjustment);
             Set<String> agents = initializeNewAmbariAgentServices(stack, candidates);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();

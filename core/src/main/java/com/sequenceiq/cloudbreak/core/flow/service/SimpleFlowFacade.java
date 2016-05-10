@@ -262,21 +262,6 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext upscaleCluster(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Upscaling of cluster. Context: {}", context);
-        try {
-            context = clusterFacade.upscaleCluster(context);
-            LOGGER.debug("Upscaling of cluster is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the upscaling of cluster: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
     public FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Bootstrapping new nodes. Context: {}", context);
         try {
@@ -297,21 +282,6 @@ public class SimpleFlowFacade implements FlowFacade {
         try {
             context = stackFacade.extendConsulMetadata(context);
             LOGGER.debug("Extending Consul metadata is finished.");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the upscaling of cluster nodes prepare: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext addClusterContainers(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Adding cluster containers. Context: {}", context);
-        try {
-            context = clusterFacade.addClusterContainers(context);
-            LOGGER.debug("'Adding cluster containers' phase is finished.");
             return context;
         } catch (CloudbreakException e) {
             throw e;

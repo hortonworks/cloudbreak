@@ -55,10 +55,9 @@ public class AmbariOperationService {
                 desiredOperationStatus, ambariOperationType), AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_OPS, MAX_FAILURE_COUNT);
     }
 
-    public PollingResult waitForOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask task,
+    public PollingResult waitForOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask<AmbariOperations> task,
             Map<String, Integer> operationRequests, AmbariOperationType ambariOperationType) {
         return operationsPollingService.pollWithTimeout(task, new AmbariOperations(stack, ambariClient, operationRequests, ambariOperationType),
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_OPS, MAX_FAILURE_COUNT);
     }
-
 }

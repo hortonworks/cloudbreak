@@ -39,7 +39,11 @@ public enum Msg {
     CLUSTER_DELETE_COMPLETED("ambari.cluster.delete.completed"),
     CLUSTER_EMAIL_SENT("ambari.cluster.notification.email"),
     CLUSTER_DELETE_FAILED("ambari.cluster.delete.failed"),
-    STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP("stack.scaling.terminating.host.from.hostgroup");
+    STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP("stack.scaling.terminating.host.from.hostgroup"),
+    AMBARI_CLUSTER_SCALING_UP("ambari.cluster.scaling.up"),
+    AMBARI_CLUSTER_SCALED_UP("ambari.cluster.scaled.up"),
+    AMBARI_CLUSTER_NOTIFICATION_EMAIL("ambari.cluster.notification.email"),
+    AMBARI_CLUSTER_SCALING_FAILED("ambari.cluster.scaling.failed");
 
     private String code;
 

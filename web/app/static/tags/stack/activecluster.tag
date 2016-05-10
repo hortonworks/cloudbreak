@@ -297,10 +297,10 @@
                                                         <span ng-if="instance.instanceStatus !== 'STOPPED' && (instance.instanceStatus === 'FAILED' || instance.state === 'UNHEALTHY' || instance.instanceStatus === 'DECOMMISSIONED')" class="label label-danger" style="font-size: 12px;">
                                                                 {{msg.active_cluster_stack_description_hostgroup_unhealthy_label}}
                                                         </span>
-                                                        <span ng-if="activeCluster.status != 'AVAILABLE' && (instance.instanceStatus == 'REQUESTED' || instance.instanceStatus == 'CREATED' || instance.instanceStatus == 'UNREGISTERED')" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-warning" style="font-size: 12px;">
+                                                        <span ng-if="activeCluster.status != 'AVAILABLE' && (instance.instanceStatus == 'REQUESTED' || instance.instanceStatus == 'CREATED')" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-warning" style="font-size: 12px;">
                                                             {{msg.active_cluster_stack_description_hostgroup_in_progress_label}}
                                                         </span>
-                                                        <span ng-if="activeCluster.status == 'AVAILABLE' && (instance.instanceStatus == 'CREATED' || instance.instanceStatus == 'UNREGISTERED')" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-warning" style="font-size: 12px;">
+                                                        <span ng-if="activeCluster.status == 'AVAILABLE' && instance.instanceStatus == 'CREATED'" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-warning" style="font-size: 12px;">
                                                             {{msg.active_cluster_stack_description_hostgroup_unused_label}}
                                                         </span>
                                                         <span ng-if="instance.state !== 'UNHEALTHY' && instance.instanceStatus == 'REGISTERED'" title="{{msg.active_cluster_stack_description_hostgroup_state_tooltip}}" class="label label-info" style="font-size: 12px;">

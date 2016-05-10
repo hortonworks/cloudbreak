@@ -8,8 +8,8 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class AmbariOperations extends StackContext {
 
-    private AmbariClient ambariClient;
-    private AmbariOperationType ambariOperationType;
+    private final AmbariClient ambariClient;
+    private final AmbariOperationType ambariOperationType;
     private Map<String, Integer> requests;
     private String requestContext;
     private String requestStatus;
@@ -33,12 +33,12 @@ public class AmbariOperations extends StackContext {
         return ambariClient;
     }
 
-    public Map<String, Integer> getRequests() {
-        return requests;
-    }
-
     public AmbariOperationType getAmbariOperationType() {
         return ambariOperationType;
+    }
+
+    public Map<String, Integer> getRequests() {
+        return requests;
     }
 
     public String getRequestContext() {

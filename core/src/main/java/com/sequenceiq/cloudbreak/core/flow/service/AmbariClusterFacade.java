@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +34,6 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
@@ -51,7 +49,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -269,82 +266,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext addClusterContainers(FlowContext context) throws CloudbreakException {
-        ClusterScalingContext actualContext = (ClusterScalingContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
-        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS, "Adding new containers to the cluster.");
-        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
-        Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-        if (orchestratorType.containerOrchestrator()) {
-            Map<String, List<Container>> containers = containerRunner.addClusterContainers(actualContext);
-            for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
-                List<String> hostNames = new ArrayList<>();
-                for (Container container : containersEntry.getValue()) {
-                    hostNames.add(container.getHost());
-                }
-                hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
-            }
-        } else if (orchestratorType.hostOrchestrator()) {
-            Map<String, String> candidates = hostRunner.addAmbariServices(actualContext);
-            for (Map.Entry<String, String> entry : candidates.entrySet()) {
-                if (!hostsPerHostGroup.keySet().contains(actualContext.getHostGroupAdjustment().getHostGroup())) {
-                    hostsPerHostGroup.put(actualContext.getHostGroupAdjustment().getHostGroup(), new ArrayList<String>());
-                }
-                hostsPerHostGroup.get(actualContext.getHostGroupAdjustment().getHostGroup()).add(entry.getKey());
-            }
-        }
-        clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup);
-        Set<String> allHosts = new HashSet<>();
-        for (Map.Entry<String, List<String>> hostsPerHostGroupEntry : hostsPerHostGroup.entrySet()) {
-            allHosts.addAll(hostsPerHostGroupEntry.getValue());
-        }
-        clusterService.updateHostCountWithAdjustment(stack.getCluster().getId(), actualContext.getHostGroupAdjustment().getHostGroup(), allHosts.size());
-        instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
-        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE, "New containers added to the cluster.");
-        return context;
-    }
-
-    @Override
-    public FlowContext upscaleCluster(FlowContext context) throws CloudbreakException {
-        ClusterScalingContext actualContext = (ClusterScalingContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(cluster);
-        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
-        fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), actualContext.getHostGroupAdjustment().getHostGroup());
-        Set<HostMetadata> upscaleHosts = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
-        Set<HostMetadata> hostMetaData = ambariClusterConnector.installAmbariNode(stack.getId(), upscaleHosts,
-                actualContext.getHostGroupAdjustment().getHostGroup());
-        int failedHosts = 0;
-
-        for (HostMetadata hostMeta : hostMetaData) {
-            if (hostGroup.getConstraint().getInstanceGroup() != null) {
-                updateInstanceMetadataAfterScaling(false, hostMeta.getHostName(), stack);
-            }
-            hostGroupService.updateHostMetaDataStatus(hostMeta.getId(), HostMetadataState.HEALTHY);
-            if (hostMeta.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
-                failedHosts++;
-            }
-        }
-
-        boolean success = failedHosts == 0;
-        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
-        if (success) {
-            fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
-            if (cluster.getEmailNeeded()) {
-                emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), cluster.getName());
-                fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
-            }
-        } else {
-            fireEventAndLog(stack.getId(), actualContext, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added",
-                    String.format("Ambari upscale operation failed on %d node(s).", failedHosts));
-        }
-        return context;
-    }
-
-    @Override
     public FlowContext runClusterContainers(FlowContext context) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
@@ -378,7 +299,7 @@ public class AmbariClusterFacade implements ClusterFacade {
                 for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
                     String groupName = instanceMetaData.getInstanceGroup().getGroupName();
                     if (!hostsPerHostGroup.keySet().contains(groupName)) {
-                        hostsPerHostGroup.put(groupName, new ArrayList<String>());
+                        hostsPerHostGroup.put(groupName, new ArrayList<>());
                     }
                     hostsPerHostGroup.get(groupName).add(instanceMetaData.getDiscoveryFQDN());
                 }
@@ -549,7 +470,7 @@ public class AmbariClusterFacade implements ClusterFacade {
     private HttpClientConfig buildAmbariClientConfig(Stack stack) throws CloudbreakSecuritySetupException {
         Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
         newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
-        newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
+        newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.REGISTERED);
         instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
