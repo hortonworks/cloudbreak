@@ -11,6 +11,8 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_I
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -94,6 +96,7 @@ public class AwsResourceConnector implements ResourceConnector {
     private static final List<String> SUSPENDED_PROCESSES = Arrays.asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
             "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
     private static final List<StackStatus> ERROR_STATUSES = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
+    private static final String CLOUDBREAK_CLUSTER_TAG = "CloudbreakClusterName";
 
     @Inject
     private AwsClient awsClient;
@@ -136,6 +139,9 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cfTemplate)
+                .withTags(Stream.of(
+                        new com.amazonaws.services.cloudformation.model.Tag().withKey(CLOUDBREAK_CLUSTER_TAG).withValue(ac.getCloudContext().getName()))
+                        .collect(Collectors.toList()))
                 .withParameters(
                         getStackParameters(
                                 ac,
