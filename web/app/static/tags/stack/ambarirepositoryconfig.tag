@@ -49,7 +49,7 @@
 <div class="form-group" name="cluster_verify1">
     <label class="col-sm-3 control-label" for="cluster_verify">{{msg.cluster_form_ambari_repo_verify_label}}</label>
     <div class="col-sm-8">
-        <input type="checkbox" name="cluster_verify" id="cluster_verify" ng-model="cluster.ambariStackDetails.verify">
+        <input type="checkbox" name="cluster_verify" id="cluster_verify" ng-click="toggleAmbariStackDetailsVerify()">
     </div>
 </div>
 <div class="form-group">
