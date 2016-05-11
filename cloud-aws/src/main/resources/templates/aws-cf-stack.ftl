@@ -235,7 +235,7 @@
 	"AmbariNodes${group.groupName?replace('_', '')}" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       <#if !existingSubnet>
-      "DependsOn" : "PublicSubnet",
+      "DependsOn" : [ "PublicSubnetRouteTableAssociation", "PublicRoute" ],
       </#if>
       "Properties" : {
         <#if !existingSubnet>
