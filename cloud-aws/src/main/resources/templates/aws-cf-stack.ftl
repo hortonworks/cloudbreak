@@ -121,6 +121,15 @@
 
   "Resources" : {
 
+    <#if mapPublicIpOnLaunch>
+    "EIP" : {
+       "Type" : "AWS::EC2::EIP",
+       "Properties" : {
+          "Domain" : "vpc"
+       }
+    },
+    </#if>
+
     <#if !existingVPC>
     "VPC" : {
       "Type" : "AWS::EC2::VPC",
@@ -320,21 +329,18 @@
       }
     }
     
-  },
-  
-  "Outputs" : {
-  
-	"Subnet" : {
-	  <#if !existingSubnet>
-	  "Value" : { "Ref" : "PublicSubnet" }
-	  <#else>
-	  "Value" : { "Ref" : "SubnetId" }
-	  </#if>
-    },
-    "SecurityGroup" : {
-      "Value" : { "Ref" : "ClusterNodeSecurityGroup" }
-    }
-    
   }
+  
+  <#if mapPublicIpOnLaunch>
+  ,
+  "Outputs" : {
+    "EIP" : {
+        "Value" : { "Ref" : "EIP" }
+    },
+    "EIPAllocationID" : {
+        "Value" : {"Fn::GetAtt" : [ "EIP" , "AllocationId" ]}
+    }
+  }
+  </#if>
 
 }
