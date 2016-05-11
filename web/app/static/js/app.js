@@ -336,3 +336,18 @@ cloudbreakApp.directive('match', function($parse) {
         }
     };
 });
+
+cloudbreakApp.directive("subnetrvalidation", function () {
+    var pattern = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/
+    return {
+        require: 'ngModel',
+        link: function(scope, elem, attrs, ctrl) {
+            scope.$watch(function() {
+                var currentValue = ctrl.$modelValue || ''
+                return pattern.test(currentValue) && currentValue.indexOf('0.') != 0;
+            }, function(currentValue) {
+                ctrl.$setValidity('invalidCidr', currentValue);
+            });
+        }
+    };
+});
