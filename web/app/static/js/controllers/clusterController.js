@@ -274,6 +274,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             return true
         }
 
+        $scope.toggleAmbariStackDetailsVerify = function() {
+            if ($scope.isUndefined($scope.cluster.ambariStackDetails)) {
+                $scope.cluster.ambariStackDetails = {};
+            }
+            if ($scope.isUndefined($scope.cluster.ambariStackDetails.verify)) {
+                $scope.cluster.ambariStackDetails.verify = true;
+            } else {
+                delete $scope.cluster.ambariStackDetails.verify;
+            }
+        }
+
         $scope.createCluster = function() {
             var blueprint = $filter('filter')($rootScope.blueprints, {
                 id: $scope.cluster.blueprintId
