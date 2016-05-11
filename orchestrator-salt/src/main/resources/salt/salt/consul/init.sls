@@ -19,10 +19,9 @@
         retry_join: {{ consul.retry_join }}
 
 
-/opt/consul/stop.sh:
+/etc/init.d/consul:
   file.managed:
-    - makedirs: True
-    - source: salt://consul/systemd/stop.sh
+    - source: salt://consul/scripts/consul
     - mode: 755
 
 /etc/systemd/system/consul.service:
