@@ -147,6 +147,23 @@ public class SaltConnector implements Closeable {
         return response;
     }
 
+    public <T> T runner(Target<String> target, String fun, String argName, String arg, Class<T> clazz) {
+        Form form = new Form();
+        form = addAuth(form)
+                .param("fun", fun)
+                .param("client", "runner")
+                .param("tgt", target.getTarget())
+                .param("expr_form", target.getType());
+        if (arg != null) {
+            form.param(argName, arg);
+        }
+        T response = saltTarget.path(SaltEndpoint.SALT_RUN
+                .getContextPath()).request()
+                .post(Entity.form(form)).readEntity(clazz);
+        LOGGER.info("Salt run response: {}", response);
+        return response;
+    }
+
     public <T> T wheel(String fun, Collection<String> match, Class<T> clazz) {
         Form form = new Form();
         form = addAuth(form)
