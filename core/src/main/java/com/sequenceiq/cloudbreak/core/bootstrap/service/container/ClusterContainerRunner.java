@@ -33,8 +33,6 @@ import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerConfigService;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
-import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
@@ -56,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
 
 @Component
 public class ClusterContainerRunner {
+
     private static final String NONE = "none";
 
     @Inject
@@ -88,7 +87,8 @@ public class ClusterContainerRunner {
     public Map<String, List<Container>> runClusterContainers(ProvisioningContext context) throws CloudbreakException {
         try {
             Stack stack = stackRepository.findOneWithLists(context.getStackId());
-            return initializeClusterContainers(stack, cloudPlatform(context));
+            String cloudPlatform = context.getCloudPlatform() != null ? context.getCloudPlatform().value() : NONE;
+            return initializeClusterContainers(stack, cloudPlatform);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -96,27 +96,16 @@ public class ClusterContainerRunner {
         }
     }
 
-    public Map<String, List<Container>> addClusterContainers(ClusterScalingContext context) throws CloudbreakException {
+    public Map<String, List<Container>> addClusterContainers(Long stackId, String cloudPlatform, String hostGroupName, Integer scalingAdjustment)
+            throws CloudbreakException {
         try {
-            Stack stack = stackRepository.findOneWithLists(context.getStackId());
-            return addClusterContainers(
-                    stack,
-                    cloudPlatform(context),
-                    context.getHostGroupAdjustment().getHostGroup(),
-                    context.getHostGroupAdjustment().getScalingAdjustment());
+            Stack stack = stackRepository.findOneWithLists(stackId);
+            return addClusterContainers(stack, cloudPlatform != null ? cloudPlatform : NONE, hostGroupName, scalingAdjustment);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }
-    }
-
-    private String cloudPlatform(DefaultFlowContext context) {
-        String cloudPlatform = NONE;
-        if (context.getCloudPlatform() != null) {
-            cloudPlatform = context.getCloudPlatform().value();
-        }
-        return cloudPlatform;
     }
 
     private Map<String, List<Container>> initializeClusterContainers(Stack stack, String cloudPlatform)

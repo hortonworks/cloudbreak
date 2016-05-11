@@ -1,13 +1,11 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SWARM;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isFailure;
-import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
@@ -211,15 +209,18 @@ public class AmbariClusterConnector {
             Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
-            int nodeCount = hostsInCluster.size();
-            PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, nodeCount, hostsInCluster);
+            PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, hostsInCluster);
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
             boolean recipesFound = false;
             if (orchestratorType.containerOrchestrator()) {
-                executeSssdRecipe(stack, null, cluster.getSssdConfig());
+                if (cluster.getSssdConfig() != null) {
+                    List<String> sssdPayload = generateSssdRecipePayload(stack);
+                    pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.SSSD_SETUP, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT, sssdPayload, null);
+                }
                 recipesFound = recipesPreInstall(stack, cluster, blueprintText, fs, hostGroups);
             }
+
             String clusterName = cluster.getName();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
             String configStrategy = cluster.getConfigStrategy().name();
@@ -296,80 +297,80 @@ public class AmbariClusterConnector {
         }
     }
 
-    public Set<HostMetadata> installAmbariNode(Long stackId, Set<HostMetadata> hostMetadata, String hostGroupName) throws CloudbreakSecuritySetupException {
-        Set<String> successHosts = Collections.emptySet();
-        Stack stack = stackRepository.findOneWithLists(stackId);
+    public void installFsRecipes(Stack stack, HostGroup hostGroup) throws CloudbreakSecuritySetupException {
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        AmbariClient ambariClient = getSecureAmbariClient(stack);
-        Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
         Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
         if (cluster.getFileSystem() != null) {
             addFsRecipes(cluster.getBlueprint().getBlueprintText(), cluster.getFileSystem(), hostGroupAsSet);
         }
-        PollingResult pollingResult = waitForHosts(stack, ambariClient, hostsInCluster.size(), hostsInCluster);
-        if (isSuccess(pollingResult)) {
-            List<String> upscaleHostNames = FluentIterable.from(hostMetadata).transform(new Function<HostMetadata, String>() {
-                @Nullable
-                @Override
-                public String apply(HostMetadata input) {
-                    return input.getHostName();
-                }
-            }).toList();
-            if (cluster.getSssdConfig() != null) {
-                executeSssdRecipe(stack, new HashSet<>(upscaleHostNames), cluster.getSssdConfig());
-            }
-            final boolean recipesFound = recipesFound(hostGroupAsSet);
-            if (!recipesFound || prepareAndExecuteRecipes(true, stack, hostGroup, hostMetadata)) {
-                pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
-                        installServices(upscaleHostNames, stack, ambariClient, hostGroupName), INSTALL_AMBARI_PROGRESS_STATE);
-                if (isSuccess(pollingResult)) {
-                    successHosts = new HashSet<>(upscaleHostNames);
-                    if (recipesFound && !prepareAndExecuteRecipes(false, stack, hostGroup, hostMetadata)) {
-                        eventService.fireCloudbreakEvent(stackId, UPDATE_FAILED.name(), "Post recipe installation failed.");
-                    }
-                }
-            }
+    }
+
+    public void waitForAmbariHosts(Stack stack) throws CloudbreakSecuritySetupException {
+        AmbariClient ambariClient = getSecureAmbariClient(stack);
+        Set<HostMetadata> hostMetadata = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
+        waitForHosts(stack, ambariClient, hostMetadata);
+    }
+
+    public void configureSssd(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
+        if (stack.getCluster().getSssdConfig() != null) {
+            List<String> sssdPayload = generateSssdRecipePayload(stack);
+            Set<String> hosts = Sets.newHashSet(getHostNames(hostMetadata));
+            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.SSSD_SETUP, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT, sssdPayload, hosts);
         }
+    }
+
+    public void installRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata)
+            throws CloudbreakSecuritySetupException {
+        if (recipesFound(Sets.newHashSet(hostGroup))) {
+            recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
+        }
+    }
+
+    public void executePreRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaData) throws CloudbreakSecuritySetupException {
+        if (recipesFound(Sets.newHashSet(hostGroup))) {
+            recipeEngine.executePreInstall(stack, metaData);
+        }
+    }
+
+    public void installServices(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata)
+            throws CloudbreakSecuritySetupException {
+        List<String> upscaleHostNames = getHostNames(hostMetadata);
+        AmbariClient ambariClient = getSecureAmbariClient(stack);
+        ambariOperationService.waitForOperations(stack, ambariClient,
+                installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), INSTALL_AMBARI_PROGRESS_STATE);
+    }
+
+    public void executePostRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaData)
+            throws CloudbreakSecuritySetupException {
+        if (recipesFound(Sets.newHashSet(hostGroup))) {
+            recipeEngine.executePostInstall(stack, metaData);
+        }
+    }
+
+    public void updateFailedHostMetaData(Set<HostMetadata> hostMetadata) {
+        List<String> upscaleHostNames = getHostNames(hostMetadata);
+        Set<String> successHosts = new HashSet<>(upscaleHostNames);
         updateFailedHostMetaData(successHosts, hostMetadata);
-        return hostMetadata;
     }
 
-    private void executeSssdRecipe(Stack stack, Set<String> hosts, SssdConfig sssdConfig) throws CloudbreakSecuritySetupException {
-        if (sssdConfig != null) {
-            SssdConfig config = stack.getCluster().getSssdConfig();
-            List<String> payload;
-            if (config.getConfiguration() != null) {
-                Map<String, String> keyValues = new HashMap<>();
-                String configName = SSSD_CONFIG + config.getId();
-                keyValues.put(configName, config.getConfiguration());
-                InstanceGroup gateway = stack.getGatewayInstanceGroup();
-                InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-                HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
-                pluginManager.prepareKeyValues(httpClientConfig, keyValues);
-                payload = Arrays.asList(configName);
-            } else {
-                payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
-                        config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
-                        config.getKerberosServer(), config.getKerberosRealm());
-            }
-            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.SSSD_SETUP, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT, payload, hosts);
+    private List<String> generateSssdRecipePayload(Stack stack) throws CloudbreakSecuritySetupException {
+        SssdConfig config = stack.getCluster().getSssdConfig();
+        List<String> payload;
+        if (config.getConfiguration() != null) {
+            Map<String, String> keyValues = new HashMap<>();
+            String configName = SSSD_CONFIG + config.getId();
+            keyValues.put(configName, config.getConfiguration());
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
+            pluginManager.prepareKeyValues(httpClientConfig, keyValues);
+            payload = Arrays.asList(configName);
+        } else {
+            payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
+                    config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
+                    config.getKerberosServer(), config.getKerberosRealm());
         }
-    }
-
-    private boolean prepareAndExecuteRecipes(boolean preExecute, Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata) {
-        try {
-            if (preExecute) {
-                recipeEngine.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
-                recipeEngine.executePreInstall(stack, hostMetadata);
-            } else {
-                recipeEngine.executePostInstall(stack, hostMetadata);
-            }
-            return true;
-        } catch (CloudbreakSecuritySetupException e) {
-            LOGGER.error(e.getMessage());
-            return false;
-        }
+        return payload;
     }
 
     private void updateFailedHostMetaData(Set<String> successHosts, Set<HostMetadata> hostMetadata) {
@@ -612,12 +613,12 @@ public class AmbariClusterConnector {
 
     }
 
-    private List<String> getHostNames(Set<InstanceMetaData> instances) {
-        return FluentIterable.from(instances).transform(new Function<InstanceMetaData, String>() {
+    private List<String> getHostNames(Set<HostMetadata> hostMetadata) {
+        return FluentIterable.from(hostMetadata).transform(new Function<HostMetadata, String>() {
             @Nullable
             @Override
-            public String apply(@Nullable InstanceMetaData input) {
-                return input.getDiscoveryFQDN();
+            public String apply(HostMetadata input) {
+                return input.getHostName();
             }
         }).toList();
     }
@@ -875,10 +876,10 @@ public class AmbariClusterConnector {
         return ambariClient.extendBlueprintGlobalConfiguration(processingBlueprint, config);
     }
 
-    private PollingResult waitForHosts(Stack stack, AmbariClient ambariClient, int nodeCount, Set<HostMetadata> hostsInCluster) {
+    private PollingResult waitForHosts(Stack stack, AmbariClient ambariClient, Set<HostMetadata> hostsInCluster) {
         LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
         return hostsPollingService.pollWithTimeoutSingleFailure(
-                ambariHostsStatusCheckerTask, new AmbariHostsCheckerContext(stack, ambariClient, hostsInCluster, nodeCount),
+                ambariHostsStatusCheckerTask, new AmbariHostsCheckerContext(stack, ambariClient, hostsInCluster, hostsInCluster.size()),
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
     }
 

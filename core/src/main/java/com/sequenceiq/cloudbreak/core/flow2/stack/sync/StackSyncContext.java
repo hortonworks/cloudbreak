@@ -10,10 +10,10 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class StackSyncContext extends CommonContext {
 
-    private Stack stack;
-    private List<InstanceMetaData> instanceMetaData;
-    private CloudContext cloudContext;
-    private CloudCredential cloudCredential;
+    private final Stack stack;
+    private final List<InstanceMetaData> instanceMetaData;
+    private final CloudContext cloudContext;
+    private final CloudCredential cloudCredential;
 
     public StackSyncContext(String flowId, Stack stack, List<InstanceMetaData> instanceMetaData, CloudContext cloudContext, CloudCredential cloudCredential) {
         super(flowId);
