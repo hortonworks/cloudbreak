@@ -278,7 +278,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             if ($scope.isUndefined($scope.cluster.ambariStackDetails)) {
                 $scope.cluster.ambariStackDetails = {};
             }
-            if ($scope.isUndefined($scope.cluster.ambariStackDetails.verify)) {
+            if ($scope.isUndefined($scope.cluster.ambariStackDetails.verify) || $scope.cluster.ambariStackDetails.verify == false) {
                 $scope.cluster.ambariStackDetails.verify = true;
             } else {
                 delete $scope.cluster.ambariStackDetails.verify;
