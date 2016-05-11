@@ -12,21 +12,21 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.ssh.MockSshServer;
 
-public class StartSshServerTest extends AbstractCloudbreakIntegrationTest {
+public class StopSshServerTest extends AbstractCloudbreakIntegrationTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StartSshServerTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StopSshServerTest.class);
 
     @Inject
     private MockSshServer mockSshServer;
 
     @Test
     @Parameters({ "sshPort" })
-    public void startSshServer(@Optional("22") Integer sshPort) {
+    public void stopSshServer(@Optional("22") Integer sshPort) {
         try {
-            mockSshServer.start(sshPort);
-            LOGGER.info("ssh server started on port: " + sshPort);
+            mockSshServer.stop(sshPort);
+            LOGGER.info("ssh server stopped");
         } catch (IOException e) {
-            throw new RuntimeException("ssh server can't start", e);
+            throw new RuntimeException("can't stop SSH server", e);
         }
     }
 }

@@ -16,6 +16,15 @@ apply plugin: 'spring-boot'
 
 dependencies {
   compile project(':core-api')
+  compile (project(':orchestrator-api')) {
+    transitive = false;
+  }
+  compile (project(':orchestrator-salt')) {
+    transitive = false;
+  }
+  compile (project(':cloud-api')) {
+    transitive = false;
+  }
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
     exclude group: 'org.slf4j';
   }
@@ -32,9 +41,7 @@ dependencies {
   }
   compile group: 'com.github.docker-java',        name: 'docker-java',              version: '2.1.2'
   compile group: 'com.sequenceiq',                name: 'consul-api',               version: '1.10'
-  compile(group: 'com.xebialabs.restito',         name: 'restito',                  version: '0.8.1') {
-    exclude group: 'com.sun.jersey'
-  }
+  compile group: 'com.sparkjava',                 name: 'spark-core',               version: '2.5'
 
   compile ("org.uncommons:reportng:1.1.4") {
     exclude group: "velocity"

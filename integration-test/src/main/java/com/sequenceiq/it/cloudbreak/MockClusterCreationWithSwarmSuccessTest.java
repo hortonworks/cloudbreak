@@ -1,5 +1,13 @@
 package com.sequenceiq.it.cloudbreak;
 
+import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
+import static com.sequenceiq.it.spark.ITResponse.CONSUL_API_ROOT;
+import static com.sequenceiq.it.spark.ITResponse.SWARM_API_ROOT;
+import static spark.Spark.delete;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.put;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -17,9 +25,22 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.spark.docker.model.Info;
+import com.sequenceiq.it.spark.docker.model.InspectContainerResponse;
+import com.sequenceiq.it.spark.ambari.AmbariBlueprintsResponse;
+import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
+import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
+import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
+import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponse;
+import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
+import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
+import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
+import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
+import com.sequenceiq.it.spark.consul.ConsulEventFireResponse;
+import com.sequenceiq.it.spark.consul.ConsulKeyValueGetResponse;
 
 
-public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
+public class MockClusterCreationWithSwarmSuccessTest extends AbstractMockIntegrationTest {
 
     @BeforeMethod
     public void setContextParameters() {
@@ -29,12 +50,12 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "clusterName", "ambariPort", "ambariUser", "ambariPassword", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
-            "kerberosPassword", "runRecipesOnHosts", "checkAmbari" })
+    @Parameters({"clusterName", "ambariPort", "ambariUser", "ambariPassword", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
+            "kerberosPassword", "runRecipesOnHosts", "checkAmbari", "mockPort"})
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("8080") String ambariPort, @Optional("admin") String ambariUser,
             @Optional("admin123!@#") String ambariPassword, @Optional("false") boolean emailNeeded,
             @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword,
-            @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari) throws Exception {
+            @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari, @Optional("443") int mockPort) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackIdStr = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
@@ -58,11 +79,51 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
 
+        int numberOfServers = 0;
+        for (HostGroup hostgroup : hostgroups) {
+            numberOfServers += hostgroup.getHostCount();
+        }
+
+        initSpark();
+
+        addSwarmMappings(numberOfServers);
+        addConsulMappings();
+        addAmbariMappings(numberOfServers);
+
         ClusterEndpoint clusterEndpoint = getCloudbreakClient().clusterEndpoint();
         CloudbreakUtil.checkResponse("ClusterCreation", clusterEndpoint.post(Long.valueOf(stackId), clusterRequest));
         // THEN
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
+
+    }
+
+    private void addAmbariMappings(int numberOfServers) {
+        get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
+        post(AMBARI_API_ROOT + "/views/:view/versions/1.0.0/instances/*", new EmptyAmbariResponse());
+        get(AMBARI_API_ROOT + "/clusters", new AmbariClusterResponse(numberOfServers));
+        post(AMBARI_API_ROOT + "/clusters/:cluster/requests", new AmbariClusterRequestsResponse());
+        post(AMBARI_API_ROOT + "/clusters/:cluster", new EmptyAmbariResponse(), gson()::toJson);
+        get(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", new AmbariServicesComponentsResponse(), gson()::toJson);
+        get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(numberOfServers), gson()::toJson);
+        get(AMBARI_API_ROOT + "/blueprints/*", new AmbariBlueprintsResponse());
+        post(AMBARI_API_ROOT + "/blueprints/*", new EmptyAmbariResponse());
+        put(AMBARI_API_ROOT + "/users/admin", new EmptyAmbariResponse());
+        get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
+        get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(numberOfServers));
+    }
+
+    private void addConsulMappings() {
+        get(CONSUL_API_ROOT + "/kv/*", new ConsulKeyValueGetResponse(), gson()::toJson);
+        put(CONSUL_API_ROOT + "/kv/*", (req, res) -> Boolean.TRUE, gson()::toJson);
+        put(CONSUL_API_ROOT + "/event/fire/*", new ConsulEventFireResponse(), gson()::toJson);
+    }
+
+    private void addSwarmMappings(int numberOfServers) {
+        post(SWARM_API_ROOT + "/containers/:container/start", (req, res) -> "");
+        get(SWARM_API_ROOT + "/info", (req, res) -> new Info(numberOfServers), gson()::toJson);
+        get(SWARM_API_ROOT + "/containers/:container/json", (req, res) -> new InspectContainerResponse("id"), gson()::toJson);
+        delete(SWARM_API_ROOT + "/containers/:container", (req, res) -> "");
     }
 
     private Set<HostGroupJson> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts) {

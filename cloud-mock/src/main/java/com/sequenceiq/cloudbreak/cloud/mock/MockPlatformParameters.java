@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
+import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
@@ -29,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 
 @Service
 public class MockPlatformParameters implements PlatformParameters {
@@ -167,6 +171,12 @@ public class MockPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public PlatformOrchestrator orchestratorParams() {
+        return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT), orchestrator(OrchestratorConstants.SWARM)),
+                orchestrator(OrchestratorConstants.SWARM));
     }
 
     private enum MockDiskType {

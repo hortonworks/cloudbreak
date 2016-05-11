@@ -1,5 +1,12 @@
 package com.sequenceiq.it.cloudbreak;
 
+import static com.sequenceiq.it.spark.ITResponse.CONSUL_API_ROOT;
+import static com.sequenceiq.it.spark.ITResponse.DOCKER_API_ROOT;
+import static com.sequenceiq.it.spark.ITResponse.SWARM_API_ROOT;
+import static spark.Spark.get;
+import static spark.Spark.port;
+import static spark.Spark.post;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,16 +23,14 @@ import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.mock.restito.consul.ConsulMembersStub;
-import com.sequenceiq.it.mock.restito.docker.DockerContainersGetStub;
-import com.sequenceiq.it.mock.restito.docker.DockerContainersStartPostStub;
-import com.sequenceiq.it.mock.restito.docker.DockerInfoGetStub;
-import com.sequenceiq.it.mock.restito.docker.SwarmInfoStub;
-import com.xebialabs.restito.server.StubServer;
+import com.sequenceiq.it.spark.consul.ConsulMemberResponse;
+import com.sequenceiq.it.spark.docker.model.Info;
+import com.sequenceiq.it.spark.docker.model.InspectContainerResponse;
 
-public class MockStackCreationFailedTest extends AbstractCloudbreakIntegrationTest {
+public class MockStackCreationFailedTest extends AbstractMockIntegrationTest {
 
     @BeforeMethod
     public void setContextParams() {
@@ -37,11 +42,12 @@ public class MockStackCreationFailedTest extends AbstractCloudbreakIntegrationTe
     }
 
     @Test
-    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage", "mockPort" })
+    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage", "orchestrator",
+            "mockPort" })
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
-            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage, @Optional("false") boolean useMockServer,
-            @Optional("443") int mockPort) throws Exception {
+            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage, @Optional("SWARM") String orchestrator,
+            @Optional("false") boolean useMockServer, @Optional("443") int mockPort) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
@@ -72,6 +78,10 @@ public class MockStackCreationFailedTest extends AbstractCloudbreakIntegrationTe
         stackRequest.setAvailabilityZone(availabilityZone);
         stackRequest.setInstanceGroups(igMap);
 
+        OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
+        orchestratorRequest.setType(orchestrator);
+        stackRequest.setOrchestrator(orchestratorRequest);
+
         Map<String, String> map = new HashMap<>();
         if (persistentStorage != null && !persistentStorage.isEmpty()) {
             map.put("persistentStorage", persistentStorage);
@@ -80,11 +90,9 @@ public class MockStackCreationFailedTest extends AbstractCloudbreakIntegrationTe
 
         int numberOfServers = getNumberOfServers(instanceGroups);
 
-        StubServer stubServer = null;
-        if (useMockServer) {
-            stubServer = startMockServer(mockPort);
-            addStubs(stubServer, numberOfServers);
-        }
+        port(mockPort);
+        addMockEndpoints(numberOfServers);
+        initSpark();
 
         // WHEN
         String stackId = getCloudbreakClient().stackEndpoint().postPrivate(stackRequest).getId().toString();
@@ -93,22 +101,18 @@ public class MockStackCreationFailedTest extends AbstractCloudbreakIntegrationTe
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "CREATE_FAILED");
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId);
-
-        if (useMockServer) {
-            stubServer.stop();
-        }
     }
 
-    private void addStubs(StubServer stubServer, int numberOfServers) {
-        stubServer.addStub(new DockerInfoGetStub());
-        stubServer.addStub(new DockerContainersGetStub());
-        stubServer.addStub(new DockerContainersStartPostStub());
-        stubServer.addStub(new SwarmInfoStub(numberOfServers));
-        oneConsulMemberFailedToStart(stubServer, numberOfServers);
+    private void addMockEndpoints(int numberOfServers) {
+        get(DOCKER_API_ROOT + "/info", (req, res) -> "");
+        get(DOCKER_API_ROOT + "/containers/:container/json", (req, res) -> new InspectContainerResponse("id"), gson()::toJson);
+        post(DOCKER_API_ROOT + "/containers/:container/start", (req, res) -> "");
+        get(SWARM_API_ROOT + "/info", (req, res) -> new Info(numberOfServers), gson()::toJson);
+        oneConsulMemberFailedToStart(numberOfServers);
     }
 
-    private void oneConsulMemberFailedToStart(StubServer stubServer, int numberOfServers) {
-        stubServer.addStub(new ConsulMembersStub(numberOfServers - 1));
+    private void oneConsulMemberFailedToStart(int numberOfServers) {
+        get(CONSUL_API_ROOT + "/agent/members", new ConsulMemberResponse(numberOfServers), gson()::toJson);
     }
 
     private int getNumberOfServers(List<InstanceGroup> instanceGroups) {
@@ -117,9 +121,5 @@ public class MockStackCreationFailedTest extends AbstractCloudbreakIntegrationTe
             numberOfServers += instanceGroup.getNodeCount();
         }
         return numberOfServers;
-    }
-
-    private StubServer startMockServer(int mockPort) {
-        return new StubServer(mockPort).secured().run();
     }
 }

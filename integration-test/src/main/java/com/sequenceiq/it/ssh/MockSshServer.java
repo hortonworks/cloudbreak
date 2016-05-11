@@ -5,20 +5,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.PublicKey;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.sshd.common.config.keys.FilePasswordProvider;
 import org.apache.sshd.common.keyprovider.AbstractFileKeyPairProvider;
 import org.apache.sshd.common.util.SecurityUtils;
 import org.apache.sshd.server.SshServer;
-import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.scp.ScpCommandFactory;
-import org.apache.sshd.server.session.ServerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ResourceLoader;
@@ -29,42 +26,31 @@ public class MockSshServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockSshServer.class);
 
-    private SshServer sshServer;
-    private boolean started;
+    private Map<Integer, SshServer> sshServerMap = new HashMap<>();
 
     @Inject
     private ResourceLoader resourceLoader;
 
-    @PostConstruct
-    public void init() {
-        sshServer = SshServer.setUpDefaultServer();
-        AbstractFileKeyPairProvider fileKeyPairProvider = SecurityUtils.createFileKeyPairProvider();
-        fileKeyPairProvider.setFiles(Collections.singleton(getHostkey()));
-        fileKeyPairProvider.setPasswordFinder(new FilePasswordProvider() {
-            @Override
-            public String getPassword(String resourceKey) throws IOException {
-                return "cloudbreak";
-            }
-        });
-        sshServer.setKeyPairProvider(fileKeyPairProvider);
-        sshServer.setPublickeyAuthenticator(createMockAuthenticator());
-        setCommandFactory();
-        sshServer.setFileSystemFactory(new MockFileSystemFactory());
+    public void start(int port) throws IOException {
+        if (sshServerMap.get(port) == null) {
+            SshServer sshServer = SshServer.setUpDefaultServer();
+            AbstractFileKeyPairProvider fileKeyPairProvider = SecurityUtils.createFileKeyPairProvider();
+            fileKeyPairProvider.setFiles(Collections.singleton(getHostkey()));
+            fileKeyPairProvider.setPasswordFinder(resourceKey -> "cloudbreak");
+            sshServer.setKeyPairProvider(fileKeyPairProvider);
+            sshServer.setPublickeyAuthenticator((username, key, session) -> true);
+            setCommandFactory(sshServer);
+            sshServer.setFileSystemFactory(new MockFileSystemFactory());
+            sshServer.setPort(port);
+            sshServer.start();
+            sshServerMap.put(port, sshServer);
+        }
     }
 
-    private void setCommandFactory() {
+    private void setCommandFactory(SshServer sshServer) {
         ScpCommandFactory scpCommandFactory = new ScpCommandFactory();
         scpCommandFactory.setDelegateCommandFactory(new MockCommandFactory());
         sshServer.setCommandFactory(scpCommandFactory);
-    }
-
-    private PublickeyAuthenticator createMockAuthenticator() {
-        return new PublickeyAuthenticator() {
-            @Override
-            public boolean authenticate(String username, PublicKey key, ServerSession session) {
-                return true;
-            }
-        };
     }
 
     private File getHostkey() {
@@ -82,14 +68,11 @@ public class MockSshServer {
         }
     }
 
-    public void start() throws IOException {
-        if (!started) {
-            sshServer.start();
-            started = true;
+    public void stop(int port) throws IOException {
+        SshServer sshServer = sshServerMap.get(port);
+        if (sshServer != null) {
+            sshServer.stop();
+            sshServerMap.remove(port);
         }
-    }
-
-    public void setPort(int port) {
-        sshServer.setPort(port);
     }
 }
