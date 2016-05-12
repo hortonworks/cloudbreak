@@ -9,17 +9,20 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 
-public class SyncGrainsChecker extends BaseSaltJobRunner {
+public class SimpleAddRoleChecker extends BaseSaltJobRunner {
 
-    public SyncGrainsChecker(Set<String> target) {
+    private String type;
+
+    public SimpleAddRoleChecker(Set<String> target, String type) {
         super(target);
+        this.type = type;
     }
 
     @Override
     public String submit(SaltConnector saltConnector) {
-        ApplyResponse grainsResult = SaltStates.syncGrains(saltConnector, new Compound(getTarget()));
-        Set<String> strings = collectMissingNodes(saltConnector, collectNodes(grainsResult));
-        setTarget(strings);
-        return strings.toString();
+        ApplyResponse response = SaltStates.addRole(saltConnector, new Compound(getTarget()), type);
+        Set<String> missingIps = collectMissingNodes(saltConnector, collectNodes(response));
+        setTarget(missingIps);
+        return missingIps.toString();
     }
 }

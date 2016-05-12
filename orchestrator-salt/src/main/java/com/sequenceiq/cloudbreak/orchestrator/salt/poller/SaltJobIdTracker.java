@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
 import static com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId.jobId;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         if (JobState.NOT_STARTED.equals(saltJobRunner.getJobState())) {
             LOGGER.info("Job has not started in the cluster. Starting first time.");
             saltJobRunner.setJid(jobId(saltJobRunner.submit(saltConnector)));
-            boolean jobRunning = SaltStates.jobIsRunning(saltConnector, saltJobRunner.getJid().getJobId(), saltJobRunner.getTarget());
+            boolean jobRunning = SaltStates.jobIsRunning(saltConnector, saltJobRunner.getJid().getJobId(), new Compound(saltJobRunner.getTarget()));
             if (jobRunning) {
                 LOGGER.info("Job is running currently waiting for next polling attempt.");
                 saltJobRunner.setJobState(JobState.IN_PROGRESS);
@@ -43,7 +42,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             }
         } else if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
             LOGGER.info("Job is running currently checking the current state.");
-            boolean jobRunning = SaltStates.jobIsRunning(saltConnector, saltJobRunner.getJid().getJobId(), saltJobRunner.getTarget());
+            boolean jobRunning = SaltStates.jobIsRunning(saltConnector, saltJobRunner.getJid().getJobId(), new Compound(saltJobRunner.getTarget()));
             if (jobRunning) {
                 LOGGER.info("Job is running currently waiting for next polling attempt.");
                 saltJobRunner.setJobState(JobState.IN_PROGRESS);
@@ -64,14 +63,14 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     }
 
     private void checkJobFinishedWithSuccess() {
-        Set<String> missingNodes = SaltStates.jidInfo(saltConnector, saltJobRunner.getJid().getJobId(), saltJobRunner.getTarget(),
+        Set<String> missingNodes = SaltStates.jidInfo(saltConnector, saltJobRunner.getJid().getJobId(), new Compound(saltJobRunner.getTarget()),
                 saltJobRunner.stateType());
         if (!missingNodes.isEmpty()) {
             LOGGER.info("There are missing nodes after the job completion: " + missingNodes);
             saltJobRunner.setJobState(JobState.FAILED);
-            List<String> newTargets = missingNodes.stream().map(node -> SaltStates.resolveHostNameToMinionHostName(saltConnector, node))
-                    .collect(Collectors.toList());
-            saltJobRunner.setTarget(new Compound(newTargets));
+            Set<String> newTargets = missingNodes.stream().map(node -> SaltStates.resolveHostNameToMinionHostName(saltConnector, node))
+                    .collect(Collectors.toSet());
+            saltJobRunner.setTarget(newTargets);
         } else {
             LOGGER.info("There job completed successfuly on every node.");
             saltJobRunner.setJobState(JobState.FINISHED);

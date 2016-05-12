@@ -49,12 +49,12 @@ public class SaltStates {
         return applyState(sc, "kerberos.server", target).getJid();
     }
 
-    public static Object addRole(SaltConnector sc, Target<String> target, String role) {
+    public static ApplyResponse addRole(SaltConnector sc, Target<String> target, String role) {
         return sc.run(target, "grains.append", LOCAL, ApplyResponse.class, "roles", role);
     }
 
-    public static Object syncGrains(SaltConnector sc) {
-        return sc.run(Glob.ALL, "saltutil.sync_grains", LOCAL, Object.class);
+    public static ApplyResponse syncGrains(SaltConnector sc, Target<String> target) {
+        return sc.run(Glob.ALL, "saltutil.sync_grains", LOCAL, ApplyResponse.class);
     }
 
     public static String highstate(SaltConnector sc) {

@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -32,18 +35,14 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.AmbariAgentAddRoleChecker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.AmbariServerAddRoleChecker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConsulChecker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateChecker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.KerberosAddRoleChecker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConsulChecker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateChecker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SimpleAddRoleChecker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsChecker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -90,7 +89,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
 
-            runNewService(sc, new ConsulChecker(Glob.ALL), exitCriteriaModel);
+            runNewService(sc, new ConsulChecker(allIPs), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred under the consul bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -106,7 +105,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
 
-            runNewService(sc, new ConsulChecker(Glob.ALL), exitCriteriaModel);
+            runNewService(sc, new ConsulChecker(newAddresses), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during salt upscale", e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -124,19 +123,19 @@ public class SaltOrchestrator implements HostOrchestrator {
                 saltPillarRunnerFuture.get();
             }
 
-            Compound gwTarget = new Compound(gatewayConfig.getPrivateAddress());
-            Compound agentNodes = new Compound(nodeIPs);
+            Set<String> server = Sets.newHashSet(gatewayConfig.getPrivateAddress());
+            Set<String> all = Stream.concat(server.stream(), nodeIPs.stream()).collect(Collectors.toSet());
 
             // ambari server
-            runSaltCommand(sc, new AmbariServerAddRoleChecker(gwTarget), exitCriteriaModel);
+            runSaltCommand(sc, new SimpleAddRoleChecker(server, "ambari_server"), exitCriteriaModel);
             // ambari agent
-            runSaltCommand(sc, new AmbariAgentAddRoleChecker(agentNodes), exitCriteriaModel);
+            runSaltCommand(sc, new SimpleAddRoleChecker(nodeIPs, "ambari_agent"), exitCriteriaModel);
             // kerberos
             if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new KerberosAddRoleChecker(gwTarget), exitCriteriaModel);
+                runSaltCommand(sc, new SimpleAddRoleChecker(Sets.newHashSet(server), "kerberos_server"), exitCriteriaModel);
             }
-            runSaltCommand(sc, new SyncGrainsChecker(Glob.ALL), exitCriteriaModel);
-            runNewService(sc, new HighStateChecker(Glob.ALL), exitCriteriaModel);
+            runSaltCommand(sc, new SyncGrainsChecker(all), exitCriteriaModel);
+            runNewService(sc, new HighStateChecker(all), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
