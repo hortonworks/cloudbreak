@@ -12,6 +12,7 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
     private final StateConverter<S> stateConverter;
     private final EventConverter<E> eventConverter;
     private final MessageFactory<E> messageFactory;
+    private boolean flowFailed;
 
     public FlowAdapter(String flowId, StateMachine<S, E> flowMachine, MessageFactory<E> messageFactory, StateConverter<S> stateConverter,
             EventConverter<E> eventConverter) {
@@ -42,5 +43,20 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
 
     public void sendEvent(String key, Object object) {
         flowMachine.sendEvent(messageFactory.createMessage(flowId, eventConverter.convert(key), object));
+    }
+
+    @Override
+    public String getFlowId() {
+        return flowId;
+    }
+
+    @Override
+    public void setFlowFailed() {
+        this.flowFailed = true;
+    }
+
+    @Override
+    public boolean isFlowFailed() {
+        return flowFailed;
     }
 }

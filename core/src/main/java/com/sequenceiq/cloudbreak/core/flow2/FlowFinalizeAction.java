@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
@@ -15,8 +16,7 @@ public final class FlowFinalizeAction extends AbstractAction<FlowState, FlowEven
     }
 
     @Override
-    protected CommonContext createFlowContext(StateContext<FlowState, FlowEvent> stateContext, Payload payload) {
-        String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
+    protected CommonContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> stateContext, Payload payload) {
         return new CommonContext(flowId);
     }
 
@@ -31,7 +31,7 @@ public final class FlowFinalizeAction extends AbstractAction<FlowState, FlowEven
     }
 
     @Override
-    protected Object getFailurePayload(CommonContext flowContext, Exception ex) {
+    protected Object getFailurePayload(Payload payload, Optional<CommonContext> flowContext, Exception ex) {
         return null;
     }
 }

@@ -9,27 +9,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
+import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 
 @Component("StackTerminationFailureAction")
-public class StackTerminationFailureAction extends AbstractStackTerminationAction<TerminateStackResult> {
+public class StackTerminationFailureAction extends AbstractStackFailureAction<StackTerminationState, StackTerminationEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationFailureAction.class);
     @Inject
     private StackTerminationService stackTerminationService;
 
-    public StackTerminationFailureAction() {
-        super(TerminateStackResult.class);
-    }
-
     @Override
-    protected void doExecute(StackTerminationContext context, TerminateStackResult payload, Map<Object, Object> variables) {
-        stackTerminationService.handleStackTerminationError(context, payload, variables);
+    protected void doExecute(StackFailureContext context, FlowFailureEvent payload, Map<Object, Object> variables) {
+        stackTerminationService.handleStackTerminationError(context.getStack(), payload, variables.get("FORCEDTERMINATION") != null);
         sendEvent(context);
     }
 
     @Override
-    protected Selectable createRequest(StackTerminationContext context) {
+    protected Selectable createRequest(StackFailureContext context) {
         return new SelectableFlowStackEvent(context.getStack().getId(), StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation());
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -32,7 +33,7 @@ public class InstanceTerminationAction extends AbstractInstanceTerminationAction
         } else {
             LOGGER.info("Couldn't remove instance '{}' because other delete in progress", context.getCloudInstance().getInstanceId());
             sendEvent(context.getFlowId(), InstanceTerminationEvent.TERMINATION_FAILED_EVENT.stringRepresentation(),
-                    getFailurePayload(context, new IllegalStateException("Other delete operation in progress.")));
+                    getFailurePayload(payload, Optional.ofNullable(context), new IllegalStateException("Other delete operation in progress.")));
         }
     }
 

@@ -9,14 +9,17 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.ObjectStateMachineFactory;
@@ -40,6 +43,12 @@ public class AbstractActionTest {
     @Mock
     private EventBus eventBus;
 
+    @Mock
+    private FlowRegister runningFlows;
+
+    @Mock
+    private Flow flow;
+
     private StateMachine<State, Event> stateMachine;
 
     @Before
@@ -47,6 +56,8 @@ public class AbstractActionTest {
         underTest = spy(new TestAction());
         underTest.setFailureEvent(Event.FAILURE);
         MockitoAnnotations.initMocks(this);
+        BDDMockito.given(flow.getFlowId()).willReturn(FLOW_ID);
+        BDDMockito.given(runningFlows.get(anyString())).willReturn(flow);
         StateMachineConfigurationBuilder<State, Event> configurationBuilder =
                 new StateMachineConfigurationBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
         configurationBuilder.setTaskExecutor(new SyncTaskExecutor());
@@ -62,23 +73,23 @@ public class AbstractActionTest {
 
     @Test
     public void testExecute() throws Exception {
-        stateMachine.sendEvent(Event.DOIT);
-        verify(underTest, times(1)).createFlowContext(any(StateContext.class), any(Payload.class));
+        stateMachine.sendEvent(new GenericMessage<Event>(Event.DOIT, Collections.singletonMap("FLOW_ID", FLOW_ID)));
+        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), any(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
         verify(underTest, times(0)).sendEvent(any(CommonContext.class));
         verify(underTest, times(0)).sendEvent(anyString(), anyString(), any());
         verify(underTest, times(0)).sendEvent(anyString(), any(Selectable.class));
-        verify(underTest, times(0)).getFailurePayload(any(CommonContext.class), any(RuntimeException.class));
+        verify(underTest, times(0)).getFailurePayload(any(Payload.class), any(Optional.class), any(RuntimeException.class));
     }
 
     @Test
     public void testFailedExecute() throws Exception {
         RuntimeException exception = new UnsupportedOperationException();
         Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
-        stateMachine.sendEvent(Event.DOIT);
-        verify(underTest, times(1)).createFlowContext(any(StateContext.class), any(Payload.class));
+        stateMachine.sendEvent(new GenericMessage<Event>(Event.DOIT, Collections.singletonMap("FLOW_ID", FLOW_ID)));
+        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), any(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
-        verify(underTest, times(1)).getFailurePayload(any(CommonContext.class), eq(exception));
+        verify(underTest, times(1)).getFailurePayload(any(Payload.class), any(Optional.class), eq(exception));
         verify(underTest, times(1)).sendEvent(eq(FLOW_ID), eq(Event.FAILURE.name()), eq(Collections.emptyMap()));
     }
 
@@ -106,7 +117,7 @@ public class AbstractActionTest {
         }
 
         @Override
-        public CommonContext createFlowContext(StateContext<State, Event> stateContext, Payload payload) {
+        public CommonContext createFlowContext(String flowId, StateContext<State, Event> stateContext, Payload payload) {
             return new CommonContext(FLOW_ID);
         }
 
@@ -120,9 +131,8 @@ public class AbstractActionTest {
         }
 
         @Override
-        public Object getFailurePayload(CommonContext flowContext, Exception ex) {
+        public Object getFailurePayload(Payload payload, Optional<CommonContext> flowContext, Exception ex) {
             return Collections.emptyMap();
         }
     }
-
 }

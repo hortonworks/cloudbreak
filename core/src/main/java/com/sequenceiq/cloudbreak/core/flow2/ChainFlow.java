@@ -18,6 +18,21 @@ public abstract class ChainFlow implements Flow, Chainable {
     }
 
     @Override
+    public String getFlowId() {
+        return actFlow.getFlowId();
+    }
+
+    @Override
+    public void setFlowFailed() {
+        actFlow.setFlowFailed();
+    }
+
+    @Override
+    public boolean isFlowFailed() {
+        return actFlow.isFlowFailed();
+    }
+
+    @Override
     public void sendEvent(String key, Object object) {
         actFlow.sendEvent(key, object);
     }

@@ -22,13 +22,13 @@ public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownsca
     private static final List<Transition<StackDownscaleState, StackDownscaleEvent>> TRANSITIONS =
             new Transition.Builder<StackDownscaleState, StackDownscaleEvent>()
                 .defaultFailureEvent(DOWNSCALE_FAILURE_EVENT)
-                .from(INIT_STATE).to(DOWNSCALE_STATE).event(DOWNSCALE_EVENT).defaultFailureEvent()
+                .from(INIT_STATE).to(DOWNSCALE_STATE).event(DOWNSCALE_EVENT).noFailureEvent()
                 .from(DOWNSCALE_STATE).to(DOWNSCALE_FINISHED_STATE).event(DOWNSCALE_FINISHED_EVENT).defaultFailureEvent()
+                .from(DOWNSCALE_FINISHED_STATE).to(FINAL_STATE).event(DOWNSCALE_FINALIZED_EVENT).defaultFailureEvent()
                 .build();
 
     private static final FlowEdgeConfig<StackDownscaleState, StackDownscaleEvent> EDGE_CONFIG =
-            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DOWNSCALE_FINISHED_STATE, DOWNSCALE_FINALIZED_EVENT,
-                    DOWNSCALE_FAILED_STATE, DOWNSCALE_FAIL_HANDLED_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DOWNSCALE_FAILED_STATE, DOWNSCALE_FAIL_HANDLED_EVENT);
 
     public StackDownscaleConfig() {
         super(StackDownscaleState.class, StackDownscaleEvent.class);

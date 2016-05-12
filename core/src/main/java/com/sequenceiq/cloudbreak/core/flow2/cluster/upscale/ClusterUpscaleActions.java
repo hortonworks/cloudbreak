@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -20,7 +21,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -236,12 +237,14 @@ public class ClusterUpscaleActions {
     @Bean(name = "FAILED_STATE")
     public Action clusterupscaleFailedAction() {
         return new AbstractClusterUpscaleAction<UpscaleClusterFailedPayload>(UpscaleClusterFailedPayload.class) {
-
             @Inject
             private StackUpdater stackUpdater;
+            @Inject
+            private FlowRegister runningFlows;
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscaleClusterFailedPayload payload, Map<Object, Object> variables) throws Exception {
+                runningFlows.get(context.getFlowId()).setFlowFailed();
                 Exception errorDetails = payload.getErrorDetails();
                 LOGGER.error("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
                 Stack stack = context.getStack();
@@ -286,13 +289,19 @@ public class ClusterUpscaleActions {
         }
 
         @Override
-        protected Object getFailurePayload(ClusterUpscaleContext flowContext, Exception ex) {
-            return new UpscaleClusterFailedPayload(flowContext.getStack().getId(), flowContext.getHostGroupName(), ex);
+        protected Object getFailurePayload(P payload, Optional<ClusterUpscaleContext> flowContext, Exception ex) {
+            UpscaleClusterFailedPayload failurePayload;
+            if (flowContext.isPresent()) {
+                ClusterUpscaleContext context = flowContext.get();
+                failurePayload = new UpscaleClusterFailedPayload(context.getStack().getId(), context.getHostGroupName(), ex);
+            } else {
+                failurePayload = new UpscaleClusterFailedPayload(payload.getStackId(), null, ex);
+            }
+            return failurePayload;
         }
 
         @Override
-        protected ClusterUpscaleContext createFlowContext(StateContext<ClusterUpscaleState, ClusterUpscaleEvent> stateContext, P payload) {
-            String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
+        protected ClusterUpscaleContext createFlowContext(String flowId, StateContext<ClusterUpscaleState, ClusterUpscaleEvent> stateContext, P payload) {
             Stack stack = stackService.getById(payload.getStackId());
             MDCBuilder.buildMdcContext(stack);
             return new ClusterUpscaleContext(flowId, stack, payload.getHostGroupName());

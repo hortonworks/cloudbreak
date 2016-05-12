@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -33,8 +34,10 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -52,7 +55,6 @@ public class StackStartActions {
     private ResourceToCloudResourceConverter cloudResourceConverter;
     @Inject
     private StackStartStopService stackStartStopService;
-
 
     @Bean(name = "START_STATE")
     public Action stackStartAction() {
@@ -93,15 +95,15 @@ public class StackStartActions {
 
     @Bean(name = "START_FAILED_STATE")
     public Action stackStartFailedAction() {
-        return new AbstractStackStartAction<StartInstancesResult>(StartInstancesResult.class) {
+        return new AbstractStackFailureAction<StackStartState, StackStartEvent>() {
             @Override
-            protected void doExecute(StackStartStopContext context, StartInstancesResult payload, Map<Object, Object> variables) throws Exception {
-                stackStartStopService.handleStackStartError(context, payload);
+            protected void doExecute(StackFailureContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
+                stackStartStopService.handleStackStartError(context.getStack(), payload);
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackStartStopContext context) {
+            protected Selectable createRequest(StackFailureContext context) {
                 return new SelectableFlowStackEvent(context.getStack().getId(), StackStartEvent.START_FAIL_HANDLED_EVENT.stringRepresentation());
             }
         };
@@ -130,8 +132,7 @@ public class StackStartActions {
         }
 
         @Override
-        protected StackStartStopContext createFlowContext(StateContext<StackStartState, StackStartEvent> stateContext, P payload) {
-            String flowId = (String) stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
+        protected StackStartStopContext createFlowContext(String flowId, StateContext<StackStartState, StackStartEvent> stateContext, P payload) {
             Long stackId = payload.getStackId();
             Stack stack = stackService.getById(stackId);
             MDCBuilder.buildMdcContext(stack);
@@ -144,12 +145,8 @@ public class StackStartActions {
         }
 
         @Override
-        protected Object getFailurePayload(StackStartStopContext flowContext, Exception ex) {
-            List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(flowContext.getInstanceMetaData());
-            List<CloudResource> cloudResources = cloudResourceConverter.convert(flowContext.getStack().getResources());
-            StartInstancesRequest startRequest = new StartInstancesRequest(flowContext.getCloudContext(), flowContext.getCloudCredential(),
-                    cloudResources, cloudInstances);
-            return new StartInstancesResult(ex.getMessage(), ex, startRequest);
+        protected Object getFailurePayload(P payload, Optional<StackStartStopContext> flowContext, Exception ex) {
+            return new FlowFailureEvent(payload.getStackId(), ex);
         }
     }
 }

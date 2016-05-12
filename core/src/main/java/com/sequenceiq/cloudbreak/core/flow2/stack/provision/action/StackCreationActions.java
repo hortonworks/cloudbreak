@@ -30,13 +30,14 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
-import com.sequenceiq.cloudbreak.core.flow2.stack.CloudPlatformResponseToFlowFailureConverter;
+import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -165,21 +166,16 @@ public class StackCreationActions {
 
     @Bean(name = "STACK_CREATION_FAILED_STATE")
     public Action stackCreationFailureAction() {
-        return new AbstractStackCreationAction<FlowFailureEvent>(FlowFailureEvent.class) {
+        return new AbstractStackFailureAction<StackCreationState, StackCreationEvent>() {
             @Override
-            protected void doExecute(StackContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.handleStackCreationFailure(context, payload.getException());
+            protected void doExecute(StackFailureContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
+                stackCreationService.handleStackCreationFailure(context.getStack(), payload.getException());
                 sendEvent(context.getFlowId(), StackCreationEvent.STACK_CREATION_FAILED_EVENT.stringRepresentation(), payload);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
-                return null;
-            }
-
-            @Override
-            protected void initPayloadConverterMap(List<PayloadConverter<FlowFailureEvent>> payloadConverters) {
-                payloadConverters.add(new CloudPlatformResponseToFlowFailureConverter());
+            protected Selectable createRequest(StackFailureContext context) {
+                return new SelectableFlowStackEvent(context.getStack().getId(), StackCreationEvent.STACK_CREATION_FINISHED_EVENT.stringRepresentation());
             }
         };
     }

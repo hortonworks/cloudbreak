@@ -10,17 +10,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.transition.Transition;
 
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleFlowConfig;
@@ -148,7 +153,7 @@ public class OfflineStateGenerator {
 
         @Override
         public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
-            return (T) new FlowFinalizeAction();
+            return (T) new CustomAction();
         }
 
         @Override
@@ -163,6 +168,36 @@ public class OfflineStateGenerator {
 
         @Override
         public ConfigurableListableBeanFactory getBeanFactory() {
+            return null;
+        }
+    }
+
+    static class CustomAction extends AbstractAction<FlowState, FlowEvent, CommonContext, Payload> {
+        CustomAction() {
+            super(Payload.class);
+        }
+
+        @Override
+        public void execute(StateContext<FlowState, FlowEvent> context) {
+        }
+
+        @Override
+        protected CommonContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> stateContext, Payload payload) {
+            return null;
+        }
+
+        @Override
+        protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) throws Exception {
+
+        }
+
+        @Override
+        protected Selectable createRequest(CommonContext context) {
+            return null;
+        }
+
+        @Override
+        protected Object getFailurePayload(Payload payload, Optional<CommonContext> flowContext, Exception ex) {
             return null;
         }
     }

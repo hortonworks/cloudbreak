@@ -41,7 +41,7 @@ public class Flow2HandlerTest {
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
 
     @Mock
-    private Map<String, Flow> runningFlows;
+    private FlowRegister runningFlows;
 
     @Mock
     private FlowConfiguration flowConfig;
@@ -76,7 +76,7 @@ public class Flow2HandlerTest {
         event.setKey(FlowPhases.STACK_SYNC.name());
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
-        verify(runningFlows, times(1)).put(anyString(), eq(flow));
+        verify(runningFlows, times(1)).put(eq(flow));
         verify(flowLogService, times(1)).save(anyString(), eq(FlowPhases.STACK_SYNC.name()), any(Payload.class), eq(flowConfig.getClass()),
                 eq(StackSyncState.INIT_STATE));
         verify(flow, times(1)).sendEvent(anyString(), any());
@@ -88,14 +88,14 @@ public class Flow2HandlerTest {
         event.setKey(FlowPhases.STACK_SYNC.name());
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
-        verify(runningFlows, times(0)).put(eq(FLOW_ID), any(Flow.class));
+        verify(runningFlows, times(0)).put(any(Flow.class));
         verify(flowLogService, times(0)).save(anyString(), anyString(), any(Payload.class), Matchers.<Class>any(), any(FlowState.class));
     }
 
     @Test
     public void testExistingFlow() {
         BDDMockito.<FlowConfiguration>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
-        given(runningFlows.get(any())).willReturn(flow);
+        given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(StackSyncState.SYNC_STATE);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
@@ -119,6 +119,6 @@ public class Flow2HandlerTest {
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, times(0)).get(eq(FLOW_ID));
-        verify(runningFlows, times(0)).put(eq(FLOW_ID), any(Flow.class));
+        verify(runningFlows, times(0)).put(any(Flow.class));
     }
 }
