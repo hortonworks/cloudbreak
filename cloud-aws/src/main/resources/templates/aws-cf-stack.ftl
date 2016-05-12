@@ -143,6 +143,7 @@
     "PublicSubnet" : {
       "Type" : "AWS::EC2::Subnet",
       "Properties" : {
+        "MapPublicIpOnLaunch" : true,
         <#if existingVPC>
         "VpcId" : { "Ref" : "VPCId" },
         "CidrBlock" : { "Ref" : "SubnetCIDR" },
@@ -150,7 +151,6 @@
         <#if availabilitySetNeeded>
         "AvailabilityZone" : {"Fn::Join" : ["",[ { "Ref" : "AvailabilitySet" } ] ]} ,
         </#if>
-        "MapPublicIpOnLaunch" : true,
         "VpcId" : { "Ref" : "VPC" },
         "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]},
         </#if>
@@ -201,7 +201,6 @@
       }
     },
 
-    <#if !existingIGW>
     "PublicRoute" : {
           "Type" : "AWS::EC2::Route",
           <#if existingVPC>
@@ -219,8 +218,6 @@
             </#if>
           }
     },
-    </#if>
-
 
     "PublicSubnetRouteTableAssociation" : {
       "Type" : "AWS::EC2::SubnetRouteTableAssociation",
