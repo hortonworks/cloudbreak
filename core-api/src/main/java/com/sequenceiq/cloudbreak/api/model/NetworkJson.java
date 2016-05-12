@@ -11,9 +11,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkJson implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.ID, required = false)
@@ -31,9 +34,7 @@ public class NetworkJson implements JsonEntity {
     @NotNull
     private boolean publicInAccount;
     @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.SUBNET_CIDR, required = true)
-    @Pattern(regexp =
-            "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            message = "The subnet field should contain a valid CIDR definition.")
+    @ValidSubnet
     private String subnetCIDR;
     @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.PARAMETERS, required = true)
     private Map<String, Object> parameters = new HashMap<>();
