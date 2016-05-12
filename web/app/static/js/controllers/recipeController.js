@@ -10,9 +10,11 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
             for (var p in recipe.plugins) {
                 if (p.indexOf("base64://") === 0) {
                     var lines = recipe.pluginContents[p] = {};
-                    for (var line of $base64.decode(p.substring(9)).split('\n')) {
-                        if (line) {
-                            var content = line.split(":");
+                    var files = $base64.decode(p.substring(9)).split('\n');
+                    for (var f = 0; f < files.length; f++) {
+                        var file = files[f];
+                        if (file) {
+                            var content = file.split(":");
                             if ("plugin.toml" != content[0]) {
                                 lines[content[0]] = $base64.decode(content[1]);
                             }
@@ -23,8 +25,8 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
         }
 
         $rootScope.recipes = AccountRecipe.query(function() {
-            for (var recipe of $rootScope.recipes) {
-                decorateBase64Plugins(recipe);
+            for (var i = 0; i < $rootScope.recipes.length; i++) {
+                decorateBase64Plugins($rootScope.recipes[i]);
             }
         });
         initalizeRecipe();
