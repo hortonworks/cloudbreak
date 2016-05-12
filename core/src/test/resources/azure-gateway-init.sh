@@ -2,7 +2,7 @@
 set -x
 
 # warming up yum in the background
-yum -y install wget &
+yum -y makecache &
 
 export CLOUD_PLATFORM="AZURE_RM"
 export START_LABEL=98
