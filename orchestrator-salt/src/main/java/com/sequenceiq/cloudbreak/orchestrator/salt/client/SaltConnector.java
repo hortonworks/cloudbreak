@@ -136,26 +136,15 @@ public class SaltConnector implements Closeable {
                 .param("tgt", target.getTarget())
                 .param("expr_form", target.getType());
         if (arg != null) {
-            for (String a : arg) {
-                form.param("arg", a);
+            if (clientType.equals(SaltClientType.LOCAL) || clientType.equals(SaltClientType.LOCAL_ASYNC)) {
+                for (String a : arg) {
+                    form.param("arg", a);
+                }
+            } else {
+                for (int i = 0; i < arg.length - 1; i = i + 2) {
+                    form.param(arg[i], arg[i + 1]);
+                }
             }
-        }
-        T response = saltTarget.path(SaltEndpoint.SALT_RUN
-                .getContextPath()).request()
-                .post(Entity.form(form)).readEntity(clazz);
-        LOGGER.info("Salt run response: {}", response);
-        return response;
-    }
-
-    public <T> T runner(Target<String> target, String fun, String argName, String arg, Class<T> clazz) {
-        Form form = new Form();
-        form = addAuth(form)
-                .param("fun", fun)
-                .param("client", "runner")
-                .param("tgt", target.getTarget())
-                .param("expr_form", target.getType());
-        if (arg != null) {
-            form.param(argName, arg);
         }
         T response = saltTarget.path(SaltEndpoint.SALT_RUN
                 .getContextPath()).request()

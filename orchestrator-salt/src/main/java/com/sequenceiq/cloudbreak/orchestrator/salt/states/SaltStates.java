@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.states;
 
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL_ASYNC;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
 
 import java.util.HashSet;
 import java.util.List;
@@ -74,13 +75,13 @@ public class SaltStates {
     }
 
     private static Set<String> applyStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
-        Map jidInfo = sc.runner(target, "jobs.lookup_jid", "jid", jid, Map.class);
+        Map jidInfo = sc.run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         Map<String, Map<String, RunnerInfoObject>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
 
     private static Set<String> highStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
-        Map jidInfo = sc.runner(target, "jobs.lookup_jid", "jid", jid, Map.class);
+        Map jidInfo = sc.run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         Map<String, Map<String, RunnerInfoObject>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }
@@ -102,7 +103,7 @@ public class SaltStates {
     }
 
     public static boolean jobIsRunning(SaltConnector sc, String jid, Target<String> target) {
-        RunningJobsResponse runningInfo = sc.runner(target, "jobs.active", "jid", jid, RunningJobsResponse.class);
+        RunningJobsResponse runningInfo = sc.run(target, "jobs.active", RUNNER, RunningJobsResponse.class, "jid", jid);
         for (Map<String, Map<String, Object>> results : runningInfo.getResult()) {
             for (Map.Entry<String, Map<String, Object>> stringMapEntry : results.entrySet()) {
                 if (stringMapEntry.getKey().equals(jid)) {
