@@ -6,5 +6,5 @@ ALTER TABLE orchestrator ALTER COLUMN apiendpoint DROP NOT NULL
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-ALTER TABLE orchestrator ALTER COLUMN apiendpoint ADD NOT NULL
+ALTER TABLE orchestrator ALTER COLUMN apiendpoint SET NOT NULL
 
