@@ -2,7 +2,7 @@
 set -x
 
 # warming up yum in the background
-yum -y install wget &
+yum -y makecache &
 
 export CLOUD_PLATFORM="${cloudPlatform}"
 export START_LABEL=${platformDiskStartLabel}
