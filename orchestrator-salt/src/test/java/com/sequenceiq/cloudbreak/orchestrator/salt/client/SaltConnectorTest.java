@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceRespon
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public class SaltConnectorTest {
@@ -26,13 +27,23 @@ public class SaltConnectorTest {
 
     @Before
     public void setup() {
-        String id = "614";
-        GatewayConfig gatewayConfig = new GatewayConfig("172.16.252.33", "10.0.0.5", 9443,
-                "/Users/akanto/prj/cbd-test/certs/stack-" + id,
-                "/Users/akanto/prj/cbd-test/certs/stack-" + id + "/ca.pem",
-                "/Users/akanto/prj/cbd-test/certs/stack-" + id + "/cert.pem",
-                "/Users/akanto/prj/cbd-test/certs/stack-" + id + "/key.pem");
+        String id = "183";
+        GatewayConfig gatewayConfig = new GatewayConfig("172.16.252.43", "10.0.0.5", 9443,
+                "/Users/rdoktorics/prj/certs/stack-" + id,
+                "/Users/rdoktorics/prj/certs/stack-" + id + "/ca.pem",
+                "/Users/rdoktorics/prj/certs/stack-" + id + "/cert.pem",
+                "/Users/rdoktorics/prj/certs/stack-" + id + "/key.pem");
         client = new SaltConnector(gatewayConfig, true);
+    }
+
+    //@Test
+    public void testJid() {
+        Object pingResponse = SaltStates.jidInfo(client, "20160510134036754632", Glob.ALL, StateType.SIMPLE);
+    }
+
+    //@Test
+    public void testConsul() {
+        Object pingResponse = SaltStates.consul(client, Glob.ALL);
     }
 
     //@Test
@@ -125,7 +136,7 @@ public class SaltConnectorTest {
 
     //@Test
     public void testRunHighstate() {
-        Object object = SaltStates.highstate(client, Glob.ALL);
+        Object object = SaltStates.ambariAgent(client, Glob.ALL);
         Assert.assertNotNull(object);
     }
 

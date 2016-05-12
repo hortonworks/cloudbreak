@@ -1,12 +1,17 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.client;
 
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltBootResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltBootResponses;
-import com.sequenceiq.cloudbreak.util.KeyStoreUtil;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import javax.net.ssl.SSLContext;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
+
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -23,16 +28,13 @@ import org.glassfish.jersey.filter.LoggingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Form;
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltBootResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltBootResponses;
+import com.sequenceiq.cloudbreak.util.KeyStoreUtil;
 
 public class SaltConnector implements Closeable {
 
@@ -126,7 +128,7 @@ public class SaltConnector implements Closeable {
     }
 
 
-    public <T> T run(Target<String> target, String fun, SaltClientType clientType, String arg, Class<T> clazz) {
+    public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
         Form form = new Form();
         form = addAuth(form)
                 .param("fun", fun)
@@ -134,7 +136,15 @@ public class SaltConnector implements Closeable {
                 .param("tgt", target.getTarget())
                 .param("expr_form", target.getType());
         if (arg != null) {
-            form.param("arg", arg);
+            if (clientType.equals(SaltClientType.LOCAL) || clientType.equals(SaltClientType.LOCAL_ASYNC)) {
+                for (String a : arg) {
+                    form.param("arg", a);
+                }
+            } else {
+                for (int i = 0; i < arg.length - 1; i = i + 2) {
+                    form.param(arg[i], arg[i + 1]);
+                }
+            }
         }
         T response = saltTarget.path(SaltEndpoint.SALT_RUN
                 .getContextPath()).request()

@@ -85,14 +85,12 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         if (targets.contains(getGatewayPrivateIp())) {
             saltAction.setServer(getGatewayPrivateIp());
             List<String> roles = new ArrayList<>();
-            roles.add("ambari_server");
             roles = appendConsulRole(getGatewayPrivateIp(), roles);
             saltAction.addMinion(createMinion(getGatewayPrivateIp(), roles));
         }
         for (String minionIp : targets) {
             if (!minionIp.equals(getGatewayPrivateIp())) {
                 List<String> roles = new ArrayList<>();
-                roles.add("ambari_agent");
                 roles = appendConsulRole(minionIp, roles);
                 saltAction.addMinion(createMinion(minionIp, roles));
             }

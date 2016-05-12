@@ -31,7 +31,8 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCa
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.ServiceInfo;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -71,8 +72,21 @@ public class ClusterHostServiceRunner {
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp());
-            OrchestrationCredential credential = new OrchestrationCredential(stack.getOrchestrator().getApiEndpoint(), new HashMap<String, Object>());
-            hostOrchestrator.runService(gatewayConfig, agents, credential, clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+            Cluster cluster = stack.getCluster();
+            Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+            if (cluster.isSecure()) {
+                Map<String, Object> krb = new HashMap<>();
+                Map<String, String> kerberosConf = new HashMap<>();
+                kerberosConf.put("masterKey", cluster.getKerberosMasterKey());
+                kerberosConf.put("user", cluster.getKerberosAdmin());
+                kerberosConf.put("password", cluster.getKerberosPassword());
+                kerberosConf.put("realm", "NODE.DC1.CONSUL");
+                kerberosConf.put("domain", "node.dc1.consul");
+                krb.put("kerberos", kerberosConf);
+                servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
+            }
+            SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
+            hostOrchestrator.runService(gatewayConfig, agents, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -84,15 +98,15 @@ public class ClusterHostServiceRunner {
         Map<String, String> candidates;
         try {
             Stack stack = stackRepository.findOneWithLists(stackId);
+            Cluster cluster = stack.getCluster();
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            candidates = collectUpscaleCandidates(stack.getCluster().getId(), hostGroupName, scalingAdjustment);
+            candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
             Set<String> agents = initializeNewAmbariAgentServices(stack, candidates);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp());
-            OrchestrationCredential credential = new OrchestrationCredential(stack.getOrchestrator().getApiEndpoint(), new HashMap<>());
-            hostOrchestrator.runService(gatewayConfig, agents, credential, clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+            hostOrchestrator.runService(gatewayConfig, agents, new SaltPillarConfig(), clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {

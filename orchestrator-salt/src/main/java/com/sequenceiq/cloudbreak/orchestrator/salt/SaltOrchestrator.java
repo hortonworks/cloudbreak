@@ -8,9 +8,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -27,12 +32,18 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorCompo
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.AmbariRunBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.ConsulPillarBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.ConsulRunBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConsulChecker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateChecker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SimpleAddRoleChecker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsChecker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -68,8 +79,8 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
 
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            ConsulPillarBootstrap pillarBootstrap = new ConsulPillarBootstrap(sc, consulServers);
-            Callable<Boolean> saltPillarRunner = runner(pillarBootstrap, exitCriteria, exitCriteriaModel);
+            PillarSave consulPillarSave = new PillarSave(sc, consulServers);
+            Callable<Boolean> saltPillarRunner = runner(consulPillarSave, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
@@ -78,10 +89,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
 
-            ConsulRunBootstrap consulRunBootstrap = new ConsulRunBootstrap(sc);
-            Callable<Boolean> consulRunBootstrapRunner = runner(consulRunBootstrap, exitCriteria, exitCriteriaModel);
-            Future<Boolean> consulRunBootstrapRunnerAppFuture = getParallelOrchestratorComponentRunner().submit(consulRunBootstrapRunner);
-            consulRunBootstrapRunnerAppFuture.get();
+            runNewService(sc, new ConsulChecker(allIPs), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred under the consul bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -97,10 +105,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
 
-            ConsulRunBootstrap consulRunBootstrap = new ConsulRunBootstrap(sc);
-            Callable<Boolean> consulRunBootstrapRunner = runner(consulRunBootstrap, exitCriteria, exitCriteriaModel);
-            Future<Boolean> consulRunBootstrapRunnerAppFuture = getParallelOrchestratorComponentRunner().submit(consulRunBootstrapRunner);
-            consulRunBootstrapRunnerAppFuture.get();
+            runNewService(sc, new ConsulChecker(newAddresses), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during salt upscale", e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -108,17 +113,50 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void runService(GatewayConfig gatewayConfig, Set<String> agents, OrchestrationCredential cred, ExitCriteriaModel exitCriteriaModel)
+    public void runService(GatewayConfig gatewayConfig, Set<String> nodeIPs, SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            AmbariRunBootstrap ambariRunBootstrap = new AmbariRunBootstrap(sc);
-            Callable<Boolean> ambariRunBootstrapRunner = runner(ambariRunBootstrap, exitCriteria, exitCriteriaModel);
-            Future<Boolean> ambariRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(ambariRunBootstrapRunner);
-            ambariRunBootstrapFuture.get();
+            for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
+                PillarSave pillarSave = new PillarSave(sc, propertiesEntry.getValue());
+                Callable<Boolean> saltPillarRunner = runner(pillarSave, exitCriteria, exitCriteriaModel);
+                Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
+                saltPillarRunnerFuture.get();
+            }
+
+            Set<String> server = Sets.newHashSet(gatewayConfig.getPrivateAddress());
+            Set<String> all = Stream.concat(server.stream(), nodeIPs.stream()).collect(Collectors.toSet());
+
+            // ambari server
+            runSaltCommand(sc, new SimpleAddRoleChecker(server, "ambari_server"), exitCriteriaModel);
+            // ambari agent
+            runSaltCommand(sc, new SimpleAddRoleChecker(nodeIPs, "ambari_agent"), exitCriteriaModel);
+            // kerberos
+            if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
+                runSaltCommand(sc, new SimpleAddRoleChecker(Sets.newHashSet(server), "kerberos_server"), exitCriteriaModel);
+            }
+            runSaltCommand(sc, new SyncGrainsChecker(all), exitCriteriaModel);
+            runNewService(sc, new HighStateChecker(all), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+    }
+
+
+    private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
+            InterruptedException {
+        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner);
+        Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
+        Future<Boolean> saltJobRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltJobRunBootstrapRunner);
+        saltJobRunBootstrapFuture.get();
+    }
+
+    private void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
+            InterruptedException {
+        SaltCommandTracker saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
+        Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel);
+        Future<Boolean> saltCommandRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltCommandRunBootstrapRunner);
+        saltCommandRunBootstrapFuture.get();
     }
 
     @Override

@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -14,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
 @Service
@@ -31,6 +34,9 @@ public class StackDecorator implements Decorator<Stack> {
 
     @Inject
     private SecurityGroupService securityGroupService;
+
+    @Inject
+    private CloudParameterService cloudParameterService;
 
     private enum DecorationData {
         CREDENTIAL_ID,
@@ -61,6 +67,7 @@ public class StackDecorator implements Decorator<Stack> {
             if (subject.getOrchestrator() != null && (subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)) {
                 throw new BadRequestException("Orchestrator cannot be configured for the stack!");
             }
+            prepareOrchestratorIfNotExist(subject, credential);
             if (subject.getFailurePolicy() != null) {
                 validatFailurePolicy(subject, consulServers, subject.getFailurePolicy());
             }
@@ -72,6 +79,16 @@ public class StackDecorator implements Decorator<Stack> {
             }
         }
         return subject;
+    }
+
+    private void prepareOrchestratorIfNotExist(Stack subject, Credential credential) {
+        if (subject.getOrchestrator() == null) {
+            PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
+            Orchestrator orchestrator = orchestrators.getDefaults().get(credential.cloudPlatform());
+            com.sequenceiq.cloudbreak.domain.Orchestrator orchestratorObject = new com.sequenceiq.cloudbreak.domain.Orchestrator();
+            orchestratorObject.setType(orchestrator.value());
+            subject.setOrchestrator(orchestratorObject);
+        }
     }
 
 
