@@ -179,7 +179,7 @@
     <label class="col-sm-3 control-label" for="openstack_sshPublicKey">{{msg.credential_openstack_form_ssh_key_label}}</label>
 
     <div class="col-sm-9">
-        <textarea placeholder="{{msg.credential_openstack_form_ssh_key_placeholder}}" rows="4" type="text" class="form-control" ng-model="credentialOpenstack.publicKey" name="openstack_sshPublicKey" id="openstack_sshPublicKey" required></textarea>
+        <textarea ng-attr-placeholder="{{msg.credential_openstack_form_ssh_key_placeholder}}" rows="4" type="text" class="form-control" ng-model="credentialOpenstack.publicKey" name="openstack_sshPublicKey" id="openstack_sshPublicKey" required></textarea>
         <div class="help-block" ng-show="openstackCredentialForm.openstack_sshPublicKey.$dirty && openstackCredentialForm.openstack_sshPublicKey.$invalid">
             <i class="fa fa-warning"></i> {{msg.credential_ssh_key_invalid}}
         </div>

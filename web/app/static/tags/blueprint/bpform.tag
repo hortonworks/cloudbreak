@@ -36,7 +36,7 @@
 <div class="form-group" ng-show="blueprintType == 'TEXT'" ng-class="{ 'has-error': blueprintForm.ambariBlueprint.$error.validjson && blueprintForm.ambariBlueprint.$dirty && blueprintForm.ambariBlueprint.$error.validjson }">
     <label class="col-sm-3 control-label" for="ambariBlueprint">{{msg.blueprint_form_manual_label}}</label>
     <div class="col-sm-9">
-        <textarea class="form-control" id="ambariBlueprint" ng-model="blueprint.ambariBlueprint" name="ambariBlueprint" placeholder="{{msg.blueprint_form_manual_placeholder}}" validjson rows="10" ng-required="blueprintType == 'TEXT' || blueprintType == 'FILE'"></textarea>
+        <textarea class="form-control" id="ambariBlueprint" ng-model="blueprint.ambariBlueprint" name="ambariBlueprint" ng-attr-placeholder="{{msg.blueprint_form_manual_placeholder}}" validjson rows="10" ng-required="blueprintType == 'TEXT' || blueprintType == 'FILE'"></textarea>
         <div class="help-block" ng-show="blueprintForm.ambariBlueprint.$error.validjson && blueprintForm.ambariBlueprint.$dirty">
             <i class="fa fa-warning"></i> {{msg.blueprint_json_invalid}}
         </div>

@@ -60,14 +60,14 @@
     <div class="form-group" ng-show="recipeType == 'SCRIPT'">
         <label class="col-sm-3 control-label" for="preInstallScript" style="border-bottom: 0">{{msg.recipe_pre_install_script}}</label>
         <div class="col-sm-9">
-            <textarea name="preInstallScript" id="preInstallScript" class="form-control" ng-model="$parent.preInstallScript" ng-change="generateStoredPluginFromText()" rows=10 placeholder="{{msg.recipe_pre_install_script_placeholder}}"></textarea>
+            <textarea name="preInstallScript" id="preInstallScript" class="form-control" ng-model="$parent.preInstallScript" ng-change="generateStoredPluginFromText()" rows=10 ng-attr-placeholder="{{msg.recipe_pre_install_script_placeholder}}"></textarea>
         </div>
     </div>
 
     <div class="form-group" ng-show="recipeType == 'SCRIPT'">
         <label class="col-sm-3 control-label" for="postInstallScript" style="border-bottom: 0">{{msg.recipe_post_install_script}}</label>
         <div class="col-sm-9">
-            <textarea name="postInstallScript" id="postInstallScript" class="form-control" ng-model="$parent.postInstallScript" ng-change="generateStoredPluginFromText()" rows=10 placeholder="{{msg.recipe_post_install_script_placeholder}}"></textarea>
+            <textarea name="postInstallScript" id="postInstallScript" class="form-control" ng-model="$parent.postInstallScript" ng-change="generateStoredPluginFromText()" rows=10 ng-attr-placeholder="{{msg.recipe_post_install_script_placeholder}}"></textarea>
         </div>
     </div>
 

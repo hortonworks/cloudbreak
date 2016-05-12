@@ -12,7 +12,7 @@
 <div class="form-group" ng-class="{'has-error': metricBasedAlertForm.alertDesc.$dirty && metricBasedAlertForm.alertDesc.$invalid }">
     <label class="col-sm-3 control-label" for="alertDesc">{{msg.periscope_alert_list_description_label}}</label>
     <div class="col-sm-9">
-        <textarea class="form-control" id="alertDesc" name="alertDesc" placeholder="" rows="2" ng-model="alert.description" ng-maxlength="1000"></textarea>
+        <textarea class="form-control" id="alertDesc" name="alertDesc" rows="2" ng-model="alert.description" ng-maxlength="1000"></textarea>
         <div class="help-block" ng-show="metricBasedAlertForm.alertDesc.$dirty && metricBasedAlertForm.alertDesc.$invalid">
             <i class="fa fa-warning"></i> {{msg.alert_description_invalid}}
         </div>

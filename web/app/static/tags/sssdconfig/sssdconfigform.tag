@@ -41,7 +41,7 @@
     <div class="form-group" ng-show="sssdConfigType == 'TEXT'" ng-class="{ 'has-error': sssdConfigCreationForm.sssdconfigtext.$dirty && sssdConfigCreationForm.sssdconfigtext.$invalid }">
         <label class="col-sm-3 control-label" for="sssdconfigtext" style="border-bottom: 0">{{msg.sssdconfig_configuration_label}}</label>
         <div class="col-sm-9">
-            <textarea name="sssdconfigtext" id="sssdconfigtext" class="form-control" sssdconfig ng-model="sssdConfig.configuration" ng-required="sssdConfigType != 'PARAMS'" rows=10 placeholder="{{msg.sssdconfig_configuration_placeholder}}"></textarea>
+            <textarea name="sssdconfigtext" id="sssdconfigtext" class="form-control" sssdconfig ng-model="sssdConfig.configuration" ng-required="sssdConfigType != 'PARAMS'" rows=10 ng-attr-placeholder="{{msg.sssdconfig_configuration_placeholder}}"></textarea>
             <div class="help-block" ng-show="sssdConfigCreationForm.sssdconfigtext.$dirty && sssdConfigCreationForm.sssdconfigtext.$invalid"><i class="fa fa-warning"></i> {{msg.sssdconfig_configuration_invalid}}</div>
         </div>
     </div>
