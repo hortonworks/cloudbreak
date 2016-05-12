@@ -35,6 +35,6 @@ public class ConfigureSssdHandler implements ClusterEventHandler<ConfigureSssdRe
         } catch (Exception e) {
             result = new ConfigureSssdResult(e.getMessage(), e, request);
         }
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 }

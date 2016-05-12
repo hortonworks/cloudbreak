@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
-public class ExecutePostRecipesResult extends AbstractClusterUpscaleResult<ExecutePostRecipesRequest> {
+public class ExecutePostRecipesResult extends AbstractClusterScaleResult<ExecutePostRecipesRequest> {
 
     public ExecutePostRecipesResult(ExecutePostRecipesRequest request) {
         super(request);

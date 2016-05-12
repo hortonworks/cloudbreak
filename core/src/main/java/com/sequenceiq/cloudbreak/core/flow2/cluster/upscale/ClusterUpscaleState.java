@@ -14,8 +14,8 @@ enum ClusterUpscaleState implements FlowState<ClusterUpscaleState, ClusterUpscal
     INSTALL_SERVICES_STATE,
     EXECUTE_POST_RECIPES_STATE,
     UPDATE_METADATA_STATE,
-    FINALIZE_STATE,
-    FAILED_STATE,
+    FINALIZE_UPSCALE_STATE,
+    CLUSTER_UPSCALE_FAILED_STATE,
     FINAL_STATE;
 
     private Class<?> clazz;

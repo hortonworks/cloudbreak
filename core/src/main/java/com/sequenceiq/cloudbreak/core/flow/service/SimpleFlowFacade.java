@@ -220,36 +220,6 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext downscaleCluster(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Downscaling of cluster. Context: {}", context);
-        try {
-            context = clusterFacade.downscaleCluster(context);
-            LOGGER.debug("Downscaling of cluster is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the downscaling of cluster: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleClusterScalingFailure(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Handling cluster scaling failure. Context: {}", context);
-        try {
-            context = clusterFacade.handleScalingFailure(context);
-            LOGGER.debug("Handling of cluster scaling failure is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the handling of cluster scaling failure: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
     public FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Update allowed subnet. Context: {}", context);
         try {

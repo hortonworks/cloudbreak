@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
-public class AddClusterContainersResult extends AbstractClusterUpscaleResult<AddClusterContainersRequest> {
+public class AddClusterContainersResult extends AbstractClusterScaleResult<AddClusterContainersRequest> {
 
     public AddClusterContainersResult(AddClusterContainersRequest request) {
         super(request);

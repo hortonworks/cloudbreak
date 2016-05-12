@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.ClusterUpscalePayload;
+import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 
-abstract class AbstractClusterUpscaleRequest extends ClusterPlatformRequest implements ClusterUpscalePayload {
+abstract class AbstractClusterScaleRequest extends ClusterPlatformRequest implements HostGroupPayload {
     private final String hostGroupName;
 
-    AbstractClusterUpscaleRequest(Long stackId, String hostGroupName) {
+    AbstractClusterScaleRequest(Long stackId, String hostGroupName) {
         super(stackId);
         this.hostGroupName = hostGroupName;
     }

@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.reactor.api.event.ClusterUpscalePayload;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterUpscaleResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AddClusterContainersResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ConfigureSssdRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ConfigureSssdResult;
@@ -198,7 +198,7 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "FINALIZE_STATE")
+    @Bean(name = "FINALIZE_UPSCALE_STATE")
     public Action upscaleFinishedAction() {
         return new AbstractClusterUpscaleAction<UpdateMetadataResult>(UpdateMetadataResult.class) {
 
@@ -234,7 +234,7 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "FAILED_STATE")
+    @Bean(name = "CLUSTER_UPSCALE_FAILED_STATE")
     public Action clusterupscaleFailedAction() {
         return new AbstractClusterUpscaleAction<UpscaleClusterFailedPayload>(UpscaleClusterFailedPayload.class) {
             @Inject
@@ -249,8 +249,7 @@ public class ClusterUpscaleActions {
                 LOGGER.error("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
                 Stack stack = context.getStack();
                 clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED, errorDetails.getMessage());
-                stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, String.format("New node(s) could not be added to the cluster: %s",
-                        errorDetails));
+                stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, String.format("New node(s) could not be added to the cluster: %s", errorDetails));
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added", errorDetails);
                 sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.stringRepresentation(), payload);
             }
@@ -260,12 +259,12 @@ public class ClusterUpscaleActions {
                 payloadConverters.add(new PayloadConverter<UpscaleClusterFailedPayload>() {
                     @Override
                     public boolean canConvert(Class sourceClass) {
-                        return AbstractClusterUpscaleResult.class.isAssignableFrom(sourceClass);
+                        return AbstractClusterScaleResult.class.isAssignableFrom(sourceClass);
                     }
 
                     @Override
                     public UpscaleClusterFailedPayload convert(Object payload) {
-                        AbstractClusterUpscaleResult result = (AbstractClusterUpscaleResult) payload;
+                        AbstractClusterScaleResult result = (AbstractClusterScaleResult) payload;
                         return new UpscaleClusterFailedPayload(result.getStackId(), result.getHostGroupName(), result.getErrorDetails());
                     }
                 });
@@ -278,7 +277,7 @@ public class ClusterUpscaleActions {
         };
     }
 
-    private abstract class AbstractClusterUpscaleAction<P extends ClusterUpscalePayload>
+    private abstract class AbstractClusterUpscaleAction<P extends HostGroupPayload>
             extends AbstractAction<ClusterUpscaleState, ClusterUpscaleEvent, ClusterUpscaleContext, P> {
 
         @Inject

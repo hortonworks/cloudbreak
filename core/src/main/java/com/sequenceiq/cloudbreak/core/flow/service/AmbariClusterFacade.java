@@ -9,7 +9,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
@@ -20,7 +19,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -33,7 +31,6 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
@@ -41,20 +38,16 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterAuthenticationContext;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -62,12 +55,10 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -95,8 +86,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
     @Inject
-    private AmbariDecommissioner ambariDecommissioner;
-    @Inject
     private StackService stackService;
     @Inject
     private ClusterService clusterService;
@@ -106,8 +95,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     private EmailSenderService emailSenderService;
     @Inject
     private CloudbreakEventService eventService;
-    @Inject
-    private HostGroupService hostGroupService;
     @Inject
     private ClusterContainerRunner containerRunner;
     @Inject
@@ -123,8 +110,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     @Inject
     private ClusterTerminationService clusterTerminationService;
     @Inject
-    private HostGroupRepository hostGroupRepository;
-    @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     private enum Msg {
@@ -138,8 +123,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         AMBARI_CLUSTER_STOPPED("ambari.cluster.stopped"),
         AMBARI_CLUSTER_SCALING_UP("ambari.cluster.scaling.up"),
         AMBARI_CLUSTER_SCALED_UP("ambari.cluster.scaled.up"),
-        AMBARI_CLUSTER_SCALING_DOWN("ambari.cluster.scaling.down"),
-        AMBARI_CLUSTER_SCALED_DOWN("ambari.cluster.scaled.down"),
         AMBARI_CLUSTER_RESET("ambari.cluster.reset"),
         AMBARI_CLUSTER_RUN_CONTAINERS("ambari.cluster.run.containers"),
         AMBARI_CLUSTER_RUN_SERVICES("ambari.cluster.run.services"),
@@ -148,8 +131,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         AMBARI_CLUSTER_START_REQUESTED("ambari.cluster.start.requested"),
         AMBARI_CLUSTER_START_FAILED("ambari.cluster.start.failed"),
         AMBARI_CLUSTER_STOP_FAILED("ambari.cluster.stop.failed"),
-        AMBARI_CLUSTER_CREATE_FAILED("ambari.cluster.create.failed"),
-        AMBARI_CLUSTER_SCALING_FAILED("ambari.cluster.scaling.failed");
+        AMBARI_CLUSTER_CREATE_FAILED("ambari.cluster.create.failed");
 
         private String code;
 
@@ -319,26 +301,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext downscaleCluster(FlowContext context) throws CloudbreakException {
-        ClusterScalingContext actualContext = (ClusterScalingContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(cluster);
-        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALING_DOWN, UPDATE_IN_PROGRESS.name());
-        Set<String> hostNames = ambariDecommissioner.decommissionAmbariNodes(stack.getId(), actualContext.getHostGroupAdjustment());
-        updateInstanceMetadataAfterScaling(true, hostNames, stack);
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), actualContext.getHostGroupAdjustment().getHostGroup());
-        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
-        context = new StackScalingContext(stack.getId(),
-                actualContext.getCloudPlatform(), hostNames.size() * (-1),
-                hostGroup.getConstraint().getInstanceGroup() == null ? null : hostGroup.getConstraint().getInstanceGroup().getGroupName(),
-                null, actualContext.getScalingType(), null);
-        return context;
-    }
-
-    @Override
     public FlowContext resetAmbariCluster(FlowContext context) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
@@ -428,21 +390,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         return handleClusterCreationFailure(context, false);
     }
 
-    @Override
-    public FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException {
-        ClusterScalingContext actualContext = (ClusterScalingContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(cluster);
-        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED, actualContext.getErrorReason());
-        Integer scalingAdjustment = actualContext.getHostGroupAdjustment().getScalingAdjustment();
-        String statusMessage = scalingAdjustment > 0 ? "New node(s) could not be added to the cluster:" : "Node(s) could not be removed from the cluster:";
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, String.format("%s %s", statusMessage, actualContext.getErrorReason()));
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_SCALING_FAILED, AVAILABLE.name(), scalingAdjustment > 0 ? "added" : "removed",
-                actualContext.getErrorReason());
-        return context;
-    }
-
     private FlowContext handleClusterCreationFailure(FlowContext context, boolean deleteClusterContainers) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
@@ -490,22 +437,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         } else {
             ambariClient.createUser(userName, password, true);
             ambariClient.deleteUser(ADMIN);
-        }
-    }
-
-    private void updateInstanceMetadataAfterScaling(boolean decommission, String hostName, Stack stack) {
-        if (!CloudConstants.BYOS.equals(stack.cloudPlatform())) {
-            if (decommission) {
-                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
-            } else {
-                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.REGISTERED);
-            }
-        }
-    }
-
-    private void updateInstanceMetadataAfterScaling(boolean decommission, Set<String> hostNames, Stack stack) {
-        for (String hostName : hostNames) {
-            updateInstanceMetadataAfterScaling(decommission, hostName, stack);
         }
     }
 

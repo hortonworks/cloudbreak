@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,7 +37,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -59,6 +57,7 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
@@ -148,16 +147,16 @@ public class AmbariDecommissioner {
         }
     }
 
-    public Set<String> decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest)
-            throws CloudbreakException {
-        Set<String> result = new HashSet<>();
-        Stack stack = stackRepository.findOneWithLists(stackId);
+    public Set<String> decommissionAmbariNodes(Stack stack, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
-        LOGGER.info("Decommission requested");
-        int adjustment = Math.abs(adjustmentRequest.getScalingAdjustment());
-        String hostGroupName = adjustmentRequest.getHostGroup();
+        int adjustment = Math.abs(scalingAdjustment);
+        Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(collectDownscaleCandidates(stack, cluster, hostGroupName, adjustment), adjustment);
+        if (hostsToRemove.size() != adjustment) {
+            throw new CloudbreakException(String.format("Only %d hosts found to downscale but %d required.", hostsToRemove.size(), adjustment));
+        }
+        Set<String> result = new HashSet<>();
         LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroupName);
-        eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
+        eventService.fireCloudbreakInstanceGroupEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP.code(), asList(adjustment, hostGroupName)), hostGroupName);
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
@@ -165,7 +164,6 @@ public class AmbariDecommissioner {
         PollingResult pollingResult = startServicesIfNeeded(stack, ambariClient, blueprintName);
         if (isSuccess(pollingResult)) {
             Set<String> components = getHadoopComponents(ambariClient, hostGroupName, blueprintName);
-            Map<String, HostMetadata> hostsToRemove = selectHostsToRemove(collectDownscaleCandidates(adjustmentRequest, stack, cluster), adjustment);
             List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
             pollingResult = ambariOperationService.waitForOperations(stack, ambariClient, decommissionComponents(ambariClient, hostList, components),
                     DECOMMISSION_AMBARI_PROGRESS_STATE);
@@ -214,19 +212,19 @@ public class AmbariDecommissioner {
         return ambariClient.getComponentsCategory(blueprintName, hostGroupName).keySet();
     }
 
-    private List<HostMetadata> collectDownscaleCandidates(HostGroupAdjustmentJson adjustmentJson, Stack stack, Cluster cluster)
+    private List<HostMetadata> collectDownscaleCandidates(Stack stack, Cluster cluster, String hostGroupName, Integer scalingAdjustment)
             throws CloudbreakSecuritySetupException {
         List<HostMetadata> downScaleCandidates;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
-        int replication = getReplicationFactor(ambariClient, adjustmentJson.getHostGroup());
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), adjustmentJson.getHostGroup());
+        int replication = getReplicationFactor(ambariClient, hostGroupName);
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
         Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
-        List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(cluster, hostsInHostGroup, adjustmentJson.getHostGroup());
+        List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(cluster, hostsInHostGroup, hostGroupName);
         int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
-        verifyNodeCount(replication, adjustmentJson.getScalingAdjustment(), filteredHostList, reservedInstances);
+        verifyNodeCount(replication, scalingAdjustment, filteredHostList, reservedInstances);
         if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup.getName())) {
-            downScaleCandidates = checkAndSortByAvailableSpace(ambariClient, replication, adjustmentJson.getScalingAdjustment(), filteredHostList);
+            downScaleCandidates = checkAndSortByAvailableSpace(ambariClient, replication, scalingAdjustment, filteredHostList);
         } else {
             downScaleCandidates = filteredHostList;
         }

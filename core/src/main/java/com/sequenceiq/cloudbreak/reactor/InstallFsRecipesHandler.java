@@ -35,6 +35,6 @@ public class InstallFsRecipesHandler implements ClusterEventHandler<InstallFsRec
         } catch (Exception e) {
             result = new InstallFsRecipesResult(e.getMessage(), e, request);
         }
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 }

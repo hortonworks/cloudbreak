@@ -35,6 +35,6 @@ public class WaitForAmbariHostsHandler implements ClusterEventHandler<WaitForAmb
         } catch (Exception e) {
             result = new WaitForAmbariHostsResult(e.getMessage(), e, request);
         }
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 }

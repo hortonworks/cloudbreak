@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapClusterHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterContainersHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCredentialChangeHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterDownscaleHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterInstallHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
@@ -24,7 +23,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHa
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSyncHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ConsulMetadataSetupHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.DownscaleMetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
@@ -56,7 +54,6 @@ public class FlowInitializer implements InitializingBean {
         registerStartFlows();
         registerStopFlows();
         registerUpscaleFlows();
-        registerDownscaleFlows();
         registerResetFlows();
         registerUpdateAllowedSubnetFlow();
         registerStopRequestedFlows();
@@ -66,7 +63,6 @@ public class FlowInitializer implements InitializingBean {
 
         reactor.on($(FlowPhases.METADATA_COLLECT.name()), getHandlerForClass(MetadataCollectHandler.class));
         reactor.on($(FlowPhases.UPSCALE_METADATA_COLLECT.name()), getHandlerForClass(UpscaleMetadataCollectHandler.class));
-        reactor.on($(FlowPhases.DOWNSCALE_METADATA_COLLECT.name()), getHandlerForClass(DownscaleMetadataCollectHandler.class));
         reactor.on($(FlowPhases.BOOTSTRAP_CLUSTER.name()), getHandlerForClass(BootstrapClusterHandler.class));
         reactor.on($(FlowPhases.CONSUL_METADATA_SETUP.name()), getHandlerForClass(ConsulMetadataSetupHandler.class));
         reactor.on($(FlowPhases.RUN_CLUSTER_CONTAINERS.name()), getHandlerForClass(ClusterContainersHandler.class));
@@ -76,7 +72,6 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.UPSCALE_STACK_SYNC.name()), getHandlerForClass(UpscaleStackSyncHandler.class));
         reactor.on($(FlowPhases.CLUSTER_START.name()), getHandlerForClass(ClusterStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
-        reactor.on($(FlowPhases.CLUSTER_DOWNSCALE.name()), getHandlerForClass(ClusterDownscaleHandler.class));
         reactor.on($(FlowPhases.UPDATE_ALLOWED_SUBNETS.name()), getHandlerForClass(UpdateAllowedSubnetsHandler.class));
         reactor.on($(FlowPhases.STACK_CREATION_FAILED.name()), getHandlerForClass(StackCreationFailureHandler.class));
         reactor.on($(FlowPhases.STACK_STOP_REQUESTED.name()), getHandlerForClass(StackStopRequestedHandler.class));
@@ -159,14 +154,6 @@ public class FlowInitializer implements InitializingBean {
 
         transitionKeyService.registerTransition(UpscaleMetadataCollectHandler.class, TransitionFactory
                 .createTransition(FlowPhases.UPSCALE_METADATA_COLLECT.name(), FlowPhases.ADD_INSTANCES.name(), FlowPhases.NONE.name()));
-    }
-
-    private void registerDownscaleFlows() {
-        transitionKeyService.registerTransition(DownscaleMetadataCollectHandler.class, TransitionFactory
-                .createTransition(FlowPhases.DOWNSCALE_METADATA_COLLECT.name(), FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.NONE.name()));
-
-        transitionKeyService.registerTransition(ClusterDownscaleHandler.class, TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_DOWNSCALE.name(), FlowPhases.STACK_DOWNSCALE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerResetFlows() {
