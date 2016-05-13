@@ -474,7 +474,7 @@ public class AmbariClusterFacade implements ClusterFacade {
         instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        return tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIp());
+        return tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
     }
 
     private void changeAmbariCredentials(HttpClientConfig ambariClientConfig, Stack stack) throws CloudbreakSecuritySetupException {
