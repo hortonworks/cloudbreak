@@ -30,11 +30,10 @@ public class CloudFormationTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String build(AuthenticatedContext ac, CloudStack stack, String snapshotId, boolean existingVPC, boolean existingIGW,
-            String existingSubnetCidr, String templatePath) {
+    public String build(ModelContext context) {
         Map<String, Object> model = new HashMap<>();
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
-        for (Group group : stack.getGroups()) {
+        for (Group group : context.stack.getGroups()) {
             InstanceTemplate instanceTemplate = group.getInstances().get(0).getTemplate();
             Boolean encrypted = instanceTemplate.getParameter("encrypted", Boolean.class);
             encrypted = encrypted == null ? Boolean.FALSE : encrypted;
@@ -53,18 +52,19 @@ public class CloudFormationTemplateBuilder {
             );
         }
         model.put("instanceGroups", awsGroupViews);
-        model.put("existingVPC", existingVPC);
-        model.put("existingIGW", existingIGW);
-        model.put("existingSubnet", isNoneEmpty(existingSubnetCidr));
-        model.put("securityRules", stack.getSecurity());
-        model.put("cbSubnet", isBlank(existingSubnetCidr) ? stack.getNetwork().getSubnet().getCidr() : existingSubnetCidr);
-        model.put("dedicatedInstances", areDedicatedInstancesRequested(stack));
-        model.put("availabilitySetNeeded", ac.getCloudContext().getLocation().getAvailabilityZone().value() == null ? false : true);
-        if (snapshotId != null) {
-            model.put("snapshotId", snapshotId);
+        model.put("existingVPC", context.existingVPC);
+        model.put("existingIGW", context.existingIGW);
+        model.put("existingSubnet", isNoneEmpty(context.existingSubnetCidr));
+        model.put("securityRules", context.stack.getSecurity());
+        model.put("cbSubnet", isBlank(context.existingSubnetCidr) ? context.stack.getNetwork().getSubnet().getCidr() : context.existingSubnetCidr);
+        model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
+        model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() == null ? false : true);
+        model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
+        if (isNoneEmpty(context.snapshotId)) {
+            model.put("snapshotId", context.snapshotId);
         }
         try {
-            return processTemplateIntoString(freemarkerConfiguration.getTemplate(templatePath, "UTF-8"), model);
+            return processTemplateIntoString(freemarkerConfiguration.getTemplate(context.templatePath, "UTF-8"), model);
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process CloudFormation freemarker template", e);
         }
@@ -89,4 +89,54 @@ public class CloudFormationTemplateBuilder {
         this.freemarkerConfiguration = freemarkerConfiguration;
     }
 
+    public static class ModelContext {
+        private AuthenticatedContext ac;
+        private CloudStack stack;
+        private String snapshotId;
+        private boolean existingVPC;
+        private boolean existingIGW;
+        private String existingSubnetCidr;
+        private boolean mapPublicIpOnLaunch;
+        private String templatePath;
+
+        public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
+            this.ac = ac;
+            return this;
+        }
+
+        public ModelContext withStack(CloudStack stack) {
+            this.stack = stack;
+            return this;
+        }
+
+        public ModelContext withSnapshotId(String snapshotId) {
+            this.snapshotId = snapshotId;
+            return this;
+        }
+
+        public ModelContext withExistingVpc(boolean existingVpc) {
+            this.existingVPC = existingVpc;
+            return this;
+        }
+
+        public ModelContext withExistingIGW(boolean existingIGW) {
+            this.existingIGW = existingIGW;
+            return this;
+        }
+
+        public ModelContext withExistingSubnetCidr(String cidr) {
+            this.existingSubnetCidr = cidr;
+            return this;
+        }
+
+        public ModelContext mapPublicIpOnLaunch(boolean mapPublicIpOnLaunch) {
+            this.mapPublicIpOnLaunch = mapPublicIpOnLaunch;
+            return this;
+        }
+
+        public ModelContext withTemplatePath(String templatePath) {
+            this.templatePath = templatePath;
+            return this;
+        }
+    }
 }
