@@ -96,8 +96,9 @@ final class VersionStrategies {
       def nearest = state.nearestVersion
       def nearestPreRelease
       def nearestRc = VersionUtils.getNearestPreReleaseVersion(grgit, state, "rc")
+
       def currentPreIdents = state.inferredPreRelease ? state.inferredPreRelease.split('\\.') as List : []
-      if (preReleaseLabel.equals("rc") || (preReleaseLabel.equals("dev") && nearestRc.preReleaseVersion.equals("rc.1"))){
+      if (preReleaseLabel.equals("rc") || (preReleaseLabel.equals("dev") && nearestRc.preReleaseVersion.equals("rc.1") && nearest.any.normalVersion != state.inferredNormal)){
         nearestPreRelease = nearestRc
       } else {
         nearestPreRelease = VersionUtils.getNearestPreReleaseVersion(grgit, state, "dev")
