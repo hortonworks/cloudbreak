@@ -129,7 +129,7 @@ public class ClusterBootstrapper {
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp()));
+            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
         }
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
