@@ -14,20 +14,29 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 public class OrchestratorBootstrapRunner implements Callable<Boolean> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrchestratorBootstrapRunner.class);
-    private static final int MAX_RETRY_COUNT = 30;
-    private static final int SLEEP_TIME = 5000;
+    private static final Integer MAX_RETRY_COUNT = 30;
+    private static final Integer SLEEP_TIME = 5000;
 
     private final OrchestratorBootstrap orchestratorBootstrap;
     private final Map<String, String> mdcMap;
     private final ExitCriteria exitCriteria;
     private final ExitCriteriaModel exitCriteriaModel;
+    private final Integer maxRetryCount;
+    private final Integer sleepTime;
 
     public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
             Map<String, String> mdcReplica) {
+        this(orchestratorBootstrap, exitCriteria, exitCriteriaModel, mdcReplica, MAX_RETRY_COUNT, SLEEP_TIME);
+    }
+
+    public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
+            Map<String, String> mdcReplica, Integer maxRetryCount, Integer sleepTime) {
         this.orchestratorBootstrap = orchestratorBootstrap;
         this.mdcMap = mdcReplica;
         this.exitCriteria = exitCriteria;
         this.exitCriteriaModel = exitCriteriaModel;
+        this.maxRetryCount = maxRetryCount;
+        this.sleepTime = sleepTime;
     }
 
     @Override
@@ -37,7 +46,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         int retryCount = 0;
         Exception actualException = null;
         String type = orchestratorBootstrap.getClass().getSimpleName().replace("Bootstrap", "");
-        while (!success && MAX_RETRY_COUNT >= retryCount) {
+        while (!success && maxRetryCount >= retryCount) {
             if (isExitNeeded()) {
                 LOGGER.error(exitCriteria.exitMessage());
                 throw new CloudbreakOrchestratorCancelledException(exitCriteria.exitMessage());
@@ -55,13 +64,13 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
                 actualException = ex;
                 retryCount++;
                 LOGGER.error("Orchestrator component {} failed to start, retrying [{}/{}] Elapsed time: {} ms; Reason: {}, additional info: {}", type,
-                        MAX_RETRY_COUNT, retryCount, elapsedTime, ex.getMessage(), orchestratorBootstrap);
-                Thread.sleep(SLEEP_TIME);
+                        maxRetryCount, retryCount, elapsedTime, ex.getMessage(), orchestratorBootstrap);
+                Thread.sleep(sleepTime);
             }
         }
 
         if (!success) {
-            LOGGER.error(String.format("Orchestrator component failed to start in %s attempts: %s", MAX_RETRY_COUNT, actualException));
+            LOGGER.error(String.format("Orchestrator component failed to start in %s attempts: %s", maxRetryCount, actualException));
             throw actualException;
         }
         return Boolean.TRUE;
