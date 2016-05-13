@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker;
 
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
+
+import java.util.Set;
 
 public class ConsulChecker extends BaseSaltJobRunner {
 
@@ -18,4 +18,8 @@ public class ConsulChecker extends BaseSaltJobRunner {
         return SaltStates.consul(saltConnector, new Compound(getTarget()));
     }
 
+    @Override
+    public String toString() {
+        return "ConsulChecker{" + super.toString() + "}";
+    }
 }

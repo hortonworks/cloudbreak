@@ -8,11 +8,18 @@ public class JobId {
         this.jobId = jobId;
     }
 
+    public static JobId jobId(String id) {
+        return new JobId(id);
+    }
+
     public String getJobId() {
         return jobId;
     }
 
-    public static JobId jobId(String id) {
-        return new JobId(id);
+    @Override
+    public String toString() {
+        return "JobId{"
+                + "jobId='" + jobId + '\''
+                + '}';
     }
 }

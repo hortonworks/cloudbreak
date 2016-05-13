@@ -14,23 +14,24 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 public class OrchestratorBootstrapRunner implements Callable<Boolean> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrchestratorBootstrapRunner.class);
-    private static final Integer MAX_RETRY_COUNT = 30;
-    private static final Integer SLEEP_TIME = 5000;
+    private static final int MAX_RETRY_COUNT = 30;
+    private static final int SLEEP_TIME = 5000;
 
     private final OrchestratorBootstrap orchestratorBootstrap;
     private final Map<String, String> mdcMap;
     private final ExitCriteria exitCriteria;
     private final ExitCriteriaModel exitCriteriaModel;
-    private final Integer maxRetryCount;
-    private final Integer sleepTime;
+    private final int maxRetryCount;
+    private final int sleepTime;
 
-    public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
-            Map<String, String> mdcReplica) {
+    public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria,
+            ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcReplica) {
         this(orchestratorBootstrap, exitCriteria, exitCriteriaModel, mdcReplica, MAX_RETRY_COUNT, SLEEP_TIME);
     }
 
-    public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
-            Map<String, String> mdcReplica, Integer maxRetryCount, Integer sleepTime) {
+    public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria,
+            ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcReplica,
+            int maxRetryCount, int sleepTime) {
         this.orchestratorBootstrap = orchestratorBootstrap;
         this.mdcMap = mdcReplica;
         this.exitCriteria = exitCriteria;
@@ -43,10 +44,10 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
     public Boolean call() throws Exception {
         MDC.setContextMap(mdcMap);
         boolean success = false;
-        int retryCount = 0;
+        int retryCount = 1;
         Exception actualException = null;
         String type = orchestratorBootstrap.getClass().getSimpleName().replace("Bootstrap", "");
-        while (!success && maxRetryCount >= retryCount) {
+        while (!success && retryCount <= maxRetryCount) {
             if (isExitNeeded()) {
                 LOGGER.error(exitCriteria.exitMessage());
                 throw new CloudbreakOrchestratorCancelledException(exitCriteria.exitMessage());
@@ -62,10 +63,12 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             } catch (Exception ex) {
                 long elapsedTime = System.currentTimeMillis() - startTime;
                 actualException = ex;
+                LOGGER.warn("Orchestrator component {} failed to start, retrying [{}/{}] Elapsed time: {} ms; Reason: {}, additional info: {}", type,
+                        retryCount, maxRetryCount, elapsedTime, actualException.getMessage(), orchestratorBootstrap);
                 retryCount++;
-                LOGGER.error("Orchestrator component {} failed to start, retrying [{}/{}] Elapsed time: {} ms; Reason: {}, additional info: {}", type,
-                        maxRetryCount, retryCount, elapsedTime, ex.getMessage(), orchestratorBootstrap);
-                Thread.sleep(sleepTime);
+                if (retryCount <= maxRetryCount) {
+                    Thread.sleep(sleepTime);
+                }
             }
         }
 
