@@ -119,4 +119,13 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         return gatewayConfig.getPrivateAddress();
     }
 
+    @Override
+    public String toString() {
+        return "SaltBootstrap{"
+                + "gatewayConfig=" + gatewayConfig
+                + ", consulServers=" + consulServers
+                + ", originalTargets=" + originalTargets
+                + ", targets=" + targets
+                + '}';
+    }
 }

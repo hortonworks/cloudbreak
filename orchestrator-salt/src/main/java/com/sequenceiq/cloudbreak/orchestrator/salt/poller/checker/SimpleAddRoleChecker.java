@@ -25,4 +25,11 @@ public class SimpleAddRoleChecker extends BaseSaltJobRunner {
         setTarget(missingIps);
         return missingIps.toString();
     }
+
+    @Override
+    public String toString() {
+        return "SimpleAddRoleChecker{"
+                + "type='" + type + '\'' + super.toString()
+                + '}';
+    }
 }

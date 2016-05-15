@@ -84,4 +84,11 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             saltJobRunner.setJobState(JobState.FINISHED);
         }
     }
+
+    @Override
+    public String toString() {
+        return "SaltJobIdTracker{"
+                + "saltJobRunner=" + saltJobRunner
+                + '}';
+    }
 }

@@ -62,4 +62,13 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
         Set<String> nodesTarget = nodes.stream().map(node -> SaltStates.resolveHostNameToMinionHostName(sc, node)).collect(Collectors.toSet());
         return target.stream().filter(t -> !nodesTarget.contains(t)).collect(Collectors.toSet());
     }
+
+    @Override
+    public String toString() {
+        return "BaseSaltJobRunner{"
+                + "target=" + target
+                + ", jid=" + jid
+                + ", jobState=" + jobState
+                + '}';
+    }
 }

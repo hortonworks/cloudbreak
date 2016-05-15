@@ -22,4 +22,11 @@ public class SaltCommandTracker implements OrchestratorBootstrap {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "SaltCommandTracker{"
+                + "saltJobRunner=" + saltJobRunner
+                + '}';
+    }
 }

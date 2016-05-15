@@ -19,4 +19,11 @@ public class RunningJobsResponse {
     public void setResult(List<Map<String, Map<String, Object>>> result) {
         this.result = result;
     }
+
+    @Override
+    public String toString() {
+        return "RunningJobsResponse{"
+                + "result=" + result
+                + '}';
+    }
 }
