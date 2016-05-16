@@ -1,14 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.common.type.BillingStatus.BILLING_STOPPED;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,12 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
@@ -88,39 +83,6 @@ public class SimpleStackFacade implements StackFacade {
     private CloudbreakMessagesService messagesService;
     @Inject
     private ServiceProviderConnectorAdapter connector;
-
-    @Override
-    public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
-            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_INFRASTRUCTURE_BOOTSTRAP, UPDATE_IN_PROGRESS.name());
-            clusterBootstrapper.bootstrapMachines(actualContext);
-        } catch (Exception e) {
-            LOGGER.error("Error occurred while bootstrapping container orchestrator: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS);
-            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
-            consulMetadataSetup.setupConsulMetadata(stack.getId());
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
-        } catch (Exception e) {
-            LOGGER.error("Exception during the consul metadata setup process.", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
 
     @Override
     public FlowContext stopRequested(FlowContext context) throws CloudbreakException {
@@ -196,36 +158,6 @@ public class SimpleStackFacade implements StackFacade {
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
             throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext handleCreationFailure(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        final Stack stack = stackService.getById(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
-        try {
-            String errorReason = actualContext.getErrorReason();
-            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, UPDATE_IN_PROGRESS.name(), errorReason);
-            if (!stack.isStackInDeletionPhase()) {
-                if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
-                    LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
-                } else {
-                    stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
-                    connector.rollback(stack, stack.getResources());
-                    fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name(), errorReason);
-                }
-                stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, errorReason);
-                fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, CREATE_FAILED.name(), errorReason);
-            }
-
-            context = new ProvisioningContext.Builder().setDefaultParams(stack.getId(), platform(stack.cloudPlatform())).build();
-        } catch (Exception ex) {
-            LOGGER.error("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
-            stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, String.format("Rollback failed: %s", ex.getMessage()));
-            fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_ROLLBACK_FAILED, CREATE_FAILED.name(), ex.getMessage());
-            throw new CloudbreakException(String.format("Stack rollback failed on {} stack: ", stack.getId(), ex));
         }
         return context;
     }

@@ -1,0 +1,10 @@
+package com.sequenceiq.cloudbreak.reactor.api.event;
+
+public enum OrchestrationEvent {
+    BOOTSTRAP_MACHINES_REQUEST,
+    BOOTSTRAP_MACHINES_DONE,
+    BOOTSTRAP_MACHINES_FAILED,
+    CONSUL_METADATA_SETUP_REQUEST,
+    CONSUL_METADATA_SETUP_DONE,
+    CONSUL_METADATA_SETUP_FAILED
+}

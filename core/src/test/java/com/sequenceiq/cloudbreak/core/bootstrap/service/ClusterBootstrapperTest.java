@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.ContainerBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.core.flow.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.flow.context.HostOrchestratorClusterContext;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -126,9 +125,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenEverythingWorksNormally() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
@@ -142,7 +139,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
         when(orchestratorRepository.save(any(Orchestrator.class))).thenReturn(new Orchestrator());
-        underTest.bootstrapContainers(context);
+        underTest.bootstrapContainers(stack);
 
         verify(tlsSecurityService, times(1)).buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString());
         verify(clusterBootstrapperErrorHandler, times(0))
@@ -157,9 +154,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenTimeOutComesInClusterAvailabilityPoller() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
@@ -173,7 +168,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapContainers(context);
+        underTest.bootstrapContainers(stack);
 
         verify(tlsSecurityService, times(1)).buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString());
         verify(clusterBootstrapperErrorHandler, times(1))
@@ -188,9 +183,7 @@ public class ClusterBootstrapperTest {
     @Test(expected = CancellationException.class)
     public void bootstrapClusterWhenOrchestratorDropCancelledException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new CancelledMockContainerOrchestrator());
@@ -204,15 +197,13 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapContainers(context);
+        underTest.bootstrapContainers(stack);
     }
 
     @Test(expected = CloudbreakException.class)
     public void bootstrapClusterWhenOrchestratorDropFailedException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new FailedMockContainerOrchestrator());
@@ -226,15 +217,13 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapContainers(context);
+        underTest.bootstrapContainers(stack);
     }
 
     @Test
     public void bootstrapClusterWhenEverythingWorksNormallyWithMoreBootstrapSegment() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        ProvisioningContext context = new ProvisioningContext.Builder().setDefaultParams(1L, GCP_PLATFORM).build();
 
-        when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new TwoLengthMockContainerOrchestrator());
@@ -247,7 +236,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapContainers(context);
+        underTest.bootstrapContainers(stack);
 
         verify(clusterBootstrapperErrorHandler, times(0))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());

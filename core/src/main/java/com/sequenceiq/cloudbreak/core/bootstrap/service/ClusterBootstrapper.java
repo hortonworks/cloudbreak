@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.ContainerBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.core.flow.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.flow.context.HostOrchestratorClusterContext;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -108,14 +107,14 @@ public class ClusterBootstrapper {
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
-    public void bootstrapMachines(ProvisioningContext provisioningContext) throws CloudbreakException {
-        Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
+    public void bootstrapMachines(Long stackId) throws CloudbreakException {
+        Stack stack = stackRepository.findOneWithLists(stackId);
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
 
         if (orchestratorType.hostOrchestrator()) {
-            bootstrapOnHost(provisioningContext);
+            bootstrapOnHost(stack);
         } else if (orchestratorType.containerOrchestrator()) {
-            bootstrapContainers(provisioningContext);
+            bootstrapContainers(stack);
         } else {
             LOGGER.error("Orchestrator not found: {}", stack.getOrchestrator().getType());
             throw new CloudbreakException("HostOrchestrator not found: " + stack.getOrchestrator().getType());
@@ -123,8 +122,7 @@ public class ClusterBootstrapper {
     }
 
     @SuppressWarnings("unchecked")
-    public void bootstrapOnHost(ProvisioningContext provisioningContext) throws CloudbreakException {
-        Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
+    public void bootstrapOnHost(Stack stack) throws CloudbreakException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         Set<Node> nodes = new HashSet<>();
@@ -163,8 +161,7 @@ public class ClusterBootstrapper {
         }
     }
 
-    public void bootstrapContainers(ProvisioningContext provisioningContext) throws CloudbreakException {
-        Stack stack = stackRepository.findOneWithLists(provisioningContext.getStackId());
+    public void bootstrapContainers(Stack stack) throws CloudbreakException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
 

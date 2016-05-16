@@ -47,17 +47,6 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext setupConsulMetadata(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Setting up Consul metadata. Context: {}", context);
-        try {
-            return stackFacade.setupConsulMetadata(context);
-        } catch (Exception e) {
-            LOGGER.error("Exception during Consul metadata setup.", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
     public FlowContext runClusterContainers(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Running cluster containers. Context: {}", context);
         try {
@@ -101,19 +90,6 @@ public class SimpleFlowFacade implements FlowFacade {
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during the cluster reset process: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleStackCreationFailure(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Stack creation failed. Context: {}", context);
-        try {
-            context = stackFacade.handleCreationFailure(context);
-            LOGGER.debug("Stack creation failure handled.");
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during stack creation!: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
@@ -245,21 +221,6 @@ public class SimpleFlowFacade implements FlowFacade {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Handling cluster bootstrap. Context: {}", context);
-        try {
-            context = stackFacade.bootstrapCluster(context);
-            LOGGER.debug("Cluster bootstrap is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the handling of munchausen setup failure: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

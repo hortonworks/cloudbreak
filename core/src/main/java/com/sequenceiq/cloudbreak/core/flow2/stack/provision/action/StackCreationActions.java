@@ -41,6 +41,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackPayload;
+import com.sequenceiq.cloudbreak.reactor.api.event.OrchestrationEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 
@@ -159,6 +161,38 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
+                return new StackPayload(OrchestrationEvent.BOOTSTRAP_MACHINES_REQUEST.name(), context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "BOOTSTRAP_MACHINES_STATE")
+    public Action bootstrapMachinesAction() {
+        return new AbstractStackCreationAction<StackPayload>(StackPayload.class) {
+            @Override
+            protected void doExecute(StackContext context, StackPayload payload, Map<Object, Object> variables) throws Exception {
+                stackCreationService.bootstrapMachines(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new StackPayload(OrchestrationEvent.CONSUL_METADATA_SETUP_REQUEST.name(), context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "CONSUL_METADATA_SETUP")
+    public Action consulMetadataSetupAction() {
+        return new AbstractStackCreationAction<StackPayload>(StackPayload.class) {
+            @Override
+            protected void doExecute(StackContext context, StackPayload payload, Map<Object, Object> variables) throws Exception {
+                stackCreationService.setupConsulMetadata(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
                 return new SelectableFlowStackEvent(context.getStack().getId(), StackCreationEvent.STACK_CREATION_FINISHED_EVENT.stringRepresentation());
             }
         };
@@ -170,12 +204,12 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackFailureContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.handleStackCreationFailure(context.getStack(), payload.getException());
-                sendEvent(context.getFlowId(), StackCreationEvent.STACK_CREATION_FAILED_EVENT.stringRepresentation(), payload);
+                sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new SelectableFlowStackEvent(context.getStack().getId(), StackCreationEvent.STACK_CREATION_FINISHED_EVENT.stringRepresentation());
+                return new SelectableFlowStackEvent(context.getStack().getId(), StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT.stringRepresentation());
             }
         };
     }
