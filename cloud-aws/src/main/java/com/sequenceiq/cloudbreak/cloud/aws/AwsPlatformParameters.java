@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class AwsPlatformParameters implements PlatformParameters {
     public static final VolumeParameterConfig EBS_MAGNETIC_CONFIG = new VolumeParameterConfig(VolumeParameterType.MAGNETIC, 1, 1024, 1, 24);
     public static final VolumeParameterConfig EBS_SSD_CONFIG = new VolumeParameterConfig(VolumeParameterType.SSD, 1, 17592, 1, 24);
+    public static final String DEDICATED_INSTANCES = "dedicatedInstances";
     public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
     public static final String S3_ROLE = "s3Role";
 
@@ -195,7 +196,7 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation("dedicatedInstances", false, Boolean.class, Optional.<String>absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.<String>absent()));
         additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE_STRATEGY, false, InstanceProfileStrategy.class,
                 Optional.<String>absent()));
         additionalStackParameterValidations.add(new StackParamValidation(S3_ROLE, false, String.class, Optional.<String>absent()));
