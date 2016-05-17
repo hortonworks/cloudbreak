@@ -1,18 +1,18 @@
 {
   "items": [
     {
-      "name": "eu-central-1",
-      "zones": [
-        "eu-central-1a",
-        "eu-central-1b"
-      ]
-    },
-    {
       "name": "sa-east-1",
       "zones": [
         "sa-east-1a",
         "sa-east-1b",
         "sa-east-1c"
+      ]
+    },
+    {
+      "name": "eu-central-1",
+      "zones": [
+        "eu-central-1a",
+        "eu-central-1b"
       ]
     },
     {

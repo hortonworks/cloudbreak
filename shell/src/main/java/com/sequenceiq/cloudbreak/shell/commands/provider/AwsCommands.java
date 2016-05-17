@@ -11,6 +11,7 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.shell.commands.CredentialCommands;
 import com.sequenceiq.cloudbreak.shell.commands.NetworkCommands;
@@ -188,11 +189,23 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
             @CliOption(key = "orchestrator", mandatory = false, help = "select orchestrator variant version") AwsOrchestratorType orchestratorType,
             @CliOption(key = "dedicatedInstances", mandatory = false, help = "request dedicated instances on AWS") Boolean dedicatedInstances,
+            @CliOption(key = "instanceProfileStrategy", mandatory = false, help = "seamless S3 access type", specifiedDefaultValue = "false")
+            InstanceProfileStrategy instanceProfileStrategy,
+            @CliOption(key = "s3Role", mandatory = false, help = "seamless S3 access role", specifiedDefaultValue = "false") String s3Role,
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
 
         Map<String, String> params = new HashMap<>();
         if (dedicatedInstances != null) {
             params.put("dedicatedInstances", dedicatedInstances.toString());
+        }
+        if (instanceProfileStrategy != null) {
+            params.put("instanceProfileStrategy", instanceProfileStrategy.toString());
+        }
+        if (s3Role != null && InstanceProfileStrategy.USE_EXISTING.equals(instanceProfileStrategy)) {
+            params.put("s3Role", s3Role.toString());
+        }
+        if (s3Role != null && !InstanceProfileStrategy.USE_EXISTING.equals(instanceProfileStrategy)) {
+            return "Please specify the role for S3 connection if you are using 'USE_EXISTING' profile type.";
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold, false,
                 wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, params);

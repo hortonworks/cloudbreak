@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -32,6 +33,7 @@ public class CloudFormationTemplateBuilder {
 
     public String build(ModelContext context) {
         Map<String, Object> model = new HashMap<>();
+        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(context.stack.getParameters());
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
         for (Group group : context.stack.getGroups()) {
             InstanceTemplate instanceTemplate = group.getInstances().get(0).getTemplate();
@@ -56,12 +58,17 @@ public class CloudFormationTemplateBuilder {
         model.put("existingIGW", context.existingIGW);
         model.put("existingSubnet", isNoneEmpty(context.existingSubnetCidr));
         model.put("securityRules", context.stack.getSecurity());
+        model.put("enableInstanceProfile", context.enableInstanceProfile || context.s3RoleAvailable);
+        model.put("existingRole", context.s3RoleAvailable);
         model.put("cbSubnet", isBlank(context.existingSubnetCidr) ? context.stack.getNetwork().getSubnet().getCidr() : context.existingSubnetCidr);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() == null ? false : true);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
         if (isNoneEmpty(context.snapshotId)) {
             model.put("snapshotId", context.snapshotId);
+        }
+        if (context.s3RoleAvailable) {
+            model.put("roleName", awsInstanceProfileView.getS3Role());
         }
         try {
             return processTemplateIntoString(freemarkerConfiguration.getTemplate(context.templatePath, "UTF-8"), model);
@@ -98,6 +105,8 @@ public class CloudFormationTemplateBuilder {
         private String existingSubnetCidr;
         private boolean mapPublicIpOnLaunch;
         private String templatePath;
+        private boolean enableInstanceProfile;
+        private boolean s3RoleAvailable;
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;
@@ -131,6 +140,16 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext mapPublicIpOnLaunch(boolean mapPublicIpOnLaunch) {
             this.mapPublicIpOnLaunch = mapPublicIpOnLaunch;
+            return this;
+        }
+
+        public ModelContext withEnableInstanceProfile(boolean enableInstanceProfile) {
+            this.enableInstanceProfile = enableInstanceProfile;
+            return this;
+        }
+
+        public ModelContext withS3RoleAvailable(boolean s3RoleAvailable) {
+            this.s3RoleAvailable = s3RoleAvailable;
             return this;
         }
 

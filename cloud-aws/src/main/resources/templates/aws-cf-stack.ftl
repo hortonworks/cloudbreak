@@ -13,6 +13,13 @@
       "MaxLength": "50"
     },
 
+    <#if enableInstanceProfile && existingRole>
+     "RoleName" : {
+          "Description" : "Instance role for machines to reach S3",
+          "Type" : "String"
+     },
+    </#if>
+
     <#if existingVPC>
     "VPCId" : {
       "Description" : "Id of the VPC where to deploy the cluster",
@@ -82,7 +89,7 @@
       "MinLength": "9",
       "MaxLength": "50000"
     },
-    
+
     "KeyName": {
       "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
       "Type": "String",
@@ -120,6 +127,47 @@
   </#if>
 
   "Resources" : {
+
+  <#if enableInstanceProfile && !existingRole>
+        "S3AccessRole" : {
+            "Type"  : "AWS::IAM::Role",
+            "Properties" : {
+                "AssumeRolePolicyDocument" : {
+                    "Statement" : [ {
+                        "Effect" : "Allow",
+                        "Principal" : {
+                            "Service" : [ "ec2.amazonaws.com" ]
+                        },
+                        "Action" : [ "sts:AssumeRole" ]
+                    } ]
+                },
+                "Path" : "/"
+            }
+        },
+
+        "S3RolePolicies" : {
+            "Type" : "AWS::IAM::Policy",
+            "Properties" : {
+                "PolicyName" : "s3access",
+                "PolicyDocument" : {
+                    "Statement" : [ {
+                        "Effect" : "Allow",
+                        "Action" : "s3:*",
+                        "Resource" : "*"
+                    }]
+                },
+                "Roles" : [ { "Ref" : "S3AccessRole" } ]
+            }
+        },
+
+        "S3InstanceProfile" : {
+            "Type" : "AWS::IAM::InstanceProfile",
+            "Properties" : {
+                "Path" : "/",
+                "Roles" : [ { "Ref" : "S3AccessRole" } ]
+            }
+        },
+    </#if>
 
     <#if mapPublicIpOnLaunch>
     "EIP" : {
@@ -263,6 +311,12 @@
     "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}"  : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
       "Properties" : {
+        <#if enableInstanceProfile && !existingRole>
+         "IamInstanceProfile" : { "Ref": "S3InstanceProfile" },
+        </#if>
+        <#if existingRole && enableInstanceProfile>
+         "IamInstanceProfile" : { "Ref": "RoleName" },
+        </#if>
       	"BlockDeviceMappings" : [
       	  {
             "DeviceName" : { "Ref" : "RootDeviceName" },

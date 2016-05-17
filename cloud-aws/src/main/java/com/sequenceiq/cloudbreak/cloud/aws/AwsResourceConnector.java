@@ -70,6 +70,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -91,6 +92,7 @@ public class AwsResourceConnector implements ResourceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceConnector.class);
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
+    private static final List<String> CAPABILITY_IAM = Arrays.asList("CAPABILITY_IAM");
 
     private static final List<String> SUSPENDED_PROCESSES = Arrays.asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
             "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
@@ -127,12 +129,14 @@ public class AwsResourceConnector implements ResourceConnector {
                 ac.getCloudContext().getLocation().getRegion().value());
         String snapshotId = getEbsSnapshotIdIfNeeded(ac, stack);
         Network network = stack.getNetwork();
+        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack.getParameters());
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         boolean existingVPC = awsNetworkView.isExistingVPC();
         boolean existingSubnet = awsNetworkView.isExistingSubnet();
         boolean existingIGW = awsNetworkView.isExistingIGW();
+        boolean s3RoleAvailable = awsInstanceProfileView.isS3RoleAvailable();
+        boolean enableInstanceProfile = awsInstanceProfileView.isEnableInstanceProfileStrategy();
         String existingSubnetCidr = existingSubnet ? getExistingSubnetCidr(ac, stack) : null;
-
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
         AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
@@ -155,6 +159,8 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withExistingIGW(existingIGW)
                 .withExistingSubnetCidr(existingSubnetCidr)
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
+                .withEnableInstanceProfile(enableInstanceProfile)
+                .withS3RoleAvailable(s3RoleAvailable)
                 .withTemplatePath(awsCloudformationTemplatePath);
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
@@ -165,6 +171,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withTags(Stream.of(
                         new com.amazonaws.services.cloudformation.model.Tag().withKey(CLOUDBREAK_CLUSTER_TAG).withValue(ac.getCloudContext().getName()))
                         .collect(Collectors.toList()))
+                .withCapabilities(CAPABILITY_IAM)
                 .withParameters(
                         getStackParameters(
                                 ac,
@@ -250,6 +257,7 @@ public class AwsResourceConnector implements ResourceConnector {
 
     private List<Parameter> getStackParameters(AuthenticatedContext ac, String coreGroupUserData, String gateWayUserData, CloudStack stack, String stackName) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack.getParameters());
         List<Parameter> parameters = new ArrayList<>(Arrays.asList(
                 new Parameter().withParameterKey("CBUserData").withParameterValue(coreGroupUserData),
                 new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(gateWayUserData),
@@ -259,6 +267,9 @@ public class AwsResourceConnector implements ResourceConnector {
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
         ));
+        if (awsInstanceProfileView.isUseExistingInstanceProfile() && awsInstanceProfileView.isEnableInstanceProfileStrategy()) {
+            parameters.add(new Parameter().withParameterKey("RoleName").withParameterValue(awsInstanceProfileView.getS3Role()));
+        }
         if (ac.getCloudContext().getLocation().getAvailabilityZone().value() != null) {
             parameters.add(new Parameter().withParameterKey("AvailabilitySet")
                     .withParameterValue(ac.getCloudContext().getLocation().getAvailabilityZone().value()));

@@ -22,6 +22,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
@@ -49,6 +50,8 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class AwsPlatformParameters implements PlatformParameters {
     public static final VolumeParameterConfig EBS_MAGNETIC_CONFIG = new VolumeParameterConfig(VolumeParameterType.MAGNETIC, 1, 1024, 1, 24);
     public static final VolumeParameterConfig EBS_SSD_CONFIG = new VolumeParameterConfig(VolumeParameterType.SSD, 1, 17592, 1, 24);
+    public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
+    public static final String S3_ROLE = "s3Role";
 
     private static final Integer START_LABEL = Integer.valueOf(97);
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
@@ -193,6 +196,9 @@ public class AwsPlatformParameters implements PlatformParameters {
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
         additionalStackParameterValidations.add(new StackParamValidation("dedicatedInstances", false, Boolean.class, Optional.<String>absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE_STRATEGY, false, InstanceProfileStrategy.class,
+                Optional.<String>absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(S3_ROLE, false, String.class, Optional.<String>absent()));
         return additionalStackParameterValidations;
     }
 

@@ -328,8 +328,23 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     return;
                 }
             }
+
             if ($rootScope.activeCredential && ($rootScope.activeCredential.cloudPlatform == 'AWS' || $rootScope.activeCredential.cloudPlatform == 'OPENSTACK')) {
                 delete $scope.cluster.fileSystem;
+            }
+            if ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform !== 'AWS') {
+                delete $scope.cluster.parameters.s3Role;
+                delete $scope.cluster.parameters.instanceProfileStrategy;
+            } else {
+                if ($scope.cluster.parameters.instanceProfileStrategy == "NONE") {
+                     delete $scope.cluster.parameters.s3Role;
+                     delete $scope.cluster.parameters.instanceProfileStrategy;
+                } else if ($scope.cluster.parameters.instanceProfileStrategy == "USE_EXISTING" && $scope.isUndefined($scope.cluster.parameters.s3Role)) {
+                    $scope.showErrorMessage($rootScope.msg.s3_role_error);
+                    return;
+                } else if ($scope.cluster.parameters.instanceProfileStrategy == "CREATE") {
+                    delete $scope.cluster.parameters.s3Role;
+                }
             }
             if (!$scope.isUndefined($scope.cluster.ambariStackDetails) && Object.keys($scope.cluster.ambariStackDetails).length !== 0) {
                 if ($scope.isUndefined($scope.cluster.ambariStackDetails.stack) ||
@@ -731,6 +746,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 initWizard();
                 setPlatformVariant();
                 setOrchestrator();
+                setInstanceProfile();
             }
         });
 
@@ -771,6 +787,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.cluster.relocateDocker = false;
                     delete $scope.cluster.fileSystem;
                     delete $scope.cluster.parameters.persistentStorage;
+                }
+            }
+        }
+
+        function setInstanceProfile() {
+            if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform != undefined) {
+                if ($rootScope.activeCredential.cloudPlatform == 'AWS') {
+                    delete $scope.cluster.parameters.s3Role;
+                    $scope.cluster.parameters.instanceProfileStrategy = "NONE";
                 }
             }
         }
@@ -1033,6 +1058,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             setRegion();
             setPlatformVariant();
             setOrchestrator();
+            setInstanceProfile();
         }
 
         $scope.getPlatformVariants = function() {
