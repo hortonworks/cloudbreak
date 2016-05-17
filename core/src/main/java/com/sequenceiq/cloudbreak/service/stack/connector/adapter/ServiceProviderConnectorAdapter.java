@@ -4,13 +4,9 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -19,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -29,19 +24,14 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -53,10 +43,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 import reactor.bus.Event;
@@ -78,45 +64,6 @@ public class ServiceProviderConnectorAdapter {
     private CredentialToCloudCredentialConverter credentialConverter;
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
-    @Inject
-    private InstanceGroupRepository instanceGroupRepository;
-    @Inject
-    private CloudbreakEventService eventService;
-    @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
-    @Inject
-    private InstanceMetadataService instanceMetadataService;
-
-    public Set<Resource> addInstances(Stack stack, Integer adjustment, String instanceGroup) {
-        LOGGER.debug("Assembling upscale stack event for stack: {}", stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
-        group.setNodeCount(group.getNodeCount() + adjustment);
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
-        instanceMetadataService.saveInstanceRequests(stack, cloudStack.getGroups());
-        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        UpscaleStackRequest<UpscaleStackResult> upscaleRequest = new UpscaleStackRequest<>(cloudContext, cloudCredential, cloudStack, resources);
-        LOGGER.info("Triggering upscale stack event: {}", upscaleRequest);
-        eventBus.notify(upscaleRequest.selector(), Event.wrap(upscaleRequest));
-        try {
-            UpscaleStackResult res = upscaleRequest.await();
-            LOGGER.info("Upscale stack result: {}", res);
-            List<CloudResourceStatus> results = res.getResults();
-            validateResourceResults(cloudContext, res);
-            updateNodeCount(stack.getId(), cloudStack.getGroups(), results, false);
-            Set<Resource> resourceSet = transformResults(results, stack);
-            if (resourceSet.isEmpty()) {
-                throw new OperationException("Failed to upscale the cluster since all create request failed: " + results.get(0).getStatusReason());
-            }
-            return resourceSet;
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while upscaling the stack", e);
-            throw new OperationException(e);
-        }
-    }
 
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
@@ -252,75 +199,6 @@ public class ServiceProviderConnectorAdapter {
             LOGGER.error("Error while getting the platform variant: " + cloudContext, e);
             throw new OperationException(e);
         }
-    }
-
-    private Set<Resource> transformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
-        Set<Resource> retSet = new HashSet<>();
-        for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
-            if (!cloudResourceStatus.isFailed()) {
-                CloudResource cloudResource = cloudResourceStatus.getCloudResource();
-                Resource resource = new Resource(cloudResource.getType(), cloudResource.getName(), cloudResource.getReference(), cloudResource.getStatus(),
-                        stack, null);
-                retSet.add(resource);
-            }
-        }
-        return retSet;
-    }
-
-    private void validateResourceResults(CloudContext cloudContext, LaunchStackResult res) {
-        validateResourceResults(cloudContext, res.getErrorDetails(), res.getResults(), true);
-    }
-
-    private void validateResourceResults(CloudContext cloudContext, UpscaleStackResult res) {
-        validateResourceResults(cloudContext, res.getException(), res.getResults(), false);
-    }
-
-    private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results, boolean create) {
-        String action = create ? "create" : "upscale";
-        if (exception != null) {
-            LOGGER.error(format("Failed to %s stack: %s", action, cloudContext), exception);
-            throw new OperationException(exception);
-        }
-        if (results.size() == 1 && (results.get(0).isFailed() || results.get(0).isDeleted())) {
-            throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext, results.get(0).getStatusReason()));
-        }
-    }
-
-    private void updateNodeCount(long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses, boolean create) {
-        for (Group group : originalGroups) {
-            int nodeCount = group.getInstances().size();
-            List<CloudResourceStatus> failedResources = removeFailedMetadata(stackId, statuses, group);
-            if (!failedResources.isEmpty() && create) {
-                int failedCount = failedResources.size();
-                InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
-                instanceGroup.setNodeCount(nodeCount - failedCount);
-                instanceGroupRepository.save(instanceGroup);
-                String message = cloudbreakMessagesService.getMessage(ROLLBACK_MESSAGE,
-                        asList(failedCount, group.getName(), failedResources.get(0).getStatusReason()));
-                eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), message);
-            }
-        }
-    }
-
-    private List<CloudResourceStatus> removeFailedMetadata(long stackId, List<CloudResourceStatus> statuses, Group group) {
-        Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
-        Set<Long> groupPrivateIds = getPrivateIds(group);
-        for (CloudResourceStatus status : statuses) {
-            Long privateId = status.getPrivateId();
-            if (privateId != null && status.isFailed() && !failedResources.containsKey(privateId) && groupPrivateIds.contains(privateId)) {
-                failedResources.put(privateId, status);
-                instanceMetadataService.deleteInstanceRequest(stackId, privateId);
-            }
-        }
-        return new ArrayList<>(failedResources.values());
-    }
-
-    private Set<Long> getPrivateIds(Group group) {
-        Set<Long> ids = new HashSet<>();
-        for (CloudInstance cloudInstance : group.getInstances()) {
-            ids.add(cloudInstance.getTemplate().getPrivateId());
-        }
-        return ids;
     }
 
 }

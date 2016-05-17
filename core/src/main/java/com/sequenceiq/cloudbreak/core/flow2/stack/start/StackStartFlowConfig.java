@@ -40,6 +40,13 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     }
 
     @Override
+    public StackStartEvent[] getInitEvents() {
+        return new StackStartEvent[] {
+                StackStartEvent.START_EVENT
+        };
+    }
+
+    @Override
     protected List<Transition<StackStartState, StackStartEvent>> getTransitions() {
         return TRANSITIONS;
     }

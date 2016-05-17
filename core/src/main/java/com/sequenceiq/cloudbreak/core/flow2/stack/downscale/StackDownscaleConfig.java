@@ -40,6 +40,13 @@ public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownsca
     }
 
     @Override
+    public StackDownscaleEvent[] getInitEvents() {
+        return new StackDownscaleEvent[] {
+                StackDownscaleEvent.DOWNSCALE_EVENT
+        };
+    }
+
+    @Override
     protected List<Transition<StackDownscaleState, StackDownscaleEvent>> getTransitions() {
         return TRANSITIONS;
     }

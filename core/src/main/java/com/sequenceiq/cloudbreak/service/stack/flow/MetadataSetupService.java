@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
-
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -15,82 +12,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
-import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 
 @Service
 public class MetadataSetupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupService.class);
-
     @Inject
     private ServiceProviderMetadataAdapter metadata;
-
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
-
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
-
-    @Inject
-    private StackService stackService;
-
     @Inject
     private ClusterService clusterService;
 
-    @Inject
-    private CloudbreakEventService eventService;
-
-    @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
-
-    private enum Msg {
-        STACK_METADATA_SETUP_UPSCALING_BILLING_CHANGED("stack.metadata.setup.billing.changed");
-
-        private String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
-    }
-
     public void collectMetadata(Stack stack) {
         saveInstanceMetaData(stack, collectCoreMetadata(stack), null);
-    }
-
-    public Set<String> setupNewMetadata(Stack stack, String instanceGroupName) {
-        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
-        List<CloudVmMetaDataStatus> coreInstanceMetaData = metadata.collectNewMetadata(stack);
-        saveInstanceMetaData(stack, coreInstanceMetaData, InstanceStatus.CREATED);
-        Set<String> upscaleCandidateAddresses = new HashSet<>();
-        for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
-            upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
-        }
-        InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
-        int nodeCount = instanceGroup.getNodeCount() + coreInstanceMetaData.size();
-        instanceGroup.setNodeCount(nodeCount);
-        instanceGroupRepository.save(instanceGroup);
-        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
-        eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-                cloudbreakMessagesService.getMessage(Msg.STACK_METADATA_SETUP_UPSCALING_BILLING_CHANGED.code));
-        return upscaleCandidateAddresses;
     }
 
     public Set<InstanceMetaData> saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus>  cloudVmMetaDataStatusList, InstanceStatus status) {

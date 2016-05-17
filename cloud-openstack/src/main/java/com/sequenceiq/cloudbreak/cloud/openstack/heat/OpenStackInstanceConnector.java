@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -52,11 +53,12 @@ public class OpenStackInstanceConnector implements InstanceConnector {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         OSClient osClient = openStackClient.createOSClient(ac);
         for (CloudInstance vm : vms) {
-            Server server = osClient.compute().servers().get(vm.getInstanceId());
-            if (server == null) {
-                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
+            Optional<Server> server = Optional.ofNullable(vm.getInstanceId())
+                                                .map(iid -> osClient.compute().servers().get(iid));
+            if (server.isPresent()) {
+                statuses.add(new CloudVmInstanceStatus(vm, NovaInstanceStatus.get(server.get())));
             } else {
-                statuses.add(new CloudVmInstanceStatus(vm, NovaInstanceStatus.get(server)));
+                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
             }
         }
         return statuses;

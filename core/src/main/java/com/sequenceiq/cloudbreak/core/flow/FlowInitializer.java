@@ -10,10 +10,8 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow.handlers.AddInstancesHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapClusterHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.BootstrapNewNodesHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterContainersHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCredentialChangeHandler;
@@ -27,8 +25,6 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSyncHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ConsulMetadataSetupHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.DownscaleMetadataCollectHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendConsulMetadataHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ExtendMetadataHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
@@ -78,10 +74,6 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_INSTALL.name()), getHandlerForClass(ClusterInstallHandler.class));
         reactor.on($(FlowPhases.CLUSTER_RESET.name()), getHandlerForClass(ClusterResetHandler.class));
         reactor.on($(FlowPhases.UPSCALE_STACK_SYNC.name()), getHandlerForClass(UpscaleStackSyncHandler.class));
-        reactor.on($(FlowPhases.ADD_INSTANCES.name()), getHandlerForClass(AddInstancesHandler.class));
-        reactor.on($(FlowPhases.EXTEND_METADATA.name()), getHandlerForClass(ExtendMetadataHandler.class));
-        reactor.on($(FlowPhases.BOOTSTRAP_NEW_NODES.name()), getHandlerForClass(BootstrapNewNodesHandler.class));
-        reactor.on($(FlowPhases.EXTEND_CONSUL_METADATA.name()), getHandlerForClass(ExtendConsulMetadataHandler.class));
         reactor.on($(FlowPhases.CLUSTER_START.name()), getHandlerForClass(ClusterStartHandler.class));
         reactor.on($(FlowPhases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
         reactor.on($(FlowPhases.CLUSTER_DOWNSCALE.name()), getHandlerForClass(ClusterDownscaleHandler.class));
@@ -167,18 +159,6 @@ public class FlowInitializer implements InitializingBean {
 
         transitionKeyService.registerTransition(UpscaleMetadataCollectHandler.class, TransitionFactory
                 .createTransition(FlowPhases.UPSCALE_METADATA_COLLECT.name(), FlowPhases.ADD_INSTANCES.name(), FlowPhases.NONE.name()));
-
-        transitionKeyService.registerTransition(AddInstancesHandler.class, TransitionFactory
-                .createTransition(FlowPhases.ADD_INSTANCES.name(), FlowPhases.EXTEND_METADATA.name(), FlowPhases.NONE.name()));
-
-        transitionKeyService.registerTransition(ExtendMetadataHandler.class, TransitionFactory
-                .createTransition(FlowPhases.EXTEND_METADATA.name(), FlowPhases.BOOTSTRAP_NEW_NODES.name(), FlowPhases.NONE.name()));
-
-        transitionKeyService.registerTransition(BootstrapNewNodesHandler.class, TransitionFactory
-                .createTransition(FlowPhases.BOOTSTRAP_NEW_NODES.name(), FlowPhases.EXTEND_CONSUL_METADATA.name(), FlowPhases.NONE.name()));
-
-        transitionKeyService.registerTransition(ExtendConsulMetadataHandler.class, TransitionFactory
-                .createTransition(FlowPhases.EXTEND_CONSUL_METADATA.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerDownscaleFlows() {

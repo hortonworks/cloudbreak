@@ -44,6 +44,13 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
     }
 
     @Override
+    public StackSyncEvent[] getInitEvents() {
+        return new StackSyncEvent[] {
+                StackSyncEvent.SYNC_EVENT
+        };
+    }
+
+    @Override
     protected List<Transition<StackSyncState, StackSyncEvent>> getTransitions() {
         return TRANSITIONS;
     }

@@ -62,10 +62,10 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 sendEvent(cf.nextSelector(), cf.nextPayload(event));
             }
         } else {
-            FlowConfiguration<?> flowConfig = flowConfigurationMap.get(key);
             if (flowId == null) {
                 LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
                 // TODO this is needed because we have two flow implementations in the same time and we want to avoid conflicts
+                FlowConfiguration<?> flowConfig = flowConfigurationMap.get(key);
                 if (flowConfig != null) {
                     flowId = UUID.randomUUID().toString();
                     Flow flow = flowConfig.createFlow(flowId);
@@ -78,7 +78,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 LOGGER.debug("flow control event arrived: key: {}, flowid: {}, payload: {}", key, flowId, payload);
                 Flow flow = runningFlows.get(flowId);
                 if (flow != null) {
-                    flowLogService.save(flowId, key, payload, flowConfig.getClass(), flow.getCurrentState());
+                    flowLogService.save(flowId, key, payload, flow.getFlowConfigClass(), flow.getCurrentState());
                     flow.sendEvent(key, payload);
                 } else {
                     LOGGER.info("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getStackId(), flowId, key);

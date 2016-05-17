@@ -11,17 +11,15 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -104,13 +102,12 @@ public class StackSyncService {
             boolean stackStatusUpdateEnabled) {
         Map<InstanceSyncState, Integer> counts = initInstanceStateCounts();
         for (final InstanceMetaData metaData : instanceMetaDataList) {
-            CloudVmInstanceStatus status = Iterables.find(instanceStatuses, new Predicate<CloudVmInstanceStatus>() {
-                @Override
-                public boolean apply(@Nullable CloudVmInstanceStatus input) {
-                    return input.getCloudInstance().getInstanceId().equals(metaData.getInstanceId());
-                }
-            });
-            InstanceSyncState state = status == null ? InstanceSyncState.DELETED : transform(status.getStatus());
+            Optional<CloudVmInstanceStatus> status = instanceStatuses.stream()
+                    .filter(is -> is != null && is.getCloudInstance().getInstanceId() != null
+                            && is.getCloudInstance().getInstanceId().equals(metaData.getInstanceId()))
+                    .findFirst();
+
+            InstanceSyncState state = !status.isPresent() ? InstanceSyncState.DELETED : transform(status.get().getStatus());
             syncInstanceStatusByState(stack, counts, metaData, state);
         }
 

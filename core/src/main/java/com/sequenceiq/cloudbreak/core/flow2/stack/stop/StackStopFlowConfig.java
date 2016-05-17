@@ -39,6 +39,13 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     }
 
     @Override
+    public StackStopEvent[] getInitEvents() {
+        return new StackStopEvent[]{
+                StackStopEvent.STOP_EVENT
+        };
+    }
+
+    @Override
     protected List<Transition<StackStopState, StackStopEvent>> getTransitions() {
         return TRANSITIONS;
     }

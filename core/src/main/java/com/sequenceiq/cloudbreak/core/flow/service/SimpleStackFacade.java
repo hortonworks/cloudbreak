@@ -24,20 +24,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -128,80 +123,6 @@ public class SimpleStackFacade implements StackFacade {
     }
 
     @Override
-    public FlowContext addInstances(FlowContext context) throws CloudbreakException {
-        StackScalingContext actualContext = (StackScalingContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            String statusReason = String.format("Adding %s new instance(s) to the infrastructure.", actualContext.getScalingAdjustment());
-            stackUpdater.updateStackStatus(actualContext.getStackId(), UPDATE_IN_PROGRESS, statusReason);
-
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_ADDING_INSTANCES, UPDATE_IN_PROGRESS.name(), actualContext.getScalingAdjustment());
-            Set<Resource> resources = stackScalingService.addInstances(stack.getId(), actualContext.getInstanceGroup(), actualContext.getScalingAdjustment());
-            context = new StackScalingContext(stack.getId(), actualContext.getCloudPlatform(), actualContext.getScalingAdjustment(),
-                    actualContext.getInstanceGroup(), resources, actualContext.getScalingType(), null);
-        } catch (Exception e) {
-            LOGGER.error("Exception during the upscaling of stack: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext extendMetadata(FlowContext context) throws CloudbreakException {
-        StackScalingContext actualCont = (StackScalingContext) context;
-        Stack stack = stackService.getById(actualCont.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(stack);
-
-        Set<String> upscaleCandidateAddresses = metadataSetupService.setupNewMetadata(stack, actualCont.getInstanceGroup());
-        fireEventAndLog(actualCont.getStackId(), context, Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
-        Integer scalingAdjustment = actualCont.getScalingAdjustment();
-        return new StackScalingContext(stack.getId(), actualCont.getCloudPlatform(), scalingAdjustment, actualCont.getInstanceGroup(),
-                actualCont.getResources(), actualCont.getScalingType(), upscaleCandidateAddresses);
-    }
-
-    @Override
-    public FlowContext bootstrapNewNodes(FlowContext context) throws CloudbreakException {
-        StackScalingContext actualContext = (StackScalingContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            fireEventAndLog(actualContext.getStackId(), context, Msg.STACK_BOOTSTRAP_NEW_NODES, UPDATE_IN_PROGRESS.name());
-            clusterBootstrapper.bootstrapNewNodes(actualContext);
-        } catch (Exception e) {
-            LOGGER.error("Exception during the handling of munchausen setup: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext extendConsulMetadata(FlowContext context) throws CloudbreakException {
-        StackScalingContext actualContext = (StackScalingContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-            MDCBuilder.buildMdcContext(stack);
-            consulMetadataSetup.setupNewConsulMetadata(stack.getId(), actualContext.getUpscaleCandidateAddresses());
-            HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-            hostGroupAdjustmentJson.setWithStackUpdate(false);
-            hostGroupAdjustmentJson.setScalingAdjustment(actualContext.getScalingAdjustment());
-            if (cluster != null) {
-                HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), actualContext.getInstanceGroup());
-                hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
-            }
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack upscale has been finished successfully.");
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
-            context = new ClusterScalingContext(stack.getId(), actualContext.getCloudPlatform(), hostGroupAdjustmentJson, actualContext.getScalingType());
-        } catch (Exception e) {
-            LOGGER.error("Exception during the extend consul metadata phase: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
     public FlowContext stopRequested(FlowContext context) throws CloudbreakException {
         StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
         try {
@@ -274,33 +195,6 @@ public class SimpleStackFacade implements StackFacade {
             fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, AVAILABLE.name(), actualContext.getErrorReason());
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext handleScalingFailure(FlowContext context) throws CloudbreakException {
-        try {
-            Long id = null;
-            String errorReason = null;
-            if (context instanceof StackScalingContext) {
-                StackScalingContext actualContext = (StackScalingContext) context;
-                id = actualContext.getStackId();
-                errorReason = actualContext.getErrorReason();
-            } else if (context instanceof ClusterScalingContext) {
-                ClusterScalingContext actualContext = (ClusterScalingContext) context;
-                id = actualContext.getStackId();
-                errorReason = actualContext.getErrorReason();
-            }
-            if (id != null) {
-                Stack stack = stackService.getById(id);
-                MDCBuilder.buildMdcContext(stack);
-                stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack update failed. " + errorReason);
-                fireEventAndLog(stack.getId(), context, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, AVAILABLE.name(), errorReason);
-            }
-        } catch (Exception e) {
-            LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
         return context;

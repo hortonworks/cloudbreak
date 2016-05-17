@@ -170,6 +170,11 @@ public class AbstractFlowConfigurationTest {
             return new Event[0];
         }
 
+        @Override
+        public Event[] getInitEvents() {
+            return new Event[]{ Event.START };
+        }
+
         class NotAcceptedException extends RuntimeException {
 
         }

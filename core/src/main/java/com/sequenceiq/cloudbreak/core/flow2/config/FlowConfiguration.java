@@ -7,4 +7,5 @@ public interface FlowConfiguration<E extends FlowEvent> {
     Flow createFlow(String flowId);
 
     E[] getEvents();
+    E[] getInitEvents();
 }

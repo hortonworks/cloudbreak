@@ -7,7 +7,6 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -42,9 +41,7 @@ import reactor.bus.EventBus;
 
 @Component
 public class ServiceProviderMetadataAdapter {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderMetadataAdapter.class);
-
     @Inject
     private EventBus eventBus;
     @Inject
@@ -76,30 +73,6 @@ public class ServiceProviderMetadataAdapter {
             return res.getResults();
         } catch (InterruptedException e) {
             LOGGER.error(format("Error while executing collectMetadata, stack: %s", cloudContext), e);
-            throw new OperationException(e);
-        }
-    }
-
-    public List<CloudVmMetaDataStatus> collectNewMetadata(Stack stack) {
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        List<CloudInstance> cloudInstances = getNewInstances(stack);
-        List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, cloudInstances);
-        LOGGER.info("Triggering event: {}", cmr);
-        eventBus.notify(cmr.selector(CollectMetadataRequest.class), Event.wrap(cmr));
-        try {
-            CollectMetadataResult res = cmr.await();
-            LOGGER.info("Result: {}", res);
-            if (res.getErrorDetails() != null) {
-                LOGGER.error(format("Failed to collect metadata, stack: %s", cloudContext), res.getErrorDetails());
-                return Collections.emptyList();
-            }
-            return res.getResults();
-        } catch (InterruptedException e) {
-            LOGGER.error(format("Error while collecting new metadata for stack: %s", cloudContext), e);
             throw new OperationException(e);
         }
     }
@@ -137,17 +110,6 @@ public class ServiceProviderMetadataAdapter {
         } else {
             return InstanceSyncState.DELETED;
         }
-    }
-
-    private List<CloudInstance> getNewInstances(Stack stack) {
-        List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);
-        Iterator<CloudInstance> iterator = cloudInstances.iterator();
-        while (iterator.hasNext()) {
-            if (iterator.next().getTemplate().getStatus() != InstanceStatus.CREATE_REQUESTED) {
-                iterator.remove();
-            }
-        }
-        return cloudInstances;
     }
 
     private InstanceSyncState transform(InstanceStatus instanceStatus) {

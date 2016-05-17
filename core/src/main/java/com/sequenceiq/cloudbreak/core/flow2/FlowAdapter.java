@@ -6,6 +6,8 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.access.StateMachineAccess;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
 
+import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
+
 public class FlowAdapter<S extends FlowState, E> implements Flow {
     private final String flowId;
     private final StateMachine<S, E> flowMachine;
@@ -13,14 +15,16 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
     private final EventConverter<E> eventConverter;
     private final MessageFactory<E> messageFactory;
     private boolean flowFailed;
+    private final Class<? extends FlowConfiguration> flowConfigClass;
 
     public FlowAdapter(String flowId, StateMachine<S, E> flowMachine, MessageFactory<E> messageFactory, StateConverter<S> stateConverter,
-            EventConverter<E> eventConverter) {
+            EventConverter<E> eventConverter, Class<? extends FlowConfiguration> flowConfigClass) {
         this.flowId = flowId;
         this.flowMachine = flowMachine;
         this.messageFactory = messageFactory;
         this.stateConverter = stateConverter;
         this.eventConverter = eventConverter;
+        this.flowConfigClass = flowConfigClass;
     }
 
     public void initialize() {
@@ -39,6 +43,11 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
 
     public S getCurrentState() {
         return flowMachine.getState().getId();
+    }
+
+    @Override
+    public Class<? extends FlowConfiguration> getFlowConfigClass() {
+        return flowConfigClass;
     }
 
     public void sendEvent(String key, Object object) {

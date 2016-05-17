@@ -74,4 +74,11 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
     public StackCreationEvent[] getEvents() {
         return OWNEVENTS.toArray(new StackCreationEvent[]{});
     }
+
+    @Override
+    public StackCreationEvent[] getInitEvents() {
+        return new StackCreationEvent[] {
+                StackCreationEvent.START_CREATION_EVENT
+        };
+    }
 }

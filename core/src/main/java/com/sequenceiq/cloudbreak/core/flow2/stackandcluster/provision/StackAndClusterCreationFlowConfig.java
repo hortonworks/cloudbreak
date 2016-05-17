@@ -45,4 +45,11 @@ public class StackAndClusterCreationFlowConfig extends StackCreationFlowConfig {
     public StackCreationEvent[] getEvents() {
         return OWNEVENTS.toArray(new StackCreationEvent[]{});
     }
+
+    @Override
+    public StackCreationEvent[] getInitEvents() {
+        return new StackCreationEvent[] {
+                StackCreationEvent.START_STACKANDCLUSTER_CREATION_EVENT
+        };
+    }
 }

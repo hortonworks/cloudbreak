@@ -49,4 +49,11 @@ public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<Ins
     public InstanceTerminationEvent[] getEvents() {
         return InstanceTerminationEvent.values();
     }
+
+    @Override
+    public InstanceTerminationEvent[] getInitEvents() {
+        return new InstanceTerminationEvent[] {
+            InstanceTerminationEvent.TERMINATION_EVENT
+        };
+    }
 }

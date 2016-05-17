@@ -51,4 +51,9 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
         return ClusterTerminationEvent.values();
     }
 
+    @Override
+    public ClusterTerminationEvent[] getInitEvents() {
+        return new ClusterTerminationEvent[]{ ClusterTerminationEvent.TERMINATION_EVENT };
+    }
+
 }

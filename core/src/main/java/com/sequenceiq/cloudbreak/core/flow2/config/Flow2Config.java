@@ -22,7 +22,7 @@ public class Flow2Config {
     public Map<String, FlowConfiguration<?>> flowConfigurationMap() {
         Map<String, FlowConfiguration<?>> flowConfigMap = new HashMap<>();
         for (FlowConfiguration<?> flowConfig : flowConfigs) {
-            for (FlowEvent event : flowConfig.getEvents()) {
+            for (FlowEvent event : flowConfig.getInitEvents()) {
                 final String key = event.stringRepresentation();
                 if (flowConfigMap.get(key) != null) {
                     throw new UnsupportedOperationException("Event already registered: " + key);

@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 
 public class OfflineStateGenerator {
 
@@ -43,16 +44,17 @@ public class OfflineStateGenerator {
 
     private static final List<FlowConfiguration<? extends FlowEvent>> CONFIGS =
             Arrays.<FlowConfiguration<? extends FlowEvent>>asList(
-                new ClusterTerminationFlowConfig(),
-                new InstanceTerminationFlowConfig(),
-                new StackCreationFlowConfig(),
-                new StackStartFlowConfig(),
-                new StackStopFlowConfig(),
-                new StackSyncFlowConfig(),
-                new StackDownscaleConfig(),
-                new StackTerminationFlowConfig(),
-                new ClusterUpscaleFlowConfig()
-        );
+                    new ClusterTerminationFlowConfig(),
+                    new InstanceTerminationFlowConfig(),
+                    new StackCreationFlowConfig(),
+                    new StackStartFlowConfig(),
+                    new StackStopFlowConfig(),
+                    new StackSyncFlowConfig(),
+                    new StackDownscaleConfig(),
+                    new StackUpscaleConfig(),
+                    new StackTerminationFlowConfig(),
+                    new ClusterUpscaleFlowConfig()
+            );
 
     private static final ApplicationContext APP_CONTEXT = new CustomApplicationContext();
 
@@ -135,7 +137,7 @@ public class OfflineStateGenerator {
         return flow;
     }
 
-    private  void saveToFile(String content) throws IOException {
+    private void saveToFile(String content) throws IOException {
         File destinationDir = new File(OUT_PATH);
         if (!destinationDir.exists()) {
             destinationDir.mkdirs();

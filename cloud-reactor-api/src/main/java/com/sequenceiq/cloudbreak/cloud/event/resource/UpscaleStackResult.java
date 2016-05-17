@@ -1,64 +1,40 @@
 package com.sequenceiq.cloudbreak.cloud.event.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
-public class UpscaleStackResult {
+public class UpscaleStackResult extends CloudPlatformResult<CloudPlatformRequest> {
 
-    private CloudContext cloudContext;
-    private ResourceStatus status;
-    private String statusReason;
-    private Exception exception;
+    private ResourceStatus resourceStatus;
     private List<CloudResourceStatus> results;
 
-    public UpscaleStackResult(CloudContext cloudContext, ResourceStatus status, String statusReason, List<CloudResourceStatus> results) {
-        this.cloudContext = cloudContext;
-        this.status = status;
-        this.statusReason = statusReason;
+    public UpscaleStackResult(CloudPlatformRequest<?> request, ResourceStatus resourceStatus, List<CloudResourceStatus> results) {
+        super(request);
+        this.resourceStatus = resourceStatus;
         this.results = results;
     }
 
-    public UpscaleStackResult(CloudContext cloudContext, Exception exception) {
-        this.cloudContext = cloudContext;
-        this.exception = exception;
-        this.status = ResourceStatus.FAILED;
-    }
-
-    public Exception getException() {
-        return exception;
-    }
-
-    public CloudContext getCloudContext() {
-        return cloudContext;
-    }
-
-    public ResourceStatus getStatus() {
-        return status;
-    }
-
-    public String getStatusReason() {
-        return statusReason;
+    public UpscaleStackResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
+        super(statusReason, errorDetails, request);
+        this.resourceStatus = ResourceStatus.FAILED;
+        this.results = new ArrayList<>();
     }
 
     public List<CloudResourceStatus> getResults() {
         return results;
     }
 
-    public boolean isFailed() {
-        return status == ResourceStatus.FAILED;
+    public ResourceStatus getResourceStatus() {
+        return resourceStatus;
     }
 
-    @Override
-    public String toString() {
-        return "LaunchStackResult{"
-                + "stackContext=" + cloudContext
-                + ", status=" + status
-                + ", statusReason='" + statusReason + '\''
-                + ", exception=" + exception
-                + ", results=" + results
-                + '}';
+    public boolean isFailed() {
+        return resourceStatus == ResourceStatus.FAILED;
     }
+
 }
