@@ -154,7 +154,7 @@ function continueInit() {
             var csrfToken = getCookieFieldValue(cookies, 'X-Uaa-Csrf');
             var username = req.body.email
             var password = req.body.password
-            var userCredentials = "username=" + username + "&password=" + password + "&X-Uaa-Csrf=" + csrfToken;
+            var userCredentials = "username=" + username + "&password=" + encodeURIComponent(password) + "&X-Uaa-Csrf=" + csrfToken;
             var options = {
                 headers: {
                     'Accept': 'application/json',
