@@ -56,15 +56,18 @@ public class AwsCredentialConnector implements CredentialConnector {
     public CloudCredentialStatus create(AuthenticatedContext auth) {
         AwsCredentialView awsCredential = new AwsCredentialView(auth.getCloudCredential());
         String region = auth.getCloudContext().getLocation().getRegion().value();
-        try {
-            LOGGER.info(String.format("Importing public key to %s region on AWS", region));
-            AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
-            ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(awsClient.getKeyPairName(auth), awsCredential.getPublicKey());
-            client.importKeyPair(importKeyPairRequest);
-        } catch (Exception e) {
-            String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(), e.getMessage());
-            LOGGER.error(errorMessage, e);
-            return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
+        if (!awsClient.existingKeyPairNameSpecified(auth)) {
+            try {
+                LOGGER.info(String.format("Importing public key to %s region on AWS", region));
+                AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
+                ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(awsClient.getKeyPairName(auth), awsCredential.getPublicKey());
+                client.importKeyPair(importKeyPairRequest);
+            } catch (Exception e) {
+                String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(),
+                        e.getMessage());
+                LOGGER.error(errorMessage, e);
+                return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
+            }
         }
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
     }
@@ -73,14 +76,16 @@ public class AwsCredentialConnector implements CredentialConnector {
     public CloudCredentialStatus delete(AuthenticatedContext auth) {
         AwsCredentialView awsCredential = new AwsCredentialView(auth.getCloudCredential());
         String region = auth.getCloudContext().getLocation().getRegion().value();
-        try {
-            AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
-            DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(awsClient.getKeyPairName(auth));
-            client.deleteKeyPair(deleteKeyPairRequest);
-        } catch (Exception e) {
-            String errorMessage = String.format("Failed to delete public key [roleArn:'%s', region: '%s'], detailed message: %s",
-                    awsCredential.getRoleArn(), region, e.getMessage());
-            LOGGER.error(errorMessage, e);
+        if (!awsClient.existingKeyPairNameSpecified(auth)) {
+            try {
+                AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
+                DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(awsClient.getKeyPairName(auth));
+                client.deleteKeyPair(deleteKeyPairRequest);
+            } catch (Exception e) {
+                String errorMessage = String.format("Failed to delete public key [roleArn:'%s', region: '%s'], detailed message: %s",
+                        awsCredential.getRoleArn(), region, e.getMessage());
+                LOGGER.error(errorMessage, e);
+            }
         }
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.DELETED);
     }
