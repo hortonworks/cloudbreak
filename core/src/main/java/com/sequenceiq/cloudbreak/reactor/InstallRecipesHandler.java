@@ -35,6 +35,6 @@ public class InstallRecipesHandler implements ClusterEventHandler<InstallRecipes
         } catch (Exception e) {
             result = new InstallRecipesResult(e.getMessage(), e, request);
         }
-        eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 }

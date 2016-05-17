@@ -10,19 +10,27 @@ import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
 public class StackScalingContext extends DefaultFlowContext {
 
-    private Integer scalingAdjustment;
+    private final Integer scalingAdjustment;
+    private final ScalingType scalingType;
     private String instanceGroup;
     private Set<Resource> resources;
-    private ScalingType scalingType;
     private Set<String> upscaleCandidateAddresses;
 
-    public StackScalingContext(Long stackId, Platform cp, Integer sa, String ig, Set<Resource> resources, ScalingType st, Set<String> uca) {
-        super(stackId, cp);
-        this.scalingAdjustment = sa;
-        this.instanceGroup = ig;
+    public StackScalingContext(Long stackId, Platform platform, Integer scalingAdjustment, String instanceGroup, Set<Resource> resources,
+            ScalingType scalingType, Set<String> upscaleCandidateAddresses) {
+        super(stackId, platform);
+        this.scalingAdjustment = scalingAdjustment;
+        this.instanceGroup = instanceGroup;
         this.resources = resources;
-        this.scalingType = st;
-        this.upscaleCandidateAddresses = uca;
+        this.scalingType = scalingType;
+        this.upscaleCandidateAddresses = upscaleCandidateAddresses;
+    }
+
+    public StackScalingContext(Long stackId, Platform platform, Integer scalingAdjustment, String instanceGroup, ScalingType scalingType) {
+        super(stackId, platform);
+        this.scalingAdjustment = scalingAdjustment;
+        this.instanceGroup = instanceGroup;
+        this.scalingType = scalingType;
     }
 
     public StackScalingContext(UpdateInstancesRequest updateInstancesRequest) {

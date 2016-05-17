@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
-public class AddClusterContainersRequest extends AbstractClusterUpscaleRequest {
+public class AddClusterContainersRequest extends AbstractClusterScaleRequest {
 
     private final Integer scalingAdjustment;
 

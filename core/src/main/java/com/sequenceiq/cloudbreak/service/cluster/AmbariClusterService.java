@@ -293,14 +293,12 @@ public class AmbariClusterService implements ClusterService {
         boolean decommissionRequest = validateRequest(stack, hostGroupAdjustment);
         UpdateAmbariHostsRequest updateRequest;
         if (decommissionRequest) {
-            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment,
-                    decommissionRequest, platform(stack.cloudPlatform()),
+            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, true, platform(stack.cloudPlatform()),
                     hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER);
             updateClusterStatusByStackId(stackId, UPDATE_REQUESTED);
             flowManager.triggerClusterDownscale(updateRequest);
         } else {
-            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment,
-                    decommissionRequest, platform(stack.cloudPlatform()),
+            updateRequest = new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, false, platform(stack.cloudPlatform()),
                     ScalingType.UPSCALE_ONLY_CLUSTER);
             flowManager.triggerClusterUpscale(updateRequest);
         }

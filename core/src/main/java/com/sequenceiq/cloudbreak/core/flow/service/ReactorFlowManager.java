@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow.ErrorHandlerAwareFlowEventFactory;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
@@ -187,7 +188,9 @@ public class ReactorFlowManager implements FlowManager {
     public void triggerClusterDownscale(Object object) {
         UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
         ClusterScalingContext context = new ClusterScalingContext(request);
-        reactor.notify(FlowPhases.CLUSTER_DOWNSCALE.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_DOWNSCALE.name()));
+        FlowPhases phase =
+                ScalingType.DOWNSCALE_ONLY_CLUSTER == request.getScalingType() ? FlowPhases.CLUSTER_DOWNSCALE : FlowPhases.CLUSTER_AND_STACK_DOWNSCALE;
+        reactor.notify(phase.name(), eventFactory.createEvent(context, phase.name()));
     }
 
     @Override

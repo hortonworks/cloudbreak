@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
-public class UpdateMetadataResult extends AbstractClusterUpscaleResult<UpdateMetadataRequest> {
+public class UpdateMetadataResult extends AbstractClusterScaleResult<UpdateMetadataRequest> {
 
-    private int failedHosts;
+    private final int failedHosts;
 
     public UpdateMetadataResult(UpdateMetadataRequest request, int failedHosts) {
         super(request);
@@ -11,6 +11,7 @@ public class UpdateMetadataResult extends AbstractClusterUpscaleResult<UpdateMet
 
     public UpdateMetadataResult(String statusReason, Exception errorDetails, UpdateMetadataRequest request) {
         super(statusReason, errorDetails, request);
+        this.failedHosts = -1;
     }
 
     public int getFailedHosts() {

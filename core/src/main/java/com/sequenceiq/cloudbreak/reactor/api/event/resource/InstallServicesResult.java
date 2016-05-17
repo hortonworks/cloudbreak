@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
-public class InstallServicesResult extends AbstractClusterUpscaleResult<InstallServicesRequest> {
+public class InstallServicesResult extends AbstractClusterScaleResult<InstallServicesRequest> {
 
     public InstallServicesResult(InstallServicesRequest request) {
         super(request);

@@ -29,10 +29,12 @@ public class StackAndClusterCreationFlowConfig extends StackCreationFlowConfig {
     @Override
     public Flow createFlow(String flowId) {
         return new ChainFlow(super.createFlow(flowId)) {
+            @Override
             public String nextSelector() {
                 return FlowPhases.BOOTSTRAP_CLUSTER.name();
             }
 
+            @Override
             public Object nextPayload(Event<? extends Payload> event) {
                 Long stackId = event.getData().getStackId();
                 Stack stack = stackService.getById(stackId);

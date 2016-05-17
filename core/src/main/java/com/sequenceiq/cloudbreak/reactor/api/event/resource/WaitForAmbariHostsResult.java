@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
-public class WaitForAmbariHostsResult extends AbstractClusterUpscaleResult<WaitForAmbariHostsRequest> {
+public class WaitForAmbariHostsResult extends AbstractClusterScaleResult<WaitForAmbariHostsRequest> {
 
     public WaitForAmbariHostsResult(WaitForAmbariHostsRequest request) {
         super(request);

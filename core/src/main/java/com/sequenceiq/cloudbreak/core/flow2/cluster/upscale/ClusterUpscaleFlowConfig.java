@@ -26,8 +26,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.CONFIGURE_SSSD_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.EXECUTE_POST_RECIPES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.EXECUTE_PRE_RECIPES_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.FAILED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.FINALIZE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.CLUSTER_UPSCALE_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.FINALIZE_UPSCALE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.INSTALL_FS_RECIPES_STATE;
@@ -64,13 +64,13 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
                     .failureEvent(INSTALL_SERVICES_FAILED_EVENT)
                 .from(EXECUTE_POST_RECIPES_STATE).to(UPDATE_METADATA_STATE).event(EXECUTE_POST_RECIPES_FINISHED_EVENT)
                     .failureEvent(EXECUTE_POST_RECIPES_FAILED_EVENT)
-                .from(UPDATE_METADATA_STATE).to(FINALIZE_STATE).event(UPDATE_METADATA_FINISHED_EVENT)
+                .from(UPDATE_METADATA_STATE).to(FINALIZE_UPSCALE_STATE).event(UPDATE_METADATA_FINISHED_EVENT)
                     .failureEvent(UPDATE_METADATA_FAILED_EVENT)
-                .from(FINALIZE_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).defaultFailureEvent()
+                .from(FINALIZE_UPSCALE_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).defaultFailureEvent()
                 .build();
 
     private static final FlowEdgeConfig<ClusterUpscaleState, ClusterUpscaleEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
-            FAILED_STATE, FAIL_HANDLED_EVENT);
+            CLUSTER_UPSCALE_FAILED_STATE, FAIL_HANDLED_EVENT);
 
     public ClusterUpscaleFlowConfig() {
         super(ClusterUpscaleState.class, ClusterUpscaleEvent.class);

@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.core.flow.context;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.reactor.api.event.ClusterUpscalePayload;
+import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 
-public class ClusterScalingContext extends DefaultFlowContext implements ClusterUpscalePayload {
+public class ClusterScalingContext extends DefaultFlowContext implements HostGroupPayload {
 
     private HostGroupAdjustmentJson hostGroupAdjustment;
     private ScalingType scalingType;
