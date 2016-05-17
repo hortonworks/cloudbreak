@@ -76,17 +76,19 @@ public class SaltStates {
 
     private static Set<String> applyStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
         Map jidInfo = sc.run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
+        LOGGER.info("Salt apply state jid info: {}", jidInfo);
         Map<String, Map<String, RunnerInfoObject>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
 
     private static Set<String> highStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
         Map jidInfo = sc.run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
+        LOGGER.info("Salt high state jid info: {}", jidInfo);
         Map<String, Map<String, RunnerInfoObject>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }
 
-    private static Set<String> collectMissingTargets(Map<String, Map<String, RunnerInfoObject>>  stringRunnerInfoObjectMap) {
+    private static Set<String> collectMissingTargets(Map<String, Map<String, RunnerInfoObject>> stringRunnerInfoObjectMap) {
         Set<String> missingTargets = new HashSet<>();
         for (Map.Entry<String, Map<String, RunnerInfoObject>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
             for (Map.Entry<String, RunnerInfoObject> targetObject : stringMapEntry.getValue().entrySet()) {
@@ -104,6 +106,7 @@ public class SaltStates {
 
     public static boolean jobIsRunning(SaltConnector sc, String jid, Target<String> target) {
         RunningJobsResponse runningInfo = sc.run(target, "jobs.active", RUNNER, RunningJobsResponse.class, "jid", jid);
+        LOGGER.info("Active salt jobs: {}", runningInfo);
         for (Map<String, Map<String, Object>> results : runningInfo.getResult()) {
             for (Map.Entry<String, Map<String, Object>> stringMapEntry : results.entrySet()) {
                 if (stringMapEntry.getKey().equals(jid)) {
