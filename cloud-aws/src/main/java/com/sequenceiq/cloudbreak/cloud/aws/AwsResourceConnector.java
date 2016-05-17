@@ -258,12 +258,17 @@ public class AwsResourceConnector implements ResourceConnector {
     private List<Parameter> getStackParameters(AuthenticatedContext ac, String coreGroupUserData, String gateWayUserData, CloudStack stack, String stackName) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack.getParameters());
+        String keyPairName = awsClient.getKeyPairName(ac);
+        if (awsClient.existingKeyPairNameSpecified(ac)) {
+            keyPairName = awsClient.getExistingKeyPairName(ac);
+        }
+
         List<Parameter> parameters = new ArrayList<>(Arrays.asList(
                 new Parameter().withParameterKey("CBUserData").withParameterValue(coreGroupUserData),
                 new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(gateWayUserData),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(ac.getCloudContext().getOwner()),
-                new Parameter().withParameterKey("KeyName").withParameterValue(awsClient.getKeyPairName(ac)),
+                new Parameter().withParameterKey("KeyName").withParameterValue(keyPairName),
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
         ));

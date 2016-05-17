@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,8 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
+import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
+import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcAttributeRequest;
@@ -83,6 +86,8 @@ public class AwsSetup implements Setup {
     @Override
     public void prerequisites(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        String region = ac.getCloudContext().getLocation().getRegion().value();
         if (!awsSpotinstanceEnabled) {
             for (Group group : stack.getGroups()) {
                 if (group.getInstances().get(0).getParameter("spotPrice", Double.class) != null) {
@@ -97,8 +102,7 @@ public class AwsSetup implements Setup {
         }
         if (awsNetworkView.isExistingVPC()) {
             try {
-                AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                        ac.getCloudContext().getLocation().getRegion().value());
+                AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, region);
                 validateExistingVpc(awsNetworkView, amazonEC2Client);
                 validateExistingIGW(awsNetworkView, amazonEC2Client);
                 validateExistingSubnet(awsNetworkView, amazonEC2Client);
@@ -109,6 +113,7 @@ public class AwsSetup implements Setup {
             }
 
         }
+        validateExistingKeyPair(ac, credentialView, region);
         LOGGER.debug("setup has been executed");
     }
 
@@ -230,5 +235,24 @@ public class AwsSetup implements Setup {
 
     @Override
     public void validateFileSystem(FileSystem fileSystem) throws Exception {
+    }
+
+    private void validateExistingKeyPair(AuthenticatedContext authenticatedContext, AwsCredentialView credentialView, String region) {
+        String keyPairName = awsClient.getExistingKeyPairName(authenticatedContext);
+        if (StringUtils.isNoneEmpty(keyPairName)) {
+            boolean keyPairIsPresentOnEC2 = false;
+            try {
+                AmazonEC2Client client = awsClient.createAccess(credentialView, region);
+                DescribeKeyPairsResult describeKeyPairsResult = client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
+                keyPairIsPresentOnEC2 = describeKeyPairsResult.getKeyPairs().stream().findFirst().isPresent();
+            } catch (Exception e) {
+                String errorMessage = String.format("Failed to get the key pair [name: '%s'] from EC2 [roleArn:'%s'], detailed message: %s.",
+                        keyPairName, credentialView.getRoleArn(), e.getMessage());
+                LOGGER.error(errorMessage, e);
+            }
+            if (!keyPairIsPresentOnEC2) {
+                throw new CloudConnectorException(String.format("The key pair '%s' could not be found in the '%s' region of EC2.", keyPairName, region));
+            }
+        }
     }
 }
