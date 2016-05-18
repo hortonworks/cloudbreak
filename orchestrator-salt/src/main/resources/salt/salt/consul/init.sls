@@ -18,11 +18,12 @@
         bootstrap_expect: {{ consul.bootstrap_expect }}
         retry_join: {{ consul.retry_join }}
 
-
 /etc/init.d/consul:
   file.managed:
     - source: salt://consul/scripts/consul
     - mode: 755
+
+{% if consul.is_systemd %}
 
 /etc/systemd/system/consul.service:
   file.managed:
@@ -38,3 +39,14 @@ start-consul:
     - name: consul
     - watch:
        - file: /etc/systemd/system/consul.service
+
+{% else %}
+
+start-consul:
+  service.running:
+    - enable: True
+    - name: consul
+    - watch:
+       - file: /etc/init.d/consul
+
+{% endif %}
