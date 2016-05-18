@@ -1,3 +1,5 @@
+{%- from 'ambari/settings.sls' import ambari with context %}
+
 include:
   - ambari.repo
 
@@ -9,12 +11,8 @@ ambari-agent:
 /opt/ambari-agent/ambari-agent-init.sh:
   file.managed:
     - makedirs: True
-    - source: salt://ambari/systemd/ambari-agent-init.sh
+    - source: salt://ambari/scripts/ambari-agent-init.sh
     - mode: 755
-
-/etc/systemd/system/ambari-agent.service:
-  file.managed:
-    - source: salt://ambari/systemd/ambari-agent.service
 
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:
@@ -50,6 +48,12 @@ set_internal_hostname_script:
       - file: /etc/ambari-agent/conf/internal_hostname.sh
       - pkg: ambari-agent
 
+{% if ambari.is_systemd %}
+
+/etc/systemd/system/ambari-agent.service:
+  file.managed:
+    - source: salt://ambari/systemd/ambari-agent.service
+
 start-ambari-agent:
   module.wait:
     - name: service.systemctl_reload
@@ -61,3 +65,19 @@ start-ambari-agent:
     - watch:
         - pkg: ambari-agent
         - file: /etc/systemd/system/ambari-agent.service
+
+{% else %}
+
+/etc/init/ambari-agent.conf:
+  file.managed:
+    - source: salt://ambari/upstart/ambari-agent.conf
+
+start-ambari-agent:
+  service.running:
+    - enable: True
+    - name: ambari-agent
+    - watch:
+       - pkg: ambari-agent
+       - file: /etc/init/ambari-agent.conf
+
+{% endif %}

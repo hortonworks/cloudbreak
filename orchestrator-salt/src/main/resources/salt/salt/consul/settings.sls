@@ -1,4 +1,8 @@
-
+{% if grains['init'] == 'upstart' %}
+    {% set is_systemd = False %}
+{% else %}
+    {% set is_systemd = True %}
+{% endif %}
 {% set advertise_addr = salt['grains.get']('consul:advertise_addr') %}
 {% if 'consul_server' in salt['grains.get']('roles') %}
     {% set is_server = True %}
@@ -17,5 +21,6 @@
     'node_name': node_name,
     'recursors': recursors,
     'bootstrap_expect': bootstrap_expect,
-    'retry_join': retry_join
+    'retry_join': retry_join,
+    'is_systemd' : is_systemd
 }) %}

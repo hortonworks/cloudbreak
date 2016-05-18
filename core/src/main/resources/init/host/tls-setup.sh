@@ -17,8 +17,8 @@ start_nginx() {
   ${sudopre} sudo ${sudocheck} mv /tmp/nginx.conf /etc/nginx/nginx.conf
   ${sudopre} sudo ${sudocheck} mkdir -p /usr/share/nginx/json/
   ${sudopre} sudo ${sudocheck} mv /tmp/50x.json /usr/share/nginx/json/50x.json
-  ${sudopre} sudo ${sudocheck} systemctl start nginx
-  ${sudopre} sudo ${sudocheck} systemctl enable nginx
+  ${sudopre} sudo ${sudocheck} service nginx start
+  ${sudopre} sudo ${sudocheck} chkconfig nginx on
 }
 
 untar_salt() {
