@@ -76,6 +76,7 @@ dependencies {
     compile group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
     compile group: 'com.icegreen',                  name: 'greenmail',                      version: '1.4.1'
     compile group: 'org.mybatis',                   name: 'mybatis-migrations',             version: '3.2.0'
+    compile group: 'com.cedarsoftware',             name: 'json-io',                        version: '4.9.1'
 
     compile project(':core-model')
     compile project(':orchestrator-api')

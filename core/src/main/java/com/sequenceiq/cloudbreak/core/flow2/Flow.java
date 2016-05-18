@@ -5,6 +5,8 @@ import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 public interface Flow {
     void initialize();
 
+    void initialize(String stateRepresentation);
+
     void sendEvent(String key, Object object);
 
     FlowState getCurrentState();

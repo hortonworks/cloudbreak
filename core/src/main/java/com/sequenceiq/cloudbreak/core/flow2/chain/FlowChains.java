@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -22,6 +23,9 @@ public class FlowChains {
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private FlowLogService flowLogService;
 
     private Map<String, Queue<Selectable>> flowChainMap = new ConcurrentHashMap<>();
 
@@ -59,6 +63,7 @@ public class FlowChains {
                 removeFlowChain(flowChainId);
                 triggerParentFlowChain(flowChainId);
             }
+            flowLogService.saveChain(flowChainId, flowChainParentMap.get(flowChainId), queue);
         }
     }
 

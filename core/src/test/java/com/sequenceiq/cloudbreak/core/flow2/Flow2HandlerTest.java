@@ -24,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
+import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 import reactor.bus.Event;
@@ -39,6 +40,9 @@ public class Flow2HandlerTest {
 
     @Mock
     private FlowLogService flowLogService;
+
+    @Mock
+    private FlowLogRepository flowLogRepository;
 
     @Mock
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
@@ -86,7 +90,7 @@ public class Flow2HandlerTest {
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
-        verify(flowLogService, times(1)).save(anyString(), eq("KEY"), any(Payload.class), eq(flowConfig.getClass()), eq(flowState));
+        verify(flowLogService, times(1)).save(anyString(), anyString(), eq("KEY"), any(Payload.class), eq(flowConfig.getClass()), eq(flowState));
         verify(flow, times(1)).sendEvent(anyString(), any());
     }
 
@@ -97,7 +101,7 @@ public class Flow2HandlerTest {
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(0)).put(any(Flow.class), isNull(String.class));
-        verify(flowLogService, times(0)).save(anyString(), anyString(), any(Payload.class), Matchers.<Class>any(), any(FlowState.class));
+        verify(flowLogService, times(0)).save(anyString(), anyString(), anyString(), any(Payload.class), Matchers.<Class>any(), any(FlowState.class));
     }
 
     @Test
@@ -107,7 +111,7 @@ public class Flow2HandlerTest {
         given(flow.getCurrentState()).willReturn(flowState);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).save(eq(FLOW_ID), eq("KEY"), any(Payload.class), any(Class.class), eq(flowState));
+        verify(flowLogService, times(1)).save(eq(FLOW_ID), anyString(), eq("KEY"), any(Payload.class), any(Class.class), eq(flowState));
         verify(flow, times(1)).sendEvent(eq("KEY"), any());
     }
 
@@ -116,7 +120,7 @@ public class Flow2HandlerTest {
         BDDMockito.<FlowConfiguration>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(0)).save(anyString(), anyString(), any(Payload.class), Matchers.<Class>any(), any(FlowState.class));
+        verify(flowLogService, times(0)).save(anyString(), anyString(), anyString(), any(Payload.class), Matchers.<Class>any(), any(FlowState.class));
         verify(flow, times(0)).sendEvent(anyString(), any());
     }
 
@@ -180,7 +184,7 @@ public class Flow2HandlerTest {
 
     @Test
     public void testCancelRunningFlows() {
-        given(flowLogService.findAllRunningNonTerminationFlowIdsByStackId(anyLong())).willReturn(Collections.singleton(FLOW_ID));
+        given(flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(anyLong())).willReturn(Collections.singleton(FLOW_ID));
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         given(runningFlows.getFlowChainId(eq(FLOW_ID))).willReturn(FLOW_CHAIN_ID);
         dummyEvent.setKey(Flow2Handler.FLOW_CANCEL);

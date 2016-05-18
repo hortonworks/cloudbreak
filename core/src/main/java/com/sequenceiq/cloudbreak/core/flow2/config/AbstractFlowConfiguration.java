@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.config;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -29,7 +30,6 @@ import org.springframework.statemachine.listener.StateMachineListener;
 import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 import org.springframework.statemachine.state.State;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.DefaultFlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
+import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.StateConverterAdapter;
 
 public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<E> {
@@ -101,7 +102,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             transitionConfigurer.source(transition.source).target(transition.target).event(transition.event);
             if (action != null && transition.getFailureEvent() != null && transition.target != flowEdgeConfig.defaultFailureState) {
                 action.setFailureEvent(transition.getFailureEvent());
-                S failureState = Optional.fromNullable(transition.getFailureState()).or(flowEdgeConfig.defaultFailureState);
+                S failureState = Optional.ofNullable(transition.getFailureState()).orElse(flowEdgeConfig.defaultFailureState);
                 stateConfigurer.state(failureState, getAction(failureState), null);
                 transitionConfigurer.and().withExternal().source(transition.source).target(failureState).event(transition.getFailureEvent());
                 if (!failHandled.contains(failureState)) {
@@ -155,6 +156,16 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         }
     }
 
+    @Override
+    public RestartAction getRestartAction(final String event) {
+        Optional<Transition<S, E>> transaction = getTransitions().stream().filter(t -> t.event.stringRepresentation().equals(event)).findFirst();
+        if (transaction.isPresent() && transaction.get().target.restartAction() != null) {
+            Class<? extends RestartAction> restartAction = transaction.get().target.restartAction();
+            return applicationContext.getBean(restartAction.getSimpleName(), restartAction);
+        }
+        return defaultRestartAction;
+    }
+
     static class MachineConfiguration<S, E> {
         private final StateMachineConfigurationBuilder<S, E> configurationBuilder;
 
@@ -206,7 +217,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         public static class Builder<S extends FlowState, E extends FlowEvent> {
             private List<Transition<S, E>> transitions = new ArrayList<>();
 
-            private Optional<E> defaultFailureEvent = Optional.absent();
+            private Optional<E> defaultFailureEvent = Optional.empty();
 
             public ToBuilder<S, E> from(S from) {
                 return new ToBuilder<>(from, this);

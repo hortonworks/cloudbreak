@@ -56,8 +56,8 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
         return flowConfigClass;
     }
 
-    public void sendEvent(String key, Object object) {
-        flowMachine.sendEvent(messageFactory.createMessage(flowId, eventConverter.convert(key), object));
+    public void sendEvent(String key, Object payload) {
+        flowMachine.sendEvent(messageFactory.createMessage(flowId, eventConverter.convert(key), payload));
     }
 
     @Override

@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.domain.FlowLog;
 @EntityType(entityClass = FlowLog.class)
 public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
 
+    FlowLog findFirstByFlowIdOrderByCreatedDesc(String flowId);
+
     @Query("SELECT DISTINCT fl.flowId FROM FlowLog fl "
             + "WHERE (fl.finalized IS NULL OR fl.finalized = false) AND fl.stackId = :stackId "
             + "AND fl.flowType != 'com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig'")
