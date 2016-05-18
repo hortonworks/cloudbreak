@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,8 +22,8 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.RegionsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -56,6 +58,8 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private static final Integer START_LABEL = Integer.valueOf(97);
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
+    private static final int DEFAULT_REGION_TYPE_POSITION = 4;
+    private static final int DEFAULT_VM_TYPE_POSITION = 21;
 
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
@@ -72,8 +76,8 @@ public class AwsPlatformParameters implements PlatformParameters {
     public void init() {
         this.regions = readRegions();
         this.vmTypes = readVmTypes();
-        this.defaultRegion = this.regions.keySet().iterator().next();
-        this.defaultVmType = this.vmTypes.get(this.vmTypes.keySet().iterator().next()).get(0);
+        this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
+        this.defaultVmType = nthElement(this.vmTypes.get(this.vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
     }
 
     private Map<AvailabilityZone, List<VmType>> readVmTypes() {
@@ -102,6 +106,7 @@ public class AwsPlatformParameters implements PlatformParameters {
                 VmTypeMeta vmTypeMeta = builder.create();
                 tmpVmTypes.add(VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta));
             }
+            Collections.sort(tmpVmTypes, new StringTypesCompare());
             for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
                 for (AvailabilityZone availabilityZone : regionListEntry.getValue()) {
                     vmTypes.put(availabilityZone, tmpVmTypes);
@@ -110,7 +115,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         } catch (IOException e) {
             return vmTypes;
         }
-        return vmTypes;
+        return sortMap(vmTypes);
     }
 
     private VolumeParameterConfig volumeParameterConfig(ConfigSpecification configSpecification) {
@@ -132,12 +137,13 @@ public class AwsPlatformParameters implements PlatformParameters {
                 for (String s : regionSpecification.getZones()) {
                     av.add(AvailabilityZone.availabilityZone(s));
                 }
+                Collections.sort(av, new StringTypesCompare());
                 regions.put(Region.region(regionSpecification.getName()), av);
             }
         } catch (IOException e) {
             return regions;
         }
-        return regions;
+        return sortMap(regions);
     }
 
     private String getDefinition(String parameter, String type) {

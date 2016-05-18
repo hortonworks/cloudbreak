@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
 @Component
-public class CloudConnectorController implements ConnectorEndpoint {
+public class PlatformParameterController implements ConnectorEndpoint {
 
     @Autowired
     private CloudParameterService cloudParameterService;
