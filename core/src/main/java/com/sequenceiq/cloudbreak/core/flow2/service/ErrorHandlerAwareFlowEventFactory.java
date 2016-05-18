@@ -17,11 +17,15 @@ public class ErrorHandlerAwareFlowEventFactory implements FlowEventFactory<Objec
 
     @Override
     public Event<Object> createEvent(Object payLoad, String eventKey) {
-        return new Event(null, payLoad, errorHandler);
+        return createEvent(null, payLoad);
+    }
+
+    public Event<Object> createEvent(Event.Headers headers, Object payLoad) {
+        return new Event<>(headers, payLoad, errorHandler);
     }
 
     @Override
     public <P> Event<P> createEvent(P payLoad) {
-        return new Event(null, payLoad, errorHandler);
+        return new Event<>(null, payLoad, errorHandler);
     }
 }

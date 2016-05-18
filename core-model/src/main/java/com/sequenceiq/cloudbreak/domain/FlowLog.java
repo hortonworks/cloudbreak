@@ -25,6 +25,8 @@ public class FlowLog {
     @Column(nullable = false)
     private String flowId;
 
+    private String flowChainId;
+
     private String nextEvent;
 
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
@@ -50,9 +52,11 @@ public class FlowLog {
         this.finalized = finalized;
     }
 
-    public FlowLog(Long stackId, String flowId, String nextEvent, String payload, Class<?> payloadType, Class<?> flowType, String currentState) {
+    public FlowLog(Long stackId, String flowId, String flowChainId, String nextEvent, String payload, Class<?> payloadType, Class<?> flowType,
+            String currentState) {
         this.stackId = stackId;
         this.flowId = flowId;
+        this.flowChainId = flowChainId;
         this.nextEvent = nextEvent;
         this.payload = payload;
         this.payloadType = payloadType;
@@ -90,6 +94,14 @@ public class FlowLog {
 
     public void setFlowId(String flowId) {
         this.flowId = flowId;
+    }
+
+    public String getFlowChainId() {
+        return flowChainId;
+    }
+
+    public void setFlowChainId(String flowChainId) {
+        this.flowChainId = flowChainId;
     }
 
     public String getNextEvent() {

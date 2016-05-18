@@ -5,5 +5,9 @@ public interface FlowState {
         return null;
     }
 
+    default Class<? extends RestartAction> restartAction() {
+        return DefaultRestartAction.class;
+    }
+
     String name();
 }
