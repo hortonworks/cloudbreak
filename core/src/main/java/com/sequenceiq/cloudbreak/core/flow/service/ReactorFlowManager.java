@@ -122,7 +122,7 @@ public class ReactorFlowManager implements FlowManager {
     public void triggerClusterStop(Object object) {
         ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
         StackStatusUpdateContext context = new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), false);
-        reactor.notify(FlowPhases.CLUSTER_STOP.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_STOP.name()));
+        reactor.notify(FlowPhases.CLUSTER_AND_STACK_STOP.name(), eventFactory.createEvent(context, FlowPhases.CLUSTER_AND_STACK_STOP.name()));
     }
 
     @Override

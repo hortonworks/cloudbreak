@@ -16,10 +16,7 @@ import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationFailureHandle
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCredentialChangeHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterInstallHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartRequestedHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStatusUpdateFailureHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStopHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterSyncHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataCollectHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.StackStatusUpdateFailureHandler;
@@ -49,7 +46,6 @@ public class FlowInitializer implements InitializingBean {
 
         registerProvisioningFlows();
         registerStartFlows();
-        registerStopFlows();
         registerUpscaleFlows();
         registerResetFlows();
         registerUpdateAllowedSubnetFlow();
@@ -65,13 +61,10 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_INSTALL.name()), getHandlerForClass(ClusterInstallHandler.class));
         reactor.on($(FlowPhases.CLUSTER_RESET.name()), getHandlerForClass(ClusterResetHandler.class));
         reactor.on($(FlowPhases.UPSCALE_STACK_SYNC.name()), getHandlerForClass(UpscaleStackSyncHandler.class));
-        reactor.on($(FlowPhases.CLUSTER_START.name()), getHandlerForClass(ClusterStartHandler.class));
-        reactor.on($(FlowPhases.CLUSTER_STOP.name()), getHandlerForClass(ClusterStopHandler.class));
         reactor.on($(FlowPhases.UPDATE_ALLOWED_SUBNETS.name()), getHandlerForClass(UpdateAllowedSubnetsHandler.class));
         reactor.on($(FlowPhases.STACK_STOP_REQUESTED.name()), getHandlerForClass(StackStopRequestedHandler.class));
         reactor.on($(FlowPhases.CLUSTER_START_REQUESTED.name()), getHandlerForClass(ClusterStartRequestedHandler.class));
         reactor.on($(FlowPhases.STACK_STATUS_UPDATE_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
-        reactor.on($(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()), getHandlerForClass(ClusterStatusUpdateFailureHandler.class));
         reactor.on($(FlowPhases.CLUSTER_SYNC.name()), getHandlerForClass(ClusterSyncHandler.class));
         reactor.on($(FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name()), getHandlerForClass(ClusterCredentialChangeHandler.class));
         reactor.on($(FlowPhases.CLUSTER_CREATION_FAILED.name()), getHandlerForClass(ClusterCreationFailureHandler.class));
@@ -105,22 +98,9 @@ public class FlowInitializer implements InitializingBean {
         transitionKeyService.registerTransition(MetadataCollectHandler.class, TransitionFactory
                 .createTransition(FlowPhases.METADATA_COLLECT.name(), FlowPhases.CLUSTER_START.name(), FlowPhases.STACK_STATUS_UPDATE_FAILED.name()));
 
-        transitionKeyService.registerTransition(ClusterStartHandler.class, TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_START.name(), FlowPhases.NONE.name(), FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()));
-
         transitionKeyService.registerTransition(StackStatusUpdateFailureHandler.class, TransitionFactory
                 .createTransition(FlowPhases.STACK_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
 
-        transitionKeyService.registerTransition(ClusterStatusUpdateFailureHandler.class, TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
-    }
-
-    private void registerStopFlows() {
-        transitionKeyService.registerTransition(ClusterStopHandler.class, TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_STOP.name(), FlowPhases.STACK_STOP.name(), FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name()));
-
-        transitionKeyService.registerTransition(ClusterStatusUpdateFailureHandler.class, TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_STATUS_UPDATE_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerStopRequestedFlows() {

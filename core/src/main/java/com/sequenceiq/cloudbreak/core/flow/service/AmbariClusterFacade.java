@@ -2,20 +2,13 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +22,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -200,54 +192,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext startCluster(FlowContext context) throws CloudbreakException {
-        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
-        if (cluster != null && (cluster.isStartRequested())) {
-            MDCBuilder.buildMdcContext(cluster);
-            clusterService.updateClusterStatusByStackId(stack.getId(), START_IN_PROGRESS);
-            stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, String.format("Starting the Ambari cluster. Ambari ip:%s", stack.getAmbariIp()));
-            fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_STARTING, UPDATE_IN_PROGRESS.name(), stack.getAmbariIp());
-            ambariClusterConnector.startCluster(stack);
-            cluster.setUpSince(new Date().getTime());
-            clusterService.updateCluster(cluster);
-            clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
-
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Ambari cluster started.");
-            fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_STARTED, AVAILABLE.name(), stack.getAmbariIp());
-
-            if (cluster.getEmailNeeded()) {
-                emailSenderService.sendStartSuccessEmail(cluster.getOwner(), stack.getAmbariIp(), cluster.getName());
-                fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
-            }
-        } else {
-            LOGGER.info("Cluster start has not been requested, start cluster later.");
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext stopCluster(FlowContext context) throws CloudbreakException {
-        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(cluster);
-        Status stackStatus = stack.getStatus();
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_STOPPING, UPDATE_IN_PROGRESS.name());
-        clusterService.updateClusterStatusByStackId(stack.getId(), STOP_IN_PROGRESS);
-        ambariClusterConnector.stopCluster(stack);
-        stack = stackService.getById(actualContext.getStackId());
-        if (!stackStatus.equals(stack.getStatus())) {
-            stackUpdater.updateStackStatus(stack.getId(), stack.isStopRequested() ? STOP_REQUESTED : stackStatus);
-        }
-        clusterService.updateClusterStatusByStackId(stack.getId(), STOPPED);
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_STOPPED, STOPPED.name());
-        return context;
-    }
-
-    @Override
     public FlowContext runClusterContainers(FlowContext context) throws CloudbreakException {
         ProvisioningContext actualContext = (ProvisioningContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
@@ -346,38 +290,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CHANGED_CREDENTIAL, AVAILABLE.name());
         return actualContext;
-    }
-
-    @Override
-    public FlowContext handleStartFailure(FlowContext context) throws CloudbreakException {
-        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(cluster);
-        clusterService.updateClusterStatusByStackId(stack.getId(), START_FAILED);
-        stackUpdater.updateStackStatus(actualContext.getStackId(), AVAILABLE, "Cluster could not be started: " + actualContext.getErrorReason());
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_START_FAILED, AVAILABLE.name(), actualContext.getErrorReason());
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), cluster.getName());
-            fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, START_FAILED.name());
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext handleStopFailure(FlowContext context) throws CloudbreakException {
-        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(cluster);
-        clusterService.updateClusterStatusByStackId(stack.getId(), STOP_FAILED);
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "The Ambari cluster could not be stopped: " + actualContext.getErrorReason());
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_STOP_FAILED, AVAILABLE.name(), actualContext.getErrorReason());
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), cluster.getName());
-            fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, STOP_FAILED.name());
-        }
-        return context;
     }
 
     @Override

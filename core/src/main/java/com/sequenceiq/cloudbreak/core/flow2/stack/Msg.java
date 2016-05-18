@@ -46,7 +46,13 @@ public enum Msg {
     AMBARI_CLUSTER_NOTIFICATION_EMAIL("ambari.cluster.notification.email"),
     AMBARI_CLUSTER_SCALING_DOWN("ambari.cluster.scaling.down"),
     AMBARI_CLUSTER_SCALED_DOWN("ambari.cluster.scaled.down"),
-    AMBARI_CLUSTER_SCALING_FAILED("ambari.cluster.scaling.failed");
+    AMBARI_CLUSTER_SCALING_FAILED("ambari.cluster.scaling.failed"),
+    AMBARI_CLUSTER_STARTING("ambari.cluster.starting"),
+    AMBARI_CLUSTER_STARTED("ambari.cluster.started"),
+    AMBARI_CLUSTER_START_FAILED("ambari.cluster.start.failed"),
+    AMBARI_CLUSTER_STOPPING("ambari.cluster.stopping"),
+    AMBARI_CLUSTER_STOPPED("ambari.cluster.stopped"),
+    AMBARI_CLUSTER_STOP_FAILED("ambari.cluster.stop.failed");
 
     private String code;
 

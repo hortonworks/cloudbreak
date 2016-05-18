@@ -26,14 +26,6 @@ public interface FlowFacade {
 
     FlowContext handleStackStatusUpdateFailure(FlowContext context) throws CloudbreakException;
 
-    FlowContext startCluster(FlowContext flowContext) throws CloudbreakException;
-
-    FlowContext handleClusterStartFailure(FlowContext flowContext) throws CloudbreakException;
-
-    FlowContext stopCluster(FlowContext flowContext) throws CloudbreakException;
-
-    FlowContext handleClusterStopFailure(FlowContext flowContext) throws CloudbreakException;
-
     FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException;
 
     FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException;
