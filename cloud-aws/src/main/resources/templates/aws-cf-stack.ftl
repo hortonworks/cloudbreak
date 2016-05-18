@@ -2,7 +2,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "CloudFormation template to create a VPC with a public securityRule on EC2",
+  "Description" : "Deploys a Hortonworks Data Platform cluster on AWS.",
 
   "Parameters" : {
   
@@ -388,8 +388,8 @@
   <#if mapPublicIpOnLaunch>
   ,
   "Outputs" : {
-    "EIP" : {
-        "Value" : { "Ref" : "EIP" }
+    "AmbariUrl" : {
+        "Value" : { "Fn::Join" : ["", ["http://", { "Ref" : "EIP" }, ":8080/"]] }
     },
     "EIPAllocationID" : {
         "Value" : {"Fn::GetAtt" : [ "EIP" , "AllocationId" ]}
