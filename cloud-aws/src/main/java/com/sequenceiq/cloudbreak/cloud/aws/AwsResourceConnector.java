@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -97,7 +95,6 @@ public class AwsResourceConnector implements ResourceConnector {
     private static final List<String> SUSPENDED_PROCESSES = Arrays.asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
             "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
     private static final List<StackStatus> ERROR_STATUSES = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
-    private static final String CLOUDBREAK_CLUSTER_TAG = "CloudbreakClusterName";
     private static final String CFS_OUTPUT_EIPALLOCATION_ID = "EIPAllocationID";
 
     @Inject
@@ -112,6 +109,8 @@ public class AwsResourceConnector implements ResourceConnector {
     private AwsPollTaskFactory awsPollTaskFactory;
     @Inject
     private CloudFormationStackUtil cloudFormationStackUtil;
+    @Inject
+    private AwsTagPreparationService awsTagPreparationService;
 
     @Value("${cb.aws.cf.template.new.path:}")
     private String awsCloudformationTemplatePath;
@@ -168,9 +167,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cfTemplate)
-                .withTags(Stream.of(
-                        new com.amazonaws.services.cloudformation.model.Tag().withKey(CLOUDBREAK_CLUSTER_TAG).withValue(ac.getCloudContext().getName()))
-                        .collect(Collectors.toList()))
+                .withTags(awsTagPreparationService.prepareTags(ac))
                 .withCapabilities(CAPABILITY_IAM)
                 .withParameters(
                         getStackParameters(
