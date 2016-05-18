@@ -9,6 +9,7 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
@@ -87,7 +88,8 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the credential belongs to") Long platformId
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the credential belongs to") Long platformId,
+            @CliOption(key = "existingKeyPairName", mandatory = false, help = "Name of an existing SSH key pair that should be exist on EC2") String keyPairName
     ) {
         Map<String, Object> parameters = new HashMap<>();
         if (roleArn != null) {
@@ -99,6 +101,9 @@ public class AwsCommands implements CommandMarker {
             parameters.put("secretKey", secretKey);
         } else {
             return "Please specify the roleArn or both the access and secret key";
+        }
+        if (!StringUtils.isEmpty(keyPairName)) {
+            parameters.put("existingKeyPairName", keyPairName);
         }
         return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
     }
