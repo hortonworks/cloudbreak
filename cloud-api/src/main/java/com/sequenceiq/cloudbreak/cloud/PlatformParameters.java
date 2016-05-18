@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -9,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 
 /**
  * Platform parameters.
@@ -71,4 +76,22 @@ public interface PlatformParameters {
      * @return the {@link PlatformOrchestrator} of a platform
      */
     PlatformOrchestrator orchestratorParams();
+
+    default <S extends StringType, O extends Object> Map<S, O> sortMap(Map<S, O> unsortMap) {
+        Map<S, O> treeMap = new TreeMap<>(
+                new Comparator<S>() {
+                    @Override
+                    public int compare(S o1, S o2) {
+                        return o2.value().compareTo(o1.value());
+                    }
+
+                });
+        treeMap.putAll(unsortMap);
+        return treeMap;
+    }
+
+    default <T extends StringType> T nthElement(Collection<T> data, int n) {
+        return data.stream().skip(n).findFirst().orElse(null);
+    }
+
 }

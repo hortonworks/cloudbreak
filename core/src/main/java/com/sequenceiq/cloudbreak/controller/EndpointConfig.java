@@ -78,7 +78,7 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         register(BlueprintController.class);
-        register(CloudConnectorController.class);
+        register(PlatformParameterController.class);
         register(ClusterController.class);
         register(CredentialController.class);
         register(NetworkController.class);

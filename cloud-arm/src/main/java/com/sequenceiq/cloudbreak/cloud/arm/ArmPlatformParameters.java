@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.RegionsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -48,6 +50,8 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class ArmPlatformParameters implements PlatformParameters {
 
     private static final int START_LABEL = 98;
+    private static final int DEFAULT_REGION_TYPE_POSITION = 4;
+    private static final int DEFAULT_VM_TYPE_POSITION = 1;
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
 
     @Value("${cb.arm.vm.parameter.definition.path:}")
@@ -65,8 +69,8 @@ public class ArmPlatformParameters implements PlatformParameters {
     public void init() {
         this.regions = readRegions();
         this.vmTypes = readVmTypes();
-        this.defaultRegion = this.regions.keySet().iterator().next();
-        this.defaultVmType = vmTypes.get(0);
+        this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
+        this.defaultVmType = nthElement(this.vmTypes, DEFAULT_VM_TYPE_POSITION);
     }
 
     private List<VmType> readVmTypes() {
@@ -97,6 +101,7 @@ public class ArmPlatformParameters implements PlatformParameters {
         } catch (IOException e) {
             return vmTypes;
         }
+        Collections.sort(vmTypes, new StringTypesCompare());
         return vmTypes;
     }
 
@@ -119,12 +124,13 @@ public class ArmPlatformParameters implements PlatformParameters {
                 for (String s : regionSpecification.getZones()) {
                     av.add(AvailabilityZone.availabilityZone(s));
                 }
+                Collections.sort(av, new StringTypesCompare());
                 regions.put(Region.region(regionSpecification.getName()), av);
             }
         } catch (IOException e) {
             return regions;
         }
-        return regions;
+        return sortMap(regions);
     }
 
     private String getDefinition(String parameter, String type) {

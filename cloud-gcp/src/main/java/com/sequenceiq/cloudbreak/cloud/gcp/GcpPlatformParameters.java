@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
@@ -45,9 +46,10 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class GcpPlatformParameters implements PlatformParameters {
-    public static final int INDEX = 14;
-    public static final float THOUSAND = 1000.0f;
-    public static final int TEN = 10;
+    private static final int DEFAULT_REGION_TYPE_POSITION = 2;
+    private static final int DEFAULT_VM_TYPE_POSITION = 14;
+    private static final float THOUSAND = 1000.0f;
+    private static final int TEN = 10;
     private static final Integer START_LABEL = Integer.valueOf(97);
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
 
@@ -67,8 +69,8 @@ public class GcpPlatformParameters implements PlatformParameters {
         this.regions = readRegions();
         this.vmTypes = readVmTypes();
 
-        this.defaultRegion = this.regions.keySet().iterator().next();
-        this.defaultVmType = this.vmTypes.get(this.vmTypes.keySet().iterator().next()).get(INDEX);
+        this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
+        this.defaultVmType = nthElement(this.vmTypes.get(this.vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
     }
 
     private Map<AvailabilityZone, List<VmType>> readVmTypes() {
@@ -99,13 +101,14 @@ public class GcpPlatformParameters implements PlatformParameters {
                     VmType vmType  = VmType.vmTypeWithMeta(machineDefinitionView.getName(), vmTypeMeta);
                     vmTypes.get(availabilityZone).add(vmType);
                 }
-
-
             }
         } catch (IOException e) {
             return vmTypes;
         }
-        return vmTypes;
+        for (Map.Entry<AvailabilityZone, List<VmType>> availabilityZoneListEntry : vmTypes.entrySet()) {
+            Collections.sort(availabilityZoneListEntry.getValue(), new StringTypesCompare());
+        }
+        return sortMap(vmTypes);
     }
 
     private Map<Region, List<AvailabilityZone>> readRegions() {
@@ -132,7 +135,10 @@ public class GcpPlatformParameters implements PlatformParameters {
         } catch (IOException e) {
             return regions;
         }
-        return regions;
+        for (Map.Entry<Region, List<AvailabilityZone>> availabilityZoneListEntry : regions.entrySet()) {
+            Collections.sort(availabilityZoneListEntry.getValue(), new StringTypesCompare());
+        }
+        return sortMap(regions);
     }
 
     @Override
@@ -202,9 +208,7 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Override
     public VmTypes vmTypes() {
         Set<VmType> lists = new LinkedHashSet<>();
-        for (List<VmType> vmTypeList : vmTypes.values()) {
-            lists.addAll(vmTypeList);
-        }
+        vmTypes.values().forEach(lists::addAll);
         return new VmTypes(lists, defaultVirtualMachine());
     }
 
