@@ -13,6 +13,7 @@ public class MetaDataToJsonConverter extends AbstractConversionServiceAwareConve
         InstanceMetaDataJson metaDataJson = new InstanceMetaDataJson();
         metaDataJson.setPrivateIp(entity.getPrivateIp());
         metaDataJson.setPublicIp(entity.getPublicIpWrapper());
+        metaDataJson.setSshPort(entity.getSshPort());
         metaDataJson.setAmbariServer(entity.getAmbariServer());
         metaDataJson.setInstanceId(entity.getInstanceId());
         metaDataJson.setDiscoveryFQDN(entity.getDiscoveryFQDN());

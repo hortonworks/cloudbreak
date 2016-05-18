@@ -54,6 +54,10 @@ integrationtest:
         tenantId:
         publicKeyFile:
 
+    mockcredential:
+        name:
+        publicKeyFile:
+
     cleanup:
         retryCount: 3
         cleanupBeforeStart: false

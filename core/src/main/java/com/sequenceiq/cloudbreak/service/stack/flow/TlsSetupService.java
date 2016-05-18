@@ -52,7 +52,6 @@ import net.schmizz.sshj.xfer.InMemorySourceFile;
 
 @Component
 public class TlsSetupService {
-    public static final int SSH_PORT = 22;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsSetupService.class);
     private static final int SETUP_TIMEOUT = 180;
@@ -79,7 +78,7 @@ public class TlsSetupService {
     @Value("#{'${cb.cert.dir:}/${cb.tls.cert.file:}'}")
     private String tlsCertificatePath;
 
-    public void setupTls(Stack stack, String publicIp, String user, Set<String> sshFingerprints) throws CloudbreakException {
+    public void setupTls(Stack stack, String publicIp, int sshPort, String user, Set<String> sshFingerprints) throws CloudbreakException {
         LOGGER.info("SSHClient parameters: stackId: {}, publicIp: {},  user: {}", stack.getId(), publicIp, user);
         if (publicIp == null) {
             throw new CloudbreakException("Failed to connect to host, IP address not defined.");
@@ -89,8 +88,8 @@ public class TlsSetupService {
         String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
         HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
         try {
-            waitForSsh(stack, publicIp, hostKeyVerifier, user, privateKeyLocation);
-            setupTemporarySsh(ssh, publicIp, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
+            waitForSsh(stack, publicIp, sshPort, hostKeyVerifier, user, privateKeyLocation);
+            setupTemporarySsh(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
             uploadSaltConfig(orchestrator, ssh);
             uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getGatewayPort(), stack.getCredential());
             executeTlsSetupScript(ssh);
@@ -109,19 +108,19 @@ public class TlsSetupService {
         }
     }
 
-    private void waitForSsh(Stack stack, String publicIp, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation) {
+    private void waitForSsh(Stack stack, String publicIp, int sshPort, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation) {
         sshCheckerTaskContextPollingService.pollWithTimeoutSingleFailure(
                 sshCheckerTask,
-                new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, user, tlsSecurityService.getSshPrivateFileLocation(stack.getId())),
+                new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, sshPort, user, tlsSecurityService.getSshPrivateFileLocation(stack.getId())),
                 SSH_POLLING_INTERVAL,
                 SSH_MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private void setupTemporarySsh(SSHClient ssh, String ip, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation, Credential credential)
-            throws IOException {
+    private void setupTemporarySsh(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation,
+            Credential credential) throws IOException {
         LOGGER.info("Setting up temporary ssh...");
         ssh.addHostKeyVerifier(hostKeyVerifier);
-        ssh.connect(ip, SSH_PORT);
+        ssh.connect(ip, port);
         if (credential.passwordAuthenticationRequired()) {
             ssh.authPassword(user, credential.getLoginPassword());
         } else {

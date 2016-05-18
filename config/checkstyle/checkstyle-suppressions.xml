@@ -27,6 +27,7 @@
     <!-- suppress everything in generated code -->
     <suppress checks=".*" files="generated"/>
     <!-- -->
+    <suppress checks="IllegalTypeCheck" files="MockSshServer.java"/>
 
     <!-- suppress everything in package level JavaDoc files -->
     <suppress checks=".*" files="package-info.java"/>

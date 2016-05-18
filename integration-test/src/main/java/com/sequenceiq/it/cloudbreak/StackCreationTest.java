@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
+
     @BeforeMethod
     public void setContextParams() {
         IntegrationTestContext itContext = getItContext();

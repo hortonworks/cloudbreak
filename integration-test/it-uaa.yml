@@ -1,0 +1,38 @@
+spring_profiles: postgresql
+
+database:
+  driverClassName: org.postgresql.Driver
+  url: jdbc:postgresql://${IDENTITY_DB_URL}/postgres
+  username: ${IDENTITY_DB_USER:postgres}
+  password: ${IDENTITY_DB_PASS:}
+
+zones:
+ internal:
+   hostnames:
+     - test
+     - cloudbreak
+     - identity
+
+oauth:
+  client:
+    override: true
+    autoapprove:
+      - cloudbreak_shell
+  clients:
+    cloudbreak:
+      id: cloudbreak
+      secret: cbsecret2015
+      authorized-grant-types: client_credentials
+      scope: scim.read,scim.write,password.write
+      authorities: uaa.resource,scim.read,scim.write,password.write
+    cloudbreak_shell:
+      id: cloudbreak_shell
+      authorized-grant-types: implicit
+      scope: cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.recipes,openid,password.write,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read
+      authorities: uaa.none
+      redirect-uri: http://cloudbreak.shell
+
+scim:
+  username_pattern: '[a-z0-9+\-_.@]+'
+  users:
+    - admin@example.com|cloudbreak|admin@example.com|Joe|Admin|openid,cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read

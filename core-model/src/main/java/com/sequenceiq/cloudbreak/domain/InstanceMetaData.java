@@ -77,6 +77,7 @@ public class InstanceMetaData implements ProvisionEntity {
     private Long privateId;
     private String privateIp;
     private String publicIp;
+    private Integer sshPort;
     private String instanceId;
     private Boolean ambariServer;
     private Boolean consulServer;
@@ -115,6 +116,14 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setPublicIp(String publicIp) {
         this.publicIp = publicIp;
+    }
+
+    public Integer getSshPort() {
+        return sshPort;
+    }
+
+    public void setSshPort(Integer sshPort) {
+        this.sshPort = sshPort;
     }
 
     public Long getId() {
@@ -228,7 +237,6 @@ public class InstanceMetaData implements ProvisionEntity {
     public void setHypervisor(String hypervisor) {
         this.hypervisor = hypervisor;
     }
-
 
     public String getPublicIpWrapper() {
         if (publicIp == null) {

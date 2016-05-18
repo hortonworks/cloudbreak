@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.util;
 
 import java.util.Set;
 
@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
+import com.sequenceiq.it.cloudbreak.WaitResult;
 import com.sequenceiq.it.cloudbreak.config.ITProps;
 
 @Component

@@ -1,0 +1,18 @@
+test:
+  dns: 172.17.0.1
+  ports:
+    - 2020:2020
+    - 9443:9443
+    - 7654:7654
+  volumes:
+    - ./:/it
+  command: java -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp
+  environment:
+    - SERVICE_NAME=test
+    - INTEGRATIONTEST_UAA_SERVER=http://identity.service.consul:8089
+    - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://cloudbreak.service.consul:8080
+    - INTEGRATIONTEST_UAA_USER=admin@example.com
+    - INTEGRATIONTEST_UAA_PASSWORD=cloudbreak
+    - CLOUDBREAK_URL=cloudbreak.service.consul:8080
+    - SPRING_CONFIG_LOCATION=/it/it-application.yml
+  image: java:8

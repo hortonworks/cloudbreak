@@ -20,6 +20,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 
 
 public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
+
     @BeforeMethod
     public void setContextParameters() {
         IntegrationTestContext itContext = getItContext();
@@ -28,12 +29,12 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "clusterName", "ambariUser", "ambariPassword", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin", "kerberosPassword",
-            "runRecipesOnHosts" })
-    public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("admin") String ambariUser,
+    @Parameters({ "clusterName", "ambariPort", "ambariUser", "ambariPassword", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
+            "kerberosPassword", "runRecipesOnHosts", "checkAmbari" })
+    public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("8080") String ambariPort, @Optional("admin") String ambariUser,
             @Optional("admin123!@#") String ambariPassword, @Optional("false") boolean emailNeeded,
             @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword,
-            @Optional("") String runRecipesOnHosts) throws Exception {
+            @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackIdStr = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
@@ -61,7 +62,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         CloudbreakUtil.checkResponse("ClusterCreation", clusterEndpoint.post(Long.valueOf(stackId), clusterRequest));
         // THEN
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
-        CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), stackIdStr, ambariUser, ambariPassword);
+        CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
     }
 
     private Set<HostGroupJson> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts) {
