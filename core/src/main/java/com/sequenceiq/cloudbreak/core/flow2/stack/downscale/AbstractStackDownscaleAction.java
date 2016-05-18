@@ -24,9 +24,9 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 
@@ -109,7 +109,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackScalingFlowContext> flowContext, Exception ex) {
-        return new FlowFailureEvent(payload.getStackId(), ex);
+        return new StackFailureEvent(payload.getStackId(), ex);
     }
 
     protected String getInstanceGroupName(Map<Object, Object> variables) {

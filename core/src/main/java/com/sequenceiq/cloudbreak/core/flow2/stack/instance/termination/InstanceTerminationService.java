@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.flow.ScalingFailedException;
@@ -74,7 +74,7 @@ public class InstanceTerminationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE_FINISHED, AVAILABLE.name());
     }
 
-    public void handleInstanceTerminationError(Stack stack, FlowFailureEvent payload) {
+    public void handleInstanceTerminationError(Stack stack, StackFailureEvent payload) {
         Exception ex = payload.getException();
         LOGGER.error("Error during instance terminating flow:", ex);
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Instance termination failed. " + ex.getMessage());

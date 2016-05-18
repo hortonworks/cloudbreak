@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 @Component("ClusterTerminationFailureAction")
 public class ClusterTerminationFailureAction extends AbstractClusterTerminationAction<TerminateClusterResult> {
@@ -26,8 +26,6 @@ public class ClusterTerminationFailureAction extends AbstractClusterTerminationA
 
     @Override
     protected Selectable createRequest(ClusterContext context) {
-        return new SelectableFlowStackEvent(context.getCluster().getStack().getId(),
-                ClusterTerminationEvent.CLUSTER_TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation());
+        return new StackEvent(ClusterTerminationEvent.CLUSTER_TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation(), context.getCluster().getStack().getId());
     }
-
 }

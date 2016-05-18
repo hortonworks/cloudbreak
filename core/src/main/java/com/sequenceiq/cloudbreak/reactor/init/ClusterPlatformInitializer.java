@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.reactor.ClusterEventHandler;
-import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 
 import reactor.bus.EventBus;
 
@@ -35,7 +35,7 @@ public class ClusterPlatformInitializer {
         validateSelectors();
         LOGGER.info("Registering ClusterEventHandler");
         for (ClusterEventHandler handler : handlers) {
-            String selector = ClusterPlatformRequest.selector(handler.type());
+            String selector = EventSelectorUtil.selector(handler.type());
             LOGGER.info("Registering handler [{}] for selector [{}]", handler.getClass(), selector);
             eventBus.on($(selector), handler);
         }

@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -48,7 +48,7 @@ public class StackStartStopService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STARTED, BillingStatus.BILLING_STARTED.name());
     }
 
-    public void handleStackStartError(Stack stack, FlowFailureEvent payload) {
+    public void handleStackStartError(Stack stack, StackFailureEvent payload) {
         handleError(stack, payload.getException(), START_FAILED, Msg.STACK_INFRASTRUCTURE_START_FAILED, "Stack start failed: ");
     }
 
@@ -74,7 +74,7 @@ public class StackStartStopService {
         }
     }
 
-    public void handleStackStopError(Stack stack, FlowFailureEvent payload) {
+    public void handleStackStopError(Stack stack, StackFailureEvent payload) {
         handleError(stack, payload.getException(), STOP_FAILED, Msg.STACK_INFRASTRUCTURE_STOP_FAILED, "Stack stop failed: ");
     }
 

@@ -32,7 +32,7 @@ public class ReactorEventHandlerInitializer {
     @PostConstruct
     public void init() throws Exception {
         validateSelectors();
-        LOGGER.info("Registering ClusterEventHandler");
+        LOGGER.info("Registering ReactorEventHandlers");
         for (ReactorEventHandler handler : handlers) {
             String selector = handler.selector();
             LOGGER.info("Registering handler [{}] for selector [{}]", handler.getClass(), selector);

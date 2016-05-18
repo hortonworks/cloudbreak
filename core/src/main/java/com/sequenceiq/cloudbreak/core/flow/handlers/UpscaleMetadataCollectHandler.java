@@ -23,4 +23,3 @@ public class UpscaleMetadataCollectHandler extends AbstractFlowHandler<StackScal
         return stackStatusUpdateContext;
     }
 }
-

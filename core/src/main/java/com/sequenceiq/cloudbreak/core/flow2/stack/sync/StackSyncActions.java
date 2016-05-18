@@ -32,14 +32,14 @@ import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceCo
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
@@ -83,7 +83,7 @@ public class StackSyncActions {
 
             @Override
             protected Selectable createRequest(StackSyncContext context) {
-                return new SelectableFlowStackEvent(context.getStack().getId(), StackSyncEvent.SYNC_FINALIZED_EVENT.stringRepresentation());
+                return new StackEvent(StackSyncEvent.SYNC_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
             }
         };
     }
@@ -92,7 +92,7 @@ public class StackSyncActions {
     public  Action stackSyncFailedAction() {
         return new AbstractStackFailureAction<StackSyncState, StackSyncEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.error("Error during Stack synchronization flow:", payload.getException());
                 flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE, Status.AVAILABLE.name());
                 sendEvent(context);
@@ -100,7 +100,7 @@ public class StackSyncActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new SelectableFlowStackEvent(context.getStack().getId(), StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.stringRepresentation());
+                return new StackEvent(StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
             }
         };
     }
@@ -134,7 +134,7 @@ public class StackSyncActions {
 
         @Override
         protected Object getFailurePayload(P payload, Optional<StackSyncContext> flowContext, Exception ex) {
-            return new FlowFailureEvent(payload.getStackId(), ex);
+            return new StackFailureEvent(payload.getStackId(), ex);
         }
     }
 }

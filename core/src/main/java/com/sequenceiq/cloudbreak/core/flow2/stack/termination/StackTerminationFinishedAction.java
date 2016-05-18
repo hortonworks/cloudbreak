@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
-import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 @Component("StackTerminationFinishedAction")
 public class StackTerminationFinishedAction extends AbstractStackTerminationAction<TerminateStackResult> {
@@ -30,6 +30,6 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
 
     @Override
     protected Selectable createRequest(StackTerminationContext context) {
-        return new SelectableFlowStackEvent(context.getStack().getId(), StackTerminationEvent.TERMINATION_FINALIZED_EVENT.stringRepresentation());
+        return new StackEvent(StackTerminationEvent.TERMINATION_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
     }
 }

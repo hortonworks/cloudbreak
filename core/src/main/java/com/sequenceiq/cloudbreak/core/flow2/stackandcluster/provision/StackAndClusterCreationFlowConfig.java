@@ -31,7 +31,7 @@ public class StackAndClusterCreationFlowConfig extends StackCreationFlowConfig {
         return new ChainFlow(super.createFlow(flowId)) {
             @Override
             public String nextSelector() {
-                return FlowPhases.BOOTSTRAP_CLUSTER.name();
+                return FlowPhases.RUN_CLUSTER_CONTAINERS.name();
             }
 
             @Override

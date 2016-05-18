@@ -21,9 +21,9 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 abstract class AbstractStackTerminationAction<P extends Payload>
@@ -56,6 +56,6 @@ abstract class AbstractStackTerminationAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackTerminationContext> flowContext, Exception ex) {
-        return new FlowFailureEvent(payload.getStackId(), ex);
+        return new StackFailureEvent(payload.getStackId(), ex);
     }
 }

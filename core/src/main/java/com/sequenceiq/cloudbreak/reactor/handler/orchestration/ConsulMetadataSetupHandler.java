@@ -2,17 +2,22 @@ package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
 import javax.inject.Inject;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackFailurePayload;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackPayload;
-import com.sequenceiq.cloudbreak.reactor.api.event.OrchestrationEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ConsulMetadataSetupFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ConsulMetadataSetupRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ConsulMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
-public class ConsulMetadataSetupHandler implements ReactorEventHandler<StackPayload> {
+@Component
+public class ConsulMetadataSetupHandler implements ReactorEventHandler<ConsulMetadataSetupRequest> {
     @Inject
     private EventBus eventBus;
     @Inject
@@ -20,19 +25,19 @@ public class ConsulMetadataSetupHandler implements ReactorEventHandler<StackPayl
 
     @Override
     public String selector() {
-        return OrchestrationEvent.CONSUL_METADATA_SETUP_REQUEST.name();
+        return EventSelectorUtil.selector(ConsulMetadataSetupRequest.class);
     }
 
     @Override
-    public void accept(Event<StackPayload> event) {
-        StackPayload request = event.getData();
+    public void accept(Event<ConsulMetadataSetupRequest> event) {
+        StackEvent request = event.getData();
         Selectable response;
         try {
             consulMetadataSetup.setupConsulMetadata(request.getStackId());
-            response = new StackPayload(OrchestrationEvent.CONSUL_METADATA_SETUP_DONE.name(), request.getStackId());
+            response = new ConsulMetadataSetupSuccess(request.getStackId());
         } catch (Exception e) {
-            response = new StackFailurePayload(OrchestrationEvent.CONSUL_METADATA_SETUP_FAILED.name(), request.getStackId(), e);
+            response = new ConsulMetadataSetupFailed(request.getStackId(), e);
         }
-        eventBus.notify(response.selector(), new Event(event.getHeaders(), response));
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

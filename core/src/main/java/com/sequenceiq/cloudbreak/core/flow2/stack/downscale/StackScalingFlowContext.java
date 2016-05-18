@@ -40,5 +40,4 @@ public class StackScalingFlowContext extends StackContext {
     public ScalingType getScalingType() {
         return scalingType;
     }
-
 }
