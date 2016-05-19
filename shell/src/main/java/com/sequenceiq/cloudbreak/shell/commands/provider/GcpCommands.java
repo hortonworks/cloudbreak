@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.shell.commands.provider;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -187,6 +188,10 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         Map<String, String> params = new HashMap<>();
+        if (availabilityZone == null) {
+            Collection<String> availabilityZonesByRegion = shellContext.getAvailabilityZonesByRegion(shellContext.getActiveCloudPlatform(), region.getName());
+            availabilityZone = new StackAvailabilityZone(availabilityZonesByRegion.iterator().next());
+        }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
                 false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, params);
     }
