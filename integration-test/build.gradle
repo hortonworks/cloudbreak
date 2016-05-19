@@ -28,6 +28,9 @@ dependencies {
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
     exclude group: 'org.slf4j';
   }
+  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',             version: '1.10.50') {
+    exclude group: 'commons-logging'
+  }
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter',      version: springBootVersion
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test', version: springBootVersion
   compile group:  'org.springframework',          name: 'spring-web',               version: springFrameworkVersion
