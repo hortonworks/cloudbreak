@@ -10,13 +10,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Component
 public class StackToJsonConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {
@@ -41,7 +41,6 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         }
         stackJson.setStatus(source.getStatus());
         stackJson.setStatusReason(source.getStatusReason());
-        stackJson.setConsulServerCount(source.getConsulServers());
         stackJson.setRegion(source.getRegion());
         stackJson.setAvailabilityZone(source.getAvailabilityZone());
         stackJson.setOnFailureAction(source.getOnFailureActionAction());

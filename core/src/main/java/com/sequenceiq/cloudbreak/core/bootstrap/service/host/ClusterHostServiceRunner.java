@@ -78,8 +78,6 @@ public class ClusterHostServiceRunner {
                 kerberosConf.put("masterKey", cluster.getKerberosMasterKey());
                 kerberosConf.put("user", cluster.getKerberosAdmin());
                 kerberosConf.put("password", cluster.getKerberosPassword());
-                kerberosConf.put("realm", "NODE.DC1.CONSUL");
-                kerberosConf.put("domain", "node.dc1.consul");
                 krb.put("kerberos", kerberosConf);
                 servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
             }

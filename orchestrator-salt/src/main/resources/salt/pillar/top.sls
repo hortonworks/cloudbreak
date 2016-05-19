@@ -1,7 +1,7 @@
 base:
   '*':
-    - consul.init
     - ambari.repo
+    - ambari.server
 
   'roles:kerberos_server':
     - match: grain

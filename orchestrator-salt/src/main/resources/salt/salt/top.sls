@@ -1,6 +1,4 @@
 base:
-  '*':
-    - consul.init
 
   'roles:ambari_server':
     - match: grain

@@ -14,13 +14,13 @@ import org.springframework.http.HttpStatus;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltBootResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltBootResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public class SaltBootstrap implements OrchestratorBootstrap {
@@ -29,16 +29,14 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private final SaltConnector sc;
     private final GatewayConfig gatewayConfig;
-    private final Set<String> consulServers;
     private final Set<String> originalTargets;
     private Set<String> targets;
 
-    public SaltBootstrap(SaltConnector sc, GatewayConfig gatewayConfig, Set<String> targets, Set<String> consulServers) {
+    public SaltBootstrap(SaltConnector sc, GatewayConfig gatewayConfig, Set<String> targets) {
         this.sc = sc;
         this.gatewayConfig = gatewayConfig;
         this.originalTargets = Collections.unmodifiableSet(targets);
         this.targets = targets;
-        this.consulServers = consulServers;
     }
 
     @Override
@@ -47,15 +45,15 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             LOGGER.info("Missing targets for SaltBootstrap: {}", targets);
 
             SaltAction saltAction = createBootstrap();
-            SaltBootResponses responses = sc.action(saltAction);
+            GenericResponses responses = sc.action(saltAction);
 
             Set<String> failedTargets = new HashSet<>();
 
             LOGGER.info("Salt run response: {}", responses);
-            for (SaltBootResponse saltBootResponse : responses.getResponses()) {
-                if (saltBootResponse.getStatusCode() != HttpStatus.OK.value()) {
-                    LOGGER.info("Successfully distributed salt run to: " + saltBootResponse.getAddress());
-                    failedTargets.add(saltBootResponse.getAddress().split(":")[0]);
+            for (GenericResponse genericResponse : responses.getResponses()) {
+                if (genericResponse.getStatusCode() != HttpStatus.OK.value()) {
+                    LOGGER.info("Successfully distributed salt run to: " + genericResponse.getAddress());
+                    failedTargets.add(genericResponse.getAddress().split(":")[0]);
                 }
             }
             targets = failedTargets;
@@ -85,26 +83,15 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         if (targets.contains(getGatewayPrivateIp())) {
             saltAction.setServer(getGatewayPrivateIp());
             List<String> roles = new ArrayList<>();
-            roles = appendConsulRole(getGatewayPrivateIp(), roles);
             saltAction.addMinion(createMinion(getGatewayPrivateIp(), roles));
         }
         for (String minionIp : targets) {
             if (!minionIp.equals(getGatewayPrivateIp())) {
                 List<String> roles = new ArrayList<>();
-                roles = appendConsulRole(minionIp, roles);
                 saltAction.addMinion(createMinion(minionIp, roles));
             }
         }
         return saltAction;
-    }
-
-    private List<String> appendConsulRole(String minionIp, List<String> roles) {
-        if (consulServers.contains(minionIp)) {
-            roles.add("consul_server");
-        } else {
-            roles.add("consul_agent");
-        }
-        return roles;
     }
 
     private Minion createMinion(String address, List<String> roles) {
@@ -123,7 +110,6 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     public String toString() {
         return "SaltBootstrap{"
                 + "gatewayConfig=" + gatewayConfig
-                + ", consulServers=" + consulServers
                 + ", originalTargets=" + originalTargets
                 + ", targets=" + targets
                 + '}';

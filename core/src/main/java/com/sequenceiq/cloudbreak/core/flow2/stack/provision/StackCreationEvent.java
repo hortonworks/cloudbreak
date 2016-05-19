@@ -10,8 +10,8 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ConsulMetadataSetupFailed;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ConsulMetadataSetupSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 
 public enum StackCreationEvent implements FlowEvent {
     START_CREATION_EVENT(FlowPhases.PROVISIONING_SETUP.name()),
@@ -32,8 +32,8 @@ public enum StackCreationEvent implements FlowEvent {
     BOOTSTRAP_MACHINES_EVENT("BOOTSTRAP_MACHINES_EVENT"),
     BOOTSTRAP_MACHINES_FINISHED_EVENT(EventSelectorUtil.selector(BootstrapMachinesSuccess.class)),
     BOOTSTRAP_MACHINES_FAILED_EVENT(EventSelectorUtil.selector(BootstrapMachinesFailed.class)),
-    CONSUL_METADATASETUP_FINISHED_EVENT(EventSelectorUtil.selector(ConsulMetadataSetupSuccess.class)),
-    CONSUL_METADATASETUP_FAILED_EVENT(EventSelectorUtil.selector(ConsulMetadataSetupFailed.class)),
+    HOST_METADATASETUP_FINISHED_EVENT(EventSelectorUtil.selector(HostMetadataSetupSuccess.class)),
+    HOST_METADATASETUP_FAILED_EVENT(EventSelectorUtil.selector(HostMetadataSetupFailed.class)),
     STACK_CREATION_FAILED_EVENT("STACK_CREATION_FAILED"),
     STACK_CREATION_FINISHED_EVENT("STACK_CREATION_FINISHED"),
     STACKCREATION_FAILURE_HANDLED_EVENT("STACK_CREATION_FAILHANDLED");

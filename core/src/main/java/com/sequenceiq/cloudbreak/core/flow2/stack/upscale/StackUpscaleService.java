@@ -126,7 +126,7 @@ public class StackUpscaleService {
         return upscaleCandidateAddresses;
     }
 
-    public HostGroupAdjustmentJson finishExtendConsulMetadata(Stack stack, String instanceGroupName, Integer adjustment) {
+    public HostGroupAdjustmentJson finishExtendHostMetadata(Stack stack, String instanceGroupName, Integer adjustment) {
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
         hostGroupAdjustmentJson.setWithStackUpdate(false);

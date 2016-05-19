@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
-import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +37,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConsulChecker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateChecker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SimpleAddRoleChecker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsChecker;
@@ -74,24 +70,16 @@ public class SaltOrchestrator implements HostOrchestrator {
             throws CloudbreakOrchestratorException {
         Set<String> allIPs = prepareTargets(gatewayConfig, targets);
 
-        Set<String> consulServers = new HashSet<>(asList(gatewayConfig.getPrivateAddress()));
-        Iterator<String> iterator = allIPs.iterator();
-        while (consulServers.size() < consulServerCount) {
-            consulServers.add(iterator.next());
-        }
-
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            PillarSave consulPillarSave = new PillarSave(sc, consulServers);
-            Callable<Boolean> saltPillarRunner = runner(consulPillarSave, exitCriteria, exitCriteriaModel);
+            PillarSave ambariServer = new PillarSave(sc, gatewayConfig.getPrivateAddress());
+            Callable<Boolean> saltPillarRunner = runner(ambariServer, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, allIPs, consulServers);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, allIPs);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
-
-            runNewService(sc, new ConsulChecker(allIPs), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred under the consul bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -102,12 +90,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         Set<String> newAddresses = prepareTargets(null, targets);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, newAddresses, Collections.EMPTY_SET);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, newAddresses);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
-
-            runNewService(sc, new ConsulChecker(newAddresses), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during salt upscale", e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -143,7 +129,6 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
-
 
     private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
             InterruptedException {

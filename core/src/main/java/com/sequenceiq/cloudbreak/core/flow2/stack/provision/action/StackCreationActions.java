@@ -42,8 +42,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ConsulMetadataSetupRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ConsulMetadataSetupSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 
@@ -183,27 +183,27 @@ public class StackCreationActions {
         };
     }
 
-    @Bean(name = "COLLECTING_CONSUL_METADATA_STATE")
-    public Action collectingConsulMetadataAction() {
+    @Bean(name = "COLLECTING_HOST_METADATA_STATE")
+    public Action collectingHostMetadataAction() {
         return new AbstractStackCreationAction<BootstrapMachinesSuccess>(BootstrapMachinesSuccess.class) {
             @Override
             protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.collectingConsulMetadata(context.getStack());
+                stackCreationService.collectingHostMetadata(context.getStack());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new ConsulMetadataSetupRequest(context.getStack().getId());
+                return new HostMetadataSetupRequest(context.getStack().getId());
             }
         };
     }
 
     @Bean(name = "STACK_CREATION_FINISHED_STATE")
     public Action stackCreationFinishedAction() {
-        return new AbstractStackCreationAction<ConsulMetadataSetupSuccess>(ConsulMetadataSetupSuccess.class) {
+        return new AbstractStackCreationAction<HostMetadataSetupSuccess>(HostMetadataSetupSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, ConsulMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.stackCreationFinished(context.getStack());
                 sendEvent(context);
             }

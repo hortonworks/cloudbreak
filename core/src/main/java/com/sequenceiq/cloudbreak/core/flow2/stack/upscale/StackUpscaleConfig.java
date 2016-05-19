@@ -12,8 +12,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEve
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.ADD_INSTANCES_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.ADD_INSTANCES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.BOOTSTRAP_NEW_NODES_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_CONSUL_METADATA_FINISHED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_CONSUL_METADATA_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_HOST_METADATA_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_HOST_METADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_METADATA_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_METADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.FINAL_STATE;
@@ -39,12 +39,12 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
                                     .failureEvent(EXTEND_METADATA_FAILURE_EVENT)
                     .from(EXTEND_METADATA_FINISHED_STATE).to(BOOTSTRAP_NEW_NODES_STATE).event(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT)
                                     .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
-                    .from(BOOTSTRAP_NEW_NODES_STATE).to(EXTEND_CONSUL_METADATA_STATE).event(StackUpscaleEvent.EXTEND_CONSUL_METADATA_EVENT)
+                    .from(BOOTSTRAP_NEW_NODES_STATE).to(EXTEND_HOST_METADATA_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_EVENT)
                                     .failureEvent(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_FAILURE_EVENT)
-                    .from(EXTEND_CONSUL_METADATA_STATE).to(EXTEND_CONSUL_METADATA_FINISHED_STATE).event(StackUpscaleEvent.EXTEND_CONSUL_METADATA_FINISHED_EVENT)
-                                    .failureEvent(StackUpscaleEvent.EXTEND_CONSUL_METADATA_FAILURE_EVENT)
-                    .from(EXTEND_CONSUL_METADATA_FINISHED_STATE).to(FINAL_STATE).event(UPSCALE_FINALIZED_EVENT)
-                                    .failureEvent(StackUpscaleEvent.EXTEND_CONSUL_METADATA_FINISHED_FAILURE_EVENT)
+                    .from(EXTEND_HOST_METADATA_STATE).to(EXTEND_HOST_METADATA_FINISHED_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_EVENT)
+                                    .failureEvent(StackUpscaleEvent.EXTEND_HOST_METADATA_FAILURE_EVENT)
+                    .from(EXTEND_HOST_METADATA_FINISHED_STATE).to(FINAL_STATE).event(UPSCALE_FINALIZED_EVENT)
+                                    .failureEvent(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_FAILURE_EVENT)
                     .build();
 
     private static final FlowEdgeConfig<StackUpscaleState, StackUpscaleEvent> EDGE_CONFIG =

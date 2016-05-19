@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
+package com.sequenceiq.cloudbreak.orchestrator.model;
 
 import org.springframework.http.HttpStatus;
 
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SaltBootResponse {
+public class GenericResponse {
 
     private String status;
     private String address;

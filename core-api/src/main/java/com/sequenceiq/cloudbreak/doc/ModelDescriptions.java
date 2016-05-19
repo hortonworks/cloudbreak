@@ -55,8 +55,6 @@ public class ModelDescriptions {
         public static final String CREDENTIAL_ID = "credential resource id for the stack";
         public static final String USERNAME = "ambari username";
         public static final String PASSWORD = "ambari password";
-        public static final String CONSUL_SERVER_COUNT = "consul server count";
-        public static final String CONSUL_SERVER_COUNT_BY_USER = "user defined consul server count";
         public static final String PARAMETERS = "additional cloud specific parameters for stack";
         public static final String SECURITY_GROUP_ID = "security group resource id for the stack";
         public static final String FAILURE_ACTION = "action on failure";

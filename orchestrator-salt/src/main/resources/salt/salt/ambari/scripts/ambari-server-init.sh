@@ -71,7 +71,7 @@ silent_security_setup() {
 }
 
 main() {
-  consul-register-service ambari-server $(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+  # consul-register-service ambari-server $(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
   if [ ! -f "/var/ambari-init-executed" ]; then
     config_remote_jdbc
     silent_security_setup

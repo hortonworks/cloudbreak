@@ -367,7 +367,6 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         onFailureAction: cluster.onFailureAction,
                         instanceGroups: cluster.instanceGroups,
                         parameters: cluster.parameters,
-                        consulServerCount: cluster.consulServerCount,
                         networkId: cluster.networkId,
                         relocateDocker: cluster.relocateDocker,
                         securityGroupId: cluster.securityGroupId,
