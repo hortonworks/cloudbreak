@@ -61,7 +61,7 @@ public class ClusterRequest {
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy = ConfigStrategy.ONLY_STACK_DEFAULTS_APPLY;
     @ApiModelProperty(value = ClusterModelDescription.ENABLE_SHIPYARD, required = false)
-    private Boolean enableShipyard = Boolean.TRUE;
+    private Boolean enableShipyard = Boolean.FALSE;
 
     public String getDescription() {
         return description;

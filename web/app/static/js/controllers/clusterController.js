@@ -332,6 +332,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             if ($rootScope.activeCredential && ($rootScope.activeCredential.cloudPlatform == 'AWS' || $rootScope.activeCredential.cloudPlatform == 'OPENSTACK')) {
                 delete $scope.cluster.fileSystem;
             }
+            if ($scope.cluster.orchestrator.type === 'SALT') {
+                $scope.cluster.enableShipyard = false;
+            }
             if ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform !== 'AWS') {
                 delete $scope.cluster.parameters.s3Role;
                 delete $scope.cluster.parameters.instanceProfileStrategy;
@@ -1046,7 +1049,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 configStrategy: $scope.configStrategies[1],
                 ldapRequired: false,
                 sssdConfigId: null,
-                enableShipyard: true
+                enableShipyard: false
             };
             $scope.selectSssd = {
                 show: false
