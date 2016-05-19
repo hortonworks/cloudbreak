@@ -95,7 +95,7 @@ public class ClusterCommands implements BaseCommands {
 
             wait = wait == null ? false : wait;
             ClusterRequest clusterRequest = new ClusterRequest();
-            clusterRequest.setEnableShipyard(enableShipyard == null ? (shellContext.isMarathonMode() ? false : true) : enableShipyard);
+            clusterRequest.setEnableShipyard(enableShipyard == null ? false : enableShipyard);
             clusterRequest.setName(shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackName() : shellContext.getStackName());
             clusterRequest.setDescription(description);
             clusterRequest.setUserName(userName);
