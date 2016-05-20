@@ -27,6 +27,7 @@ dependencies {
       exclude group: 'log4j'
       exclude group: 'slf4j-api'
     }
+    compile group: 'org.codehaus.groovy',           name: 'groovy-all',                     version: '2.4.6'
 
     testCompile project(path: ':core-model', configuration: 'tests')
     testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
