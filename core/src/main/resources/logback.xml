@@ -25,11 +25,9 @@
             <appender name="FILE-${owner}" class="ch.qos.logback.core.FileAppender">
                 <file>owners_log/${owner}.log</file>
                 <append>false</append>
-                <layout class="ch.qos.logback.classic.PatternLayout">
-                    <encoder>
-                        <pattern>%date{ISO8601} [%thread] %method:%line %highlight(%-5level) %logger{5} - [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
-                    </encoder>
-                </layout>
+                <encoder>
+                    <pattern>%date{ISO8601} [%thread] %method:%line %highlight(%-5level) %logger{5} - [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
+                </encoder>
             </appender>
         </sift>
     </appender>
