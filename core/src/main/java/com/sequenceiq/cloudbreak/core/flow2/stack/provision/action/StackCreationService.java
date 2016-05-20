@@ -161,6 +161,16 @@ public class StackCreationService {
         return stackService.getById(stack.getId());
     }
 
+    public void bootstrapMachines(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_BOOTSTRAP, UPDATE_IN_PROGRESS.name());
+    }
+
+    public void setupConsulMetadata(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
+    }
+
     public void handleStackCreationFailure(Stack stack, Exception errorDetails) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.error("Error during stack creation flow:", errorDetails);

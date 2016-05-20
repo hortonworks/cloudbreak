@@ -48,15 +48,15 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
         C flowContext = null;
         try {
-            prepareExecution(context.getExtendedState().getVariables());
+            prepareExecution(payload, context.getExtendedState().getVariables());
             flowContext = createFlowContext(flowId, context, payload);
             doExecute(flowContext, payload, context.getExtendedState().getVariables());
         } catch (Exception ex) {
-            LOGGER.error("Error during execution of " + getClass().getSimpleName(), ex);
+            LOGGER.error("Error during execution of " + getClass().getName(), ex);
             if (failureEvent != null) {
                 sendEvent(flowId, failureEvent.stringRepresentation(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex));
             } else {
-                LOGGER.error("Missing error handling for " + getClass().getSimpleName());
+                LOGGER.error("Missing error handling for " + getClass().getName());
             }
         }
     }
@@ -88,13 +88,16 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         // By default payloadconvertermap is empty.
     }
 
-    protected void prepareExecution(Map<Object, Object> variables) {
+    protected void prepareExecution(P payload, Map<Object, Object> variables) {
+    }
+
+    protected Selectable createRequest(C context) {
+        throw new UnsupportedOperationException("Context based request creation is not supported by default");
     }
 
     protected abstract C createFlowContext(String flowId, StateContext<S, E> stateContext, P payload);
 
     protected abstract void doExecute(C context, P payload, Map<Object, Object> variables) throws Exception;
-    protected abstract Selectable createRequest(C context);
     protected abstract Object getFailurePayload(P payload, Optional<C> flowContext, Exception ex);
 
     private P convertPayload(Object payload) {
@@ -108,6 +111,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                         result = payloadConverter.convert(payload);
                         break;
                     }
+                }
+                if (result == null) {
+                    LOGGER.error("No payload converter found for {}, payload will be null", payload);
                 }
             }
         } catch (Exception ex) {

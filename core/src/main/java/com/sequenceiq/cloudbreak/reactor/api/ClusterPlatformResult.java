@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.api;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 
 public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> implements Payload, Selectable {
 
@@ -26,17 +27,9 @@ public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> im
         this.request = request;
     }
 
-    public static String selector(Class clazz) {
-        return clazz.getSimpleName().toUpperCase();
-    }
-
-    public static String failureSelector(Class clazz) {
-        return clazz.getSimpleName().toUpperCase() + "_ERROR";
-    }
-
     @Override
     public String selector() {
-        return status == EventStatus.OK ? selector(getClass()) : failureSelector(getClass());
+        return status == EventStatus.OK ? EventSelectorUtil.selector(getClass()) : EventSelectorUtil.failureSelector(getClass());
     }
 
     public EventStatus getStatus() {

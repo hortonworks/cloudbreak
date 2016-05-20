@@ -15,20 +15,21 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-public abstract class AbstractStackFailureAction<S extends FlowState, E extends FlowEvent> extends AbstractAction<S, E, StackFailureContext, FlowFailureEvent> {
+public abstract class AbstractStackFailureAction<S extends FlowState, E extends FlowEvent> extends AbstractAction<S, E, StackFailureContext, StackFailureEvent> {
     @Inject
     private StackService stackService;
     @Inject
     private FlowRegister runningFlows;
 
     protected AbstractStackFailureAction() {
-        super(FlowFailureEvent.class);
+        super(StackFailureEvent.class);
     }
 
     @Override
-    protected StackFailureContext createFlowContext(String flowId, StateContext<S, E> stateContext, FlowFailureEvent payload) {
+    protected StackFailureContext createFlowContext(String flowId, StateContext<S, E> stateContext, StackFailureEvent payload) {
         Flow flow = runningFlows.get(flowId);
         Stack stack = stackService.getById(payload.getStackId());
         MDCBuilder.buildMdcContext(stack);
@@ -37,12 +38,13 @@ public abstract class AbstractStackFailureAction<S extends FlowState, E extends 
     }
 
     @Override
-    protected Object getFailurePayload(FlowFailureEvent payload, Optional<StackFailureContext> flowContext, Exception ex) {
+    protected Object getFailurePayload(StackFailureEvent payload, Optional<StackFailureContext> flowContext, Exception ex) {
         return null;
     }
 
     @Override
-    protected void initPayloadConverterMap(List<PayloadConverter<FlowFailureEvent>> payloadConverters) {
-        payloadConverters.add(new CloudPlatformResponseToFlowFailureConverter());
+    protected void initPayloadConverterMap(List<PayloadConverter<StackFailureEvent>> payloadConverters) {
+        payloadConverters.add(new CloudPlatformResponseToStackFailureConverter());
+        payloadConverters.add(new ClusterPlatformResponseToStackFailureConverter());
     }
 }

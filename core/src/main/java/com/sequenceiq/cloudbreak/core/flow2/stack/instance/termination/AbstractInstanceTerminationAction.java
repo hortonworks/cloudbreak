@@ -23,10 +23,10 @@ import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceCo
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -74,6 +74,6 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<InstanceTerminationContext> flowContext, Exception ex) {
-        return new FlowFailureEvent(payload.getStackId(), ex);
+        return new StackFailureEvent(payload.getStackId(), ex);
     }
 }

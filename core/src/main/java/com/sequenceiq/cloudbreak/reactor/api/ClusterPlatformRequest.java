@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.api;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 
 public abstract class ClusterPlatformRequest implements Payload, Selectable {
 
@@ -18,10 +19,6 @@ public abstract class ClusterPlatformRequest implements Payload, Selectable {
 
     @Override
     public String selector() {
-        return selector(getClass());
-    }
-
-    public static String selector(Class clazz) {
-        return clazz.getSimpleName().toUpperCase();
+        return EventSelectorUtil.selector(getClass());
     }
 }

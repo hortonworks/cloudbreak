@@ -33,14 +33,14 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
-import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopService;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -72,7 +72,7 @@ public class StackStopActions {
                             cloudResources, cloudInstances);
                 }
                 //finish the flow
-                return new SelectableFlowStackEvent(context.getStack().getId(), StackStopEvent.STOP_FAILURE_EVENT.stringRepresentation());
+                return new StackEvent(StackStopEvent.STOP_FAILURE_EVENT.stringRepresentation(), context.getStack().getId());
             }
         };
     }
@@ -88,7 +88,7 @@ public class StackStopActions {
 
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
-                return new SelectableFlowStackEvent(context.getStack().getId(), StackStopEvent.STOP_FINALIZED_EVENT.stringRepresentation());
+                return new StackEvent(StackStopEvent.STOP_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
             }
         };
     }
@@ -97,14 +97,14 @@ public class StackStopActions {
     public Action stackStopFailedAction() {
         return new AbstractStackFailureAction<StackStopState, StackStopEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 stackStartStopService.handleStackStopError(context.getStack(), payload);
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new SelectableFlowStackEvent(context.getStack().getId(), StackStopEvent.STOP_FAIL_HANDLED_EVENT.stringRepresentation());
+                return new StackEvent(StackStopEvent.STOP_FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
             }
         };
     }
@@ -140,7 +140,7 @@ public class StackStopActions {
 
         @Override
         protected Object getFailurePayload(P payload, Optional<StackStartStopContext> flowContext, Exception ex) {
-            return new FlowFailureEvent(payload.getStackId(), ex);
+            return new StackFailureEvent(payload.getStackId(), ex);
         }
     }
 }

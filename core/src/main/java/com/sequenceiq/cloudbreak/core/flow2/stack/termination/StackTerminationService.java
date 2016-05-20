@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -50,7 +50,7 @@ public class StackTerminationService {
         }
     }
 
-    public void handleStackTerminationError(Stack stack, FlowFailureEvent payload, boolean forced) {
+    public void handleStackTerminationError(Stack stack, StackFailureEvent payload, boolean forced) {
         String stackUpdateMessage;
         Msg eventMessage;
         Status status;

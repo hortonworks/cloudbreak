@@ -14,18 +14,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.reactor.ClusterEventHandler;
-import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 
 import reactor.bus.EventBus;
 
 @Component
-public class ClusterPlatformInitializer {
+public class ReactorEventHandlerInitializer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterPlatformInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReactorEventHandlerInitializer.class);
 
     @Resource
-    private List<ClusterEventHandler> handlers;
+    private List<ReactorEventHandler> handlers;
 
     @Inject
     private EventBus eventBus;
@@ -33,9 +32,9 @@ public class ClusterPlatformInitializer {
     @PostConstruct
     public void init() throws Exception {
         validateSelectors();
-        LOGGER.info("Registering ClusterEventHandler");
-        for (ClusterEventHandler handler : handlers) {
-            String selector = EventSelectorUtil.selector(handler.type());
+        LOGGER.info("Registering ReactorEventHandlers");
+        for (ReactorEventHandler handler : handlers) {
+            String selector = handler.selector();
             LOGGER.info("Registering handler [{}] for selector [{}]", handler.getClass(), selector);
             eventBus.on($(selector), handler);
         }
@@ -43,9 +42,9 @@ public class ClusterPlatformInitializer {
 
     private void validateSelectors() {
         LOGGER.debug("There are {} handlers suitable for registering", handlers.size());
-        Map<Class, ClusterEventHandler> handlerMap = new HashMap<>();
-        for (ClusterEventHandler handler : handlers) {
-            ClusterEventHandler entry = handlerMap.put(handler.type(), handler);
+        Map<String, ReactorEventHandler> handlerMap = new HashMap<>();
+        for (ReactorEventHandler handler : handlers) {
+            ReactorEventHandler entry = handlerMap.put(handler.selector(), handler);
             if (null != entry) {
                 LOGGER.error("Duplicated handlers! actual: {}, existing: {}", handler, entry);
                 throw new IllegalStateException("Duplicate handlers! first: " + handler + " second: " + entry);

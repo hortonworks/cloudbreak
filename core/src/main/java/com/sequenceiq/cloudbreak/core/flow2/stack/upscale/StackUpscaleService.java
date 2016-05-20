@@ -30,23 +30,19 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -92,69 +88,63 @@ public class StackUpscaleService {
     private StackToCloudStackConverter cloudStackConverter;
 
 
-    public void startAddInstances(StackScalingFlowContext context, StackScalingContext payload) {
-        MDCBuilder.buildMdcContext(context.getStack());
-        String statusReason = format("Adding %s new instance(s) to the infrastructure.", payload.getScalingAdjustment());
-        stackUpdater.updateStackStatus(payload.getStackId(), UPDATE_IN_PROGRESS, statusReason);
-        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_ADDING_INSTANCES, UPDATE_IN_PROGRESS.name(), payload.getScalingAdjustment());
+    public void startAddInstances(Stack stack, Integer scalingAdjustment) {
+        String statusReason = format("Adding %s new instance(s) to the infrastructure.", scalingAdjustment);
+        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, statusReason);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_ADDING_INSTANCES, UPDATE_IN_PROGRESS.name(), scalingAdjustment);
     }
 
-    public StackScalingContext finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
+    public Set<Resource> finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
         LOGGER.info("Upscale stack result: {}", payload);
         List<CloudResourceStatus> results = payload.getResults();
-        validateResourceResults(context.getCloudContext(), payload.getErrorDetails(), payload.getResults());
+        validateResourceResults(context.getCloudContext(), payload.getErrorDetails(), results);
         updateNodeCount(context.getStack().getId(), context.getCloudStack().getGroups(), results, false);
         Set<Resource> resourceSet = transformResults(results, context.getStack());
         if (resourceSet.isEmpty()) {
             throw new OperationException("Failed to upscale the cluster since all create request failed: " + results.get(0).getStatusReason());
         }
         LOGGER.debug("Adding new instances to the stack is DONE");
-        return new StackScalingContext(context.getStack().getId(), Platform.platform(context.getStack().cloudPlatform()),
-                context.getAdjustment(), context.getInstanceGroupName(), resourceSet, context.getScalingType(), null);
-
+        return resourceSet;
     }
 
-    public Set<String> finishExtendMetadata(StackScalingFlowContext context, CollectMetadataResult payload) {
+    public Set<String> finishExtendMetadata(Stack stack, String instanceGroupName, CollectMetadataResult payload) {
         List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();
-        metadataSetupService.saveInstanceMetaData(context.getStack(), coreInstanceMetaData, CREATED);
+        metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
         Set<String> upscaleCandidateAddresses = new HashSet<>();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
             upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
         }
-        InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(context.getStack().getId(), context.getInstanceGroupName());
+        InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
         int nodeCount = instanceGroup.getNodeCount() + coreInstanceMetaData.size();
         instanceGroup.setNodeCount(nodeCount);
         instanceGroupRepository.save(instanceGroup);
-        clusterService.updateClusterStatusByStackId(context.getStack().getId(), AVAILABLE);
-        eventService.fireCloudbreakEvent(context.getStack().getId(), BillingStatus.BILLING_CHANGED.name(),
+        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
+        eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 messagesService.getMessage("stack.metadata.setup.billing.changed"));
-        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
 
         return upscaleCandidateAddresses;
     }
 
-    public HostGroupAdjustmentJson finishExtendConsulMetadata(StackScalingFlowContext context) {
-        MDCBuilder.buildMdcContext(context.getStack());
-        Cluster cluster = clusterService.retrieveClusterByStackId(context.getStack().getId());
+    public HostGroupAdjustmentJson finishExtendConsulMetadata(Stack stack, String instanceGroupName, Integer adjustment) {
+        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
         hostGroupAdjustmentJson.setWithStackUpdate(false);
-        hostGroupAdjustmentJson.setScalingAdjustment(context.getAdjustment());
+        hostGroupAdjustmentJson.setScalingAdjustment(adjustment);
         if (cluster != null) {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), context.getInstanceGroupName());
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), instanceGroupName);
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
         }
-        stackUpdater.updateStackStatus(context.getStack().getId(), AVAILABLE, "Stack upscale has been finished successfully.");
-        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
+        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack upscale has been finished successfully.");
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
 
         return hostGroupAdjustmentJson;
     }
 
-    public void handleStackUpscaleFailure(StackFailureContext context, FlowFailureEvent payload) {
+    public void handleStackUpscaleFailure(Stack stack, StackFailureEvent payload) {
         LOGGER.error("Exception during the downscaling of stack", payload.getException());
         try {
             String errorReason = payload.getException().getMessage();
-            Stack stack = context.getStack();
-            MDCBuilder.buildMdcContext(stack);
             stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack update failed. " + errorReason);
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, AVAILABLE.name(), errorReason);
         } catch (Exception e) {
@@ -177,13 +167,12 @@ public class StackUpscaleService {
     }
 
     private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results) {
-        String action = "upscale";
         if (exception != null) {
-            LOGGER.error(format("Failed to %s stack: %s", action, cloudContext), exception);
+            LOGGER.error(format("Failed to upscale stack: %s", cloudContext), exception);
             throw new OperationException(exception);
         }
         if (results.size() == 1 && (results.get(0).isFailed() || results.get(0).isDeleted())) {
-            throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext, results.get(0).getStatusReason()));
+            throw new OperationException(format("Failed to upscale the stack for %s due to: %s", cloudContext, results.get(0).getStatusReason()));
         }
     }
 

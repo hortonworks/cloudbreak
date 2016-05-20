@@ -10,10 +10,6 @@ public interface FlowFacade {
 
     FlowContext collectMetadata(FlowContext flowContext) throws CloudbreakException;
 
-    FlowContext bootstrapCluster(FlowContext context) throws CloudbreakException;
-
-    FlowContext setupConsulMetadata(FlowContext flowContext) throws CloudbreakException;
-
     FlowContext runClusterContainers(FlowContext context) throws CloudbreakException;
 
     FlowContext startAmbari(FlowContext flowContext) throws CloudbreakException;
@@ -21,8 +17,6 @@ public interface FlowFacade {
     FlowContext buildAmbariCluster(FlowContext flowContext) throws CloudbreakException;
 
     FlowContext resetAmbariCluster(FlowContext flowContext) throws CloudbreakException;
-
-    FlowContext handleStackCreationFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext handleClusterCreationFailure(FlowContext flowContext) throws CloudbreakException;
 

@@ -14,17 +14,16 @@ import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.core.flow.CloudbreakFlowException;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowStackEvent;
-import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToFlowStackEventConverter;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 import reactor.fn.Consumer;
 import reactor.fn.timer.Timer;
 
 @Component("CheckImageAction")
-public class CheckImageAction extends AbstractStackCreationAction<FlowStackEvent> {
+public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckImageAction.class);
     private static final int REPEAT_TIME = 5000;
     private static final int FAULT_TOLERANCE = 5;
@@ -36,11 +35,11 @@ public class CheckImageAction extends AbstractStackCreationAction<FlowStackEvent
     private Timer timer;
 
     public CheckImageAction() {
-        super(FlowStackEvent.class);
+        super(StackEvent.class);
     }
 
     @Override
-    protected void doExecute(final StackContext context, FlowStackEvent payload, Map<Object, Object> variables) {
+    protected void doExecute(final StackContext context, StackEvent payload, Map<Object, Object> variables) {
         CheckImageResult checkImageResult = stackCreationService.checkImage(context);
         switch (checkImageResult.getImageStatus()) {
             case IN_PROGRESS:
@@ -69,20 +68,19 @@ public class CheckImageAction extends AbstractStackCreationAction<FlowStackEvent
 
     @Override
     protected Selectable createRequest(StackContext context) {
-        return new SelectableFlowStackEvent(context.getStack().getId(), StackCreationEvent.IMAGE_COPY_FINISHED_EVENT.stringRepresentation());
+        return new StackEvent(StackCreationEvent.IMAGE_COPY_FINISHED_EVENT.stringRepresentation(), context.getStack().getId());
     }
 
     @Override
-    protected void initPayloadConverterMap(List<PayloadConverter<FlowStackEvent>> payloadConverters) {
-        payloadConverters.add(new PrepareImageResultToFlowStackEventConverter());
+    protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+        payloadConverters.add(new PrepareImageResultToStackEventConverter());
     }
 
     private void repeat(final StackContext context) {
         timer.submit(new Consumer<Long>() {
             @Override
             public void accept(Long aLong) {
-                sendEvent(context.getFlowId(), StackCreationEvent.IMAGE_COPY_CHECK_EVENT.stringRepresentation(),
-                        new FlowStackEvent(context.getStack().getId()));
+                sendEvent(context.getFlowId(), new StackEvent(StackCreationEvent.IMAGE_COPY_CHECK_EVENT.stringRepresentation(), context.getStack().getId()));
             }
         }, REPEAT_TIME, TimeUnit.MILLISECONDS);
     }

@@ -23,12 +23,12 @@ import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceCo
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowFailureEvent;
-import com.sequenceiq.cloudbreak.core.flow2.stack.SelectableFlowStackEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 
 @Configuration
 public class StackDownscaleActions {
@@ -84,7 +84,7 @@ public class StackDownscaleActions {
 
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
-                return new SelectableFlowStackEvent(context.getStack().getId(), StackDownscaleEvent.DOWNSCALE_FINALIZED_EVENT.stringRepresentation());
+                return new StackEvent(StackDownscaleEvent.DOWNSCALE_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
             }
         };
     }
@@ -93,14 +93,14 @@ public class StackDownscaleActions {
     public Action stackDownscaleFailedAction() {
         return new AbstractStackFailureAction<StackDownscaleState, StackDownscaleEvent>() {
             @Override
-            protected void doExecute(StackFailureContext context, FlowFailureEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 stackDownscaleService.handleStackDownscaleError(payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new SelectableFlowStackEvent(context.getStack().getId(), StackDownscaleEvent.DOWNSCALE_FAIL_HANDLED_EVENT.stringRepresentation());
+                return new StackEvent(StackDownscaleEvent.DOWNSCALE_FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
             }
         };
     }
