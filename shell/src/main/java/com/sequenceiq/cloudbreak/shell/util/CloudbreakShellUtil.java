@@ -42,34 +42,35 @@ public class CloudbreakShellUtil {
     private WaitResult waitAndCheckStatus(Long stackId, String desiredStatus, String statusPath) throws Exception {
         for (int i = 0; i < MAX_ATTEMPT; i++) {
             WaitResult waitResult = waitForStatus(stackId, desiredStatus, statusPath);
-            if (waitResult.equals(WaitResult.FAILED) || waitResult.equals(WaitResult.TIMEOUT)) {
-                return WaitResult.FAILED;
+            if (waitResult.getWaitResultStatus().equals(WaitResultStatus.FAILED)) {
+                return waitResult;
             }
         }
-        return WaitResult.SUCCESSFUL;
+        return new WaitResult(WaitResultStatus.SUCCESSFUL, "");
     }
 
     private WaitResult waitForStatus(Long stackId, String desiredStatus, String statusPath) throws Exception {
-        WaitResult waitResult = WaitResult.SUCCESSFUL;
-        String stackStatus = null;
+        WaitResult waitResult = new WaitResult(WaitResultStatus.SUCCESSFUL, "");
+        String status = null;
+        String statusReason;
         int retryCount = 0;
         do {
-            LOGGER.info("Waiting for stack status {}, stack id: {}, current status {} ...", desiredStatus, stackId, stackStatus);
+            LOGGER.info("Waiting for status {}, stack id: {}, current status {} ...", desiredStatus, stackId, status);
             sleep();
             Map<String, Object> statusResult = cloudbreakClient.stackEndpoint().status(stackId);
             if (statusResult == null || statusResult.isEmpty()) {
-                return WaitResult.FAILED;
+                return new WaitResult(WaitResultStatus.FAILED, "Status result is empty.");
             }
-            stackStatus = (String) statusResult.get(statusPath);
+            status = (String) statusResult.get(statusPath);
+            statusReason = (String) statusResult.get(statusPath + "Reason");
             retryCount++;
-        } while (!desiredStatus.equals(stackStatus) && !stackStatus.contains("FAILED") && !Status.DELETE_COMPLETED.name().equals(stackStatus)
+        } while (!desiredStatus.equals(status) && !status.contains("FAILED") && !Status.DELETE_COMPLETED.name().equals(status)
                 && retryCount < MAX_RETRY);
-        LOGGER.info("Status {} for {} is in desired status {}", statusPath, stackId, stackStatus);
-        if (stackStatus.contains("FAILED") || (!Status.DELETE_COMPLETED.name().equals(desiredStatus) && Status.DELETE_COMPLETED.name().equals(stackStatus))) {
-            waitResult = WaitResult.FAILED;
-        }
-        if (retryCount == MAX_RETRY) {
-            waitResult = WaitResult.TIMEOUT;
+        LOGGER.info("Status {} for {} is in desired status {}", statusPath, stackId, status);
+        if (status.contains("FAILED") || (!Status.DELETE_COMPLETED.name().equals(desiredStatus) && Status.DELETE_COMPLETED.name().equals(status))) {
+            waitResult = new WaitResult(WaitResultStatus.FAILED, statusReason);
+        } else if (retryCount == MAX_RETRY) {
+            waitResult = new WaitResult(WaitResultStatus.FAILED, "Timeout while trying to fetch status.");
         }
         return waitResult;
     }
@@ -82,9 +83,27 @@ public class CloudbreakShellUtil {
         }
     }
 
-    public enum WaitResult {
+    public enum WaitResultStatus {
         SUCCESSFUL,
-        FAILED,
-        TIMEOUT
+        FAILED
+    }
+
+    public class WaitResult {
+
+        private WaitResultStatus waitResultStatus;
+        private String reason;
+
+        public WaitResult(WaitResultStatus waitResultStatus, String reason) {
+            this.waitResultStatus = waitResultStatus;
+            this.reason = reason;
+        }
+
+        public WaitResultStatus getWaitResultStatus() {
+            return waitResultStatus;
+        }
+
+        public String getReason() {
+            return reason;
+        }
     }
 }

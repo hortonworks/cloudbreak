@@ -140,8 +140,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 shellContext.removeStack(id.toString());
                 if (wait) {
                     CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(Long.valueOf(id), Status.DELETE_COMPLETED.name());
-                    if (CloudbreakShellUtil.WaitResult.FAILED.equals(waitResult)) {
-                        throw shellContext.exceptionTransformer().transformToRuntimeException("Stack terminated failed on stack with id: " + id);
+                    if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
+                        throw shellContext.exceptionTransformer().transformToRuntimeException("Stack termination failed: " + waitResult.getReason());
                     } else {
                         return "Stack terminated with id: " + id;
                     }
@@ -155,9 +155,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
                 if (wait) {
                     CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(response.getId(), Status.DELETE_COMPLETED.name());
-                    if (CloudbreakShellUtil.WaitResult.FAILED.equals(waitResult)) {
+                    if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                         throw shellContext.exceptionTransformer()
-                                .transformToRuntimeException("Stack terminated failed on stack with id: " + response.getId());
+                                .transformToRuntimeException("Stack termination failed: " + waitResult.getReason());
                     } else {
                         return "Stack terminated with name: " + name;
                     }
@@ -295,8 +295,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
             if (wait) {
                 CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(id.getId(), Status.AVAILABLE.name());
-                if (CloudbreakShellUtil.WaitResult.FAILED.equals(waitResult)) {
-                    throw shellContext.exceptionTransformer().transformToRuntimeException("Stack creation failed with name:" + name);
+                if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
+                    throw shellContext.exceptionTransformer().transformToRuntimeException("Stack creation failed:" + waitResult.getReason());
                 } else {
                     return "Stack creation finished with name: " + name;
                 }
