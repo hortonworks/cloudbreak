@@ -45,7 +45,8 @@ public class HeatTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String build(String stackName, List<Group> groups, Security security, Image instanceUserData, boolean existingNetwork, boolean existingSubnet) {
+    public String build(String stackName, List<Group> groups, Security security, Image instanceUserData, boolean existingNetwork,
+                        boolean existingSubnet, boolean assignFloatingIp) {
         try {
             List<NovaInstanceView> novaInstances = new OpenStackGroupView(groups).getFlatNovaView();
             Map<String, Object> model = new HashMap<>();
@@ -56,6 +57,7 @@ public class HeatTemplateBuilder {
             model.put("rules", security.getRules());
             model.put("existingNetwork", existingNetwork);
             model.put("existingSubnet", existingSubnet);
+            model.put("assignFloatingIp", assignFloatingIp);
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
             LOGGER.debug("Generated Heat template: {}", generatedTemplate);
             return generatedTemplate;
@@ -68,7 +70,9 @@ public class HeatTemplateBuilder {
         KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
         NeutronNetworkView neutronView = new NeutronNetworkView(network);
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("public_net_id", neutronView.getPublicNetId());
+        if (neutronView.assignFloatingIp()) {
+            parameters.put("public_net_id", neutronView.getPublicNetId());
+        }
         parameters.put("image_id", image.getImageName());
         parameters.put("key_name", osCredential.getKeyPairName());
         if (existingNetwork) {
