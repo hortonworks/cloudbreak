@@ -16,11 +16,9 @@
             <appender name="FILE-${suite}" class="ch.qos.logback.core.FileAppender">
                 <file>${LOG_PATH}/suites_log/${suite}-${date}.log</file>
                 <append>true</append>
-                <layout class="ch.qos.logback.classic.PatternLayout">
-                    <encoder>
-                        <pattern>%date{ISO8601} [%thread] %-5level %logger{36} [%X{suite:-nosuite}] - %msg%n</pattern>
-                    </encoder>
-                </layout>
+                <encoder>
+                    <pattern>%date{ISO8601} [%thread] %-5level %logger{36} [%X{suite:-nosuite}] - %msg%n</pattern>
+                </encoder>
             </appender>
         </sift>
     </appender>

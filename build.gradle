@@ -255,6 +255,8 @@ subprojects {
     checkstyle("com.google.guava:guava:19.0") { force = true }
   }
 
+  task allDeps(type: DependencyReportTask) {}
+
   repositories {
     mavenCentral()
     maven { url "http://maven.sequenceiq.com/releases" }
