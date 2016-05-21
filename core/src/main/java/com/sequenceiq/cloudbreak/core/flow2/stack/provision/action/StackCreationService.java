@@ -167,7 +167,7 @@ public class StackCreationService {
     }
 
     public void setupConsulMetadata(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
+        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
     }
 
