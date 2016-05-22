@@ -173,6 +173,9 @@ public class AmbariClusterService implements ClusterService {
         if (clusterRepository.findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
         }
+        if (Status.CREATE_FAILED.equals(stack.getStatus())) {
+            throw new BadRequestException("Stack creation failed, cannot create cluster.");
+        }
         for (HostGroup hostGroup : cluster.getHostGroups()) {
             constraintRepository.save(hostGroup.getConstraint());
         }

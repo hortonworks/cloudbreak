@@ -152,9 +152,9 @@ public class ClusterCommands implements BaseCommands {
             if (wait) {
                 CloudbreakShellUtil.WaitResult waitResult =
                         cloudbreakShellUtil.waitAndCheckClusterStatus(Long.valueOf(stackId), Status.AVAILABLE.name());
-                if (CloudbreakShellUtil.WaitResult.FAILED.equals(waitResult)) {
+                if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                     throw shellContext.exceptionTransformer().transformToRuntimeException(
-                            String.format("Cluster creation failed on stack with id: '%d' and name: '%s'", stackId, shellContext.getStackName()));
+                            String.format("Cluster creation failed on stack with id: '%s': '%s'", stackId, waitResult.getReason()));
                 } else {
                     return "Cluster creation finished";
                 }
