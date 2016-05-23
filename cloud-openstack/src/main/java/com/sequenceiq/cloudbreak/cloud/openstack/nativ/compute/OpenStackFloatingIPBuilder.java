@@ -26,18 +26,21 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
             List<CloudResource> buildableResource) throws Exception {
         CloudResource resource = buildableResource.get(0);
         try {
-            OSClient osClient = createOSClient(auth);
-            List<CloudResource> computeResources = context.getComputeResources(privateId);
-            CloudResource instance = getInstance(computeResources);
             String publicNetId = context.getStringParameter(OpenStackConstants.PUBLIC_NET_ID);
-            FloatingIP unusedIp = osClient.compute().floatingIps().allocateIP(publicNetId);
-            ActionResponse response = osClient.compute().floatingIps().addFloatingIP(instance.getParameter(OpenStackConstants.SERVER, Server.class),
-                    unusedIp.getFloatingIpAddress());
-            if (!response.isSuccess()) {
-                throw new OpenStackResourceException("Add floating-ip to server failed", resourceType(), resource.getName(),
-                        auth.getCloudContext().getId(), response.getFault());
+            if (publicNetId != null) {
+                OSClient osClient = createOSClient(auth);
+                List<CloudResource> computeResources = context.getComputeResources(privateId);
+                CloudResource instance = getInstance(computeResources);
+                FloatingIP unusedIp = osClient.compute().floatingIps().allocateIP(publicNetId);
+                ActionResponse response = osClient.compute().floatingIps().addFloatingIP(instance.getParameter(OpenStackConstants.SERVER, Server.class),
+                        unusedIp.getFloatingIpAddress());
+                if (!response.isSuccess()) {
+                    throw new OpenStackResourceException("Add floating-ip to server failed", resourceType(), resource.getName(),
+                            auth.getCloudContext().getId(), response.getFault());
+                }
+                return Collections.singletonList(createPersistedResource(resource, unusedIp.getId()));
             }
-            return Collections.singletonList(createPersistedResource(resource, unusedIp.getId()));
+            return (List<CloudResource>) Collections.EMPTY_LIST;
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Add floating-ip to server failed", resourceType(), resource.getName(), ex);
         }

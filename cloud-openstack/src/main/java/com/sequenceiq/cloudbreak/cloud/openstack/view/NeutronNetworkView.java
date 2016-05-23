@@ -15,6 +15,13 @@ public class NeutronNetworkView {
         return network.getSubnet().getCidr();
     }
 
+    public boolean assignFloatingIp() {
+        if (getPublicNetId() == null || getPublicNetId().isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
     public String getPublicNetId() {
         return network.getParameter(OpenStackConstants.PUBLIC_NET_ID, String.class);
     }

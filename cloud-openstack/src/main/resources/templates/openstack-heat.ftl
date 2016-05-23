@@ -15,9 +15,11 @@ parameters:
   app_net_cidr:
     type: string
     description: app network address (CIDR notation)
+  <#if assignFloatingIp>
   public_net_id:
     type: string
     description: The ID of the public network. You will need to replace it with your DevStack public network ID
+  </#if>
   <#if existingNetwork>
   app_net_id:
     type: string
@@ -101,14 +103,23 @@ ${core_user_data}
       key_name: { get_param: key_name }
       admin_user: centos
       metadata: ${agent.metadata}
+      <#if assignFloatingIp>
       networks:
         - port: { get_resource: ambari_app_port_${agent.instanceId} }
+      <#else>
+      networks:
+        <#if existingNetwork>
+        - network: { get_param: app_net_id }
+        <#else>
+        - network: { get_resource: app_network }
+        </#if>
+      security_groups: [ { get_resource: server_security_group } ]
+      </#if>
       block_device_mapping:
       <#list agent.volumes as volume>
       - device_name: ${volume.device}
         volume_id: { get_resource: ambari_volume_${agent.instanceId}_${volume_index} }
       </#list>
-
       user_data_format: SOFTWARE_CONFIG
       <#if agent.type == "GATEWAY">
       user_data:  { get_resource: gw_user_data_config }
@@ -116,24 +127,7 @@ ${core_user_data}
       user_data:  { get_resource: core_user_data_config }
       </#if>
 
-  ambari_app_port_${agent.instanceId}:
-      type: OS::Neutron::Port
-      properties:
-        <#if existingNetwork>
-        network_id: { get_param: app_net_id }
-        <#else>
-        network_id: { get_resource: app_network }
-        </#if>
-        replacement_policy: AUTO
-        fixed_ips:
-        <#if existingSubnet>
-          - subnet_id: { get_param: subnet_id }
-        <#else>
-          - subnet_id: { get_resource: app_subnet }
-        </#if>
-        security_groups: [ { get_resource: server_security_group } ]
-        
-<#list agent.volumes as volume>
+  <#list agent.volumes as volume>
 
   ambari_volume_${agent.instanceId}_${volume_index}:
     type: OS::Cinder::Volume
@@ -141,14 +135,32 @@ ${core_user_data}
       name: hdfs-volume
       size: ${volume.size}
 
-</#list>
+  </#list>
+
+  <#if assignFloatingIp>
+  ambari_app_port_${agent.instanceId}:
+    type: OS::Neutron::Port
+    properties:
+      <#if existingNetwork>
+      network_id: { get_param: app_net_id }
+      <#else>
+      network_id: { get_resource: app_network }
+      </#if>
+      replacement_policy: AUTO
+      fixed_ips:
+      <#if existingSubnet>
+        - subnet_id: { get_param: subnet_id }
+      <#else>
+        - subnet_id: { get_resource: app_subnet }
+      </#if>
+      security_groups: [ { get_resource: server_security_group } ]
 
   ambari_server_floatingip_${agent.instanceId}:
     type: OS::Neutron::FloatingIP
     properties:
       floating_network_id: { get_param: public_net_id }
       port_id: { get_resource: ambari_app_port_${agent.instanceId} }
-  
+  </#if>
   </#list>     
 
   server_security_group:
@@ -176,7 +188,6 @@ ${core_user_data}
         {remote_ip_prefix: 0.0.0.0/0,
         protocol: icmp}]
 
-        
 outputs:
   <#list agents as agent>
   instance_uuid_${agent.instanceId}:
