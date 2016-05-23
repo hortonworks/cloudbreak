@@ -33,7 +33,7 @@ cb:
     db: postgres
   
   aws:
-    spotinstances.enabled: false
+    spotinstances.enabled: true
     hostkey.verify: false
     external.id: provision-ambari
     cf.template.new.path: templates/aws-cf-stack.ftl

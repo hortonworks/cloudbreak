@@ -49,7 +49,7 @@ public class CloudFormationTemplateBuilder {
                             encrypted.equals(Boolean.TRUE),
                             instanceTemplate.getVolumeSize(),
                             instanceTemplate.getVolumeType(),
-                            instanceTemplate.getParameter("spotPrice", Double.class)
+                            getSpotPrice(instanceTemplate)
                     )
             );
         }
@@ -77,7 +77,6 @@ public class CloudFormationTemplateBuilder {
         }
     }
 
-
     public boolean areDedicatedInstancesRequested(CloudStack cloudStack) {
         boolean result = false;
         if (isDedicatedInstancesParamExistAndTrue(cloudStack)) {
@@ -89,6 +88,14 @@ public class CloudFormationTemplateBuilder {
     private boolean isDedicatedInstancesParamExistAndTrue(CloudStack stack) {
         return stack.getParameters().containsKey("dedicatedInstances")
                 && Boolean.valueOf(stack.getParameters().get("dedicatedInstances"));
+    }
+
+    private double getSpotPrice(InstanceTemplate instanceTemplate) {
+        try {
+            return instanceTemplate.getParameter("spotPrice", Double.class);
+        } catch (ClassCastException e) {
+            return instanceTemplate.getParameter("spotPrice", Integer.class);
+        }
     }
 
     @VisibleForTesting
