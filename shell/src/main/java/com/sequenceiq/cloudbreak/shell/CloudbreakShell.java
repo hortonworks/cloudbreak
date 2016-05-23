@@ -19,6 +19,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.shell.CommandLine;
+import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.event.ShellStatus;
 import org.springframework.shell.event.ShellStatusListener;
@@ -74,8 +75,9 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
             init();
             for (String cmd : shellCommandsToExecute) {
                 String replacedCommand = getReplacedString(cmd);
-                if (!shell.executeScriptLine(replacedCommand)) {
-                    System.out.println(String.format("%s: [%s]", replacedCommand, FAILED));
+                CommandResult commandResult = shell.executeCommand(replacedCommand);
+                if (!commandResult.isSuccess()) {
+                    System.out.println(String.format("%s: [%s] [REASON: %s]", replacedCommand, FAILED, commandResult.getException().getMessage()));
                     break;
                 } else {
                     System.out.println(String.format("%s: [%s]", replacedCommand, SUCCESS));
