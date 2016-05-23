@@ -9,17 +9,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
@@ -107,13 +104,7 @@ public class CloudbreakCleanupAction {
     }
 
     private boolean stackToSyncContainsCluster(List<Stack> stacksToSync, Cluster cluster) {
-        ImmutableSet<Long> stackIds = FluentIterable.from(stacksToSync).transform(new Function<Stack, Long>() {
-            @Nullable
-            @Override
-            public Long apply(@Nullable Stack input) {
-                return input.getId();
-            }
-        }).toSet();
+        Set<Long> stackIds = stacksToSync.stream().map(Stack::getId).collect(Collectors.toSet());
         return stackIds.contains(cluster.getStack().getId());
     }
 

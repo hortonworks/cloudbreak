@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -17,15 +18,14 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
+import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.core.CloudbreakRecipeSetupException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -84,7 +84,7 @@ public class RecipeEngine {
     public void executePreInstall(Stack stack) throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
         try {
             pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.PRE_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
-        } catch (CloudbreakServiceException  e) {
+        } catch (CloudbreakServiceException e) {
             throw new CloudbreakRecipeSetupException("Recipe pre install failed: " + e.getMessage());
         }
     }
@@ -101,7 +101,7 @@ public class RecipeEngine {
     public void executePostInstall(Stack stack) throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
         try {
             pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
-        } catch (CloudbreakServiceException  e) {
+        } catch (CloudbreakServiceException e) {
             throw new CloudbreakRecipeSetupException("Recipe post install failed: " + e.getMessage());
         }
     }
@@ -148,7 +148,7 @@ public class RecipeEngine {
         for (Recipe recipe : recipes) {
             Map<String, PluginExecutionType> plugins = new HashMap<>();
             for (Map.Entry<String, PluginExecutionType> entry : recipe.getPlugins().entrySet()) {
-                String url = entry.getKey().startsWith("base64://") ? "consul://" + getPluginConsulKey(recipe, entry.getKey())  : entry.getKey();
+                String url = entry.getKey().startsWith("base64://") ? "consul://" + getPluginConsulKey(recipe, entry.getKey()) : entry.getKey();
                 plugins.put(url, entry.getValue());
             }
             Map<String, Set<String>> eventIdMap = pluginManager.installPlugins(clientConfig, plugins, getHostnames(hostMetadata), existingHostGroup);
@@ -186,13 +186,7 @@ public class RecipeEngine {
     }
 
     private Set<String> getHostnames(Set<HostMetadata> hostMetadata) {
-        return FluentIterable.from(hostMetadata).transform(new Function<HostMetadata, String>() {
-            @Nullable
-            @Override
-            public String apply(@Nullable HostMetadata metadata) {
-                return metadata.getHostName();
-            }
-        }).toSet();
+        return hostMetadata.stream().map(HostMetadata::getHostName).collect(Collectors.toSet());
     }
 
 }
