@@ -90,11 +90,11 @@ public class CloudFormationTemplateBuilder {
                 && Boolean.valueOf(stack.getParameters().get("dedicatedInstances"));
     }
 
-    private double getSpotPrice(InstanceTemplate instanceTemplate) {
+    private Double getSpotPrice(InstanceTemplate instanceTemplate) {
         try {
             return instanceTemplate.getParameter("spotPrice", Double.class);
         } catch (ClassCastException e) {
-            return instanceTemplate.getParameter("spotPrice", Integer.class);
+            return instanceTemplate.getParameter("spotPrice", Integer.class).doubleValue();
         }
     }
 
