@@ -21,14 +21,14 @@ tests:
       credentialName: it-mock-credential
       publicKeyFile: raw:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3JiQtcQT48nn7Ax+yJLJqaWKRzczeJAda6x4JHFRqJW15pAmrSG7ld33V89yHeizAziLfhYYhw6uwN4aDKixS/XreQxZWyK2k/namyr8crFC83n6NNxlDa9DGujg61X8JoE2SyPHSVwhizfyoEmnkeyXJlsn6YtEnKfq23P4Di+p6I9xj7Ay52EzRHKMRMH8Q4kscKfp0taQKdOD2rCO1eOJ7vwCdMLjZc4H6TISk+lwnAJlDfbIdy6SO2jKIJvwoSjehfitWgGp8dGIEcV59GmO2aGlSwCqAwF6S9qP7O++5B5irFKc0TxuIplDSPL/yuCycWvz81FJKLTaUdJ6l
     classes:
-      - com.sequenceiq.it.cloudbreak.MockCredentialCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockCredentialCreationTest
 
   - name: create mock network
     parameters:
       networkName: it-mock-network
       subnetCIDR: 10.0.36.0/24
     classes:
-      - com.sequenceiq.it.cloudbreak.MockNetworkCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockNetworkCreationTest
 
   - name: create gateway template
     parameters:
@@ -39,7 +39,7 @@ tests:
       volumeSize: 10
       templateAdditions: "cbgateway,1,GATEWAY"
     classes:
-      - com.sequenceiq.it.cloudbreak.MockTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
   - name: create master template
     parameters:
@@ -50,7 +50,7 @@ tests:
       volumeSize: 40
       templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
     classes:
-      - com.sequenceiq.it.cloudbreak.MockTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
   - name: create slave template
     parameters:
@@ -61,7 +61,7 @@ tests:
       volumeSize: 200
       templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
     classes:
-      - com.sequenceiq.it.cloudbreak.MockTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
   - name: create cluster
     parameters: {
@@ -73,8 +73,8 @@ tests:
       mockPort: 9443
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.MockStackCreationWithSwarmSuccessTest
-      - com.sequenceiq.it.cloudbreak.MockClusterCreationWithSwarmSuccessTest
+      - com.sequenceiq.it.cloudbreak.mock.MockStackCreationWithSwarmSuccessTest
+      - com.sequenceiq.it.cloudbreak.mock.MockClusterCreationWithSwarmSuccessTest
 
   - name: stop ssh server
     parameters:

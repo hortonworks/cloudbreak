@@ -1,10 +1,10 @@
 package com.sequenceiq.it.spark.ambari.model;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Clusters {
 
-    @SerializedName("cluster_name")
+    @JsonProperty("cluster_name")
     private String clusterName;
 
     public Clusters(String clusterName) {

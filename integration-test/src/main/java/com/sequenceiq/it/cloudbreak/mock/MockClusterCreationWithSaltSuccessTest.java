@@ -1,8 +1,8 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.mock;
 
 import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
-import static com.sequenceiq.it.spark.ITResponse.CONSUL_API_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.SALT_API_ROOT;
+import static com.sequenceiq.it.spark.ITResponse.SALT_BOOT_ROOT;
 import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.put;
@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
@@ -27,7 +28,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
+import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
+import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
+import com.sequenceiq.it.cloudbreak.HostGroup;
 import com.sequenceiq.it.spark.ambari.AmbariBlueprintsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
@@ -37,8 +43,6 @@ import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
-import com.sequenceiq.it.spark.consul.ConsulEventFireResponse;
-import com.sequenceiq.it.spark.consul.ConsulKeyValueGetResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
 
 
@@ -91,7 +95,6 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         initSpark();
 
         addSaltMappings(numberOfServers + 1);
-        addConsulMappings();
         addAmbariMappings(numberOfServers);
 
         ClusterEndpoint clusterEndpoint = getCloudbreakClient().clusterEndpoint();
@@ -100,6 +103,28 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
 
+        verify(AMBARI_API_ROOT + "/views/FILES/versions/1.0.0/instances/files", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
+        verify(AMBARI_API_ROOT + "/views/PIG/versions/1.0.0/instances/pig", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
+        verify(AMBARI_API_ROOT + "/views/HIVE/versions/1.0.0/instances/hive", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
+        verify(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", "GET").exactTimes(1).verify();
+        verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
+        verify(AMBARI_API_ROOT + "/check", "GET").exactTimes(1).verify();
+        verify(AMBARI_API_ROOT + "/users/admin", "PUT").exactTimes(1).bodyContains("Users/password").bodyContains("Users/old_password").verify();
+        verify(AMBARI_API_ROOT + "/blueprints/bp", "POST").exactTimes(1)
+                .bodyContains("blueprint_name").bodyContains("stack_name").bodyContains("stack_version").bodyContains("host_groups")
+                .exactTimes(1).verify();
+        verify(AMBARI_API_ROOT + "/clusters/it-mock-cluster", "POST").exactTimes(1).bodyContains("blueprint").bodyContains("default_password")
+                .bodyContains("host_groups").verify();
+        verify(AMBARI_API_ROOT + "/clusters/ambari_cluster/requests/1", "GET").atLeast(1).verify();
+        verify(AMBARI_API_ROOT + "/clusters/ambari_cluster/hosts", "GET").exactTimes(1).verify();
+
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.interface_ip").atLeast(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").exactTimes(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.lookup_jid").bodyContains("jid=1").exactTimes(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_agent").exactTimes(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_server").exactTimes(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").exactTimes(1).verify();
     }
 
     private void addAmbariMappings(int numberOfServers) {
@@ -117,16 +142,15 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(numberOfServers));
     }
 
-    private void addConsulMappings() {
-        get(CONSUL_API_ROOT + "/kv/*", new ConsulKeyValueGetResponse(), gson()::toJson);
-        put(CONSUL_API_ROOT + "/kv/*", (req, res) -> Boolean.TRUE, gson()::toJson);
-        put(CONSUL_API_ROOT + "/event/fire/*", new ConsulEventFireResponse(), gson()::toJson);
-    }
-
     private void addSaltMappings(int numberOfServers) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
         post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(numberOfServers));
+        post(SALT_BOOT_ROOT + "/salt/server/pillar", (request, response) -> {
+            GenericResponse genericResponse = new GenericResponse();
+            genericResponse.setStatusCode(HttpStatus.OK.value());
+            return genericResponse;
+        }, gson()::toJson);
     }
 
     private Set<HostGroupJson> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts) {

@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.mock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +12,8 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
+import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class MockCredentialCreationTest extends AbstractCloudbreakIntegrationTest {

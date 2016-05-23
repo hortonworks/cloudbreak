@@ -19,12 +19,15 @@ public class ConsulMemberResponse extends ITResponse {
 
     private List<Member> createMembers() {
         List<Member> members = new ArrayList<>();
-        for (int i = 1; i <= serverNumber; i++) {
-            Member member = new Member();
-            member.setAddress("192.168.1." + i);
-            member.setStatus(ALIVE_STATUS);
-            member.setName("consul" + i);
-            members.add(member);
+        for (int i = 0; i <= serverNumber / 254; i++) {
+            int subAddress = Integer.min(254, serverNumber - i * 254);
+            for (int j = 1; j <= subAddress; j++) {
+                Member member = new Member();
+                member.setAddress("192.168." + i + "." + j);
+                member.setStatus(ALIVE_STATUS);
+                member.setName("consul-" + i + "-" + j);
+                members.add(member);
+            }
         }
         return members;
     }

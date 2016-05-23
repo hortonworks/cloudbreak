@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.mock;
 
 import static com.sequenceiq.it.spark.ITResponse.CONSUL_API_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.DOCKER_API_ROOT;
@@ -26,6 +26,10 @@ import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
+import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
+import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
+import com.sequenceiq.it.cloudbreak.InstanceGroup;
 import com.sequenceiq.it.spark.consul.ConsulMemberResponse;
 import com.sequenceiq.it.spark.docker.model.Info;
 import com.sequenceiq.it.spark.docker.model.InspectContainerResponse;
