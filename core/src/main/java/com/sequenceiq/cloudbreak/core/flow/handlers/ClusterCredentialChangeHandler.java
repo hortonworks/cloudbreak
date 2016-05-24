@@ -15,7 +15,7 @@ import reactor.bus.Event;
 @Component
 public class ClusterCredentialChangeHandler extends AbstractFlowHandler<ClusterAuthenticationContext> implements FlowHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterContainersHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCredentialChangeHandler.class);
 
     @Override
     protected Object execute(Event<ClusterAuthenticationContext> event) throws CloudbreakException {

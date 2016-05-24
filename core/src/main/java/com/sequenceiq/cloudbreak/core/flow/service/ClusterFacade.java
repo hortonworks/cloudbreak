@@ -7,15 +7,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
  * Contract for Flow related ambari operations.
  */
 public interface ClusterFacade {
-
-    FlowContext runClusterContainers(FlowContext context) throws CloudbreakException;
-
-    FlowContext startAmbari(FlowContext context) throws Exception;
-
-    FlowContext buildAmbariCluster(FlowContext context) throws Exception;
-
-    FlowContext handleClusterCreationFailure(FlowContext context) throws CloudbreakException;
-
     FlowContext handleClusterInstallationFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext resetAmbariCluster(FlowContext context) throws CloudbreakException;

@@ -47,6 +47,9 @@ public class Flow2HandlerTest {
     private FlowConfiguration flowConfig;
 
     @Mock
+    private FlowTriggerCondition flowTriggerCondition;
+
+    @Mock
     private Flow flow;
 
     private Event<? extends Payload> dummyEvent;
@@ -71,6 +74,8 @@ public class Flow2HandlerTest {
     public void testNewFlow() {
         BDDMockito.<FlowConfiguration>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString())).willReturn(flow);
+        given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
         given(flow.getCurrentState()).willReturn(StackSyncState.INIT_STATE);
         Event<Payload> event = new Event<>(payload);
         event.setKey(FlowPhases.STACK_SYNC.name());

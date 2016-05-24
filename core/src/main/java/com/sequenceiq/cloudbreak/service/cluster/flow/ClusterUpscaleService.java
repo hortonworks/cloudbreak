@@ -74,7 +74,7 @@ public class ClusterUpscaleService {
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
         if (orchestratorType.containerOrchestrator()) {
-            Map<String, List<Container>> containers = containerRunner.addClusterContainers(stackId, stack.cloudPlatform(), hostGroupName, scalingAdjustment);
+            Map<String, List<Container>> containers = containerRunner.addClusterContainers(stackId, hostGroupName, scalingAdjustment);
             for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
                 List<String> hostNames = containersEntry.getValue().stream().map(Container::getHost).collect(Collectors.toList());
                 hostsPerHostGroup.put(containersEntry.getKey(), hostNames);

@@ -10,11 +10,7 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariStartHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterContainersHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterCredentialChangeHandler;
-import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterInstallHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterResetHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.ClusterStartRequestedHandler;
 import com.sequenceiq.cloudbreak.core.flow.handlers.MetadataCollectHandler;
@@ -43,7 +39,6 @@ public class FlowInitializer implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        registerProvisioningFlows();
         registerStartFlows();
         registerUpscaleFlows();
         registerResetFlows();
@@ -54,9 +49,6 @@ public class FlowInitializer implements InitializingBean {
 
         reactor.on($(FlowPhases.METADATA_COLLECT.name()), getHandlerForClass(MetadataCollectHandler.class));
         reactor.on($(FlowPhases.UPSCALE_METADATA_COLLECT.name()), getHandlerForClass(UpscaleMetadataCollectHandler.class));
-        reactor.on($(FlowPhases.RUN_CLUSTER_CONTAINERS.name()), getHandlerForClass(ClusterContainersHandler.class));
-        reactor.on($(FlowPhases.AMBARI_START.name()), getHandlerForClass(AmbariStartHandler.class));
-        reactor.on($(FlowPhases.CLUSTER_INSTALL.name()), getHandlerForClass(ClusterInstallHandler.class));
         reactor.on($(FlowPhases.CLUSTER_RESET.name()), getHandlerForClass(ClusterResetHandler.class));
         reactor.on($(FlowPhases.UPSCALE_STACK_SYNC.name()), getHandlerForClass(UpscaleStackSyncHandler.class));
         reactor.on($(FlowPhases.UPDATE_ALLOWED_SUBNETS.name()), getHandlerForClass(UpdateAllowedSubnetsHandler.class));
@@ -64,26 +56,11 @@ public class FlowInitializer implements InitializingBean {
         reactor.on($(FlowPhases.CLUSTER_START_REQUESTED.name()), getHandlerForClass(ClusterStartRequestedHandler.class));
         reactor.on($(FlowPhases.STACK_STATUS_UPDATE_FAILED.name()), getHandlerForClass(StackStatusUpdateFailureHandler.class));
         reactor.on($(FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name()), getHandlerForClass(ClusterCredentialChangeHandler.class));
-        reactor.on($(FlowPhases.CLUSTER_CREATION_FAILED.name()), getHandlerForClass(ClusterCreationFailureHandler.class));
     }
 
     private void registerAuthenticationClusterChangeFlows() {
         transitionKeyService.registerTransition(ClusterCredentialChangeHandler.class, TransitionFactory
                 .createTransition(FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
-    }
-
-    private void registerProvisioningFlows() {
-        transitionKeyService.registerTransition(ClusterContainersHandler.class, TransitionFactory
-                .createTransition(FlowPhases.RUN_CLUSTER_CONTAINERS.name(), FlowPhases.AMBARI_START.name(), FlowPhases.CLUSTER_CREATION_FAILED.name()));
-
-        transitionKeyService.registerTransition(AmbariStartHandler.class, TransitionFactory
-                .createTransition(FlowPhases.AMBARI_START.name(), FlowPhases.CLUSTER_INSTALL.name(), FlowPhases.CLUSTER_CREATION_FAILED.name()));
-
-        transitionKeyService.registerTransition(ClusterInstallHandler.class, TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_INSTALL.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
-
-        transitionKeyService.registerTransition(ClusterCreationFailureHandler.class, TransitionFactory
-                .createTransition(FlowPhases.CLUSTER_CREATION_FAILED.name(), FlowPhases.NONE.name(), FlowPhases.NONE.name()));
     }
 
     private void registerStartFlows() {

@@ -46,41 +46,6 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext runClusterContainers(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Running cluster containers. Context: {}", context);
-        try {
-            return clusterFacade.runClusterContainers(context);
-        } catch (Exception e) {
-            LOGGER.error("Exception while setting up cluster containers.", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext startAmbari(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Starting Ambari. Context: {}", context);
-        try {
-            return clusterFacade.startAmbari(context);
-        } catch (Exception e) {
-            LOGGER.error("Exception while starting Ambari : {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext buildAmbariCluster(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Building ambari cluster. Context: {}", context);
-        try {
-            context = clusterFacade.buildAmbariCluster(context);
-            LOGGER.debug("Building ambari cluster DONE");
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the cluster build process: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
     public FlowContext resetAmbariCluster(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Reset Ambari cluster. Context: {}", context);
         try {
@@ -89,19 +54,6 @@ public class SimpleFlowFacade implements FlowFacade {
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during the cluster reset process: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleClusterCreationFailure(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Cluster creation failed. Context: {}", context);
-        try {
-            context = clusterFacade.handleClusterCreationFailure(context);
-            LOGGER.debug("Cluster creation failure handled.");
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during cluster creation!: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

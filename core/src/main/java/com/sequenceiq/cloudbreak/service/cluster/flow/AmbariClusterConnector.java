@@ -6,8 +6,10 @@ import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.A
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_SERVER;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isFailure;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isTimeout;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_AMBARI_SERVER_STARTUP;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.INSTALL_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.SMOKE_TEST_AMBARI_PROGRESS_STATE;
@@ -94,6 +96,8 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfi
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
+import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -103,7 +107,6 @@ import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterConnector {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
     private static final String REALM = "NODE.DC1.CONSUL";
     private static final String DOMAIN = "node.dc1.consul";
@@ -113,6 +116,7 @@ public class AmbariClusterConnector {
     private static final String UPSCALE_REQUEST_CONTEXT = "Logical Request: Scale Cluster";
     private static final String UPSCALE_REQUEST_STATUS = "IN_PROGRESS";
     private static final String SSSD_CONFIG = "sssd-config-";
+    private static final String ADMIN = "admin";
 
     @Inject
     private StackRepository stackRepository;
@@ -142,6 +146,10 @@ public class AmbariClusterConnector {
     private PollingService<AmbariHostsCheckerContext> ambariHostJoin;
     @Inject
     private PollingService<AmbariClientPollerObject> ambariHealthChecker;
+    @Inject
+    private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
+    @Inject
+    private AmbariStartupListenerTask ambariStartupListenerTask;
     @Inject
     private AmbariHealthCheckerTask ambariHealthCheckerTask;
     @Inject
@@ -184,6 +192,21 @@ public class AmbariClusterConnector {
 
         public String code() {
             return code;
+        }
+    }
+
+    public void waitForAmbariServer(Stack stack) throws CloudbreakException {
+        AmbariClient ambariClient = getDefaultAmbariClient(stack);
+        AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, stack.getAmbariIp(), ambariClient);
+        PollingResult pollingResult = ambariStartupPollerObjectPollingService.pollWithTimeoutSingleFailure(ambariStartupListenerTask, ambariStartupPollerObject,
+                AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_SERVER_STARTUP);
+        if (isSuccess(pollingResult)) {
+            LOGGER.info("Ambari has successfully started! Polling result: {}", pollingResult);
+        } else if (isExited(pollingResult)) {
+            throw new CancellationException("Polling of Ambari server start has been cancelled.");
+        } else {
+            LOGGER.info("Could not start Ambari. polling result: {}", pollingResult);
+            throw new CloudbreakException(String.format("Could not start Ambari. polling result: '%s'", pollingResult));
         }
     }
 
@@ -382,6 +405,12 @@ public class AmbariClusterConnector {
         }
     }
 
+    private AmbariClient getDefaultAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
+        Cluster cluster = stack.getCluster();
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        return ambariClientProvider.getDefaultAmbariClient(clientConfig, stack.getGatewayPort());
+    }
+
     private AmbariClient getAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
@@ -434,6 +463,22 @@ public class AmbariClusterConnector {
             ambariClient.deleteUser(oldUserName);
         }
         return cluster;
+    }
+
+    public void changeOriginalAmbariCredentials(Stack stack) throws CloudbreakSecuritySetupException {
+        Cluster cluster = stack.getCluster();
+        LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), cluster.getAmbariIp());
+        String userName = cluster.getUserName();
+        String password = cluster.getPassword();
+        AmbariClient ambariClient = getDefaultAmbariClient(stack);
+        if (ADMIN.equals(userName)) {
+            if (!ADMIN.equals(password)) {
+                ambariClient.changePassword(ADMIN, ADMIN, password, true);
+            }
+        } else {
+            ambariClient.createUser(userName, password, true);
+            ambariClient.deleteUser(ADMIN);
+        }
     }
 
     public void stopCluster(Stack stack) throws CloudbreakException {

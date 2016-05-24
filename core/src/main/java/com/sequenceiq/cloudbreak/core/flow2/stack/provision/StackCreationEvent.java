@@ -29,13 +29,14 @@ public enum StackCreationEvent implements FlowEvent {
     COLLECT_METADATA_FAILED_EVENT(CollectMetadataResult.failureSelector(CollectMetadataResult.class)),
     SSHFINGERPRINTS_EVENT(GetSSHFingerprintsResult.selector(GetSSHFingerprintsResult.class)),
     SSHFINGERPRINTS_FAILED_EVENT(GetSSHFingerprintsResult.failureSelector(GetSSHFingerprintsResult.class)),
+    BOOTSTRAP_MACHINES_EVENT("BOOTSTRAP_MACHINES_EVENT"),
     BOOTSTRAP_MACHINES_FINISHED_EVENT(EventSelectorUtil.selector(BootstrapMachinesSuccess.class)),
     BOOTSTRAP_MACHINES_FAILED_EVENT(EventSelectorUtil.selector(BootstrapMachinesFailed.class)),
     CONSUL_METADATASETUP_FINISHED_EVENT(EventSelectorUtil.selector(ConsulMetadataSetupSuccess.class)),
     CONSUL_METADATASETUP_FAILED_EVENT(EventSelectorUtil.selector(ConsulMetadataSetupFailed.class)),
     STACK_CREATION_FAILED_EVENT("STACK_CREATION_FAILED"),
     STACK_CREATION_FINISHED_EVENT("STACK_CREATION_FINISHED"),
-    STACKCREATION_FAILURE_HANDLED_EVENT("FAILHANDLED");
+    STACKCREATION_FAILURE_HANDLED_EVENT("STACK_CREATION_FAILHANDLED");
 
     private String stringRepresentation;
 

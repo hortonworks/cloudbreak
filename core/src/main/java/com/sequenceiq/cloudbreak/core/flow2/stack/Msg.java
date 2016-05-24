@@ -41,9 +41,13 @@ public enum Msg {
     CLUSTER_EMAIL_SENT("ambari.cluster.notification.email"),
     CLUSTER_DELETE_FAILED("ambari.cluster.delete.failed"),
     STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP("stack.scaling.terminating.host.from.hostgroup"),
+    AMBARI_CLUSTER_RUN_CONTAINERS("ambari.cluster.run.containers"),
+    AMBARI_CLUSTER_RUN_SERVICES("ambari.cluster.run.services"),
+    AMBARI_CLUSTER_BUILDING("ambari.cluster.building"),
+    AMBARI_CLUSTER_BUILT("ambari.cluster.built"),
+    AMBARI_CLUSTER_CREATE_FAILED("ambari.cluster.create.failed"),
     AMBARI_CLUSTER_SCALING_UP("ambari.cluster.scaling.up"),
     AMBARI_CLUSTER_SCALED_UP("ambari.cluster.scaled.up"),
-    AMBARI_CLUSTER_NOTIFICATION_EMAIL("ambari.cluster.notification.email"),
     AMBARI_CLUSTER_SCALING_DOWN("ambari.cluster.scaling.down"),
     AMBARI_CLUSTER_SCALED_DOWN("ambari.cluster.scaled.down"),
     AMBARI_CLUSTER_SCALING_FAILED("ambari.cluster.scaling.failed"),
@@ -52,7 +56,8 @@ public enum Msg {
     AMBARI_CLUSTER_START_FAILED("ambari.cluster.start.failed"),
     AMBARI_CLUSTER_STOPPING("ambari.cluster.stopping"),
     AMBARI_CLUSTER_STOPPED("ambari.cluster.stopped"),
-    AMBARI_CLUSTER_STOP_FAILED("ambari.cluster.stop.failed");
+    AMBARI_CLUSTER_STOP_FAILED("ambari.cluster.stop.failed"),
+    AMBARI_CLUSTER_NOTIFICATION_EMAIL("ambari.cluster.notification.email");
 
     private String code;
 
