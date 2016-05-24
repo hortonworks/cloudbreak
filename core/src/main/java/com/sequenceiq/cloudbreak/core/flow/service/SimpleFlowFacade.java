@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.concurrent.LockedMethod;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -140,57 +139,6 @@ public class SimpleFlowFacade implements FlowFacade {
             return context;
         } catch (Exception e) {
             LOGGER.error("Exception during handling stack start/stop failure!: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    @LockedMethod(lockPrefix = "startCluster")
-    public FlowContext startCluster(FlowContext flowContext) throws CloudbreakException {
-        LOGGER.debug("Starting cluster. Context: {}", flowContext);
-        try {
-            return clusterFacade.startCluster(flowContext);
-        } catch (Exception e) {
-            LOGGER.error("Exception during cluster start!: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleClusterStartFailure(FlowContext flowContext) throws CloudbreakException {
-        LOGGER.debug("Starting cluster. Context: {}", flowContext);
-        try {
-            flowContext = clusterFacade.handleStartFailure(flowContext);
-            LOGGER.debug("Cluster started.");
-            return flowContext;
-        } catch (Exception e) {
-            LOGGER.error("Exception during cluster start!: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext stopCluster(FlowContext flowContext) throws CloudbreakException {
-        LOGGER.debug("Stopping cluster. Context: {}", flowContext);
-        try {
-            flowContext = clusterFacade.stopCluster(flowContext);
-            LOGGER.debug("Cluster stopped.");
-            return flowContext;
-        } catch (Exception e) {
-            LOGGER.error("Exception during cluster stop!: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleClusterStopFailure(FlowContext flowContext) throws CloudbreakException {
-        LOGGER.debug("Handling cluster stop failure. Context: {}", flowContext);
-        try {
-            flowContext = clusterFacade.handleStopFailure(flowContext);
-            LOGGER.debug("Cluster stop failure handled.");
-            return flowContext;
-        } catch (Exception e) {
-            LOGGER.error("Exception during cluster stop failure!: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }

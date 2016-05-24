@@ -71,7 +71,6 @@ public class StackStopActions {
                     return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(),
                             cloudResources, cloudInstances);
                 }
-                //finish the flow
                 return new StackEvent(StackStopEvent.STOP_FAILURE_EVENT.stringRepresentation(), context.getStack().getId());
             }
         };
