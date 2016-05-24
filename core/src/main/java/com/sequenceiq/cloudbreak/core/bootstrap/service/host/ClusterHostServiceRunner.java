@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCa
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.ServiceInfo;
@@ -65,7 +66,7 @@ public class ClusterHostServiceRunner {
     public void runAmbariServices(Stack stack) throws CloudbreakException {
         try {
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            Set<String> agents = initializeAmbariAgentServices(stack);
+            Set<Node> agents = initializeAmbariAgentServices(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
@@ -82,7 +83,7 @@ public class ClusterHostServiceRunner {
                 servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
             }
             SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
-            hostOrchestrator.runService(gatewayConfig, agents, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+            hostOrchestrator.runService(gatewayConfig, agents, agents, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -97,12 +98,14 @@ public class ClusterHostServiceRunner {
             Cluster cluster = stack.getCluster();
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
             candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-            Set<String> agents = initializeNewAmbariAgentServices(stack, candidates);
+            Set<Node> allNodes = initializeAmbariAgentServices(stack);
+            Set<Node> agents = initializeNewAmbariAgentServices(stack, candidates);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp());
-            hostOrchestrator.runService(gatewayConfig, agents, new SaltPillarConfig(), clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+            hostOrchestrator.runService(gatewayConfig, allNodes, agents,
+                    new SaltPillarConfig(), clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -128,13 +131,13 @@ public class ClusterHostServiceRunner {
         return null;
     }
 
-    private Set<String> initializeNewAmbariAgentServices(Stack stack, Map<String, String> candidates) throws CloudbreakException,
+    private Set<Node> initializeNewAmbariAgentServices(Stack stack, Map<String, String> candidates) throws CloudbreakException,
             CloudbreakOrchestratorException {
-        Set<String> agents = new HashSet<>();
+        Set<Node> agents = new HashSet<>();
         Map<String, List<ServiceInfo>> serviceInfos = new HashMap<>();
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         for (Map.Entry<String, String> entry : candidates.entrySet()) {
-            agents.add(entry.getValue());
+            agents.add(new Node(entry.getValue(), null, entry.getKey()));
             ServiceInfo agentServiceInfo = new ServiceInfo(HostServiceType.AMBARI_AGENT.getName(), entry.getKey());
             serviceInfos.put(entry.getKey(), Arrays.asList(agentServiceInfo));
         }
@@ -142,8 +145,8 @@ public class ClusterHostServiceRunner {
         return agents;
     }
 
-    private Set<String> initializeAmbariAgentServices(Stack stack) throws CloudbreakException, CloudbreakOrchestratorException {
-        Set<String> agents = new HashSet<>();
+    private Set<Node> initializeAmbariAgentServices(Stack stack) throws CloudbreakException, CloudbreakOrchestratorException {
+        Set<Node> agents = new HashSet<>();
         Map<String, List<ServiceInfo>> serviceInfos = new HashMap<>();
         InstanceGroup gatewayInstanceGroup = stack.getGatewayInstanceGroup();
         InstanceMetaData next = gatewayInstanceGroup.getInstanceMetaData().iterator().next();
@@ -153,7 +156,7 @@ public class ClusterHostServiceRunner {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (instanceGroup.getInstanceGroupType().equals(InstanceGroupType.CORE)) {
                 for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
-                    agents.add(instanceMetaData.getPrivateIp());
+                    agents.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryFQDN()));
                     ServiceInfo agentServiceInfo = new ServiceInfo(HostServiceType.AMBARI_AGENT.getName(), instanceMetaData.getDiscoveryFQDN());
                     serviceInfos.put(instanceMetaData.getPrivateIp(), Arrays.asList(agentServiceInfo));
                 }

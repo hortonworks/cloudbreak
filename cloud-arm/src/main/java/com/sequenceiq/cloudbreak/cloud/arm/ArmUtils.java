@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,8 +57,13 @@ public class ArmUtils {
         throw new CloudConnectorException(String.format("No resource found: %s", ResourceType.ARM_TEMPLATE));
     }
 
+    public static String getGroupName(String group) {
+        String shortened = WordUtils.initials(group.replaceAll("_", " ")).toLowerCase();
+        return shortened.length() <= 3 ? shortened : shortened.substring(0, 3);
+    }
+
     public String getPrivateInstanceId(String stackName, String groupName, String privateId) {
-        return String.format("%s%s%s", stackName, groupName.replaceAll("_", ""), privateId);
+        return String.format("%s%s%s", stackName, getGroupName(groupName), privateId);
     }
 
     public String getStackName(CloudContext cloudContext) {

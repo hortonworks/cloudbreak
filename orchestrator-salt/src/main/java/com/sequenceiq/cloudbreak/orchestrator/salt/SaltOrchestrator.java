@@ -69,7 +69,6 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void bootstrap(GatewayConfig gatewayConfig, Set<Node> targets, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         Set<String> allIPs = prepareTargets(gatewayConfig, targets);
-
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             PillarSave ambariServer = new PillarSave(sc, gatewayConfig.getPrivateAddress());
             Callable<Boolean> saltPillarRunner = runner(ambariServer, exitCriteria, exitCriteriaModel);
@@ -101,23 +100,29 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void runService(GatewayConfig gatewayConfig, Set<String> nodeIPs, SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
+    public void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> targetNodes, SaltPillarConfig pillarConfig,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+            PillarSave hostSave = new PillarSave(sc, allNodes);
+            Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
+            Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
+            saltPillarRunnerFuture.get();
+
             for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
                 PillarSave pillarSave = new PillarSave(sc, propertiesEntry.getValue());
-                Callable<Boolean> saltPillarRunner = runner(pillarSave, exitCriteria, exitCriteriaModel);
-                Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
+                saltPillarRunner = runner(pillarSave, exitCriteria, exitCriteriaModel);
+                saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
                 saltPillarRunnerFuture.get();
             }
 
             Set<String> server = Sets.newHashSet(gatewayConfig.getPrivateAddress());
-            Set<String> all = Stream.concat(server.stream(), nodeIPs.stream()).collect(Collectors.toSet());
+            Set<String> targetIps = targetNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            Set<String> all = Stream.concat(server.stream(), targetIps.stream()).collect(Collectors.toSet());
 
             // ambari server
             runSaltCommand(sc, new SimpleAddRoleChecker(server, "ambari_server"), exitCriteriaModel);
             // ambari agent
-            runSaltCommand(sc, new SimpleAddRoleChecker(nodeIPs, "ambari_agent"), exitCriteriaModel);
+            runSaltCommand(sc, new SimpleAddRoleChecker(targetIps, "ambari_agent"), exitCriteriaModel);
             // kerberos
             if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
                 runSaltCommand(sc, new SimpleAddRoleChecker(Sets.newHashSet(server), "kerberos_server"), exitCriteriaModel);
