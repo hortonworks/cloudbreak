@@ -124,6 +124,7 @@ cloudbreak-conf-cert() {
 cloudbreak-delete-dbs() {
     declare desc="deletes all cloudbreak related dbs: cbdb,pcdb,uaadb"
 
+    cloudbreak-conf-db
     if is_linux; then
         rm -rf /var/lib/cloudbreak/*
     else
@@ -131,7 +132,7 @@ cloudbreak-delete-dbs() {
         if [[ -n "$DOCKER_MACHINE" ]]; then
           sshcommand='docker-machine ssh '$DOCKER_MACHINE
         fi
-        $sshcommand ' sudo rm -rf '${CB_DB_ROOT_PATH}'/*'
+        $sshcommand ' sudo rm -rf '${CB_DB_ROOT_PATH:? required}'/*'
     fi
 }
 
