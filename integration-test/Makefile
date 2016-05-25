@@ -10,7 +10,11 @@ else
 TEST_ENV := boot2docker
 endif
 
-all: buildcb create-image create-cloudbreak-context docker-compose check-results
+all: download-cbd buildcb create-image create-cloudbreak-context docker-compose check-results
+
+download-cbd:
+	@echo "\n\033[1;96m--- download latest cbd\033[0m\n"
+	@cd $(INTEGCB_LOCATION); curl -L s3.amazonaws.com/public-repo-1.hortonworks.com/HDP/cloudbreak/cloudbreak-deployer_snapshot_$$(uname)_x86_64.tgz | tar -xz
 
 buildcb:
 	@echo "\n\033[1;96m--- build cloudbreak\033[0m\n"
@@ -26,27 +30,32 @@ create-image:
 
 create-cloudbreak-context:
 	@echo "\n\033[1;96m--- Create cloudbreak context\033[0m\n"
-	@cd $(INTEGCB_LOCATION); cbd delete;
-	@cd $(INTEGCB_LOCATION); docker-compose down; cbd regenerate;
-	@docker-compose down
+	@cd $(INTEGCB_LOCATION); ./cbd delete;
+	@cd $(INTEGCB_LOCATION); ./cbd regenerate;
+	@$(INTEGCB_LOCATION)/.deps/bin/docker-compose stop; $(INTEGCB_LOCATION)/.deps/bin/docker-compose kill
 
 docker-compose:
 	@echo "\n\033[1;96m--- Stop and remove running cbd containers\033[0m\n"
-	@cd $(INTEGCB_LOCATION); docker-compose down
-#	@docker-compose down
+	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose stop; .deps/bin/docker-compose kill
 	@echo "\n\033[1;96m--- Start cloudbreak\033[0m\n"
-	@cd $(INTEGCB_LOCATION); docker-compose up -d consul registrator uaadb identity cbdb cloudbreak > /dev/null
+	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose up -d consul registrator uaadb identity cbdb cloudbreak > /dev/null
 	@rm -rf test-output
 	@echo "\n\033[1;96m--- Check cloudbreak if available\033[0m\n"
-	@docker run -it --rm --net=container:integcb_cloudbreak_1 --entrypoint /bin/bash sequenceiq/cloudbreak -c /wait_for_cloudbreak_api.sh
+	@docker run -t --rm --net=container:integcb_cloudbreak_1 --entrypoint /bin/bash sequenceiq/cloudbreak -c /wait_for_cloudbreak_api.sh
 	@echo "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
-	@docker-compose up test > test.out
+	@$(INTEGCB_LOCATION)/.deps/bin/docker-compose up test > test.out
 	@echo "\n\033[1;96m--- Test finished\033[0m\n"
 
 check-results:
 	@if grep -q 'skipped="0".*failed="0"' test-output/testng-results.xml; then echo "\n\033[0;92m+++ INTEGRATION TEST SUCCESSFULLY FINISHED +++\n"; else echo "\033[0;91m--- !!! INTEGRATION TEST FAILED, CHECK \033[1;93mtest-output\033[0;91m DIR FOR RESULTS !!! ---\n"; fi
 
 remove-test-containers:
-	@cd $(INTEGCB_LOCATION); cbd kill; cbd delete;
+	@cd $(INTEGCB_LOCATION); ./cbd kill; ./cbd delete;
 
 without-build: create-image create-cloudbreak-context docker-compose check-results
+
+build-with-docker: docker-build download-cbd create-image create-cloudbreak-context docker-compose check-results
+
+docker-build:
+	@echo "\n\033[1;96m--- build cloudbreak in docker container\033[0m\n"
+	docker run -i --rm -v $(shell pwd)/../:/tmp/prj:rw java:openjdk-8 /tmp/prj/gradlew -b /tmp/prj/build.gradle clean build
