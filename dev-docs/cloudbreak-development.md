@@ -2,6 +2,14 @@
 
 To make local development easier we introduced some environment configuration at Profile.
 
+## Docker-machine
+
+If you want to use cloudbreak deployer with docker-machine, please edit Profile by adding the line below:
+
+```
+export DOCKER_MACHINE=name_of_the_docker_machine
+```
+
 ## Uluwatu
 
 To configure local Uluwatu source location use ULUWATU_VOLUME_HOST variable. Please note that you need to regenerate your config files after variable changed. So the usual process is:

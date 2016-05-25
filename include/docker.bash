@@ -1,7 +1,6 @@
 docker-check-boot2docker() {
 
-    boot2docker version &> /dev/null || local missing=1
-    if [[ "$missing" ]]; then
+    if ! boot2docker version &> /dev/null; then
         error "boot2docker command not found, please install by:"
         echo "  brew install boot2docker" | blue
         _exit 127
@@ -57,6 +56,29 @@ UNTIL-BOOT2DOCKER-CLI-366-GET-MERGED
     fi
 
     info "boot2docker: OK" | green
+}
+
+docker-check-docker-machine() {
+    if ! docker-machine version &> /dev/null; then
+        error "docker-machine command not found, please install by:"
+        echo "  brew install docker-machine" | blue
+        _exit 127
+    fi
+    if [[ "$(docker-machine status)" == "Running" ]]; then
+      if [[ "$(docker-machine active)" == "$DOCKER_MACHINE" ]]; then
+          info "docker-machine env init: OK"
+      else
+          error "docker-machine env is not set correctly, please run:"
+          echo " eval \$(docker-machine env $DOCKER_MACHINE)" | blue
+          _exit 125
+      fi
+    else
+      error "docker-machine is not running, please start by:"
+      echo "  docker-machine start $DOCKER_MACHINE" | blue
+      _exit 126
+    fi
+
+    info "docker-machine: OK" | green
 }
 
 docker-getversion() {
