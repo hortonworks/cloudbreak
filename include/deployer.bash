@@ -407,7 +407,6 @@ main() {
 
     cmd-export cmd-help help
     cmd-export cbd-version version
-    cmd-export cbd-update update
     cmd-export doctor doctor
     cmd-export init-profile init
     cmd-export cmd-bash-complete bash-complete
@@ -426,6 +425,7 @@ main() {
     cmd-export azure-configure-arm
     
     if [[ "$PROFILE_LOADED" ]] ; then
+        cmd-export cbd-update update
         cmd-export deployer-generate generate
         cmd-export deployer-regenerate regenerate
         cmd-export deployer-delete delete
