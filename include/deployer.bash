@@ -127,43 +127,62 @@ init-profile() {
         info "$CBD_PROFILE already exists, now you are ready to run:"
         echo "cbd generate" | blue
     else
-        if is_linux; then
-            # on amazon
-            if curl -m 1 -f -s 169.254.169.254/latest/ &>/dev/null ; then
-                echo "export PUBLIC_IP=$(curl 169.254.169.254/latest/meta-data/public-hostname)" > $CBD_PROFILE
-                #echo "export PRIVATE_IP=$(curl 169.254.169.254/latest/meta-data/local-ipv4)" >> $CBD_PROFILE
-            fi
-
-            # on openstack
-            if curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-hostname | grep -q novalocal ; then
-                echo "export PUBLIC_IP=$(curl 169.254.169.254/latest/meta-data/public-ipv4)" > $CBD_PROFILE
-            fi
-            
-            # on gce
-            if curl -m 1 -f -s -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
-                echo "export PUBLIC_IP=$(curl -f -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)" > $CBD_PROFILE
-            fi
-
-            # if Profile is still not created, give some hint:
-            if ! [ -f $CBD_PROFILE ]; then
-                warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
-                echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
+        ipcommand=$(public-ip-resolver-command)
+        if [[ "$ipcommand" ]]; then
+            PUBLIC_IP=$(eval "$ipcommand")
+            echo "export PUBLIC_IP=\$($ipcommand)" > $CBD_PROFILE
+            if ! is_linux && [[ "$(boot2docker status)" == "running" ]]; then
+                boot2docker shellinit 2>/dev/null >> $CBD_PROFILE
             fi
         else
-            if [[ "$(boot2docker status)" == "running" ]]; then
-                echo "export PUBLIC_IP=$(boot2docker ip)" > $CBD_PROFILE
-                echo "export PRIVATE_IP=$(boot2docker ip)" >> $CBD_PROFILE
-                boot2docker shellinit 2>/dev/null >> $CBD_PROFILE
-            else
+            if ! is_linux && [[ "$(boot2docker status)" != "running" ]]; then
                 echo "boot2docker isn't running, please start it, with the following 2 commands:" | red
                 echo "boot2docker start" | blue
-                echo ' eval "$(boot2docker shellinit)"' | blue
-            fi
+                echo 'eval "$(boot2docker shellinit)"' | blue
+            else
+                warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
+                echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
+            fi    
+            _exit 2
         fi
-        _exit 2
     fi
 
     doctor
+}
+
+public-ip-resolver-command() {
+    declare desc="Generates command to resolve public IP"
+    
+    if is_linux; then
+        # on openstack
+        if curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-hostname | grep -q novalocal ; then
+            echo "curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-ipv4"
+            return
+        fi
+        
+        # on gce
+        if curl -m 1 -f -s -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
+            echo "curl -m 1 -f -s -H \"Metadata-Flavor: Google\" 169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip"
+            return
+        fi
+        
+        # on amazon
+        if curl -m 1 -f -s 169.254.169.254/latest/ &>/dev/null ; then
+            if curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-hostname &>/dev/null ; then
+                echo "curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-hostname"
+            else
+                warn "Public hostname not found setting up loopback as public IP"
+                echo "echo 127.0.0.1"
+                #echo $(curl 169.254.169.254/latest/meta-data/local-ipv4)
+            fi
+            return
+        fi
+    else
+        if [[ "$(boot2docker status)" == "running" ]]; then
+            echo "boot2docker ip"
+            return
+        fi
+    fi
 }
 
 load-profile() {
