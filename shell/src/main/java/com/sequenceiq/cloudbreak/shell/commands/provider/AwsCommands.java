@@ -67,7 +67,7 @@ public class AwsCommands implements CommandMarker {
         return basePlatformCommands.createPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "network create --AWS")
+    @CliAvailabilityIndicator(value = { "network create --AWS --NEW_SUBNET", "network create --AWS --NEW", "network create --AWS --EXISTING_SUBNET" })
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM);
     }
@@ -108,27 +108,48 @@ public class AwsCommands implements CommandMarker {
         return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --AWS", help = "Create a new AWS network configuration")
-    public String createNetwork(
+    @CliCommand(value = "network create --AWS --NEW", help = "Create an Openstack network configuration with a new network and a new subnet")
+    public String createNewNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
-            @CliOption(key = "vpcID", mandatory = false, help = "The ID of the virtual private cloud (VPC)") String vpcId,
-            @CliOption(key = "internetGatewayID", mandatory = false,
-                    help = "The ID of the internet gateway that is attached to the VPC (configured via 'vpcID' option)") String internetGatewayId,
-            @CliOption(key = "subnetId", mandatory = false, help = "The ID of the subnet which belongs to the custom VPC") String subnetId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
-        if (vpcId != null && internetGatewayId != null) {
-            parameters.put("vpcId", vpcId);
-            parameters.put("internetGatewayId", internetGatewayId);
-            if (subnetId != null) {
-                parameters.put("subnetId", subnetId);
-            }
-        }
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "network create --AWS --NEW_SUBNET", help = "Create an OpenStack network configuration with a new subnet in an existing network")
+    public String createNetworkWithNewSubnet(
+            @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
+            @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
+            @CliOption(key = "vpcID", mandatory = true, help = "The ID of the virtual private cloud (VPC)") String vpcId,
+            @CliOption(key = "internetGatewayID", mandatory = true,
+                    help = "The ID of the internet gateway that is attached to the VPC (configured via 'vpcID' option)") String internetGatewayId,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+    ) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("vpcId", vpcId);
+        parameters.put("internetGatewayId", internetGatewayId);
+        return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "network create --AWS --EXISTING_SUBNET", help = "Create network which use an existing subnet in an existing network")
+    public String createNetworkWithExistingSubnet(
+            @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
+            @CliOption(key = "vpcID", mandatory = true, help = "The ID of the virtual private cloud (VPC)") String vpcId,
+            @CliOption(key = "subnetId", mandatory = true, help = "The ID of the subnet which belongs to the custom VPC") String subnetId,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+    ) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("vpcId", vpcId);
+        parameters.put("subnetId", subnetId);
+        return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
     @CliCommand(value = "template create --AWS", help = "Create a new AWS template")

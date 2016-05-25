@@ -256,7 +256,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             if (availabilityZone != null) {
                 stackRequest.setAvailabilityZone(availabilityZone.getName());
             }
-            stackRequest.setOnFailureAction(onFailureAction == null ? OnFailureAction.ROLLBACK : OnFailureAction.valueOf(onFailureAction.name()));
+            stackRequest.setOnFailureAction(onFailureAction == null ? OnFailureAction.DO_NOTHING : OnFailureAction.valueOf(onFailureAction.name()));
             stackRequest.setSecurityGroupId(Long.valueOf(shellContext.getActiveSecurityGroupId()));
             stackRequest.setNetworkId(Long.valueOf(shellContext.getActiveNetworkId()));
             FailurePolicyJson failurePolicyJson = new FailurePolicyJson();

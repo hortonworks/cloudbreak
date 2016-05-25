@@ -67,7 +67,7 @@ public class AzureCommands implements CommandMarker {
         return basePlatformCommands.createPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "network create --AZURE")
+    @CliAvailabilityIndicator(value = { "network create --AZURE --NEW", "network create --AZURE --EXISTING_SUBNET" })
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM);
     }
@@ -100,27 +100,36 @@ public class AzureCommands implements CommandMarker {
         return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --AZURE", help = "Create a new AZURE network configuration")
-    public String createNetwork(
+    @CliCommand(value = "network create --AZURE --NEW", help = "Create an Openstack network configuration with a new network and a new subnet")
+    public String createNewNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
-            @CliOption(key = "addressPrefix", mandatory = true, help = "The address prefix of the Azure virtual network in CIDR format") String addressPrefix,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
-            @CliOption(key = "resourceGroupName", mandatory = false,
-                    help = "Name of the custom resource group in case of existing virtual network and subnet") String rgName,
-            @CliOption(key = "networkId", mandatory = false, help = "Name of the custom network within the custom resource group") String networkId,
-            @CliOption(key = "subnetId", mandatory = false, help = "Name of the custom subnet within the custom resource group") String subnetId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("addressPrefix", addressPrefix);
+        return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "network create --AZURE --EXISTING_SUBNET", help = "Create network which use an existing subnet in an existing network")
+    public String createNetworkWithExistingSubnet(
+            @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
+            @CliOption(key = "resourceGroupName", mandatory = true,
+                    help = "Name of the custom resource group in case of existing virtual network and subnet") String rgName,
+            @CliOption(key = "networkId", mandatory = true, help = "Name of the custom network within the custom resource group") String networkId,
+            @CliOption(key = "subnetId", mandatory = true, help = "Name of the custom subnet within the custom resource group") String subnetId,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+    ) {
+        Map<String, Object> parameters = new HashMap<>();
         if (rgName != null && networkId != null && subnetId != null) {
             parameters.put("resourceGroupName", rgName);
             parameters.put("networkId", networkId);
             parameters.put("subnetId", subnetId);
         }
-        return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
+        return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
     @CliCommand(value = "template create --AZURE", help = "Create a new AZURE template")

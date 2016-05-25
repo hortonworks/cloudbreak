@@ -71,7 +71,8 @@ public class GcpCommands implements CommandMarker {
         return basePlatformCommands.createPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "network create --GCP")
+    @CliAvailabilityIndicator(value = { "network create --GCP --NEW", "network create --GCP --NEW_SUBNET",
+            "network create --GCP --EXISTING_SUBNET", "network create --GCP --LEGACY" })
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM);
     }
@@ -109,12 +110,39 @@ public class GcpCommands implements CommandMarker {
         return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --GCP", help = "Create a new GCP network configuration")
+    @CliCommand(value = "network create --GCP --NEW", help = "Create an Openstack network configuration with a new network and a new subnet")
+    public String createNewNetwork(
+            @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
+            @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+    ) {
+        Map<String, Object> parameters = new HashMap<>();
+        return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "network create --GCP --NEW_SUBNET", help = "Create an OpenStack network configuration with a new subnet in an existing network")
     public String createNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
-            @CliOption(key = "subnet", mandatory = false, help = "Subnet of the network in CIDR format") String subnet,
-            @CliOption(key = "networkId", mandatory = false, help = "Id of a custom network") String networkId,
-            @CliOption(key = "subnetId", mandatory = false, help = "Id of a custom subnet") String subnetId,
+            @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
+            @CliOption(key = "networkId", mandatory = true, help = "Id of a custom network") String networkId,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+    ) {
+        Map<String, Object> parameters = new HashMap<>();
+        if (networkId != null) {
+            parameters.put("networkId", networkId);
+        }
+        return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "network create --GCP --EXISTING_SUBNET", help = "Create network which use an existing subnet in an existing network")
+    public String createExistingSubnetNetwork(
+            @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
+            @CliOption(key = "networkId", mandatory = true, help = "Id of a custom network") String networkId,
+            @CliOption(key = "subnetId", mandatory = true, help = "Id of a custom subnet") String subnetId,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
@@ -126,7 +154,22 @@ public class GcpCommands implements CommandMarker {
         if (subnetId != null) {
             parameters.put("subnetId", subnetId);
         }
-        return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
+        return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "network create --GCP --LEGACY", help = "Create a legacy GCP network configuration without subnet")
+    public String createLegacyNetwork(
+            @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
+            @CliOption(key = "networkId", mandatory = false, help = "Id of a custom network") String networkId,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+    ) {
+        Map<String, Object> parameters = new HashMap<>();
+        if (networkId != null) {
+            parameters.put("networkId", networkId);
+        }
+        return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
     @CliCommand(value = "template create --GCP", help = "Create a new GCP template")
