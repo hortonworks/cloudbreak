@@ -132,26 +132,57 @@ public class OpenStackCommands implements CommandMarker {
         return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --OPENSTACK", help = "Create a new OpenStack network configuration")
-    public String createNetwork(
+    @CliCommand(value = "network create --OPENSTACK --EXISTING", help = "Create network configuration which use an existing subnet in an existing network")
+    public String createExisitngNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
-            @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
-            @CliOption(key = "publicNetID", mandatory = true, help = "ID of the available and desired OpenStack public network") String publicNetID,
-            @CliOption(key = "networkId", mandatory = false, help = "ID of the custom network to use") String networkId,
-            @CliOption(key = "routerId", mandatory = false, help = "ID of the custom router to use") String routerId,
-            @CliOption(key = "subnetId", mandatory = false, help = "ID of the custom subnet to use") String subnetId,
+            @CliOption(key = "networkId", mandatory = true, help = "ID of the custom network to use") String networkId,
+            @CliOption(key = "subnetId", mandatory = true, help = "ID of the custom subnet to use") String subnetId,
+            @CliOption(key = "publicNetID", mandatory = false, help = "ID of the available and desired OpenStack public network") String publicNetID,
             @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
             @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("publicNetId", publicNetID);
-        if (networkId != null && routerId != null) {
-            parameters.put("networkId", networkId);
-            parameters.put("routerId", routerId);
-            if (subnetId != null) {
-                parameters.put("subnetId", subnetId);
-            }
+        parameters.put("networkId", networkId);
+        parameters.put("subnetId", subnetId);
+        if (publicNetID != null) {
+            parameters.put("publicNetId", publicNetID);
+        }
+        return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "network create --OPENSTACK --NEW", help = "Create an Openstack network configuration with a new network and a new subnet")
+    public String createNewNetwork(
+            @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
+            @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
+            @CliOption(key = "publicNetID", mandatory = false, help = "ID of the available and desired OpenStack public network") String publicNetID,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+    ) {
+        Map<String, Object> parameters = new HashMap<>();
+        if (publicNetID != null) {
+            parameters.put("publicNetId", publicNetID);
+        }
+        return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "network create --OPENSTACK --NEW_SUBNET", help = "Create an OpenStack network configuration with a new subnet in an existing network")
+    public String createNetworkWithNewSubnet(
+            @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
+            @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
+            @CliOption(key = "networkId", mandatory = true, help = "ID of the custom network to use") String networkId,
+            @CliOption(key = "routerId", mandatory = true, help = "ID of the custom router to use") String routerId,
+            @CliOption(key = "publicNetID", mandatory = false, help = "ID of the available and desired OpenStack public network") String publicNetID,
+            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
+            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+    ) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("networkId", networkId);
+        parameters.put("routerId", routerId);
+        if (publicNetID != null) {
+            parameters.put("publicNetId", publicNetID);
         }
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
     }
