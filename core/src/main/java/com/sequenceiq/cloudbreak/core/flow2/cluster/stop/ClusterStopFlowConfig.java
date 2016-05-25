@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.stop;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.CLUSTER_AND_STACK_STOP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.CLUSTER_STOP_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopState.CLUSTER_STOP_FAILED_STATE;
@@ -24,7 +25,7 @@ public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStop
                     .from(INIT_STATE).to(CLUSTER_STOP_STATE).event(CLUSTER_AND_STACK_STOP_EVENT).noFailureEvent()
                     .from(CLUSTER_STOP_STATE).to(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).event(ClusterStopEvent.CLUSTER_STOP_FINISHED_EVENT)
                             .failureEvent(ClusterStopEvent.CLUSTER_STOP_FINISHED_FAILURE_EVENT)
-                    .from(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).noFailureEvent()
+                    .from(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).failureEvent(FAILURE_EVENT)
                     .build();
 
     private static final FlowEdgeConfig<ClusterStopState, ClusterStopEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
