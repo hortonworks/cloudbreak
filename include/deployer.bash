@@ -179,7 +179,7 @@ public-ip-resolver-command() {
         fi
     else
         if [[ "$(boot2docker status)" == "running" ]]; then
-            echo "boot2docker ip"
+            echo "echo $(boot2docker ip)"
             return
         fi
     fi
