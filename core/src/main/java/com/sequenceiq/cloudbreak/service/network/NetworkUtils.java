@@ -57,10 +57,10 @@ public final class NetworkUtils {
         ports.add(new Port(RESOURCEMANAGER_SCHEDULER, "8030", "tcp"));
         ports.add(new Port(RESOURCEMANAGER_IPC, "8050", "tcp"));
         ports.add(new Port(JOB_HISTORY_SERVER, "19888", "tcp"));
-        ports.add(new Port(HBASE_MASTER_WEB, "60010", "tcp"));
+        ports.add(new Port(HBASE_MASTER_WEB, "16010", "tcp"));
         ports.add(new Port(HBASE_MASTER, "60000", "tcp"));
         ports.add(new Port(HBASE_REGION, "16020", "tcp"));
-        ports.add(new Port(HBASE_REGION_INFO, "60030", "tcp"));
+        ports.add(new Port(HBASE_REGION_INFO, "16030", "tcp"));
         ports.add(new Port(HIVE_METASTORE, "9083", "tcp"));
         ports.add(new Port(HIVE_SERVER, "10000", "tcp"));
         ports.add(new Port(HIVE_SERVER_HTTP, "10001", "tcp"));
