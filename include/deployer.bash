@@ -216,7 +216,12 @@ doctor() {
     cbd-version
     if [[ "$(uname)" == "Darwin" ]]; then
         debug "checking OSX specific dependencies..."
-        docker-check-boot2docker
+        if [[ "$DOCKER_MACHINE" ]]; then
+          docker-check-docker-machine
+        else
+          docker-check-boot2docker
+        fi
+
         if [[ $(is-sub-path $(dirname ~/.) $(pwd)) == 0 ]]; then
           info "deployer location: OK"
         else
