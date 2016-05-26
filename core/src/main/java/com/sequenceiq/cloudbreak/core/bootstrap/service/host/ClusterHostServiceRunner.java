@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
+import static java.util.Collections.singletonMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,8 +83,10 @@ public class ClusterHostServiceRunner {
                 krb.put("kerberos", kerberosConf);
                 servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
             }
+            servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
             SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
-            hostOrchestrator.runService(gatewayConfig, agents, agents, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+            hostOrchestrator.runService(gatewayConfig, agents, agents, saltPillarConfig,
+                    clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {

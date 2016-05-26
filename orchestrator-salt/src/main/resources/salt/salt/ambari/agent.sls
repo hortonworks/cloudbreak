@@ -50,17 +50,6 @@ set_internal_hostname_script:
       - file: /etc/ambari-agent/conf/internal_hostname.sh
       - pkg: ambari-agent
 
-{% for ip, args in pillar.get('hosts', {}).items() %}
-replace_etc_hosts_on_azure_{{ loop.index }}:
-  file.replace:
-    - name: /etc/hosts
-    - pattern: "{{ ip }}\\s *.*"
-    - repl: "{{ ip }} {{ args['fqdn'] }} {{ args['hostname'] }}"
-    - append_if_not_found: true
-    - onlyif:
-      - ls -1 /var/lib/waagent
-{% endfor %}
-
 {% if ambari.is_systemd %}
 
 /etc/systemd/system/ambari-agent.service:

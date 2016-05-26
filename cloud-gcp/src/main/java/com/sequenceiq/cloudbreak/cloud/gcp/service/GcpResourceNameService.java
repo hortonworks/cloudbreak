@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.service;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,7 +74,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         checkArgs(INSTANCE_NAME_PART_COUNT, parts);
         String name = null;
         String stackName = String.valueOf(parts[0]);
-        String instanceGroupName = String.valueOf(parts[1]);
+        String instanceGroupName = WordUtils.initials(String.valueOf(parts[1]).replaceAll("_", " "));
         String privateId = String.valueOf(parts[2]);
 
         name = normalize(stackName);
