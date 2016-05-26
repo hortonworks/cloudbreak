@@ -32,8 +32,6 @@ public interface FlowFacade {
 
     FlowContext startClusterRequested(FlowContext context) throws CloudbreakException;
 
-    FlowContext handleClusterSync(FlowContext context) throws CloudbreakException;
-
     FlowContext handleStackSync(FlowContext context) throws CloudbreakException;
 
     FlowContext credentialChange(FlowContext context) throws CloudbreakException;

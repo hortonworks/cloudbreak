@@ -269,16 +269,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext sync(FlowContext context) throws CloudbreakException {
-        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
-        ambariClusterStatusUpdater.updateClusterStatus(stack, cluster);
-        return context;
-    }
-
-    @Override
     public FlowContext credentialChange(FlowContext context) throws CloudbreakException {
         ClusterAuthenticationContext actualContext = (ClusterAuthenticationContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
