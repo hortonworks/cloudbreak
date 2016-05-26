@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.HostServiceConfigService;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostService;
@@ -63,9 +62,8 @@ public class ClusterHostServiceRunner {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public void runAmbariServices(ProvisioningContext context) throws CloudbreakException {
+    public void runAmbariServices(Stack stack) throws CloudbreakException {
         try {
-            Stack stack = stackRepository.findOneWithLists(context.getStackId());
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
             Set<String> agents = initializeAmbariAgentServices(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());

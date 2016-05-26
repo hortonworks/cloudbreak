@@ -45,28 +45,15 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         String flowId = getFlowId(event);
 
         if (FLOW_CANCEL.equals(key)) {
-            Set<String> flowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(payload.getStackId());
-            LOGGER.debug("flow cancellation arrived: ids: {}", flowIds);
-            for (String id : flowIds) {
-                Flow flow = runningFlows.remove(id);
-                if (flow != null) {
-                    flowLogService.cancel(payload.getStackId(), id);
-                }
-            }
+            cancelRunningFlows(payload.getStackId());
         } else if (FLOW_FINAL.equals(key)) {
-            LOGGER.debug("flow finalizing arrived: id: {}", flowId);
-            flowLogService.close(payload.getStackId(), flowId);
-            Flow flow = runningFlows.remove(flowId);
-            if (flow instanceof ChainFlow && !flow.isFlowFailed()) {
-                ChainFlow cf = (ChainFlow) flow;
-                sendEvent(cf.nextSelector(), cf.nextPayload(event));
-            }
+            finalizeFlow(flowId, payload.getStackId(), event);
         } else {
             if (flowId == null) {
                 LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
                 // TODO this is needed because we have two flow implementations in the same time and we want to avoid conflicts
                 FlowConfiguration<?> flowConfig = flowConfigurationMap.get(key);
-                if (flowConfig != null) {
+                if (flowConfig != null && flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getStackId())) {
                     flowId = UUID.randomUUID().toString();
                     Flow flow = flowConfig.createFlow(flowId);
                     runningFlows.put(flow);
@@ -90,6 +77,27 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private void sendEvent(String selector, Object payload) {
         LOGGER.info("Triggering new flow with event: {}", payload);
         eventBus.notify(selector, new Event<>(payload));
+    }
+
+    private void cancelRunningFlows(Long stackId) {
+        Set<String> flowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+        LOGGER.debug("flow cancellation arrived: ids: {}", flowIds);
+        for (String id : flowIds) {
+            Flow flow = runningFlows.remove(id);
+            if (flow != null) {
+                flowLogService.cancel(stackId, id);
+            }
+        }
+    }
+
+    private void finalizeFlow(String flowId, Long stackId, Event<? extends Payload> event) {
+        LOGGER.debug("flow finalizing arrived: id: {}", flowId);
+        flowLogService.close(stackId, flowId);
+        Flow flow = runningFlows.remove(flowId);
+        if (flow instanceof ChainFlow && !flow.isFlowFailed()) {
+            ChainFlow cf = (ChainFlow) flow;
+            sendEvent(cf.nextSelector(), cf.nextPayload(event));
+        }
     }
 
     private String getFlowId(Event<?> event) {

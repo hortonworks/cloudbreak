@@ -31,17 +31,18 @@ import org.springframework.statemachine.state.State;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.DefaultFlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowAdapter;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
 import com.sequenceiq.cloudbreak.core.flow2.StateConverterAdapter;
 
 public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<E> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);
 
     private StateMachineFactory<S, E> stateMachineFactory;
@@ -65,8 +66,23 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 config.stateBuilder.build());
     }
 
+    @Override
+    public Flow createFlow(String flowId) {
+        return new FlowAdapter<>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
+                new EventConverterAdapter<>(eventType), getClass());
+    }
+
+    @Override
+    public FlowTriggerCondition getFlowTriggerCondition() {
+        return applicationContext.getBean(DefaultFlowTriggerCondition.class);
+    }
+
     protected StateMachineFactory<S, E> getStateMachineFactory() {
         return stateMachineFactory;
+    }
+
+    protected ApplicationContext getApplicationContext() {
+        return applicationContext;
     }
 
     private void configure(StateMachineStateConfigurer<S, E> stateConfig, StateMachineTransitionConfigurer<S, E> transitionConfig,
@@ -117,11 +133,9 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener, new SyncTaskExecutor());
     }
 
-    @Override
-    public Flow createFlow(String flowId) {
-        return new FlowAdapter<>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
-                new EventConverterAdapter<>(eventType), getClass());
-    }
+    protected abstract List<Transition<S, E>> getTransitions();
+
+    protected abstract FlowEdgeConfig<S, E> getEdgeConfig();
 
     private AbstractAction getAction(FlowState state) {
         return state.action() == null ? getAction(state.name()) : getAction(state.action());
@@ -138,10 +152,6 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             return null;
         }
     }
-
-    protected abstract List<Transition<S, E>> getTransitions();
-
-    protected abstract FlowEdgeConfig<S, E> getEdgeConfig();
 
     static class MachineConfiguration<S, E> {
         private final StateMachineConfigurationBuilder<S, E> configurationBuilder;

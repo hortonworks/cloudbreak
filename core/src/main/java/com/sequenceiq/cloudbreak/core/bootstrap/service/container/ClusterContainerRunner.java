@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
@@ -33,7 +34,6 @@ import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerConfigService;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -84,10 +84,9 @@ public class ClusterContainerRunner {
     @Inject
     private ContainerConstraintFactory constraintFactory;
 
-    public Map<String, List<Container>> runClusterContainers(ProvisioningContext context) throws CloudbreakException {
+    public Map<String, List<Container>> runClusterContainers(Stack stack) throws CloudbreakException {
         try {
-            Stack stack = stackRepository.findOneWithLists(context.getStackId());
-            String cloudPlatform = context.getCloudPlatform() != null ? context.getCloudPlatform().value() : NONE;
+            String cloudPlatform = StringUtils.isNotEmpty(stack.cloudPlatform()) ? stack.cloudPlatform() : NONE;
             return initializeClusterContainers(stack, cloudPlatform);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
@@ -96,11 +95,12 @@ public class ClusterContainerRunner {
         }
     }
 
-    public Map<String, List<Container>> addClusterContainers(Long stackId, String cloudPlatform, String hostGroupName, Integer scalingAdjustment)
+    public Map<String, List<Container>> addClusterContainers(Long stackId, String hostGroupName, Integer scalingAdjustment)
             throws CloudbreakException {
         try {
             Stack stack = stackRepository.findOneWithLists(stackId);
-            return addClusterContainers(stack, cloudPlatform != null ? cloudPlatform : NONE, hostGroupName, scalingAdjustment);
+            String cloudPlatform = StringUtils.isNotEmpty(stack.cloudPlatform()) ? stack.cloudPlatform() : NONE;
+            return addClusterContainers(stack, cloudPlatform, hostGroupName, scalingAdjustment);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {

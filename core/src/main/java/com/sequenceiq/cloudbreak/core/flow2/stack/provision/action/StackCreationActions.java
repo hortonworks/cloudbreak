@@ -162,17 +162,33 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
+                return new StackEvent(StackCreationEvent.BOOTSTRAP_MACHINES_EVENT.stringRepresentation(), context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "BOOTSTRAPING_MACHINES_STATE")
+    public Action bootstrappingMachinesAction() {
+        return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                stackCreationService.bootstrappingMachines(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
                 return new BootstrapMachinesRequest(context.getStack().getId());
             }
         };
     }
 
-    @Bean(name = "BOOTSTRAP_MACHINES_STATE")
-    public Action bootstrapMachinesAction() {
+    @Bean(name = "COLLECTING_CONSUL_METADATA_STATE")
+    public Action collectingConsulMetadataAction() {
         return new AbstractStackCreationAction<BootstrapMachinesSuccess>(BootstrapMachinesSuccess.class) {
             @Override
             protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.bootstrapMachines(context.getStack());
+                stackCreationService.collectingConsulMetadata(context.getStack());
                 sendEvent(context);
             }
 
@@ -183,12 +199,12 @@ public class StackCreationActions {
         };
     }
 
-    @Bean(name = "CONSUL_METADATA_SETUP")
-    public Action consulMetadataSetupAction() {
+    @Bean(name = "STACK_CREATION_FINISHED_STATE")
+    public Action stackCreationFinishedAction() {
         return new AbstractStackCreationAction<ConsulMetadataSetupSuccess>(ConsulMetadataSetupSuccess.class) {
             @Override
             protected void doExecute(StackContext context, ConsulMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.setupConsulMetadata(context.getStack());
+                stackCreationService.stackCreationFinished(context.getStack());
                 sendEvent(context);
             }
 

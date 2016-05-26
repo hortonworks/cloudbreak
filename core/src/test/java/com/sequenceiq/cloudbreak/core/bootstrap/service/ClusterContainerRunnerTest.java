@@ -20,15 +20,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerConstraintFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -47,9 +43,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterContainerRunnerTest {
-
-    private static final Platform GCP_PLATFORM = Platform.platform(CloudConstants.GCP);
-
     @Mock
     private StackRepository stackRepository;
 
@@ -106,9 +99,8 @@ public class ClusterContainerRunnerTest {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
-        HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        hostGroupAdjustmentJson.setHostGroup("agent");
-        ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson, ScalingType.UPSCALE_ONLY_CLUSTER);
+        HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
+        hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new FailedMockContainerOrchestrator());
         when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
 
@@ -136,12 +128,10 @@ public class ClusterContainerRunnerTest {
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<InstanceMetaData>());
         when(containerService.save(anyList())).thenReturn(new ArrayList<Container>());
-        HostGroupAdjustmentJson hostGroupAdjustment = context.getHostGroupAdjustment();
         when(constraintFactory.getAmbariAgentConstraint(ambariServer.getHost(), null, stack.cloudPlatform(),
                 TestUtil.hostGroup(), hostGroupAdjustment.getScalingAdjustment(), new ArrayList<String>()))
                 .thenReturn(new ContainerConstraint.Builder().build());
-        underTest.addClusterContainers(context.getStackId(), context.getCloudPlatform().value(), hostGroupAdjustment.getHostGroup(),
-                hostGroupAdjustment.getScalingAdjustment());
+        underTest.addClusterContainers(stack.getId(), hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
     }
 
     @Test(expected = CancellationException.class)
@@ -150,9 +140,8 @@ public class ClusterContainerRunnerTest {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
-        HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        hostGroupAdjustmentJson.setHostGroup("agent");
-        ClusterScalingContext context = new ClusterScalingContext(1L, GCP_PLATFORM, hostGroupAdjustmentJson, ScalingType.UPSCALE_ONLY_CLUSTER);
+        HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
+        hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString()))
@@ -179,17 +168,6 @@ public class ClusterContainerRunnerTest {
 
         when(containerService.findContainersInCluster(anyLong())).thenReturn(containers);
 
-        HostGroupAdjustmentJson hostGroupAdjustment = context.getHostGroupAdjustment();
-        underTest.addClusterContainers(context.getStackId(), context.getCloudPlatform().value(), hostGroupAdjustment.getHostGroup(),
-                hostGroupAdjustment.getScalingAdjustment());
+        underTest.addClusterContainers(stack.getId(), hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
     }
-
-    private Set<String> getPrivateIps(Stack stack) {
-        Set<String> ips = new HashSet<>();
-        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            ips.add(instanceMetaData.getPrivateIp());
-        }
-        return ips;
-    }
-
 }
