@@ -86,7 +86,7 @@
         <input type="checkbox" id="asdefaultfs" ng-model="cluster.fileSystem.defaultFs" ng-disabled="activeCredential.cloudPlatform == 'GCP'" name="asdefaultfs">
     </div>
 </div>
-<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE_RM'">
+<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE_RM' && cluster.orchestrator.type !== 'SALT'">
     <label class="col-sm-3 control-label" for="relocateDocker">{{msg.relocate_docker_label}}</label>
     <div class="col-sm-8">
         <input type="checkbox" id="relocateDocker" ng-model="cluster.relocateDocker" name="relocateDocker">
