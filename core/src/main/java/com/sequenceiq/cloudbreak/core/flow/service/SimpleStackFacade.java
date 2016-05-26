@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Arrays;
@@ -80,21 +79,6 @@ public class SimpleStackFacade implements StackFacade {
     private CloudbreakMessagesService messagesService;
     @Inject
     private ServiceProviderConnectorAdapter connector;
-
-    @Override
-    public FlowContext stopRequested(FlowContext context) throws CloudbreakException {
-        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_STOP_REQUESTED, STOP_REQUESTED.name());
-        } catch (Exception e) {
-            LOGGER.error("Exception during the stack stop requested process: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
 
     @Override
     public FlowContext sync(FlowContext context) throws CloudbreakException {
@@ -248,7 +232,6 @@ public class SimpleStackFacade implements StackFacade {
         STACK_UPSCALE_FINISHED("stack.upscale.finished"),
         STACK_DOWNSCALE_INSTANCES("stack.downscale.instances"),
         STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
-        STACK_STOP_REQUESTED("stack.stop.requested"),
         STACK_PROVISIONING("stack.provisioning"),
         STACK_INFRASTRUCTURE_TIME("stack.infrastructure.time"),
         STACK_INFRASTRUCTURE_SUBNETS_UPDATING("stack.infrastructure.subnets.updating"),

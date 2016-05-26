@@ -163,6 +163,7 @@ public class StackController implements StackEndpoint {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getById(id);
+        MDCBuilder.buildMdcContext(stack);
         if (CloudConstants.BYOS.equals(stack.cloudPlatform())) {
             LOGGER.warn("A 'Bring your own stack' type of infrastructure cannot be modified.");
             return Response.status(Response.Status.BAD_REQUEST).build();

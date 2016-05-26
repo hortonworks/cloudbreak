@@ -72,17 +72,6 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext stopStackRequested(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Stopping stack requested. Context: {}", context);
-        try {
-            return stackFacade.stopRequested(context);
-        } catch (Exception e) {
-            LOGGER.error("Exception during stack stop requested!: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
     public FlowContext handleStackStatusUpdateFailure(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Handling stack start/stop failure. Context: {}", context);
         try {

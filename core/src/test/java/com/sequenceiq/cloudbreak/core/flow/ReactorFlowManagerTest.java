@@ -102,7 +102,6 @@ public class ReactorFlowManagerTest {
         flowManager.triggerClusterReInstall(provisionRequest);
         flowManager.triggerStackStop(stackStatusUpdateRequest);
         flowManager.triggerStackStart(stackStatusUpdateRequest);
-        flowManager.triggerStackStopRequested(stackStatusUpdateRequest);
         flowManager.triggerClusterStartRequested(clusterStatusUpdateRequest);
         flowManager.triggerClusterStop(clusterStatusUpdateRequest);
         flowManager.triggerClusterStart(clusterStatusUpdateRequest);

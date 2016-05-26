@@ -369,7 +369,9 @@ public class StackService {
 
     private void stop(Stack stack, Cluster cluster, StatusRequest statusRequest) {
         if (cluster != null && cluster.isStopInProgress()) {
-            flowManager.triggerStackStopRequested(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
+            stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
+            String message = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_REQUESTED.code());
+            eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), message);
         } else {
             if (stack.isStopped()) {
                 String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
@@ -545,7 +547,8 @@ public class StackService {
 
     private enum Msg {
         STACK_STOP_IGNORED("stack.stop.ignored"),
-        STACK_START_IGNORED("stack.start.ignored");
+        STACK_START_IGNORED("stack.start.ignored"),
+        STACK_STOP_REQUESTED("stack.stop.requested");
 
         private String code;
 

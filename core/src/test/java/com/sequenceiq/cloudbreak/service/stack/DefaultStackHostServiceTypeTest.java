@@ -5,11 +5,14 @@ import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +37,8 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultStackHostServiceTypeTest {
@@ -59,10 +64,15 @@ public class DefaultStackHostServiceTypeTest {
     @Mock
     private BlueprintValidator blueprintValidator;
 
+    @Mock
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    @Mock
+    private CloudbreakEventService eventService;
+
     @Before
     public void before() {
         doNothing().when(flowManager).triggerStackStop(anyObject());
-        doNothing().when(flowManager).triggerStackStopRequested(anyObject());
         doNothing().when(flowManager).triggerStackStart(anyObject());
     }
 
@@ -83,7 +93,7 @@ public class DefaultStackHostServiceTypeTest {
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         underTest.updateStatus(1L, StatusRequest.STOPPED);
-        verify(flowManager, times(1)).triggerStackStopRequested(anyObject());
+        verify(eventService, times(1)).fireCloudbreakEvent(eq(1L), eq(STOP_REQUESTED.name()), anyString());
     }
 
     @Test
