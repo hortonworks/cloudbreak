@@ -22,7 +22,5 @@ public interface ClusterFacade {
 
     FlowContext startRequested(FlowContext context) throws CloudbreakException;
 
-    FlowContext sync(FlowContext context) throws CloudbreakException;
-
     FlowContext credentialChange(FlowContext context) throws CloudbreakException;
 }

@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleConfig;
@@ -53,6 +54,7 @@ public class OfflineStateGenerator {
                     new StackStartFlowConfig(),
                     new StackStopFlowConfig(),
                     new StackSyncFlowConfig(),
+                    new ClusterSyncFlowConfig(),
                     new StackUpscaleConfig(),
                     new ClusterDownscaleFlowConfig(),
                     new StackDownscaleConfig(),
