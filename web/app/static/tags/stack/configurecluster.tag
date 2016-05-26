@@ -80,7 +80,7 @@
     </div>
 </div>
 
-<div class="form-group">
+<div class="form-group" ng-show="cluster.orchestrator.type !== 'SALT'">
     <label class="col-sm-3 control-label" for="enableShipyard">{{msg.shipyard_enabled_label}}</label>
     <div class="col-sm-8">
         <input type="checkbox" id="enableShipyard" ng-model="cluster.enableShipyard" name="enableShipyard">

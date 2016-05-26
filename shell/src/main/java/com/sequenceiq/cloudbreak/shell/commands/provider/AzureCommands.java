@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 public class AzureCommands implements CommandMarker {
 
     public static final String PLATFORM = "AZURE_RM";
+    public static final String SALT = "SALT";
 
     private ShellContext shellContext;
     private CredentialCommands baseCredentialCommands;
@@ -206,8 +207,16 @@ public class AzureCommands implements CommandMarker {
             String persistentStorage,
             @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
 
-            relocateDocker = relocateDocker == null ? true : relocateDocker;
-
+            orchestratorType = (orchestratorType == null) ? new ArmOrchestratorType(SALT) : orchestratorType;
+            if (SALT.equals(orchestratorType.getName())) {
+                relocateDocker = relocateDocker == null ? false : relocateDocker;
+                if (relocateDocker) {
+                    throw shellContext.exceptionTransformer()
+                            .transformToRuntimeException("Relocate docker could not be 'yes' if you are not using containers in the cluster");
+                }
+            } else {
+                relocateDocker = relocateDocker == null ? true : relocateDocker;
+            }
             Map<String, String> params = new HashMap<>();
 
             if (diskPerStorage != null) {
@@ -224,7 +233,6 @@ public class AzureCommands implements CommandMarker {
                 params.put("persistentStorage", "cbstore");
             }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                relocateDocker == null ? true : relocateDocker,
-                wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, params);
+                relocateDocker, wait, platformVariant, orchestratorType.getName(), PLATFORM, params);
     }
 }
