@@ -33,8 +33,8 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltBootResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltBootResponses;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.spark.consul.ConsulMemberResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
@@ -128,20 +128,20 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
 
     private void addMockEndpoints(int numberOfServers) {
         get(SALT_BOOT_ROOT + "/health", (request, response) -> {
-            SaltBootResponse saltBootResponse = new SaltBootResponse();
-            saltBootResponse.setStatusCode(HttpStatus.OK.value());
-            return saltBootResponse;
+            GenericResponse genericResponse = new GenericResponse();
+            genericResponse.setStatusCode(HttpStatus.OK.value());
+            return genericResponse;
         }, gson()::toJson);
 
         post(SALT_BOOT_ROOT + "/salt/server/pillar", (request, response) -> {
-            SaltBootResponse saltBootResponse = new SaltBootResponse();
-            saltBootResponse.setStatusCode(HttpStatus.OK.value());
-            return saltBootResponse;
+            GenericResponse genericResponse = new GenericResponse();
+            genericResponse.setStatusCode(HttpStatus.OK.value());
+            return genericResponse;
         }, gson()::toJson);
         post(SALT_BOOT_ROOT + "/salt/action/distribute", (request, response) -> {
-            SaltBootResponses saltBootResponses = new SaltBootResponses();
-            saltBootResponses.setResponses(new ArrayList<>());
-            return saltBootResponses;
+            GenericResponses genericResponses = new GenericResponses();
+            genericResponses.setResponses(new ArrayList<>());
+            return genericResponses;
         }, gson()::toJson);
         post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(numberOfServers));
 

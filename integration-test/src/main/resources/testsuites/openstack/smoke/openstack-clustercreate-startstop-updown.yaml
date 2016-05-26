@@ -13,7 +13,7 @@ tests:
     parameters:
       networkName: it-openstack-network-ssud
       subnetCIDR: 10.0.36.0/24
-      publicNetId: 8a1ca549-30cb-4fd5-9d32-84a42433558b
+      publicNetId: 999e09bc-cf75-4a19-98fb-c0b4ddee6d93
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
 

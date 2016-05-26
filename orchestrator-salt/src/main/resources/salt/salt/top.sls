@@ -1,6 +1,12 @@
 base:
-  '*':
-    - consul.init
+
+  'platform:GCP':
+     - match: pillar
+     - discovery.init
+
+  'platform:AZURE_RM':
+     - match: pillar
+     - discovery.init
 
   'roles:ambari_server':
     - match: grain

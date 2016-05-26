@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,9 +28,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ContainerConfigService;
@@ -231,19 +228,13 @@ public class ClusterContainerRunner {
 
         try {
             Set<Container> existingContainers = containerService.findContainersInCluster(cluster.getId());
-            String ambariServerHost = FluentIterable.from(existingContainers).firstMatch(new Predicate<Container>() {
-                @Override
-                public boolean apply(Container input) {
-                    return input.getImage().contains(AMBARI_SERVER.getName());
-                }
-            }).get().getHost();
+            String ambariServerHost = existingContainers.stream()
+                    .filter(input -> input.getImage().contains(AMBARI_SERVER.getName()))
+                    .findFirst().get().getHost();
             final HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
-            String ambariAgentApp = FluentIterable.from(existingContainers).firstMatch(new Predicate<Container>() {
-                @Override
-                public boolean apply(Container input) {
-                    return hostGroup.getHostNames().contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName());
-                }
-            }).get().getName();
+            String ambariAgentApp = existingContainers.stream()
+                    .filter(input -> hostGroup.getHostNames().contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName()))
+                    .findFirst().get().getName();
             List<String> hostBlackList = getOtherHostgroupsAgentHostsFromContainer(existingContainers, hostGroupName);
             ContainerConstraint ambariAgentConstraint = constraintFactory.getAmbariAgentConstraint(ambariServerHost, ambariAgentApp,
                     cloudPlatform, hostGroup, adjustment, hostBlackList);
@@ -274,28 +265,13 @@ public class ClusterContainerRunner {
 
     private List<String> getOtherHostgroupsAgentHostsFromContainer(Set<Container> existingContainers, String hostGroupName) {
         final String hostGroupNamePart = hostGroupName.replace("_", "-");
-        return FluentIterable.from(existingContainers).filter(new Predicate<Container>() {
-            @Override
-            public boolean apply(@Nullable Container input) {
-                return input.getImage().contains(AMBARI_AGENT.getName()) && !input.getName().contains(hostGroupNamePart);
-            }
-        }).transform(new Function<Container, String>() {
-            @Nullable
-            @Override
-            public String apply(@Nullable Container input) {
-                return input.getHost();
-            }
-        }).toList();
+        return existingContainers.stream()
+                .filter(input -> input.getImage().contains(AMBARI_AGENT.getName()) && !input.getName().contains(hostGroupNamePart))
+                .map(Container::getHost).collect(Collectors.toList());
     }
 
     private List<String> getHostsFromContainerInfo(List<ContainerInfo> containerInfos) {
-        return FluentIterable.from(containerInfos).transform(new Function<ContainerInfo, String>() {
-            @Nullable
-            @Override
-            public String apply(@Nullable ContainerInfo input) {
-                return input.getHost();
-            }
-        }).toList();
+        return containerInfos.stream().map(ContainerInfo::getHost).collect(Collectors.toList());
     }
 
     private List<String> getHosts(Stack stack) {

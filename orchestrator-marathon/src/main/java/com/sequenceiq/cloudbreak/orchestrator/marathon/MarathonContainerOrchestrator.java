@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon;
 
-
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATHON;
 
 import java.util.ArrayList;
@@ -11,14 +10,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
@@ -137,12 +135,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
             for (String appName : containersPerApp.keySet()) {
                 App app = client.getApp(appName).getApp();
-                Set<String> tasksInApp = FluentIterable.from(app.getTasks()).transform(new Function<Task, String>() {
-                    @Override
-                    public String apply(Task input) {
-                        return input.getId();
-                    }
-                }).toSet();
+                Set<String> tasksInApp = app.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
                 if (containersPerApp.get(appName).containsAll(tasksInApp)) {
                     deleteEntireApp(client, futures, appName);
                 } else {
@@ -174,12 +167,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     private String appNamesAsString(List<ContainerInfo> containerInfo) {
-        return Arrays.toString(FluentIterable.from(containerInfo).transform(new Function<ContainerInfo, String>() {
-            @Override
-            public String apply(ContainerInfo input) {
-                return input.getName();
-            }
-        }).toArray(String.class));
+        return Arrays.toString(containerInfo.stream().map(ContainerInfo::getName).toArray(String[]::new));
     }
 
     @Override
@@ -194,11 +182,13 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException { }
+            throws CloudbreakOrchestratorException {
+    }
 
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException { }
+            throws CloudbreakOrchestratorException {
+    }
 
     @Override
     public boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig) {

@@ -309,9 +309,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.showErrorMessage($rootScope.msg.hostgroup_single_invalid);
                 return;
             }
-            if (blueprint.hostGroupCount === 1) {
-                $scope.cluster.consulServerCount = 1;
-            }
             if (!$scope.isUndefined($scope.cluster.ambariStackDetails)) {
                 for (var item in $scope.cluster.ambariStackDetails) {
                     if ($scope.cluster.ambariStackDetails[item] === "" || $scope.cluster.ambariStackDetails[item] === undefined) {
@@ -473,9 +470,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.prepareParameters = function(cluster) {
-            if (cluster.consulServerCount === null || cluster.consulServerCount === undefined) {
-                delete cluster.consulServerCount;
-            }
             for (var item in cluster.parameters) {
                 if (cluster.parameters[item] === "" || cluster.parameters[item] === undefined) {
                     delete cluster.parameters[item];
@@ -1040,7 +1034,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 onFailureAction: "DO_NOTHING",
                 bestEffort: "BEST_EFFORT",
                 validateBlueprint: true,
-                consulServerCount: 3,
                 parameters: {},
                 failurePolicy: {
                     adjustmentType: "BEST_EFFORT",

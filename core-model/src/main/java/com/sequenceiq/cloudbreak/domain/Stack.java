@@ -227,6 +227,7 @@ public class Stack implements ProvisionEntity {
     private String availabilityZone;
     @Column(nullable = false)
     private Integer gatewayPort;
+    // TODO remove
     private int consulServers;
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;

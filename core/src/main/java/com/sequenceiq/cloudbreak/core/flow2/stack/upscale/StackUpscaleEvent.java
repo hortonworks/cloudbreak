@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendConsulMetadataResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 
 public enum StackUpscaleEvent implements FlowEvent {
     ADD_INSTANCES_EVENT(FlowPhases.ADD_INSTANCES.name()),
@@ -19,10 +19,10 @@ public enum StackUpscaleEvent implements FlowEvent {
     EXTEND_METADATA_FINISHED_FAILURE_EVENT("EXTEND_METADATA_FINISHED_FAILURE_EVENT"),
     BOOTSTRAP_NEW_NODES_EVENT(FlowPhases.BOOTSTRAP_NEW_NODES.name()),
     BOOTSTRAP_NEW_NODES_FAILURE_EVENT(EventSelectorUtil.failureSelector(BootstrapNewNodesResult.class)),
-    EXTEND_CONSUL_METADATA_EVENT(EventSelectorUtil.selector(BootstrapNewNodesResult.class)),
-    EXTEND_CONSUL_METADATA_FINISHED_EVENT(EventSelectorUtil.selector(ExtendConsulMetadataResult.class)),
-    EXTEND_CONSUL_METADATA_FINISHED_FAILURE_EVENT("EXTEND_CONSUL_METADATA_FINISHED_FAILURE_EVENT"),
-    EXTEND_CONSUL_METADATA_FAILURE_EVENT(EventSelectorUtil.failureSelector(ExtendConsulMetadataResult.class)),
+    EXTEND_HOST_METADATA_EVENT(EventSelectorUtil.selector(BootstrapNewNodesResult.class)),
+    EXTEND_HOST_METADATA_FINISHED_EVENT(EventSelectorUtil.selector(ExtendHostMetadataResult.class)),
+    EXTEND_HOST_METADATA_FINISHED_FAILURE_EVENT("EXTEND_CONSUL_METADATA_FINISHED_FAILURE_EVENT"),
+    EXTEND_HOST_METADATA_FAILURE_EVENT(EventSelectorUtil.failureSelector(ExtendHostMetadataResult.class)),
     UPSCALE_FINALIZED_EVENT("UPSCALESTACKFINALIZED"),
     UPSCALE_FAIL_HANDLED_EVENT("UPSCALEFAILHANDLED");
 

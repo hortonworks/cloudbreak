@@ -40,8 +40,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendConsulMetadataRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendConsulMetadataResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 
@@ -150,24 +150,24 @@ public class StackUpscaleActions {
         };
     }
 
-    @Bean(name = "EXTEND_CONSUL_METADATA_STATE")
-    public Action extendConsulMetadata() {
+    @Bean(name = "EXTEND_HOST_METADATA_STATE")
+    public Action extendHostMetadata() {
         return new AbstractStackUpscaleAction<BootstrapNewNodesResult>(BootstrapNewNodesResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesResult payload, Map<Object, Object> variables) throws Exception {
-                ExtendConsulMetadataRequest request = new ExtendConsulMetadataRequest(context.getStack().getId(),
+                ExtendHostMetadataRequest request = new ExtendHostMetadataRequest(context.getStack().getId(),
                         payload.getRequest().getUpscaleCandidateAddresses());
                 sendEvent(context.getFlowId(), request);
             }
         };
     }
 
-    @Bean(name = "EXTEND_CONSUL_METADATA_FINISHED_STATE")
-    public Action finishExtendConsulMetadata() {
-        return new AbstractStackUpscaleAction<ExtendConsulMetadataResult>(ExtendConsulMetadataResult.class) {
+    @Bean(name = "EXTEND_HOST_METADATA_FINISHED_STATE")
+    public Action finishExtendHostMetadata() {
+        return new AbstractStackUpscaleAction<ExtendHostMetadataResult>(ExtendHostMetadataResult.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, ExtendConsulMetadataResult payload, Map<Object, Object> variables) throws Exception {
-                HostGroupAdjustmentJson hostGroupAdjustmentJson = stackUpscaleService.finishExtendConsulMetadata(context.getStack(),
+            protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) throws Exception {
+                HostGroupAdjustmentJson hostGroupAdjustmentJson = stackUpscaleService.finishExtendHostMetadata(context.getStack(),
                         context.getInstanceGroupName(), context.getAdjustment());
                 ClusterScalingContext request = new ClusterScalingContext(context.getStack().getId(), Platform.platform(context.getStack().cloudPlatform()),
                         hostGroupAdjustmentJson, context.getScalingType());

@@ -40,7 +40,6 @@ public class StackDecorator implements Decorator<Stack> {
 
     private enum DecorationData {
         CREDENTIAL_ID,
-        USR_CONSUL_SERVER_COUNT,
         NETWORK_ID,
         SECURITY_GROUP_ID
     }
@@ -60,8 +59,6 @@ public class StackDecorator implements Decorator<Stack> {
             if (securityGroupId != null) {
                 subject.setSecurityGroup(securityGroupService.get((Long) securityGroupId));
             }
-            int consulServers = getConsulServerCount((Integer) data[DecorationData.USR_CONSUL_SERVER_COUNT.ordinal()], subject.getFullNodeCount());
-            subject.setConsulServers(consulServers);
 
             subject.setNetwork(networkService.getById((Long) networkId));
             if (subject.getOrchestrator() != null && (subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)) {
@@ -69,7 +66,7 @@ public class StackDecorator implements Decorator<Stack> {
             }
             prepareOrchestratorIfNotExist(subject, credential);
             if (subject.getFailurePolicy() != null) {
-                validatFailurePolicy(subject, consulServers, subject.getFailurePolicy());
+                validatFailurePolicy(subject, subject.getFailurePolicy());
             }
             validate(subject);
         } else {
@@ -111,35 +108,26 @@ public class StackDecorator implements Decorator<Stack> {
         return consulServers;
     }
 
-    private long calculateMinCount(Stack stack) {
-        return Math.round(Double.valueOf(stack.getFullNodeCount()) * (Double.valueOf(stack.getFailurePolicy().getThreshold()) / ONE_HUNDRED));
-    }
-
-    private void validatFailurePolicy(Stack stack, int consulServers, FailurePolicy failurePolicy) {
+    private void validatFailurePolicy(Stack stack, FailurePolicy failurePolicy) {
         if (failurePolicy.getThreshold() == 0L && !AdjustmentType.BEST_EFFORT.equals(failurePolicy.getAdjustmentType())) {
             throw new BadRequestException("The threshold can not be 0");
         }
-        String errorMsg = String.format("At least %s live nodes are required after rollback", consulServers);
         if (AdjustmentType.EXACT.equals(failurePolicy.getAdjustmentType())) {
-            validateExactCount(stack, consulServers, failurePolicy, errorMsg);
+            validateExactCount(stack, failurePolicy);
         } else if (AdjustmentType.PERCENTAGE.equals(failurePolicy.getAdjustmentType())) {
-            validatePercentageCount(stack, consulServers, failurePolicy, errorMsg);
+            validatePercentageCount(failurePolicy);
         }
     }
 
-    private void validatePercentageCount(Stack stack, int consulServers, FailurePolicy failurePolicy, String errorMsg) {
-        if (calculateMinCount(stack) < consulServers) {
-            throw new BadRequestException(errorMsg);
-        } else if (failurePolicy.getThreshold() < 0L || failurePolicy.getThreshold() > ONE_HUNDRED) {
+    private void validatePercentageCount(FailurePolicy failurePolicy) {
+        if (failurePolicy.getThreshold() < 0L || failurePolicy.getThreshold() > ONE_HUNDRED) {
             throw new BadRequestException("The percentage of the threshold has to be between 0 an 100.");
         }
     }
 
-    private void validateExactCount(Stack stack, int consulServers, FailurePolicy failurePolicy, String errorMsg) {
-        if (failurePolicy.getThreshold() < consulServers) {
-            throw new BadRequestException(errorMsg);
-        } else if (failurePolicy.getThreshold() > stack.getFullNodeCount()) {
-            throw new BadRequestException("Threshold can not be higher than the nodecount of the stack.");
+    private void validateExactCount(Stack stack, FailurePolicy failurePolicy) {
+        if (failurePolicy.getThreshold() > stack.getFullNodeCount()) {
+            throw new BadRequestException("Threshold can not be higher than the node count of the stack.");
         }
     }
 

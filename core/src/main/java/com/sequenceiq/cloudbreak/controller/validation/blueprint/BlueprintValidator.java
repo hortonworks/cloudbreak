@@ -9,8 +9,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,8 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -107,13 +105,7 @@ public class BlueprintValidator {
     }
 
     private Set<String> getHostGroupsFromRequest(Set<HostGroup> hostGroup) {
-        return FluentIterable.from(hostGroup).transform(new Function<HostGroup, String>() {
-            @Nullable
-            @Override
-            public String apply(@Nullable HostGroup hostGroup) {
-                return hostGroup.getName();
-            }
-        }).toSet();
+        return hostGroup.stream().map(HostGroup::getName).collect(Collectors.toSet());
     }
 
     private Set<String> getHostGroupsFromBlueprint(JsonNode hostGroupsNode) {

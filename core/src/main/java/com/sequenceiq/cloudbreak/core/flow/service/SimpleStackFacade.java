@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.stack.flow.ConsulMetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
@@ -65,8 +64,6 @@ public class SimpleStackFacade implements StackFacade {
     private HostGroupService hostGroupService;
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
-    @Inject
-    private ConsulMetadataSetup consulMetadataSetup;
     @Inject
     private ClusterService clusterService;
     @Inject

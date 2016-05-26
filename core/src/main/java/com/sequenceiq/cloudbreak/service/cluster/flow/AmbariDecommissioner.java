@@ -26,16 +26,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -351,20 +347,10 @@ public class AmbariDecommissioner {
                 ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
                 Set<Container> containers = containerRepository.findContainersInCluster(stack.getCluster().getId());
 
-                List<ContainerInfo> containersToDelete = FluentIterable.from(containers)
-                        .filter(new Predicate<Container>() {
-                            @Override
-                            public boolean apply(Container input) {
-                                return hostList.contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName());
-                            }
-                        }).transform(new Function<Container, ContainerInfo>() {
-                            @Nullable
-                            @Override
-                            public ContainerInfo apply(Container input) {
-                                return new ContainerInfo(input.getContainerId(), input.getName(), input.getHost(), input.getImage());
-                            }
-                        }).toList();
-
+                List<ContainerInfo> containersToDelete = containers.stream()
+                        .filter(input -> hostList.contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName()))
+                        .map(input -> new ContainerInfo(input.getContainerId(), input.getName(), input.getHost(), input.getImage()))
+                        .collect(Collectors.toList());
 
                 containerOrchestrator.deleteContainer(containersToDelete, credential);
                 containerRepository.delete(containers);

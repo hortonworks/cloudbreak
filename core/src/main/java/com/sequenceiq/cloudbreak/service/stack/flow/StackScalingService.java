@@ -2,10 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -14,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
@@ -27,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
@@ -44,10 +40,6 @@ public class StackScalingService {
 
     @Inject
     private StackService stackService;
-    @Inject
-    private PollingService<ConsulContext> consulPollingService;
-    @Inject
-    private ConsulAgentLeaveCheckerTask consulAgentLeaveCheckerTask;
     @Inject
     private CloudbreakEventService eventService;
     @Inject
@@ -118,11 +110,9 @@ public class StackScalingService {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
-        ConsulClient client = ConsulUtils.createClient(clientConfig);
 
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
-                removeAgentFromConsul(stack, client, instanceMetaData);
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
@@ -136,10 +126,9 @@ public class StackScalingService {
 
     public Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
         Map<String, String> instanceIds = new HashMap<>();
-
         int i = 0;
         for (InstanceMetaData metaData : stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData()) {
-            if (!metaData.getAmbariServer() && !metaData.getConsulServer()
+            if (!metaData.getAmbariServer()
                     && (metaData.isDecommissioned() || metaData.isUnRegistered() || metaData.isCreated() || metaData.isFailed())) {
                 instanceIds.put(metaData.getInstanceId(), metaData.getDiscoveryFQDN());
                 if (++i >= scalingAdjustment * -1) {
@@ -150,15 +139,4 @@ public class StackScalingService {
         return instanceIds;
     }
 
-    private void removeAgentFromConsul(Stack stack, ConsulClient client, InstanceMetaData metaData) {
-        Optional<String> nodeName = Optional.ofNullable(metaData.getDiscoveryFQDN())
-                                            .map(fqdn -> fqdn.replace(ConsulUtils.CONSUL_DOMAIN, ""));
-        if (nodeName.isPresent()) {
-            consulPollingService.pollWithTimeoutSingleFailure(
-                    consulAgentLeaveCheckerTask,
-                    new ConsulContext(stack, client, Collections.singletonList(nodeName.get())),
-                    POLLING_INTERVAL,
-                    MAX_POLLING_ATTEMPTS);
-        }
-    }
 }

@@ -20,7 +20,11 @@ dependencies {
     compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
     compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
     compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
-
+    compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+    compile group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: '4.5.1'
+    compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+    compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+    compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
     runtime ('org.springframework.cloud:spring-cloud-starter-consul-config:1.0.0.M6-v3'){
       exclude group: 'com.ecwid.consul';
     }

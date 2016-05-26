@@ -8,12 +8,6 @@ ambari-agent:
     - require:
       - sls: ambari.repo
 
-/opt/ambari-agent/ambari-agent-init.sh:
-  file.managed:
-    - makedirs: True
-    - source: salt://ambari/scripts/ambari-agent-init.sh
-    - mode: 755
-
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:
     - source: salt://ambari/scripts/internal_hostname.sh
@@ -25,6 +19,14 @@ ambari-agent:
   file.managed:
     - source: salt://ambari/scripts/public_hostname.sh
     - mode: 755
+    - watch:
+      - pkg: ambari-agent
+
+set_ambari_server_address:
+  file.replace:
+    - name: /etc/ambari-agent/conf/ambari-agent.ini
+    - pattern: "hostname=localhost"
+    - repl: "hostname={{ ambari.server_address }}"
     - watch:
       - pkg: ambari-agent
 

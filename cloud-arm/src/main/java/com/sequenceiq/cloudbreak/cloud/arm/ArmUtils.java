@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +43,7 @@ public class ArmUtils {
     private static final int RG_PART = 4;
     private static final int ID_SEGMENTS = 9;
     private static final int SEC_GROUP_PART = 8;
+    private static final int HOST_GROUP_LENGTH = 3;
 
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
@@ -56,8 +58,13 @@ public class ArmUtils {
         throw new CloudConnectorException(String.format("No resource found: %s", ResourceType.ARM_TEMPLATE));
     }
 
+    public static String getGroupName(String group) {
+        String shortened = WordUtils.initials(group.replaceAll("_", " ")).toLowerCase();
+        return shortened.length() <= HOST_GROUP_LENGTH ? shortened : shortened.substring(0, HOST_GROUP_LENGTH);
+    }
+
     public String getPrivateInstanceId(String stackName, String groupName, String privateId) {
-        return String.format("%s%s%s", stackName, groupName.replaceAll("_", ""), privateId);
+        return String.format("%s%s%s", stackName, getGroupName(groupName), privateId);
     }
 
     public String getStackName(CloudContext cloudContext) {

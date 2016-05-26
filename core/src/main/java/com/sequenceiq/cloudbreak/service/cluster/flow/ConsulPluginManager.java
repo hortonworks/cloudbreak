@@ -9,8 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,13 +18,12 @@ import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.event.model.EventParams;
-import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -219,12 +218,6 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     private Set<String> getHostnames(Set<HostMetadata> hostMetadata) {
-        return FluentIterable.from(hostMetadata).transform(new Function<HostMetadata, String>() {
-            @Nullable
-            @Override
-            public String apply(@Nullable HostMetadata metadata) {
-                return metadata.getHostName();
-            }
-        }).toSet();
+        return hostMetadata.stream().map(HostMetadata::getHostName).collect(Collectors.toSet());
     }
 }

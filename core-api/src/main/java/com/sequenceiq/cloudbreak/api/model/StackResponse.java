@@ -32,8 +32,6 @@ public class StackResponse extends StackBase {
     @Valid
     @ApiModelProperty
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
-    @ApiModelProperty(StackModelDescription.CONSUL_SERVER_COUNT)
-    private Integer consulServerCount;
     @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
     private OrchestratorResponse orchestrator;
 
@@ -52,14 +50,6 @@ public class StackResponse extends StackBase {
 
     public void setCluster(ClusterResponse cluster) {
         this.cluster = cluster;
-    }
-
-    public Integer getConsulServerCount() {
-        return consulServerCount;
-    }
-
-    public void setConsulServerCount(Integer consulServerCount) {
-        this.consulServerCount = consulServerCount;
     }
 
     public Long getId() {

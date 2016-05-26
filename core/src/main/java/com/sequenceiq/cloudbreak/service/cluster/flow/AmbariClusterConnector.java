@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
@@ -45,8 +45,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
@@ -659,13 +657,7 @@ public class AmbariClusterConnector {
     }
 
     private List<String> getHostNames(Set<HostMetadata> hostMetadata) {
-        return FluentIterable.from(hostMetadata).transform(new Function<HostMetadata, String>() {
-            @Nullable
-            @Override
-            public String apply(HostMetadata input) {
-                return input.getHostName();
-            }
-        }).toList();
+        return hostMetadata.stream().map(HostMetadata::getHostName).collect(Collectors.toList());
     }
 
     private boolean recipesFound(Set<HostGroup> hostGroups) {
@@ -698,25 +690,11 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void stopAmbariAgents(Stack stack, Set<String> hosts) throws CloudbreakException {
-        LOGGER.info("Stopping Ambari agents on hosts: {}", hosts == null || hosts.isEmpty() ? "all" : hosts);
-        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.STOP_AMBARI_EVENT,
-                DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT, Collections.<String>emptyList(), hosts);
-    }
-
     private void startAmbariAgents(Stack stack) throws CloudbreakException {
         LOGGER.info("Starting Ambari agents on the hosts.");
-//        try {
-//            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.START_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
-//        } catch (PluginFailureException e) {
-//            LOGGER.warn("Ambari agent start event couldn't finish in time, safely ignoring it", e);
-//        }
         PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
         if (PollingResult.EXIT.equals(hostsJoinedResult)) {
             throw new CancellationException("Cluster was terminated while starting Ambari agents.");
-        } else if (PollingResult.TIMEOUT.equals(hostsJoinedResult)) {
-            LOGGER.info("Ambari agents couldn't join. Restarting ambari agents...");
-//            restartAmbariAgents(stack);
         }
     }
 
@@ -816,8 +794,12 @@ public class AmbariClusterConnector {
                 if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
                     InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
                     gatewayHost = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId()).get(0);
+                    String domain = gatewayHost.substring(gatewayHost.indexOf(".") + 1);
+                    blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, domain.toUpperCase(), domain);
+                } else {
+                    // TODO this won't work on mesos, but it doesn't work anyway
+                    blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);
                 }
-                blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);
                 blueprintText = addHBaseClient(blueprintText);
                 if (ConfigStrategy.ONLY_STACK_DEFAULTS_APPLY.equals(cluster.getConfigStrategy())) {
                     blueprintText = fixHiveConfig(ambariClient, blueprintText);

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmDiskType;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmStorage;
+import com.sequenceiq.cloudbreak.cloud.arm.ArmUtils;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -46,7 +47,7 @@ public class ArmInstanceView {
     }
 
     public String getInstanceId() {
-        return instance.getGroupName().replaceAll("_", "") + instance.getPrivateId();
+        return ArmUtils.getGroupName(instance.getGroupName()) + instance.getPrivateId();
     }
 
     public long getPrivateId() {

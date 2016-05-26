@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-public class ConsulMetadataSetupRequest extends StackEvent {
-    public ConsulMetadataSetupRequest(Long stackId) {
+public class HostMetadataSetupRequest extends StackEvent {
+    public HostMetadataSetupRequest(Long stackId) {
         super(stackId);
     }
 }

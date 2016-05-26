@@ -1,23 +1,23 @@
-package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
+package com.sequenceiq.cloudbreak.orchestrator.model;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 
 import java.util.List;
 
-public class SaltBootResponses {
+public class GenericResponses {
 
-    private List<SaltBootResponse> responses;
+    private List<GenericResponse> responses;
 
-    public List<SaltBootResponse> getResponses() {
+    public List<GenericResponse> getResponses() {
         return responses;
     }
 
-    public void setResponses(List<SaltBootResponse> responses) {
+    public void setResponses(List<GenericResponse> responses) {
         this.responses = responses;
     }
 
     public void assertError() throws CloudbreakOrchestratorFailedException {
-        for (SaltBootResponse resp : responses) {
+        for (GenericResponse resp : responses) {
             resp.assertError();
         }
     }

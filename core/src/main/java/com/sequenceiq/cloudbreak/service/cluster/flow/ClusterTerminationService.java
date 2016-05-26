@@ -12,16 +12,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -80,13 +78,8 @@ public class ClusterTerminationService {
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
                 ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
                 Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
-                List<ContainerInfo> containerInfo = FluentIterable.from(containers).transform(new Function<Container, ContainerInfo>() {
-                    @Nullable
-                    @Override
-                    public ContainerInfo apply(Container input) {
-                        return new ContainerInfo(input.getContainerId(), input.getName(), input.getHost(), input.getImage());
-                    }
-                }).toList();
+                List<ContainerInfo> containerInfo = containers.stream()
+                        .map(c -> new ContainerInfo(c.getContainerId(), c.getName(), c.getHost(), c.getImage())).collect(Collectors.toList());
                 containerOrchestrator.deleteContainer(containerInfo, credential);
                 containerRepository.delete(containers);
                 deleteClusterHostGroupsWithItsMetadata(cluster);
