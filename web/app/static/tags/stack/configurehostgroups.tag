@@ -61,8 +61,8 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-group" ng-hide="instanceGroup.type=='GATEWAY' || $root.recipes.length === 0">
-                                <label class="col-sm-3 control-label" for="recipenames{{$index}}">Recipes</label>
+                            <div class="form-group" ng-hide="instanceGroup.type=='GATEWAY' || $root.recipes.length === 0 || cluster.orchestrator.type === 'SALT'">
+                               <label class="col-sm-3 control-label" for="recipenames{{$index}}">Recipes</label>
                                 <div class="col-sm-8">
                                     <div id="recipenames{{$index}}" name="recipenames{{$index}}">
                                         <div class="radio" ng-repeat="recipe in $root.recipes">
