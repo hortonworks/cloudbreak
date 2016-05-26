@@ -27,7 +27,6 @@ public class ClusterTerminationAction extends AbstractClusterTerminationAction<D
                 context.getCluster().getStack().getName(),
                 context.getCluster().getId(),
                 context.getCluster().getOwner());
-        // TODO: check if context is ok and send an event
         TerminateClusterRequest terminateRequest = new TerminateClusterRequest(clusterContext);
         sendEvent(context.getFlowId(), AmbariClusterRequest.selector(TerminateClusterRequest.class), terminateRequest);
     }

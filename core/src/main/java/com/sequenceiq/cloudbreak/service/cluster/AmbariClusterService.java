@@ -480,10 +480,13 @@ public class AmbariClusterService implements ClusterService {
         }
         Blueprint blueprint = blueprintService.get(blueprintId);
         if (blueprint == null) {
-            throw new BadRequestException(String.format("Blueprint not exist with '%s' id.", blueprintId));
+            throw new BadRequestException(String.format("Blueprint not exists with '%s' id.", blueprintId));
         }
         Stack stack = stackService.getById(stackId);
         Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
+        if (cluster == null) {
+            throw new BadRequestException(String.format("Cluster not exists on stack with '%s' id.", stackId));
+        }
         if (validateBlueprint) {
             blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stack.getInstanceGroups());
         }
