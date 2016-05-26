@@ -38,7 +38,7 @@ cb:
     external.id: provision-ambari
     cf.template.new.path: templates/aws-cf-stack.ftl
   
-  blueprint.defaults: hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster
+  blueprint.defaults: hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster,hdp-ephemeral
   template.defaults: minviable-gcp,minviable-azure,minviable-aws
   custom.user.data: |
     touch /tmp/custom-user-data
@@ -114,3 +114,6 @@ cb:
             agent.version: 2.2.1
             server.version: 2.2.1
             repo.url: https://raw.githubusercontent.com/sequenceiq/docker-ambari/master/ambari-agent/ambari.repo
+
+  smartsense.configure: false
+  smartsense.id.pattern: A-9990%d-C-%d

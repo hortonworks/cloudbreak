@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -69,6 +69,29 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
             return services;
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to get components for hostgroup '" + hostGroup + "' from blueprint.", e);
+        }
+    }
+
+    @Override
+    public boolean componentExistsInBlueprint(String component, String blueprintText) {
+        boolean componentExists = false;
+        try {
+            ObjectNode root = (ObjectNode) JsonUtil.readTree(blueprintText);
+            ArrayNode hostGroupsNode = (ArrayNode) root.path(HOST_GROUPS_NODE);
+            Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
+            while (hostGroups.hasNext()) {
+                JsonNode hostGroupNode = hostGroups.next();
+                Iterator<JsonNode> components = hostGroupNode.path("components").elements();
+                while (components.hasNext()) {
+                    if (component.equals(components.next().path("name").textValue())) {
+                        componentExists = true;
+                        break;
+                    }
+                }
+            }
+            return componentExists;
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to check that component('" + component + "') exists in the blueprint.", e);
         }
     }
 }
