@@ -100,7 +100,7 @@ public class AzureCommands implements CommandMarker {
         return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --AZURE --NEW", help = "Create an Openstack network configuration with a new network and a new subnet")
+    @CliCommand(value = "network create --AZURE --NEW", help = "Create an Azure network configuration with a new network and a new subnet")
     public String createNewNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
@@ -112,7 +112,7 @@ public class AzureCommands implements CommandMarker {
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --AZURE --EXISTING_SUBNET", help = "Create network which use an existing subnet in an existing network")
+    @CliCommand(value = "network create --AZURE --EXISTING_SUBNET", help = "Create an Azure network which use an existing subnet in an existing network")
     public String createNetworkWithExistingSubnet(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "resourceGroupName", mandatory = true,

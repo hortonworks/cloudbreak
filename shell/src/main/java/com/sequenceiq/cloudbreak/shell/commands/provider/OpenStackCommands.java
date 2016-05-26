@@ -132,7 +132,7 @@ public class OpenStackCommands implements CommandMarker {
         return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --OPENSTACK --EXISTING_SUBNET", help = "Create network which use an existing subnet in an existing network")
+    @CliCommand(value = "network create --OPENSTACK --EXISTING_SUBNET", help = "Create an Openstack network which use an existing subnet in an existing network")
     public String createExisitngNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "networkId", mandatory = true, help = "ID of the custom network to use") String networkId,

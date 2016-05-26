@@ -108,7 +108,7 @@ public class AwsCommands implements CommandMarker {
         return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --AWS --NEW", help = "Create an Openstack network configuration with a new network and a new subnet")
+    @CliCommand(value = "network create --AWS --NEW", help = "Create an Aws network configuration with a new network and a new subnet")
     public String createNewNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
@@ -120,7 +120,7 @@ public class AwsCommands implements CommandMarker {
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --AWS --NEW_SUBNET", help = "Create an OpenStack network configuration with a new subnet in an existing network")
+    @CliCommand(value = "network create --AWS --NEW_SUBNET", help = "Create an Aws network configuration with a new subnet in an existing network")
     public String createNetworkWithNewSubnet(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
@@ -137,7 +137,7 @@ public class AwsCommands implements CommandMarker {
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --AWS --EXISTING_SUBNET", help = "Create network which use an existing subnet in an existing network")
+    @CliCommand(value = "network create --AWS --EXISTING_SUBNET", help = "Create an Aws network which use an existing subnet in an existing network")
     public String createNetworkWithExistingSubnet(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "vpcID", mandatory = true, help = "The ID of the virtual private cloud (VPC)") String vpcId,
