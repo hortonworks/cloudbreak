@@ -19,8 +19,6 @@ public interface FlowFacade {
 
     FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException;
 
-    FlowContext startClusterRequested(FlowContext context) throws CloudbreakException;
-
     FlowContext handleStackSync(FlowContext context) throws CloudbreakException;
 
     FlowContext credentialChange(FlowContext context) throws CloudbreakException;

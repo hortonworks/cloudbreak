@@ -115,17 +115,6 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext startClusterRequested(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Starting cluster requested. Context: {}", context);
-        try {
-            return clusterFacade.startRequested(context);
-        } catch (Exception e) {
-            LOGGER.error("Exception during cluster start requested!: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
     public FlowContext handleStackSync(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Stack sync requested. Context: {}", context);
         try {

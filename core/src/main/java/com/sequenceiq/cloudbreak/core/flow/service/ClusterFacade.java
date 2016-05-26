@@ -11,7 +11,5 @@ public interface ClusterFacade {
 
     FlowContext resetAmbariCluster(FlowContext context) throws CloudbreakException;
 
-    FlowContext startRequested(FlowContext context) throws CloudbreakException;
-
     FlowContext credentialChange(FlowContext context) throws CloudbreakException;
 }
