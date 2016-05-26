@@ -1,23 +1,23 @@
 aws:
-  ap-northeast-1: ami-1bf7157a
-  ap-northeast-2: ami-19be7577
-  ap-southeast-1: ami-48fc2d2b
-  ap-southeast-2: ami-f09cb393
-  eu-central-1: ami-549e713b
-  eu-west-1: ami-4f92033c
-  sa-east-1: ami-5fed6633
-  us-east-1: ami-7f3ec812
-  us-west-1: ami-3a750e5a
-  us-west-2: ami-6d0df30d
+  ap-northeast-1: ami-8608e4e7
+  ap-northeast-2: ami-5fc40f31
+  ap-southeast-1: ami-ff6ebf9c
+  ap-southeast-2: ami-d9032dba
+  eu-central-1: ami-4e799621
+  eu-west-1: ami-88f566fb
+  sa-east-1: ami-9fbd36f3
+  us-east-1: ami-f54ebc98
+  us-west-1: ami-09d8a369
+  us-west-2: ami-cd4bb2ad
 
-aws-ambari_2.2.2.0-hdp_2.4.2.0_258:
-  ap-northeast-1: ami-5de00c3c
-  ap-northeast-2: ami-d9c50eb7
-  ap-southeast-1: ami-e079a883
-  ap-southeast-2: ami-513a1432
-  eu-central-1: ami-9216f9fd
-  eu-west-1: ami-d20494a1
-  sa-east-1: ami-a78c07cb
-  us-east-1: ami-d0e81abd
-  us-west-1: ami-e0f48f80
-  us-west-2: ami-2104fd41
+aws-ambari_2.4.0.0-hdp_2.4.2.0_258:
+  ap-northeast-1: ami-5647ab37
+  ap-northeast-2: ami-3ade1554
+  ap-southeast-1: ami-339f4f50
+  ap-southeast-2: ami-2f103e4c
+  eu-central-1: ami-e0ac428f
+  eu-west-1: ami-9ab92ae9
+  sa-east-1: ami-e84ac184
+  us-east-1: ami-392ed354
+  us-west-1: ami-f0c7bc90
+  us-west-2: ami-4f9a622f

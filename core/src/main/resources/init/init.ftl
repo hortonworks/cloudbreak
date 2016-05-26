@@ -20,6 +20,4 @@ export SSH_USER=${sshUser}
 
 ${customUserData}
 
-find /usr/lib -name "os_family.json*" | xargs sed -i 's/amazon2015/amazon2016/g'
-
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
