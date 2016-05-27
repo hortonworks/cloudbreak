@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-public enum ClusterCredentialChangeState implements FlowState<ClusterCredentialChangeState, ClusterCredentialChangeEvent> {
+public enum ClusterCredentialChangeState implements FlowState {
     INIT_STATE,
     CLUSTER_CREDENTIALCHANGE_FAILED_STATE,
 
@@ -12,7 +13,7 @@ public enum ClusterCredentialChangeState implements FlowState<ClusterCredentialC
     FINAL_STATE;
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return null;
     }
 }

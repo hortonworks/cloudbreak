@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-public enum StackDownscaleState implements FlowState<StackDownscaleState, StackDownscaleEvent> {
+public enum StackDownscaleState implements FlowState {
     INIT_STATE,
     DOWNSCALE_FAILED_STATE,
     DOWNSCALE_STATE,
@@ -10,7 +11,7 @@ public enum StackDownscaleState implements FlowState<StackDownscaleState, StackD
     FINAL_STATE;
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return null;
     }
 

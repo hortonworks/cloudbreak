@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.sync;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-public enum ClusterSyncState implements FlowState<ClusterSyncState, ClusterSyncEvent> {
+public enum ClusterSyncState implements FlowState {
     INIT_STATE,
     CLUSTER_SYNC_FAILED_STATE,
 
@@ -12,7 +13,7 @@ public enum ClusterSyncState implements FlowState<ClusterSyncState, ClusterSyncE
     FINAL_STATE;
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return null;
     }
 }

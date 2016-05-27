@@ -1,15 +1,13 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.start;
+package com.sequenceiq.cloudbreak.core.flow2.stack.updatesubnet;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-public enum ClusterStartState implements FlowState {
+enum UpdateSubnetState implements FlowState {
     INIT_STATE,
-    CLUSTER_START_FAILED_STATE,
-
-    CLUSTER_STARTING_STATE,
-    CLUSTER_START_FINISHED_STATE,
-
+    UPDATE_SUBNET_STATE,
+    UPDATE_SUBNET_FINISHED_STATE,
+    UPDATE_SUBNET_FAILED_STATE,
     FINAL_STATE;
 
     @Override

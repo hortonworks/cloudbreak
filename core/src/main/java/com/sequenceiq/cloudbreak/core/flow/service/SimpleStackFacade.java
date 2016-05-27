@@ -1,18 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -26,9 +18,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
-import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
-import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
@@ -97,53 +86,6 @@ public class SimpleStackFacade implements StackFacade {
     }
 
     @Override
-    public FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException {
-        UpdateAllowedSubnetsContext actualContext = (UpdateAllowedSubnetsContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Updating allowed subnets.");
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_SUBNETS_UPDATING, UPDATE_IN_PROGRESS.name());
-
-            Map<String, Set<SecurityRule>> modifiedSubnets = getModifiedSubnetList(stack, actualContext.getAllowedSecurityRules());
-            Set<SecurityRule> newSecurityRules = modifiedSubnets.get(UPDATED_SUBNETS);
-            stack.getSecurityGroup().setSecurityRules(newSecurityRules);
-            connector.updateAllowedSubnets(stack);
-            securityRuleRepository.delete(modifiedSubnets.get(REMOVED_SUBNETS));
-            securityRuleRepository.save(newSecurityRules);
-
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Allowed subnets successfully updated.");
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_SUBNETS_UPDATED, AVAILABLE.name());
-        } catch (Exception e) {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            SecurityGroup securityGroup = stack.getSecurityGroup();
-            String msg = String.format("Failed to update security group with allowed subnets: %s", securityGroup);
-            if (stack != null && stack.isStackInDeletionPhase()) {
-                msg = String.format("Failed to update security group with allowed subnets: %s; stack is already in deletion phase.",
-                        securityGroup);
-            }
-            LOGGER.error(msg, e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
-    public FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException {
-        UpdateAllowedSubnetsContext actualContext = (UpdateAllowedSubnetsContext) context;
-        try {
-            Stack stack = stackService.getById(actualContext.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, String.format("Stack update failed. %s", actualContext.getErrorReason()));
-            fireEventAndLog(stack.getId(), actualContext, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, AVAILABLE.name(), actualContext.getErrorReason());
-        } catch (Exception e) {
-            LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-        return context;
-    }
-
-    @Override
     public FlowContext handleStatusUpdateFailure(FlowContext flowContext) throws CloudbreakException {
         StackStatusUpdateContext context = (StackStatusUpdateContext) flowContext;
         Stack stack = stackService.getById(context.getStackId());
@@ -170,39 +112,6 @@ public class SimpleStackFacade implements StackFacade {
             }
         }
         return context;
-    }
-
-    private Map<String, Set<SecurityRule>> getModifiedSubnetList(Stack stack, List<SecurityRule> securityRuleList) {
-        Map<String, Set<SecurityRule>> result = new HashMap<>();
-        Set<SecurityRule> removed = new HashSet<>();
-        Set<SecurityRule> updated = new HashSet<>();
-        Long securityGroupId = stack.getSecurityGroup().getId();
-        Set<SecurityRule> securityRules = securityGroupService.get(securityGroupId).getSecurityRules();
-        for (SecurityRule securityRule : securityRules) {
-            if (!securityRule.isModifiable()) {
-                updated.add(securityRule);
-                removeFromNewSubnetList(securityRule, securityRuleList);
-            } else {
-                removed.add(securityRule);
-            }
-        }
-        for (SecurityRule securityRule : securityRuleList) {
-            updated.add(securityRule);
-        }
-        result.put(UPDATED_SUBNETS, updated);
-        result.put(REMOVED_SUBNETS, removed);
-        return result;
-    }
-
-    private void removeFromNewSubnetList(SecurityRule securityRule, List<SecurityRule> securityRuleList) {
-        Iterator<SecurityRule> iterator = securityRuleList.iterator();
-        String cidr = securityRule.getCidr();
-        while (iterator.hasNext()) {
-            SecurityRule next = iterator.next();
-            if (next.getCidr().equals(cidr)) {
-                iterator.remove();
-            }
-        }
     }
 
     private void fireEventAndLog(Long stackId, FlowContext context, Msg msgCode, String eventType, Object... args) {

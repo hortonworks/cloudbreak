@@ -126,11 +126,6 @@ public class ServiceProviderConnectorAdapter {
         }
     }
 
-    public void rollback(Stack stack, Set<Resource> resourceSet) {
-        LOGGER.info("Rollback the whole stack for {}", stack.getId());
-        deleteStack(stack, stack.getCredential());
-    }
-
     public void updateAllowedSubnets(Stack stack) {
         LOGGER.debug("Assembling update subnet event for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -141,20 +136,11 @@ public class ServiceProviderConnectorAdapter {
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         UpdateStackRequest<UpdateStackResult> updateRequest = new UpdateStackRequest<>(cloudContext, cloudCredential, cloudStack, resources);
         eventBus.notify(updateRequest.selector(), Event.wrap(updateRequest));
-        try {
-            UpdateStackResult res = updateRequest.await();
-            LOGGER.info("Update stack result: {}", res);
-            if (res.isFailed()) {
-                if (res.getException() != null) {
-                    LOGGER.error("Failed to update the stack", res.getException());
-                    throw new OperationException(res.getException());
-                }
-                throw new OperationException(format("Failed to update the stack: %s due to: %s", cloudContext, res.getStatusReason()));
-            }
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while updating the stack: " + cloudContext, e);
-            throw new OperationException(e);
-        }
+    }
+
+    public void rollback(Stack stack, Set<Resource> resourceSet) {
+        LOGGER.info("Rollback the whole stack for {}", stack.getId());
+        deleteStack(stack, stack.getCredential());
     }
 
     public PlatformParameters getPlatformParameters(Stack stack) {

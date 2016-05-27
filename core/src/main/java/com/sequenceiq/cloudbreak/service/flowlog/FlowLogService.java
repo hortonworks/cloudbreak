@@ -20,7 +20,7 @@ public class FlowLogService {
     @Inject
     private FlowLogRepository flowLogRepository;
 
-    public FlowLog save(String flowId, String key, Payload payload, Class<?> flowType, FlowState<?, ?> currentState) {
+    public FlowLog save(String flowId, String key, Payload payload, Class<?> flowType, FlowState currentState) {
         String payloadJson = JsonWriter.objectToJson(payload);
         FlowLog flowLog = new FlowLog(payload.getStackId(), flowId, key, payloadJson, payload.getClass(), flowType, currentState.toString());
         return flowLogRepository.save(flowLog);

@@ -3,10 +3,11 @@ package com.sequenceiq.cloudbreak.cloud.event.resource;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
-public class UpdateStackResult {
+public class UpdateStackResult implements Payload {
 
     private CloudContext cloudContext;
     private ResourceStatus status;
@@ -49,6 +50,11 @@ public class UpdateStackResult {
 
     public boolean isFailed() {
         return status == ResourceStatus.FAILED;
+    }
+
+    @Override
+    public Long getStackId() {
+        return cloudContext.getId();
     }
 
     @Override

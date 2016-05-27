@@ -114,11 +114,11 @@ public class AbstractFlowConfigurationTest {
         flow.sendEvent(Event.FAILURE.name(), null);
     }
 
-    enum State implements FlowState<State, Event> {
+    enum State implements FlowState {
         INIT, DO, DO2, FINISH, FAILED, FAILED2, FINAL;
 
         @Override
-        public Class<?> action() {
+        public Class<? extends AbstractAction> action() {
             return FlowFinalizeAction.class;
         }
     }

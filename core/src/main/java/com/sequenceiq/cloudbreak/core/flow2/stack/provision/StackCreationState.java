@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.CheckImageAction;
 
-public enum StackCreationState implements FlowState<StackCreationState, StackCreationEvent> {
+public enum StackCreationState implements FlowState {
     INIT_STATE,
     STACK_CREATION_FAILED_STATE,
     SETUP_STATE,
@@ -18,17 +19,17 @@ public enum StackCreationState implements FlowState<StackCreationState, StackCre
     STACK_CREATION_FINISHED_STATE,
     FINAL_STATE;
 
-    private Class<?> action;
+    private Class<? extends AbstractAction> action;
 
     StackCreationState() {
     }
 
-    StackCreationState(Class<?> action) {
+    StackCreationState(Class<? extends AbstractAction> action) {
         this.action = action;
     }
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return action;
     }
 }

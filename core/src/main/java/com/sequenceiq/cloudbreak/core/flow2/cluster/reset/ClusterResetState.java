@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.reset;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-public enum ClusterResetState implements FlowState<ClusterResetState, ClusterResetEvent> {
+public enum ClusterResetState implements FlowState {
     INIT_STATE,
     CLUSTER_RESET_FAILED_STATE,
 
@@ -14,7 +15,7 @@ public enum ClusterResetState implements FlowState<ClusterResetState, ClusterRes
     FINAL_STATE;
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return null;
     }
 }
