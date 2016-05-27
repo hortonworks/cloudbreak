@@ -66,6 +66,11 @@ cbd-version() {
         warn "Please update it by:"
         echo "  cbd update" | blue
     fi
+
+    echo "docker images:"
+    sed -n "s/.*image://p" docker-compose.yml | grep "sequenceiq\|hortonworks" |green
+
+
 }
 
 cbd-update() {
