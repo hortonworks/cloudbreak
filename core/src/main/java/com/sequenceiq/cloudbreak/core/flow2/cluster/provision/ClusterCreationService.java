@@ -84,8 +84,11 @@ public class ClusterCreationService {
 
         // TODO Only triggering the deleteClusterContainers flow
         try {
-            clusterTerminationService.deleteClusterContainers(cluster.getId());
-        } catch (TerminationFailedException ex) {
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
+            if (cluster != null && orchestratorType.containerOrchestrator()) {
+                clusterTerminationService.deleteClusterContainers(cluster);
+            }
+        } catch (CloudbreakException | TerminationFailedException ex) {
             LOGGER.error("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
         }
 
