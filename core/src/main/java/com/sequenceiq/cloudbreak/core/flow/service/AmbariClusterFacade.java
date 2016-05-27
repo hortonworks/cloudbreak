@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Arrays;
@@ -20,7 +19,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceR
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterAuthenticationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -96,7 +94,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         AMBARI_CLUSTER_RESET("ambari.cluster.reset"),
         AMBARI_CLUSTER_CHANGING_CREDENTIAL("ambari.cluster.changing.credential"),
         AMBARI_CLUSTER_CHANGED_CREDENTIAL("ambari.cluster.changed.credential"),
-        AMBARI_CLUSTER_START_REQUESTED("ambari.cluster.start.requested"),
         AMBARI_CLUSTER_START_FAILED("ambari.cluster.start.failed"),
         AMBARI_CLUSTER_STOP_FAILED("ambari.cluster.stop.failed"),
         AMBARI_CLUSTER_CREATE_FAILED("ambari.cluster.create.failed"),
@@ -124,16 +121,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         context = new ProvisioningContext.Builder()
                 .withProvisioningContext(actualContext)
                 .build();
-        return context;
-    }
-
-    @Override
-    public FlowContext startRequested(FlowContext context) throws CloudbreakException {
-        StackStatusUpdateContext actualContext = (StackStatusUpdateContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(stack);
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_START_REQUESTED, START_REQUESTED.name());
-        clusterService.updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
         return context;
     }
 
