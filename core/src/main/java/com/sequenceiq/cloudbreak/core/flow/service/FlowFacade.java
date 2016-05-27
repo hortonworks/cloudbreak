@@ -9,10 +9,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 public interface FlowFacade {
     FlowContext collectMetadata(FlowContext flowContext) throws CloudbreakException;
 
-    FlowContext resetAmbariCluster(FlowContext flowContext) throws CloudbreakException;
-
-    FlowContext handleClusterInstallationFailure(FlowContext flowContext) throws CloudbreakException;
-
     FlowContext handleStackStatusUpdateFailure(FlowContext context) throws CloudbreakException;
 
     FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException;

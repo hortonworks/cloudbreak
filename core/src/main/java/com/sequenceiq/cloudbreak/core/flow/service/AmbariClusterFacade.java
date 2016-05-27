@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow.service;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Arrays;
@@ -18,7 +17,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContain
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow.context.ClusterAuthenticationContext;
 import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -111,20 +109,6 @@ public class AmbariClusterFacade implements ClusterFacade {
     }
 
     @Override
-    public FlowContext resetAmbariCluster(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(cluster);
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_RESET, UPDATE_IN_PROGRESS.name());
-        ambariClusterConnector.resetAmbariCluster(stack.getId());
-        context = new ProvisioningContext.Builder()
-                .withProvisioningContext(actualContext)
-                .build();
-        return context;
-    }
-
-    @Override
     public FlowContext credentialChange(FlowContext context) throws CloudbreakException {
         ClusterAuthenticationContext actualContext = (ClusterAuthenticationContext) context;
         Stack stack = stackService.getById(actualContext.getStackId());
@@ -135,23 +119,6 @@ public class AmbariClusterFacade implements ClusterFacade {
         clusterService.updateClusterUsernameAndPassword(cluster, actualContext.getUser(), actualContext.getPassword());
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CHANGED_CREDENTIAL, AVAILABLE.name());
-        return actualContext;
-    }
-
-    @Override
-    public FlowContext handleClusterInstallationFailure(FlowContext context) throws CloudbreakException {
-        ProvisioningContext actualContext = (ProvisioningContext) context;
-        Stack stack = stackService.getById(actualContext.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(actualContext.getStackId());
-        MDCBuilder.buildMdcContext(cluster);
-        clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, actualContext.getErrorReason());
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
-        fireEventAndLog(stack.getId(), context, Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), actualContext.getErrorReason());
-
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
-            fireEventAndLog(actualContext.getStackId(), context, Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
-        }
         return actualContext;
     }
 
