@@ -46,32 +46,6 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext resetAmbariCluster(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Reset Ambari cluster. Context: {}", context);
-        try {
-            context = clusterFacade.resetAmbariCluster(context);
-            LOGGER.debug("Reset Ambari cluster DONE");
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the cluster reset process: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleClusterInstallationFailure(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Cluster installation failed. Context: {}", context);
-        try {
-            context = clusterFacade.handleClusterInstallationFailure(context);
-            LOGGER.debug("Cluster installation failure handled.");
-            return context;
-        } catch (Exception e) {
-            LOGGER.error("Exception during cluster installation!: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
     public FlowContext handleStackStatusUpdateFailure(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Handling stack start/stop failure. Context: {}", context);
         try {
