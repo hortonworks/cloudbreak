@@ -19,14 +19,14 @@ tests:
     parameters:
       credentialName: it-mock-credential
     classes:
-      - com.sequenceiq.it.cloudbreak.MockCredentialCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockCredentialCreationTest
 
   - name: create mock network
     parameters:
       networkName: it-mock-network
       subnetCIDR: 10.0.36.0/24
     classes:
-      - com.sequenceiq.it.cloudbreak.MockNetworkCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockNetworkCreationTest
 
   - name: create gateway template
     parameters:
@@ -37,7 +37,7 @@ tests:
       volumeSize: 10
       templateAdditions: "cbgateway,1,GATEWAY"
     classes:
-      - com.sequenceiq.it.cloudbreak.MockTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
   - name: create master template
     parameters:
@@ -48,7 +48,7 @@ tests:
       volumeSize: 40
       templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
     classes:
-      - com.sequenceiq.it.cloudbreak.MockTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
   - name: create slave template
     parameters:
@@ -59,7 +59,7 @@ tests:
       volumeSize: 200
       templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
     classes:
-      - com.sequenceiq.it.cloudbreak.MockTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
   - name: create cluster
     parameters: {
@@ -71,5 +71,5 @@ tests:
       mockPort: 7654
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.MockStackCreationFailedTest
+      - com.sequenceiq.it.cloudbreak.mock.MockStackCreationFailedTest
 #      - com.sequenceiq.it.cloudbreak.ClusterCreationTest

@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.it.spark.ITResponse;
+import com.sequenceiq.it.util.ServerAddressGenerator;
 
 import spark.Request;
 import spark.Response;
@@ -31,14 +32,13 @@ public class SaltApiRunPostResponse extends ITResponse {
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
+        ServerAddressGenerator serverAddressGenerator = new ServerAddressGenerator(numberOfServers);
         if (request.body().contains("grains.append")) {
             ApplyResponse applyResponse = new ApplyResponse();
             ArrayList<Map<String, Object>> responseList = new ArrayList<>();
 
             Map<String, Object> hostMap = new HashMap<>();
-            for (int i = 1; i <= numberOfServers; i++) {
-                hostMap.put("host" + i, "192.168.1." + i);
-            }
+            serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address, address));
             responseList.add(hostMap);
 
             applyResponse.setResult(responseList);
@@ -47,11 +47,11 @@ public class SaltApiRunPostResponse extends ITResponse {
         if (request.body().contains("network.interface_ip")) {
             NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
             List<Map<String, String>> result = new ArrayList<>();
-            for (int i = 1; i <= numberOfServers; i++) {
+            serverAddressGenerator.iterateOver(address -> {
                 Map<String, String> networkHashMap = new HashMap<>();
-                networkHashMap.put("host" + i, "192.168.1." + i);
+                networkHashMap.put("host-" + address, address);
                 result.add(networkHashMap);
-            }
+            });
             networkInterfaceResponse.setResult(result);
             return getObjectMapper().writeValueAsString(networkInterfaceResponse);
         }
@@ -60,40 +60,32 @@ public class SaltApiRunPostResponse extends ITResponse {
             ArrayList<Map<String, Object>> responseList = new ArrayList<>();
 
             Map<String, Object> hostMap = new HashMap<>();
-            for (int i = 1; i <= numberOfServers; i++) {
-                hostMap.put("host" + i, "192.168.1." + i);
-            }
+            serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address, address));
             responseList.add(hostMap);
 
             applyResponse.setResult(responseList);
             return getObjectMapper().writeValueAsString(applyResponse);
         }
         if (request.body().contains("state.highstate")) {
-            return responseFromJsonFile("saltapi/highstateresponse.json");
+            return responseFromJsonFile("saltapi/high_state_response.json");
         }
         if (request.body().contains("jobs.active")) {
-            return responseFromJsonFile("saltapi/runningjobsresponse.json");
+            return responseFromJsonFile("saltapi/runningjobs_response.json");
         }
         if (request.body().contains("jobs.lookup_jid")) {
-            return responseFromJsonFile("saltapi/lookupjidresponse.json");
+            return responseFromJsonFile("saltapi/lookup_jid_response.json");
         }
         if (request.body().contains("state.apply")) {
-            return responseFromJsonFile("saltapi/stateapplyresponse.json");
-        }
-        if (request.body().contains("jobs.active")) {
-            return responseFromJsonFile("saltapi/runningjobsresponse.json");
-        }
-        if (request.body().contains("jobs.lookup_jid")) {
-            return responseFromJsonFile("saltapi/lookupjidresponse.json");
+            return responseFromJsonFile("saltapi/state_apply_response.json");
         }
         if (request.body().contains("network.interface_ip")) {
             NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
             List<Map<String, String>> result = new ArrayList<>();
-            for (int i = 1; i <= numberOfServers + 1; i++) {
+            serverAddressGenerator.iterateOver(address -> {
                 Map<String, String> networkHashMap = new HashMap<>();
-                networkHashMap.put("host" + i, "192.168.1." + i);
+                networkHashMap.put("host-" + address, address);
                 result.add(networkHashMap);
-            }
+            });
             networkInterfaceResponse.setResult(result);
             return objectMapper.writeValueAsString(networkInterfaceResponse);
         }

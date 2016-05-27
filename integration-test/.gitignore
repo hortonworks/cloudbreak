@@ -17,3 +17,9 @@ curl_config_admin_user
 startit.sh
 build/
 test-output/
+integcb/.deps/
+integcb/cbd
+integcb/certs/
+integcb/docker-compose.yml
+integcb/uaa.yml
+test.out

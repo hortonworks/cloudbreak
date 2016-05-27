@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.mock;
 
 import org.testng.Assert;
 import org.testng.annotations.Optional;
@@ -6,6 +6,8 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
+import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 
 public class MockNetworkCreationTest extends AbstractCloudbreakIntegrationTest {
     @Test

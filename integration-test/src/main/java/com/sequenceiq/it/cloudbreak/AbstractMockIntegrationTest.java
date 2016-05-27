@@ -22,7 +22,7 @@ import org.testng.annotations.BeforeClass;
 
 import com.google.gson.Gson;
 import com.sequenceiq.it.verification.Call;
-import com.sequenceiq.it.verification.Verify;
+import com.sequenceiq.it.verification.Verification;
 
 import spark.Response;
 
@@ -59,8 +59,12 @@ public abstract class AbstractMockIntegrationTest extends AbstractCloudbreakInte
         stop();
     }
 
-    public Verify verify(String path, String httpMethod) {
-        return new Verify(path, httpMethod, requestResponseMap);
+    public Verification verify(String path, String httpMethod) {
+        return new Verification(path, httpMethod, requestResponseMap, false);
+    }
+
+    public Verification verifyRegexpPath(String regexpPath, String httpMethod) {
+        return new Verification(regexpPath, httpMethod, requestResponseMap, true);
     }
 
     protected String responseFromJsonFile(String path) {

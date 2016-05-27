@@ -95,5 +95,15 @@ public class Call {
         return request;
     }
 
-
+    @Override
+    public String toString() {
+        return "Call{"
+                + "url='" + url + '\''
+                + ", uri='" + uri + '\''
+                + ", contentType='" + contentType + '\''
+                + ", postBody='" + postBody + '\''
+                + ", method='" + method + '\''
+                + ", parameters=" + parameters
+                + '}';
+    }
 }

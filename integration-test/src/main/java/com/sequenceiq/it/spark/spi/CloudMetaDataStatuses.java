@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.it.spark.ITResponse;
+import com.sequenceiq.it.util.ServerAddressGenerator;
 
 public class CloudMetaDataStatuses extends ITResponse {
 
@@ -28,14 +29,15 @@ public class CloudMetaDataStatuses extends ITResponse {
 
     private List<CloudVmMetaDataStatus> createCloudVmMetaDataStatuses(List<CloudInstance> cloudInstances) {
         List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
-        for (int i = 0; i < cloudInstances.size(); i++) {
-            CloudInstance cloudInstance = cloudInstances.get(i);
-            CloudInstance cloudInstanceWithId = new CloudInstance(Integer.toString(i), cloudInstance.getTemplate());
+        int numberOfServers = cloudInstances.size();
+        new ServerAddressGenerator(numberOfServers).iterateOver((address, number) -> {
+            CloudInstance cloudInstance = cloudInstances.get(number);
+            CloudInstance cloudInstanceWithId = new CloudInstance("instance-" + address, cloudInstance.getTemplate());
             CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstanceWithId, InstanceStatus.STARTED);
-            CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData("192.168.1." + (i + 1), mockServerAddress, sshPort, "MOCK");
+            CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(address, mockServerAddress, sshPort, "MOCK");
             CloudVmMetaDataStatus cloudVmMetaDataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
             cloudVmMetaDataStatuses.add(cloudVmMetaDataStatus);
-        }
+        });
         return cloudVmMetaDataStatuses;
     }
 

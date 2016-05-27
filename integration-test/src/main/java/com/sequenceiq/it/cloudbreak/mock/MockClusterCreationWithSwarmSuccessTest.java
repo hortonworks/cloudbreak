@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.mock;
 
 import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.CONSUL_API_ROOT;
@@ -25,8 +25,10 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.spark.docker.model.Info;
-import com.sequenceiq.it.spark.docker.model.InspectContainerResponse;
+import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
+import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
+import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
+import com.sequenceiq.it.cloudbreak.HostGroup;
 import com.sequenceiq.it.spark.ambari.AmbariBlueprintsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
@@ -38,6 +40,8 @@ import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.consul.ConsulEventFireResponse;
 import com.sequenceiq.it.spark.consul.ConsulKeyValueGetResponse;
+import com.sequenceiq.it.spark.docker.model.Info;
+import com.sequenceiq.it.spark.docker.model.InspectContainerResponse;
 
 
 public class MockClusterCreationWithSwarmSuccessTest extends AbstractMockIntegrationTest {
@@ -96,6 +100,31 @@ public class MockClusterCreationWithSwarmSuccessTest extends AbstractMockIntegra
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
 
+        verify(AMBARI_API_ROOT + "/views/FILES/versions/1.0.0/instances/files", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
+        verify(AMBARI_API_ROOT + "/views/PIG/versions/1.0.0/instances/pig", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
+        verify(AMBARI_API_ROOT + "/views/HIVE/versions/1.0.0/instances/hive", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
+        verify(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", "GET").exactTimes(1).verify();
+        verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
+        verify(AMBARI_API_ROOT + "/check", "GET").exactTimes(1).verify();
+        verify(AMBARI_API_ROOT + "/users/admin", "PUT").exactTimes(1).bodyContains("Users/password").bodyContains("Users/old_password").verify();
+        verify(AMBARI_API_ROOT + "/blueprints/bp", "POST").exactTimes(1)
+                .bodyContains("blueprint_name").bodyContains("stack_name").bodyContains("stack_version").bodyContains("host_groups")
+                .exactTimes(1).verify();
+        verify(AMBARI_API_ROOT + "/clusters/it-mock-cluster", "POST").exactTimes(1).bodyContains("blueprint").bodyContains("default_password")
+                .bodyContains("host_groups").verify();
+        verify(AMBARI_API_ROOT + "/clusters/ambari_cluster/requests/1", "GET").atLeast(1).verify();
+        verify(AMBARI_API_ROOT + "/clusters/ambari_cluster/hosts", "GET").exactTimes(1).verify();
+
+        verify(CONSUL_API_ROOT + "/event/fire/recipe-post-install", "PUT").exactTimes(1).verify();
+        verify(CONSUL_API_ROOT + "/event/fire/cleanup-plugin", "PUT").atLeast(1).verify();
+        verify(CONSUL_API_ROOT + "/event/fire/install-plugin", "PUT").exactTimes(1).verify();
+
+        verifyRegexpPath(SWARM_API_ROOT + "/containers/logrotate.*/start", "POST").exactTimes(numberOfServers + 1).verify();
+        verifyRegexpPath(SWARM_API_ROOT + "/containers/consul-watch.*/start", "POST").exactTimes(numberOfServers + 1).verify();
+        verify(SWARM_API_ROOT + "/containers/registrator-" + clusterName + "/start", "POST").exactTimes(1).verify();
+        verify(SWARM_API_ROOT + "/containers/ambari_db-" + clusterName + "/start", "POST").exactTimes(1).verify();
+        verify(SWARM_API_ROOT + "/containers/ambari-server-" + clusterName + "/start", "POST").exactTimes(1).verify();
+        verifyRegexpPath(SWARM_API_ROOT + "/containers/ambari-agent-" + clusterName + ".*/start", "POST").exactTimes(numberOfServers).verify();
     }
 
     private void addAmbariMappings(int numberOfServers) {

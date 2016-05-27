@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak;
+package com.sequenceiq.it.cloudbreak.mock;
 
 import java.util.List;
 
@@ -11,6 +11,9 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
+import com.sequenceiq.it.cloudbreak.TemplateAddition;
+import com.sequenceiq.it.cloudbreak.TemplateAdditionHelper;
 
 public class MockTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     @Inject

@@ -8,6 +8,6 @@ integrationtest:
     defaultBlueprintName: hdp-small-default
     outputdir: /it
     command: suites
-    suiteFiles: /it/src/main/resources/testsuites/mock/mock-clustercreate-swarm.yaml,/it/src/main/resources/testsuites/mock/mock-clustercreate-salt.yaml
+    suiteFiles: /it/src/main/resources/testsuites/mock/mock-clustercreate-salt.yaml
     cleanup:
       cleanupBeforeStart: true
