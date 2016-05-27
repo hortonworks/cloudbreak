@@ -18,9 +18,6 @@ public class SimpleFlowFacade implements FlowFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleFlowFacade.class);
 
     @Inject
-    private ClusterFacade clusterFacade;
-
-    @Inject
     private StackFacade stackFacade;
 
     @Inject
@@ -95,17 +92,6 @@ public class SimpleFlowFacade implements FlowFacade {
             return stackFacade.sync(context);
         } catch (Exception e) {
             LOGGER.error("Exception during cluster start sync!: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext credentialChange(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Authentication change for cluster requested. Context: {}", context);
-        try {
-            return clusterFacade.credentialChange(context);
-        } catch (Exception e) {
-            LOGGER.error("Exception during cluster authentication change!: {}", e.getMessage());
             throw new CloudbreakException(e);
         }
     }
