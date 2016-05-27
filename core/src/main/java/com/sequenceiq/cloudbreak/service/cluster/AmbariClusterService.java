@@ -90,9 +90,6 @@ public class AmbariClusterService implements ClusterService {
     private StackService stackService;
 
     @Inject
-    private ClusterService clusterService;
-
-    @Inject
     private BlueprintService blueprintService;
 
     @Inject
@@ -356,7 +353,7 @@ public class AmbariClusterService implements ClusterService {
             retVal = new ClusterStatusUpdateRequest(stack.getId(), statusRequest, platform(stack.cloudPlatform()));
             String message = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_START_REQUESTED.code());
             eventService.fireCloudbreakEvent(stack.getId(), START_REQUESTED.name(), message);
-            clusterService.updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
+            updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
         } else {
             if (cluster.isAvailable()) {
                 String statusDesc = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_START_IGNORED.code());
