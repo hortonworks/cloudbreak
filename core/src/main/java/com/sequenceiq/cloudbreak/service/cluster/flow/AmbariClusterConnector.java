@@ -262,7 +262,6 @@ public class AmbariClusterConnector {
             executeSmokeTest(stack, ambariClient);
             //TODO https://hortonworks.jira.com/browse/BUG-51920
             startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
-            createDefaultViews(ambariClient, blueprintText, hostGroups);
             cluster = handleClusterCreationSuccess(stack, cluster);
             return cluster;
         } catch (CancellationException cancellationException) {
@@ -979,20 +978,6 @@ public class AmbariClusterConnector {
                 String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
                 throw new CloudbreakServiceException("Ambari could not install services. " + errorMessage, e);
             }
-        }
-    }
-
-    private void createDefaultViews(AmbariClient ambariClient, String blueprintText, Set<HostGroup> hostGroups) {
-        try {
-            ambariClient.createFilesView();
-            if (isComponentPresent(blueprintText, "PIG", hostGroups)) {
-                ambariClient.createPigView();
-            }
-            if (isComponentPresent(blueprintText, "HIVE_SERVER", hostGroups)) {
-                ambariClient.createHiveView();
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Could not create default views", e);
         }
     }
 
