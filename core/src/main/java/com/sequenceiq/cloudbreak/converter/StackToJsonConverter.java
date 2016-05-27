@@ -69,6 +69,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         if (source.getOrchestrator() != null) {
             stackJson.setOrchestrator(conversionService.convert(source.getOrchestrator(), OrchestratorResponse.class));
         }
+        stackJson.setCreated(source.getCreated());
         return stackJson;
     }
 

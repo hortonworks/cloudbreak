@@ -34,7 +34,8 @@ public class StackResponse extends StackBase {
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
     @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
     private OrchestratorResponse orchestrator;
-
+    @ApiModelProperty(StackModelDescription.CREATED)
+    private Long created;
 
     public String getAccount() {
         return account;
@@ -107,5 +108,13 @@ public class StackResponse extends StackBase {
 
     public void setOrchestrator(OrchestratorResponse orchestrator) {
         this.orchestrator = orchestrator;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }
