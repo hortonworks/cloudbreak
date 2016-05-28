@@ -15,7 +15,9 @@ import javax.ws.rs.client.WebTarget;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -33,6 +35,10 @@ public class HostMetadataSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HostMetadataSetup.class);
     private static final String HOSTNAME_ENDPOINT = "saltboot/hostname/distribute";
+    private static final String DEFAULT_DOMAIN = ".example.com";
+
+    @Value("${cb.host.discovery.custom.domain:}")
+    private String customDomain;
 
     @Inject
     private StackService stackService;
@@ -89,7 +95,10 @@ public class HostMetadataSetup {
                 String address = members.get(privateIp);
                 // TODO remove column
                 instanceMetaData.setConsulServer(false);
-                instanceMetaData.setDiscoveryFQDN(address);
+                String fqdn = determineFqdn(instanceMetaData.getInstanceId(), instanceMetaData.getPrivateIp(), address);
+                instanceMetaData.setDiscoveryFQDN(fqdn);
+                LOGGER.info("Domain used for isntance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(), address,
+                        instanceMetaData.getDiscoveryFQDN());
             }
         } catch (Exception e) {
             throw new CloudbreakSecuritySetupException(e);
@@ -98,6 +107,31 @@ public class HostMetadataSetup {
                 restClient.close();
             }
         }
+    }
+
+    private String determineFqdn(String id, String ip, String address) {
+        String fqdn;
+        if (StringUtils.isEmpty(customDomain)) {
+            if (address.split("\\.").length == 1) {
+                //if there is no domain, we need to add one since ambari fails without domain, actually it does nothing just hangs...
+                fqdn = address + DEFAULT_DOMAIN;
+                LOGGER.warn("Default domain is used, since there is no proper domain configured for instance: {}, ip: {}, original: {}, fqdn: {}",
+                        id, ip, address, fqdn);
+            } else {
+                fqdn = address;
+            }
+        } else {
+            String hostname = address.split("\\.")[0];
+            // this is just for convenience
+            if (customDomain.startsWith(".")) {
+                fqdn = hostname + customDomain;
+            } else {
+                fqdn = hostname + "." + customDomain;
+            }
+            LOGGER.warn("Domain of instance will be overwritten instance: {}, ip: {}, original: {}, fqdn: {}",
+                    id, ip, address, fqdn);
+        }
+        return fqdn;
     }
 
 }
