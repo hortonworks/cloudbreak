@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -24,22 +25,26 @@ public class PillarSave implements OrchestratorBootstrap {
         this.pillar = new Pillar("/ambari/server.sls", singletonMap("ambari", singletonMap("server", gateway)));
     }
 
-    public PillarSave(SaltConnector sc, Set<Node> hosts) {
+    public PillarSave(SaltConnector sc, GatewayConfig gatewayConfig, Set<Node> hosts) {
         this.sc = sc;
         Map<String, Map<String, String>> fqdn = hosts
                 .stream()
-                .collect(Collectors.toMap(Node::getPrivateIp, node -> {
-                    Map<String, String> map = new HashMap<>();
-                    map.put("fqdn", node.getHostname());
-                    map.put("hostname", node.getHostname().split("\\.")[0]);
-                    return map;
-                }));
+                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname())));
+
+        fqdn.put(gatewayConfig.getPrivateAddress(), discovery(gatewayConfig.getHostname()));
         this.pillar = new Pillar("/nodes/hosts.sls", singletonMap("hosts", fqdn));
     }
 
     public PillarSave(SaltConnector sc, SaltPillarProperties pillarProperties) {
         this.sc = sc;
         this.pillar = new Pillar(pillarProperties.getPath(), pillarProperties.getProperties());
+    }
+
+    private Map<String, String> discovery(String hostname) {
+        Map<String, String> map = new HashMap<>();
+        map.put("fqdn", hostname);
+        map.put("hostname", hostname.split("\\.")[0]);
+        return map;
     }
 
     @Override

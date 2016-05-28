@@ -4,20 +4,22 @@ public class GatewayConfig {
 
     private final String publicAddress;
     private final String privateAddress;
+    private final String hostname;
     private final String certificateDir;
-    private Integer gatewayPort;
     private final String serverCert;
     private final String clientCert;
     private final String clientKey;
+    private Integer gatewayPort;
 
     public GatewayConfig(String publicAddress, String privateAddress, Integer gatewayPort, String certificateDir) {
-        this(publicAddress, privateAddress, gatewayPort, certificateDir, null, null, null);
+        this(publicAddress, privateAddress, null, gatewayPort, certificateDir, null, null, null);
     }
 
-    public GatewayConfig(String publicAddress, String privateAddress, Integer gatewayPort, String certificateDir, String serverCert, String clientCert,
-            String clientKey) {
+    public GatewayConfig(String publicAddress, String privateAddress, String hostname,
+            Integer gatewayPort, String certificateDir, String serverCert, String clientCert, String clientKey) {
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
+        this.hostname = hostname;
         this.certificateDir = certificateDir;
         this.gatewayPort = gatewayPort;
         this.serverCert = serverCert;
@@ -31,6 +33,10 @@ public class GatewayConfig {
 
     public String getPrivateAddress() {
         return privateAddress;
+    }
+
+    public String getHostname() {
+        return hostname;
     }
 
     public String getCertificateDir() {
