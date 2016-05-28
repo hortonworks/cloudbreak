@@ -28,7 +28,7 @@ public class SaltConnectorTest {
     @Before
     public void setup() {
         String id = "183";
-        GatewayConfig gatewayConfig = new GatewayConfig("172.16.252.43", "10.0.0.5", 9443,
+        GatewayConfig gatewayConfig = new GatewayConfig("172.16.252.43", "10.0.0.5", "host-172-16-252-43", 9443,
                 "/Users/rdoktorics/prj/certs/stack-" + id,
                 "/Users/rdoktorics/prj/certs/stack-" + id + "/ca.pem",
                 "/Users/rdoktorics/prj/certs/stack-" + id + "/cert.pem",

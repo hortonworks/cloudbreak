@@ -124,7 +124,7 @@ public class ClusterContainerRunnerTest {
         when(containerService.findContainersInCluster(anyLong())).thenReturn(containers);
         when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString()))
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<InstanceMetaData>());
         when(containerService.save(anyList())).thenReturn(new ArrayList<Container>());
@@ -144,7 +144,7 @@ public class ClusterContainerRunnerTest {
         hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString()))
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
         when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());

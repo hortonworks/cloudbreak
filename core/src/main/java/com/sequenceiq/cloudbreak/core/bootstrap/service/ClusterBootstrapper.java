@@ -131,7 +131,7 @@ public class ClusterBootstrapper {
         }
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
-                    stack.getGatewayPort(), gatewayInstance.getPrivateIp());
+                    stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     hostBootstrapApiCheckerTask,
@@ -171,7 +171,7 @@ public class ClusterBootstrapper {
         }
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
-                    stack.getGatewayPort(), gatewayInstance.getPrivateIp());
+                    stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(SWARM);
             PollingResult bootstrapApiPolling = containerBootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     containerBootstrapApiCheckerTask,
@@ -241,7 +241,7 @@ public class ClusterBootstrapper {
         }
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
-                    stack.getGatewayPort(), gatewayInstance.getPrivateIp());
+                    stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             if (orchestratorType.hostOrchestrator()) {
                 bootstrapNewNodesOnHost(stack, gatewayInstance, nodes, gatewayConfig);

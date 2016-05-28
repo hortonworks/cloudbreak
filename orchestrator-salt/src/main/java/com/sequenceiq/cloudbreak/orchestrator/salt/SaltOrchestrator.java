@@ -103,7 +103,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> targetNodes, SaltPillarConfig pillarConfig,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            PillarSave hostSave = new PillarSave(sc, allNodes);
+            PillarSave hostSave = new PillarSave(sc, gatewayConfig, allNodes);
             Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
@@ -118,6 +118,12 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> server = Sets.newHashSet(gatewayConfig.getPrivateAddress());
             Set<String> targetIps = targetNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             Set<String> all = Stream.concat(server.stream(), targetIps.stream()).collect(Collectors.toSet());
+
+            LOGGER.info("Pillar saved, starting to set up discovery...");
+            //run discovery only
+            runNewService(sc, new HighStateChecker(all), exitCriteriaModel);
+
+            LOGGER.info("Pillar saved, discovery has been set up with highstate");
 
             // ambari server
             runSaltCommand(sc, new SimpleAddRoleChecker(server, "ambari_server"), exitCriteriaModel);

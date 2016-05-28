@@ -187,10 +187,12 @@ public class TlsSecurityService {
         return privateKeyPath;
     }
 
-    public GatewayConfig buildGatewayConfig(Long stackId, String publicIp, Integer gatewayPort, String privateIp) throws CloudbreakSecuritySetupException {
+    public GatewayConfig buildGatewayConfig(Long stackId, String publicIp, Integer gatewayPort,
+            String privateIp, String hostname) throws CloudbreakSecuritySetupException {
         prepareCertDir(stackId);
         HttpClientConfig conf = buildTLSClientConfig(stackId, publicIp);
-        return new GatewayConfig(publicIp, privateIp, gatewayPort, prepareCertDir(stackId), conf.getServerCert(), conf.getClientCert(), conf.getClientKey());
+        return new GatewayConfig(publicIp, privateIp, hostname, gatewayPort,
+                prepareCertDir(stackId), conf.getServerCert(), conf.getClientCert(), conf.getClientKey());
     }
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
