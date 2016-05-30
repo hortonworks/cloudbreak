@@ -103,9 +103,6 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
 
-        verify(AMBARI_API_ROOT + "/views/FILES/versions/1.0.0/instances/files", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
-        verify(AMBARI_API_ROOT + "/views/PIG/versions/1.0.0/instances/pig", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
-        verify(AMBARI_API_ROOT + "/views/HIVE/versions/1.0.0/instances/hive", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
         verify(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", "GET").exactTimes(1).verify();
         verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
         verify(AMBARI_API_ROOT + "/check", "GET").exactTimes(1).verify();
@@ -120,11 +117,11 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
 
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.interface_ip").atLeast(1).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").exactTimes(1).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(1).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.lookup_jid").bodyContains("jid=1").exactTimes(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.lookup_jid").bodyContains("jid=1").exactTimes(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_agent").exactTimes(1).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_server").exactTimes(1).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").exactTimes(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").exactTimes(2).verify();
     }
 
     private void addAmbariMappings(int numberOfServers) {
