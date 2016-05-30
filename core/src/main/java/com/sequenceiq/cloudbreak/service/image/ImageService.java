@@ -63,10 +63,10 @@ public class ImageService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public void create(Stack stack, PlatformParameters params) {
+    public void create(Stack stack, PlatformParameters params, String ambariHDPVersion) {
         try {
             Platform platform = platform(stack.cloudPlatform());
-            String imageName = imageNameUtil.determineImageName(platform, stack.getRegion());
+            String imageName = imageNameUtil.determineImageName(platform, stack.getRegion(), ambariHDPVersion);
             String tmpSshKey = tlsSecurityService.readPublicSshKey(stack.getId());
             String sshUser = stack.getCredential().getLoginUserName();
             String publicSssKey = stack.getCredential().getPublicKey();

@@ -261,7 +261,7 @@ public class StackService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Stack create(CbUser user, Stack stack) {
+    public Stack create(CbUser user, Stack stack, String ambariHDPVersion) {
         Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -278,7 +278,7 @@ public class StackService {
                 instanceGroupRepository.save(savedStack.getInstanceGroups());
                 tlsSecurityService.copyClientKeys(stack.getId());
                 tlsSecurityService.storeSSHKeys(stack);
-                imageService.create(savedStack, connector.getPlatformParameters(stack));
+                imageService.create(savedStack, connector.getPlatformParameters(stack), ambariHDPVersion);
                 flowManager.triggerProvisioning(new ProvisionRequest(platform(savedStack.cloudPlatform()), savedStack.getId()));
             } else {
                 savedStack.setStatus(Status.AVAILABLE);

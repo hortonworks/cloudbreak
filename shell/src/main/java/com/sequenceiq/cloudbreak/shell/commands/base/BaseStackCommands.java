@@ -240,7 +240,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @Override
     public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, Boolean publicInAccount, OnFailureAction onFailureAction,
             AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, Boolean wait, PlatformVariant platformVariant, String orchestrator,
-            String platform, Map<String, String> params) {
+            String platform, String ambHDPVersion, Map<String, String> params) {
         try {
             validateNetwork();
             validateSecurityGroup();
@@ -268,6 +268,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setPlatformVariant(platformVariant == null ? "" : platformVariant.getName());
             stackRequest.setCloudPlatform(platform);
             stackRequest.setParameters(params);
+            stackRequest.setAmbariHDPVersion(ambHDPVersion);
             OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
             orchestratorRequest.setType(orchestrator);
             stackRequest.setOrchestrator(orchestratorRequest);
