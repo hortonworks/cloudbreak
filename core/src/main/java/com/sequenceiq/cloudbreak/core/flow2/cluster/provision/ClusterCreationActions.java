@@ -10,6 +10,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -29,7 +30,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
     public Action startingAmbariServicesAction() {
-        return new AbstractClusterCreationAction<ProvisioningContext>(ProvisioningContext.class) {
+        return new AbstractClusterAction<ProvisioningContext>(ProvisioningContext.class) {
             @Override
             protected void doExecute(ClusterContext context, ProvisioningContext payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingAmbariServices(context.getStack(), context.getCluster());
@@ -45,7 +46,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "STARTING_AMBARI_STATE")
     public Action startingAmbariAction() {
-        return new AbstractClusterCreationAction<StartAmbariServicesSuccess>(StartAmbariServicesSuccess.class) {
+        return new AbstractClusterAction<StartAmbariServicesSuccess>(StartAmbariServicesSuccess.class) {
             @Override
             protected void doExecute(ClusterContext context, StartAmbariServicesSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingAmbari(context.getStack());
@@ -61,7 +62,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "INSTALLING_CLUSTER_STATE")
     public Action installingClusterAction() {
-        return new AbstractClusterCreationAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
+        return new AbstractClusterAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
             @Override
             protected void doExecute(ClusterContext context, StartAmbariSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.installingCluster(context.getStack());
@@ -77,7 +78,7 @@ public class ClusterCreationActions {
 
     @Bean(name = "CLUSTER_CREATION_FINISHED_STATE")
     public Action clusterCreationFinishedAction() {
-        return new AbstractClusterCreationAction<InstallClusterSuccess>(InstallClusterSuccess.class) {
+        return new AbstractClusterAction<InstallClusterSuccess>(InstallClusterSuccess.class) {
             @Override
             protected void doExecute(ClusterContext context, InstallClusterSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.clusterInstallationFinished(context.getStack(), context.getCluster());

@@ -6,7 +6,7 @@ public enum ClusterStopState implements FlowState<ClusterStopState, ClusterStopE
     INIT_STATE,
     CLUSTER_STOP_FAILED_STATE,
 
-    CLUSTER_STOP_STATE,
+    CLUSTER_STOPPING_STATE,
     CLUSTER_STOP_FINISHED_STATE,
 
     FINAL_STATE;

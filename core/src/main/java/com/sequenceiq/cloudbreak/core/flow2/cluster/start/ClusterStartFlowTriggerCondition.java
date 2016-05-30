@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.start;
 
 import javax.inject.Inject;
 
@@ -7,12 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
-public class ClusterCreationFlowTriggerCondition implements FlowTriggerCondition {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationFlowTriggerCondition.class);
+public class ClusterStartFlowTriggerCondition implements FlowTriggerCondition {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStartFlowTriggerCondition.class);
 
     @Inject
     private StackService stackService;
@@ -20,9 +21,10 @@ public class ClusterCreationFlowTriggerCondition implements FlowTriggerCondition
     @Override
     public boolean isFlowTriggerable(Long stackId) {
         Stack stack = stackService.getById(stackId);
-        boolean result = stack.isAvailable() && stack.getCluster() != null && stack.getCluster().isRequested();
+        Cluster cluster = stack.getCluster();
+        boolean result = cluster != null && cluster.isStartRequested();
         if (!result) {
-            LOGGER.warn("Cluster creation cannot be triggered, because cluster is not in requested status or stack is not available.");
+            LOGGER.warn("Cluster start cannot be triggered, because cluster is null or not in startRequested status");
         }
         return result;
     }

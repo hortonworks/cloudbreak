@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.stop;
 import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterStopResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
 
 public enum ClusterStopEvent implements FlowEvent {
     CLUSTER_STOP_EVENT(FlowPhases.CLUSTER_STOP.name()),

@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 
 @Component
@@ -31,6 +32,11 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
 
     public StackStopFlowConfig() {
         super(StackStopState.class, StackStopEvent.class);
+    }
+
+    @Override
+    public FlowTriggerCondition getFlowTriggerCondition() {
+        return getApplicationContext().getBean(StackStopFlowTriggerCondition.class);
     }
 
     @Override

@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -25,14 +24,12 @@ public class ClusterStopService {
     @Inject
     private EmailSenderService emailSenderService;
 
-    public void stopCluster(Stack stack) {
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(cluster);
+    public void stoppingCluster(Stack stack) {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOPPING, Status.UPDATE_IN_PROGRESS.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.STOP_IN_PROGRESS);
     }
 
-    public void finishStopCluster(Stack stack, Status statusBeforeAmbariStop) {
+    public void clusterStopFinished(Stack stack, Status statusBeforeAmbariStop) {
         if (!statusBeforeAmbariStop.equals(stack.getStatus())) {
             stackUpdater.updateStackStatus(stack.getId(), stack.isStopRequested() ? Status.STOP_REQUESTED : statusBeforeAmbariStop);
         }
@@ -41,8 +38,7 @@ public class ClusterStopService {
     }
 
     public void handleClusterStopFailure(Stack stack, String errorReason) {
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(cluster);
+        Cluster cluster = stack.getCluster();
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.STOP_FAILED);
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "The Ambari cluster could not be stopped: " + errorReason);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOP_FAILED, Status.AVAILABLE.name(), errorReason);
