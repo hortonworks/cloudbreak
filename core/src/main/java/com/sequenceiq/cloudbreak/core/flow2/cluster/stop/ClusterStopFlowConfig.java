@@ -5,8 +5,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopState.CLUSTER_STOPPING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopState.CLUSTER_STOP_FAILED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopState.CLUSTER_STOP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopState.INIT_STATE;
 
@@ -21,9 +21,9 @@ import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStopState, ClusterStopEvent> {
     private static final List<Transition<ClusterStopState, ClusterStopEvent>> TRANSITIONS =
             new Transition.Builder<ClusterStopState, ClusterStopEvent>()
-                    .from(INIT_STATE).to(CLUSTER_STOP_STATE).event(CLUSTER_STOP_EVENT).noFailureEvent()
-                    .from(INIT_STATE).to(CLUSTER_STOP_STATE).event(CLUSTER_AND_STACK_STOP_EVENT).noFailureEvent()
-                    .from(CLUSTER_STOP_STATE).to(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).event(ClusterStopEvent.CLUSTER_STOP_FINISHED_EVENT)
+                    .from(INIT_STATE).to(CLUSTER_STOPPING_STATE).event(CLUSTER_STOP_EVENT).noFailureEvent()
+                    .from(INIT_STATE).to(CLUSTER_STOPPING_STATE).event(CLUSTER_AND_STACK_STOP_EVENT).noFailureEvent()
+                    .from(CLUSTER_STOPPING_STATE).to(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).event(ClusterStopEvent.CLUSTER_STOP_FINISHED_EVENT)
                             .failureEvent(ClusterStopEvent.CLUSTER_STOP_FINISHED_FAILURE_EVENT)
                     .from(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).failureEvent(FAILURE_EVENT)
                     .build();
@@ -38,7 +38,6 @@ public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStop
     }
 
     @Override
-
     protected List<Transition<ClusterStopState, ClusterStopEvent>> getTransitions() {
         return TRANSITIONS;
     }

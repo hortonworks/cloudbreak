@@ -6,7 +6,7 @@ public enum ClusterStartState implements FlowState<ClusterStartState, ClusterSta
     INIT_STATE,
     CLUSTER_START_FAILED_STATE,
 
-    CLUSTER_START_STATE,
+    CLUSTER_STARTING_STATE,
     CLUSTER_START_FINISHED_STATE,
 
     FINAL_STATE;

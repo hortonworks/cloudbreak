@@ -1,12 +1,13 @@
-package com.sequenceiq.cloudbreak.reactor;
+package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterStopRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterStopResult;
+import com.sequenceiq.cloudbreak.reactor.ClusterEventHandler;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 

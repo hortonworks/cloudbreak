@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -30,17 +29,15 @@ public class ClusterStartService {
     @Inject
     private EmailSenderService emailSenderService;
 
-    public void startCluster(Stack stack, Cluster cluster) {
-        MDCBuilder.buildMdcContext(cluster);
+    public void startingCluster(Stack stack, Cluster cluster) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS);
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format("Starting the Ambari cluster. Ambari ip:%s",
                 stack.getAmbariIp()));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTING, Status.UPDATE_IN_PROGRESS.name(), stack.getAmbariIp());
     }
 
-    public void finishStartCluster(Stack stack) {
+    public void clusterStartFinished(Stack stack) {
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(stack);
         cluster.setUpSince(new Date().getTime());
         clusterService.updateCluster(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
@@ -53,8 +50,7 @@ public class ClusterStartService {
     }
 
     public void handleClusterStartFailure(Stack stack, String errorReason) {
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(cluster);
+        Cluster cluster = stack.getCluster();
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_FAILED);
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Cluster could not be started: " + errorReason);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_START_FAILED, Status.AVAILABLE.name(), errorReason);
@@ -63,5 +59,4 @@ public class ClusterStartService {
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.START_FAILED.name());
         }
     }
-
 }

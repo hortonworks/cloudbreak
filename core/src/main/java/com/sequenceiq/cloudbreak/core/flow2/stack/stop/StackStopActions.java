@@ -65,13 +65,9 @@ public class StackStopActions {
 
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
-                if (stackStartStopService.isStopPossible(context.getStack())) {
-                    List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(context.getInstanceMetaData());
-                    List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
-                    return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(),
-                            cloudResources, cloudInstances);
-                }
-                return new StackEvent(StackStopEvent.STOP_FAILURE_EVENT.stringRepresentation(), context.getStack().getId());
+                List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(context.getInstanceMetaData());
+                List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
+                return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }
         };
     }

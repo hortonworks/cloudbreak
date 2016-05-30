@@ -4,9 +4,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEve
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_STARTING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_FINISHED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.INIT_STATE;
 
@@ -14,14 +14,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 
 @Component
 public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterStartState, ClusterStartEvent> {
     private static final List<Transition<ClusterStartState, ClusterStartEvent>> TRANSITIONS =
             new Transition.Builder<ClusterStartState, ClusterStartEvent>()
-                    .from(INIT_STATE).to(CLUSTER_START_STATE).event(CLUSTER_START_EVENT).noFailureEvent()
-                    .from(CLUSTER_START_STATE).to(CLUSTER_START_FINISHED_STATE).event(ClusterStartEvent.CLUSTER_START_FINISHED_EVENT)
+                    .from(INIT_STATE).to(CLUSTER_STARTING_STATE).event(CLUSTER_START_EVENT).noFailureEvent()
+                    .from(CLUSTER_STARTING_STATE).to(CLUSTER_START_FINISHED_STATE).event(ClusterStartEvent.CLUSTER_START_FINISHED_EVENT)
                                 .failureEvent(ClusterStartEvent.CLUSTER_START_FINISHED_FAILURE_EVENT)
                     .from(CLUSTER_START_FINISHED_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).failureEvent(FAILURE_EVENT)
                     .build();
@@ -34,7 +35,11 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
     }
 
     @Override
+    public FlowTriggerCondition getFlowTriggerCondition() {
+        return getApplicationContext().getBean(ClusterStartFlowTriggerCondition.class);
+    }
 
+    @Override
     protected List<Transition<ClusterStartState, ClusterStartEvent>> getTransitions() {
         return TRANSITIONS;
     }

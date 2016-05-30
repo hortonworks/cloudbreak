@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.start;
 import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterStartResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
 
 public enum ClusterStartEvent implements FlowEvent {
     CLUSTER_START_EVENT(FlowPhases.CLUSTER_START.name()),
