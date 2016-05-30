@@ -14,6 +14,8 @@ public class StackRequest extends StackBase {
     @Valid
     @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
     private OrchestratorRequest orchestrator;
+    @ApiModelProperty(value = StackModelDescription.AMBARI_HDP_VERSION)
+    private String ambariHDPVersion;
 
     public OrchestratorRequest getOrchestrator() {
         return orchestrator;
@@ -23,4 +25,11 @@ public class StackRequest extends StackBase {
         this.orchestrator = orchestrator;
     }
 
+    public String getAmbariHDPVersion() {
+        return ambariHDPVersion;
+    }
+
+    public void setAmbariHDPVersion(String ambariHDPVersion) {
+        this.ambariHDPVersion = ambariHDPVersion;
+    }
 }

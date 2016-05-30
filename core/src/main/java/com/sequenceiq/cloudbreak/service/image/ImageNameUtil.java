@@ -18,13 +18,38 @@ public class ImageNameUtil {
     @Inject
     private Environment environment;
 
-    public String determineImageName(Platform cloudPlatform, String region) {
+    public String determineImageName(Platform cloudPlatform, String region, String ambariHDPVersion) {
         String platform = cloudPlatform.value().toLowerCase();
-        String image = environment.getProperty(platform + "." + region);
-        if (image == null) {
-            image = environment.getProperty(platform + "." + DEFAULT);
+        String image = getDefaultImage(platform, region);
+        if (ambariHDPVersion != null) {
+            String specificImage = getSpecificImage(platform, region, ambariHDPVersion);
+            if (specificImage != null) {
+                image = specificImage;
+            } else {
+                LOGGER.info("The specified ambari-hdp version image not found: {}", ambariHDPVersion);
+            }
         }
         LOGGER.info("Selected VM image for CloudPlatform '{}' is: {}", cloudPlatform, image);
         return image;
+    }
+
+    private String getDefaultImage(String platform, String region) {
+        String image = getImage(platform + "." + region);
+        if (image == null) {
+            image = getImage(platform + "." + DEFAULT);
+        }
+        return image;
+    }
+
+    private String getSpecificImage(String platform, String region, String ambariHDPVersion) {
+        String image = getImage(String.format("%s-%s.%s", platform, ambariHDPVersion, region));
+        if (image == null) {
+            image = getImage(String.format("%s-%s.%s", platform, ambariHDPVersion, DEFAULT));
+        }
+        return image;
+    }
+
+    private String getImage(String key) {
+        return environment.getProperty(key);
     }
 }
