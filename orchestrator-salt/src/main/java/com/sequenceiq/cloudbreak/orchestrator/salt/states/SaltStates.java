@@ -4,15 +4,15 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL_ASYNC;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
@@ -65,43 +65,51 @@ public class SaltStates {
         return applyState(sc, "consul", target).getJid();
     }
 
-    public static Set<String> jidInfo(SaltConnector sc, String jid, Target<String> target, StateType stateType) {
+    public static Multimap<String, String> jidInfo(SaltConnector sc, String jid, Target<String> target, StateType stateType) {
         if (StateType.HIGH.equals(stateType)) {
             return highStateJidInfo(sc, jid, target);
         } else if (StateType.SIMPLE.equals(stateType)) {
             return applyStateJidInfo(sc, jid, target);
         }
-        return new HashSet<>();
+        return ArrayListMultimap.create();
     }
 
-    private static Set<String> applyStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
+    private static Multimap<String, String> applyStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
         Map jidInfo = sc.run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         LOGGER.info("Salt apply state jid info: {}", jidInfo);
         Map<String, Map<String, RunnerInfoObject>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
 
-    private static Set<String> highStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
+    private static Multimap<String, String> highStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
         Map jidInfo = sc.run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         LOGGER.info("Salt high state jid info: {}", jidInfo);
         Map<String, Map<String, RunnerInfoObject>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }
 
-    private static Set<String> collectMissingTargets(Map<String, Map<String, RunnerInfoObject>> stringRunnerInfoObjectMap) {
-        Set<String> missingTargets = new HashSet<>();
+    private static Multimap<String, String> collectMissingTargets(Map<String, Map<String, RunnerInfoObject>> stringRunnerInfoObjectMap) {
+        Multimap<String, String> missingTargetsWithErrors = ArrayListMultimap.create();
         for (Map.Entry<String, Map<String, RunnerInfoObject>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
+            LOGGER.info("Collect missing targets from host: {}", stringMapEntry.getKey());
+            logRunnerInfos(stringMapEntry);
             for (Map.Entry<String, RunnerInfoObject> targetObject : stringMapEntry.getValue().entrySet()) {
                 if (targetObject.getValue().getResult()) {
                     LOGGER.info("{} finished under {} seconds.", targetObject.getValue().getComment(), targetObject.getValue().getDuration());
                 } else {
                     LOGGER.info("{} job state is {}.", targetObject.getValue().getComment(), targetObject.getValue().getResult());
-                    missingTargets.add(targetObject.getKey());
-                    break;
+                    missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getValue().getComment());
                 }
             }
         }
-        return missingTargets;
+        return missingTargetsWithErrors;
+    }
+
+    private static void logRunnerInfos(Map.Entry<String, Map<String, RunnerInfoObject>> stringMapEntry) {
+        stringMapEntry.getValue().entrySet().stream().sorted((o1, o2) -> Integer.compare(o1.getValue().getRunNum(), o2.getValue().getRunNum()))
+                .forEach(stringRunnerInfoObjectEntry -> {
+                    LOGGER.info("Runner info: {} --- {}", stringRunnerInfoObjectEntry.getKey(), stringRunnerInfoObjectEntry.getValue().getComment());
+        });
     }
 
     public static boolean jobIsRunning(SaltConnector sc, String jid, Target<String> target) {
