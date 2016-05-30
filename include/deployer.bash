@@ -68,7 +68,9 @@ cbd-version() {
     fi
 
     echo "docker images:"
-    sed -n "s/.*image://p" docker-compose.yml | grep "sequenceiq\|hortonworks" |green
+    if [ -e docker-compose.yml ]; then
+        sed -n "s/.*image://p" docker-compose.yml | grep "sequenceiq\|hortonworks" |green
+    fi
 
 
 }
