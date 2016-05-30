@@ -52,6 +52,12 @@ public class CloudbreakUtil {
         return waitForStatus(cloudbreakClient, stackId, desiredStatus, "clusterStatus");
     }
 
+    public static void checkClusterFailed(StackEndpoint stackEndpoint, String stackId, String failMessage) {
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        Assert.assertEquals(stackResponse.getCluster().getStatus(), "CREATE_FAILED");
+        Assert.assertTrue(stackResponse.getCluster().getStatusReason().contains(failMessage));
+    }
+
     public static void checkClusterAvailability(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
             boolean checkAmbari) throws Exception {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
@@ -70,14 +76,15 @@ public class CloudbreakUtil {
         }
     }
 
-    public static void checkClusterStopped(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassowrd) throws Exception {
+    public static void checkClusterStopped(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassword)
+            throws Exception {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
 
         Assert.assertEquals(stackResponse.getCluster().getStatus(), "STOPPED", "The cluster is not stopped!");
         Assert.assertEquals(stackResponse.getStatus(), Status.STOPPED, "The stack is not stopped!");
 
         String ambariIp = stackResponse.getCluster().getAmbariServerIp();
-        AmbariClient ambariClient = new AmbariClient(ambariIp, port, ambariUser, ambariPassowrd);
+        AmbariClient ambariClient = new AmbariClient(ambariIp, port, ambariUser, ambariPassword);
         Assert.assertFalse(isAmbariRunning(ambariClient), "The Ambari server is running in stopped state!");
     }
 
