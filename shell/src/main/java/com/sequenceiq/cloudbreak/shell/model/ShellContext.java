@@ -165,21 +165,22 @@ public class ShellContext {
     }
 
     public void addBlueprint(String id) throws Exception {
-        BlueprintResponse bp = cloudbreakClient.blueprintEndpoint().get(Long.valueOf(id));
         this.instanceGroups = new HashMap<>();
         this.hostGroups = new HashMap<>();
         this.activeInstanceGroups = new HashSet<>();
         this.activeHostGroups = new HashSet<>();
-
-        JsonNode hostGroups = objectMapper.readTree(bp.getAmbariBlueprint().getBytes()).get("host_groups");
+        String blueprintText = getBlueprintText(id);
+        JsonNode hostGroups = objectMapper.readTree(blueprintText.getBytes()).get("host_groups");
         for (JsonNode hostGroup : hostGroups) {
             activeHostGroups.add(hostGroup.get("name").asText());
             activeInstanceGroups.add(hostGroup.get("name").asText());
         }
-
-        this.activeInstanceGroups.add("cbgateway");
         addProperty(PropertyKey.BLUEPRINT_ID, id);
         setBlueprintAccessible();
+    }
+
+    public String getBlueprintText() {
+        return getBlueprintText(getBlueprintId());
     }
 
     public void prepareInstanceGroups(StackResponse stack) {
@@ -538,6 +539,11 @@ public class ShellContext {
         } catch (Exception ex) {
             return "";
         }
+    }
+
+    private String getBlueprintText(String id) {
+        BlueprintResponse bp = cloudbreakClient.blueprintEndpoint().get(Long.valueOf(id));
+        return bp.getAmbariBlueprint();
     }
 
     public void setVolumeTypes(Map<String, Collection<String>> volumeTypes) {

@@ -13,9 +13,11 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -67,8 +69,19 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
     private Set<InstanceGroup> convertInstanceGroups(List<InstanceGroupJson> instanceGroupJsons, Stack stack) {
         Set<InstanceGroup> convertedSet = (Set<InstanceGroup>) getConversionService().convert(instanceGroupJsons, TypeDescriptor.forObject(instanceGroupJsons),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroup.class)));
+        boolean gatewaySpecified = false;
         for (InstanceGroup instanceGroup : convertedSet) {
             instanceGroup.setStack(stack);
+            if (!gatewaySpecified) {
+                if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
+                    gatewaySpecified = true;
+                }
+            } else if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
+                throw new BadRequestException("Only 1 Ambari server can be specified");
+            }
+        }
+        if (!gatewaySpecified) {
+            throw new BadRequestException("Ambari server must be specified");
         }
         return convertedSet;
     }

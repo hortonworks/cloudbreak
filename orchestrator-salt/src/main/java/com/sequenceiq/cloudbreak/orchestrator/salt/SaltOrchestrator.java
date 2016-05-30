@@ -128,10 +128,10 @@ public class SaltOrchestrator implements HostOrchestrator {
             // ambari server
             runSaltCommand(sc, new SimpleAddRoleChecker(server, "ambari_server"), exitCriteriaModel);
             // ambari agent
-            runSaltCommand(sc, new SimpleAddRoleChecker(targetIps, "ambari_agent"), exitCriteriaModel);
+            runSaltCommand(sc, new SimpleAddRoleChecker(all, "ambari_agent"), exitCriteriaModel);
             // kerberos
             if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new SimpleAddRoleChecker(Sets.newHashSet(server), "kerberos_server"), exitCriteriaModel);
+                runSaltCommand(sc, new SimpleAddRoleChecker(server, "kerberos_server"), exitCriteriaModel);
             }
             runSaltCommand(sc, new SyncGrainsChecker(all), exitCriteriaModel);
             runNewService(sc, new HighStateChecker(all), exitCriteriaModel);

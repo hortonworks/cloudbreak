@@ -2,6 +2,38 @@
   "href": "/api/v1/stacks/HDP/versions/2.2/services?fields=serviceComponents/StackServiceComponents",
   "items": [
     {
+      "href": "/api/v1/services/AMBARI",
+      "StackServices": {
+        "service_name": "AMBARI",
+        "stack_name": "HDP",
+        "stack_version": "2.2"
+      },
+      "components": [
+        {
+          "href": "/api/v1/services/AMBARI/components/AMBARI_SERVER",
+          "StackServiceComponents": {
+            "component_name": "AMBARI_SERVER",
+            "service_name": "AMBARI",
+            "cardinality": "1",
+            "component_category": "MASTER",
+            "stack_name": "HDP",
+            "stack_version": "2.2"
+          }
+        },
+        {
+          "href": "/api/v1/services/AMBARI/components/AMBARI_AGENT",
+          "StackServiceComponents": {
+            "component_name": "AMBARI_AGENT",
+            "service_name": "AMBARI",
+            "cardinality": "1",
+            "component_category": "CLIENT",
+            "stack_name": "HDP",
+            "stack_version": "2.2"
+          }
+        }
+      ]
+    },
+    {
       "href": "/api/v1/stacks/HDP/versions/2.2/services/FALCON",
       "StackServices": {
         "service_name": "FALCON",
