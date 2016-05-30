@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.util.StringUtils;
+
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -29,9 +31,9 @@ public class PillarSave implements OrchestratorBootstrap {
         this.sc = sc;
         Map<String, Map<String, String>> fqdn = hosts
                 .stream()
-                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname())));
+                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp())));
 
-        fqdn.put(gatewayConfig.getPrivateAddress(), discovery(gatewayConfig.getHostname()));
+        fqdn.put(gatewayConfig.getPrivateAddress(), discovery(gatewayConfig.getHostname(), gatewayConfig.getPublicAddress()));
         this.pillar = new Pillar("/nodes/hosts.sls", singletonMap("hosts", fqdn));
     }
 
@@ -40,10 +42,11 @@ public class PillarSave implements OrchestratorBootstrap {
         this.pillar = new Pillar(pillarProperties.getPath(), pillarProperties.getProperties());
     }
 
-    private Map<String, String> discovery(String hostname) {
+    private Map<String, String> discovery(String hostname, String publicAddress) {
         Map<String, String> map = new HashMap<>();
         map.put("fqdn", hostname);
         map.put("hostname", hostname.split("\\.")[0]);
+        map.put("public_address", StringUtils.isEmpty(publicAddress) ? "False" : "True");
         return map;
     }
 
