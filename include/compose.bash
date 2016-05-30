@@ -232,9 +232,9 @@ logspout:
         - logsink
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    image: gliderlabs/logspout:master
+    image: gliderlabs/logspout:v3.1
     entrypoint: ["/bin/sh"]
-    command: -c 'sleep 1; /bin/logspout'
+    command: -c 'sleep 1; ROUTE_URIS=$LOGSINK_PORT_3333_TCP /bin/logspout'
 
 uaadb:
     privileged: true
