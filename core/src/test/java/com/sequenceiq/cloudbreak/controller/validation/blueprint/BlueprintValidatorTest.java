@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller.validation.blueprint;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +68,7 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
-        Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups.stream().limit(instanceGroups.size() - 1).collect(Collectors.toSet()));
         JsonNode blueprintJsonTree = createJsonTree();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
