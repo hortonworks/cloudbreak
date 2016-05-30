@@ -10,11 +10,11 @@ public class RunnerInfoObject {
 
     private String startTime;
 
-    private String result;
+    private boolean result;
 
     private String duration;
 
-    private String runNum;
+    private Integer runNum;
 
     private Map<String, Object> changes;
 
@@ -45,19 +45,19 @@ public class RunnerInfoObject {
         this.startTime = startTime;
     }
 
-    public String getResult() {
+    public boolean getResult() {
         return result;
     }
 
-    public void setResult(String result) {
+    public void setResult(boolean result) {
         this.result = result;
     }
 
-    public String getRunNum() {
+    public Integer getRunNum() {
         return runNum;
     }
 
-    public void setRunNum(String runNum) {
+    public void setRunNum(Integer runNum) {
         this.runNum = runNum;
     }
 

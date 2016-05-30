@@ -92,7 +92,7 @@ public class SaltStates {
         Set<String> missingTargets = new HashSet<>();
         for (Map.Entry<String, Map<String, RunnerInfoObject>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
             for (Map.Entry<String, RunnerInfoObject> targetObject : stringMapEntry.getValue().entrySet()) {
-                if (targetObject.getValue().getResult().toLowerCase().equals("true")) {
+                if (targetObject.getValue().getResult()) {
                     LOGGER.info("{} finished under {} seconds.", targetObject.getValue().getComment(), targetObject.getValue().getDuration());
                 } else {
                     LOGGER.info("{} job state is {}.", targetObject.getValue().getComment(), targetObject.getValue().getResult());
