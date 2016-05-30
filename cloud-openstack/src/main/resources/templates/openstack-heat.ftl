@@ -66,7 +66,9 @@ resources:
       type: OS::Neutron::RouterGateway
       properties:
         router_id: { get_resource: router }
+        <#if assignFloatingIp>
         network_id: { get_param: public_net_id }
+        </#if>
   </#if>
 
   <#if !existingSubnet>
@@ -103,18 +105,8 @@ ${core_user_data}
       key_name: { get_param: key_name }
       admin_user: centos
       metadata: ${agent.metadata}
-      <#if assignFloatingIp>
       networks:
         - port: { get_resource: ambari_app_port_${agent.instanceId} }
-      <#else>
-      networks:
-        <#if existingNetwork>
-        - network: { get_param: app_net_id }
-        <#else>
-        - network: { get_resource: app_network }
-        </#if>
-      security_groups: [ { get_resource: server_security_group } ]
-      </#if>
       block_device_mapping:
       <#list agent.volumes as volume>
       - device_name: ${volume.device}
@@ -137,7 +129,6 @@ ${core_user_data}
 
   </#list>
 
-  <#if assignFloatingIp>
   ambari_app_port_${agent.instanceId}:
     type: OS::Neutron::Port
     properties:
@@ -155,6 +146,7 @@ ${core_user_data}
       </#if>
       security_groups: [ { get_resource: server_security_group } ]
 
+  <#if assignFloatingIp>
   ambari_server_floatingip_${agent.instanceId}:
     type: OS::Neutron::FloatingIP
     properties:
