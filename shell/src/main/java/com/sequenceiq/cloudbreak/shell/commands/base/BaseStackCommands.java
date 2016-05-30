@@ -233,7 +233,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 && shellContext.getActiveCloudPlatform().equals(platform)
                 && shellContext.getActiveNetworkId() != null
                 && shellContext.getActiveSecurityGroupId() != null
-                && (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size() - 1
+                && (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
                 && shellContext.getActiveHostGroups().size() != 0) && !shellContext.isMarathonMode();
     }
 
@@ -245,6 +245,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             validateNetwork();
             validateSecurityGroup();
             validateRegion(region);
+            validateInstanceGroups();
             validateAvailabilityZone(region, availabilityZone);
             publicInAccount = publicInAccount == null ? false : publicInAccount;
             wait = wait == null ? false : wait;
@@ -545,6 +546,13 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         if (regionsByPlatform != null && !regionsByPlatform.isEmpty() && !regionsByPlatform.contains(region.getName())) {
             throw new ValidationException("Region is not available for the selected platform.");
         }
+    }
+
+    private void validateInstanceGroups() {
+        shellContext.getInstanceGroups().values()
+                .stream().filter(i -> "GATEWAY".equals(i.getType()))
+                .findAny()
+                .orElseThrow(() -> new ValidationException("You must specify where to install ambari server to with '--ambariServer true' on instancegroup"));
     }
 
     private void prepareCluster(String stackId) {

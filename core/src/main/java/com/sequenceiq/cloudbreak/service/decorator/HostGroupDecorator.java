@@ -1,15 +1,17 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.isGateway;
 import static org.springframework.util.StringUtils.isEmpty;
+
+import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -27,10 +29,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
 
 @Component
 public class HostGroupDecorator implements Decorator<HostGroup> {
@@ -107,10 +105,6 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
                 LOGGER.error("Instance group not found: {}", instanceGroupName);
                 throw new BadRequestException(String.format("Instance group '%s' not found on stack.", instanceGroupName));
             }
-            if (isGateway(instanceGroup.getInstanceGroupType())) {
-                LOGGER.error("Cannot define hostgroup on gateway! Instance group: {}", instanceGroupName);
-                throw new BadRequestException(String.format("Cannot define hostgroup on gateway! Instance group: '%s'", instanceGroupName));
-            }
             constraint.setInstanceGroup(instanceGroup);
         }
         if (constraintTemplateName != null) {
@@ -161,13 +155,9 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
     }
 
     private HostGroup getDetailsFromExistingHostGroup(Constraint constraint, HostGroup subject, final String instanceGroupName, Set<HostGroup> hostGroups) {
-        Optional<HostGroup> hostGroupOptional = FluentIterable.from(hostGroups).firstMatch(new Predicate<HostGroup>() {
-            @Override
-            public boolean apply(HostGroup input) {
-                String inputInstanceGroupName = input.getConstraint().getInstanceGroup().getGroupName();
-                return inputInstanceGroupName.equals(instanceGroupName);
-            }
-        });
+        Optional<HostGroup> hostGroupOptional = hostGroups.stream().filter(input ->
+                input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupName)
+        ).findFirst();
         if (hostGroupOptional.isPresent()) {
             HostGroup hostGroup = hostGroupOptional.get();
             Integer instanceGroupNodeCount = hostGroup.getConstraint().getInstanceGroup().getNodeCount();

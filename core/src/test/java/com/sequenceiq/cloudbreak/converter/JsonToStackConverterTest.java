@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -42,9 +45,12 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
 
     @Test
     public void testConvert() {
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+
         // GIVEN
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<InstanceGroup>());
+                .willReturn(new HashSet<>(Arrays.asList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());

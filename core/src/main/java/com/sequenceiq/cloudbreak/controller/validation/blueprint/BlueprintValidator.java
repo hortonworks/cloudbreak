@@ -90,7 +90,7 @@ public class BlueprintValidator {
                 if (hostGroup.getName().equals(hostGroupNode.get("name").asText())) {
                     hostGroup.getConstraint().setHostCount(hostGroup.getConstraint().getHostCount() + adjustment);
                     try {
-                        validateHostGroup(hostGroupNode, hostGroupMap, new HashMap<String, BlueprintServiceComponent>());
+                        validateHostGroup(hostGroupNode, hostGroupMap, new HashMap<>());
                     } catch (BadRequestException be) {
                         throw be;
                     } finally {

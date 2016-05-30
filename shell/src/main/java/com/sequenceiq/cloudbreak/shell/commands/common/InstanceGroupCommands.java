@@ -29,7 +29,7 @@ public class InstanceGroupCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "instancegroup configure")
     public boolean createAvailable() {
-        return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable())  && !shellContext.isMarathonMode();
+        return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable()) && !shellContext.isMarathonMode();
     }
 
 
@@ -42,6 +42,7 @@ public class InstanceGroupCommands implements CommandMarker {
     public String create(
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "nodecount", mandatory = true, help = "Nodecount for instanceGroup") Integer nodeCount,
+            @CliOption(key = "ambariServer", mandatory = true, help = "Ambari server will be installed here if true") boolean ambariServer,
             @CliOption(key = "templateId", mandatory = false, help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
             @CliOption(key = "templateName", mandatory = false, help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName)
             throws Exception {
@@ -63,13 +64,21 @@ public class InstanceGroupCommands implements CommandMarker {
             if (parsedTemplateId != null) {
                 Map<Long, Integer> map = new HashMap<>();
                 map.put(parsedTemplateId, nodeCount);
-                if (!"cbgateway".equals(instanceGroup.getName())) {
-                    shellContext.putHostGroup(instanceGroup.getName(), new HostgroupEntry(nodeCount, new HashSet<Long>()));
-                    shellContext.putInstanceGroup(instanceGroup.getName(), new InstanceGroupEntry(parsedTemplateId, nodeCount, "CORE"));
-                } else {
+                if (ambariServer) {
+                    boolean ambariSpecified = shellContext.getInstanceGroups().values()
+                            .stream().filter(e -> e.getType().equals("GATEWAY")).findAny().isPresent();
+                    if (ambariSpecified) {
+                        return "Ambari server is already specified";
+                    }
+                    if (nodeCount != 1) {
+                        return "Allowed node count for Ambari server: 1";
+                    }
                     shellContext.putInstanceGroup(instanceGroup.getName(), new InstanceGroupEntry(parsedTemplateId, nodeCount, "GATEWAY"));
+                } else {
+                    shellContext.putInstanceGroup(instanceGroup.getName(), new InstanceGroupEntry(parsedTemplateId, nodeCount, "CORE"));
                 }
-                if (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size() - 1
+                shellContext.putHostGroup(instanceGroup.getName(), new HostgroupEntry(nodeCount, new HashSet<>()));
+                if (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
                         && shellContext.getActiveHostGroups().size() != 0) {
                     shellContext.setHint(Hints.SELECT_NETWORK);
                 } else {

@@ -68,21 +68,21 @@ public class InstanceGroupCommandsTest {
 
     @Test
     public void testConfigureByTemplateId() throws Exception {
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, dummyTemplateId, null);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, dummyTemplateId, null);
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }
 
     @Test
     public void testConfigureByTemplateName() throws Exception {
         given(mockClient.getPublic(DUMMY_TEMPLATE)).willReturn(dummyResult);
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, null, dummyTemplateName);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName);
         verify(mockClient, times(1)).getPublic(anyString());
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }
 
     @Test
     public void testConfigureByTemplateIdAndName() throws Exception {
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, dummyTemplateId, dummyTemplateName);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, dummyTemplateId, dummyTemplateName);
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
         verify(mockClient, times(0)).getPublic(anyString());
     }
@@ -90,7 +90,7 @@ public class InstanceGroupCommandsTest {
     @Test
     public void testConfigureByTemplateNameWhenTemplateNotFound() throws Exception {
         given(mockClient.getPublic(DUMMY_TEMPLATE)).willReturn(null);
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, null, dummyTemplateName);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName);
         verify(mockClient, times(1)).getPublic(anyString());
         verify(mockContext, times(0)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }
