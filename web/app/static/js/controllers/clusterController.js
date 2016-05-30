@@ -186,12 +186,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }, true);
                 var instanceGroups = [];
                 var hostGroups = [];
-                instanceGroups.push({
-                    templateId: tmpTemplateId,
-                    group: "cbgateway",
-                    nodeCount: 1,
-                    type: "GATEWAY"
-                });
                 actualBp[0].ambariBlueprint.host_groups.forEach(function(k) {
                     instanceGroups.push({
                         templateId: tmpTemplateId,
@@ -1139,6 +1133,26 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             }
             return false
+        }
+
+        $scope.changeAmbariServer = function(instanceGroup) {
+            angular.forEach($scope.cluster.instanceGroups, function(ig) {
+                if (ig.group === instanceGroup.group) {
+                    ig.type = 'GATEWAY'
+                } else {
+                    ig.type = 'CORE'
+                }
+            });
+        }
+
+        $scope.ambariServerSelected = function() {
+            var result = false
+            angular.forEach($scope.cluster.instanceGroups, function(ig) {
+                if (ig.type === 'GATEWAY') {
+                    result = true
+                }
+            });
+            return result
         }
     }
 ]);
