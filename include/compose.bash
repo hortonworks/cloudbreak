@@ -226,7 +226,6 @@ logspout:
         - SERVICE_NAME=logspout
         - DEBUG=true
         - LOGSPOUT=ignore
-        - ROUTE_URIS=tcp://logsink:3333
         - "RAW_FORMAT={{.Container.Name}} | {{.Data}}\n"
     links:
         - logsink
@@ -234,7 +233,7 @@ logspout:
       - /var/run/docker.sock:/var/run/docker.sock
     image: gliderlabs/logspout:v3.1
     entrypoint: ["/bin/sh"]
-    command: -c 'sleep 1; ROUTE_URIS=$LOGSINK_PORT_3333_TCP /bin/logspout'
+    command: -c 'sleep 1; ROUTE_URIS=\$LOGSINK_PORT_3333_TCP /bin/logspout'
 
 uaadb:
     privileged: true
