@@ -1,4 +1,5 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
+{%- from 'nodes/settings.sls' import host with context %}
 
 include:
   - ambari.repo
@@ -18,6 +19,10 @@ ambari-agent:
 /etc/ambari-agent/conf/public_hostname.sh:
   file.managed:
     - source: salt://ambari/scripts/public_hostname.sh
+    - template: jinja
+    - context:
+      has_public_address: {{ host.has_public_address }}
+      private_address: {{ host.private_address }}
     - mode: 755
     - watch:
       - pkg: ambari-agent
