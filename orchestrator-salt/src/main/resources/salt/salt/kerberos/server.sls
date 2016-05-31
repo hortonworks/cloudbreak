@@ -21,9 +21,15 @@ create_db:
 
 create_admin_user:
   cmd.run:
-    - name: 'kadmin.local -q "addprinc -pw {{ kerberos.password }} {{ kerberos.user }}/admin" && echo "*/admin@{{ kerberos.realm }} *" > /var/kerberos/krb5kdc/kadm5.acl'
+    - name: 'kadmin.local -q "addprinc -pw {{ kerberos.password }} {{ kerberos.user }}/admin"'
     - shell: /bin/bash
-    - unless: cat /var/kerberos/krb5kdc/kadm5.acl | grep "*/admin@{{ kerberos.realm }} *"
+    - unless: kadmin.local -q "list_principals *" | grep "*/admin@{{ kerberos.realm }} *"
+
+/var/kerberos/krb5kdc/kadm5.acl:
+  cmd.run:
+    - name: 'echo "*/admin@{{ kerberos.realm }} *" >> /var/kerberos/krb5kdc/kadm5.acl'
+    - shell: /bin/bash
+    - unless:  cat /var/kerberos/krb5kdc/kadm5.acl | grep "*/admin@{{ kerberos.realm }} *"
 
 start_kadmin:
   service.running:
