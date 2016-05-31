@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
@@ -34,63 +35,80 @@ public class SaltApiRunPostResponse extends ITResponse {
     public Object handle(Request request, Response response) throws Exception {
         ServerAddressGenerator serverAddressGenerator = new ServerAddressGenerator(numberOfServers);
         if (request.body().contains("grains.append")) {
-            ApplyResponse applyResponse = new ApplyResponse();
-            ArrayList<Map<String, Object>> responseList = new ArrayList<>();
-
-            Map<String, Object> hostMap = new HashMap<>();
-            serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address, address));
-            responseList.add(hostMap);
-
-            applyResponse.setResult(responseList);
-            return getObjectMapper().writeValueAsString(applyResponse);
+            return grainsAppendResponse(serverAddressGenerator);
         }
         if (request.body().contains("network.interface_ip")) {
-            NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
-            List<Map<String, String>> result = new ArrayList<>();
-            serverAddressGenerator.iterateOver(address -> {
-                Map<String, String> networkHashMap = new HashMap<>();
-                networkHashMap.put("host-" + address, address);
-                result.add(networkHashMap);
-            });
-            networkInterfaceResponse.setResult(result);
-            return getObjectMapper().writeValueAsString(networkInterfaceResponse);
+            return networkInterfaceIp(serverAddressGenerator);
         }
         if (request.body().contains("saltutil.sync_grains")) {
-            ApplyResponse applyResponse = new ApplyResponse();
-            ArrayList<Map<String, Object>> responseList = new ArrayList<>();
-
-            Map<String, Object> hostMap = new HashMap<>();
-            serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address, address));
-            responseList.add(hostMap);
-
-            applyResponse.setResult(responseList);
-            return getObjectMapper().writeValueAsString(applyResponse);
+            return saltUtilSyncGrainsResponse(serverAddressGenerator);
         }
         if (request.body().contains("state.highstate")) {
-            return responseFromJsonFile("saltapi/high_state_response.json");
+            return stateHighState();
         }
         if (request.body().contains("jobs.active")) {
-            return responseFromJsonFile("saltapi/runningjobs_response.json");
+            return jobsActive();
         }
         if (request.body().contains("jobs.lookup_jid")) {
-            return responseFromJsonFile("saltapi/lookup_jid_response.json");
+            return jobsLookupJid();
         }
         if (request.body().contains("state.apply")) {
-            return responseFromJsonFile("saltapi/state_apply_response.json");
-        }
-        if (request.body().contains("network.interface_ip")) {
-            NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
-            List<Map<String, String>> result = new ArrayList<>();
-            serverAddressGenerator.iterateOver(address -> {
-                Map<String, String> networkHashMap = new HashMap<>();
-                networkHashMap.put("host-" + address, address);
-                result.add(networkHashMap);
-            });
-            networkInterfaceResponse.setResult(result);
-            return objectMapper.writeValueAsString(networkInterfaceResponse);
+            return stateApply();
         }
         LOGGER.error("no response for this SALT RUN request: " + request.body());
         throw new IllegalStateException("no response for this SALT RUN request: " + request.body());
+    }
+
+    protected Object stateApply() {
+        return responseFromJsonFile("saltapi/state_apply_response.json");
+    }
+
+    protected Object jobsLookupJid() {
+        return responseFromJsonFile("saltapi/lookup_jid_response.json");
+    }
+
+    protected Object jobsActive() {
+        return responseFromJsonFile("saltapi/runningjobs_response.json");
+    }
+
+    protected Object stateHighState() {
+        return responseFromJsonFile("saltapi/high_state_response.json");
+    }
+
+    protected Object networkInterfaceIp(ServerAddressGenerator serverAddressGenerator) throws JsonProcessingException {
+        NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
+        List<Map<String, String>> result = new ArrayList<>();
+        serverAddressGenerator.iterateOver(address -> {
+            Map<String, String> networkHashMap = new HashMap<>();
+            networkHashMap.put("host-" + address, address);
+            result.add(networkHashMap);
+        });
+        networkInterfaceResponse.setResult(result);
+        return getObjectMapper().writeValueAsString(networkInterfaceResponse);
+    }
+
+    protected Object saltUtilSyncGrainsResponse(ServerAddressGenerator serverAddressGenerator) throws JsonProcessingException {
+        ApplyResponse applyResponse = new ApplyResponse();
+        ArrayList<Map<String, Object>> responseList = new ArrayList<>();
+
+        Map<String, Object> hostMap = new HashMap<>();
+        serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address, address));
+        responseList.add(hostMap);
+
+        applyResponse.setResult(responseList);
+        return getObjectMapper().writeValueAsString(applyResponse);
+    }
+
+    protected Object grainsAppendResponse(ServerAddressGenerator serverAddressGenerator) throws JsonProcessingException {
+        ApplyResponse applyResponse = new ApplyResponse();
+        ArrayList<Map<String, Object>> responseList = new ArrayList<>();
+
+        Map<String, Object> hostMap = new HashMap<>();
+        serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address, address));
+        responseList.add(hostMap);
+
+        applyResponse.setResult(responseList);
+        return getObjectMapper().writeValueAsString(applyResponse);
     }
 
     @Override

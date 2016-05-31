@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.states;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,14 +40,17 @@ public class JidInfoResponseTransformer {
     private static Map<String, RunnerInfoObject> runnerInfoObjects(Map<String, Map<String, Object>> map) {
         Map<String, RunnerInfoObject> runnerInfoObjectMap = new HashMap<>();
         for (Map.Entry<String, Map<String, Object>> stringMapEntry : map.entrySet()) {
+            Map<String, Object> value = stringMapEntry.getValue();
             RunnerInfoObject runnerInfoObject = new RunnerInfoObject();
-            runnerInfoObject.setChanges((Map<String, Object>) stringMapEntry.getValue().get("changes"));
-            runnerInfoObject.setComment(stringMapEntry.getValue().get("comment").toString());
-            runnerInfoObject.setDuration(stringMapEntry.getValue().get("duration").toString());
-            runnerInfoObject.setName(stringMapEntry.getValue().get("name").toString());
-            runnerInfoObject.setResult(stringMapEntry.getValue().get("result").toString());
-            runnerInfoObject.setRunNum(stringMapEntry.getValue().get("__run_num__").toString());
-            runnerInfoObject.setStartTime(stringMapEntry.getValue().get("start_time").toString());
+            Object changes = value.get("changes");
+            runnerInfoObject.setChanges(changes == null ? Collections.emptyMap() : (Map<String, Object>) changes);
+            runnerInfoObject.setComment(String.valueOf(value.get("comment")));
+            runnerInfoObject.setDuration(String.valueOf(value.get("duration")));
+            runnerInfoObject.setName(String.valueOf(value.get("name")));
+            runnerInfoObject.setResult(Boolean.valueOf(String.valueOf(value.get("result"))));
+            String runNum = String.valueOf(value.get("__run_num__"));
+            runnerInfoObject.setRunNum(runNum == null ? -1 : Integer.parseInt(runNum));
+            runnerInfoObject.setStartTime(String.valueOf(value.get("start_time")));
             runnerInfoObjectMap.put(stringMapEntry.getKey(), runnerInfoObject);
         }
         return runnerInfoObjectMap;
