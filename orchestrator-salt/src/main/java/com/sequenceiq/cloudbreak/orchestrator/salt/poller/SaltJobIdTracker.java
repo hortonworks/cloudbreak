@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
 import static com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId.jobId;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
@@ -35,48 +37,63 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             JobId jobIdObject = jobId(saltJobRunner.submit(saltConnector));
             String jobId = jobIdObject.getJobId();
             saltJobRunner.setJid(jobIdObject);
-            boolean jobRunning = SaltStates.jobIsRunning(saltConnector, jobId, new Compound(saltJobRunner.getTarget()));
-            if (jobRunning) {
-                LOGGER.info("Job: {} is running currently, waiting for next polling attempt.", jobId);
-                saltJobRunner.setJobState(JobState.IN_PROGRESS);
-            } else {
-                LOGGER.info("Job finished: {}. Collecting missing nodes", jobId);
-                checkJobFinishedWithSuccess();
-            }
+            checkIsFinished(jobId);
         } else if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
             String jobId = saltJobRunner.getJid().getJobId();
             LOGGER.info("Job: {} is running currently checking the current state.", jobId);
-            boolean jobRunning = SaltStates.jobIsRunning(saltConnector, jobId, new Compound(saltJobRunner.getTarget()));
-            if (jobRunning) {
-                LOGGER.info("Job: {} is running currently waiting for next polling attempt.", jobId);
-                saltJobRunner.setJobState(JobState.IN_PROGRESS);
-            } else {
-                LOGGER.info("Job: {} finished. Collecting missing nodes", jobId);
-                checkJobFinishedWithSuccess();
-            }
+            checkIsFinished(jobId);
         } else if (JobState.FAILED.equals(saltJobRunner.getJobState())) {
             String jobId = saltJobRunner.getJid().getJobId();
             LOGGER.info("Job: {} failed in the previous time. Trigger again with these targets: {}", jobId, saltJobRunner.getTarget());
             saltJobRunner.setJid(jobId(saltJobRunner.submit(saltConnector)));
             saltJobRunner.setJobState(JobState.IN_PROGRESS);
+            return call();
         }
-        if (!JobState.FINISHED.equals(saltJobRunner.getJobState())) {
-            String jobId = saltJobRunner.getJid().getJobId();
-            throw new CloudbreakOrchestratorFailedException(String.format("There are missing nodes from job (jid: %s) result: %s",
-                    jobId, saltJobRunner.getTarget()));
+        if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
+            String jobIsRunningMessage = String.format("Job: %s is running currently, waiting for next polling attempt", saltJobRunner.getJid());
+            throw new CloudbreakOrchestratorFailedException(jobIsRunningMessage);
+        }
+        if (JobState.FAILED.equals(saltJobRunner.getJobState())) {
+            throw new CloudbreakOrchestratorFailedException(buildErrorMessage());
         }
         LOGGER.info("Job (jid: {}) was finished. Triggering next salt event.", saltJobRunner.getJid().getJobId());
         return true;
     }
 
+    private void checkIsFinished(String jobId) {
+        boolean jobRunning = SaltStates.jobIsRunning(saltConnector, jobId, new Compound(saltJobRunner.getTarget()));
+        if (jobRunning) {
+            LOGGER.info("Job: {} is running currently, waiting for next polling attempt.", jobId);
+            saltJobRunner.setJobState(JobState.IN_PROGRESS);
+        } else {
+            LOGGER.info("Job finished: {}. Collecting missing nodes", jobId);
+            checkJobFinishedWithSuccess();
+        }
+    }
+
+    private String buildErrorMessage() {
+        String jobId = saltJobRunner.getJid().getJobId();
+        StringBuilder errorMessageBuilder = new StringBuilder();
+        errorMessageBuilder.append(String.format("There are missing nodes from job (jid: %s), target: %s", jobId, saltJobRunner.getTarget()));
+        if (saltJobRunner.getJobState().getNodesWithError() != null) {
+            for (String host : saltJobRunner.getJobState().getNodesWithError().keySet()) {
+                Collection<String> errorMessages = saltJobRunner.getJobState().getNodesWithError().get(host);
+                errorMessageBuilder.append("\n").append("Node: ").append(host).append(" Error(s): ").append(String.join(" | ", errorMessages));
+            }
+        }
+        return errorMessageBuilder.toString();
+    }
+
     private void checkJobFinishedWithSuccess() {
         String jobId = saltJobRunner.getJid().getJobId();
-        Set<String> missingNodes = SaltStates.jidInfo(saltConnector, jobId, new Compound(saltJobRunner.getTarget()),
+        Multimap<String, String> missingNodesWithReason = SaltStates.jidInfo(saltConnector, jobId, new Compound(saltJobRunner.getTarget()),
                 saltJobRunner.stateType());
-        if (!missingNodes.isEmpty()) {
-            LOGGER.info("There are missing nodes after the job (jid: {}) completion: {}", jobId, missingNodes);
+        if (!missingNodesWithReason.isEmpty()) {
+            LOGGER.info("There are missing nodes after the job (jid: {}) completion: {}", jobId, String.join(",", missingNodesWithReason.keySet()));
+            JobState jobState = JobState.FAILED;
+            jobState.setNodesWithError(missingNodesWithReason);
             saltJobRunner.setJobState(JobState.FAILED);
-            Set<String> newTargets = missingNodes.stream().map(node -> SaltStates.resolveHostNameToMinionHostName(saltConnector, node))
+            Set<String> newTargets = missingNodesWithReason.keySet().stream().map(node -> SaltStates.resolveHostNameToMinionHostName(saltConnector, node))
                     .collect(Collectors.toSet());
             saltJobRunner.setTarget(newTargets);
         } else {
