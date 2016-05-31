@@ -82,7 +82,7 @@ public class GcpCommands implements CommandMarker {
         return baseCredentialCommands.createCredentialAvailable(PLATFORM);
     }
 
-    @CliCommand(value = "credential create --GCP", help = "Create a new Gcp credential")
+    @CliCommand(value = "credential create --GCP", help = "Create a new GCP credential")
     public String createCredential(
             @CliOption(key = "name", mandatory = true, help = "Name of the credential") String name,
             @CliOption(key = "projectId", mandatory = true, help = "projectId of the credential") String projectId,
@@ -110,7 +110,7 @@ public class GcpCommands implements CommandMarker {
         return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --GCP --NEW", help = "Create an Gcp network configuration with a new network and a new subnet")
+    @CliCommand(value = "network create --GCP --NEW", help = "Create a GCP network configuration with a new network and a new subnet")
     public String createNewNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
@@ -122,7 +122,7 @@ public class GcpCommands implements CommandMarker {
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --GCP --NEW_SUBNET", help = "Create a Gcp network configuration with a new subnet in an existing network")
+    @CliCommand(value = "network create --GCP --NEW_SUBNET", help = "Create a GCP network configuration with a new subnet in an existing network")
     public String createNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
@@ -138,7 +138,7 @@ public class GcpCommands implements CommandMarker {
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --GCP --EXISTING_SUBNET", help = "Create a Gcp network which use an existing subnet in an existing network")
+    @CliCommand(value = "network create --GCP --EXISTING_SUBNET", help = "Create a GCP network which use an existing subnet in an existing network")
     public String createExistingSubnetNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "networkId", mandatory = true, help = "Id of a custom network") String networkId,
@@ -157,7 +157,7 @@ public class GcpCommands implements CommandMarker {
         return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --GCP --LEGACY", help = "Create a Gcp legacy GCP network configuration without subnet")
+    @CliCommand(value = "network create --GCP --LEGACY", help = "Create a legacy GCP network configuration without subnet")
     public String createLegacyNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "networkId", mandatory = false, help = "Id of a custom network") String networkId,
@@ -218,7 +218,7 @@ public class GcpCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "stack create --GCP", help = "Create a new stack based on a template")
+    @CliCommand(value = "stack create --GCP", help = "Create a new GCP stack based on a template")
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
