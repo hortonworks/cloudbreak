@@ -297,7 +297,6 @@ public class ClusterBootstrapperTest {
                         any(GatewayConfig.class), any(Set.class));
 
         underTest.bootstrapNewNodes(context);
-
         verify(clusterBootstrapperErrorHandler, times(0))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
         verify(tlsSecurityService, times(1)).buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString());
