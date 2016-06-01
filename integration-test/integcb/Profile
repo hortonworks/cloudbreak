@@ -2,5 +2,5 @@ export PUBLIC_IP=172.17.0.1
 #export PRIVATE_IP=172.17.0.1
 export CB_DB_ROOT_PATH=/var/lib/boot2docker/it-test
 export DOCKER_TAG_CLOUDBREAK=dev
-export CB_JAVA_OPTS=-Dmock.spi.endpoint=https://test.service.consul:9443
+export CB_JAVA_OPTS='-Drest.debug=true -Dmock.spi.endpoint=https://test.service.consul:9443'
 #export DOCKER_MACHINE=test
