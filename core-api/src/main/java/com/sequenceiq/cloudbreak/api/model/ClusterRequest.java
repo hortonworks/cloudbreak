@@ -59,7 +59,7 @@ public class ClusterRequest {
     @Valid
     private FileSystemRequest fileSystem;
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
-    private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
+    private ConfigStrategy configStrategy = ConfigStrategy.ONLY_STACK_DEFAULTS_APPLY;
     @ApiModelProperty(value = ClusterModelDescription.ENABLE_SHIPYARD, required = false)
     private Boolean enableShipyard = Boolean.FALSE;
 
