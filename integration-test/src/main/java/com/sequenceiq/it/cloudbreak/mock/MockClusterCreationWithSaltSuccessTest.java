@@ -115,7 +115,6 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         verify(AMBARI_API_ROOT + "/clusters/ambari_cluster/requests/1", "GET").atLeast(1).verify();
         verify(AMBARI_API_ROOT + "/clusters/ambari_cluster/hosts", "GET").exactTimes(1).verify();
 
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.interface_ip").atLeast(1).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").exactTimes(1).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.lookup_jid").bodyContains("jid=1").exactTimes(2).verify();

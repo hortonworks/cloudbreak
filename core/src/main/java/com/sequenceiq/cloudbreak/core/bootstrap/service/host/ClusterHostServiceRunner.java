@@ -16,7 +16,6 @@ import javax.inject.Inject;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.HostServiceConfigService;
@@ -85,8 +84,7 @@ public class ClusterHostServiceRunner {
             }
             servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
             SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
-            hostOrchestrator.runService(gatewayConfig, agents, agents, saltPillarConfig,
-                    clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+            hostOrchestrator.runService(gatewayConfig, agents, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -107,8 +105,7 @@ public class ClusterHostServiceRunner {
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                     gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
-            hostOrchestrator.runService(gatewayConfig, allNodes, agents,
-                    new SaltPillarConfig(), clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+            hostOrchestrator.runService(gatewayConfig, allNodes, new SaltPillarConfig(), clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -157,12 +154,10 @@ public class ClusterHostServiceRunner {
         serviceInfos.put(next.getPrivateIp(), Arrays.asList(serverServiceInfo));
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            if (instanceGroup.getInstanceGroupType().equals(InstanceGroupType.CORE)) {
-                for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
-                    agents.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryFQDN()));
-                    ServiceInfo agentServiceInfo = new ServiceInfo(HostServiceType.AMBARI_AGENT.getName(), instanceMetaData.getDiscoveryFQDN());
-                    serviceInfos.put(instanceMetaData.getPrivateIp(), Arrays.asList(agentServiceInfo));
-                }
+            for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+                agents.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryFQDN()));
+                ServiceInfo agentServiceInfo = new ServiceInfo(HostServiceType.AMBARI_AGENT.getName(), instanceMetaData.getDiscoveryFQDN());
+                serviceInfos.put(instanceMetaData.getPrivateIp(), Arrays.asList(agentServiceInfo));
             }
         }
         saveHostServices(serviceInfos, cluster);

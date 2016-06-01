@@ -11,7 +11,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +99,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> targetNodes, SaltPillarConfig pillarConfig,
+    public void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, SaltPillarConfig pillarConfig,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             PillarSave hostSave = new PillarSave(sc, gatewayConfig, allNodes);
@@ -116,25 +115,24 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
 
             Set<String> server = Sets.newHashSet(gatewayConfig.getPrivateAddress());
-            Set<String> targetIps = targetNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            Set<String> all = Stream.concat(server.stream(), targetIps.stream()).collect(Collectors.toSet());
+            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
 
             LOGGER.info("Pillar saved, starting to set up discovery...");
             //run discovery only
-            runNewService(sc, new HighStateChecker(all), exitCriteriaModel);
+            runNewService(sc, new HighStateChecker(all, allNodes), exitCriteriaModel);
 
             LOGGER.info("Pillar saved, discovery has been set up with highstate");
 
             // ambari server
-            runSaltCommand(sc, new SimpleAddRoleChecker(server, "ambari_server"), exitCriteriaModel);
+            runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "ambari_server"), exitCriteriaModel);
             // ambari agent
-            runSaltCommand(sc, new SimpleAddRoleChecker(all, "ambari_agent"), exitCriteriaModel);
+            runSaltCommand(sc, new SimpleAddRoleChecker(all, allNodes, "ambari_agent"), exitCriteriaModel);
             // kerberos
             if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new SimpleAddRoleChecker(server, "kerberos_server"), exitCriteriaModel);
+                runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "kerberos_server"), exitCriteriaModel);
             }
-            runSaltCommand(sc, new SyncGrainsChecker(all), exitCriteriaModel);
-            runNewService(sc, new HighStateChecker(all), exitCriteriaModel);
+            runSaltCommand(sc, new SyncGrainsChecker(all, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateChecker(all, allNodes), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
