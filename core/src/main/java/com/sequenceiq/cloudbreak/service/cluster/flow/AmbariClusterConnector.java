@@ -49,7 +49,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
-import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -819,9 +818,6 @@ public class AmbariClusterConnector {
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);
                 }
                 blueprintText = addHBaseClient(blueprintText);
-                if (ConfigStrategy.ONLY_STACK_DEFAULTS_APPLY.equals(cluster.getConfigStrategy())) {
-                    blueprintText = fixHiveConfig(ambariClient, blueprintText);
-                }
             }
             LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
             ambariClient.addBlueprint(blueprintText);
@@ -870,48 +866,6 @@ public class AmbariClusterConnector {
         return processingBlueprint;
     }
 
-    // TODO https://issues.apache.org/jira/browse/AMBARI-15296
-    private String fixHiveConfig(AmbariClient ambariClient, String blueprint) {
-        String processingBlueprint = blueprint;
-        if (processingBlueprint.contains("HIVE_SERVER")) {
-            try {
-                processingBlueprint = extendHiveConfig(ambariClient, processingBlueprint);
-                String descriptor = FileReaderUtils.readFileFromClasspath("hdp/hive-kerberos-descriptor.json");
-                ObjectNode descriptorNode = (ObjectNode) JsonUtil.readTree(descriptor);
-                JsonNode root = JsonUtil.readTree(processingBlueprint);
-                ObjectNode security = (ObjectNode) root.path("Blueprints").path("security");
-                JsonNode kerberosDescriptor = security.path("kerberos_descriptor");
-                if (kerberosDescriptor.isMissingNode()) {
-                    security.setAll(descriptorNode);
-                } else {
-                    JsonNode services = kerberosDescriptor.path("services");
-                    ObjectNode kerberosNode = (ObjectNode) kerberosDescriptor;
-                    ArrayNode hiveServices = (ArrayNode) descriptorNode.path("kerberos_descriptor").path("services");
-                    if (services.isMissingNode()) {
-                        ArrayNode serviceArray = kerberosNode.putArray("services");
-                        serviceArray.add(hiveServices.get(0));
-                    } else {
-                        ArrayNode serviceArray = (ArrayNode) services;
-                        Iterator<JsonNode> elements = serviceArray.elements();
-                        boolean hivePresent = false;
-                        while (elements.hasNext()) {
-                            if ("HIVE".equals(elements.next().path("name").textValue())) {
-                                hivePresent = true;
-                                break;
-                            }
-                        }
-                        if (!hivePresent) {
-                            serviceArray.add(hiveServices.get(0));
-                        }
-                    }
-                }
-                processingBlueprint = JsonUtil.writeValueAsString(root);
-            } catch (Exception e) {
-                LOGGER.warn("Cannot extend blueprint with HIVE kerberos descriptor", e);
-            }
-        }
-        return processingBlueprint;
-    }
 
     private String extendHiveConfig(AmbariClient ambariClient, String processingBlueprint) {
         Map<String, Map<String, String>> config = new HashMap<>();
