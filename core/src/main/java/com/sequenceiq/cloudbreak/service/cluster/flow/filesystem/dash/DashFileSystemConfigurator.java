@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.DashFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
 
