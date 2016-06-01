@@ -5,21 +5,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
-import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public abstract class BaseSaltJobRunner implements SaltJobRunner {
 
     private Set<String> target = new HashSet<>();
+    private Set<Node> allNode;
     private JobId jid;
     private JobState jobState = JobState.NOT_STARTED;
 
-    public BaseSaltJobRunner(Set<String> target) {
+    public BaseSaltJobRunner(Set<String> target, Set<Node> allNode) {
         this.target = target;
+        this.allNode = allNode;
     }
 
     public Set<String> getTarget() {
@@ -58,8 +59,9 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
         return set;
     }
 
-    public Set<String> collectMissingNodes(SaltConnector sc, Set<String> nodes) {
-        Set<String> nodesTarget = nodes.stream().map(node -> SaltStates.resolveHostNameToMinionHostName(sc, node)).collect(Collectors.toSet());
+    public Set<String> collectMissingNodes(Set<String> nodes) {
+        Map<String, String> hostNames = allNode.stream().collect(Collectors.toMap(Node::getHostname, Node::getPrivateIp));
+        Set<String> nodesTarget = nodes.stream().map(hostNames::get).collect(Collectors.toSet());
         return target.stream().filter(t -> !nodesTarget.contains(t)).collect(Collectors.toSet());
     }
 

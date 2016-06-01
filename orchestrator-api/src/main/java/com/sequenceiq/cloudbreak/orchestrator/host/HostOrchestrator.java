@@ -26,7 +26,7 @@ public interface HostOrchestrator {
 
     int getMaxBootstrapNodes();
 
-    void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> targetNodes, SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
+    void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
     List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
