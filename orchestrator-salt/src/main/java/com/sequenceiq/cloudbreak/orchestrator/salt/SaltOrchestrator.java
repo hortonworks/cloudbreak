@@ -135,7 +135,8 @@ public class SaltOrchestrator implements HostOrchestrator {
                 runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "kerberos_server"), exitCriteriaModel);
             }
             if (configureSmartSense) {
-                runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "smartsense"), exitCriteriaModel);
+                runSaltCommand(sc, new SimpleAddRoleChecker(all, allNodes, "smartsense"), exitCriteriaModel);
+                runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "smartsense_gateway"), exitCriteriaModel);
             }
             runSaltCommand(sc, new SyncGrainsChecker(all, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateChecker(all, allNodes), exitCriteriaModel);

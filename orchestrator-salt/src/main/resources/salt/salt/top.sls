@@ -30,7 +30,7 @@ base:
     - match: compound
     - smartsense.init
 
-  'I@platform:AWS and G@roles:smartsense and G@roles:ambari_server':
+  'I@platform:AWS and G@roles:smartsense_gateway':
     - match: compound
     - smartsense.gateway-init
 
