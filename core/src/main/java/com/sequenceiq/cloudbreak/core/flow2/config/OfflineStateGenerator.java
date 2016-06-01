@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.updatesubnet.UpdateSubnetFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 
 public class OfflineStateGenerator {
@@ -66,8 +65,7 @@ public class OfflineStateGenerator {
                     new ClusterStartFlowConfig(),
                     new ClusterStopFlowConfig(),
                     new ClusterResetFlowConfig(),
-                    new ClusterCredentialChangeFlowConfig(),
-                    new UpdateSubnetFlowConfig()
+                    new ClusterCredentialChangeFlowConfig()
             );
 
     private static final ApplicationContext APP_CONTEXT = new CustomApplicationContext();

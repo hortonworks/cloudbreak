@@ -26,8 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -52,7 +50,6 @@ import reactor.bus.EventBus;
 public class ServiceProviderConnectorAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderConnectorAdapter.class);
-    private static final String ROLLBACK_MESSAGE = "stack.infrastructure.create.rollback";
 
     @Inject
     private EventBus eventBus;
@@ -124,18 +121,6 @@ public class ServiceProviderConnectorAdapter {
             LOGGER.error("Error while terminating the stack", e);
             throw new OperationException(e);
         }
-    }
-
-    public void updateAllowedSubnets(Stack stack) {
-        LOGGER.debug("Assembling update subnet event for: {}", stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
-                location);
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
-        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        UpdateStackRequest<UpdateStackResult> updateRequest = new UpdateStackRequest<>(cloudContext, cloudCredential, cloudStack, resources);
-        eventBus.notify(updateRequest.selector(), Event.wrap(updateRequest));
     }
 
     public void rollback(Stack stack, Set<Resource> resourceSet) {
