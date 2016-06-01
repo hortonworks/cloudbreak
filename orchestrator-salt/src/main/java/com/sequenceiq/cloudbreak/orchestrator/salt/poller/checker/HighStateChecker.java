@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker;
 
+import java.util.Set;
+
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
-import java.util.Set;
-
 
 public class HighStateChecker extends BaseSaltJobRunner {
 
-    public HighStateChecker(Set<String> target) {
-        super(target);
+    public HighStateChecker(Set<String> target, Set<Node> allNode) {
+        super(target, allNode);
     }
 
     @Override

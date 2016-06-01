@@ -74,7 +74,7 @@ public class OpenStackCommands implements CommandMarker {
         return baseCredentialCommands.createCredentialAvailable(PLATFORM);
     }
 
-    @CliCommand(value = "credential create --OPENSTACK", help = "Create a new OPENSTACK credential")
+    @CliCommand(value = "credential create --OPENSTACK", help = "Create a new OpenStack credential")
     public String createCredential(
             @CliOption(key = "name", mandatory = true, help = "Name of the credential") String name,
             @CliOption(key = "userName", mandatory = true, help = "Username of the credential") String userName,
@@ -132,7 +132,7 @@ public class OpenStackCommands implements CommandMarker {
         return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --OPENSTACK --EXISTING_SUBNET", help = "Create an Openstack network which use an existing subnet in an existing network")
+    @CliCommand(value = "network create --OPENSTACK --EXISTING_SUBNET", help = "Create an OpenStack network which use an existing subnet in an existing network")
     public String createExisitngNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "networkId", mandatory = true, help = "ID of the custom network to use") String networkId,
@@ -151,7 +151,7 @@ public class OpenStackCommands implements CommandMarker {
         return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --OPENSTACK --NEW", help = "Create an Openstack network configuration with a new network and a new subnet")
+    @CliCommand(value = "network create --OPENSTACK --NEW", help = "Create an OpenStack network configuration with a new network and a new subnet")
     public String createNewNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
@@ -187,7 +187,7 @@ public class OpenStackCommands implements CommandMarker {
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "template create --OPENSTACK", help = "Create a new OPENSTACK template")
+    @CliCommand(value = "template create --OPENSTACK", help = "Create a new OpenStack template")
     public String createTemplate(
             @CliOption(key = "name", mandatory = true, help = "Name of the template") String name,
             @CliOption(key = "instanceType", mandatory = true, help = "instanceType of the template") String instanceType,
@@ -207,7 +207,7 @@ public class OpenStackCommands implements CommandMarker {
         return baseTemplateCommands.create(name, instanceType, volumeCount, volumeSize, "HDD", publicInAccount, description, parameters, platformId, PLATFORM);
     }
 
-    @CliCommand(value = "platform create --OPENSTACK", help = "Create a new Openstack platform configuration")
+    @CliCommand(value = "platform create --OPENSTACK", help = "Create a new OpenStack platform configuration")
     public String createPlatform(
             @CliOption(key = "name", mandatory = true, help = "Name of the platform") String name,
             @CliOption(key = "description", mandatory = false, help = "Description of the platform") String description,
@@ -221,7 +221,7 @@ public class OpenStackCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "stack create --OPENSTACK", help = "Create a new stack based on a template")
+    @CliCommand(value = "stack create --OPENSTACK", help = "Create a new OpenStack stack based on a template")
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,

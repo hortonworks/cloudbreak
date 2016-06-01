@@ -79,7 +79,7 @@ public class AzureCommands implements CommandMarker {
     }
 
 
-    @CliCommand(value = "credential create --AZURE", help = "Create a new AZURE credential")
+    @CliCommand(value = "credential create --AZURE", help = "Create a new Azure credential")
     public String createCredential(
             @CliOption(key = "name", mandatory = true, help = "Name of the credential") String name,
             @CliOption(key = "subscriptionId", mandatory = true, help = "subscriptionId of the credential") String subscriptionId,
@@ -133,7 +133,7 @@ public class AzureCommands implements CommandMarker {
         return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "template create --AZURE", help = "Create a new AZURE template")
+    @CliCommand(value = "template create --AZURE", help = "Create a new Azure template")
     public String createTemplate(
             @CliOption(key = "name", mandatory = true, help = "Name of the template") String name,
             @CliOption(key = "instanceType", mandatory = true, help = "type of the VM") AzureInstanceType instanceType,
@@ -189,7 +189,7 @@ public class AzureCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "stack create --AZURE", help = "Create a new stack based on a template")
+    @CliCommand(value = "stack create --AZURE", help = "Create a new Azure stack based on a template")
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
