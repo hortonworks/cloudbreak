@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-enum ClusterUpscaleState implements FlowState<ClusterUpscaleState, ClusterUpscaleEvent> {
+enum ClusterUpscaleState implements FlowState {
 
     INIT_STATE,
     ADD_CLUSTER_CONTAINERS_STATE(AddClusterContainersAction.class),
@@ -18,17 +19,17 @@ enum ClusterUpscaleState implements FlowState<ClusterUpscaleState, ClusterUpscal
     CLUSTER_UPSCALE_FAILED_STATE,
     FINAL_STATE;
 
-    private Class<?> clazz;
+    private Class<? extends AbstractAction> clazz;
 
     ClusterUpscaleState() {
     }
 
-    ClusterUpscaleState(Class<?> clazz) {
+    ClusterUpscaleState(Class<? extends AbstractAction> clazz) {
         this.clazz = clazz;
     }
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return clazz;
     }
 }

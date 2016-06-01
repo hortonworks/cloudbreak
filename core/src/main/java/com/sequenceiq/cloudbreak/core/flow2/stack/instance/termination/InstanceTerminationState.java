@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-enum InstanceTerminationState implements FlowState<InstanceTerminationState, InstanceTerminationEvent> {
+enum InstanceTerminationState implements FlowState {
 
     INIT_STATE,
     TERMINATION_FAILED_STATE(InstanceTerminationFailureAction.class),
@@ -10,19 +11,18 @@ enum InstanceTerminationState implements FlowState<InstanceTerminationState, Ins
     TERMINATION_FINISHED_STATE(InstanceTerminationFinishedAction.class),
     FINAL_STATE;
 
-    private Class<?> action;
-    private InstanceTerminationEvent failureEvent;
+    private Class<? extends AbstractAction> action;
 
     InstanceTerminationState() {
     }
 
-    InstanceTerminationState(Class<?> action) {
+    InstanceTerminationState(Class<? extends AbstractAction> action) {
         this.action = action;
     }
 
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return action;
     }
 }

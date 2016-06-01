@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackInstanceUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
-import com.sequenceiq.cloudbreak.core.flow.context.UpdateAllowedSubnetsContext;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.DefaultClusterFlowContext;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
@@ -30,7 +29,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackForcedDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.UpdateAllowedSubnetsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
 import reactor.bus.Event;
@@ -177,13 +175,6 @@ public class ReactorFlowManager implements FlowManager {
         FlowPhases phase =
                 ScalingType.DOWNSCALE_ONLY_CLUSTER == request.getScalingType() ? FlowPhases.CLUSTER_DOWNSCALE : FlowPhases.CLUSTER_AND_STACK_DOWNSCALE;
         reactor.notify(phase.name(), eventFactory.createEvent(context, phase.name()));
-    }
-
-    @Override
-    public void triggerUpdateAllowedSubnets(Object object) {
-        UpdateAllowedSubnetsRequest updateAllowedSubnetsRequest = (UpdateAllowedSubnetsRequest) object;
-        UpdateAllowedSubnetsContext context = new UpdateAllowedSubnetsContext(updateAllowedSubnetsRequest);
-        reactor.notify(FlowPhases.UPDATE_ALLOWED_SUBNETS.name(), eventFactory.createEvent(context, FlowPhases.UPDATE_ALLOWED_SUBNETS.name()));
     }
 
     @Override

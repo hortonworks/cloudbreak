@@ -56,36 +56,6 @@ public class SimpleFlowFacade implements FlowFacade {
     }
 
     @Override
-    public FlowContext updateAllowedSubnets(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Update allowed subnet. Context: {}", context);
-        try {
-            context = stackFacade.updateAllowedSubnets(context);
-            LOGGER.debug("Updating of allowed subnet is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the updating of allowed subnet: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
-    public FlowContext handleUpdateAllowedSubnetsFailure(FlowContext context) throws CloudbreakException {
-        LOGGER.debug("Handling 'update allowed subnet' failure. Context: {}", context);
-        try {
-            context = stackFacade.handleUpdateAllowedSubnetsFailure(context);
-            LOGGER.debug("Handling of 'update allowed subnet' failure is DONE");
-            return context;
-        } catch (CloudbreakException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Exception during the handling of update allowed subnet failure: {}", e.getMessage());
-            throw new CloudbreakException(e);
-        }
-    }
-
-    @Override
     public FlowContext handleStackSync(FlowContext context) throws CloudbreakException {
         LOGGER.debug("Stack sync requested. Context: {}", context);
         try {

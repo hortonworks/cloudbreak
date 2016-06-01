@@ -111,7 +111,6 @@ public class ReactorFlowManagerTest {
         flowManager.triggerStackRemoveInstance(removeInstanceRequest);
         flowManager.triggerClusterUpscale(updateAmbariHostsRequest);
         flowManager.triggerClusterDownscale(updateAmbariHostsRequest);
-        flowManager.triggerUpdateAllowedSubnets(updateAllowedSubnetsRequest);
         flowManager.triggerClusterSync(clusterStatusUpdateRequest);
         flowManager.triggerStackSync(stackStatusUpdateRequest);
         flowManager.triggerFullSync(stackStatusUpdateRequest);

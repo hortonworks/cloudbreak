@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-public enum StackStartState implements FlowState<StackStartState, StackStartEvent> {
+public enum StackStartState implements FlowState {
     INIT_STATE,
     START_FAILED_STATE,
     START_STATE,
@@ -10,7 +11,7 @@ public enum StackStartState implements FlowState<StackStartState, StackStartEven
     FINAL_STATE;
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return null;
     }
 }

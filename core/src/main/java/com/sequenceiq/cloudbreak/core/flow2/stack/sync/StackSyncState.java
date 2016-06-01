@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.sync;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-public enum StackSyncState implements FlowState<StackSyncState, StackSyncEvent> {
+public enum StackSyncState implements FlowState {
     INIT_STATE,
     SYNC_FAILED_STATE,
     SYNC_STATE,
@@ -10,7 +11,7 @@ public enum StackSyncState implements FlowState<StackSyncState, StackSyncEvent> 
     FINAL_STATE;
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return null;
     }
 }

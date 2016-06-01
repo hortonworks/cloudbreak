@@ -93,11 +93,11 @@ public class AbstractActionTest {
         verify(underTest, times(1)).sendEvent(eq(FLOW_ID), eq(Event.FAILURE.name()), eq(Collections.emptyMap()));
     }
 
-    enum State implements FlowState<State, Event> {
+    enum State implements FlowState {
         INIT, DOING;
 
         @Override
-        public Class<?> action() {
+        public Class<? extends AbstractAction> action() {
             return TestAction.class;
         }
     }

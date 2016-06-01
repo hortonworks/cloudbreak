@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-public enum StackUpscaleState implements FlowState<StackUpscaleState, StackUpscaleEvent> {
+public enum StackUpscaleState implements FlowState {
     INIT_STATE,
     UPSCALE_FAILED_STATE,
     ADD_INSTANCES_STATE,
@@ -15,7 +16,7 @@ public enum StackUpscaleState implements FlowState<StackUpscaleState, StackUpsca
     FINAL_STATE;
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return null;
     }
 }

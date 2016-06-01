@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
+import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
-enum ClusterDownscaleState implements FlowState<ClusterDownscaleState, ClusterDownscaleEvent> {
+enum ClusterDownscaleState implements FlowState {
     INIT_STATE,
     DECOMMISSION_STATE,
     UPDATE_INSTANCE_METADATA_STATE,
@@ -11,7 +12,7 @@ enum ClusterDownscaleState implements FlowState<ClusterDownscaleState, ClusterDo
     FINAL_STATE;
 
     @Override
-    public Class<?> action() {
+    public Class<? extends AbstractAction> action() {
         return null;
     }
 }
