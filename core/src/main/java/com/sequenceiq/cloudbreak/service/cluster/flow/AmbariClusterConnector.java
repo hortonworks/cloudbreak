@@ -90,6 +90,10 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DefaultConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -168,6 +172,8 @@ public class AmbariClusterConnector {
     private TlsSecurityService tlsSecurityService;
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
+    @Inject
+    private SmartSenseConfigProvider smartSenseConfigProvider;
 
     private enum Msg {
         AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
@@ -222,6 +228,7 @@ public class AmbariClusterConnector {
             }
 
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, defaultConfigProvider.getDefaultConfigs(), false);
+            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, smartSenseConfigProvider.getConfigs(stack, blueprintText), true);
 
             AmbariClient ambariClient = getAmbariClient(stack);
             setBaseRepoURL(cluster, ambariClient);
@@ -262,6 +269,7 @@ public class AmbariClusterConnector {
             executeSmokeTest(stack, ambariClient);
             //TODO https://hortonworks.jira.com/browse/BUG-51920
             startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
+            triggerSmartSenseCapture(ambariClient, blueprintText);
             cluster = handleClusterCreationSuccess(stack, cluster);
             return cluster;
         } catch (CancellationException cancellationException) {
@@ -653,6 +661,17 @@ public class AmbariClusterConnector {
         hostMetadataRepository.save(hostMetadata);
         return cluster;
 
+    }
+
+    private void triggerSmartSenseCapture(AmbariClient ambariClient, String blueprintText) {
+        if (smartSenseConfigProvider.smartSenseIsConfigurable(blueprintText)) {
+            try {
+                LOGGER.info("Triggering SmartSense data capture.");
+                ambariClient.smartSenseCapture(0);
+            } catch (Exception e) {
+                LOGGER.error("Triggering SmartSense capture is failed.", e);
+            }
+        }
     }
 
     private List<String> getHostNames(Set<HostMetadata> hostMetadata) {

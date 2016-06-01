@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
-import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;

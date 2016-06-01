@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
-import com.sequenceiq.cloudbreak.service.cluster.flow.BlueprintConfigurationEntry;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeScript;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 

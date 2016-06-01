@@ -56,6 +56,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${rest.debug:false}")
     private boolean restDebug;
 
+    @Value("${cb.smartsense.configure:false}")
+    private boolean configureSmartSense;
+
     private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
     private ExitCriteria exitCriteria;
 
@@ -132,6 +135,9 @@ public class SaltOrchestrator implements HostOrchestrator {
             // kerberos
             if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
                 runSaltCommand(sc, new SimpleAddRoleChecker(server, "kerberos_server"), exitCriteriaModel);
+            }
+            if (configureSmartSense) {
+                runSaltCommand(sc, new SimpleAddRoleChecker(server, "smartsense"), exitCriteriaModel);
             }
             runSaltCommand(sc, new SyncGrainsChecker(all), exitCriteriaModel);
             runNewService(sc, new HighStateChecker(all), exitCriteriaModel);
