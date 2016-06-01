@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.config;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -10,7 +11,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 
@@ -30,11 +30,9 @@ public class Flow2Initializer {
 
     @PostConstruct
     public void init() {
-        Joiner joiner = Joiner.on("|");
-        reactor.on(Selectors.regex(joiner.join(Flow2Handler.FLOW_FINAL, Flow2Handler.FLOW_CANCEL)), flow2Handler);
-        for (FlowConfiguration<?> flowConfig : flowConfigs) {
-            String selector = Arrays.stream(flowConfig.getEvents()).map(FlowEvent::stringRepresentation).collect(Collectors.joining("|"));
-            reactor.on(Selectors.regex(selector), flow2Handler);
-        }
+        String eventSelector = Stream.concat(Stream.of(Flow2Handler.FLOW_FINAL, Flow2Handler.FLOW_CANCEL),
+                                            flowConfigs.stream().flatMap(c -> Arrays.stream(c.getEvents())).map(FlowEvent::stringRepresentation)
+                                    ).distinct().collect(Collectors.joining("|"));
+        reactor.on(Selectors.regex(eventSelector), flow2Handler);
     }
 }

@@ -47,8 +47,8 @@ public class Flow2InitializerTest {
         List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
         flowConfigs.add(new StackSyncFlowConfig());
         flowConfigs.add(new StackTerminationFlowConfig());
-        given(this.flowConfigs.iterator()).willReturn(flowConfigs.iterator());
+        given(this.flowConfigs.stream()).willReturn(flowConfigs.stream());
         underTest.init();
-        verify(reactor, times(3)).on(any(Selector.class), any(Consumer.class));
+        verify(reactor, times(1)).on(any(Selector.class), any(Consumer.class));
     }
 }
