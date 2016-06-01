@@ -24,13 +24,13 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
+import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
-import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -248,15 +248,16 @@ public class TestUtil {
     }
 
     public static InstanceMetaData instanceMetaData(Long id, InstanceStatus instanceStatus, boolean ambariServer, InstanceGroup instanceGroup) {
+        Random random = new Random();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(instanceStatus);
         instanceMetaData.setAmbariServer(ambariServer);
         instanceMetaData.setConsulServer(true);
         instanceMetaData.setSshPort(22);
-        instanceMetaData.setDiscoveryFQDN("test");
-        instanceMetaData.setInstanceId("test");
-        instanceMetaData.setPrivateIp("1.1.1." + (id + Math.abs(new Random().nextInt(255))));
-        instanceMetaData.setPublicIp("2.2.2." + (id + Math.abs(new Random().nextInt(255))));
+        instanceMetaData.setDiscoveryFQDN("test" + id);
+        instanceMetaData.setInstanceId("test" + id);
+        instanceMetaData.setPrivateIp("1.1.1." + (id + Math.abs(random.nextInt(255))));
+        instanceMetaData.setPublicIp("2.2.2." + (id + Math.abs(random.nextInt(255))));
         instanceMetaData.setId(id);
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setStartDate(new Date().getTime());
@@ -532,9 +533,9 @@ public class TestUtil {
 
     public static Set<InstanceGroup> generateGcpInstanceGroupsByNodeCount(int... count) {
         Set<InstanceGroup> instanceGroups = new HashSet<>();
-        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, gcpTemplate(1L), count[0]));
+        instanceGroups.add(instanceGroup(0L, InstanceGroupType.GATEWAY, gcpTemplate(1L), count[0]));
         for (int i = 1; i < count.length; i++) {
-            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, gcpTemplate(1L), count[i]));
+            instanceGroups.add(instanceGroup(Long.valueOf(i), InstanceGroupType.CORE, gcpTemplate(1L), count[i]));
         }
         return instanceGroups;
     }
