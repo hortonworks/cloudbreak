@@ -180,6 +180,7 @@ angular.module('uluwatuControllers').controller('templateController', [
         }
 
         $scope.createMesosTemplate = function() {
+            $scope.mesosTemp.orchestratorType = "MESOS";
             if ($scope.mesosTemp.public) {
                 AccountConstraint.save($scope.mesosTemp, function(result) {
                     handleMesosTemplateSuccess(result)

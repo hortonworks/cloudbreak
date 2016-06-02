@@ -34,6 +34,10 @@ public abstract class ConstraintTemplateBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.DISK, readOnly = true)
     private Double disk;
 
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.ORCHESTRATOR_TYPE, readOnly = true)
+    private String orchestratorType;
+
     public String getName() {
         return name;
     }
@@ -72,5 +76,13 @@ public abstract class ConstraintTemplateBase implements JsonEntity {
 
     public void setDisk(Double disk) {
         this.disk = disk;
+    }
+
+    public String getOrchestratorType() {
+        return orchestratorType;
+    }
+
+    public void setOrchestratorType(String orchestratorType) {
+        this.orchestratorType = orchestratorType;
     }
 }

@@ -84,6 +84,9 @@ public class ConstraintTemplate {
     private Double memory;
     private Double disk;
 
+    @Column(nullable = false)
+    private String orchestratorType;
+
     private boolean deleted;
 
     @Enumerated(EnumType.STRING)
@@ -167,6 +170,14 @@ public class ConstraintTemplate {
 
     public void setStatus(ResourceStatus status) {
         this.status = status;
+    }
+
+    public String getOrchestratorType() {
+        return orchestratorType;
+    }
+
+    public void setOrchestratorType(String orchestratorType) {
+        this.orchestratorType = orchestratorType;
     }
 
     public boolean isDeleted() {
