@@ -205,7 +205,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 });
                 $scope.cluster.instanceGroups = instanceGroups;
                 $scope.cluster.hostGroups = hostGroups;
-                $scope.cluster.activeGroup = 'cbgateway';
+                $scope.cluster.activeGroup = $filter('orderBy')($scope.cluster.instanceGroups, 'group', false)[0].group;
             } else {
                 var constraintTemplates = $rootScope.constraints;
                 var tmpConstraint = $filter('orderBy')(constraintTemplates, 'name', false)[0];

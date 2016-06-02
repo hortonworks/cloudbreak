@@ -132,6 +132,10 @@ function addClusterFormJQEventListeners() {
         e.stopPropagation();
         goToPanel(this, 'topologies');
     });
+    $jq(document).on("click", ".blueprintselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'blueprints');
+    });
 
     function goToPanel(pane, type) {
         var segment = $jq(pane).attr('segment');
