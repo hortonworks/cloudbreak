@@ -61,13 +61,13 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
     }
 
     public Set<String> collectMissingNodes(Set<String> nodes) {
-        Map<String, String> hostNames = allNode.stream().collect(Collectors.toMap(this::getShortHostName, Node::getPrivateIp));
-        Set<String> nodesTarget = nodes.stream().map(hostNames::get).collect(Collectors.toSet());
+        Map<String, String> hostNames = allNode.stream().collect(Collectors.toMap(node -> getShortHostName(node.getHostname()), Node::getPrivateIp));
+        Set<String> nodesTarget = nodes.stream().map(node -> hostNames.get(getShortHostName(node))).collect(Collectors.toSet());
         return target.stream().filter(t -> !nodesTarget.contains(t)).collect(Collectors.toSet());
     }
 
-    private String getShortHostName(Node node) {
-        return new Scanner(node.getHostname()).useDelimiter("\\.").next();
+    private String getShortHostName(String hostName) {
+        return new Scanner(hostName).useDelimiter("\\.").next();
     }
 
     @Override
