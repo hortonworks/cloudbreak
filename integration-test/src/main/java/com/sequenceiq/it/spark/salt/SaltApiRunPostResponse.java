@@ -80,7 +80,7 @@ public class SaltApiRunPostResponse extends ITResponse {
         List<Map<String, String>> result = new ArrayList<>();
         serverAddressGenerator.iterateOver(address -> {
             Map<String, String> networkHashMap = new HashMap<>();
-            networkHashMap.put("host-" + address, address);
+            networkHashMap.put("host-" + address.replace(".", "-"), address);
             result.add(networkHashMap);
         });
         networkInterfaceResponse.setResult(result);
@@ -92,7 +92,7 @@ public class SaltApiRunPostResponse extends ITResponse {
         ArrayList<Map<String, Object>> responseList = new ArrayList<>();
 
         Map<String, Object> hostMap = new HashMap<>();
-        serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address, address));
+        serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address.replace(".", "-"), address));
         responseList.add(hostMap);
 
         applyResponse.setResult(responseList);
@@ -104,7 +104,7 @@ public class SaltApiRunPostResponse extends ITResponse {
         ArrayList<Map<String, Object>> responseList = new ArrayList<>();
 
         Map<String, Object> hostMap = new HashMap<>();
-        serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address, address));
+        serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address.replace(".", "-"), address));
         responseList.add(hostMap);
 
         applyResponse.setResult(responseList);
