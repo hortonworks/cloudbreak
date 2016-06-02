@@ -46,7 +46,7 @@
     <div class="form-group" ng-show="activeCredential">
         <label class="col-sm-3 control-label" for="sl_network_active">{{msg.active_cluster_network_label}}</label>
         <div class="networkselect col-sm-8">
-            <a id="sl_network_active" class="networkselect form-control-static review-a" ng-repeat="network in $root.networks|filter: { id: cluster.networkId }:false" segment="#panel-network-collapse{{cluster.networkId}}">{{network.name}}</a>
+            <a id="sl_network_active" class="networkselect form-control-static review-a" ng-repeat="network in $root.networks|filter: { id: cluster.networkId }:true" segment="#panel-network-collapse{{cluster.networkId}}">{{network.name}}</a>
         </div>
     </div>
 
