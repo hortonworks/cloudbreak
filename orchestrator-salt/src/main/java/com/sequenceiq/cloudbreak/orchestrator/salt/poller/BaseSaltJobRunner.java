@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,15 +55,19 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
     public Set<String> collectNodes(ApplyResponse applyResponse) {
         Set<String> set = new HashSet<>();
         for (Map<String, Object> stringObjectMap : applyResponse.getResult()) {
-            set.addAll(stringObjectMap.entrySet().stream().map(Map.Entry<String, Object>::getKey).collect(Collectors.toList()));
+            set.addAll(stringObjectMap.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
         }
         return set;
     }
 
     public Set<String> collectMissingNodes(Set<String> nodes) {
-        Map<String, String> hostNames = allNode.stream().collect(Collectors.toMap(Node::getHostname, Node::getPrivateIp));
+        Map<String, String> hostNames = allNode.stream().collect(Collectors.toMap(this::getShortHostName, Node::getPrivateIp));
         Set<String> nodesTarget = nodes.stream().map(hostNames::get).collect(Collectors.toSet());
         return target.stream().filter(t -> !nodesTarget.contains(t)).collect(Collectors.toSet());
+    }
+
+    private String getShortHostName(Node node) {
+        return new Scanner(node.getHostname()).useDelimiter("\\.").next();
     }
 
     @Override

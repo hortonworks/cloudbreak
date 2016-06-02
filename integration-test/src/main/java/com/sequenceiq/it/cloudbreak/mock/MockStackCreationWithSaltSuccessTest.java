@@ -156,7 +156,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
             new ServerAddressGenerator(numberOfServers).iterateOver(address -> {
                 GenericResponse genericResponse = new GenericResponse();
                 genericResponse.setAddress(address);
-                genericResponse.setStatus("host-" + address);
+                genericResponse.setStatus("host-" + address.replace(".", "-"));
                 responses.add(genericResponse);
             });
             genericResponses.setResponses(responses);
