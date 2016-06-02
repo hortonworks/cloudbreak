@@ -794,12 +794,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         function setNetwork() {
             if ($rootScope.activeCredential != undefined) {
-                angular.forEach($rootScope.networks, function(data) {
-                    if (data.cloudPlatform === $rootScope.activeCredential.cloudPlatform) {
-                        $scope.cluster.networkId = data.id;
-                        return;
-                    }
-                });
+                var nets = $filter('filter')($rootScope.networks, function(value, index, array) {value.cloudPlatform === $rootScope.activeCredential.cloudPlatform}, true);
+                var orderedNets = $filter('orderBy')($rootScope.networks, 'name', false);
+                if (orderedNets.length > 0) {
+                    $scope.cluster.networkId = orderedNets[0].id;
+                }
             }
         }
 
