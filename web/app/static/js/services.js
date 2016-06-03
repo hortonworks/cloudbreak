@@ -295,6 +295,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                 cluster.minutesUp = cluster.cluster.minutesUp;
                 cluster.blueprintId = cluster.cluster.blueprintId;
                 cluster.hostGroups = cluster.cluster.hostGroups;
+                cluster.gatewayPort = cluster.gatewayPort;
                 cluster.nodeCount = 0;
                 if (!cluster.cloudPlatform) {
                     cluster.cloudPlatform = cluster.orchestrator.type;
