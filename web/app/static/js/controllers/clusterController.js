@@ -300,10 +300,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.showErrorMessage($rootScope.msg.hostgroup_invalid_node_count);
                 return;
             }
-            if (blueprint.hostGroupCount === 1 && tmpNodeCount != 1) {
-                $scope.showErrorMessage($rootScope.msg.hostgroup_single_invalid);
-                return;
-            }
             if (!$scope.isUndefined($scope.cluster.ambariStackDetails)) {
                 for (var item in $scope.cluster.ambariStackDetails) {
                     if ($scope.cluster.ambariStackDetails[item] === "" || $scope.cluster.ambariStackDetails[item] === undefined) {
