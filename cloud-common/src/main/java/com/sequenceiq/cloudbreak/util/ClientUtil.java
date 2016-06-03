@@ -34,12 +34,11 @@ public class ClientUtil {
     private ClientUtil() {
     }
 
-    public static Client createClient(String serverCert, String clientCert, String clientKey) throws Exception {
-        return createClient(serverCert, clientCert, clientKey, false, null);
+    public static Client createSSLClient(String serverCert, String clientCert, String clientKey) throws Exception {
+        return createSSLClient(serverCert, clientCert, clientKey, false, null);
     }
 
-    public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug, Class debugClass) throws Exception {
-
+    public static Client createSSLClient(String serverCert, String clientCert, String clientKey, boolean debug, Class debugClass) throws Exception {
         SSLContext sslContext = SSLContexts.custom()
                 .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
                 .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
@@ -73,6 +72,23 @@ public class ClientUtil {
         Client client = builder.build();
         LOGGER.info("Jax rs client has been constructed: {}, sslContext: {}", client, sslContext);
         return client;
+    }
+
+    public static Client createClient() {
+        ClientConfig config = new ClientConfig();
+        config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
+
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(MAX_TOTAL_CONNECTION);
+        connectionManager.setDefaultMaxPerRoute(MAX_PER_ROUTE_CONNECTION);
+
+        // tell the jersey config about the connection manager
+        config.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
+        config.connectorProvider(new ApacheConnectorProvider());
+
+        ClientBuilder builder = JerseyClientBuilder.newBuilder().withConfig(config);
+
+        return builder.build();
     }
 
     public static WebTarget createTarget(Client client, String address) {

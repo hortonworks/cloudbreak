@@ -33,7 +33,7 @@ public class SaltConnector implements Closeable {
 
     public SaltConnector(GatewayConfig gatewayConfig, boolean debug) {
         try {
-            this.restClient = ClientUtil.createClient(
+            this.restClient = ClientUtil.createSSLClient(
                     gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(), debug, SaltConnector.class);
             this.saltTarget = ClientUtil.createTarget(restClient, gatewayConfig.getGatewayUrl());
         } catch (Exception e) {

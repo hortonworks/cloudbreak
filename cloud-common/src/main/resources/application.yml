@@ -111,9 +111,11 @@ cb:
   host:
     service:
         ambari:
-            agent.version: 2.2.1
-            server.version: 2.2.1
-            repo.url: https://raw.githubusercontent.com/sequenceiq/docker-ambari/master/ambari-agent/ambari.repo
+            agent.version: 2.4.0.0
+            server.version: 2.4.0.0
+            repo.url: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.4.0.0/ambari.repo
 
   smartsense.configure: false
   smartsense.id.pattern: A-9990%d-C-%d
+
+  image.catalog.url: https://s3-eu-west-1.amazonaws.com/cloudbreak-info/cb-image-catalog.json

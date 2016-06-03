@@ -77,7 +77,7 @@ public class HostMetadataSetup {
             throws CloudbreakSecuritySetupException {
         Client restClient = null;
         try {
-            restClient = ClientUtil.createClient(clientConfig.getServerCert(), clientConfig.getClientCert(), clientConfig.getClientKey());
+            restClient = ClientUtil.createSSLClient(clientConfig.getServerCert(), clientConfig.getClientCert(), clientConfig.getClientKey());
             Set<InstanceMetaData> metadataToUpdate;
             if (newInstanceMetadata == null || newInstanceMetadata.isEmpty()) {
                 metadataToUpdate = stack.getRunningInstanceMetaData();
