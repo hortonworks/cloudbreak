@@ -69,6 +69,9 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                     case "RESTART_AMBARI_PROGRESS_STATE":
                         handleAmbariProgressState(notification, $rootScope.msg.restart_ambari_progress_state_label);
                         break;
+                    case "UPSCALE_AMBARI_PROGRESS_STATE":
+                        handleAmbariProgressState(notification, $rootScope.msg.upscale_ambari_progress_state_label);
+                        break;
                     case "DECOMMISSION_AMBARI_PROGRESS_STATE":
                         handleAmbariProgressState(notification, $rootScope.msg.decommission_ambari_progress_state_label);
                         break;
