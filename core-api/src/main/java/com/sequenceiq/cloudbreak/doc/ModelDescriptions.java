@@ -45,6 +45,7 @@ public class ModelDescriptions {
         public static final String CPU = "number of CPU cores needed for the Ambari node";
         public static final String MEMORY = "memory needed for the Ambari container (GB)";
         public static final String DISK = "disk size needed for an Ambari node (GB)";
+        public static final String ORCHESTRATOR_TYPE = "type of orchestrator";
     }
 
     public static class StackModelDescription {

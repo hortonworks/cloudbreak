@@ -105,7 +105,7 @@
                         <div class="panel-heading">
                             <h5>
                                     <a href="" data-toggle="collapse" data-parent="#constraint-list-accordion" data-target="#panel-constraint-collapse{{constraint.id}}"><i class="fa fa-file-o fa-fw"></i>{{constraint.name}}</a>
-                                    <span class="label label-info pull-right" >MESOS</span>
+                                    <span class="label label-info pull-right" >{{constraint.orchestratorType}}</span>
                                     <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="constraint.public"></i>
                                 </h5>
                         </div>

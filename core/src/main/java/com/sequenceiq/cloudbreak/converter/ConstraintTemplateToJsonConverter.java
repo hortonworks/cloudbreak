@@ -17,6 +17,8 @@ public class ConstraintTemplateToJsonConverter extends AbstractConversionService
         constraintTemplateResponse.setCpu(source.getCpu());
         constraintTemplateResponse.setMemory(source.getMemory());
         constraintTemplateResponse.setDisk(source.getDisk());
+        constraintTemplateResponse.setOrchestratorType(source.getOrchestratorType());
+
         return constraintTemplateResponse;
     }
 }

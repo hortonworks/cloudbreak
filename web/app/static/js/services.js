@@ -28,7 +28,7 @@ uluwatuServices.factory('AccountTemplate', ['$resource',
 
 uluwatuServices.factory('UserConstraint', ['$resource',
     function($resource) {
-        return $resource('user/constraints');
+        return $resource('constraints/user');
     }
 ]);
 
