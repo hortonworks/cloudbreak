@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
-import com.sequenceiq.cloudbreak.core.flow.service.AmbariHostsRemover;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -92,8 +91,6 @@ public class AmbariDecommissioner {
     private HostGroupService hostGroupService;
     @Inject
     private AmbariClientProvider ambariClientProvider;
-    @Inject
-    private AmbariHostsRemover ambariHostsRemover;
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
     @Inject
@@ -190,7 +187,7 @@ public class AmbariDecommissioner {
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());
             if ("UNKNOWN".equals(hostState)) {
-                ambariHostsRemover.deleteHosts(stack, asList(data.getHostName()), new ArrayList<>(components));
+                deleteHosts(stack, asList(data.getHostName()), new ArrayList<>(components));
                 hostDeleted = true;
             }
         } else {
@@ -202,6 +199,16 @@ public class AmbariDecommissioner {
 
     private Set<String> getHadoopComponents(AmbariClient ambariClient, String hostGroupName, String blueprintName) {
         return ambariClient.getComponentsCategory(blueprintName, hostGroupName).keySet();
+    }
+
+    private void deleteHosts(Stack stack, List<String> hosts, List<String> components) throws CloudbreakSecuritySetupException {
+        Cluster cluster = stack.getCluster();
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
+        for (String hostName : hosts) {
+            ambariClient.deleteHostComponents(hostName, components);
+            ambariClient.deleteHost(hostName);
+        }
     }
 
     private List<HostMetadata> collectDownscaleCandidates(Stack stack, Cluster cluster, String hostGroupName, Integer scalingAdjustment)
@@ -373,7 +380,7 @@ public class AmbariDecommissioner {
     }
 
     private void deleteHosts(Stack stack, List<String> hostList, Set<String> components) throws CloudbreakSecuritySetupException {
-        ambariHostsRemover.deleteHosts(stack, hostList, new ArrayList<>(components));
+        deleteHosts(stack, hostList, new ArrayList<>(components));
     }
 
     private PollingResult waitForHostsToLeave(Stack stack, AmbariClient ambariClient, List<String> hostNames) throws CloudbreakSecuritySetupException {

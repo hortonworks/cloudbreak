@@ -12,9 +12,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterTerminationResult;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
@@ -35,11 +38,11 @@ public class ClusterTerminationFlowService {
     private FlowMessageService flowMessageService;
 
     public void terminateCluster(ClusterContext context) {
-        clusterService.updateClusterStatusByStackId(context.getCluster().getStack().getId(), Status.DELETE_IN_PROGRESS);
+        clusterService.updateClusterStatusByStackId(context.getStack().getId(), Status.DELETE_IN_PROGRESS);
         LOGGER.info("Cluster delete started.");
     }
 
-    public void finishClusterTermination(ClusterContext context, TerminateClusterResult payload) {
+    public void finishClusterTermination(ClusterContext context, ClusterTerminationResult payload) {
         LOGGER.info("Terminate cluster result: {}", payload);
         Cluster cluster = context.getCluster();
         terminationService.finalizeClusterTermination(cluster.getId());
@@ -53,11 +56,11 @@ public class ClusterTerminationFlowService {
         }
     }
 
-    public void handleClusterTerminationError(ClusterContext context, TerminateClusterResult payload) {
+    public void handleClusterTerminationError(StackFailureEvent payload) {
         LOGGER.info("Handling cluster delete failure event.");
-        Exception errorDetails = payload.getErrorDetails();
+        Exception errorDetails = payload.getException();
         LOGGER.error("Error during cluster termination flow: ", errorDetails);
-        Cluster cluster = clusterService.getById(context.getCluster().getId());
+        Cluster cluster = clusterService.retrieveClusterByStackId(payload.getStackId());
         cluster.setStatus(DELETE_FAILED);
         cluster.setStatusReason(errorDetails.getMessage());
         clusterService.updateCluster(cluster);

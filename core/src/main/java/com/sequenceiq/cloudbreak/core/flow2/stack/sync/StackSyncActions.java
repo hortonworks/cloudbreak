@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
@@ -57,9 +56,9 @@ public class StackSyncActions {
 
     @Bean(name = "SYNC_STATE")
     public Action stackSyncAction() {
-        return new AbstractStackSyncAction<StackStatusUpdateContext>(StackStatusUpdateContext.class) {
+        return new AbstractStackSyncAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(StackSyncContext context, StackStatusUpdateContext payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackSyncContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 

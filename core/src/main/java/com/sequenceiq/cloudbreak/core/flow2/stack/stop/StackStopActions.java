@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -56,9 +55,9 @@ public class StackStopActions {
 
     @Bean(name = "STOP_STATE")
     public Action stackStopAction() {
-        return new AbstractStackStopAction<StackStatusUpdateContext>(StackStatusUpdateContext.class) {
+        return new AbstractStackStopAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(StackStartStopContext context, StackStatusUpdateContext payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackStartStopContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 stackStartStopService.startStackStop(context);
                 sendEvent(context);
             }

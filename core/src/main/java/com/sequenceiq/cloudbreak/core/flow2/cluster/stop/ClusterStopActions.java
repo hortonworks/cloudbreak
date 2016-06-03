@@ -11,7 +11,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -30,9 +29,9 @@ public class ClusterStopActions {
 
     @Bean(name = "CLUSTER_STOPPING_STATE")
     public Action stoppingCluster() {
-        return new AbstractClusterAction<StackStatusUpdateContext>(StackStatusUpdateContext.class) {
+        return new AbstractClusterAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterContext context, StackStatusUpdateContext payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 Stack stack = context.getStack();
                 variables.put(STACK_STATUS, stack.getStatus());
                 clusterStopService.stoppingCluster(stack);

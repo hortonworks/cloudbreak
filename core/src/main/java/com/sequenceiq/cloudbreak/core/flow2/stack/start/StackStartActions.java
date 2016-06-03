@@ -58,9 +58,9 @@ public class StackStartActions {
 
     @Bean(name = "START_STATE")
     public Action stackStartAction() {
-        return new AbstractStackStartAction<StackStatusUpdateContext>(StackStatusUpdateContext.class) {
+        return new AbstractStackStartAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(StackStartStopContext context, StackStatusUpdateContext payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackStartStopContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 stackStartStopService.startStackStart(context);
                 sendEvent(context);
             }

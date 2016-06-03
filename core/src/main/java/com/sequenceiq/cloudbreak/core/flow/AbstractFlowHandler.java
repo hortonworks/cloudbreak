@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow.service.FlowFacade;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 import reactor.bus.Event;
 import reactor.fn.Consumer;
@@ -61,7 +62,7 @@ public abstract class AbstractFlowHandler<T extends DefaultFlowContext> implemen
                 result = handleErrorFlow(t, event.getData());
             } catch (Exception e) {
                 LOGGER.error("Exception during error handling flow, (propagating further!):", e);
-                throw new CloudbreakFlowException(e);
+                throw new CloudbreakServiceException(e);
             }
         }
         Object payload = assemblePayload(result);
