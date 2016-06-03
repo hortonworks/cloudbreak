@@ -146,7 +146,7 @@ public class ClusterUpscaleService {
         ambariClusterConnector.executePreRecipes(stack, hostGroup, hostMetadata);
     }
 
-    public void installServices(Long stackId, String hostGroupName) throws CloudbreakSecuritySetupException {
+    public void installServices(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start installing Ambari services");

@@ -16,6 +16,7 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.START_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.START_OPERATION_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.STOP_AMBARI_PROGRESS_STATE;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.UPSCALE_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
@@ -185,6 +186,7 @@ public class AmbariClusterConnector {
         AMBARI_CLUSTER_ADDING_NODE_TO_HOSTGROUP("ambari.cluster.adding.node.to.hostgroup"),
         AMBARI_CLUSTER_HOST_JOIN_FAILED("ambari.cluster.host.join.failed"),
         AMBARI_CLUSTER_INSTALL_FAILED("ambari.cluster.install.failed"),
+        AMBARI_CLUSTER_UPSCALE_FAILED("ambari.cluster.upscale.failed"),
         AMBARI_CLUSTER_MR_SMOKE_FAILED("ambari.cluster.mr.smoke.failed");
 
         private String code;
@@ -360,11 +362,12 @@ public class AmbariClusterConnector {
     }
 
     public void installServices(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata)
-            throws CloudbreakSecuritySetupException {
+            throws CloudbreakException {
         List<String> upscaleHostNames = getHostNames(hostMetadata);
         AmbariClient ambariClient = getSecureAmbariClient(stack);
-        ambariOperationService.waitForOperations(stack, ambariClient,
-                installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), INSTALL_AMBARI_PROGRESS_STATE);
+        PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
+                installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
+        checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_UPSCALE_FAILED.code()));
     }
 
     public void executePostRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaData)
@@ -941,9 +944,7 @@ public class AmbariClusterConnector {
         try {
             Cluster cluster = stack.getCluster();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
-            ambariClient.addHostsWithBlueprint(blueprintName, hostGroup, hosts);
-            ambariOperationService.waitForOperations(stack, ambariClient, UPSCALE_REQUEST_CONTEXT, UPSCALE_REQUEST_STATUS, START_OPERATION_STATE);
-            return singletonMap("UPSCALE_REQUEST", ambariClient.getRequestIdWithContext(UPSCALE_REQUEST_CONTEXT, UPSCALE_REQUEST_STATUS));
+            return singletonMap("UPSCALE_REQUEST", ambariClient.addHostsWithBlueprint(blueprintName, hostGroup, hosts));
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
                 throw new BadRequestException("Host already exists.", e);
@@ -953,5 +954,4 @@ public class AmbariClusterConnector {
             }
         }
     }
-
 }
