@@ -36,6 +36,8 @@ public class StackResponse extends StackBase {
     private OrchestratorResponse orchestrator;
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
+    @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
+    private Integer gatewayPort;
 
     public String getAccount() {
         return account;
@@ -116,5 +118,13 @@ public class StackResponse extends StackBase {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public Integer getGatewayPort() {
+        return gatewayPort;
+    }
+
+    public void setGatewayPort(Integer gatewayPort) {
+        this.gatewayPort = gatewayPort;
     }
 }
