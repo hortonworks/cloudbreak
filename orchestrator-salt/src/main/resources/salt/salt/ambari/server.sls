@@ -1,18 +1,5 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 
-include:
-  - ambari.repo
-
-haveged:
-  pkg.installed: []
-  service.running:
-    - enable: True
-
-ambari-server:
-  pkg.latest:
-    - require:
-      - sls: ambari.repo
-
 /opt/ambari-server/ambari-server-init.sh:
   file.managed:
     - makedirs: True
@@ -24,8 +11,6 @@ set_install_timeout:
     - name: /etc/ambari-server/conf/ambari.properties
     - pattern: "agent.package.install.task.timeout=1800"
     - repl: "agent.package.install.task.timeout=3600"
-    - watch:
-      - pkg: ambari-server
 
 {% if ambari.is_systemd %}
 
@@ -42,7 +27,6 @@ start-ambari-server:
     - enable: True
     - name: ambari-server
     - watch:
-       - pkg: ambari-server
        - file: /etc/systemd/system/ambari-server.service
 
 {% else %}
@@ -56,7 +40,6 @@ start-ambari-server:
     - enable: True
     - name: ambari-server
     - watch:
-       - pkg: ambari-server
        - file: /etc/init/ambari-server.conf
 
 {% endif %}
