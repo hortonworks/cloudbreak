@@ -508,7 +508,7 @@ public class AmbariClusterService implements ClusterService {
         cluster.setStack(stack);
         cluster = clusterRepository.save(cluster);
 
-        if (cluster.getContainers().isEmpty() || cluster.getHostServices().isEmpty()) {
+        if (cluster.getContainers().isEmpty()) {
             flowManager.triggerClusterInstall(new ProvisionRequest(platform(stack.cloudPlatform()), stack.getId()));
         } else {
             flowManager.triggerClusterReInstall(new ProvisionRequest(platform(stack.cloudPlatform()), stack.getId()));

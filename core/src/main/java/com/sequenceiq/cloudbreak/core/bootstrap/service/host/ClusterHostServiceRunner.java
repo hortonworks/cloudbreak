@@ -3,11 +3,8 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
 import static java.util.Collections.singletonMap;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,14 +15,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.HostServiceConfigService;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostService;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.orchestrator.container.HostServiceType;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -33,13 +27,11 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.orchestrator.model.ServiceInfo;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.HostServiceService;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -50,10 +42,6 @@ public class ClusterHostServiceRunner {
     private HostOrchestratorResolver hostOrchestratorResolver;
     @Inject
     private TlsSecurityService tlsSecurityService;
-    @Inject
-    private HostServiceConfigService hostServiceConfigService;
-    @Inject
-    private HostServiceService hostServiceService;
     @Inject
     private ConversionService conversionService;
     @Inject
@@ -66,7 +54,7 @@ public class ClusterHostServiceRunner {
     public void runAmbariServices(Stack stack) throws CloudbreakException {
         try {
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            Set<Node> agents = initializeAmbariAgentServices(stack);
+            Set<Node> nodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
@@ -84,7 +72,7 @@ public class ClusterHostServiceRunner {
             }
             servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
             SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
-            hostOrchestrator.runService(gatewayConfig, agents, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+            hostOrchestrator.runService(gatewayConfig, nodes, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -99,8 +87,7 @@ public class ClusterHostServiceRunner {
             Cluster cluster = stack.getCluster();
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
             candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-            Set<Node> allNodes = initializeAmbariAgentServices(stack);
-            Set<Node> agents = initializeNewAmbariAgentServices(stack, candidates);
+            Set<Node> allNodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
@@ -131,57 +118,14 @@ public class ClusterHostServiceRunner {
         return null;
     }
 
-    private Set<Node> initializeNewAmbariAgentServices(Stack stack, Map<String, String> candidates) throws CloudbreakException,
-            CloudbreakOrchestratorException {
+    private Set<Node> collectNodes(Stack stack) throws CloudbreakException, CloudbreakOrchestratorException {
         Set<Node> agents = new HashSet<>();
-        Map<String, List<ServiceInfo>> serviceInfos = new HashMap<>();
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        for (Map.Entry<String, String> entry : candidates.entrySet()) {
-            agents.add(new Node(entry.getValue(), null, entry.getKey()));
-            ServiceInfo agentServiceInfo = new ServiceInfo(HostServiceType.AMBARI_AGENT.getName(), entry.getKey());
-            serviceInfos.put(entry.getKey(), Arrays.asList(agentServiceInfo));
-        }
-        saveHostServices(serviceInfos, cluster);
-        return agents;
-    }
-
-    private Set<Node> initializeAmbariAgentServices(Stack stack) throws CloudbreakException, CloudbreakOrchestratorException {
-        Set<Node> agents = new HashSet<>();
-        Map<String, List<ServiceInfo>> serviceInfos = new HashMap<>();
-        InstanceGroup gatewayInstanceGroup = stack.getGatewayInstanceGroup();
-        InstanceMetaData next = gatewayInstanceGroup.getInstanceMetaData().iterator().next();
-        ServiceInfo serverServiceInfo = new ServiceInfo(HostServiceType.AMBARI_SERVER.getName(), next.getDiscoveryFQDN());
-        serviceInfos.put(next.getPrivateIp(), Arrays.asList(serverServiceInfo));
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
                 agents.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryFQDN()));
-                ServiceInfo agentServiceInfo = new ServiceInfo(HostServiceType.AMBARI_AGENT.getName(), instanceMetaData.getDiscoveryFQDN());
-                serviceInfos.put(instanceMetaData.getPrivateIp(), Arrays.asList(agentServiceInfo));
             }
         }
-        saveHostServices(serviceInfos, cluster);
         return agents;
-    }
-
-    private Map<String, List<HostService>> saveHostServices(Map<String, List<ServiceInfo>> serviceInfo, Cluster cluster) {
-        Map<String, List<HostService>> hostServices = new HashMap<>();
-        for (Map.Entry<String, List<ServiceInfo>> serviceInfoEntry : serviceInfo.entrySet()) {
-            List<HostService> hostGroupHostServices = convert(serviceInfoEntry.getValue(), cluster);
-            hostServices.put(serviceInfoEntry.getKey(), hostGroupHostServices);
-            hostServiceService.save(hostGroupHostServices);
-        }
-        return hostServices;
-    }
-
-    private List<HostService> convert(List<ServiceInfo> serviceInfos, Cluster cluster) {
-        List<HostService> services = new ArrayList<>();
-        for (ServiceInfo source : serviceInfos) {
-            HostService hostService = conversionService.convert(source, HostService.class);
-            hostService.setCluster(cluster);
-            services.add(hostService);
-        }
-        return services;
     }
 
 }

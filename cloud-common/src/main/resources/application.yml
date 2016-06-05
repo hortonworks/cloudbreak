@@ -108,13 +108,6 @@ cb:
   nginx:
     port: 9443
 
-  host:
-    service:
-        ambari:
-            agent.version: 2.4.0.0
-            server.version: 2.4.0.0
-            repo.url: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.4.0.0/ambari.repo
-
   smartsense.configure: false
   smartsense.id.pattern: A-9990%d-C-%d
 

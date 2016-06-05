@@ -108,9 +108,6 @@ public class ClusterBootstrapperTest {
     private ContainerConfigService containerConfigService;
 
     @Mock
-    private HostServiceConfigService hostServiceConfigService;
-
-    @Mock
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @InjectMocks
