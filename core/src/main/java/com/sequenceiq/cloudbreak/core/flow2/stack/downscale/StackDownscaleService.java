@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -34,12 +33,11 @@ public class StackDownscaleService {
     private StackScalingService stackScalingService;
 
 
-    public void startStackDownscale(StackScalingFlowContext context, StackScalingContext payload) {
+    public void startStackDownscale(StackScalingFlowContext context, Integer adjustment) {
         LOGGER.debug("Downscaling of stack ", context.getStack().getId());
         MDCBuilder.buildMdcContext(context.getStack());
         stackUpdater.updateStackStatus(context.getStack().getId(), UPDATE_IN_PROGRESS);
-        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(),
-                Math.abs(payload.getScalingAdjustment()));
+        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(), Math.abs(adjustment));
     }
 
     public void finishStackDownscale(StackScalingFlowContext context, String instanceGroupName, Set<String> instanceIds)

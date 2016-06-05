@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
-import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariServicesSu
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
 
 public enum ClusterCreationEvent implements FlowEvent {
-    CLUSTER_CREATION_EVENT(FlowPhases.RUN_CLUSTER_CONTAINERS.name()),
+    CLUSTER_CREATION_EVENT(FlowTriggers.CLUSTER_PROVISION_TRIGGER_EVENT),
     START_AMBARI_SERVICES_FINISHED_EVENT(EventSelectorUtil.selector(StartAmbariServicesSuccess.class)),
     START_AMBARI_SERVICES_FAILED_EVENT(EventSelectorUtil.selector(StartAmbariServicesFailed.class)),
     START_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(StartAmbariSuccess.class)),

@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
@@ -37,8 +36,6 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -126,19 +123,9 @@ public class StackUpscaleService {
         return upscaleCandidateAddresses;
     }
 
-    public HostGroupAdjustmentJson finishExtendHostMetadata(Stack stack, String instanceGroupName, Integer adjustment) {
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
-        hostGroupAdjustmentJson.setWithStackUpdate(false);
-        hostGroupAdjustmentJson.setScalingAdjustment(adjustment);
-        if (cluster != null) {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), instanceGroupName);
-            hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
-        }
+    public void finishExtendHostMetadata(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack upscale has been finished successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
-
-        return hostGroupAdjustmentJson;
     }
 
     public void handleStackUpscaleFailure(Stack stack, StackFailureEvent payload) {

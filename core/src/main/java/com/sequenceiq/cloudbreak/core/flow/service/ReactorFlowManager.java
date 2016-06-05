@@ -6,30 +6,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow.ErrorHandlerAwareFlowEventFactory;
 import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
-import com.sequenceiq.cloudbreak.core.flow.TransitionKeyService;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterCredentialChangeEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterScaleEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.StartInstanceTerminationEvent;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
-import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackForcedDeleteRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 /**
@@ -44,37 +42,95 @@ public class ReactorFlowManager implements FlowManager {
     private EventBus reactor;
 
     @Inject
-    private TransitionKeyService transitionKeyService;
-
-    @Inject
     private ErrorHandlerAwareFlowEventFactory eventFactory;
 
     @Override
-    public void triggerNext(Class sourceHandlerClass, Object payload, boolean success) {
-        String key = success ? transitionKeyService.successKey(sourceHandlerClass) : transitionKeyService.failureKey(sourceHandlerClass);
-        if (isTriggerKey(key)) {
-            Event event = eventFactory.createEvent(payload, key);
-            reactor.notify(key, event);
-        } else {
-            LOGGER.debug("The handler {} has no transitions.", sourceHandlerClass);
-        }
+    public void triggerProvisioning(Long stackId) {
+        String selector = FlowTriggers.FULL_PROVISION_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 
     @Override
-    public void triggerProvisioning(Object object) {
-        ProvisionRequest provisionRequest = (ProvisionRequest) object;
-        reactor.notify(FlowPhases.STACKANDCLUSTER_PROVISIONING_SETUP.name(), Event.wrap(provisionRequest));
-    }
-
-    private boolean isTriggerKey(String key) {
-        return key != null && !FlowPhases.valueOf(key).equals(FlowPhases.NONE);
+    public void triggerStackStart(Long stackId) {
+        String selector = FlowTriggers.FULL_START_TRIGGER_EVENT;
+        StackEvent startTriggerEvent = new StackEvent(selector, stackId);
+        reactor.notify(selector, eventFactory.createEvent(startTriggerEvent, selector));
     }
 
     @Override
-    public void triggerClusterInstall(Object object) {
-        ProvisionRequest provisionRequest = (ProvisionRequest) object;
-        reactor.notify(FlowPhases.RUN_CLUSTER_CONTAINERS.name(),
-                eventFactory.createEvent(new StackEvent(provisionRequest.getStackId()), FlowPhases.RUN_CLUSTER_CONTAINERS.name()));
+    public void triggerStackStop(Long stackId) {
+        String selector = FlowTriggers.STACK_STOP_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+    }
+
+    @Override
+    public void triggerStackUpscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment) {
+        String selector = FlowTriggers.FULL_UPSCALE_TRIGGER_EVENT;
+        StackAndClusterUpscaleTriggerEvent stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
+                stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
+                instanceGroupAdjustment.getWithClusterEvent() ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
+        reactor.notify(selector, eventFactory.createEvent(stackAndClusterUpscaleTriggerEvent, selector));
+    }
+
+    @Override
+    public void triggerStackDownscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment) {
+        String selector = FlowTriggers.STACK_DOWNSCALE_TRIGGER_EVENT;
+        StackScaleTriggerEvent stackScaleTriggerEvent = new StackScaleTriggerEvent(selector, stackId, instanceGroupAdjustment.getInstanceGroup(),
+                instanceGroupAdjustment.getScalingAdjustment());
+        reactor.notify(selector, eventFactory.createEvent(stackScaleTriggerEvent, selector));
+    }
+
+    @Override
+    public void triggerStackSync(Long stackId) {
+        String selector = FlowTriggers.STACK_SYNC_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+    }
+
+    @Override
+    public void triggerClusterInstall(Long stackId) {
+        String selector = FlowTriggers.CLUSTER_PROVISION_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+    }
+
+    @Override
+    public void triggerClusterUpscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
+        String selector = FlowTriggers.CLUSTER_UPSCALE_TRIGGER_EVENT;
+        ClusterScaleTriggerEvent event = new ClusterScaleTriggerEvent(selector, stackId,
+                hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
+        reactor.notify(selector, eventFactory.createEvent(event, event.selector()));
+    }
+
+    @Override
+    public void triggerClusterDownscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
+        String selector = FlowTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
+        ScalingType scalingType = hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER;
+        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
+                hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment(), scalingType);
+        reactor.notify(selector, eventFactory.createEvent(event, selector));
+    }
+
+    @Override
+    public void triggerClusterStart(Long stackId) {
+        String selector = FlowTriggers.CLUSTER_START_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+    }
+
+    @Override
+    public void triggerClusterStop(Long stackId) {
+        String selector = FlowTriggers.FULL_STOP_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+    }
+
+    @Override
+    public void triggerClusterSync(Long stackId) {
+        String selector = FlowTriggers.CLUSTER_SYNC_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+    }
+
+    @Override
+    public void triggerFullSync(Long stackId) {
+        String selector = FlowTriggers.FULL_SYNC_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 
     @Override
@@ -82,35 +138,6 @@ public class ReactorFlowManager implements FlowManager {
         ProvisionRequest provisionRequest = (ProvisionRequest) object;
         reactor.notify(FlowPhases.CLUSTER_RESET.name(),
                 eventFactory.createEvent(new StackEvent(provisionRequest.getStackId()), FlowPhases.CLUSTER_RESET.name()));
-    }
-
-    @Override
-    public void triggerStackStop(Object object) {
-        StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
-        reactor.notify(FlowPhases.STACK_STOP.name(),
-                eventFactory.createEvent(new StackEvent(statusUpdateRequest.getStackId()), FlowPhases.STACK_STOP.name()));
-    }
-
-    @Override
-    public void triggerStackStart(Object object) {
-        StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
-        reactor.notify(FlowPhases.STACK_START.name(),
-                eventFactory.createEvent(new StackEvent(statusUpdateRequest.getStackId()), FlowPhases.STACK_START.name()));
-    }
-
-    @Override
-    public void triggerClusterStop(Object object) {
-        ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
-        reactor.notify(FlowPhases.CLUSTER_AND_STACK_STOP.name(),
-                eventFactory.createEvent(new StackEvent(statusUpdateRequest.getStackId()), FlowPhases.CLUSTER_AND_STACK_STOP.name()));
-    }
-
-    @Override
-    public void triggerClusterStart(Object object) {
-        ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
-        reactor.notify(FlowPhases.CLUSTER_START.name(),
-                eventFactory.createEvent(new StackStatusUpdateContext(statusUpdateRequest.getStackId(), statusUpdateRequest.getCloudPlatform(), true),
-                        FlowPhases.CLUSTER_START.name()));
     }
 
     @Override
@@ -137,63 +164,10 @@ public class ReactorFlowManager implements FlowManager {
     }
 
     @Override
-    public void triggerStackUpscale(Object object) {
-        UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
-        StackScalingContext context = new StackScalingContext(updateRequest);
-        reactor.notify(FlowPhases.UPSCALE_STACK_SYNC.name(), eventFactory.createEvent(context, FlowPhases.UPSCALE_STACK_SYNC.name()));
-    }
-
-    @Override
-    public void triggerStackDownscale(Object object) {
-        UpdateInstancesRequest updateRequest = (UpdateInstancesRequest) object;
-        StackScalingContext context = new StackScalingContext(updateRequest);
-        reactor.notify(FlowPhases.STACK_DOWNSCALE.name(), eventFactory.createEvent(context, FlowPhases.STACK_DOWNSCALE.name()));
-    }
-
-    @Override
     public void triggerStackRemoveInstance(Object object) {
         RemoveInstanceRequest removeInstanceRequest = (RemoveInstanceRequest) object;
         StartInstanceTerminationEvent event = new StartInstanceTerminationEvent(removeInstanceRequest.getStackId(), removeInstanceRequest.getInstanceId());
         reactor.notify(FlowPhases.REMOVE_INSTANCE.name(), eventFactory.createEvent(event, FlowPhases.REMOVE_INSTANCE.name()));
-    }
-
-    @Override
-    public void triggerClusterUpscale(Object object) {
-        UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
-        StartClusterScaleEvent event = new StartClusterScaleEvent(request.getStackId(),
-                request.getHostGroupAdjustment().getHostGroup(), request.getHostGroupAdjustment().getScalingAdjustment());
-        reactor.notify(FlowPhases.ADD_CLUSTER_CONTAINERS.name(), eventFactory.createEvent(event, FlowPhases.ADD_CLUSTER_CONTAINERS.name()));
-    }
-
-    @Override
-    public void triggerClusterDownscale(Object object) {
-        UpdateAmbariHostsRequest request = (UpdateAmbariHostsRequest) object;
-        StartClusterScaleEvent event = new StartClusterScaleEvent(request.getStackId(),
-                request.getHostGroupAdjustment().getHostGroup(), request.getHostGroupAdjustment().getScalingAdjustment());
-        FlowPhases phase =
-                ScalingType.DOWNSCALE_ONLY_CLUSTER == request.getScalingType() ? FlowPhases.CLUSTER_DOWNSCALE : FlowPhases.CLUSTER_AND_STACK_DOWNSCALE;
-        reactor.notify(phase.name(), eventFactory.createEvent(event, phase.name()));
-    }
-
-    @Override
-    public void triggerClusterSync(Object object) {
-        ClusterStatusUpdateRequest statusUpdateRequest = (ClusterStatusUpdateRequest) object;
-        reactor.notify(FlowPhases.CLUSTER_SYNC.name(),
-                eventFactory.createEvent(new StackEvent(statusUpdateRequest.getStackId()), FlowPhases.CLUSTER_SYNC.name()));
-    }
-
-    @Override
-    public void triggerStackSync(Object object) {
-        StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
-        reactor.notify(FlowPhases.STACK_SYNC.name(),
-                eventFactory.createEvent(new StackEvent(statusUpdateRequest.getStackId()), FlowPhases.STACK_SYNC.name()));
-    }
-
-    @Override
-    public void triggerFullSync(Object object) {
-        StackStatusUpdateRequest statusUpdateRequest = (StackStatusUpdateRequest) object;
-        reactor.notify(FlowPhases.STACK_AND_CLUSTER_SYNC.name(),
-                eventFactory.createEvent(new StackEvent(statusUpdateRequest.getStackId()), FlowPhases.STACK_AND_CLUSTER_SYNC.name()));
     }
 
     @Override

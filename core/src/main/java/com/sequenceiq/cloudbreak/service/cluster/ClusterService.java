@@ -14,8 +14,6 @@ import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
-import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 public interface ClusterService {
@@ -36,9 +34,9 @@ public interface ClusterService {
 
     String getClusterJson(String ambariIp, Long stackId);
 
-    UpdateAmbariHostsRequest updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException;
+    void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException;
 
-    ClusterStatusUpdateRequest updateStatus(Long stackId, StatusRequest statusRequest);
+    void updateStatus(Long stackId, StatusRequest statusRequest);
 
     Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason);
 

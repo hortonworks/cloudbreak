@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -32,9 +31,9 @@ public class ClusterStartActions {
 
     @Bean(name = "CLUSTER_STARTING_STATE")
     public Action startingCluster() {
-        return new AbstractClusterAction<StackStatusUpdateContext>(StackStatusUpdateContext.class) {
+        return new AbstractClusterAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterContext context, StackStatusUpdateContext payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterStartService.startingCluster(context.getStack(), context.getCluster());
                 sendEvent(context);
             }

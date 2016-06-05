@@ -22,7 +22,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.STACK_CREATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.STACK_CREATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.START_CREATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.START_STACKANDCLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.BOOTSTRAPING_MACHINES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.COLLECTING_HOST_METADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.COLLECTMETADATA_STATE;
@@ -37,7 +36,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.START_PROVISIONING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.TLS_SETUP_STATE;
 
-import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -49,7 +47,6 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
     private static final List<Transition<StackCreationState, StackCreationEvent>> TRANSITIONS = new Transition.Builder<StackCreationState, StackCreationEvent>()
             .defaultFailureEvent(STACK_CREATION_FAILED_EVENT)
             .from(INIT_STATE).to(SETUP_STATE).event(START_CREATION_EVENT).noFailureEvent()
-            .from(INIT_STATE).to(SETUP_STATE).event(START_STACKANDCLUSTER_CREATION_EVENT).noFailureEvent()
             .from(SETUP_STATE).to(IMAGESETUP_STATE).event(SETUP_FINISHED_EVENT).failureEvent(SETUP_FAILED_EVENT)
             .from(IMAGESETUP_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
             .from(IMAGE_CHECK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_COPY_CHECK_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)
@@ -68,8 +65,6 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
     private static final FlowEdgeConfig<StackCreationState, StackCreationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STACK_CREATION_FAILED_STATE, STACKCREATION_FAILURE_HANDLED_EVENT);
 
-    private static final EnumSet<StackCreationEvent> OWNEVENTS = EnumSet.complementOf(EnumSet.of(START_STACKANDCLUSTER_CREATION_EVENT));
-
     public StackCreationFlowConfig() {
         super(StackCreationState.class, StackCreationEvent.class);
     }
@@ -86,7 +81,7 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
 
     @Override
     public StackCreationEvent[] getEvents() {
-        return OWNEVENTS.toArray(new StackCreationEvent[]{});
+        return StackCreationEvent.values();
     }
 
     @Override

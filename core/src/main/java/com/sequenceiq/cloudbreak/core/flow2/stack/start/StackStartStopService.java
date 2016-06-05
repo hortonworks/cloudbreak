@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.api.model.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_FAILED;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -21,10 +24,13 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
+import com.sequenceiq.cloudbreak.service.stack.flow.WrongMetadataException;
 
 @Service
 public class StackStartStopService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStartStopService.class);
+
     @Inject
     private StackUpdater stackUpdater;
     @Inject
@@ -33,6 +39,8 @@ public class StackStartStopService {
     private EmailSenderService emailSenderService;
     @Inject
     private ClusterService clusterService;
+    @Inject
+    private MetadataSetupService metadatSetupService;
 
     public void startStackStart(StackStartStopContext context) {
         Stack stack = context.getStack();
@@ -41,8 +49,13 @@ public class StackStartStopService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STARTING, Status.START_IN_PROGRESS.name());
     }
 
-    public void finishStackStart(StackStartStopContext context) {
-        Stack stack = context.getStack();
+    public void finishStackStart(Stack stack, List<CloudVmMetaDataStatus> coreInstanceMetaData) {
+        if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
+            throw new WrongMetadataException(String.format(
+                    "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
+                    coreInstanceMetaData.size(), stack.getFullNodeCount()));
+        }
+        metadatSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, null);
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Cluster infrastructure started successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STARTED, AVAILABLE.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STARTED, BillingStatus.BILLING_STARTED.name());

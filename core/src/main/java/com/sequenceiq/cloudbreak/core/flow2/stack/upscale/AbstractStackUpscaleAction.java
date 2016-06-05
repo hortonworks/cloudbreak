@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -32,7 +31,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 public abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractAction<StackUpscaleState, StackUpscaleEvent, StackScalingFlowContext, P> {
     protected static final String INSTANCEGROUPNAME = "INSTANCEGROUPNAME";
     protected static final String ADJUSTMENT = "ADJUSTMENT";
-    protected static final String SCALINGTYPE = "SCALINGTYPE";
 
     @Inject
     private StackService stackService;
@@ -60,7 +58,7 @@ public abstract class AbstractStackUpscaleAction<P extends Payload> extends Abst
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackScalingFlowContext(flowId, stack, cloudContext, cloudCredential, cloudStack, getInstanceGroupName(variables),
-                Collections.<String>emptySet(), getAdjustment(variables), getScalingType(variables));
+                Collections.<String>emptySet(), getAdjustment(variables));
     }
 
     @Override
@@ -74,9 +72,5 @@ public abstract class AbstractStackUpscaleAction<P extends Payload> extends Abst
 
     private Integer getAdjustment(Map<Object, Object> variables) {
         return (Integer) variables.get(ADJUSTMENT);
-    }
-
-    private ScalingType getScalingType(Map<Object, Object> variables) {
-        return (ScalingType) variables.get(SCALINGTYPE);
     }
 }

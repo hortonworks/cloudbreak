@@ -12,30 +12,30 @@ import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterScaleEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AddClusterContainersRequest;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component("AddClusterContainersAction")
-public class AddClusterContainersAction extends AbstractAction<ClusterUpscaleState, ClusterUpscaleEvent, AddClusterContainersContext, StartClusterScaleEvent> {
+public class AddClusterContainersAction extends AbstractAction<ClusterUpscaleState, ClusterUpscaleEvent, AddClusterContainersContext, ClusterScaleTriggerEvent> {
 
     @Inject
     private StackService stackService;
 
     protected AddClusterContainersAction() {
-        super(StartClusterScaleEvent.class);
+        super(ClusterScaleTriggerEvent.class);
     }
 
     @Override
     protected AddClusterContainersContext createFlowContext(String flowId, StateContext<ClusterUpscaleState, ClusterUpscaleEvent> stateContext,
-            StartClusterScaleEvent payload) {
+            ClusterScaleTriggerEvent payload) {
         Stack stack = stackService.getById(payload.getStackId());
         MDCBuilder.buildMdcContext(stack);
         return new AddClusterContainersContext(flowId, stack, payload.getHostGroupName(), payload.getAdjustment());
     }
 
     @Override
-    protected void doExecute(AddClusterContainersContext context, StartClusterScaleEvent payload, Map<Object, Object> variables) throws Exception {
+    protected void doExecute(AddClusterContainersContext context, ClusterScaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
         sendEvent(context);
     }
 
@@ -45,7 +45,7 @@ public class AddClusterContainersAction extends AbstractAction<ClusterUpscaleSta
     }
 
     @Override
-    protected Object getFailurePayload(StartClusterScaleEvent payload, Optional<AddClusterContainersContext> flowContext, Exception ex) {
+    protected Object getFailurePayload(ClusterScaleTriggerEvent payload, Optional<AddClusterContainersContext> flowContext, Exception ex) {
         UpscaleClusterFailedPayload failurePayload;
         if (flowContext.isPresent()) {
             ClusterUpscaleContext context = flowContext.get();

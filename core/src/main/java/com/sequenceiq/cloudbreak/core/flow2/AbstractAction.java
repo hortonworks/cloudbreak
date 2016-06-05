@@ -68,6 +68,10 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         this.failureEvent = failureEvent;
     }
 
+    protected Flow getFlow(String flowId) {
+        return runningFlows.get(flowId);
+    }
+
     protected void sendEvent(C context) {
         Selectable payload = createRequest(context);
         sendEvent(context.getFlowId(), payload.selector(), payload);
@@ -78,9 +82,13 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     }
 
     protected void sendEvent(String flowId, String selector, Object payload) {
+        String flowChainId = runningFlows.getFlowChainId(flowId);
         LOGGER.info("Triggering event: {}", payload);
         Map<String, Object> headers = new HashMap<>();
         headers.put("FLOW_ID", flowId);
+        if (flowChainId != null) {
+            headers.put("FLOW_CHAIN_ID", flowChainId);
+        }
         eventBus.notify(selector, new Event<>(new Event.Headers(headers), payload));
     }
 

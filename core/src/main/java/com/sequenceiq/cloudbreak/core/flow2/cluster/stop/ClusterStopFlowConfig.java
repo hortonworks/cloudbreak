@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stop;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.CLUSTER_AND_STACK_STOP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.CLUSTER_STOP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.FAIL_HANDLED_EVENT;
@@ -10,7 +9,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopState
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopState.INIT_STATE;
 
-import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -22,7 +20,6 @@ public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStop
     private static final List<Transition<ClusterStopState, ClusterStopEvent>> TRANSITIONS =
             new Transition.Builder<ClusterStopState, ClusterStopEvent>()
                     .from(INIT_STATE).to(CLUSTER_STOPPING_STATE).event(CLUSTER_STOP_EVENT).noFailureEvent()
-                    .from(INIT_STATE).to(CLUSTER_STOPPING_STATE).event(CLUSTER_AND_STACK_STOP_EVENT).noFailureEvent()
                     .from(CLUSTER_STOPPING_STATE).to(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).event(ClusterStopEvent.CLUSTER_STOP_FINISHED_EVENT)
                             .failureEvent(ClusterStopEvent.CLUSTER_STOP_FINISHED_FAILURE_EVENT)
                     .from(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).failureEvent(FAILURE_EVENT)
@@ -30,8 +27,6 @@ public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStop
 
     private static final FlowEdgeConfig<ClusterStopState, ClusterStopEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_STOP_FAILED_STATE, FAIL_HANDLED_EVENT);
-
-    private static final EnumSet<ClusterStopEvent> OWNEVENTS = EnumSet.complementOf(EnumSet.of(CLUSTER_AND_STACK_STOP_EVENT));
 
     public ClusterStopFlowConfig() {
         super(ClusterStopState.class, ClusterStopEvent.class);
@@ -49,7 +44,7 @@ public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStop
 
     @Override
     public ClusterStopEvent[] getEvents() {
-        return OWNEVENTS.toArray(new ClusterStopEvent[]{});
+        return ClusterStopEvent.values();
     }
 
     @Override

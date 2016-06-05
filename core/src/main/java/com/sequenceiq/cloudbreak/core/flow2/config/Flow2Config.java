@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 
 @Configuration
 public class Flow2Config {
-
     @Resource
     private List<FlowConfiguration<?>> flowConfigs;
 

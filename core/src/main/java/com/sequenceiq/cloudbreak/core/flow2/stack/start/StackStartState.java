@@ -7,6 +7,7 @@ public enum StackStartState implements FlowState {
     INIT_STATE,
     START_FAILED_STATE,
     START_STATE,
+    COLLECTING_METADATA,
     START_FINISHED_STATE,
     FINAL_STATE;
 

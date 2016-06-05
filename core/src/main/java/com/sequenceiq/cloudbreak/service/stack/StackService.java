@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -73,12 +72,9 @@ import com.sequenceiq.cloudbreak.service.image.ImageNameUtil;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackForcedDeleteRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Service
@@ -279,7 +275,7 @@ public class StackService {
                 tlsSecurityService.copyClientKeys(stack.getId());
                 tlsSecurityService.storeSSHKeys(stack);
                 imageService.create(savedStack, connector.getPlatformParameters(stack), ambariVersion, hdpVersion);
-                flowManager.triggerProvisioning(new ProvisionRequest(platform(savedStack.cloudPlatform()), savedStack.getId()));
+                flowManager.triggerProvisioning(savedStack.getId());
             } else {
                 savedStack.setStatus(Status.AVAILABLE);
                 savedStack.setCreated(new Date().getTime());
@@ -358,9 +354,9 @@ public class StackService {
     private void sync(Stack stack, StatusRequest statusRequest, boolean full) {
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
-                flowManager.triggerFullSync(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
+                flowManager.triggerFullSync(stack.getId());
             } else {
-                flowManager.triggerStackSync(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
+                flowManager.triggerStackSync(stack.getId());
             }
         } else {
             LOGGER.warn("Stack could not be synchronized in {} state!", stack.getStatus());
@@ -388,7 +384,7 @@ public class StackService {
                         String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stack.getId()));
             } else {
                 stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED);
-                flowManager.triggerStackStop(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
+                flowManager.triggerStackStop(stack.getId());
             }
         }
     }
@@ -403,7 +399,7 @@ public class StackService {
                     String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getId()));
         } else if (stack.isStopped() || stack.isStartFailed()) {
             stackUpdater.updateStackStatus(stack.getId(), START_REQUESTED);
-            flowManager.triggerStackStart(new StackStatusUpdateRequest(platform(stack.cloudPlatform()), stack.getId(), statusRequest));
+            flowManager.triggerStackStart(stack.getId());
         }
     }
 
@@ -416,15 +412,10 @@ public class StackService {
             validateHostGroupAdjustment(instanceGroupAdjustmentJson, stack, instanceGroupAdjustmentJson.getScalingAdjustment());
         }
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
-            UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(platform(stack.cloudPlatform()), stack.getId(),
-                    instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(),
-                    instanceGroupAdjustmentJson.getWithClusterEvent() ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
             stackUpdater.updateStackStatus(stackId, UPDATE_REQUESTED);
-            flowManager.triggerStackUpscale(updateInstancesRequest);
+            flowManager.triggerStackUpscale(stack.getId(), instanceGroupAdjustmentJson);
         } else {
-            UpdateInstancesRequest updateInstancesRequest = new UpdateInstancesRequest(platform(stack.cloudPlatform()), stack.getId(),
-                    instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup(), ScalingType.DOWNSCALE_ONLY_STACK);
-            flowManager.triggerStackDownscale(updateInstancesRequest);
+            flowManager.triggerStackDownscale(stack.getId(), instanceGroupAdjustmentJson);
         }
     }
 

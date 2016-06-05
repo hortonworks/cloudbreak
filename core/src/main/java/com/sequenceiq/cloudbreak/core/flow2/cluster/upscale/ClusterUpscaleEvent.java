@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
-import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AddClusterContainersResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ConfigureSssdResult;
@@ -13,9 +13,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.InstallServicesResul
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpdateMetadataResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.WaitForAmbariHostsResult;
 
-enum ClusterUpscaleEvent implements FlowEvent {
+public enum ClusterUpscaleEvent implements FlowEvent {
 
-    ADD_CONTAINERS_EVENT(FlowPhases.ADD_CLUSTER_CONTAINERS.name()),
+    ADD_CONTAINERS_EVENT(FlowTriggers.CLUSTER_UPSCALE_TRIGGER_EVENT),
     ADD_CONTAINERS_FINISHED_EVENT(EventSelectorUtil.selector(AddClusterContainersResult.class)),
     ADD_CONTAINERS_FAILED_EVENT(EventSelectorUtil.failureSelector(AddClusterContainersResult.class)),
     INSTALL_FS_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(InstallFsRecipesResult.class)),

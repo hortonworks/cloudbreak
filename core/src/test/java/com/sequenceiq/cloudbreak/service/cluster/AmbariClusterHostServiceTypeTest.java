@@ -2,14 +2,11 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -17,7 +14,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.ConnectException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,18 +49,15 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
-import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterHostServiceTypeTest {
@@ -76,25 +69,10 @@ public class AmbariClusterHostServiceTypeTest {
     private ClusterRepository clusterRepository;
 
     @Mock
-    private EventBus reactor;
-
-    @Mock
     private AmbariClient ambariClient;
 
     @Mock
-    private HttpResponseException mockedException;
-
-    @Mock
     private AmbariClientProvider ambariClientProvider;
-
-    @Mock
-    private HostFilterService hostFilterService;
-
-    @Mock
-    private HostGroupRepository hostGroupRepository;
-
-    @Mock
-    private AmbariConfigurationService configurationService;
 
     @Mock
     private InstanceMetaDataRepository instanceMetadataRepository;
@@ -201,17 +179,12 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
-        when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(Collections.<HostMetadata>emptyList());
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
         when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
-        UpdateAmbariHostsRequest updateAmbariHostsRequest = underTest.updateHosts(stack.getId(), json);
-
-        assertTrue(updateAmbariHostsRequest.isDecommission());
+        underTest.updateHosts(stack.getId(), json);
     }
 
     @Test
@@ -229,17 +202,14 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
-        when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(asList(metadata2, metadata3));
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
         when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
-        UpdateAmbariHostsRequest updateAmbariHostsRequest = underTest.updateHosts(stack.getId(), json);
+        underTest.updateHosts(stack.getId(), json);
 
-        assertTrue(updateAmbariHostsRequest.isDecommission());
+        verify(flowManager, times(1)).triggerClusterDownscale(stack.getId(), json);
     }
 
     @Test
@@ -274,11 +244,8 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(instanceMetaData4.getAmbariServer()).thenReturn(false);
-        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
-        when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
@@ -288,11 +255,9 @@ public class AmbariClusterHostServiceTypeTest {
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
         when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
-        doNothing().when(flowManager).triggerClusterDownscale(anyObject());
-
         underTest.updateHosts(stack.getId(), json);
 
-        verify(flowManager, times(1)).triggerClusterDownscale(anyObject());
+        verify(flowManager, times(1)).triggerClusterDownscale(stack.getId(), json);
     }
 
     @Test
@@ -323,11 +288,8 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData1.getAmbariServer()).thenReturn(false);
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
-        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
-        when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
@@ -335,11 +297,10 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
         when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
-        doNothing().when(flowManager).triggerClusterDownscale(anyObject());
 
         underTest.updateHosts(stack.getId(), json);
 
-        verify(flowManager, times(1)).triggerClusterDownscale(anyObject());
+        verify(flowManager, times(1)).triggerClusterDownscale(stack.getId(), json);
     }
 
     @Test
@@ -375,11 +336,8 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(instanceMetaData4.getAmbariServer()).thenReturn(false);
-        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
-        when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
@@ -389,11 +347,9 @@ public class AmbariClusterHostServiceTypeTest {
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
         when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
-        doNothing().when(flowManager).triggerClusterDownscale(anyObject());
-
         underTest.updateHosts(stack.getId(), json);
 
-        verify(flowManager, times(1)).triggerClusterDownscale(anyObject());
+        verify(flowManager, times(1)).triggerClusterDownscale(stack.getId(), json);
     }
 
     @Test
@@ -424,11 +380,8 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData1.getAmbariServer()).thenReturn(false);
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
-        when(hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), "slave_1")).thenReturn(hostGroup);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
-        when(hostFilterService.filterHostsForDecommission(cluster, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
@@ -437,8 +390,8 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
-        UpdateAmbariHostsRequest updateAmbariHostsRequest = underTest.updateHosts(stack.getId(), json);
+        underTest.updateHosts(stack.getId(), json);
 
-        assertTrue(updateAmbariHostsRequest.isDecommission());
+        verify(flowManager, times(1)).triggerClusterDownscale(stack.getId(), json);
     }
 }
