@@ -94,7 +94,6 @@ import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DefaultConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -171,8 +170,6 @@ public class AmbariClusterConnector {
     @Inject
     private RecipeBuilder recipeBuilder;
     @Inject
-    private DefaultConfigProvider defaultConfigProvider;
-    @Inject
     private TlsSecurityService tlsSecurityService;
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
@@ -234,7 +231,6 @@ public class AmbariClusterConnector {
                 blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
             }
 
-            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, defaultConfigProvider.getDefaultConfigs(), false);
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, smartSenseConfigProvider.getConfigs(stack, blueprintText), true);
 
             AmbariClient ambariClient = getAmbariClient(stack);
