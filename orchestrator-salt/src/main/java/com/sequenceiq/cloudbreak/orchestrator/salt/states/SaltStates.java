@@ -95,7 +95,7 @@ public class SaltStates {
             logRunnerInfos(stringMapEntry);
             for (Map.Entry<String, RunnerInfoObject> targetObject : stringMapEntry.getValue().entrySet()) {
                 if (targetObject.getValue().getResult()) {
-                    LOGGER.info("{} finished under {} seconds.", targetObject.getValue().getComment(), targetObject.getValue().getDuration());
+                    LOGGER.info("{} finished in {} ms.", targetObject.getValue().getComment(), targetObject.getValue().getDuration());
                 } else {
                     LOGGER.info("{} job state is {}.", targetObject.getValue().getComment(), targetObject.getValue().getResult());
                     missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getValue().getComment());

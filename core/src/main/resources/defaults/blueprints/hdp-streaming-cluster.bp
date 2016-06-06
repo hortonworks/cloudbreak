@@ -1,12 +1,4 @@
 {
-  "configurations": [
-    {
-      "hive-site": {
-        "javax.jdo.option.ConnectionUserName": "hive",
-        "javax.jdo.option.ConnectionPassword": "hive"
-      }
-    }
-  ],
   "host_groups": [
     {
       "name": "host_group_slave_1",

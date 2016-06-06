@@ -117,8 +117,6 @@ public class AmbariClusterConnector {
     private static final String KEY_TYPE = "PERSISTED";
     private static final String PRINCIPAL = "/admin";
     private static final String FQDN = "fqdn";
-    private static final String UPSCALE_REQUEST_CONTEXT = "Logical Request: Scale Cluster";
-    private static final String UPSCALE_REQUEST_STATUS = "IN_PROGRESS";
     private static final String SSSD_CONFIG = "sssd-config-";
     private static final String ADMIN = "admin";
     private static final String REPO_ID_TAG = "repoid";
@@ -255,12 +253,14 @@ public class AmbariClusterConnector {
             String clusterName = cluster.getName();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
             String configStrategy = cluster.getConfigStrategy().name();
+            String clusterTemplate;
             if (cluster.isSecure()) {
-                ambariClient.createSecureCluster(clusterName, blueprintName,
-                        hostGroupMappings, configStrategy, cluster.getKerberosAdmin() + PRINCIPAL, cluster.getKerberosPassword(), KEY_TYPE);
+                clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
+                        cluster.getPassword(), cluster.getKerberosAdmin() + PRINCIPAL, cluster.getKerberosPassword(), KEY_TYPE);
             } else {
-                ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy);
+                clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy, cluster.getPassword());
             }
+            LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate));
             PollingResult pollingResult = ambariOperationService.waitForOperationsToStart(stack, ambariClient, singletonMap("INSTALL_START", 1),
                     START_OPERATION_STATE);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
