@@ -105,7 +105,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, SaltPillarConfig pillarConfig,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            PillarSave hostSave = new PillarSave(sc, gatewayConfig, allNodes);
+            PillarSave hostSave = new PillarSave(sc, allNodes);
             Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
