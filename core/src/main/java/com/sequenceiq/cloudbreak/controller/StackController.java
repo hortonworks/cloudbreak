@@ -223,7 +223,7 @@ public class StackController implements StackEndpoint {
         if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
             stackService.validateOrchestrator(stack.getOrchestrator());
         }
-        stack = stackService.create(user, stack, stackRequest.getAmbariHDPVersion());
+        stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion());
         return new IdJson(stack.getId());
     }
 

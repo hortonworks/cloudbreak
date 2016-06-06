@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.TopologyEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.UserEndpoint;
-import com.sequenceiq.cloudbreak.client.config.ConfigKey;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -78,7 +77,7 @@ public class CloudbreakClient {
     private ConstraintTemplateEndpoint constraintTemplateEndpoint;
 
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
-        this.client = RestClient.get(configKey);
+        this.client = RestClientUtil.get(configKey);
         this.cloudbreakAddress = cloudbreakAddress;
         this.identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
         this.user = user;
@@ -90,7 +89,7 @@ public class CloudbreakClient {
     }
 
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String secret, String clientId, ConfigKey configKey) {
-        this.client = RestClient.get(configKey);
+        this.client = RestClientUtil.get(configKey);
         this.cloudbreakAddress = cloudbreakAddress;
         this.identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
         this.secret = secret;

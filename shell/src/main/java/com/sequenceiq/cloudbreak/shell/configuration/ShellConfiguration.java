@@ -17,9 +17,9 @@ import org.springframework.shell.plugin.HistoryFileNameProvider;
 import org.springframework.shell.plugin.support.DefaultHistoryFileNameProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.exception.SSLConnectionException;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
+import com.sequenceiq.cloudbreak.client.SSLConnectionException;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 /**

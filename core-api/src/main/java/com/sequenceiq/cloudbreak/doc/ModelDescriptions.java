@@ -71,8 +71,9 @@ public class ModelDescriptions {
         public static final String ORCHESTRATOR = "the details of the container orchestrator api to use";
         public static final String RELOCATE_DOCKER = "relocate the docker service in startup time";
         public static final String CREATED = "creation time of the stack in long";
-        public static final String AMBARI_HDP_VERSION = "specific version of ambari and HDP";
         public static final String GATEWAY_PORT = "port of the gateway secured proxy";
+        public static final String AMBARI_VERSION = "specific version of ambari";
+        public static final String HDP_VERSION = "specific version of HDP";
     }
 
     public static class ClusterModelDescription {

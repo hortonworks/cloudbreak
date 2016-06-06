@@ -126,9 +126,6 @@ public class Cluster implements ProvisionEntity {
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Container> containers = new HashSet<>();
 
-    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<HostService> hostServices = new HashSet<>();
-
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private AmbariStackDetails ambariStackDetails;
 
@@ -396,14 +393,6 @@ public class Cluster implements ProvisionEntity {
 
     public Boolean getEnableShipyard() {
         return enableShipyard;
-    }
-
-    public Set<HostService> getHostServices() {
-        return hostServices;
-    }
-
-    public void setHostServices(Set<HostService> hostServices) {
-        this.hostServices = hostServices;
     }
 
     public void setEnableShipyard(Boolean enableShipyard) {

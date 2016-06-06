@@ -14,13 +14,16 @@ import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.client.AccessToken;
+import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.cloudbreak.client.IdentityClient;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.api.endpoint.AlertEndpoint;
 import com.sequenceiq.periscope.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.periscope.api.endpoint.ConfigurationEndpoint;
 import com.sequenceiq.periscope.api.endpoint.HistoryEndpoint;
 import com.sequenceiq.periscope.api.endpoint.PolicyEndpoint;
-import com.sequenceiq.periscope.client.config.ConfigKey;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -39,7 +42,6 @@ public class AutoscaleClient {
     private final IdentityClient identityClient;
     private final String autoscaleAddress;
 
-
     private String user;
     private String password;
 
@@ -54,7 +56,7 @@ public class AutoscaleClient {
     private PolicyEndpoint policyEndpoint;
 
     private AutoscaleClient(String autoscaleAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
-        this.client = RestClient.get(configKey);
+        this.client = RestClientUtil.get(configKey);
         this.autoscaleAddress = autoscaleAddress;
         this.identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
         this.user = user;
@@ -66,7 +68,7 @@ public class AutoscaleClient {
     }
 
     private AutoscaleClient(String autoscaleAddress, String identityServerAddress, String secret, String clientId, ConfigKey configKey) {
-        this.client = RestClient.get(configKey);
+        this.client = RestClientUtil.get(configKey);
         this.autoscaleAddress = autoscaleAddress;
         this.identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
         this.secret = secret;

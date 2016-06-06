@@ -25,6 +25,7 @@ dependencies {
     compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
     compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
     compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
+    compile group: 'com.sequenceiq',                name: 'consul-api',                     version: '1.10'
     runtime ('org.springframework.cloud:spring-cloud-starter-consul-config:1.0.0.M6-v3'){
       exclude group: 'com.ecwid.consul';
     }

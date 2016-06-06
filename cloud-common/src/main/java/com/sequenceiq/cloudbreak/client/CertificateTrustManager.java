@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.client.security;
+package com.sequenceiq.cloudbreak.client;
 
 import java.security.KeyManagementException;
 import java.security.SecureRandom;

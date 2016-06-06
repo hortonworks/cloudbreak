@@ -226,7 +226,8 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "publicInAccount", mandatory = false, help = "marks the stack as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "onFailureAction", mandatory = false, help = "onFailureAction which is ROLLBACK or DO_NOTHING.") OnFailureAction onFailureAction,
             @CliOption(key = "adjustmentType", mandatory = false, help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
-            @CliOption(key = "ambariHDPVersion", mandatory = false, help = "Ambari and HDP version, e.g: ambari_2.2.2.0-hdp_2.4.2.0_258") String hdpVersion,
+            @CliOption(key = "ambariVersion", mandatory = false, help = "Ambari version") String ambariVersion,
+            @CliOption(key = "hdpVersion", mandatory = false, help = "HDP version") String hdpVersion,
             @CliOption(key = "threshold", mandatory = false, help = "threshold of failure") Long threshold,
             @CliOption(key = "orchestrator", mandatory = false, help = "select orchestrator variant version") GcpOrchestratorType orchestratorType,
             @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
@@ -237,7 +238,7 @@ public class GcpCommands implements CommandMarker {
             availabilityZone = new StackAvailabilityZone(availabilityZonesByRegion.iterator().next());
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, hdpVersion, params);
+                false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, params);
     }
 
 }

@@ -22,7 +22,8 @@ public interface StackCommands {
             PlatformVariant platformVariant,
             String orchestrator,
             String platform,
-            String ambariHDPVersion,
+            String ambariVersion,
+            String hdpVersion,
             Map<String, String> params);
 
     boolean createStackAvailable(String platform);

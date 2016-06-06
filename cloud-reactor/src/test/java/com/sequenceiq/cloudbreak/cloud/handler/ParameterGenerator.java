@@ -71,7 +71,7 @@ public class ParameterGenerator {
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
-        Image image = new Image("cb-centos66-amb200-2015-05-25", userData);
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, null, null);
 
         Subnet subnet = new Subnet("10.0.0.0/24");
         Network network = new Network(subnet);

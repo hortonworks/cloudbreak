@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.container.HostServiceType;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -102,9 +101,6 @@ public class ClusterBootstrapper {
     private ContainerConfigService containerConfigService;
 
     @Inject
-    private HostServiceConfigService hostServiceConfigService;
-
-    @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
@@ -139,8 +135,6 @@ public class ClusterBootstrapper {
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
-            hostServiceConfigService.get(stack, HostServiceType.AMBARI_AGENT);
-            hostServiceConfigService.get(stack, HostServiceType.AMBARI_SERVER);
             hostOrchestrator.bootstrap(gatewayConfig, nodes, stack.getConsulServers(), clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
 
             PollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
@@ -265,8 +259,6 @@ public class ClusterBootstrapper {
                 POLLING_INTERVAL,
                 MAX_POLLING_ATTEMPTS);
         validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
-        hostServiceConfigService.get(stack, HostServiceType.AMBARI_AGENT);
-        hostServiceConfigService.get(stack, HostServiceType.AMBARI_SERVER);
         for (int i = 0; i < nodeMap.size(); i++) {
             hostOrchestrator.bootstrapNewNodes(gatewayConfig, nodeMap.get(i), clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
             PollingResult newNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(

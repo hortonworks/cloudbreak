@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.client.Client;
 
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,14 +32,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
-import com.sequenceiq.cloudbreak.client.RestClient;
-import com.sequenceiq.cloudbreak.client.config.ConfigKey;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 public class AppConfig implements ResourceLoaderAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
-    private static final int TIMEOUT = 5_000;
     private static final String ETC_DIR = "/etc/cloudbreak";
 
     @Value("#{'${cb.supported.container.orchestrators:}'.split(',')}")
@@ -195,7 +194,7 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Bean
     public Client restClient() {
-        return RestClient.get(new ConfigKey(certificateValidation, restDebug));
+        return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug));
     }
 
     @Bean

@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.HostService;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -59,7 +58,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
-import com.sequenceiq.cloudbreak.repository.HostServiceRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -126,8 +124,6 @@ public class AmbariDecommissioner {
     private OrchestratorTypeResolver orchestratorTypeResolver;
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
-    @Inject
-    private HostServiceRepository hostServiceRepository;
 
     private enum Msg {
         AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup");
@@ -362,18 +358,12 @@ public class AmbariDecommissioner {
                     deleteHosts(stack, hostList, components);
                 }
             } else if (orchestratorType.hostOrchestrator()) {
-                Set<HostService> hostServices = hostServiceRepository.findServicesInCluster(stack.getCluster().getId());
-                Set<HostService> hostServicesToDelete = hostServices
-                        .stream().parallel()
-                        .filter(service -> hostList.contains(service.getHost()))
-                        .collect(Collectors.toSet());
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 InstanceGroup gateway = stack.getGatewayInstanceGroup();
                 InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
                 GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
                         stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
                 hostOrchestrator.tearDown(gatewayConfig, hostList);
-                hostServiceRepository.delete(hostServicesToDelete);
                 deleteHosts(stack, hostList, components);
             }
         } catch (CloudbreakOrchestratorException e) {
