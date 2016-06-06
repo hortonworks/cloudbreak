@@ -4,15 +4,60 @@
       "name": "core-site",
       "configurations": [
         {
+          "key": "proxyuser_group",
+          "value": "hadoop"
+        },
+        {
           "key": "hadoop.proxyuser.root.groups",
+          "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.falcon.groups",
+          "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.hbase.groups",
+          "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.hcat.groups",
+          "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.hive.groups",
+          "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.oozie.groups",
           "value": "*"
         },
         {
           "key": "hadoop.proxyuser.root.hosts",
           "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.falcon.hosts",
+          "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.hbase.hosts",
+          "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.hcat.hosts",
+          "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.hive.hosts",
+          "value": "*"
+        },
+        {
+          "key": "hadoop.proxyuser.oozie.hosts",
+          "value": "*"
         }
       ]
-    },{
+    },
+    {
       "name": "webhcat-site",
       "configurations": [
         {
@@ -22,6 +67,15 @@
         {
           "key": "webhcat.proxyuser.root.hosts",
           "value": "*"
+        }
+      ]
+    },
+    {
+      "name": "hbase-site",
+      "configurations": [
+        {
+          "key": "zookeeper.recovery.retry",
+          "value": "10"
         }
       ]
     }

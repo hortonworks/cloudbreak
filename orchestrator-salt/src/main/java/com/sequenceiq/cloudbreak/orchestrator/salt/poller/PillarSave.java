@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -27,13 +26,12 @@ public class PillarSave implements OrchestratorBootstrap {
         this.pillar = new Pillar("/ambari/server.sls", singletonMap("ambari", singletonMap("server", gateway)));
     }
 
-    public PillarSave(SaltConnector sc, GatewayConfig gatewayConfig, Set<Node> hosts) {
+    public PillarSave(SaltConnector sc, Set<Node> hosts) {
         this.sc = sc;
-        Map<String, Map<String, String>> fqdn = hosts
+        Map<String, Map<String, Object>> fqdn = hosts
                 .stream()
                 .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp())));
 
-        fqdn.put(gatewayConfig.getPrivateAddress(), discovery(gatewayConfig.getHostname(), gatewayConfig.getPublicAddress()));
         this.pillar = new Pillar("/nodes/hosts.sls", singletonMap("hosts", fqdn));
     }
 
@@ -42,11 +40,11 @@ public class PillarSave implements OrchestratorBootstrap {
         this.pillar = new Pillar(pillarProperties.getPath(), pillarProperties.getProperties());
     }
 
-    private Map<String, String> discovery(String hostname, String publicAddress) {
-        Map<String, String> map = new HashMap<>();
+    private Map<String, Object> discovery(String hostname, String publicAddress) {
+        Map<String, Object> map = new HashMap<>();
         map.put("fqdn", hostname);
         map.put("hostname", hostname.split("\\.")[0]);
-        map.put("public_address", StringUtils.isEmpty(publicAddress) ? "False" : "True");
+        map.put("public_address", StringUtils.isEmpty(publicAddress) ? Boolean.FALSE : Boolean.TRUE);
         return map;
     }
 
