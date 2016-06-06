@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
@@ -43,9 +42,9 @@ public class ClusterResetActions {
 
     @Bean(name = "CLUSTER_RESET_STATE")
     public Action syncCluster() {
-        return new AbstractClusterResetAction<ProvisioningContext>(ProvisioningContext.class) {
+        return new AbstractClusterResetAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterContext context, ProvisioningContext payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterResetService.resetCluster(context.getStack(), context.getCluster());
                 sendEvent(context);
             }

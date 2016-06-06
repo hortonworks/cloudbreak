@@ -9,33 +9,33 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterScaleEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AddClusterContainersRequest;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component("AddClusterContainersAction")
-public class AddClusterContainersAction extends AbstractAction<ClusterUpscaleState, ClusterUpscaleEvent, AddClusterContainersContext, ClusterScalingContext> {
+public class AddClusterContainersAction extends AbstractAction<ClusterUpscaleState, ClusterUpscaleEvent, AddClusterContainersContext, StartClusterScaleEvent> {
 
     @Inject
     private StackService stackService;
 
     protected AddClusterContainersAction() {
-        super(ClusterScalingContext.class);
+        super(StartClusterScaleEvent.class);
     }
 
     @Override
     protected AddClusterContainersContext createFlowContext(String flowId, StateContext<ClusterUpscaleState, ClusterUpscaleEvent> stateContext,
-            ClusterScalingContext payload) {
+            StartClusterScaleEvent payload) {
         Stack stack = stackService.getById(payload.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        return new AddClusterContainersContext(flowId, stack, payload.getHostGroupName(), payload.getScalingAdjustment());
+        return new AddClusterContainersContext(flowId, stack, payload.getHostGroupName(), payload.getAdjustment());
     }
 
     @Override
-    protected void doExecute(AddClusterContainersContext context, ClusterScalingContext payload, Map<Object, Object> variables) throws Exception {
+    protected void doExecute(AddClusterContainersContext context, StartClusterScaleEvent payload, Map<Object, Object> variables) throws Exception {
         sendEvent(context);
     }
 
@@ -45,7 +45,7 @@ public class AddClusterContainersAction extends AbstractAction<ClusterUpscaleSta
     }
 
     @Override
-    protected Object getFailurePayload(ClusterScalingContext payload, Optional<AddClusterContainersContext> flowContext, Exception ex) {
+    protected Object getFailurePayload(StartClusterScaleEvent payload, Optional<AddClusterContainersContext> flowContext, Exception ex) {
         UpscaleClusterFailedPayload failurePayload;
         if (flowContext.isPresent()) {
             ClusterUpscaleContext context = flowContext.get();

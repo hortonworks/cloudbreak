@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
 import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
-import com.sequenceiq.cloudbreak.core.flow.handlers.AmbariClusterResult;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterTerminationResult;
 
 public enum ClusterTerminationEvent implements FlowEvent {
     TERMINATION_EVENT(FlowPhases.CLUSTER_TERMINATION.name()),
-    TERMINATION_FINISHED_EVENT(AmbariClusterResult.selector(TerminateClusterResult.class)),
-    TERMINATION_FAILED_EVENT(AmbariClusterResult.failureSelector(TerminateClusterResult.class)),
-    TERMINATION_FINALIZED_EVENT("TERMINATECLUSTERFINALIZED"),
-    CLUSTER_TERMINATION_FAIL_HANDLED_EVENT("TERMINATECLUSTERFAILHANDLED");
+    TERMINATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterTerminationResult.class)),
+    TERMINATION_FAILED_EVENT(EventSelectorUtil.failureSelector(ClusterTerminationResult.class)),
+
+    FINALIZED_EVENT("TERMINATECLUSTERFINALIZED"),
+    FAILURE_EVENT("TERMINATECLUSTERFAILUREEVENT"),
+    FAIL_HANDLED_EVENT("TERMINATECLUSTERFAILHANDLED");
 
     private String stringRepresentation;
 

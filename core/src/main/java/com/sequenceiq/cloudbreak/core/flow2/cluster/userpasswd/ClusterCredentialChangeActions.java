@@ -11,13 +11,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterAuthenticationContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterCredentialChangeEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeResult;
 
@@ -29,9 +29,9 @@ public class ClusterCredentialChangeActions {
 
     @Bean(name = "CLUSTER_CREDENTIALCHANGE_STATE")
     public Action changingClusterCredential() {
-        return new AbstractClusterAction<ClusterAuthenticationContext>(ClusterAuthenticationContext.class) {
+        return new AbstractClusterAction<StartClusterCredentialChangeEvent>(StartClusterCredentialChangeEvent.class) {
             @Override
-            protected void doExecute(ClusterContext context, ClusterAuthenticationContext payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterContext context, StartClusterCredentialChangeEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterCredentialChangeService.credentialChange(context.getStack().getId());
                 sendEvent(context.getFlowId(), new ClusterCredentialChangeRequest(context.getStack().getId(), payload.getUser(), payload.getPassword()));
             }

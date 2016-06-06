@@ -19,9 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow.context.ClusterScalingContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
@@ -33,6 +31,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.ClusterScalePayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.ScalingAdjustmentPayload;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterScaleEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
@@ -55,19 +54,18 @@ public class ClusterDownscaleActions {
 
     @Bean(name = "DECOMMISSION_STATE")
     public Action decommissionAction() {
-        return new AbstractClusterDownscaleAction<ClusterDecommissionContext, ClusterScalingContext>(ClusterScalingContext.class) {
+        return new AbstractClusterDownscaleAction<ClusterDecommissionContext, StartClusterScaleEvent>(StartClusterScaleEvent.class) {
 
             @Override
             protected ClusterDecommissionContext createFlowContext(String flowId, StateContext<ClusterDownscaleState, ClusterDownscaleEvent> stateContext,
-                    ClusterScalingContext payload) {
+                    StartClusterScaleEvent payload) {
                 Stack stack = stackService.getById(payload.getStackId());
                 MDCBuilder.buildMdcContext(stack);
-                HostGroupAdjustmentJson hostGroupAdjustment = payload.getHostGroupAdjustment();
-                return new ClusterDecommissionContext(flowId, stack, hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
+                return new ClusterDecommissionContext(flowId, stack, payload.getHostGroupName(), payload.getAdjustment());
             }
 
             @Override
-            protected void doExecute(ClusterDecommissionContext context, ClusterScalingContext payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterDecommissionContext context, StartClusterScaleEvent payload, Map<Object, Object> variables) throws Exception {
                 variables.put(SCALING_ADJUSTMENT, context.getScalingAdjustment());
                 flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.AMBARI_CLUSTER_SCALING_DOWN, UPDATE_IN_PROGRESS.name());
                 sendEvent(context);

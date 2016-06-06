@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -30,9 +29,9 @@ public class ClusterCreationActions {
 
     @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
     public Action startingAmbariServicesAction() {
-        return new AbstractClusterAction<ProvisioningContext>(ProvisioningContext.class) {
+        return new AbstractClusterAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterContext context, ProvisioningContext payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingAmbariServices(context.getStack(), context.getCluster());
                 sendEvent(context);
             }

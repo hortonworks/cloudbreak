@@ -12,19 +12,17 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
-import com.sequenceiq.cloudbreak.core.flow.context.DefaultFlowContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Component("StackTerminationAction")
-public class StackTerminationAction extends AbstractStackTerminationAction<DefaultFlowContext> {
-
+public class StackTerminationAction extends AbstractStackTerminationAction<StackEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationAction.class);
-
     @Inject
     private StackUpdater stackUpdater;
     @Inject
@@ -35,11 +33,11 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Defau
     private TerminationService terminationService;
 
     public StackTerminationAction() {
-        super(DefaultFlowContext.class);
+        super(StackEvent.class);
     }
 
     @Override
-    protected void doExecute(StackTerminationContext context, DefaultFlowContext payload, Map<Object, Object> variables) {
+    protected void doExecute(StackTerminationContext context, StackEvent payload, Map<Object, Object> variables) {
         doExecute(context);
     }
 

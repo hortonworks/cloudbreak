@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
-import com.sequenceiq.cloudbreak.core.flow.CloudbreakFlowException;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 import reactor.fn.Consumer;
 import reactor.fn.timer.Timer;
@@ -53,7 +53,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
                 int faultNum = getFaultNum(variables) + 1;
                 if (faultNum == FAULT_TOLERANCE) {
                     removeFaultNum(variables);
-                    throw new CloudbreakFlowException("Image copy failed.");
+                    throw new CloudbreakServiceException("Image copy failed.");
                 } else {
                     setFaultNum(variables, faultNum);
                     repeat(context);

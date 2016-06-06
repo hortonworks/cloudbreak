@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -23,9 +22,9 @@ public class ClusterSyncActions {
 
     @Bean(name = "CLUSTER_SYNC_STATE")
     public Action syncCluster() {
-        return new AbstractClusterSyncAction<StackStatusUpdateContext>(StackStatusUpdateContext.class) {
+        return new AbstractClusterSyncAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterSyncContext context, StackStatusUpdateContext payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterSyncContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 

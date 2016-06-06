@@ -11,21 +11,21 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceRequest;
-import com.sequenceiq.cloudbreak.core.flow.context.StackInstanceUpdateContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.StartInstanceTerminationEvent;
 
 @Component("InstanceTerminationAction")
-public class InstanceTerminationAction extends AbstractInstanceTerminationAction<StackInstanceUpdateContext> {
+public class InstanceTerminationAction extends AbstractInstanceTerminationAction<StartInstanceTerminationEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTerminationAction.class);
     @Inject
     private InstanceTerminationService instanceTerminationService;
 
     public InstanceTerminationAction() {
-        super(StackInstanceUpdateContext.class);
+        super(StartInstanceTerminationEvent.class);
     }
 
     @Override
-    protected void doExecute(InstanceTerminationContext context, StackInstanceUpdateContext payload, Map<Object, Object> variables) throws Exception {
+    protected void doExecute(InstanceTerminationContext context, StartInstanceTerminationEvent payload, Map<Object, Object> variables) throws Exception {
         Stack stack = context.getStack();
         if (!stack.isDeleteInProgress()) {
             instanceTerminationService.instanceTermination(context);

@@ -7,14 +7,13 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
-import com.sequenceiq.cloudbreak.core.flow.context.ProvisioningContext;
 import com.sequenceiq.cloudbreak.core.flow2.ChainFlow;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -38,7 +37,7 @@ public class StackAndClusterCreationFlowConfig extends StackCreationFlowConfig {
             public Object nextPayload(Event<? extends Payload> event) {
                 Long stackId = event.getData().getStackId();
                 Stack stack = stackService.getById(stackId);
-                return new ProvisioningContext.Builder().setDefaultParams(stack.getId(), Platform.platform(stack.cloudPlatform())).build();
+                return new StackEvent(stack.getId());
             }
         };
     }
