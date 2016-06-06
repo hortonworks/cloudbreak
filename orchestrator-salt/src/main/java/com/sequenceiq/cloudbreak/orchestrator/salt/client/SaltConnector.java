@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
-import com.sequenceiq.cloudbreak.util.ClientUtil;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 
 public class SaltConnector implements Closeable {
 
@@ -33,9 +33,9 @@ public class SaltConnector implements Closeable {
 
     public SaltConnector(GatewayConfig gatewayConfig, boolean debug) {
         try {
-            this.restClient = ClientUtil.createSSLClient(
+            this.restClient = RestClientUtil.createClient(
                     gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(), debug, SaltConnector.class);
-            this.saltTarget = ClientUtil.createTarget(restClient, gatewayConfig.getGatewayUrl());
+            this.saltTarget = RestClientUtil.createTarget(restClient, gatewayConfig.getGatewayUrl());
         } catch (Exception e) {
             throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
         }

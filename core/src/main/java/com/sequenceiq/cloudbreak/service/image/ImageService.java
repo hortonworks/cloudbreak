@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.util.ClientUtil;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 
 @Service
 @Transactional
@@ -122,7 +122,7 @@ public class ImageService {
         }
         try {
             if (catalogUrl.startsWith("http")) {
-                Client client = ClientUtil.createClient();
+                Client client = RestClientUtil.get();
                 WebTarget target = client.target(catalogUrl);
                 return target.request().get().readEntity(CloudbreakImageCatalog.class);
             } else {

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.client.config;
+package com.sequenceiq.cloudbreak.client;
 
 
 public class ConfigKey {

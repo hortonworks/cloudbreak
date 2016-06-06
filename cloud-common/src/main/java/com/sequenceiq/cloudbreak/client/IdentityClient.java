@@ -18,10 +18,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.exception.SSLConnectionException;
-import com.sequenceiq.cloudbreak.api.exception.TokenUnavailableException;
-import com.sequenceiq.cloudbreak.client.config.ConfigKey;
-
 public class IdentityClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdentityClient.class);
@@ -39,7 +35,7 @@ public class IdentityClient {
     public IdentityClient(String identityServerAddress, String clientId, ConfigKey configKey) {
         this.identityServerAddress = identityServerAddress;
         this.clientId = clientId;
-        WebTarget identityWebTarget = RestClient.get(configKey).target(identityServerAddress);
+        WebTarget identityWebTarget = RestClientUtil.get(configKey).target(identityServerAddress);
         authorizeWebTarget = identityWebTarget.path("/oauth/authorize").queryParam("response_type", "token").queryParam("client_id", clientId);
         tokenWebTarget = identityWebTarget.path("/oauth/token").queryParam("grant_type", "client_credentials");
         LOGGER.info("IdentityClient has been created. identity: {}, clientId: {}, configKey: {}", identityServerAddress, clientId, configKey);

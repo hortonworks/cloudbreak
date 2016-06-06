@@ -22,9 +22,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
-import com.sequenceiq.cloudbreak.client.RestClient;
-import com.sequenceiq.cloudbreak.client.config.ConfigKey;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 
 import freemarker.template.TemplateException;
 
@@ -76,7 +76,7 @@ public class AppConfig implements AsyncConfigurer {
 
     @Bean
     public Client restClient() {
-        return RestClient.get(new ConfigKey(certificateValidation, restDebug));
+        return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug));
     }
 
     @Bean

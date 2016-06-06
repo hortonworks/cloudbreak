@@ -1,5 +1,5 @@
 {% for ip, args in pillar.get('hosts', {}).items() %}
-replace_etc_hosts_on_azure_{{ loop.index }}:
+replace_etc_hosts_{{ loop.index }}:
   file.replace:
     - name: /etc/hosts
     - pattern: "{{ ip }}\\s *.*"

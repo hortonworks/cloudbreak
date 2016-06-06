@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.exception;
+package com.sequenceiq.cloudbreak.client;
 
 public class TokenUnavailableException extends RuntimeException {
 

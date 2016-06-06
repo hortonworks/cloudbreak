@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.util.ClientUtil;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 
 @Service
 public class HostMetadataSetup {
@@ -77,7 +77,7 @@ public class HostMetadataSetup {
             throws CloudbreakSecuritySetupException {
         Client restClient = null;
         try {
-            restClient = ClientUtil.createSSLClient(clientConfig.getServerCert(), clientConfig.getClientCert(), clientConfig.getClientKey());
+            restClient = RestClientUtil.createClient(clientConfig.getServerCert(), clientConfig.getClientCert(), clientConfig.getClientKey());
             Set<InstanceMetaData> metadataToUpdate;
             if (newInstanceMetadata == null || newInstanceMetadata.isEmpty()) {
                 metadataToUpdate = stack.getRunningInstanceMetaData();
@@ -85,7 +85,7 @@ public class HostMetadataSetup {
                 metadataToUpdate = newInstanceMetadata;
             }
             List<String> privateIps = metadataToUpdate.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
-            WebTarget target = ClientUtil.createTarget(restClient, String.format("https://%s:%s", clientConfig.getApiAddress(), clientConfig.getApiPort()));
+            WebTarget target = RestClientUtil.createTarget(restClient, String.format("https://%s:%s", clientConfig.getApiAddress(), clientConfig.getApiPort()));
             GenericResponses responses = target.path(HOSTNAME_ENDPOINT).request()
                     .post(Entity.json(singletonMap("clients", privateIps))).readEntity(GenericResponses.class);
             Map<String, String> members = responses.getResponses().stream().collect(Collectors.toMap(GenericResponse::getAddress, GenericResponse::getStatus));
