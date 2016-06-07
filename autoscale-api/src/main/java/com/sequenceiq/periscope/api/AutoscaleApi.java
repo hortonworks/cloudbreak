@@ -7,3 +7,4 @@ public class AutoscaleApi {
     private AutoscaleApi() {
     }
 }
+

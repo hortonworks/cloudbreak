@@ -51,6 +51,9 @@ public class ShellConfiguration {
     @Value("${cmdfile:}")
     private String cmdFile;
 
+    @Value("${server.contextPath:/cb}")
+    private String cbRootContextPath;
+
     @Bean
     static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
@@ -59,7 +62,7 @@ public class ShellConfiguration {
     @Bean
     public CloudbreakClient cloudbreakClient() {
         try {
-            return new CloudbreakClientBuilder(cloudbreakAddress, identityServerAddress, CLIENT_ID).withCredential(user, password).
+            return new CloudbreakClientBuilder(cloudbreakAddress + cbRootContextPath, identityServerAddress, CLIENT_ID).withCredential(user, password).
                     withDebug(restDebug).withCertificateValidation(certificateValidation).build();
         } catch (SSLConnectionException e) {
             System.out.println(String.format("%s Try to start the shell with --cert.validation=false parameter.", e.getMessage()));
