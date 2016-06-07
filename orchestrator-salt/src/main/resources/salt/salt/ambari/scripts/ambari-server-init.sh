@@ -2,36 +2,8 @@
 
 set -x
 
-: ${CLOUD_PLATFORM:="none"}
-: ${USE_CONSUL_DNS:="true"}
-: ${JAVA_HOME:="/usr/jdk64/jdk1.7.0_67"}
+: ${JAVA_HOME:="/usr/lib/jvm/java"}
 
-get_nameserver_addr() {
-  if [[ "$NAMESERVER_ADDR" ]]; then
-    echo $NAMESERVER_ADDR
-  else
-    if ip addr show docker0 &> /dev/null; then
-      ip addr show docker0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1
-    else
-      ip ro | grep default | cut -d" " -f 3
-    fi
-  fi
-}
-
-consul-register-service() {
-  while [[ -z "$(curl -s localhost:8500/v1/catalog/services | grep $1)" ]]; do
-    echo Trying to register $1 service
-    curl -X PUT -d "{
-      \"Node\": \"$1\",
-      \"Address\": \"$2\",
-      \"Service\": {
-      \"Service\": \"$1\"
-      }
-    }" http://localhost:8500/v1/catalog/register
-    sleep 1
-  done
-  echo Registered $1 service to $2
-}
 
 wait_for_db() {
   while : ; do
