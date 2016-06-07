@@ -49,6 +49,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private boolean skipRemainingSuiteTestsAfterOneFailed;
     @Value("${integrationtest.cleanup.cleanupBeforeStart}")
     private boolean cleanUpBeforeStart;
+    @Value("${server.contextPath:/cb}")
+    private String cbRootContextPath;
 
     @Inject
     private ITProps itProps;
@@ -82,7 +84,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         String user = itContext.getContextParam(IntegrationTestContext.AUTH_USER);
         String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);
 
-        CloudbreakClient cloudbreakClient = new CloudbreakClient.CloudbreakClientBuilder(cloudbreakServer, identity, "cloudbreak_shell")
+        CloudbreakClient cloudbreakClient = new CloudbreakClient.CloudbreakClientBuilder(cloudbreakServer + cbRootContextPath, identity, "cloudbreak_shell")
                 .withCertificateValidation(false).withDebug(true).withCredential(user, password).build();
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
         if (cleanUpBeforeStart) {

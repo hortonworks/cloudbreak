@@ -1,0 +1,6 @@
+server:
+  contextPath: "/as"
+
+cb:
+  server:
+    contextPath: "/cb"
