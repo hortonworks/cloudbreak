@@ -59,7 +59,8 @@ public class AmbariClusterStatusUpdater {
 
     public void updateClusterStatus(Stack stack, Cluster cluster) throws CloudbreakSecuritySetupException {
         if (isStackOrClusterStatusInvalid(stack, cluster)) {
-            String msg = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_COULD_NOT_SYNC.code(), Arrays.asList(stack.getStatus(), cluster.getStatus()));
+            String msg = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_COULD_NOT_SYNC.code(), Arrays.asList(stack.getStatus(),
+                    cluster == null ? "" : cluster.getStatus()));
             LOGGER.warn(msg);
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), msg);
         } else {
@@ -79,6 +80,7 @@ public class AmbariClusterStatusUpdater {
         return stack.isStackInDeletionPhase()
                 || stack.isStackInStopPhase()
                 || stack.isModificationInProgress()
+                || cluster == null
                 || cluster.isModificationInProgress();
     }
 

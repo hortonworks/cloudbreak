@@ -81,7 +81,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group" ng-show="group.group != 'cbgateway'" ng-repeat="blueprint in $root.blueprints|filter: { id: cluster.blueprintId }:true">
+                            <div class="form-group" ng-repeat="blueprint in $root.blueprints|filter: { id: cluster.blueprintId }:true">
                                 <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
                                 <div class="col-sm-5 col-lg-6">
                                     <div class="host-group-table row" ng-repeat="hostgroup in blueprint.ambariBlueprint.host_groups|filter: { name: group.group }:true">

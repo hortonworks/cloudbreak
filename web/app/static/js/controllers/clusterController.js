@@ -561,11 +561,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                             id: $rootScope.activeCluster.credentialId
                         }, true)[0];
                         $rootScope.activeCluster.cloudPlatform = $rootScope.activeClusterCredential.cloudPlatform
-                        $rootScope.activeCluster.activeGroup = "cbgateway";
                     } else {
                         $rootScope.activeCluster.cloudPlatform = $rootScope.activeCluster.orchestrator.type
-                        $rootScope.activeCluster.activeGroup = $rootScope.activeCluster.hostGroups != undefined && $rootScope.activeCluster.hostGroups.length > 0 ? $rootScope.activeCluster.hostGroups[0].name : '';
                     }
+                    $rootScope.activeCluster.activeGroup = $rootScope.activeCluster.hostGroups != undefined && $rootScope.activeCluster.hostGroups.length > 0 ? $rootScope.activeCluster.hostGroups[0].name : '';
                     if ($rootScope.activeCluster.networkId) {
                         $rootScope.activeClusterNetwork = $filter('filter')($rootScope.networks, {
                             id: $rootScope.activeCluster.networkId
@@ -746,7 +745,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $rootScope.activeCredential = undefined;
                 $scope.cluster.parameters = {};
                 $scope.cluster.region = null;
-                $scope.cluster.activeGroup = "cbgateway";
+                $scope.cluster.activeGroup = $rootScope.activeCluster.hostGroups != undefined && $rootScope.activeCluster.hostGroups.length > 0 ? $rootScope.activeCluster.hostGroups[0].name : '';
                 delete $scope.cluster.fileSystem;
                 delete $scope.cluster.network;
                 delete $scope.cluster.securityGroup;
