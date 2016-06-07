@@ -11,5 +11,6 @@ public enum APIResourceType {
     SSSDCONFIG,
     NETWORK,
     TOPOLOGY,
-    SECURITY_GROUP
+    SECURITY_GROUP,
+    CLUSTER_TEMPLATE
 }
