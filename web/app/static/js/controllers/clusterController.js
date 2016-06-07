@@ -690,7 +690,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         };
 
         $scope.getHostGroupName = function() {
-            return $rootScope.activeCluster.hostGroups[0].name;
+            if ($rootScope.activeCluster.hostGroups !== null && $rootScope.activeCluster.hostGroups.length > 0) {
+                return $rootScope.activeCluster.hostGroups[0].name
+            }
+            return ''
         };
 
         $scope.initReinstallClusterObject = function() {
