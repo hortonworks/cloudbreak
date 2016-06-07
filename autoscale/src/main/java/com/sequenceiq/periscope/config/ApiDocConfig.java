@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.utils.FileReaderUtils;
 
 import io.swagger.jaxrs.config.BeanConfig;
@@ -19,7 +20,7 @@ public class ApiDocConfig {
         beanConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/auto-scaling-introduction"));
         beanConfig.setVersion("1.2.0");
         beanConfig.setSchemes(new String[]{"http"});
-        beanConfig.setBasePath("/api/v1");
+        beanConfig.setBasePath(AutoscaleApi.API_ROOT_CONTEXT);
         beanConfig.setResourcePackage("com.sequenceiq.periscope.api");
         beanConfig.setScan(true);
         return beanConfig;
