@@ -158,7 +158,7 @@ public class AmbariClusterConnectorTest {
 
     @Test(expected = AmbariOperationFailedException.class)
     public void testInstallAmbariWhenExceptionOccursShouldInstallationFailed() throws Exception {
-        doThrow(new IllegalArgumentException()).when(ambariClient).createCluster(anyString(), anyString(), anyMap(), anyString());
+        doThrow(new IllegalArgumentException()).when(ambariClient).createCluster(anyString(), anyString(), anyMap(), anyString(), anyString());
         underTest.buildAmbariCluster(stack);
     }
 
