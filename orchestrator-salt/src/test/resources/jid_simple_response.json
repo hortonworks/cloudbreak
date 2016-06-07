@@ -1,0 +1,221 @@
+{
+  "return": [
+    {
+      "host-192.168.0.1": {
+        "file_|-/etc/ambari-agent/conf/internal_hostname.sh_|-/etc/ambari-agent/conf/internal_hostname.sh_|-managed": {
+          "comment": "File /etc/ambari-agent/conf/internal_hostname.sh is in the correct state",
+          "name": "/etc/ambari-agent/conf/internal_hostname.sh",
+          "start_time": "10:25:44.099404",
+          "result": true,
+          "duration": "3.449 ms",
+          "__run_num__": 13,
+          "changes": {
+          }
+        },
+        "file_|-set_public_hostname_script_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+          "comment": "unless execution succeeded",
+          "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+          "start_time": "10:25:44.118328",
+          "skip_watch": true,
+          "result": true,
+          "duration": "12.154 ms",
+          "__run_num__": 16,
+          "changes": {
+          }
+        },
+        "file_|-replace_etc_hosts_on_azure_3_|-/etc/hosts_|-replace": {
+          "comment": "No changes needed to be made",
+          "name": "/etc/hosts",
+          "start_time": "10:25:36.664494",
+          "result": true,
+          "duration": "2.579 ms",
+          "__run_num__": 2,
+          "changes": {
+          }
+        },
+        "pkg_|-ambari-server_|-ambari-server_|-latest": {
+          "comment": "Package ambari-server is already up-to-date.",
+          "name": "ambari-server",
+          "start_time": "10:25:38.182734",
+          "result": true,
+          "duration": "4983.093 ms",
+          "__run_num__": 6,
+          "changes": {
+          }
+        },
+        "pkg_|-haveged_|-haveged_|-installed": {
+          "comment": "Package haveged is already installed.",
+          "name": "haveged",
+          "start_time": "10:25:37.192230",
+          "result": false,
+          "duration": "624.43 ms",
+          "__run_num__": 4,
+          "changes": {
+          }
+        },
+        "service_|-start-ambari-server_|-ambari-server_|-running": {
+          "comment": "Service ambari-server is already enabled, and is dead",
+          "name": "ambari-server",
+          "start_time": "10:25:43.270143",
+          "result": false,
+          "duration": "448.151 ms",
+          "__run_num__": 11,
+          "changes": {
+            "ambari-server": false
+          }
+        },
+        "file_|-set_internal_hostname_script_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+          "comment": "unless execution succeeded",
+          "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+          "start_time": "10:25:44.134851",
+          "skip_watch": true,
+          "result": true,
+          "duration": "11.59 ms",
+          "__run_num__": 17,
+          "changes": {
+          }
+        },
+        "file_|-/etc/systemd/system/ambari-agent.service_|-/etc/systemd/system/ambari-agent.service_|-managed": {
+          "comment": "File /etc/systemd/system/ambari-agent.service is in the correct state",
+          "name": "/etc/systemd/system/ambari-agent.service",
+          "start_time": "10:25:44.146640",
+          "result": true,
+          "duration": "11.974 ms",
+          "__run_num__": 18,
+          "changes": {
+          }
+        },
+        "file_|-replace_etc_hosts_on_azure_2_|-/etc/hosts_|-replace": {
+          "comment": "No changes needed to be made",
+          "name": "/etc/hosts",
+          "start_time": "10:25:36.661720",
+          "result": true,
+          "duration": "2.65 ms",
+          "__run_num__": 1,
+          "changes": {
+          }
+        },
+        "service_|-start-ambari-agent_|-ambari-agent_|-running": {
+          "comment": "Service ambari-agent is already enabled, and is in the desired state",
+          "name": "ambari-agent",
+          "start_time": "10:25:44.160696",
+          "result": true,
+          "duration": "332.71 ms",
+          "__run_num__": 20,
+          "changes": {
+          }
+        },
+        "file_|-/etc/ambari-agent/conf/public_hostname.sh_|-/etc/ambari-agent/conf/public_hostname.sh_|-managed": {
+          "comment": "File /etc/ambari-agent/conf/public_hostname.sh is in the correct state",
+          "name": "/etc/ambari-agent/conf/public_hostname.sh",
+          "start_time": "10:25:44.106130",
+          "result": true,
+          "duration": "2.664 ms",
+          "__run_num__": 14,
+          "changes": {
+          }
+        },
+        "file_|-set_ambari_server_address_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+          "comment": "No changes needed to be made",
+          "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+          "start_time": "10:25:44.112068",
+          "result": true,
+          "duration": "2.25 ms",
+          "__run_num__": 15,
+          "changes": {
+          }
+        },
+        "file_|-set_install_timeout_|-/etc/ambari-server/conf/ambari.properties_|-replace": {
+          "comment": "No changes needed to be made",
+          "name": "/etc/ambari-server/conf/ambari.properties",
+          "start_time": "10:25:43.262316",
+          "result": true,
+          "duration": "3.059 ms",
+          "__run_num__": 8,
+          "changes": {
+          }
+        },
+        "file_|-replace_etc_hosts_on_azure_1_|-/etc/hosts_|-replace": {
+          "comment": "No changes needed to be made",
+          "name": "/etc/hosts",
+          "start_time": "10:25:36.648972",
+          "result": true,
+          "duration": "12.596 ms",
+          "__run_num__": 0,
+          "changes": {
+          }
+        },
+        "file_|-/etc/systemd/system/ambari-server.service_|-/etc/systemd/system/ambari-server.service_|-managed": {
+          "comment": "File /etc/systemd/system/ambari-server.service is in the correct state",
+          "name": "/etc/systemd/system/ambari-server.service",
+          "start_time": "10:25:43.265509",
+          "result": true,
+          "duration": "2.768 ms",
+          "__run_num__": 9,
+          "changes": {
+          }
+        },
+        "module_|-start-ambari-agent_|-service.systemctl_reload_|-wait": {
+          "comment": "",
+          "name": "service.systemctl_reload",
+          "start_time": "10:25:44.159671",
+          "result": true,
+          "duration": "0.4 ms",
+          "__run_num__": 19,
+          "changes": {
+          }
+        },
+        "pkg_|-ambari-agent_|-ambari-agent_|-latest": {
+          "comment": "Package ambari-agent is already up-to-date.",
+          "name": "ambari-agent",
+          "start_time": "10:25:43.718741",
+          "result": true,
+          "duration": "376.694 ms",
+          "__run_num__": 12,
+          "changes": {
+          }
+        },
+        "file_|-/etc/yum.repos.d/ambari.repo_|-/etc/yum.repos.d/ambari.repo_|-managed": {
+          "comment": "File /etc/yum.repos.d/ambari.repo is in the correct state",
+          "name": "/etc/yum.repos.d/ambari.repo",
+          "start_time": "10:25:36.667198",
+          "result": true,
+          "duration": "13.847 ms",
+          "__run_num__": 3,
+          "changes": {
+          }
+        },
+        "module_|-start-ambari-server_|-service.systemctl_reload_|-wait": {
+          "comment": "",
+          "name": "service.systemctl_reload",
+          "start_time": "10:25:43.269163",
+          "result": true,
+          "duration": "0.383 ms",
+          "__run_num__": 10,
+          "changes": {
+          }
+        },
+        "service_|-haveged_|-haveged_|-running": {
+          "comment": "Service haveged is already enabled, and is in the desired state",
+          "name": "haveged",
+          "start_time": "10:25:37.817500",
+          "result": true,
+          "duration": "364.751 ms",
+          "__run_num__": 5,
+          "changes": {
+          }
+        },
+        "file_|-/opt/ambari-server/ambari-server-init.sh_|-/opt/ambari-server/ambari-server-init.sh_|-managed": {
+          "comment": "Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
+          "name": "/opt/ambari-server/ambari-server-init.sh",
+          "start_time": "10:25:43.166072",
+          "result": false,
+          "duration": "2.852 ms",
+          "__run_num__": 7,
+          "changes": {
+          }
+        }
+      }
+    }
+  ]
+}
