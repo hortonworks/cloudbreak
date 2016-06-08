@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.orchestrator.salt;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,14 +70,13 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, Set<Node> targets, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
-        Set<String> allIPs = prepareTargets(gatewayConfig, targets);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             PillarSave ambariServer = new PillarSave(sc, gatewayConfig.getPrivateAddress());
             Callable<Boolean> saltPillarRunner = runner(ambariServer, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, allIPs);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, targets);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -90,9 +88,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-        Set<String> newAddresses = prepareTargets(null, targets);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, newAddresses);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, targets);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -209,17 +206,6 @@ public class SaltOrchestrator implements HostOrchestrator {
         Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel);
         Future<Boolean> saltCommandRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltCommandRunBootstrapRunner);
         saltCommandRunBootstrapFuture.get();
-    }
-
-    private Set<String> prepareTargets(GatewayConfig gatewayConfig, Set<Node> targets) {
-        Set<String> targetList = new HashSet<>();
-        if (gatewayConfig != null) {
-            targetList.add(gatewayConfig.getPrivateAddress());
-        }
-        for (Node node : targets) {
-            targetList.add(node.getPrivateIp());
-        }
-        return targetList;
     }
 
     private ParallelOrchestratorComponentRunner getParallelOrchestratorComponentRunner() {
