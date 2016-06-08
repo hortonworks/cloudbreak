@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorCompo
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
@@ -146,22 +147,6 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
-            InterruptedException {
-        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner);
-        Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
-        Future<Boolean> saltJobRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltJobRunBootstrapRunner);
-        saltJobRunBootstrapFuture.get();
-    }
-
-    private void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
-            InterruptedException {
-        SaltCommandTracker saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
-        Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel);
-        Future<Boolean> saltCommandRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltCommandRunBootstrapRunner);
-        saltCommandRunBootstrapFuture.get();
-    }
-
     @Override
     public void tearDown(GatewayConfig gatewayConfig, List<String> hostnames) throws CloudbreakOrchestratorException {
         try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
@@ -170,6 +155,11 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.error("Error occurred during salt minion tear down", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+    }
+
+    @Override
+    public void preInstallRecipes(GatewayConfig gatewayConfig, Map<String, List<RecipeModel>> recipes) {
+        LOGGER.info("Execute pre-install recipes: {}", recipes);
     }
 
     @Override
@@ -203,6 +193,22 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public int getMaxBootstrapNodes() {
         return MAX_NODES;
+    }
+
+    private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
+            InterruptedException {
+        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner);
+        Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
+        Future<Boolean> saltJobRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltJobRunBootstrapRunner);
+        saltJobRunBootstrapFuture.get();
+    }
+
+    private void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
+            InterruptedException {
+        SaltCommandTracker saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
+        Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel);
+        Future<Boolean> saltCommandRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltCommandRunBootstrapRunner);
+        saltCommandRunBootstrapFuture.get();
     }
 
     private Set<String> prepareTargets(GatewayConfig gatewayConfig, Set<Node> targets) {
