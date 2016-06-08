@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-public enum PluginExecutionType {
+public enum ExecutionType {
     ONE_NODE,
     ALL_NODES
 }

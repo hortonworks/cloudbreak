@@ -23,7 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
@@ -495,10 +495,10 @@ public class TestUtil {
         return cloudbreakEvent;
     }
 
-    private static Map<String, PluginExecutionType> createRecipePlugins() {
-        Map<String, PluginExecutionType> plugin = new HashMap<>();
-        plugin.put("all-node-plugin", PluginExecutionType.ALL_NODES);
-        plugin.put("one-node-plugin", PluginExecutionType.ONE_NODE);
+    private static Map<String, ExecutionType> createRecipePlugins() {
+        Map<String, ExecutionType> plugin = new HashMap<>();
+        plugin.put("all-node-plugin", ExecutionType.ALL_NODES);
+        plugin.put("one-node-plugin", ExecutionType.ONE_NODE);
         return plugin;
     }
 

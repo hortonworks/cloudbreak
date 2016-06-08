@@ -53,7 +53,7 @@ import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -579,8 +579,8 @@ public class AmbariClusterConnector {
         List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
         for (Recipe recipe : fsRecipes) {
             boolean oneNode = false;
-            for (Entry<String, PluginExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
-                if (PluginExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
+            for (Entry<String, ExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
+                if (ExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
                     oneNode = true;
                 }
             }
@@ -604,8 +604,8 @@ public class AmbariClusterConnector {
             for (HostGroup hostGroup : hostGroups) {
                 if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", cluster.getUserName());
-                    RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL, PluginExecutionType.ONE_NODE);
-                    Recipe recipe = recipeBuilder.buildRecipes(asList(recipeScript), Collections.<String, String>emptyMap()).get(0);
+                    RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL, ExecutionType.ONE_NODE);
+                    Recipe recipe = recipeBuilder.buildRecipes(asList(recipeScript), Collections.emptyMap()).get(0);
                     hostGroup.addRecipe(recipe);
                     break;
                 }

@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 
 public class RecipeScript {
     private String script;
     private ClusterLifecycleEvent clusterLifecycleEvent;
-    private PluginExecutionType executionType;
+    private ExecutionType executionType;
 
-    public RecipeScript(String script, ClusterLifecycleEvent clusterLifecycleEvent, PluginExecutionType executionType) {
+    public RecipeScript(String script, ClusterLifecycleEvent clusterLifecycleEvent, ExecutionType executionType) {
         this.script = script;
         this.clusterLifecycleEvent = clusterLifecycleEvent;
         this.executionType = executionType;
@@ -21,7 +21,7 @@ public class RecipeScript {
         return clusterLifecycleEvent;
     }
 
-    public PluginExecutionType getExecutionType() {
+    public ExecutionType getExecutionType() {
         return executionType;
     }
 }

@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
@@ -16,7 +16,7 @@ public interface PluginManager {
 
     void prepareKeyValues(HttpClientConfig clientConfig, Map<String, String> keyValues);
 
-    Map<String, Set<String>> installPlugins(HttpClientConfig clientConfig, Map<String, PluginExecutionType> plugins, Set<String> hosts,
+    Map<String, Set<String>> installPlugins(HttpClientConfig clientConfig, Map<String, ExecutionType> plugins, Set<String> hosts,
             boolean existingHostGroup);
 
     Map<String, Set<String>> cleanupPlugins(HttpClientConfig clientConfig, Set<String> hosts);

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.core.CloudbreakRecipeSetupException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -146,8 +146,8 @@ public class RecipeEngine {
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
         for (Recipe recipe : recipes) {
-            Map<String, PluginExecutionType> plugins = new HashMap<>();
-            for (Map.Entry<String, PluginExecutionType> entry : recipe.getPlugins().entrySet()) {
+            Map<String, ExecutionType> plugins = new HashMap<>();
+            for (Map.Entry<String, ExecutionType> entry : recipe.getPlugins().entrySet()) {
                 String url = entry.getKey().startsWith("base64://") ? "consul://" + getPluginConsulKey(recipe, entry.getKey()) : entry.getKey();
                 plugins.put(url, entry.getValue());
             }
