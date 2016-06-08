@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import javax.ws.rs.ApplicationPath;
+
+import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.mapper.AccessDeniedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.AuthenticationCredentialsNotFoundExceptionMapper;
@@ -24,10 +29,6 @@ import com.sequenceiq.cloudbreak.controller.mapper.TerminationFailedExceptionMap
 import com.sequenceiq.cloudbreak.controller.mapper.TypeMismatchExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.UnsupportedOperationFailedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.stereotype.Component;
-
-import javax.ws.rs.ApplicationPath;
 
 @ApplicationPath(CoreApi.API_ROOT_CONTEXT)
 //TODO find a working solution for storing response codes globally
@@ -90,6 +91,7 @@ public class EndpointConfig extends ResourceConfig {
         register(ConstraintTemplateController.class);
         register(UserController.class);
         register(TopologyController.class);
+        register(ClusterTemplateController.class);
 
         register(CloudbreakEventController.class);
         register(SubscriptionController.class);

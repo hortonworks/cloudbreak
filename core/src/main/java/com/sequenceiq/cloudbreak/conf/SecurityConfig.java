@@ -77,6 +77,7 @@ public class SecurityConfig {
         private static final String[] NETWORK_URL_PATTERNS = new String[]{"/api/v1/networks/**"};
         private static final String[] SECURITYGROUP_URL_PATTERNS = new String[]{"/api/v1/securitygroups/**"};
         private static final String[] STACK_URL_PATTERNS = new String[]{"/api/v1/stacks/**"};
+        private static final String[] STACK_TEMPLATE_URL_PATTERNS = new String[]{"/api/v1/stacktemplates/**"};
 
         @Value("${cb.client.id}")
         private String clientId;
@@ -118,6 +119,8 @@ public class SecurityConfig {
 
                     .antMatchers(HttpMethod.GET, BLUEPRINT_URL_PATTERNS)
                         .access("#oauth2.hasScope('cloudbreak.blueprints.read') or #oauth2.hasScope('cloudbreak.blueprints')")
+                    .antMatchers(HttpMethod.GET, STACK_TEMPLATE_URL_PATTERNS)
+                        .access("#oauth2.hasScope('cloudbreak.stacks.read') or #oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(HttpMethod.GET, TEMPLATE_URL_PATTERNS)
                         .access("#oauth2.hasScope('cloudbreak.templates.read') or #oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(HttpMethod.GET, CREDENTIAL_URL_PATTERNS)
@@ -140,6 +143,7 @@ public class SecurityConfig {
                     .antMatchers(NETWORK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.networks')")
                     .antMatchers(SECURITYGROUP_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.securitygroups')")
                     .antMatchers(STACK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers(STACK_TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers("/api/v1/stacks/ambari", "/api/v1/stacks/*/certificate").access("#oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers("/api/v1/events").access("#oauth2.hasScope('cloudbreak.events')")
                     .antMatchers("/api/v1/usages/account/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
