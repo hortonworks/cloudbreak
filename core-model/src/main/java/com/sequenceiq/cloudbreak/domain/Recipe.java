@@ -18,7 +18,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 
 @Entity
 @Table(name = "recipe", uniqueConstraints = {
@@ -61,7 +61,7 @@ public class Recipe implements ProvisionEntity {
     @MapKeyColumn(name = "plugin")
     @Column(name = "execution_type")
     @Enumerated(EnumType.STRING)
-    private Map<String, PluginExecutionType> plugins;
+    private Map<String, ExecutionType> plugins;
     private Integer timeout;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -107,11 +107,11 @@ public class Recipe implements ProvisionEntity {
         this.keyValues = keyValues;
     }
 
-    public Map<String, PluginExecutionType> getPlugins() {
+    public Map<String, ExecutionType> getPlugins() {
         return plugins;
     }
 
-    public void setPlugins(Map<String, PluginExecutionType> plugins) {
+    public void setPlugins(Map<String, ExecutionType> plugins) {
         this.plugins = plugins;
     }
 

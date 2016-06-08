@@ -33,7 +33,7 @@ abstract class RecipeBase implements JsonEntity {
 
     @ValidPlugin
     @ApiModelProperty(value = RecipeModelDescription.PLUGINS, required = true)
-    private Map<String, PluginExecutionType> plugins;
+    private Map<String, ExecutionType> plugins;
 
     @JsonProperty("properties")
     @ApiModelProperty(value = RecipeModelDescription.PROPERTIES)
@@ -63,11 +63,11 @@ abstract class RecipeBase implements JsonEntity {
         this.timeout = timeout;
     }
 
-    public Map<String, PluginExecutionType> getPlugins() {
+    public Map<String, ExecutionType> getPlugins() {
         return plugins;
     }
 
-    public void setPlugins(Map<String, PluginExecutionType> plugins) {
+    public void setPlugins(Map<String, ExecutionType> plugins) {
         this.plugins = plugins;
     }
 

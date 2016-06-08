@@ -11,13 +11,12 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
 public class ConsulRecipeBuilder implements RecipeBuilder {
 
-    private static final String RECIPE_KEY_PREFIX = "recipes/built-in/";
     private static final int NAME_LENGTH = 10;
 
     @Override
@@ -34,7 +33,7 @@ public class ConsulRecipeBuilder implements RecipeBuilder {
                     .append("[plugin.config]\n[plugin.compatibility]").toString();
             StringBuilder pluginContentBuilder = new StringBuilder();
             pluginContentBuilder.append("plugin.toml:").append(Base64.encodeBase64String(tomlContent.getBytes())).append("\n");
-            Map<String, PluginExecutionType> plugins = new HashMap<>();
+            Map<String, ExecutionType> plugins = new HashMap<>();
             switch (script.getClusterLifecycleEvent()) {
                 case PRE_INSTALL:
                     pluginContentBuilder.append("recipe-pre-install:").append(Base64.encodeBase64String(script.getScript().getBytes())).append("\n");
@@ -51,7 +50,7 @@ public class ConsulRecipeBuilder implements RecipeBuilder {
             if (index == 0) {
                 recipe.setKeyValues(properties);
             } else {
-                recipe.setKeyValues(new HashMap<String, String>());
+                recipe.setKeyValues(new HashMap<>());
             }
             index++;
             recipes.add(recipe);

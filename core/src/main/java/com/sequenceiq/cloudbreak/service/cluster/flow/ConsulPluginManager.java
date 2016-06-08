@@ -20,7 +20,7 @@ import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.event.model.EventParams;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -68,13 +68,13 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public Map<String, Set<String>> installPlugins(HttpClientConfig clientConfig, Map<String, PluginExecutionType> plugins, Set<String> hosts,
+    public Map<String, Set<String>> installPlugins(HttpClientConfig clientConfig, Map<String, ExecutionType> plugins, Set<String> hosts,
             boolean existingHostGroup) {
         Map<String, Set<String>> eventIdMap = new HashMap<>();
         ConsulClient client = ConsulUtils.createClient(clientConfig);
-        for (Map.Entry<String, PluginExecutionType> plugin : plugins.entrySet()) {
+        for (Map.Entry<String, ExecutionType> plugin : plugins.entrySet()) {
             Set<String> installedHosts = new HashSet<>();
-            if (PluginExecutionType.ONE_NODE.equals(plugin.getValue())) {
+            if (ExecutionType.ONE_NODE.equals(plugin.getValue())) {
                 if (!existingHostGroup) {
                     String installedHost = FluentIterable.from(hosts).first().get();
                     installedHosts.add(installedHost);

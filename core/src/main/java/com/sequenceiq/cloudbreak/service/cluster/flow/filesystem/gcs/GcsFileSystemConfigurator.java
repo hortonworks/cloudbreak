@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.gcs;
 
-import static com.sequenceiq.cloudbreak.api.model.PluginExecutionType.ALL_NODES;
+import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ALL_NODES;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.PRE_INSTALL;
 import static com.sequenceiq.cloudbreak.api.model.FileSystemType.GCS;
 

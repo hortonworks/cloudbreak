@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem;
 
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent;
 
 public class FileSystemScriptConfig {
     private String scriptLocation;
     private ClusterLifecycleEvent clusterLifecycleEvent;
-    private PluginExecutionType executionType;
+    private ExecutionType executionType;
 
-    public FileSystemScriptConfig(String scriptLocation, ClusterLifecycleEvent clusterLifecycleEvent, PluginExecutionType executionType) {
+    public FileSystemScriptConfig(String scriptLocation, ClusterLifecycleEvent clusterLifecycleEvent, ExecutionType executionType) {
         this.scriptLocation = scriptLocation;
         this.clusterLifecycleEvent = clusterLifecycleEvent;
         this.executionType = executionType;
@@ -22,7 +22,7 @@ public class FileSystemScriptConfig {
         return clusterLifecycleEvent;
     }
 
-    public PluginExecutionType getExecutionType() {
+    public ExecutionType getExecutionType() {
         return executionType;
     }
 }

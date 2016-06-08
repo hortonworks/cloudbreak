@@ -8,9 +8,9 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.codec.binary.Base64;
 
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 
-public class PluginValidator implements ConstraintValidator<ValidPlugin, Map<String, PluginExecutionType>> {
+public class PluginValidator implements ConstraintValidator<ValidPlugin, Map<String, ExecutionType>> {
 
     private static final String RECIPE_KEY_PREFIX = "consul-watch-plugin/";
     private static final String URL_PATTERN = "^(http|https|git|consul|base64)://.*";
@@ -22,7 +22,7 @@ public class PluginValidator implements ConstraintValidator<ValidPlugin, Map<Str
     }
 
     @Override
-    public boolean isValid(Map<String, PluginExecutionType> plugins, ConstraintValidatorContext cxt) {
+    public boolean isValid(Map<String, ExecutionType> plugins, ConstraintValidatorContext cxt) {
         if (plugins == null || plugins.isEmpty()) {
             return false;
         }
