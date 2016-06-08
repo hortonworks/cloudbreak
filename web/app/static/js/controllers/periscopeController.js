@@ -20,7 +20,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         resetAlarmForms();
         resetScalingActionForm();
 
-        $rootScope.$watch('activeCluster', function(uluCluster, oldUluCluster) {
+        $rootScope.$watch("activeCluster || activeCluster.cluster.status == 'AVAILABLE' && activeCluster.status == 'AVAILABLE'", function(uluCluster, oldUluCluster) {
             if (uluCluster.cluster != undefined && uluCluster.cluster.ambariServerIp != undefined) {
                 var periCluster = selectPeriscopeClusterByAmbariIp(uluCluster.cluster.ambariServerIp);
                 if (isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster)) {
@@ -32,15 +32,6 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
                 disableAutoScalingPolicies();
             }
         }, false);
-
-        $rootScope.$watch("activeCluster.cluster.status == 'AVAILABLE' && activeCluster.status == 'AVAILABLE'", function(newValue, oldValue) {
-            if ($rootScope.activeCluster.cluster != undefined && $rootScope.activeCluster.cluster.ambariServerIp != undefined) {
-                var periCluster = selectPeriscopeClusterByAmbariIp($rootScope.activeCluster.cluster.ambariServerIp);
-                if (newValue && !oldValue && isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster)) {
-                    setActivePeriClusterWithResources(periCluster);
-                }
-            }
-        });
 
         function isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster) {
             return periCluster != undefined && $rootScope.activeCluster.cluster.ambariServerIp != undefined && $rootScope.activeCluster.cluster.ambariServerIp == periCluster.host && periCluster.state == 'RUNNING';
