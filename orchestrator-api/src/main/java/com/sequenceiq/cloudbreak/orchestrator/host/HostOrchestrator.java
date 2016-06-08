@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
-public interface HostOrchestrator {
+public interface HostOrchestrator extends HostRecipeExecutor {
 
     String name();
 

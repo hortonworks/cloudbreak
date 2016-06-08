@@ -4,7 +4,6 @@ import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,13 +26,13 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(SaltStates.class)
-public class SimpleAddRoleCheckerTest {
+public class SyncGrainsRunnerTest {
 
     private Set<String> targets;
     private Set<Node> allNode;
 
     @Test
-    public void submitTest() throws Exception {
+    public void submit() throws Exception {
         targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
@@ -51,13 +50,13 @@ public class SimpleAddRoleCheckerTest {
         nodes.put("10-0-0-2.example.com", "something");
         result.add(nodes);
         applyResponse.setResult(result);
-        PowerMockito.when(SaltStates.addRole(any(), any(), anyString())).thenReturn(applyResponse);
+        PowerMockito.when(SaltStates.syncGrains(any(), any())).thenReturn(applyResponse);
 
-        SimpleAddRoleChecker addRoleChecker = new SimpleAddRoleChecker(targets, allNode, "ambari_server");
+        SyncGrainsRunner syncGrainsRunner = new SyncGrainsRunner(targets, allNode);
 
         SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
-        String missingIps = addRoleChecker.submit(saltConnector);
-        assertThat(addRoleChecker.getTarget(), hasItems("10.0.0.3"));
+        String missingIps = syncGrainsRunner.submit(saltConnector);
+        assertThat(syncGrainsRunner.getTarget(), hasItems("10.0.0.3"));
         assertEquals("[10.0.0.3]", missingIps);
     }
 

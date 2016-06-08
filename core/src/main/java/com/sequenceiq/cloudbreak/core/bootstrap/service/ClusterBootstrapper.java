@@ -122,7 +122,9 @@ public class ClusterBootstrapper {
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
+            Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper());
+            node.setHostGroup(instanceMetaData.getInstanceGroupName());
+            nodes.add(node);
         }
         try {
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
@@ -254,11 +256,14 @@ public class ClusterBootstrapper {
                 POLLING_INTERVAL,
                 MAX_POLLING_ATTEMPTS);
         validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
-        for (int i = 0; i < nodeMap.size(); i++) {
-            hostOrchestrator.bootstrapNewNodes(gatewayConfig, nodeMap.get(i), clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
+        Set<InstanceMetaData> runningInstanceMetaData = stack.getRunningInstanceMetaData();
+        for (Set<Node> nodeSet : nodeMap) {
+            nodeSet.forEach(n -> n.setHostGroup(
+                    runningInstanceMetaData.stream().filter(i -> i.getPrivateIp().equals(n.getPrivateIp())).findFirst().get().getInstanceGroupName()));
+            hostOrchestrator.bootstrapNewNodes(gatewayConfig, nodeSet, clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
             PollingResult newNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
                     hostClusterAvailabilityCheckerTask,
-                    new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodeMap.get(i)),
+                    new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodeSet),
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(newNodesAvailabilityPolling, "Polling of new nodes availability was cancelled.");

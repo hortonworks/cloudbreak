@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
@@ -29,10 +29,10 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private final SaltConnector sc;
     private final GatewayConfig gatewayConfig;
-    private final Set<String> originalTargets;
-    private Set<String> targets;
+    private final Set<Node> originalTargets;
+    private Set<Node> targets;
 
-    public SaltBootstrap(SaltConnector sc, GatewayConfig gatewayConfig, Set<String> targets) {
+    public SaltBootstrap(SaltConnector sc, GatewayConfig gatewayConfig, Set<Node> targets) {
         this.sc = sc;
         this.gatewayConfig = gatewayConfig;
         this.originalTargets = Collections.unmodifiableSet(targets);
@@ -47,13 +47,14 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             SaltAction saltAction = createBootstrap();
             GenericResponses responses = sc.action(saltAction);
 
-            Set<String> failedTargets = new HashSet<>();
+            Set<Node> failedTargets = new HashSet<>();
 
             LOGGER.info("Salt run response: {}", responses);
             for (GenericResponse genericResponse : responses.getResponses()) {
                 if (genericResponse.getStatusCode() != HttpStatus.OK.value()) {
                     LOGGER.info("Successfully distributed salt run to: " + genericResponse.getAddress());
-                    failedTargets.add(genericResponse.getAddress().split(":")[0]);
+                    String address = genericResponse.getAddress().split(":")[0];
+                    failedTargets.addAll(originalTargets.stream().filter(a -> a.getPrivateIp().equals(address)).collect(Collectors.toList()));
                 }
             }
             targets = failedTargets;
@@ -65,10 +66,10 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         }
 
         Map<String, String> networkResult = SaltStates.networkInterfaceIP(sc, Glob.ALL).getResultGroupByIP();
-        originalTargets.forEach(ip -> {
-            if (!networkResult.containsKey(ip)) {
-                LOGGER.info("Salt-minion is not responding on host: {}, yet", ip);
-                targets.add(ip);
+        originalTargets.forEach(node -> {
+            if (!networkResult.containsKey(node.getPrivateIp())) {
+                LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
+                targets.add(node);
             }
         });
         if (!targets.isEmpty()) {
@@ -80,25 +81,25 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     private SaltAction createBootstrap() {
         SaltAction saltAction = new SaltAction(SaltActionType.RUN);
 
-        if (targets.contains(getGatewayPrivateIp())) {
+        if (targets.stream().map(Node::getPrivateIp).collect(Collectors.toList()).contains(getGatewayPrivateIp())) {
             saltAction.setServer(getGatewayPrivateIp());
-            List<String> roles = new ArrayList<>();
-            saltAction.addMinion(createMinion(getGatewayPrivateIp(), roles));
+            Node saltMaster = targets.stream().filter(n -> n.getPrivateIp().equals(getGatewayPrivateIp())).findFirst().get();
+            saltAction.addMinion(createMinion(saltMaster));
         }
-        for (String minionIp : targets) {
-            if (!minionIp.equals(getGatewayPrivateIp())) {
-                List<String> roles = new ArrayList<>();
-                saltAction.addMinion(createMinion(minionIp, roles));
+        for (Node minion : targets) {
+            if (!minion.getPrivateIp().equals(getGatewayPrivateIp())) {
+                saltAction.addMinion(createMinion(minion));
             }
         }
         return saltAction;
     }
 
-    private Minion createMinion(String address, List<String> roles) {
+    private Minion createMinion(Node node) {
         Minion minion = new Minion();
-        minion.setAddress(address);
-        minion.setRoles(roles);
+        minion.setAddress(node.getPrivateIp());
+        minion.setRoles(Collections.emptyList());
         minion.setServer(getGatewayPrivateIp());
+        minion.setHostGroup(node.getHostGroup());
         return minion;
     }
 

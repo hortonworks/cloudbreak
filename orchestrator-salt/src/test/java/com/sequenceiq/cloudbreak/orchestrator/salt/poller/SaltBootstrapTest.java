@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
@@ -60,10 +61,10 @@ public class SaltBootstrapTest {
 
     @Test
     public void callTest() {
-        Set<String> targets = new HashSet<>();
-        targets.add("10.0.0.1");
-        targets.add("10.0.0.2");
-        targets.add("10.0.0.3");
+        Set<Node> targets = new HashSet<>();
+        targets.add(new Node("10.0.0.1", null, null));
+        targets.add(new Node("10.0.0.2", null, null));
+        targets.add(new Node("10.0.0.3", null, null));
 
         SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, gatewayConfig, targets);
         try {
@@ -80,11 +81,11 @@ public class SaltBootstrapTest {
         networkMap.put("host-10-0-0-1.example.com", "10.0.0.1");
         networkMap.put("host-10-0-0-2.example.com", "10.0.0.2");
 
-        Set<String> targets = new HashSet<>();
-        targets.add("10.0.0.1");
-        targets.add("10.0.0.2");
+        Set<Node> targets = new HashSet<>();
+        targets.add(new Node("10.0.0.1", null, null));
+        targets.add(new Node("10.0.0.2", null, null));
         String missingNodeIp = "10.0.0.3";
-        targets.add(missingNodeIp);
+        targets.add(new Node(missingNodeIp, null, null));
 
         SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, gatewayConfig, targets);
         try {

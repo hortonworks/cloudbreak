@@ -20,4 +20,7 @@ export SSH_USER=${sshUser}
 
 ${customUserData}
 
+curl -Lo /usr/sbin/salt-bootstrap https://dl.dropboxusercontent.com/u/13919958/salt-bootstrap
+chmod +x /usr/sbin/salt-bootstrap
+
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log

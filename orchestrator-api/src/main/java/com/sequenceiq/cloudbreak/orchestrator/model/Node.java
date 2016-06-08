@@ -6,6 +6,7 @@ public class Node {
     private String privateIp;
     private String publicIp;
     private String hostname;
+    private String hostGroup;
     private Set<String> dataVolumes;
 
     public Node(String privateIp, String publicIp, String fqdn) {
@@ -39,5 +40,25 @@ public class Node {
 
     public Set<String> getDataVolumes() {
         return dataVolumes;
+    }
+
+    public String getHostGroup() {
+        return hostGroup;
+    }
+
+    public void setHostGroup(String hostGroup) {
+        this.hostGroup = hostGroup;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Node{");
+        sb.append("privateIp='").append(privateIp).append('\'');
+        sb.append(", publicIp='").append(publicIp).append('\'');
+        sb.append(", hostname='").append(hostname).append('\'');
+        sb.append(", hostGroup='").append(hostGroup).append('\'');
+        sb.append(", dataVolumes=").append(dataVolumes);
+        sb.append('}');
+        return sb.toString();
     }
 }

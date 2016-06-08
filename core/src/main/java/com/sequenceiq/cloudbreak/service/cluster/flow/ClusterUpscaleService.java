@@ -119,7 +119,7 @@ public class ClusterUpscaleService {
         ambariClusterConnector.waitForAmbariHosts(stackService.getById(stackId));
     }
 
-    public void configureSssd(Long stackId, String hostGroupName) throws CloudbreakSecuritySetupException {
+    public void configureSssd(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start configuring SSSD");
@@ -128,7 +128,7 @@ public class ClusterUpscaleService {
         ambariClusterConnector.configureSssd(stack, hostMetadata);
     }
 
-    public void installRecipes(Long stackId, String hostGroupName) throws CloudbreakSecuritySetupException {
+    public void installRecipes(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start installing recipes");
@@ -137,7 +137,7 @@ public class ClusterUpscaleService {
         ambariClusterConnector.installRecipes(stack, hostGroup, hostMetadata);
     }
 
-    public void executePreRecipes(Long stackId, String hostGroupName) throws CloudbreakSecuritySetupException {
+    public void executePreRecipes(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start executing pre recipes");
@@ -155,7 +155,7 @@ public class ClusterUpscaleService {
         ambariClusterConnector.installServices(stack, hostGroup, hostMetadata);
     }
 
-    public void executePostRecipes(Long stackId, String hostGroupName) throws CloudbreakSecuritySetupException {
+    public void executePostRecipes(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start executing post recipes");
