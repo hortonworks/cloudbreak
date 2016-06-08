@@ -87,8 +87,8 @@ var config = {
     sultansAddress: null,
     cloudbreakAddress: null,
     periscopeAddress: null,
-    cloudbreakApiRootContext: '/api/v1',
-    periscopeApiRootContext: '/api/v1'
+    cloudbreakApiRootContext: '/cb/api/v1',
+    periscopeApiRootContext: '/as/api/v1'
 }
 
 if (config.addressResolvingRetryCount <= 0) {
