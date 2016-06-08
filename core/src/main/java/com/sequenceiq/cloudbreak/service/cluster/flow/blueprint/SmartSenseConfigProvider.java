@@ -88,8 +88,8 @@ public class SmartSenseConfigProvider {
         Matcher m = Pattern.compile("arn:aws:iam::(?<accountId>[0-9]{12}):.*").matcher(roleArn);
         if (m.matches()) {
             String accountId = m.group("accountId");
-            Integer firstPart = Integer.valueOf(accountId.substring(0, FIRST_PART_LENGTH));
-            Integer secondPart = Integer.valueOf(accountId.substring(FIRST_PART_LENGTH));
+            String firstPart = accountId.substring(0, FIRST_PART_LENGTH);
+            String secondPart = accountId.substring(FIRST_PART_LENGTH);
             smartSenseId = String.format(smartSenseIdPattern, firstPart, secondPart);
         }
         return smartSenseId;
