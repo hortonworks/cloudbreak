@@ -27,6 +27,26 @@ public class JacksonBlueprintProcessorTest {
     }
 
     @Test
+    public void testModifyStackVersionWithThreeTag() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        String result = underTest.modifyHdpVersion(testBlueprint, "2.2.4.4");
+
+        JsonNode configNode = JsonUtil.readTree(result).path("Blueprints");
+        String stackVersion = configNode.get("stack_version").asText();
+        Assert.assertEquals("2.2", stackVersion);
+    }
+
+    @Test
+    public void testModifyStackVersionWithTwoTag() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        String result = underTest.modifyHdpVersion(testBlueprint, "2.6");
+
+        JsonNode configNode = JsonUtil.readTree(result).path("Blueprints");
+        String stackVersion = configNode.get("stack_version").asText();
+        Assert.assertEquals("2.6", stackVersion);
+    }
+
+    @Test
     public void testAddConfigEntriesAddsConfigFileEntryIfMissing() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-with-empty-config-block.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();

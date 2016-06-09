@@ -18,6 +18,8 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
 
     private static final String CONFIGURATIONS_NODE = "configurations";
     private static final String HOST_GROUPS_NODE = "host_groups";
+    private static final String BLUEPRINTS = "Blueprints";
+    private static final String STACK_VERSION = "stack_version";
 
     @Override
     public String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> configurationEntries, boolean override) {
@@ -92,6 +94,20 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
             return componentExists;
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to check that component('" + component + "') exists in the blueprint.", e);
+        }
+    }
+
+    @Override
+    public String modifyHdpVersion(String blueprintText, String hdpVersion) {
+        try {
+            ObjectNode root = (ObjectNode) JsonUtil.readTree(blueprintText);
+            ObjectNode blueprintsNode = (ObjectNode) root.path(BLUEPRINTS);
+            blueprintsNode.remove(STACK_VERSION);
+            String[] split = hdpVersion.split("\\.");
+            blueprintsNode.put(STACK_VERSION, split[0] + "." + split[1]);
+            return JsonUtil.writeValueAsString(root);
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to modify hdp version.", e);
         }
     }
 }
