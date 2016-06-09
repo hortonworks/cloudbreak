@@ -188,7 +188,11 @@ public class AmbariClusterConnector {
         AMBARI_CLUSTER_HOST_JOIN_FAILED("ambari.cluster.host.join.failed"),
         AMBARI_CLUSTER_INSTALL_FAILED("ambari.cluster.install.failed"),
         AMBARI_CLUSTER_UPSCALE_FAILED("ambari.cluster.upscale.failed"),
-        AMBARI_CLUSTER_MR_SMOKE_FAILED("ambari.cluster.mr.smoke.failed");
+        AMBARI_CLUSTER_MR_SMOKE_FAILED("ambari.cluster.mr.smoke.failed"),
+        AMBARI_CLUSTER_SERVICES_STARTING("ambari.cluster.services.starting"),
+        AMBARI_CLUSTER_SERVICES_STARTED("ambari.cluster.services.started"),
+        AMBARI_CLUSTER_SERVICES_STOPPING("ambari.cluster.services.stopping"),
+        AMBARI_CLUSTER_SERVICES_STOPPED("ambari.cluster.services.stopped");
 
         private String code;
 
@@ -609,6 +613,8 @@ public class AmbariClusterConnector {
     }
 
     private void stopAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
+        eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STOPPING.code()));
         int requestId = ambariClient.stopAllServices();
         if (requestId != -1) {
             LOGGER.info("Waiting for Hadoop services to stop on stack");
@@ -622,9 +628,13 @@ public class AmbariClusterConnector {
         } else {
             throw new CloudbreakException("Failed to stop Hadoop services.");
         }
+        eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STOPPED.code()));
     }
 
     private void startAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
+        eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STARTING.code()));
         int requestId = ambariClient.startAllServices();
         if (requestId != -1) {
             LOGGER.info("Waiting for Hadoop services to start on stack");
@@ -638,6 +648,8 @@ public class AmbariClusterConnector {
         } else {
             throw new CloudbreakException("Failed to start Hadoop services.");
         }
+        eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STARTED.code()));
     }
 
 
