@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.flow.FlowManager;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -81,7 +81,7 @@ public class AmbariClusterHostServiceTypeTest {
     private TlsSecurityService tlsSecurityService;
 
     @Mock
-    private FlowManager flowManager;
+    private ReactorFlowManager flowManager;
 
     @Mock
     private HostGroupService hostGroupService;

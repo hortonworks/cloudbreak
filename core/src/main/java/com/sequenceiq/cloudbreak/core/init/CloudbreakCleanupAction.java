@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.core.flow.FlowManager;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -56,7 +56,7 @@ public class CloudbreakCleanupAction {
     private FlowLogService flowLogService;
 
     @Inject
-    private FlowManager flowManager;
+    private ReactorFlowManager flowManager;
 
     public void resetStates() {
         List<Stack> stacksToSync = resetStackStatus();

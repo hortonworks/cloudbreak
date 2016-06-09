@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurat
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
-import com.sequenceiq.cloudbreak.core.flow.FlowManager;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -102,7 +102,7 @@ public class StackService {
     @Inject
     private TerminationService terminationService;
     @Inject
-    private FlowManager flowManager;
+    private ReactorFlowManager flowManager;
     @Inject
     private BlueprintValidator blueprintValidator;
     @Inject

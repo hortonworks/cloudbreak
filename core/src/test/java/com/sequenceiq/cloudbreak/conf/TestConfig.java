@@ -4,20 +4,14 @@ import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-
-import com.sequenceiq.cloudbreak.core.flow.FlowConfig;
-import com.sequenceiq.cloudbreak.core.flow.FlowHandler;
-import com.sequenceiq.cloudbreak.core.flow.FlowManager;
 
 import reactor.Environment;
 import reactor.bus.EventBus;
 
 
 @Configuration
-@ComponentScan(basePackageClasses = {FlowManager.class, FlowHandler.class  })
-@Import(FlowConfig.class)
+@ComponentScan
 public class TestConfig {
 
     @Bean

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow.context;
+package com.sequenceiq.cloudbreak.core.bootstrap.service.container.context;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
