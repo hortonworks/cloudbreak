@@ -112,7 +112,7 @@
                         <label class="col-sm-3 control-label" for="azure_networkRGId">{{msg.network_azure_form_resource_group_id_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="azure_networkRGId" ng-model="network.parameters.resourceGroupName" id="azure_networkRGId" placeholder="{{msg.network_azure_form_resource_group_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/" required>
+                            <input type="text" class="form-control" name="azure_networkRGId" ng-model="network.parameters.resourceGroupName" id="azure_networkRGId" placeholder="{{msg.network_azure_form_resource_group_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9-()._,]*[-a-zA-Z0-9-()_,]$/" required>
                             <div class="help-block" ng-show="azureNetworkForm_2.azure_networkRGId.$dirty && azureNetworkForm_2.azure_networkRGId.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_resource_group_invalid}}
                             </div>
@@ -123,7 +123,7 @@
                         <label class="col-sm-3 control-label" for="azure_networkVPCId">{{msg.network_azure_form_network_id_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="azure_networkVPCId" ng-model="network.parameters.networkId" id="azure_networkVPCId" placeholder="{{msg.network_azure_form_network_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/" required>
+                            <input type="text" class="form-control" name="azure_networkVPCId" ng-model="network.parameters.networkId" id="azure_networkVPCId" placeholder="{{msg.network_azure_form_network_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9][-a-zA-Z0-9-._,]*[-a-zA-Z0-9]$/" required>
                             <div class="help-block" ng-show="azureNetworkForm_2.azure_networkVPCId.$dirty && azureNetworkForm_2.azure_networkVPCId.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_identifier_invalid}}
                             </div>
@@ -134,7 +134,7 @@
                         <label class="col-sm-3 control-label" for="azure_networkSubnetId">{{msg.network_azure_form_subnet_id_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="azure_networkSubnetId" ng-model="network.parameters.subnetId" id="azure_networkSubnetId" placeholder="{{msg.network_azure_form_subnet_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9]*$/" required>
+                            <input type="text" class="form-control" name="azure_networkSubnetId" ng-model="network.parameters.subnetId" id="azure_networkSubnetId" placeholder="{{msg.network_azure_form_subnet_id_placeholder}}" ng-pattern="/^[-a-zA-Z0-9][-a-zA-Z0-9-._,]*[-a-zA-Z0-9]$/" required>
                             <div class="help-block" ng-show="azureNetworkForm_2.azure_networkSubnetId.$dirty && azureNetworkForm_2.azure_networkSubnetId.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_subnetid2_invalid}}
                             </div>

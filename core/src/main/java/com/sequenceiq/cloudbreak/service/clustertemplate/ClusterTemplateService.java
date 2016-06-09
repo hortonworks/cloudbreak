@@ -117,7 +117,7 @@ public class ClusterTemplateService {
 
     private void delete(ClusterTemplate clusterTemplate, CbUser user) {
         if (!user.getUserId().equals(clusterTemplate.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-            throw new BadRequestException("Blueprints can only be deleted by account admins or owners.");
+            throw new BadRequestException("ClusterTemplate can only be deleted by account admins or owners.");
         }
         clusterTemplateRepository.delete(clusterTemplate);
     }
