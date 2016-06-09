@@ -34,7 +34,9 @@ public class Compound implements Target<String> {
 
     public enum CompoundType {
         IP("S@"),
-        HOST("L@");
+        HOST("L@"),
+        GRAINS("G@"),
+        PILLAR("I@");
 
         private String delimiter;
 

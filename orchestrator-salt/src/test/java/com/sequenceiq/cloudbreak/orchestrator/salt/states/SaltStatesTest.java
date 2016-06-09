@@ -115,7 +115,7 @@ public class SaltStatesTest {
     @Test
     public void addRoleTest() throws Exception {
         String role = "ambari-server";
-        SaltStates.addRole(saltConnector, target, role);
+        SaltStates.addGrain(saltConnector, target, "roles", role);
         verify(saltConnector, times(1)).run(eq(target), eq("grains.append"), eq(LOCAL), eq(ApplyResponse.class), eq("roles"), eq(role));
     }
 

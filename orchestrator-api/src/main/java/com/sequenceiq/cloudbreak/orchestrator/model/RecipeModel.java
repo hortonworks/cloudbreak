@@ -1,15 +1,13 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class RecipeModel {
 
     private String name;
-    private List<String> preInstall = new ArrayList<>();
-    private List<String> postInstall = new ArrayList<>();
+    private String preInstall;
+    private String postInstall;
     private Map<String, String> keyValues = new HashMap<>();
 
     public RecipeModel(String name) {
@@ -24,20 +22,20 @@ public class RecipeModel {
         this.name = name;
     }
 
-    public List<String> getPreInstall() {
+    public String getPreInstall() {
         return preInstall;
     }
 
-    public void addPreInstall(String script) {
-        this.preInstall.add(script);
+    public void setPreInstall(String preInstall) {
+        this.preInstall = preInstall;
     }
 
-    public List<String> getPostInstall() {
+    public String getPostInstall() {
         return postInstall;
     }
 
-    public void addPostInstall(String script) {
-        this.postInstall.add(script);
+    public void setPostInstall(String postInstall) {
+        this.postInstall = postInstall;
     }
 
     public Map<String, String> getKeyValues() {

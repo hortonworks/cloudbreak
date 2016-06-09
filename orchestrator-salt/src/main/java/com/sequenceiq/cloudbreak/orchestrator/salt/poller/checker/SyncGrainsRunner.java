@@ -9,10 +9,9 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
+public class SyncGrainsRunner extends BaseSaltJobRunner {
 
-public class SyncGrainsChecker extends BaseSaltJobRunner {
-
-    public SyncGrainsChecker(Set<String> target, Set<Node> allNode) {
+    public SyncGrainsRunner(Set<String> target, Set<Node> allNode) {
         super(target, allNode);
     }
 

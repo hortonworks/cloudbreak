@@ -31,14 +31,15 @@ import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateChecker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SimpleAddRoleChecker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsChecker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SimpleAddGrainRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -120,24 +121,24 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             LOGGER.info("Pillar saved, starting to set up discovery...");
             //run discovery only
-            runNewService(sc, new HighStateChecker(all, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
 
             LOGGER.info("Pillar saved, discovery has been set up with highstate");
 
             // ambari server
-            runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "ambari_server"), exitCriteriaModel);
+            runSaltCommand(sc, new SimpleAddGrainRunner(server, allNodes, "ambari_server"), exitCriteriaModel);
             // ambari agent
-            runSaltCommand(sc, new SimpleAddRoleChecker(all, allNodes, "ambari_agent"), exitCriteriaModel);
+            runSaltCommand(sc, new SimpleAddGrainRunner(all, allNodes, "ambari_agent"), exitCriteriaModel);
             // kerberos
             if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "kerberos_server"), exitCriteriaModel);
+                runSaltCommand(sc, new SimpleAddGrainRunner(server, allNodes, "kerberos_server"), exitCriteriaModel);
             }
             if (configureSmartSense) {
-                runSaltCommand(sc, new SimpleAddRoleChecker(all, allNodes, "smartsense"), exitCriteriaModel);
-                runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "smartsense_gateway"), exitCriteriaModel);
+                runSaltCommand(sc, new SimpleAddGrainRunner(all, allNodes, "smartsense"), exitCriteriaModel);
+                runSaltCommand(sc, new SimpleAddGrainRunner(server, allNodes, "smartsense_gateway"), exitCriteriaModel);
             }
-            runSaltCommand(sc, new SyncGrainsChecker(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateChecker(all, allNodes), exitCriteriaModel);
+            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -155,8 +156,30 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void preInstallRecipes(GatewayConfig gatewayConfig, Map<String, List<RecipeModel>> recipes) {
+    public void preInstallRecipes(GatewayConfig gatewayConfig, Map<String, List<RecipeModel>> recipes, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
         LOGGER.info("Execute pre-install recipes: {}", recipes);
+        try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+            PillarSave scriptPillarSave = new PillarSave(sc, recipes);
+            Callable<Boolean> saltPillarRunner = runner(scriptPillarSave, exitCriteria, exitCriteriaModel);
+            Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
+            saltPillarRunnerFuture.get();
+
+            //TODO upload files
+
+            // add 'pre' grain to selected host groups
+            for (String hostGroup : recipes.keySet()) {
+                Set<String> targets = allNodes.stream().filter(n -> n.getHostGroup().equals(hostGroup)).map(Node::getPrivateIp).collect(Collectors.toSet());
+                runSaltCommand(sc, new SimpleAddGrainRunner(targets, allNodes, "recipes", "pre", Compound.CompoundType.IP), exitCriteriaModel);
+            }
+
+            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during pre-recipe execution", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
     }
 
     @Override

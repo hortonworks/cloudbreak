@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,11 +17,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 
@@ -35,11 +41,17 @@ public class OrchestratorRecipeExecutor {
 
     public void preInstall(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-        Map<String, List<RecipeModel>> recipeMap = hostGroups.stream().collect(Collectors.toMap(HostGroup::getName, h -> convert(h.getRecipes())));
+        Map<String, List<RecipeModel>> recipeMap = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
+                .collect(Collectors.toMap(HostGroup::getName, h -> convert(h.getRecipes())));
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
                 gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
-        hostOrchestrator.preInstallRecipes(gatewayConfig, recipeMap);
+        try {
+            hostOrchestrator.preInstallRecipes(gatewayConfig, recipeMap, collectNodes(stack),
+                    clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorFailedException e) {
+            throw new CloudbreakException(e);
+        }
     }
 
     private List<RecipeModel> convert(Set<Recipe> recipes) {
@@ -49,10 +61,10 @@ public class OrchestratorRecipeExecutor {
                 String decodedRecipe = new String(Base64.decodeBase64(rawRecipe.replaceFirst("base64://", "")));
                 RecipeModel recipeModel = new RecipeModel(recipe.getName());
                 if (decodedRecipe.contains(PRE_INSTALL_TAG)) {
-                    recipeModel.addPreInstall(
+                    recipeModel.setPreInstall(
                             new String(Base64.decodeBase64(decodedRecipe.substring(decodedRecipe.indexOf(PRE_INSTALL_TAG) + PRE_INSTALL_TAG.length()))));
                 } else if (decodedRecipe.contains("recipe-post-install")) {
-                    recipeModel.addPostInstall(
+                    recipeModel.setPostInstall(
                             new String(Base64.decodeBase64(decodedRecipe.substring(decodedRecipe.indexOf(POST_INSTALL_TAG) + POST_INSTALL_TAG.length()))));
                 }
                 recipeModel.setKeyValues(recipe.getKeyValues());
@@ -60,5 +72,17 @@ public class OrchestratorRecipeExecutor {
             });
         }
         return result;
+    }
+
+    private Set<Node> collectNodes(Stack stack) {
+        Set<Node> agents = new HashSet<>();
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+                Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryFQDN());
+                node.setHostGroup(instanceGroup.getGroupName());
+                agents.add(node);
+            }
+        }
+        return agents;
     }
 }
