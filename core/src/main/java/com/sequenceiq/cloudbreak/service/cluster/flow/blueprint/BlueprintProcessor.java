@@ -10,4 +10,6 @@ public interface BlueprintProcessor {
     Set<String> getComponentsInHostGroup(String blueprintText, String hostGroup);
 
     boolean componentExistsInBlueprint(String component, String blueprintText);
+
+    String modifyHdpVersion(String originalBlueprint, String hdpVersion);
 }

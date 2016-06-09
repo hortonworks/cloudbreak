@@ -234,6 +234,10 @@ public class AmbariClusterConnector {
             }
 
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, smartSenseConfigProvider.getConfigs(stack, blueprintText), true);
+            Image image = imageService.getImage(stack.getId());
+            if (image.getHdpVersion() != null) {
+                blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, image.getHdpVersion());
+            }
 
             AmbariClient ambariClient = getAmbariClient(stack);
             setBaseRepoURL(stack, ambariClient);
