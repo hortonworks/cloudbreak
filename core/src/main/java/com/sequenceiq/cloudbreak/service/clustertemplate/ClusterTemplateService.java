@@ -116,16 +116,9 @@ public class ClusterTemplateService {
     }
 
     private void delete(ClusterTemplate clusterTemplate, CbUser user) {
-        if (clusterRepository.findAllClustersByBlueprint(clusterTemplate.getId()).isEmpty()) {
-            if (!user.getUserId().equals(clusterTemplate.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-                throw new BadRequestException("Blueprints can only be deleted by account admins or owners.");
-            }
-            clusterTemplateRepository.delete(clusterTemplate);
-
-        } else {
-            throw new BadRequestException(String.format(
-                    "There are clusters associated with clusterTemplate '%s'. Please remove these before deleting the clusterTemplate.",
-                    clusterTemplate.getId()));
+        if (!user.getUserId().equals(clusterTemplate.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            throw new BadRequestException("ClusterTemplate can only be deleted by account admins or owners.");
         }
+        clusterTemplateRepository.delete(clusterTemplate);
     }
 }
