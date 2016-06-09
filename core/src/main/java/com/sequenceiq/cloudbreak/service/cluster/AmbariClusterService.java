@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.flow.FlowManager;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -108,7 +108,7 @@ public class AmbariClusterService implements ClusterService {
     private AmbariClientProvider ambariClientProvider;
 
     @Inject
-    private FlowManager flowManager;
+    private ReactorFlowManager flowManager;
 
     @Inject
     private BlueprintValidator blueprintValidator;

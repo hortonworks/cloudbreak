@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow;
+package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

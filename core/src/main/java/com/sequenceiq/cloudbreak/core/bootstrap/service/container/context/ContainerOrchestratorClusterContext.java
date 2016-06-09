@@ -1,29 +1,29 @@
-package com.sequenceiq.cloudbreak.core.flow.context;
+package com.sequenceiq.cloudbreak.core.bootstrap.service.container.context;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.StackContext;
 
-public class HostOrchestratorClusterContext extends StackContext {
+public class ContainerOrchestratorClusterContext extends StackContext {
 
-    private HostOrchestrator hostOrchestrator;
+    private ContainerOrchestrator containerOrchestrator;
     private GatewayConfig gatewayConfig;
     private Set<Node> nodes = new HashSet<>();
 
-    public HostOrchestratorClusterContext(Stack stack, HostOrchestrator hostOrchestrator, GatewayConfig gatewayConfig, Set<Node> nodes) {
+    public ContainerOrchestratorClusterContext(Stack stack, ContainerOrchestrator containerOrchestrator, GatewayConfig gatewayConfig, Set<Node> nodes) {
         super(stack);
-        this.hostOrchestrator = hostOrchestrator;
+        this.containerOrchestrator = containerOrchestrator;
         this.gatewayConfig = gatewayConfig;
         this.nodes = nodes;
     }
 
-    public HostOrchestrator getHostOrchestrator() {
-        return hostOrchestrator;
+    public ContainerOrchestrator getContainerOrchestrator() {
+        return containerOrchestrator;
     }
 
     public GatewayConfig getGatewayConfig() {

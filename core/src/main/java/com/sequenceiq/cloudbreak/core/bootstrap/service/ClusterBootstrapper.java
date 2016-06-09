@@ -25,10 +25,10 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrche
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
-import com.sequenceiq.cloudbreak.core.flow.context.ContainerBootstrapApiContext;
-import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterContext;
-import com.sequenceiq.cloudbreak.core.flow.context.HostBootstrapApiContext;
-import com.sequenceiq.cloudbreak.core.flow.context.HostOrchestratorClusterContext;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.context.ContainerBootstrapApiContext;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.context.ContainerOrchestratorClusterContext;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
