@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.securitygroup;
 
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.GATEWAY;
+import static com.sequenceiq.cloudbreak.service.network.ExposedService.HTTPS;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SSH;
 
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class DefaultSecurityGroupCreator {
     private void createDefaultStringSecurityGroup(CbUser user, Set<SecurityGroup> securityGroups) {
         List<Port> strictSecurityGroupPorts = new ArrayList<>();
         strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp"));
-        strictSecurityGroupPorts.add(new Port(SSH, "2022", "tcp"));
+        strictSecurityGroupPorts.add(new Port(HTTPS, "443", "tcp"));
         strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
         String strictSecurityGroupDesc = getPortsOpenDesc(strictSecurityGroupPorts);
 
