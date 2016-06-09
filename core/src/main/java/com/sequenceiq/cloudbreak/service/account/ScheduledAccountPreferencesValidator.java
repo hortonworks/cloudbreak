@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.account;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +15,6 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 
 @Service
 public class ScheduledAccountPreferencesValidator {
@@ -66,7 +63,7 @@ public class ScheduledAccountPreferencesValidator {
     private void terminateStack(Stack stack) {
         if (!stack.isDeleteCompleted()) {
             LOGGER.info("Trigger termination of stack: '{}', owner: '{}', account: '{}'.", stack.getName(), stack.getOwner(), stack.getAccount());
-            flowManager.triggerTermination(new StackDeleteRequest(platform(stack.cloudPlatform()), stack.getId()));
+            flowManager.triggerTermination(stack.getId());
         }
     }
 }

@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.util.concurrent.Striped;
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.core.flow.context.FlowContext;
 
 @Component
 @Aspect
@@ -34,19 +34,19 @@ public class ConcurrentMethodExecutionAspect {
     public void lockedMethod() {
     }
 
-    @Pointcut("args(com.sequenceiq.cloudbreak.core.flow.context.FlowContext)")
-    public void methodWithFlowContextArgument() {
+    @Pointcut("args(com.sequenceiq.cloudbreak.cloud.event.Payload)")
+    public void methodWithPayloadArgument() {
     }
 
-    @Pointcut("guardedMethod() && methodWithFlowContextArgument()")
-    public void guardedMethodWithFlowContextArg() {
+    @Pointcut("guardedMethod() && methodWithPayloadArgument()")
+    public void guardedMethodWithPayloadArg() {
     }
 
-    @Pointcut("lockedMethod() && methodWithFlowContextArgument()")
-    public void lockedMethodWithFlowContextArg() {
+    @Pointcut("lockedMethod() && methodWithPayloadArgument()")
+    public void lockedMethodWithPayloadArg() {
     }
 
-    @Around("com.sequenceiq.cloudbreak.concurrent.ConcurrentMethodExecutionAspect.lockedMethodWithFlowContextArg()")
+    @Around("com.sequenceiq.cloudbreak.concurrent.ConcurrentMethodExecutionAspect.lockedMethodWithPayloadArg()")
     public Object executeLockedMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         Long stackId = getStackId(joinPoint);
         String lockPrefix = getLockedMethodLockPrefix(joinPoint);
@@ -64,7 +64,7 @@ public class ConcurrentMethodExecutionAspect {
         }
     }
 
-    @Around("com.sequenceiq.cloudbreak.concurrent.ConcurrentMethodExecutionAspect.guardedMethodWithFlowContextArg()")
+    @Around("com.sequenceiq.cloudbreak.concurrent.ConcurrentMethodExecutionAspect.guardedMethodWithPayloadArg()")
     public Object executeGuardedMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         Long stackId = getStackId(joinPoint);
         String lockPrefix = getGuardedMethodLockPrefix(joinPoint);
@@ -109,18 +109,18 @@ public class ConcurrentMethodExecutionAspect {
     }
 
     private Long getStackId(JoinPoint joinPoint) {
-        FlowContext context = getFlowContext(joinPoint);
-        return context == null ? null : context.getStackId();
+        Payload payload = getPayload(joinPoint);
+        return payload == null ? null : payload.getStackId();
     }
 
-    private FlowContext getFlowContext(JoinPoint joinPoint) {
-        FlowContext context = null;
+    private Payload getPayload(JoinPoint joinPoint) {
+        Payload payload = null;
         for (Object arg : joinPoint.getArgs()) {
-            if (arg instanceof FlowContext) {
-                context = (FlowContext) arg;
+            if (arg instanceof Payload) {
+                payload = (Payload) arg;
             }
         }
-        return context;
+        return payload;
     }
 
     private Object skipMethodExecution(String lockPrefix, Long stackId) {

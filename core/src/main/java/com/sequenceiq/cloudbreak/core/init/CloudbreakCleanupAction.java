@@ -19,8 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -29,7 +27,6 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
@@ -131,7 +128,6 @@ public class CloudbreakCleanupAction {
 
     private void triggerSyncs(List<Stack> stacksToSync, List<Cluster> clustersToSync) {
         for (Stack stack : stacksToSync) {
-            Platform platform = Platform.platform(stack.cloudPlatform());
             LOGGER.info("Triggering full sync on stack [name: {}, id: {}].", stack.getName(), stack.getId());
             fireEvent(stack);
             flowManager.triggerFullSync(stack.getId());
@@ -139,8 +135,6 @@ public class CloudbreakCleanupAction {
 
         for (Cluster cluster : clustersToSync) {
             Stack stack = cluster.getStack();
-            Platform platform = Platform.platform(stack.cloudPlatform());
-            ClusterStatusUpdateRequest request = new ClusterStatusUpdateRequest(stack.getId(), StatusRequest.SYNC, platform);
             LOGGER.info("Triggering sync on cluster [name: {}, id: {}].", cluster.getName(), cluster.getId());
             fireEvent(stack);
             flowManager.triggerClusterSync(stack.getId());

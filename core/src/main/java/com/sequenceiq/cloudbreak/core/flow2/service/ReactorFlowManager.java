@@ -7,22 +7,15 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.InstanceTerminationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterCredentialChangeEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.stack.StartInstanceTerminationEvent;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackForcedDeleteRequest;
 
 import reactor.bus.EventBus;
 
@@ -75,9 +68,42 @@ public class ReactorFlowManager {
         reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 
+    public void triggerStackRemoveInstance(Long stackId, String instanceId) {
+        String selector = FlowTriggers.REMOVE_INSTANCE_TRIGGER_EVENT;
+        InstanceTerminationTriggerEvent event = new InstanceTerminationTriggerEvent(selector, stackId, instanceId);
+        reactor.notify(selector, eventFactory.createEvent(event, selector));
+    }
+
+    public void triggerTermination(Long stackId) {
+        String selector = FlowTriggers.STACK_TERMINATE_TRIGGER_EVENT;
+        StackEvent event = new StackEvent(selector, stackId);
+        StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
+        reactor.notify(selector, eventFactory.createEvent(event, selector));
+        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEvent(cancelEvent, Flow2Handler.FLOW_CANCEL));
+    }
+
+    public void triggerForcedTermination(Long stackId) {
+        String selector = FlowTriggers.STACK_FORCE_TERMINATE_TRIGGER_EVENT;
+        StackEvent event = new StackEvent(selector, stackId);
+        StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
+        reactor.notify(selector, eventFactory.createEvent(event, selector));
+        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEvent(event, Flow2Handler.FLOW_CANCEL));
+    }
+
     public void triggerClusterInstall(Long stackId) {
         String selector = FlowTriggers.CLUSTER_PROVISION_TRIGGER_EVENT;
         reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+    }
+
+    public void triggerClusterReInstall(Long stackId) {
+        String selector = FlowTriggers.CLUSTER_RESET_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+    }
+
+    public void triggerClusterCredentialChange(Long stackId, String userName, String password) {
+        String selector = FlowTriggers.CLUSTER_CREDENTIALCHANGE_TRIGGER_EVENT;
+        ClusterCredentialChangeTriggerEvent event = new ClusterCredentialChangeTriggerEvent(selector, stackId, userName, password);
+        reactor.notify(selector, eventFactory.createEvent(event, selector));
     }
 
     public void triggerClusterUpscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
@@ -115,45 +141,9 @@ public class ReactorFlowManager {
         reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 
-    public void triggerClusterReInstall(Object object) {
-        ProvisionRequest provisionRequest = (ProvisionRequest) object;
-        reactor.notify(FlowPhases.CLUSTER_RESET.name(),
-                eventFactory.createEvent(new StackEvent(provisionRequest.getStackId()), FlowPhases.CLUSTER_RESET.name()));
+    public void triggerClusterTermination(Long stackId) {
+        String selector = FlowTriggers.CLUSTER_TERMINATION_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
-
-    public void triggerTermination(Object object) {
-        StackDeleteRequest deleteRequest = (StackDeleteRequest) object;
-        StackEvent event = new StackEvent(deleteRequest.getStackId());
-        reactor.notify(FlowPhases.TERMINATION.name(), eventFactory.createEvent(event, FlowPhases.TERMINATION.name()));
-        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEvent(event, Flow2Handler.FLOW_CANCEL));
-    }
-
-    public void triggerForcedTermination(Object object) {
-        StackDeleteRequest deleteRequest = (StackForcedDeleteRequest) object;
-        StackEvent event = new StackEvent(deleteRequest.getStackId());
-        reactor.notify(FlowPhases.FORCED_TERMINATION.name(), eventFactory.createEvent(event, FlowPhases.FORCED_TERMINATION.name()));
-        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEvent(event, Flow2Handler.FLOW_CANCEL));
-    }
-
-    public void triggerClusterTermination(Object object) {
-        ClusterDeleteRequest deleteRequest = (ClusterDeleteRequest) object;
-        reactor.notify(FlowPhases.CLUSTER_TERMINATION.name(),
-                eventFactory.createEvent(new StackEvent(deleteRequest.getStackId()), FlowPhases.CLUSTER_TERMINATION.name()));
-    }
-
-    public void triggerStackRemoveInstance(Object object) {
-        RemoveInstanceRequest removeInstanceRequest = (RemoveInstanceRequest) object;
-        StartInstanceTerminationEvent event = new StartInstanceTerminationEvent(removeInstanceRequest.getStackId(), removeInstanceRequest.getInstanceId());
-        reactor.notify(FlowPhases.REMOVE_INSTANCE.name(), eventFactory.createEvent(event, FlowPhases.REMOVE_INSTANCE.name()));
-    }
-
-    public void triggerClusterUserNamePasswordUpdate(Object object) {
-        ClusterUserNamePasswordUpdateRequest request = (ClusterUserNamePasswordUpdateRequest) object;
-        StartClusterCredentialChangeEvent event = new StartClusterCredentialChangeEvent(request.getStackId(), request.getNewUserName(),
-                    request.getNewPassword());
-        reactor.notify(FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name(),
-                eventFactory.createEvent(event, FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name()));
-    }
-
 }
 

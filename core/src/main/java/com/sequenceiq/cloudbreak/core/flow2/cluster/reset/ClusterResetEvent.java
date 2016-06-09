@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.reset;
 
-import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetResult;
 
 public enum ClusterResetEvent implements FlowEvent {
-    CLUSTER_RESET_EVENT(FlowPhases.CLUSTER_RESET.name()),
+    CLUSTER_RESET_EVENT(FlowTriggers.CLUSTER_RESET_TRIGGER_EVENT),
     CLUSTER_RESET_FINISHED_EVENT(EventSelectorUtil.selector(ClusterResetResult.class)),
     CLUSTER_RESET_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(ClusterResetResult.class)),
 

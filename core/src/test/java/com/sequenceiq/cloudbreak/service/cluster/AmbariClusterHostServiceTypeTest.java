@@ -23,8 +23,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -51,13 +49,11 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 import groovyx.net.http.HttpResponseException;
-import reactor.bus.Event;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterHostServiceTypeTest {
@@ -88,12 +84,6 @@ public class AmbariClusterHostServiceTypeTest {
 
     @Mock
     private StatusToPollGroupConverter statusToPollGroupConverter;
-
-    @Captor
-    private ArgumentCaptor<Event<UpdateAmbariHostsRequest>> eventCaptor;
-
-    @Captor
-    private ArgumentCaptor<String> eventTypeCaptor;
 
     @InjectMocks
     @Spy
