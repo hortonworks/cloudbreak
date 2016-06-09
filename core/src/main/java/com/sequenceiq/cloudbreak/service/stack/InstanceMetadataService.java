@@ -66,10 +66,10 @@ public class InstanceMetadataService {
         }
     }
 
-    public void deleteInstanceRequest(long stackId, long privateId) {
+    public void deleteInstanceRequest(Long stackId, Long privateId) {
         Set<InstanceMetaData> instanceMetaData = instanceMetaDataRepository.findAllInStack(stackId);
         for (InstanceMetaData metaData : instanceMetaData) {
-            if (metaData.getPrivateId() == privateId) {
+            if (metaData.getPrivateId().equals(privateId)) {
                 instanceMetaDataRepository.delete(metaData);
                 break;
             }

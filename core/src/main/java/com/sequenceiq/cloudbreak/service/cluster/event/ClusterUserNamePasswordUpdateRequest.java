@@ -4,24 +4,20 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
 public class ClusterUserNamePasswordUpdateRequest {
 
-    private Long stackId;
-    private String newUserName;
-    private String newPassword;
-    private Platform cloudPlatform;
+    private final Long stackId;
+    private final String newUserName;
+    private final String newPassword;
+    private final Platform cloudPlatform;
 
-    public ClusterUserNamePasswordUpdateRequest(long stackId, String newUserName, String newPassword, Platform cloudPlatform) {
+    public ClusterUserNamePasswordUpdateRequest(Long stackId, String newUserName, String newPassword, Platform cloudPlatform) {
         this.stackId = stackId;
         this.newUserName = newUserName;
         this.newPassword = newPassword;
         this.cloudPlatform = cloudPlatform;
     }
 
-    public long getStackId() {
+    public Long getStackId() {
         return stackId;
-    }
-
-    public void setStackId(long stackId) {
-        this.stackId = stackId;
     }
 
     public String getNewUserName() {

@@ -28,9 +28,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 
-public abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractAction<StackUpscaleState, StackUpscaleEvent, StackScalingFlowContext, P> {
-    protected static final String INSTANCEGROUPNAME = "INSTANCEGROUPNAME";
-    protected static final String ADJUSTMENT = "ADJUSTMENT";
+abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractAction<StackUpscaleState, StackUpscaleEvent, StackScalingFlowContext, P> {
+    static final String INSTANCEGROUPNAME = "INSTANCEGROUPNAME";
+    static final String ADJUSTMENT = "ADJUSTMENT";
 
     @Inject
     private StackService stackService;
@@ -43,7 +43,7 @@ public abstract class AbstractStackUpscaleAction<P extends Payload> extends Abst
     @Inject
     private StackScalingService stackScalingService;
 
-    protected AbstractStackUpscaleAction(Class<P> payloadClass) {
+    AbstractStackUpscaleAction(Class<P> payloadClass) {
         super(payloadClass);
     }
 
@@ -57,8 +57,8 @@ public abstract class AbstractStackUpscaleAction<P extends Payload> extends Abst
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        return new StackScalingFlowContext(flowId, stack, cloudContext, cloudCredential, cloudStack, getInstanceGroupName(variables),
-                Collections.<String>emptySet(), getAdjustment(variables));
+        return new StackScalingFlowContext(flowId, stack, cloudContext, cloudCredential, cloudStack, getInstanceGroupName(variables), Collections.emptySet(),
+                getAdjustment(variables));
     }
 
     @Override

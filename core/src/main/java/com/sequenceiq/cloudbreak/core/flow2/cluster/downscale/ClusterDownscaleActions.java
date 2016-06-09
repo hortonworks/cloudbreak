@@ -21,9 +21,9 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterScaleContext;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.ClusterScalePayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.ScalingAdjustmentPayload;
-import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
@@ -129,13 +128,11 @@ public class ClusterDownscaleActions {
             @Inject
             private ClusterService clusterService;
             @Inject
-            private FlowRegister runningFlows;
-            @Inject
             private FlowMessageService flowMessageService;
 
             @Override
             protected void doExecute(ClusterScaleContext context, DownscaleClusterFailurePayload payload, Map<Object, Object> variables) throws Exception {
-                runningFlows.get(context.getFlowId()).setFlowFailed();
+                getFlow(context.getFlowId()).setFlowFailed();
                 Stack stack = context.getStack();
                 String message = payload.getErrorDetails().getMessage();
                 LOGGER.error("Error during Cluster downscale flow: " + message, payload.getErrorDetails());

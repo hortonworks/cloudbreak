@@ -95,12 +95,10 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
         flowLogService.close(stackId, flowId);
         Flow flow = runningFlows.remove(flowId);
-        if (!flow.isFlowFailed()) {
-            if (flowChainId != null) {
-                flowChains.triggerNextFlow(flowChainId);
-            }
-        } else {
+        if (flow.isFlowFailed()) {
             flowChains.removeFlowChain(flowChainId);
+        } else if (flowChainId != null) {
+            flowChains.triggerNextFlow(flowChainId);
         }
     }
 

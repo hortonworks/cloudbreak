@@ -178,7 +178,7 @@ public class StackUpscaleService {
         }
     }
 
-    private List<CloudResourceStatus> removeFailedMetadata(long stackId, List<CloudResourceStatus> statuses, Group group) {
+    private List<CloudResourceStatus> removeFailedMetadata(Long stackId, List<CloudResourceStatus> statuses, Group group) {
         Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
         Set<Long> groupPrivateIds = getPrivateIds(group);
         for (CloudResourceStatus status : statuses) {

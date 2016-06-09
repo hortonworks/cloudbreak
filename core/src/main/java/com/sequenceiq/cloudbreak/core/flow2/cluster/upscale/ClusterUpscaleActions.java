@@ -21,7 +21,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -239,12 +238,10 @@ public class ClusterUpscaleActions {
         return new AbstractClusterUpscaleAction<UpscaleClusterFailedPayload>(UpscaleClusterFailedPayload.class) {
             @Inject
             private StackUpdater stackUpdater;
-            @Inject
-            private FlowRegister runningFlows;
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscaleClusterFailedPayload payload, Map<Object, Object> variables) throws Exception {
-                runningFlows.get(context.getFlowId()).setFlowFailed();
+                getFlow(context.getFlowId()).setFlowFailed();
                 Exception errorDetails = payload.getErrorDetails();
                 LOGGER.error("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
                 Stack stack = context.getStack();
