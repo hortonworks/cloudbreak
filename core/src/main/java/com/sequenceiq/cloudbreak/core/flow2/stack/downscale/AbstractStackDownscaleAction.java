@@ -18,12 +18,11 @@ import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -35,7 +34,6 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     protected static final String INSTANCEGROUPNAME = "INSTANCEGROUPNAME";
     protected static final String INSTANCEIDS = "INSTANCEIDS";
     private static final String ADJUSTMENT = "ADJUSTMENT";
-    private static final String SCALINGTYPE = "SCALINGTYPE";
 
     @Inject
     private StackService stackService;
@@ -64,33 +62,23 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         String instanceGroupName = extractInstanceGroupName(payload, variables);
         Set<String> instanceIds = extractInstanceIds(payload, variables, stack);
         Integer adjustment = extractAdjustment(payload, variables);
-        ScalingType scalingType = extractScalingType(payload, variables);
         CloudStack cloudStack = cloudStackConverter.convertForDownscale(stack, instanceIds);
-        return new StackScalingFlowContext(flowId, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment, scalingType);
-    }
-
-    private ScalingType extractScalingType(P payload, Map<Object, Object> variables) {
-        if (payload instanceof StackScalingContext) {
-            StackScalingContext ssc = (StackScalingContext) payload;
-            variables.put(SCALINGTYPE, ssc.getScalingType());
-            return ssc.getScalingType();
-        }
-        return getScalingType(variables);
+        return new StackScalingFlowContext(flowId, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment);
     }
 
     private Integer extractAdjustment(P payload, Map<Object, Object> variables) {
-        if (payload instanceof StackScalingContext) {
-            StackScalingContext ssc = (StackScalingContext) payload;
-            variables.put(ADJUSTMENT, ssc.getScalingAdjustment());
-            return ssc.getScalingAdjustment();
+        if (payload instanceof StackScaleTriggerEvent) {
+            StackScaleTriggerEvent ssc = (StackScaleTriggerEvent) payload;
+            variables.put(ADJUSTMENT, ssc.getAdjustment());
+            return ssc.getAdjustment();
         }
         return getAdjustment(variables);
     }
 
     private Set<String> extractInstanceIds(P payload, Map<Object, Object> variables, Stack stack) {
-        if (payload instanceof StackScalingContext) {
-            StackScalingContext ssc = (StackScalingContext) payload;
-            Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(ssc.getInstanceGroup(), ssc.getScalingAdjustment(), stack);
+        if (payload instanceof StackScaleTriggerEvent) {
+            StackScaleTriggerEvent ssc = (StackScaleTriggerEvent) payload;
+            Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(ssc.getInstanceGroup(), ssc.getAdjustment(), stack);
             Set<String> instanceIds = new HashSet<>(unusedInstanceIds.keySet());
             variables.put(INSTANCEIDS, instanceIds);
             return instanceIds;
@@ -99,8 +87,8 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     }
 
     private String extractInstanceGroupName(P payload, Map<Object, Object> variables) {
-        if (payload instanceof StackScalingContext) {
-            StackScalingContext ssc = (StackScalingContext) payload;
+        if (payload instanceof StackScaleTriggerEvent) {
+            StackScaleTriggerEvent ssc = (StackScaleTriggerEvent) payload;
             variables.put(INSTANCEGROUPNAME, ssc.getInstanceGroup());
             return ssc.getInstanceGroup();
         }
@@ -122,9 +110,5 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
 
     protected Integer getAdjustment(Map<Object, Object> variables) {
         return (Integer) variables.get(ADJUSTMENT);
-    }
-
-    protected ScalingType getScalingType(Map<Object, Object> variables) {
-        return (ScalingType) variables.get(SCALINGTYPE);
     }
 }

@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachin
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 
 @Configuration
 public class StackCreationActions {
@@ -62,9 +61,9 @@ public class StackCreationActions {
 
     @Bean(name = "SETUP_STATE")
     public Action provisioningSetupAction() {
-        return new AbstractStackCreationAction<ProvisionRequest>(ProvisionRequest.class) {
+        return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(StackContext context, ProvisionRequest payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 

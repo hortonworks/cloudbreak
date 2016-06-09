@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerClusterAvailabilityCheckerTask;
@@ -37,10 +36,8 @@ import com.sequenceiq.cloudbreak.core.flow.context.ContainerBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.core.flow.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.flow.context.HostOrchestratorClusterContext;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
@@ -247,8 +244,6 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapNewNodesInClusterWhenEverythingWorksNormally() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        StackScalingContext context = new StackScalingContext(1L, GCP_PLATFORM, 2, "master1", new HashSet<Resource>(),
-                ScalingType.UPSCALE_ONLY_STACK, getPrivateIps(stack));
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString()))
@@ -264,7 +259,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapNewNodes(context);
+        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
 
         verify(clusterBootstrapperErrorHandler, times(0))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
@@ -276,8 +271,6 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapNewNodesInClusterWhenBootstrapHappeningInTwoSegments() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        StackScalingContext context = new StackScalingContext(1L, GCP_PLATFORM, 2, "master1", new HashSet<Resource>(),
-                ScalingType.UPSCALE_ONLY_STACK, getPrivateIps(stack));
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString()))
@@ -293,7 +286,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapNewNodes(context);
+        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
         verify(clusterBootstrapperErrorHandler, times(0))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
         verify(tlsSecurityService, times(1)).buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString());
@@ -304,8 +297,6 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapNewNodesInClusterWhenClusterAvailabilityDropTimeout() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        StackScalingContext context = new StackScalingContext(1L, GCP_PLATFORM, 2, "master1", new HashSet<Resource>(),
-                ScalingType.UPSCALE_ONLY_STACK, getPrivateIps(stack));
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString()))
@@ -321,7 +312,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapNewNodes(context);
+        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
 
         verify(clusterBootstrapperErrorHandler, times(1))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
@@ -333,8 +324,6 @@ public class ClusterBootstrapperTest {
     @Test(expected = CancellationException.class)
     public void bootstrapNewNodesInClusterWhenOrchestratorDropCancelledException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        StackScalingContext context = new StackScalingContext(1L, GCP_PLATFORM, 2, "master1", new HashSet<Resource>(),
-                ScalingType.UPSCALE_ONLY_STACK, getPrivateIps(stack));
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString()))
@@ -350,14 +339,12 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapNewNodes(context);
+        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
     }
 
     @Test(expected = CloudbreakException.class)
     public void bootstrapNewNodesInClusterWhenOrchestratorDropFailedException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-        StackScalingContext context = new StackScalingContext(1L, GCP_PLATFORM, 2, "master1", new HashSet<Resource>(),
-                ScalingType.UPSCALE_ONLY_STACK, getPrivateIps(stack));
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString()))
@@ -373,7 +360,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapNewNodes(context);
+        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
     }
 
     private Set<String> getPrivateIps(Stack stack) {

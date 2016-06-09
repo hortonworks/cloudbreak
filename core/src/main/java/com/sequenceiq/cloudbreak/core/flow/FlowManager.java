@@ -1,48 +1,49 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
+import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
+
 /**
  * Contract for flow management operations.
  * A <b>flow<b/> represents a succession of <b>phases<b/>, each performed on a different thread.
  */
 public interface FlowManager {
+    void triggerProvisioning(Long stackId);
 
-    void triggerProvisioning(Object object);
+    void triggerStackStart(Long stackId);
 
-    void triggerNext(Class sourceHandlerClass, Object payload, boolean success);
+    void triggerStackStop(Long stackId);
 
-    void triggerClusterInstall(Object object);
+    void triggerStackUpscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment);
+
+    void triggerStackDownscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment);
+
+    void triggerStackSync(Long stackId);
+
+    void triggerClusterInstall(Long stackId);
+
+    void triggerClusterStart(Long stackId);
+
+    void triggerClusterStop(Long stackId);
+
+    void triggerClusterUpscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment);
+
+    void triggerClusterDownscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment);
+
+    void triggerClusterSync(Long stackId);
+
+    void triggerFullSync(Long stackId);
+
 
     void triggerClusterReInstall(Object object);
 
     void triggerTermination(Object object);
 
-    void triggerStackStop(Object object);
-
-    void triggerStackStart(Object object);
-
-    void triggerClusterStop(Object object);
-
-    void triggerClusterStart(Object object);
-
     void triggerForcedTermination(Object object);
 
     void triggerClusterTermination(Object object);
 
-    void triggerStackUpscale(Object object);
-
-    void triggerStackDownscale(Object object);
-
     void triggerStackRemoveInstance(Object object);
-
-    void triggerClusterUpscale(Object object);
-
-    void triggerClusterDownscale(Object object);
-
-    void triggerClusterSync(Object object);
-
-    void triggerStackSync(Object object);
-
-    void triggerFullSync(Object object);
 
     void triggerClusterUserNamePasswordUpdate(Object object);
 }

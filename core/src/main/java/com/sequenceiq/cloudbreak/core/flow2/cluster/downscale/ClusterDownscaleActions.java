@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.ClusterScalePayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.ScalingAdjustmentPayload;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterScaleEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
@@ -54,18 +54,18 @@ public class ClusterDownscaleActions {
 
     @Bean(name = "DECOMMISSION_STATE")
     public Action decommissionAction() {
-        return new AbstractClusterDownscaleAction<ClusterDecommissionContext, StartClusterScaleEvent>(StartClusterScaleEvent.class) {
+        return new AbstractClusterDownscaleAction<ClusterDecommissionContext, ClusterScaleTriggerEvent>(ClusterScaleTriggerEvent.class) {
 
             @Override
             protected ClusterDecommissionContext createFlowContext(String flowId, StateContext<ClusterDownscaleState, ClusterDownscaleEvent> stateContext,
-                    StartClusterScaleEvent payload) {
+                    ClusterScaleTriggerEvent payload) {
                 Stack stack = stackService.getById(payload.getStackId());
                 MDCBuilder.buildMdcContext(stack);
                 return new ClusterDecommissionContext(flowId, stack, payload.getHostGroupName(), payload.getAdjustment());
             }
 
             @Override
-            protected void doExecute(ClusterDecommissionContext context, StartClusterScaleEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterDecommissionContext context, ClusterScaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 variables.put(SCALING_ADJUSTMENT, context.getScalingAdjustment());
                 flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.AMBARI_CLUSTER_SCALING_DOWN, UPDATE_IN_PROGRESS.name());
                 sendEvent(context);

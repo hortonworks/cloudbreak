@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
@@ -22,12 +21,10 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.converter.spi.CloudResourceToResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -36,7 +33,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowCont
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterScaleEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
@@ -64,17 +60,16 @@ public class StackUpscaleActions {
 
     @Bean(name = "ADD_INSTANCES_STATE")
     public Action addInstances() {
-        return new AbstractStackUpscaleAction<StackScalingContext>(StackScalingContext.class) {
+        return new AbstractStackUpscaleAction<StackScaleTriggerEvent>(StackScaleTriggerEvent.class) {
             @Override
-            protected void prepareExecution(StackScalingContext payload, Map<Object, Object> variables) {
+            protected void prepareExecution(StackScaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(INSTANCEGROUPNAME, payload.getInstanceGroup());
-                variables.put(ADJUSTMENT, payload.getScalingAdjustment());
-                variables.put(SCALINGTYPE, payload.getScalingType());
+                variables.put(ADJUSTMENT, payload.getAdjustment());
             }
 
             @Override
-            protected void doExecute(StackScalingFlowContext context, StackScalingContext payload, Map<Object, Object> variables) throws Exception {
-                stackUpscaleService.startAddInstances(context.getStack(), payload.getScalingAdjustment());
+            protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+                stackUpscaleService.startAddInstances(context.getStack(), payload.getAdjustment());
                 sendEvent(context);
             }
 
@@ -166,15 +161,8 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<ExtendHostMetadataResult>(ExtendHostMetadataResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) throws Exception {
-                HostGroupAdjustmentJson hostGroupAdjustmentJson = stackUpscaleService.finishExtendHostMetadata(context.getStack(),
-                        context.getInstanceGroupName(), context.getAdjustment());
-
-                StartClusterScaleEvent event = new StartClusterScaleEvent(context.getStack().getId(),
-                        hostGroupAdjustmentJson.getHostGroup(), hostGroupAdjustmentJson.getScalingAdjustment());
+                stackUpscaleService.finishExtendHostMetadata(context.getStack());
                 sendEvent(context);
-                if (ScalingType.isClusterUpScale(context.getScalingType())) {
-                    sendEvent(null, FlowPhases.ADD_CLUSTER_CONTAINERS.name(), event);
-                }
             }
 
             @Override

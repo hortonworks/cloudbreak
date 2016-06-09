@@ -5,8 +5,8 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
-import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
@@ -14,8 +14,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSet
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 
 public enum StackCreationEvent implements FlowEvent {
-    START_CREATION_EVENT(FlowPhases.PROVISIONING_SETUP.name()),
-    START_STACKANDCLUSTER_CREATION_EVENT(FlowPhases.STACKANDCLUSTER_PROVISIONING_SETUP.name()),
+    START_CREATION_EVENT(FlowTriggers.STACK_PROVISION_TRIGGER_EVENT),
     SETUP_FINISHED_EVENT(SetupResult.selector(SetupResult.class)),
     SETUP_FAILED_EVENT(SetupResult.failureSelector(SetupResult.class)),
     IMAGE_PREPARATION_FINISHED_EVENT(PrepareImageResult.selector(PrepareImageResult.class)),

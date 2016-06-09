@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.core.flow.context.ContainerBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.flow.context.ContainerOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.core.flow.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.flow.context.HostOrchestratorClusterContext;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -216,10 +215,6 @@ public class ClusterBootstrapper {
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }
-    }
-
-    public void bootstrapNewNodes(StackScalingContext stackScalingContext) throws CloudbreakException {
-        bootstrapNewNodes(stackScalingContext.getStackId(), stackScalingContext.getUpscaleCandidateAddresses());
     }
 
     public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {

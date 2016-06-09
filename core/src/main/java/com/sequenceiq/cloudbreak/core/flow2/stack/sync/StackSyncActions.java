@@ -75,7 +75,6 @@ public class StackSyncActions {
         return new AbstractStackSyncAction<GetInstancesStateResult>(GetInstancesStateResult.class) {
             @Override
             protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) throws Exception {
-                // TODO !(actualContext instanceof StackScalingContext) requires for sync during upscale      here
                 stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), true);
                 sendEvent(context);
             }

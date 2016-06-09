@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
@@ -33,6 +34,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
 
     @Inject
+    private FlowChains flowChains;
+
+    @Inject
     private FlowRegister runningFlows;
 
     @Inject
@@ -43,11 +47,12 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         String key = (String) event.getKey();
         Payload payload = event.getData();
         String flowId = getFlowId(event);
+        String flowChainId = getFlowChainId(event);
 
         if (FLOW_CANCEL.equals(key)) {
             cancelRunningFlows(payload.getStackId());
         } else if (FLOW_FINAL.equals(key)) {
-            finalizeFlow(flowId, payload.getStackId(), event);
+            finalizeFlow(flowId, flowChainId, payload.getStackId(), event);
         } else {
             if (flowId == null) {
                 LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
@@ -56,7 +61,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 if (flowConfig != null && flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getStackId())) {
                     flowId = UUID.randomUUID().toString();
                     Flow flow = flowConfig.createFlow(flowId);
-                    runningFlows.put(flow);
+                    runningFlows.put(flow, flowChainId);
                     flow.initialize();
                     flowLogService.save(flowId, key, payload, flowConfig.getClass(), flow.getCurrentState());
                     flow.sendEvent(key, payload);
@@ -74,11 +79,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private void sendEvent(String selector, Object payload) {
-        LOGGER.info("Triggering new flow with event: {}", payload);
-        eventBus.notify(selector, new Event<>(payload));
-    }
-
     private void cancelRunningFlows(Long stackId) {
         Set<String> flowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(stackId);
         LOGGER.debug("flow cancellation arrived: ids: {}", flowIds);
@@ -86,21 +86,29 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             Flow flow = runningFlows.remove(id);
             if (flow != null) {
                 flowLogService.cancel(stackId, id);
+                flowChains.removeFlowChain(runningFlows.getFlowChainId(id));
             }
         }
     }
 
-    private void finalizeFlow(String flowId, Long stackId, Event<? extends Payload> event) {
+    private void finalizeFlow(String flowId, String flowChainId, Long stackId, Event<? extends Payload> event) {
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
         flowLogService.close(stackId, flowId);
         Flow flow = runningFlows.remove(flowId);
-        if (flow instanceof ChainFlow && !flow.isFlowFailed()) {
-            ChainFlow cf = (ChainFlow) flow;
-            sendEvent(cf.nextSelector(), cf.nextPayload(event));
+        if (!flow.isFlowFailed()) {
+            if (flowChainId != null) {
+                flowChains.triggerNextFlow(flowChainId);
+            }
+        } else {
+            flowChains.removeFlowChain(flowChainId);
         }
     }
 
     private String getFlowId(Event<?> event) {
         return event.getHeaders().get("FLOW_ID");
+    }
+
+    private String getFlowChainId(Event<?> event) {
+        return event.getHeaders().get("FLOW_CHAIN_ID");
     }
 }

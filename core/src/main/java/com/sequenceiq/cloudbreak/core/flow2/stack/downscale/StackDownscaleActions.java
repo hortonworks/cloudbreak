@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -18,10 +17,9 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
-import com.sequenceiq.cloudbreak.core.flow.context.StackScalingContext;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -43,16 +41,11 @@ public class StackDownscaleActions {
 
     @Bean(name = "DOWNSCALE_STATE")
     public Action stackDownscaleAction() {
-        return new AbstractStackDownscaleAction<StackScalingContext>(StackScalingContext.class) {
+        return new AbstractStackDownscaleAction<StackScaleTriggerEvent>(StackScaleTriggerEvent.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, StackScalingContext payload, Map<Object, Object> variables) throws Exception {
-                if (ScalingType.isStackDownScale(payload.getScalingType())) {
-                    stackDownscaleService.startStackDownscale(context, payload);
-                    sendEvent(context);
-                } else {
-                    sendEvent(context.getFlowId(), StackDownscaleEvent.DOWNSCALE_FAILURE_EVENT.stringRepresentation(),
-                            getFailurePayload(payload, Optional.ofNullable(context), new Exception("Stack downscale wasn't requested.")));
-                }
+            protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+                stackDownscaleService.startStackDownscale(context, payload.getAdjustment());
+                sendEvent(context);
             }
 
             @Override

@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
-import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 
 @Component
 public class CloudbreakCleanupAction {
@@ -133,10 +132,9 @@ public class CloudbreakCleanupAction {
     private void triggerSyncs(List<Stack> stacksToSync, List<Cluster> clustersToSync) {
         for (Stack stack : stacksToSync) {
             Platform platform = Platform.platform(stack.cloudPlatform());
-            StackStatusUpdateRequest request = new StackStatusUpdateRequest(platform, stack.getId(), StatusRequest.FULL_SYNC);
             LOGGER.info("Triggering full sync on stack [name: {}, id: {}].", stack.getName(), stack.getId());
             fireEvent(stack);
-            flowManager.triggerFullSync(request);
+            flowManager.triggerFullSync(stack.getId());
         }
 
         for (Cluster cluster : clustersToSync) {
@@ -145,7 +143,7 @@ public class CloudbreakCleanupAction {
             ClusterStatusUpdateRequest request = new ClusterStatusUpdateRequest(stack.getId(), StatusRequest.SYNC, platform);
             LOGGER.info("Triggering sync on cluster [name: {}, id: {}].", cluster.getName(), cluster.getId());
             fireEvent(stack);
-            flowManager.triggerClusterSync(request);
+            flowManager.triggerClusterSync(stack.getId());
         }
     }
 

@@ -21,18 +21,18 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
-import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
-import com.sequenceiq.cloudbreak.core.flow.context.StackStatusUpdateContext;
+import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -49,6 +49,9 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 @Configuration
 public class StackStartActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStartActions.class);
+
+    @Inject
+    private StackToCloudStackConverter cloudStackConverter;
     @Inject
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
     @Inject
@@ -75,15 +78,30 @@ public class StackStartActions {
         };
     }
 
-    @Bean(name = "START_FINISHED_STATE")
-    public Action stackStartFinishedAction() {
+    @Bean(name = "COLLECTING_METADATA")
+    public Action collectingMetadataAction() {
         return new AbstractStackStartAction<StartInstancesResult>(StartInstancesResult.class) {
             @Override
             protected void doExecute(StackStartStopContext context, StartInstancesResult payload, Map<Object, Object> variables) throws Exception {
-                stackStartStopService.finishStackStart(context);
                 sendEvent(context);
-                sendEvent(context.getFlowId(), FlowPhases.METADATA_COLLECT.name(),
-                        new StackStatusUpdateContext(context.getStack().getId(), Platform.platform(context.getStack().cloudPlatform()), true));
+            }
+
+            @Override
+            protected Selectable createRequest(StackStartStopContext context) {
+                List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(context.getStack());
+                List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
+                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
+            }
+        };
+    }
+
+    @Bean(name = "START_FINISHED_STATE")
+    public Action startFinishedAction() {
+        return new AbstractStackStartAction<CollectMetadataResult>(CollectMetadataResult.class) {
+            @Override
+            protected void doExecute(StackStartStopContext context, CollectMetadataResult payload, Map<Object, Object> variables) throws Exception {
+                stackStartStopService.finishStackStart(context.getStack(), payload.getResults());
+                sendEvent(context);
             }
 
             @Override
@@ -110,7 +128,7 @@ public class StackStartActions {
     }
 
     private abstract static class AbstractStackStartAction<P extends Payload>
-                extends AbstractAction<StackStartState, StackStartEvent, StackStartStopContext, P> {
+            extends AbstractAction<StackStartState, StackStartEvent, StackStartStopContext, P> {
         private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackStartAction.class);
         @Inject
         private StackService stackService;

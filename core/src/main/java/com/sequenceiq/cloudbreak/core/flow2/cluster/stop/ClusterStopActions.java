@@ -62,7 +62,6 @@ public class ClusterStopActions {
         };
     }
 
-
     @Bean(name = "CLUSTER_STOP_FAILED_STATE")
     public Action clusterStopFailedAction() {
         return new AbstractStackFailureAction<ClusterStopState, ClusterStopEvent>() {
