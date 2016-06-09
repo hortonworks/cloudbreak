@@ -38,6 +38,8 @@ public class StackResponse extends StackBase {
     private Long created;
     @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
     private Integer gatewayPort;
+    @ApiModelProperty(StackModelDescription.IMAGE)
+    private ImageJson image;
 
     public String getAccount() {
         return account;
@@ -126,5 +128,13 @@ public class StackResponse extends StackBase {
 
     public void setGatewayPort(Integer gatewayPort) {
         this.gatewayPort = gatewayPort;
+    }
+
+    public ImageJson getImage() {
+        return image;
+    }
+
+    public void setImage(ImageJson image) {
+        this.image = image;
     }
 }

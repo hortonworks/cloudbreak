@@ -48,8 +48,14 @@ public class ModelDescriptions {
         public static final String ORCHESTRATOR_TYPE = "type of orchestrator";
     }
 
+    public static class ImageModelDescription {
+        public static final String IMAGE_NAME = "name of the image";
+        public static final String HDPVERSION = "hdp version of image";
+    }
+
     public static class StackModelDescription {
         public static final String STACK_ID = "id of the stack";
+        public static final String IMAGE = "image of the stack";
         public static final String STACK_NAME = "name of the stack";
         public static final String REGION = "region of the stack";
         public static final String AVAILABILITY_ZONE = "availability zone of the stack";

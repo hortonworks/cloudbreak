@@ -12,11 +12,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
+import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 
 @Component
 public class StackToJsonConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {
@@ -24,9 +27,16 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
     @Inject
     private ConversionService conversionService;
 
+    @Inject
+    private ImageService imageService;
+
     @Override
     public StackResponse convert(Stack source) {
         StackResponse stackJson = new StackResponse();
+        Image image = imageService.getImage(source.getId());
+        if (image != null) {
+            stackJson.setImage(getConversionService().convert(image, ImageJson.class));
+        }
         stackJson.setName(source.getName());
         stackJson.setOwner(source.getOwner());
         stackJson.setAccount(source.getAccount());
