@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATHON;
 
 import java.io.IOException;
@@ -62,14 +61,11 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -206,8 +202,7 @@ public class AmbariClusterService implements ClusterService {
         if (Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {
             throw new BadRequestException("Clusters is already deleted.");
         }
-        ClusterDeleteRequest clusterDeleteRequest = new ClusterDeleteRequest(stackId, platform(stack.cloudPlatform()), stack.getCluster().getId());
-        flowManager.triggerClusterTermination(clusterDeleteRequest);
+        flowManager.triggerClusterTermination(stackId);
     }
 
     @Override
@@ -325,9 +320,7 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public Cluster updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson) {
         Stack stack = stackService.get(stackId);
-        flowManager.triggerClusterUserNamePasswordUpdate(
-                new ClusterUserNamePasswordUpdateRequest(stack.getId(), userNamePasswordJson.getUserName(),
-                        userNamePasswordJson.getPassword(), platform(stack.cloudPlatform())));
+        flowManager.triggerClusterCredentialChange(stack.getId(), userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
         return stack.getCluster();
     }
 
@@ -492,7 +485,7 @@ public class AmbariClusterService implements ClusterService {
         if (cluster.getContainers().isEmpty()) {
             flowManager.triggerClusterInstall(stack.getId());
         } else {
-            flowManager.triggerClusterReInstall(new ProvisionRequest(platform(stack.cloudPlatform()), stack.getId()));
+            flowManager.triggerClusterReInstall(stack.getId());
         }
         return stack.getCluster();
     }

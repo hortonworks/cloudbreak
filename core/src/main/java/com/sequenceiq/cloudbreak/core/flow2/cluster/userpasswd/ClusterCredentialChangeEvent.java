@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd;
 
-import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeResult;
 
 public enum ClusterCredentialChangeEvent implements FlowEvent {
-    CLUSTER_CREDENTIALCHANGE_EVENT(FlowPhases.CLUSTER_USERNAME_PASSWORD_UPDATE.name()),
+    CLUSTER_CREDENTIALCHANGE_EVENT(FlowTriggers.CLUSTER_CREDENTIALCHANGE_TRIGGER_EVENT),
     CLUSTER_CREDENTIALCHANGE_FINISHED_EVENT(EventSelectorUtil.selector(ClusterCredentialChangeResult.class)),
     CLUSTER_CREDENTIALCHANGE_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(ClusterCredentialChangeResult.class)),
 

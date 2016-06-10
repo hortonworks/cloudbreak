@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 import java.util.Date;
 import java.util.List;
@@ -72,9 +71,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageNameUtil;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackForcedDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Service
@@ -319,7 +315,7 @@ public class StackService {
         if (!stack.isPublicInAccount() && !stack.getOwner().equals(user.getUserId())) {
             throw new BadRequestException(String.format("Private stack (%s) only modifiable by the owner.", stackId));
         }
-        flowManager.triggerStackRemoveInstance(new RemoveInstanceRequest(platform(stack.cloudPlatform()), stack.getId(), instanceId));
+        flowManager.triggerStackRemoveInstance(stackId, instanceId);
     }
 
     @Transactional(Transactional.TxType.NEVER)
@@ -515,7 +511,7 @@ public class StackService {
         }
         if (!stack.isDeleteCompleted()) {
             if (!"BYOS".equals(stack.cloudPlatform())) {
-                flowManager.triggerTermination(new StackDeleteRequest(platform(stack.cloudPlatform()), stack.getId()));
+                flowManager.triggerTermination(stack.getId());
             } else {
                 terminationService.finalizeTermination(stack.getId(), false);
             }
@@ -530,7 +526,7 @@ public class StackService {
             throw new BadRequestException("Stacks can be force deleted only by account admins or owners.");
         }
         if (!stack.isDeleteCompleted()) {
-            flowManager.triggerForcedTermination(new StackForcedDeleteRequest(platform(stack.cloudPlatform()), stack.getId()));
+            flowManager.triggerForcedTermination(stack.getId());
         } else {
             LOGGER.info("Stack is already deleted.");
         }
@@ -551,5 +547,4 @@ public class StackService {
             return code;
         }
     }
-
 }

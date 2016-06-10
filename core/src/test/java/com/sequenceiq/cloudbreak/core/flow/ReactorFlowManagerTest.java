@@ -23,12 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterDeleteRequest;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterUserNamePasswordUpdateRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.RemoveInstanceRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
-import com.sequenceiq.cloudbreak.service.stack.event.StackForcedDeleteRequest;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -58,35 +52,28 @@ public class ReactorFlowManagerTest {
     @Test
     public void shouldReturnTheNextFailureTransition() throws Exception {
         Long stackId = 1L;
-        ProvisionRequest provisionRequest = new ProvisionRequest(GCP_PLATFORM, 1L);
-        StackDeleteRequest stackDeleteRequest = new StackDeleteRequest(GCP_PLATFORM, 1L);
-        StackForcedDeleteRequest stackForcedDeleteRequest = new StackForcedDeleteRequest(GCP_PLATFORM, 1L);
-        RemoveInstanceRequest removeInstanceRequest = new RemoveInstanceRequest(GCP_PLATFORM, 1L, "instanceId");
-        ClusterUserNamePasswordUpdateRequest clusterUserNamePasswordUpdateRequest =
-                new ClusterUserNamePasswordUpdateRequest(1L, "admin", "admin1", GCP_PLATFORM);
-        ClusterDeleteRequest clusterDeleteRequest = new ClusterDeleteRequest(1L, GCP_PLATFORM, 1L);
         InstanceGroupAdjustmentJson instanceGroupAdjustment = new InstanceGroupAdjustmentJson();
         HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
 
         flowManager.triggerProvisioning(stackId);
         flowManager.triggerClusterInstall(stackId);
-        flowManager.triggerClusterReInstall(provisionRequest);
+        flowManager.triggerClusterReInstall(stackId);
         flowManager.triggerStackStop(stackId);
         flowManager.triggerStackStart(stackId);
         flowManager.triggerClusterStop(stackId);
         flowManager.triggerClusterStart(stackId);
-        flowManager.triggerTermination(stackDeleteRequest);
-        flowManager.triggerForcedTermination(stackForcedDeleteRequest);
+        flowManager.triggerTermination(stackId);
+        flowManager.triggerForcedTermination(stackId);
         flowManager.triggerStackUpscale(stackId, instanceGroupAdjustment);
         flowManager.triggerStackDownscale(stackId, instanceGroupAdjustment);
-        flowManager.triggerStackRemoveInstance(removeInstanceRequest);
+        flowManager.triggerStackRemoveInstance(stackId, "instanceId");
         flowManager.triggerClusterUpscale(stackId, hostGroupAdjustment);
         flowManager.triggerClusterDownscale(stackId, hostGroupAdjustment);
         flowManager.triggerClusterSync(stackId);
         flowManager.triggerStackSync(stackId);
         flowManager.triggerFullSync(stackId);
-        flowManager.triggerClusterUserNamePasswordUpdate(clusterUserNamePasswordUpdateRequest);
-        flowManager.triggerClusterTermination(clusterDeleteRequest);
+        flowManager.triggerClusterCredentialChange(stackId, "admin", "admin1");
+        flowManager.triggerClusterTermination(stackId);
 
         int count = 0;
         for (Method method : flowManager.getClass().getDeclaredMethods()) {
