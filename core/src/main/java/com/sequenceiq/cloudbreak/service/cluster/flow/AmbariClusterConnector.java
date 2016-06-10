@@ -222,7 +222,7 @@ public class AmbariClusterConnector {
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, hostsInCluster);
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
-            recipeEngine.executePreInstall(stack, hostGroups, blueprintText);
+            recipeEngine.executePreInstall(stack, hostGroups);
 
             String clusterName = cluster.getName();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
@@ -295,12 +295,9 @@ public class AmbariClusterConnector {
         }
     }
 
-    public void installFsRecipes(Stack stack, HostGroup hostGroup) throws CloudbreakSecuritySetupException {
-        Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        Set<HostGroup> hostGroupAsSet = Sets.newHashSet(hostGroup);
-        if (cluster.getFileSystem() != null) {
-            recipeEngine.addFsRecipes(cluster.getBlueprint().getBlueprintText(), cluster.getFileSystem(), hostGroupAsSet);
-        }
+    public void installFsRecipes(Stack stack, HostGroup hostGroup) throws CloudbreakException {
+        // TODO remove as there is no point for this
+        recipeEngine.addFsRecipes(stack, Sets.newHashSet(hostGroup));
     }
 
     public void waitForAmbariHosts(Stack stack) throws CloudbreakSecuritySetupException {
@@ -317,8 +314,8 @@ public class AmbariClusterConnector {
         recipeEngine.installRecipes(stack, hostGroup, hostMetadata);
     }
 
-    public void executePreRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaData) throws CloudbreakException {
-        recipeEngine.executePreInstall(stack, hostGroup, metaData);
+    public void executePreRecipes(Stack stack, Set<HostMetadata> metaData) throws CloudbreakException {
+        recipeEngine.executeUpscalePreInstall(stack, metaData);
     }
 
     public void installServices(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata)
@@ -330,8 +327,8 @@ public class AmbariClusterConnector {
         checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_UPSCALE_FAILED.code()));
     }
 
-    public void executePostRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaData) throws CloudbreakException {
-        recipeEngine.executePostInstall(stack, hostGroup, metaData);
+    public void executePostRecipes(Stack stack, Set<HostMetadata> metaData) throws CloudbreakException {
+        recipeEngine.executePostInstall(stack, metaData);
     }
 
     public void updateFailedHostMetaData(Set<HostMetadata> hostMetadata) {

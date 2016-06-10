@@ -65,20 +65,13 @@ public class RecipeEngine {
     @Inject
     private BlueprintProcessor blueprintProcessor;
 
-    public void executePreInstall(Stack stack, Set<HostGroup> hostGroups, String blueprintText) throws CloudbreakException {
-        Cluster cluster = stack.getCluster();
+    public void executePreInstall(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         configureSssd(stack, null);
-        FileSystem fs = cluster.getFileSystem();
-        String orchestrator = cluster.getStack().getOrchestrator().getType();
-        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
-        if (SWARM.equals(orchestrator) || SALT.equals(orchestrator)) {
-            if (fs != null) {
-                addFsRecipes(blueprintText, fs, hostGroups);
-            }
-            addHDFSRecipe(cluster, blueprintText, hostGroups);
-        }
+        addFsRecipes(stack, hostGroups);
         boolean recipesFound = recipesFound(hostGroups);
         if (recipesFound) {
+            String orchestrator = stack.getOrchestrator().getType();
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
             if (orchestratorType.containerOrchestrator()) {
                 consulRecipeExecutor.preInstall(stack, hostGroups);
             } else {
@@ -87,15 +80,13 @@ public class RecipeEngine {
         }
     }
 
-    public void executePreInstall(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaData) throws CloudbreakException {
-        if (recipesFound(Sets.newHashSet(hostGroup))) {
-            String orchestrator = stack.getOrchestrator().getType();
-            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
-            if (orchestratorType.containerOrchestrator()) {
-                consulRecipeExecutor.executePreInstall(stack, metaData);
-            } else {
-                //TODO
-            }
+    public void executeUpscalePreInstall(Stack stack, Set<HostMetadata> metaData) throws CloudbreakException {
+        String orchestrator = stack.getOrchestrator().getType();
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
+        if (orchestratorType.containerOrchestrator()) {
+            consulRecipeExecutor.executePreInstall(stack, metaData);
+        } else {
+            orchestratorRecipeExecutor.preInstall(stack);
         }
     }
 
@@ -109,41 +100,48 @@ public class RecipeEngine {
         }
     }
 
-    public void executePostInstall(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata) throws CloudbreakException {
-        if (recipesFound(Sets.newHashSet(hostGroup))) {
-            String orchestrator = stack.getOrchestrator().getType();
-            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
-            if (orchestratorType.containerOrchestrator()) {
-                consulRecipeExecutor.executePostInstall(stack, hostMetadata);
-            } else {
-                //TODO
-            }
+    public void executePostInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
+        String orchestrator = stack.getOrchestrator().getType();
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
+        if (orchestratorType.containerOrchestrator()) {
+            consulRecipeExecutor.executePostInstall(stack, hostMetadata);
+        } else {
+            orchestratorRecipeExecutor.postInstall(stack);
         }
     }
 
-    public void addFsRecipes(String blueprintText, FileSystem fs, Set<HostGroup> hostGroups) {
-        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
-        List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
-        List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
-        for (Recipe recipe : fsRecipes) {
-            boolean oneNode = false;
-            for (Map.Entry<String, ExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
-                if (ExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
-                    oneNode = true;
-                }
-            }
-            if (oneNode) {
-                for (HostGroup hostGroup : hostGroups) {
-                    if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
-                        hostGroup.addRecipe(recipe);
-                        break;
+    public void addFsRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+        String orchestrator = stack.getOrchestrator().getType();
+        if (SWARM.equals(orchestrator) || SALT.equals(orchestrator)) {
+            Cluster cluster = stack.getCluster();
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
+            FileSystem fs = cluster.getFileSystem();
+            if (fs != null) {
+                FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
+                List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
+                List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
+                for (Recipe recipe : fsRecipes) {
+                    boolean oneNode = false;
+                    for (Map.Entry<String, ExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
+                        if (ExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
+                            oneNode = true;
+                        }
+                    }
+                    if (oneNode) {
+                        for (HostGroup hostGroup : hostGroups) {
+                            if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
+                                hostGroup.addRecipe(recipe);
+                                break;
+                            }
+                        }
+                    } else {
+                        for (HostGroup hostGroup : hostGroups) {
+                            hostGroup.addRecipe(recipe);
+                        }
                     }
                 }
-            } else {
-                for (HostGroup hostGroup : hostGroups) {
-                    hostGroup.addRecipe(recipe);
-                }
             }
+            addHDFSRecipe(cluster, blueprintText, hostGroups);
         }
     }
 
@@ -167,7 +165,7 @@ public class RecipeEngine {
             if (orchestratorType.containerOrchestrator()) {
                 consulRecipeExecutor.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
             } else {
-                //TODO
+                LOGGER.info("Install recipe is not required in case of host orchestrator");
             }
         }
     }
