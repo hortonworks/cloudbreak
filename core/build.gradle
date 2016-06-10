@@ -55,7 +55,8 @@ dependencies {
     compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
     compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
     compile group: 'org.jasypt',                    name: 'jasypt',                         version: '1.9.2'
-    compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: '1.5.6'
+    compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
+    compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
     compile group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.17.0-rc'
     compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.17.0-rc')   { exclude module: 'servlet-api' }
     compile group: 'com.jcraft',                    name: 'jsch',                           version: jschVersion
