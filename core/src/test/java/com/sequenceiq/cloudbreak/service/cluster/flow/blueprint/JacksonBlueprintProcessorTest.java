@@ -171,6 +171,12 @@ public class JacksonBlueprintProcessorTest {
         Assert.assertEquals("org.apache.hadoop.io.serializer.WritableSerialization", configValue2);
     }
 
+    @Test
+    public void testRemoveComponentFromBlueprint() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        String result = underTest.removeComponentFromBlueprint("NAGIOS_SERVER", testBlueprint);
+        Assert.assertFalse(result.contains("NAGIOS_SERVER"));
+    }
 
     @Test(expected = BlueprintProcessingException.class)
     public void testAddConfigEntriesThrowsExceptionIfBlueprintCannotBeParsed() throws Exception {

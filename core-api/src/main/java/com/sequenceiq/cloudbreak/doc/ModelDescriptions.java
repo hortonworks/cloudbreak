@@ -109,6 +109,13 @@ public class ModelDescriptions {
         public static final String VERIFY = "whether to verify or not the repo url";
     }
 
+    public static class RDSConfig {
+        public static final String CONNECTION_URL = "JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>";
+        public static final String DB_TYPE = "Type of the external database (allowed values: MYSQL, POSTGRES)";
+        public static final String USERNAME = "Username to use for the jdbc connection";
+        public static final String PASSWORD = "Password to use for the jdbc connection";
+    }
+
     public static class FileSystem {
         public static final String NAME = "name of the filesystem";
         public static final String TYPE = "type of the filesystem";

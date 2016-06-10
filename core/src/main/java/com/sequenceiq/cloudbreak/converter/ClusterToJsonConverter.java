@@ -19,6 +19,7 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
@@ -70,6 +72,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         AmbariStackDetails ambariStackDetails = source.getAmbariStackDetails();
         if (ambariStackDetails != null) {
             clusterResponse.setAmbariStackDetails(getConversionService().convert(ambariStackDetails, AmbariStackDetailsJson.class));
+        }
+        RDSConfig rdsConfig = source.getRdsConfig();
+        if (rdsConfig != null) {
+            clusterResponse.setRdsConfigJson(getConversionService().convert(rdsConfig, RDSConfigJson.class));
         }
         clusterResponse.setAmbariServerIp(source.getAmbariIp());
         clusterResponse.setUserName(source.getUserName());

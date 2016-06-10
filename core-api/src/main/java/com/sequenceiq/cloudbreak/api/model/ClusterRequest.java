@@ -57,6 +57,8 @@ public class ClusterRequest {
     @Valid
     private AmbariStackDetailsJson ambariStackDetails;
     @Valid
+    private RDSConfigJson rdsConfigJson;
+    @Valid
     private FileSystemRequest fileSystem;
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
@@ -165,6 +167,14 @@ public class ClusterRequest {
 
     public void setAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
         this.ambariStackDetails = ambariStackDetails;
+    }
+
+    public RDSConfigJson getRdsConfigJson() {
+        return rdsConfigJson;
+    }
+
+    public void setRdsConfigJson(RDSConfigJson rdsConfigJson) {
+        this.rdsConfigJson = rdsConfigJson;
     }
 
     public String getUserName() {

@@ -75,6 +75,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -94,6 +95,7 @@ import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -174,6 +176,8 @@ public class AmbariClusterConnector {
     @Inject
     private SmartSenseConfigProvider smartSenseConfigProvider;
     @Inject
+    private RDSConfigProvider rdsConfigProvider;
+    @Inject
     private ImageService imageService;
 
     private enum Msg {
@@ -229,15 +233,8 @@ public class AmbariClusterConnector {
 
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             FileSystem fs = cluster.getFileSystem();
-            if (fs != null) {
-                blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
-            }
 
-            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, smartSenseConfigProvider.getConfigs(stack, blueprintText), true);
-            Image image = imageService.getImage(stack.getId());
-            if (image.getHdpVersion() != null) {
-                blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, image.getHdpVersion());
-            }
+            blueprintText = updateBlueprintConfiguration(stack, blueprintText, cluster.getRdsConfig(), fs);
 
             AmbariClient ambariClient = getAmbariClient(stack);
             setBaseRepoURL(stack, ambariClient);
@@ -292,6 +289,22 @@ public class AmbariClusterConnector {
             LOGGER.error("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new AmbariOperationFailedException(e.getMessage(), e);
         }
+    }
+
+    private String updateBlueprintConfiguration(Stack stack, String blueprintText, RDSConfig rdsConfig, FileSystem fs) throws IOException {
+        if (fs != null) {
+            blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
+        }
+        blueprintText = blueprintProcessor.addConfigEntries(blueprintText, smartSenseConfigProvider.getConfigs(stack, blueprintText), true);
+        Image image = imageService.getImage(stack.getId());
+        if (image.getHdpVersion() != null) {
+            blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, image.getHdpVersion());
+        }
+        if (rdsConfig != null) {
+            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, rdsConfigProvider.getConfigs(rdsConfig), true);
+            blueprintText = blueprintProcessor.removeComponentFromBlueprint("MYSQL_SERVER", blueprintText);
+        }
+        return blueprintText;
     }
 
     private boolean recipesPreInstall(Stack stack, Cluster cluster, String blueprintText, FileSystem fs, Set<HostGroup> hostGroups)
