@@ -26,6 +26,13 @@ config_remote_jdbc() {
   fi
 }
 
+config_jdbc_drivers() {
+  LATEST_PSQL_DRIVER=$(find /var/lib/ambari-server/jdbc-drivers -name "postgresql*.jar" | tail -n1)
+  ambari-server setup --jdbc-db=postgres --jdbc-driver=${LATEST_PSQL_DRIVER}
+  LATEST_MYSQL_DRIVER=$(find /var/lib/ambari-server/jdbc-drivers -name "mysql*.jar" | tail -n1)
+  ambari-server setup --jdbc-db=mysql --jdbc-driver=${LATEST_MYSQL_DRIVER}
+}
+
 # https://issues.apache.org/jira/browse/AMBARI-14627
 silent_security_setup() {
   ambari-server setup-security --security-option=encrypt-passwords --master-key=bigdata --master-key-persist=true
@@ -36,6 +43,7 @@ main() {
   if [ ! -f "/var/ambari-init-executed" ]; then
     config_remote_jdbc
     silent_security_setup
+    config_jdbc_drivers
   fi
   echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/ambari-init-executed
 }

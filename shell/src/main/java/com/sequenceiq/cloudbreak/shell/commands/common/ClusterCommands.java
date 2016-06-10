@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
@@ -61,6 +63,10 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "utilsRepoId", mandatory = false, help = "Stack utils repoId") String utilsRepoId,
             @CliOption(key = "utilsBaseURL", mandatory = false, help = "Stack utils URL") String utilsBaseURL,
             @CliOption(key = "verify", mandatory = false, help = "Whether to verify the URLs or not") Boolean verify,
+            @CliOption(key = "connectionURL", mandatory = false, help = "JDBC connection URL (jdbc:<db-type>://<address>:<port>/<db>)") String connectionURL,
+            @CliOption(key = "databaseType", mandatory = false, help = "Type of the external database (MYSQL, POSTGRES)") RDSDatabase databaseType,
+            @CliOption(key = "connectionUserName", mandatory = false, help = "Username to use for the jdbc connection") String connectionUserName,
+            @CliOption(key = "connectionPassword", mandatory = false, help = "Password to use for the jdbc connection") String connectionPassword,
             @CliOption(key = "enableSecurity", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false",
                     help = "Kerberos security status") Boolean enableSecurity,
             @CliOption(key = "kerberosMasterKey", mandatory = false, specifiedDefaultValue = "key", help = "Kerberos mater key") String kerberosMasterKey,
@@ -145,6 +151,17 @@ public class ClusterCommands implements BaseCommands {
             }
             clusterRequest.setAmbariStackDetails(ambariStackDetailsJson);
 
+            if (connectionURL != null && connectionUserName != null && connectionPassword != null && databaseType != null) {
+                RDSConfigJson rdsConfigJson = new RDSConfigJson();
+                rdsConfigJson.setConnectionURL(connectionURL);
+                rdsConfigJson.setDatabaseType(databaseType);
+                rdsConfigJson.setConnectionUserName(connectionUserName);
+                rdsConfigJson.setConnectionPassword(connectionPassword);
+                clusterRequest.setRdsConfigJson(rdsConfigJson);
+            } else if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null) {
+                return "connectionURL, databaseType, connectionUserName and connectionPassword must be all set.";
+            }
+
             String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
             cloudbreakShellUtil.checkResponse("createCluster", shellContext.cloudbreakClient().clusterEndpoint().post(Long.valueOf(stackId), clusterRequest));
             shellContext.setHint(Hints.NONE);
@@ -165,7 +182,7 @@ public class ClusterCommands implements BaseCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = { "cluster stop", "cluster start" })
+    @CliAvailabilityIndicator(value = {"cluster stop", "cluster start"})
     public boolean startStopAvailable() {
         return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable());
     }
@@ -259,7 +276,7 @@ public class ClusterCommands implements BaseCommands {
         throw new MethodNotSupportedException("Cluster list command not available");
     }
 
-    @CliAvailabilityIndicator(value = { "cluster show --id", "cluster show --name" })
+    @CliAvailabilityIndicator(value = {"cluster show --id", "cluster show --name"})
     @Override
     public boolean showAvailable() {
         return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable());
@@ -293,12 +310,12 @@ public class ClusterCommands implements BaseCommands {
         return show(null, name);
     }
 
-    @CliAvailabilityIndicator(value = { "cluster node" })
+    @CliAvailabilityIndicator(value = {"cluster node"})
     public boolean nodeAvailable() {
         return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable());
     }
 
-    @CliAvailabilityIndicator(value = { "cluster fileSystem" })
+    @CliAvailabilityIndicator(value = {"cluster fileSystem"})
     public boolean fileSystemAvailable() {
         return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
     }

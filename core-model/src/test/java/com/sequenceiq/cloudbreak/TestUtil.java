@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -349,6 +350,8 @@ public class TestUtil {
         cluster.setEnableShipyard(true);
         AmbariStackDetails ambariStackDetails = new AmbariStackDetails();
         cluster.setAmbariStackDetails(ambariStackDetails);
+        RDSConfig rdsConfig = new RDSConfig();
+        cluster.setRdsConfig(rdsConfig);
         cluster.setHostGroups(hostGroups(cluster));
         return cluster;
     }
