@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -36,13 +37,13 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(ClusterAndStackDownscaleTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new ClusterScaleTriggerEvent(FlowTriggers.CLUSTER_DOWNSCALE_TRIGGER_EVENT, event.getStackId(),
-                event.getHostGroupName(), event.getAdjustment()));
+        flowEventChain.add(new ClusterScaleTriggerEvent(FlowTriggers.CLUSTER_DOWNSCALE_TRIGGER_EVENT, event.getStackId(), event.getHostGroupName(),
+                event.getAdjustment()));
         if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
             Stack stack = stackService.getById(event.getStackId());
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), event.getHostGroupName());
             Constraint hostGroupConstraint = hostGroup.getConstraint();
-            String instanceGroupName = Optional.ofNullable(hostGroupConstraint.getInstanceGroup()).map(ig -> ig.getGroupName()).orElse(null);
+            String instanceGroupName = Optional.ofNullable(hostGroupConstraint.getInstanceGroup()).map(InstanceGroup::getGroupName).orElse(null);
             flowEventChain.add(new StackScaleTriggerEvent(FlowTriggers.STACK_DOWNSCALE_TRIGGER_EVENT, event.getStackId(), instanceGroupName,
                     event.getAdjustment()));
         }

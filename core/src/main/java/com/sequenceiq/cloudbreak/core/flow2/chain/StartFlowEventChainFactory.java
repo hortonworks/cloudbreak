@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 @Component
 public class StartFlowEventChainFactory implements FlowEventChainFactory<StackEvent> {
+
     @Override
     public String initEvent() {
         return FlowTriggers.FULL_START_TRIGGER_EVENT;

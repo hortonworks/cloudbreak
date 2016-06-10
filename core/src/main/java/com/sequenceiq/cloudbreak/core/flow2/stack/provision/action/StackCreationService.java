@@ -250,7 +250,7 @@ public class StackCreationService {
         }
     }
 
-    private void updateNodeCount(long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses, boolean create) {
+    private void updateNodeCount(Long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses, boolean create) {
         for (Group group : originalGroups) {
             int nodeCount = group.getInstances().size();
             List<CloudResourceStatus> failedResources = removeFailedMetadata(stackId, statuses, group);
@@ -265,7 +265,7 @@ public class StackCreationService {
         }
     }
 
-    private List<CloudResourceStatus> removeFailedMetadata(long stackId, List<CloudResourceStatus> statuses, Group group) {
+    private List<CloudResourceStatus> removeFailedMetadata(Long stackId, List<CloudResourceStatus> statuses, Group group) {
         Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
         Set<Long> groupPrivateIds = getPrivateIds(group);
         for (CloudResourceStatus status : statuses) {

@@ -9,6 +9,7 @@ import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow.FlowPhases;
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncState;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
@@ -31,6 +33,7 @@ import reactor.bus.Event;
 public class Flow2HandlerTest {
 
     public static final String FLOW_ID = "flowId";
+    public static final String FLOW_CHAIN_ID = "flowChainId";
 
     @InjectMocks
     private Flow2Handler underTest;
@@ -48,6 +51,9 @@ public class Flow2HandlerTest {
     private FlowConfiguration flowConfig;
 
     @Mock
+    private FlowChains flowChains;
+
+    @Mock
     private FlowTriggerCondition flowTriggerCondition;
 
     @Mock
@@ -55,12 +61,7 @@ public class Flow2HandlerTest {
 
     private Event<? extends Payload> dummyEvent;
 
-    private Payload payload = new Payload() {
-        @Override
-        public Long getStackId() {
-            return 1L;
-        }
-    };
+    private Payload payload = () -> 1L;
 
     @Before
     public void setUp() {
@@ -118,13 +119,55 @@ public class Flow2HandlerTest {
         verify(flow, times(0)).sendEvent(anyString(), any());
     }
 
-/*    @Test
-    public void testFlowFinal() {
+    @Test
+    public void testFlowFinalFlowNotChained() {
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, times(0)).get(eq(FLOW_ID));
         verify(runningFlows, times(0)).put(any(Flow.class), isNull(String.class));
-    }*/
+        verify(flowChains, times(0)).removeFlowChain(anyString());
+        verify(flowChains, times(0)).triggerNextFlow(anyString());
+    }
+
+    @Test
+    public void testFlowFinalFlowChained() {
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
+        dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
+        dummyEvent.getHeaders().set("FLOW_CHAIN_ID", FLOW_CHAIN_ID);
+        underTest.accept(dummyEvent);
+        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
+        verify(runningFlows, times(1)).remove(eq(FLOW_ID));
+        verify(runningFlows, times(0)).get(eq(FLOW_ID));
+        verify(runningFlows, times(0)).put(any(Flow.class), isNull(String.class));
+        verify(flowChains, times(0)).removeFlowChain(anyString());
+        verify(flowChains, times(1)).triggerNextFlow(eq(FLOW_CHAIN_ID));
+    }
+
+    @Test
+    public void testFlowFinalFlowFailed() {
+        given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
+        dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
+        underTest.accept(dummyEvent);
+        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
+        verify(runningFlows, times(1)).remove(eq(FLOW_ID));
+        verify(runningFlows, times(0)).get(eq(FLOW_ID));
+        verify(runningFlows, times(0)).put(any(Flow.class), isNull(String.class));
+        verify(flowChains, times(1)).removeFlowChain(anyString());
+        verify(flowChains, times(0)).triggerNextFlow(anyString());
+    }
+
+    @Test
+    public void testCancelRunningFlows() {
+        given(flowLogService.findAllRunningNonTerminationFlowIdsByStackId(anyLong())).willReturn(Collections.singleton(FLOW_ID));
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
+        given(runningFlows.getFlowChainId(eq(FLOW_ID))).willReturn(FLOW_CHAIN_ID);
+        dummyEvent.setKey(Flow2Handler.FLOW_CANCEL);
+        underTest.accept(dummyEvent);
+        verify(flowLogService, times(1)).cancel(anyLong(), eq(FLOW_ID));
+        verify(flowChains, times(1)).removeFlowChain(eq(FLOW_CHAIN_ID));
+    }
 }

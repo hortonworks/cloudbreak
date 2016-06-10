@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
@@ -34,7 +32,6 @@ import reactor.bus.EventBus;
  */
 @Service
 public class ReactorFlowManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReactorFlowManager.class);
 
     @Inject
     private EventBus reactor;
