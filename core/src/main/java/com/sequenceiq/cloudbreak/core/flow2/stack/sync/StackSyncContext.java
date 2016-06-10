@@ -14,13 +14,16 @@ public class StackSyncContext extends CommonContext {
     private final List<InstanceMetaData> instanceMetaData;
     private final CloudContext cloudContext;
     private final CloudCredential cloudCredential;
+    private final Boolean statusUpdateEnabled;
 
-    public StackSyncContext(String flowId, Stack stack, List<InstanceMetaData> instanceMetaData, CloudContext cloudContext, CloudCredential cloudCredential) {
+    public StackSyncContext(String flowId, Stack stack, List<InstanceMetaData> instanceMetaData, CloudContext cloudContext, CloudCredential cloudCredential,
+            Boolean statusUpdateEnabled) {
         super(flowId);
         this.stack = stack;
         this.instanceMetaData = instanceMetaData;
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
+        this.statusUpdateEnabled = statusUpdateEnabled;
     }
 
     public Stack getStack() {
@@ -37,5 +40,9 @@ public class StackSyncContext extends CommonContext {
 
     public CloudCredential getCloudCredential() {
         return cloudCredential;
+    }
+
+    public Boolean isStatusUpdateEnabled() {
+        return statusUpdateEnabled;
     }
 }

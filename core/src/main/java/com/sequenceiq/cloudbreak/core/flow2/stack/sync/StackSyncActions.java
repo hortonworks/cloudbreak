@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -56,9 +57,14 @@ public class StackSyncActions {
 
     @Bean(name = "SYNC_STATE")
     public Action stackSyncAction() {
-        return new AbstractStackSyncAction<StackEvent>(StackEvent.class) {
+        return new AbstractStackSyncAction<StackSyncTriggerEvent>(StackSyncTriggerEvent.class) {
             @Override
-            protected void doExecute(StackSyncContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void prepareExecution(StackSyncTriggerEvent payload, Map<Object, Object> variables) {
+                variables.put(STATUS_UPDATE_ENABLED, payload.getStatusUpdateEnabled());
+            }
+
+            @Override
+            protected void doExecute(StackSyncContext context, StackSyncTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 
@@ -75,7 +81,7 @@ public class StackSyncActions {
         return new AbstractStackSyncAction<GetInstancesStateResult>(GetInstancesStateResult.class) {
             @Override
             protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) throws Exception {
-                stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), true);
+                stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), context.isStatusUpdateEnabled());
                 sendEvent(context);
             }
 
@@ -104,6 +110,8 @@ public class StackSyncActions {
     }
 
     private abstract static class AbstractStackSyncAction<P extends Payload> extends AbstractAction<StackSyncState, StackSyncEvent, StackSyncContext, P> {
+        static final String STATUS_UPDATE_ENABLED = "STATUS_UPDATE_ENABLED";
+
         @Inject
         private StackService stackService;
         @Inject
@@ -119,6 +127,7 @@ public class StackSyncActions {
 
         @Override
         protected StackSyncContext createFlowContext(String flowId, StateContext<StackSyncState, StackSyncEvent> stateContext, P payload) {
+            Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             Long stackId = payload.getStackId();
             Stack stack = stackService.getById(stackId);
             MDCBuilder.buildMdcContext(stack);
@@ -127,12 +136,16 @@ public class StackSyncActions {
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                     location);
             CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-            return new StackSyncContext(flowId, stack, instances, cloudContext, cloudCredential);
+            return new StackSyncContext(flowId, stack, instances, cloudContext, cloudCredential, isStatusUpdateEnabled(variables));
         }
 
         @Override
         protected Object getFailurePayload(P payload, Optional<StackSyncContext> flowContext, Exception ex) {
             return new StackFailureEvent(payload.getStackId(), ex);
+        }
+
+        private Boolean isStatusUpdateEnabled(Map<Object, Object> variables) {
+            return (Boolean) variables.get(STATUS_UPDATE_ENABLED);
         }
     }
 }
