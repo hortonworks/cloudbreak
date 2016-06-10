@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -19,10 +21,12 @@ import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
 @Component
 public class StackToJsonConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackToJsonConverter.class);
 
     @Inject
     private ConversionService conversionService;
@@ -33,9 +37,11 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
     @Override
     public StackResponse convert(Stack source) {
         StackResponse stackJson = new StackResponse();
-        Image image = imageService.getImage(source.getId());
-        if (image != null) {
+        try {
+            Image image = imageService.getImage(source.getId());
             stackJson.setImage(getConversionService().convert(image, ImageJson.class));
+        } catch (CloudbreakServiceException exc) {
+            LOGGER.info(exc.getMessage());
         }
         stackJson.setName(source.getName());
         stackJson.setOwner(source.getOwner());
