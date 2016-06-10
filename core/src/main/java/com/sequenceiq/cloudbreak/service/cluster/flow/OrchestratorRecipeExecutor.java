@@ -56,6 +56,19 @@ public class OrchestratorRecipeExecutor {
         }
     }
 
+    public void preInstall(Stack stack) throws CloudbreakException {
+        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+        InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
+        GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
+                gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
+        try {
+            hostOrchestrator.preInstallRecipes(gatewayConfig, collectNodes(stack),
+                    clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorFailedException e) {
+            throw new CloudbreakException(e);
+        }
+    }
+
     public void postInstall(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();

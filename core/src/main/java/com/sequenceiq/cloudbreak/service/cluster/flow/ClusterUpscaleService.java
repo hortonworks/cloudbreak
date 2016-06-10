@@ -103,7 +103,7 @@ public class ClusterUpscaleService {
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE, "New containers added to the cluster.");
     }
 
-    public void installFsRecipes(Long stackId, String hostGroupName) throws CloudbreakSecuritySetupException {
+    public void installFsRecipes(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start upscale cluster");
@@ -143,7 +143,7 @@ public class ClusterUpscaleService {
         LOGGER.info("Start executing pre recipes");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
-        ambariClusterConnector.executePreRecipes(stack, hostGroup, hostMetadata);
+        ambariClusterConnector.executePreRecipes(stack, hostMetadata);
     }
 
     public void installServices(Long stackId, String hostGroupName) throws CloudbreakException {
@@ -161,7 +161,7 @@ public class ClusterUpscaleService {
         LOGGER.info("Start executing post recipes");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
-        ambariClusterConnector.executePostRecipes(stack, hostGroup, hostMetadata);
+        ambariClusterConnector.executePostRecipes(stack, hostMetadata);
     }
 
     public int updateMetadata(Long stackId, String hostGroupName) throws CloudbreakSecuritySetupException {
