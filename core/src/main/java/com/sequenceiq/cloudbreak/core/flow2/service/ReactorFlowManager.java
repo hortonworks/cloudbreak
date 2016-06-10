@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.InstanceTerminationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 import reactor.bus.EventBus;
@@ -65,7 +66,7 @@ public class ReactorFlowManager {
 
     public void triggerStackSync(Long stackId) {
         String selector = FlowTriggers.STACK_SYNC_TRIGGER_EVENT;
-        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+        reactor.notify(selector, eventFactory.createEvent(new StackSyncTriggerEvent(selector, stackId, true), selector));
     }
 
     public void triggerStackRemoveInstance(Long stackId, String instanceId) {

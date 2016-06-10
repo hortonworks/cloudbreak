@@ -39,21 +39,19 @@ public class InstanceTerminationService {
 
     public void instanceTermination(InstanceTerminationContext context) {
         Stack stack = context.getStack();
-        if (!stack.isDeleteInProgress()) {
-            stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Removing instance");
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE, UPDATE_IN_PROGRESS.name());
-            InstanceMetaData instanceMetaData = context.getInstanceMetaData();
-            String hostName = instanceMetaData.getDiscoveryFQDN();
-            if (stack.getCluster() != null) {
-                HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
-                if (hostMetadata != null && HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
-                    throw new ScalingFailedException(String.format("Host (%s) is in HEALTHY state. Cannot be removed.", hostName));
-                }
+        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Removing instance");
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE, UPDATE_IN_PROGRESS.name());
+        InstanceMetaData instanceMetaData = context.getInstanceMetaData();
+        String hostName = instanceMetaData.getDiscoveryFQDN();
+        if (stack.getCluster() != null) {
+            HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
+            if (hostMetadata != null && HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
+                throw new ScalingFailedException(String.format("Host (%s) is in HEALTHY state. Cannot be removed.", hostName));
             }
-            String instanceGroupName = instanceMetaData.getInstanceGroup().getGroupName();
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP, UPDATE_IN_PROGRESS.name(),
-                    hostName, instanceGroupName);
         }
+        String instanceGroupName = instanceMetaData.getInstanceGroup().getGroupName();
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP, UPDATE_IN_PROGRESS.name(),
+                hostName, instanceGroupName);
     }
 
     public void finishInstanceTermination(InstanceTerminationContext context, RemoveInstanceResult payload) throws Exception {
