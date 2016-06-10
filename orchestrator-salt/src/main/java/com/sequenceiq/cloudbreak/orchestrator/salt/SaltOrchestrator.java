@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorCompo
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.model.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -157,36 +158,31 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void preInstallRecipes(GatewayConfig gatewayConfig, Map<String, List<RecipeModel>> recipes, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void uploadRecipes(GatewayConfig gatewayConfig, Map<String, List<RecipeModel>> recipes, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
-        LOGGER.info("Execute pre-install recipes: {}", recipes);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             PillarSave scriptPillarSave = new PillarSave(sc, recipes);
             Callable<Boolean> saltPillarRunner = runner(scriptPillarSave, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
-            //TODO upload files
-
-            // add 'pre' grain to selected host groups
-            for (String hostGroup : recipes.keySet()) {
-                Set<String> targets = allNodes.stream().filter(n -> n.getHostGroup().equals(hostGroup)).map(Node::getPrivateIp).collect(Collectors.toSet());
-                runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", "pre", Compound.CompoundType.IP), exitCriteriaModel);
-            }
-
-            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
-
-            // remove 'pre' grain from selected host groups
-            for (String hostGroup : recipes.keySet()) {
-                Set<String> targets = allNodes.stream().filter(n -> n.getHostGroup().equals(hostGroup)).map(Node::getPrivateIp).collect(Collectors.toSet());
-                runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", "pre", Compound.CompoundType.IP), exitCriteriaModel);
-            }
+            // TODO upload recipes
         } catch (Exception e) {
             LOGGER.error("Error occurred during pre-recipe execution", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+    }
+
+    @Override
+    public void preInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE);
+    }
+
+    @Override
+    public void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST);
     }
 
     @Override
@@ -236,6 +232,25 @@ public class SaltOrchestrator implements HostOrchestrator {
         Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel);
         Future<Boolean> saltCommandRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltCommandRunBootstrapRunner);
         saltCommandRunBootstrapFuture.get();
+    }
+
+    private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+            // add 'recipe' grain to all nodes
+            Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", phase.value(), Compound.CompoundType.IP), exitCriteriaModel);
+
+            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
+
+            // remove 'recipe' grain from all nodes
+            targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", phase.value(), Compound.CompoundType.IP), exitCriteriaModel);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during recipe execution", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
     }
 
     private ParallelOrchestratorComponentRunner getParallelOrchestratorComponentRunner() {

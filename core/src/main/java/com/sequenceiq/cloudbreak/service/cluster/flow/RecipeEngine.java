@@ -105,7 +105,7 @@ public class RecipeEngine {
         if (orchestratorType.containerOrchestrator()) {
             consulRecipeExecutor.executePostInstall(stack);
         } else {
-            //TODO
+            orchestratorRecipeExecutor.postInstall(stack);
         }
     }
 
