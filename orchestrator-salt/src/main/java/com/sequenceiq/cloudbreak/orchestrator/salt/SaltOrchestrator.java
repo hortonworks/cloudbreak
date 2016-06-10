@@ -37,8 +37,9 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SimpleAddGrainRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -126,16 +127,16 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.info("Pillar saved, discovery has been set up with highstate");
 
             // ambari server
-            runSaltCommand(sc, new SimpleAddGrainRunner(server, allNodes, "ambari_server"), exitCriteriaModel);
+            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitCriteriaModel);
             // ambari agent
-            runSaltCommand(sc, new SimpleAddGrainRunner(all, allNodes, "ambari_agent"), exitCriteriaModel);
+            runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent"), exitCriteriaModel);
             // kerberos
             if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new SimpleAddGrainRunner(server, allNodes, "kerberos_server"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "kerberos_server"), exitCriteriaModel);
             }
             if (configureSmartSense) {
-                runSaltCommand(sc, new SimpleAddGrainRunner(all, allNodes, "smartsense"), exitCriteriaModel);
-                runSaltCommand(sc, new SimpleAddGrainRunner(server, allNodes, "smartsense_gateway"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(all, allNodes, "smartsense"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "smartsense_gateway"), exitCriteriaModel);
             }
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
@@ -170,12 +171,18 @@ public class SaltOrchestrator implements HostOrchestrator {
             // add 'pre' grain to selected host groups
             for (String hostGroup : recipes.keySet()) {
                 Set<String> targets = allNodes.stream().filter(n -> n.getHostGroup().equals(hostGroup)).map(Node::getPrivateIp).collect(Collectors.toSet());
-                runSaltCommand(sc, new SimpleAddGrainRunner(targets, allNodes, "recipes", "pre", Compound.CompoundType.IP), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", "pre", Compound.CompoundType.IP), exitCriteriaModel);
             }
 
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
+
+            // remove 'pre' grain from selected host groups
+            for (String hostGroup : recipes.keySet()) {
+                Set<String> targets = allNodes.stream().filter(n -> n.getHostGroup().equals(hostGroup)).map(Node::getPrivateIp).collect(Collectors.toSet());
+                runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", "pre", Compound.CompoundType.IP), exitCriteriaModel);
+            }
         } catch (Exception e) {
             LOGGER.error("Error occurred during pre-recipe execution", e);
             throw new CloudbreakOrchestratorFailedException(e);

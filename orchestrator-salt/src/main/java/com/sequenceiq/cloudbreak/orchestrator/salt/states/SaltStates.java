@@ -53,6 +53,10 @@ public class SaltStates {
         return sc.run(target, "grains.append", LOCAL, ApplyResponse.class, key, value);
     }
 
+    public static ApplyResponse removeGrain(SaltConnector sc, Target<String> target, String key, String value) {
+        return sc.run(target, "grains.remove", LOCAL, ApplyResponse.class, key, value);
+    }
+
     public static ApplyResponse syncGrains(SaltConnector sc, Target<String> target) {
         return sc.run(Glob.ALL, "saltutil.sync_grains", LOCAL, ApplyResponse.class);
     }

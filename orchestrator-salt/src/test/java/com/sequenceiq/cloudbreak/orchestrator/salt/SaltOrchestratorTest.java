@@ -47,8 +47,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SimpleAddGrainRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -135,11 +135,11 @@ public class SaltOrchestratorTest {
         PillarSave pillarSave = mock(PillarSave.class);
         whenNew(PillarSave.class).withAnyArguments().thenReturn(pillarSave);
 
-        SimpleAddGrainRunner simpleAddGrainRunner = mock(SimpleAddGrainRunner.class);
-        whenNew(SimpleAddGrainRunner.class).withAnyArguments().thenReturn(simpleAddGrainRunner);
+        GrainAddRunner addRemoveGrainRunner = mock(GrainAddRunner.class);
+        whenNew(GrainAddRunner.class).withAnyArguments().thenReturn(addRemoveGrainRunner);
 
         SaltCommandTracker roleCheckerSaltCommandTracker = mock(SaltCommandTracker.class);
-        whenNew(SaltCommandTracker.class).withArguments(eq(saltConnector), eq(simpleAddGrainRunner)).thenReturn(roleCheckerSaltCommandTracker);
+        whenNew(SaltCommandTracker.class).withArguments(eq(saltConnector), eq(addRemoveGrainRunner)).thenReturn(roleCheckerSaltCommandTracker);
 
         SyncGrainsRunner syncGrainsRunner = mock(SyncGrainsRunner.class);
         whenNew(SyncGrainsRunner.class).withAnyArguments().thenReturn(syncGrainsRunner);
@@ -164,15 +164,15 @@ public class SaltOrchestratorTest {
                 .withArguments(eq(pillarSave), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
 
         // verify ambari server role
-        verifyNew(SimpleAddGrainRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getPrivateAddress())),
+        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getPrivateAddress())),
                 eq(targets), eq("ambari_server"));
 
         // verify ambari agent role
         Set<String> allNodes = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-        verifyNew(SimpleAddGrainRunner.class, times(1)).withArguments(eq(allNodes),
+        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(allNodes),
                 eq(targets), eq("ambari_agent"));
         // verify two role command (amabari server, ambari agent)
-        verifyNew(SaltCommandTracker.class, times(2)).withArguments(eq(saltConnector), eq(simpleAddGrainRunner));
+        verifyNew(SaltCommandTracker.class, times(2)).withArguments(eq(saltConnector), eq(addRemoveGrainRunner));
         // verify two OrchestratorBootstrapRunner call with rolechecker command tracker
         verifyNew(OrchestratorBootstrapRunner.class, times(2))
                 .withArguments(eq(roleCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());

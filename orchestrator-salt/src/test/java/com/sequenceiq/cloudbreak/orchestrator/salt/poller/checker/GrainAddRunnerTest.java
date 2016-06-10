@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(SaltStates.class)
-public class SimpleAddGrainRunnerTest {
+public class GrainAddRunnerTest {
 
     private Set<String> targets;
     private Set<Node> allNode;
@@ -53,7 +53,7 @@ public class SimpleAddGrainRunnerTest {
         applyResponse.setResult(result);
         PowerMockito.when(SaltStates.addGrain(any(), any(), anyString(), any())).thenReturn(applyResponse);
 
-        SimpleAddGrainRunner addRoleChecker = new SimpleAddGrainRunner(targets, allNode, "ambari_server");
+        GrainAddRunner addRoleChecker = new GrainAddRunner(targets, allNode, "ambari_server");
 
         SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
         String missingIps = addRoleChecker.submit(saltConnector);
