@@ -27,10 +27,23 @@ config_remote_jdbc() {
 }
 
 config_jdbc_drivers() {
-  LATEST_PSQL_DRIVER=$(find /var/lib/ambari-server/jdbc-drivers -name "postgresql*.jar" | tail -n1)
-  ambari-server setup --jdbc-db=postgres --jdbc-driver=${LATEST_PSQL_DRIVER}
-  LATEST_MYSQL_DRIVER=$(find /var/lib/ambari-server/jdbc-drivers -name "mysql*.jar" | tail -n1)
-  ambari-server setup --jdbc-db=mysql --jdbc-driver=${LATEST_MYSQL_DRIVER}
+  JDBC_DRIVER_DIR="/var/lib/ambari-server/jdbc-drivers"
+  if [ -d "$JDBC_DRIVER_DIR" ]; then
+    LATEST_PSQL_DRIVER=$(find /var/lib/ambari-server/jdbc-drivers -name "postgresql*.jar" | tail -n1)
+    if [ -n "$LATEST_PSQL_DRIVER" ]; then
+      ambari-server setup --jdbc-db=postgres --jdbc-driver=${LATEST_PSQL_DRIVER}
+    else
+      echo "PostgreSQL JDBC driver not found."
+    fi
+    LATEST_MYSQL_DRIVER=$(find /var/lib/ambari-server/jdbc-drivers -name "mysql*.jar" | tail -n1)
+    if [ -n "$LATEST_MYSQL_DRIVER" ]; then
+      ambari-server setup --jdbc-db=mysql --jdbc-driver=${LATEST_MYSQL_DRIVER}
+    else
+      echo "MySQL JDBC driver not found."
+    fi
+  else
+    echo "JDBC driver directory not found."
+  fi
 }
 
 # https://issues.apache.org/jira/browse/AMBARI-14627

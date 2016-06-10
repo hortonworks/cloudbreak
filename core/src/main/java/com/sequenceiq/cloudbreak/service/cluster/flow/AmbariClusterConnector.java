@@ -302,6 +302,7 @@ public class AmbariClusterConnector {
         }
         if (rdsConfig != null) {
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, rdsConfigProvider.getConfigs(rdsConfig), true);
+            blueprintText = blueprintProcessor.removeComponentFromBlueprint("MYSQL_SERVER", blueprintText);
         }
         return blueprintText;
     }

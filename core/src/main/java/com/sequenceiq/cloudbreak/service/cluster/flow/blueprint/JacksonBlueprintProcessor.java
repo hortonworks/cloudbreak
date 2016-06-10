@@ -98,6 +98,27 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
     }
 
     @Override
+    public String removeComponentFromBlueprint(String component, String blueprintText) {
+        try {
+            ObjectNode root = (ObjectNode) JsonUtil.readTree(blueprintText);
+            ArrayNode hostGroupsNode = (ArrayNode) root.path(HOST_GROUPS_NODE);
+            Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
+            while (hostGroups.hasNext()) {
+                JsonNode hostGroupNode = hostGroups.next();
+                Iterator<JsonNode> components = hostGroupNode.path("components").elements();
+                while (components.hasNext()) {
+                    if (component.equals(components.next().path("name").textValue())) {
+                        components.remove();
+                    }
+                }
+            }
+            return JsonUtil.writeValueAsString(root);
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to remove component('" + component + "') from the blueprint.", e);
+        }
+    }
+
+    @Override
     public String modifyHdpVersion(String blueprintText, String hdpVersion) {
         try {
             ObjectNode root = (ObjectNode) JsonUtil.readTree(blueprintText);

@@ -11,5 +11,7 @@ public interface BlueprintProcessor {
 
     boolean componentExistsInBlueprint(String component, String blueprintText);
 
+    String removeComponentFromBlueprint(String component, String blueprintText);
+
     String modifyHdpVersion(String originalBlueprint, String hdpVersion);
 }
