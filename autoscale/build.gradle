@@ -42,7 +42,7 @@ dependencies {
     compile group: 'org.quartz-scheduler',          name: 'quartz',                                 version: '2.2.1'
     compile group: 'dnsjava',                       name: 'dnsjava',                                version: '2.1.7'
     compile group: 'org.mybatis',                   name: 'mybatis-migrations',                     version: '3.2.0'
-    compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',                  version: '1.5.6'
+    compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',                  version: swaggerVersion
 
     testCompile group: 'junit',                     name: 'junit',                                  version: '4.11'
     testCompile group: 'org.mockito',               name: 'mockito-all',                            version: '1.9.5'

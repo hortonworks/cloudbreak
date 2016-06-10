@@ -21,23 +21,10 @@ start_nginx() {
   ${sudopre} sudo ${sudocheck} chkconfig nginx on
 }
 
-untar_salt() {
-  MAX_RETRIES=60
-  retries=0
-  while ((retries++ < MAX_RETRIES)) && [ ! -d "/tmp/salt" ]; do
-    echo Trying to unzip salt.zip
-    cd /tmp && unzip salt.zip &> /dev/null
-    sleep 2
-  done
-  ${sudopre} sudo ${sudocheck} cp -r /tmp/salt/ /srv
-  ${sudopre} sudo ${sudocheck} cp -r /tmp/pillar/ /srv
-}
-
 setup_tls() {
   setup_cbclient_cert
   create_certificates
   start_nginx
-  untar_salt
 }
 
 main() {
