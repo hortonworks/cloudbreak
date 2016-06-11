@@ -1,3 +1,7 @@
+create_recipe_log_dir:
+  file.directory:
+    - name: /var/log/recipes
+
 {% for hg, args in pillar.get('recipes', {}).items() %}
 {% if grains['hostgroup'] == hg %}
 {% for scrip_name in args['pre'] %}

@@ -38,7 +38,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
@@ -295,27 +294,10 @@ public class AmbariClusterConnector {
         }
     }
 
-    public void installFsRecipes(Stack stack, HostGroup hostGroup) throws CloudbreakException {
-        // TODO remove as there is no point for this
-        recipeEngine.addFsRecipes(stack, Sets.newHashSet(hostGroup));
-    }
-
     public void waitForAmbariHosts(Stack stack) throws CloudbreakSecuritySetupException {
         AmbariClient ambariClient = getSecureAmbariClient(stack);
         Set<HostMetadata> hostMetadata = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
         waitForHosts(stack, ambariClient, hostMetadata);
-    }
-
-    public void configureSssd(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
-        recipeEngine.configureSssd(stack, hostMetadata);
-    }
-
-    public void installRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata) throws CloudbreakException {
-        recipeEngine.installRecipes(stack, hostGroup, hostMetadata);
-    }
-
-    public void executePreRecipes(Stack stack, Set<HostMetadata> metaData) throws CloudbreakException {
-        recipeEngine.executeUpscalePreInstall(stack, metaData);
     }
 
     public void installServices(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata)
@@ -325,25 +307,6 @@ public class AmbariClusterConnector {
         PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
                 installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
         checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_UPSCALE_FAILED.code()));
-    }
-
-    public void executePostRecipes(Stack stack, Set<HostMetadata> metaData) throws CloudbreakException {
-        recipeEngine.executePostInstall(stack, metaData);
-    }
-
-    public void updateFailedHostMetaData(Set<HostMetadata> hostMetadata) {
-        List<String> upscaleHostNames = getHostNames(hostMetadata);
-        Set<String> successHosts = new HashSet<>(upscaleHostNames);
-        updateFailedHostMetaData(successHosts, hostMetadata);
-    }
-
-    private void updateFailedHostMetaData(Set<String> successHosts, Set<HostMetadata> hostMetadata) {
-        for (HostMetadata metaData : hostMetadata) {
-            if (!successHosts.contains(metaData.getHostName())) {
-                metaData.setHostMetadataState(HostMetadataState.UNHEALTHY);
-                hostMetadataRepository.save(metaData);
-            }
-        }
     }
 
     private AmbariClient getDefaultAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {

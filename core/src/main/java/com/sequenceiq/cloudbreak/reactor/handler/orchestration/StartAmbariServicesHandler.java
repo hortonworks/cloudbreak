@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.reactor.handler.cluster;
+package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
 import javax.inject.Inject;
 
@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariServicesFailed;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariServicesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariServicesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 
 import reactor.bus.Event;

@@ -3,37 +3,21 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.AddClusterContainersResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ConfigureSssdResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExecutePostRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExecutePreRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.InstallFsRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.InstallRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.InstallServicesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpdateMetadataResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.WaitForAmbariHostsResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePreRecipesResult;
 
 public enum ClusterUpscaleEvent implements FlowEvent {
-
-    ADD_CONTAINERS_EVENT(FlowTriggers.CLUSTER_UPSCALE_TRIGGER_EVENT),
-    ADD_CONTAINERS_FINISHED_EVENT(EventSelectorUtil.selector(AddClusterContainersResult.class)),
-    ADD_CONTAINERS_FAILED_EVENT(EventSelectorUtil.failureSelector(AddClusterContainersResult.class)),
-    INSTALL_FS_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(InstallFsRecipesResult.class)),
-    INSTALL_FS_RECIPES_FAILED_EVENT(EventSelectorUtil.failureSelector(InstallFsRecipesResult.class)),
-    WAIT_FOR_AMBARI_HOSTS_FINISHED_EVENT(EventSelectorUtil.selector(WaitForAmbariHostsResult.class)),
-    WAIT_FOR_AMBARI_HOSTS_FAILED_EVENT(EventSelectorUtil.failureSelector(WaitForAmbariHostsResult.class)),
-    SSSD_CONFIG_FINISHED_EVENT(EventSelectorUtil.selector(ConfigureSssdResult.class)),
-    SSSD_CONFIG_FAILED_EVENT(EventSelectorUtil.failureSelector(ConfigureSssdResult.class)),
-    INSTALL_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(InstallRecipesResult.class)),
-    INSTALL_RECIPES_FAILED_EVENT(EventSelectorUtil.failureSelector(InstallRecipesResult.class)),
-    EXECUTE_PRE_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(ExecutePreRecipesResult.class)),
-    EXECUTE_PRE_RECIPES_FAILED_EVENT(EventSelectorUtil.failureSelector(ExecutePreRecipesResult.class)),
-    INSTALL_SERVICES_FINISHED_EVENT(EventSelectorUtil.selector(InstallServicesResult.class)),
-    INSTALL_SERVICES_FAILED_EVENT(EventSelectorUtil.failureSelector(InstallServicesResult.class)),
-    EXECUTE_POST_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(ExecutePostRecipesResult.class)),
-    EXECUTE_POST_RECIPES_FAILED_EVENT(EventSelectorUtil.failureSelector(ExecutePostRecipesResult.class)),
-    UPDATE_METADATA_FINISHED_EVENT(EventSelectorUtil.selector(UpdateMetadataResult.class)),
-    UPDATE_METADATA_FAILED_EVENT(EventSelectorUtil.failureSelector(UpdateMetadataResult.class)),
+    CLUSTER_UPSCALE_TRIGGER_EVENT(FlowTriggers.CLUSTER_UPSCALE_TRIGGER_EVENT),
+    UPSCALE_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleAmbariResult.class)),
+    UPSCALE_AMBARI_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscaleAmbariResult.class)),
+    EXECUTE_PRERECIPES_FINISHED_EVENT(EventSelectorUtil.selector(UpscalePreRecipesResult.class)),
+    EXECUTE_PRERECIPES_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscalePreRecipesResult.class)),
+    CLUSTER_UPSCALE_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleClusterResult.class)),
+    CLUSTER_UPSCALE_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscaleClusterResult.class)),
+    EXECUTE_POSTRECIPES_FINISHED_EVENT(EventSelectorUtil.selector(UpscalePostRecipesResult.class)),
+    EXECUTE_POSTRECIPES_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscalePostRecipesResult.class)),
     FINALIZED_EVENT("CLUSTERUPSCALEFINALIZEDEVENT"),
     FAILURE_EVENT("CLUSTERUPSCALEFAILUREEVENT"),
     FAIL_HANDLED_EVENT("CLUSTERUPSCALEFAILHANDLEDEVENT");

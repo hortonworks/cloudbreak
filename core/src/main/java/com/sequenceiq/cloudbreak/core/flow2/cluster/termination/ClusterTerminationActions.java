@@ -15,8 +15,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterTerminationRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterTerminationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 
 @Configuration
 public class ClusterTerminationActions {

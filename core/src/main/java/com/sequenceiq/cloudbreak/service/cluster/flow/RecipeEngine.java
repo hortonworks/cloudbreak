@@ -75,18 +75,26 @@ public class RecipeEngine {
             if (orchestratorType.containerOrchestrator()) {
                 consulRecipeExecutor.preInstall(stack, hostGroups);
             } else {
-                orchestratorRecipeExecutor.preInstall(stack, hostGroups);
+                orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
+                orchestratorRecipeExecutor.preInstall(stack);
             }
         }
     }
 
-    public void executeUpscalePreInstall(Stack stack, Set<HostMetadata> metaData) throws CloudbreakException {
-        String orchestrator = stack.getOrchestrator().getType();
-        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
-        if (orchestratorType.containerOrchestrator()) {
-            consulRecipeExecutor.executePreInstall(stack, metaData);
-        } else {
-            orchestratorRecipeExecutor.preInstall(stack);
+    public void executeUpscalePreInstall(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaData) throws CloudbreakException {
+        Set<HostGroup> hostGroups = Collections.singleton(hostGroup);
+        configureSssd(stack, metaData);
+        addFsRecipes(stack, hostGroups);
+        boolean recipesFound = recipesFound(hostGroups);
+        if (recipesFound) {
+            String orchestrator = stack.getOrchestrator().getType();
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
+            if (orchestratorType.containerOrchestrator()) {
+                consulRecipeExecutor.setupRecipesOnHosts(stack, hostGroup.getRecipes(), metaData);
+                consulRecipeExecutor.executePreInstall(stack, metaData);
+            } else {
+                orchestratorRecipeExecutor.preInstall(stack);
+            }
         }
     }
 
@@ -100,7 +108,7 @@ public class RecipeEngine {
         }
     }
 
-    public void executePostInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
+    public void executeUpscalePostInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
         String orchestrator = stack.getOrchestrator().getType();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
         if (orchestratorType.containerOrchestrator()) {
@@ -110,7 +118,7 @@ public class RecipeEngine {
         }
     }
 
-    public void addFsRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    private void addFsRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         String orchestrator = stack.getOrchestrator().getType();
         if (SWARM.equals(orchestrator) || SALT.equals(orchestrator)) {
             Cluster cluster = stack.getCluster();
@@ -145,7 +153,7 @@ public class RecipeEngine {
         }
     }
 
-    public void configureSssd(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
+    private void configureSssd(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
         if (stack.getCluster().getSssdConfig() != null) {
             List<String> sssdPayload = generateSssdRecipePayload(stack);
             String orchestrator = stack.getOrchestrator().getType();
@@ -154,18 +162,6 @@ public class RecipeEngine {
                 consulRecipeExecutor.configureSssd(stack, hostMetadata, sssdPayload);
             } else {
                 //TODO
-            }
-        }
-    }
-
-    public void installRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata) throws CloudbreakException {
-        if (recipesFound(Sets.newHashSet(hostGroup))) {
-            String orchestrator = stack.getOrchestrator().getType();
-            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
-            if (orchestratorType.containerOrchestrator()) {
-                consulRecipeExecutor.setupRecipesOnHosts(stack, hostGroup.getRecipes(), hostMetadata);
-            } else {
-                LOGGER.info("Install recipe is not required in case of host orchestrator");
             }
         }
     }

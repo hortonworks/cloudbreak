@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -101,50 +102,6 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private void uploadSaltConfig(SaltConnector saltConnector) throws IOException {
-        byte[] byteArray = zipSaltConfig();
-        LOGGER.info("Upload salt.zip to /tmp/salt.zip");
-        saltConnector.upload("/srv", "salt.zip", new ByteArrayInputStream(byteArray));
-    }
-
-    private byte[] zipSaltConfig() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ZipOutputStream zout = new ZipOutputStream(baos);
-            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Map<String, List<Resource>> structure = new TreeMap<>();
-            for (Resource resource : resolver.getResources("classpath*:salt/**")) {
-                String path = resource.getURL().getPath();
-                String dir = path.substring(path.indexOf("/salt") + "/salt".length(), path.lastIndexOf("/") + 1);
-                List<Resource> list = structure.get(dir);
-                if (list == null) {
-                    list = new ArrayList<>();
-                }
-                structure.put(dir, list);
-                if (!path.endsWith("/")) {
-                    list.add(resource);
-                }
-            }
-            for (String dir : structure.keySet()) {
-                zout.putNextEntry(new ZipEntry(dir));
-                for (Resource resource : structure.get(dir)) {
-                    LOGGER.info("Zip salt entry: {}", resource.getFilename());
-                    zout.putNextEntry(new ZipEntry(dir + resource.getFilename()));
-                    InputStream inputStream = resource.getInputStream();
-                    byte[] bytes = IOUtils.toByteArray(inputStream);
-                    zout.write(bytes);
-                    zout.closeEntry();
-                }
-            }
-            zout.close();
-            baos.close();
-        } catch (IOException e) {
-            LOGGER.error("Failed to zip salt configurations", e);
-            throw new IOException("Failed to zip salt configurations", e);
-        }
-        return baos.toByteArray();
-    }
-
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
@@ -222,9 +179,18 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
-            // TODO upload recipes
+            for (List<RecipeModel> recipeList : recipes.values()) {
+                for (RecipeModel model : recipeList) {
+                    if (model.getPreInstall() != null) {
+                        uploadRecipe(sc, model.getName(), model.getPreInstall(), RecipeExecutionPhase.PRE);
+                    }
+                    if (model.getPostInstall() != null) {
+                        uploadRecipe(sc, model.getName(), model.getPostInstall(), RecipeExecutionPhase.POST);
+                    }
+                }
+            }
         } catch (Exception e) {
-            LOGGER.error("Error occurred during pre-recipe execution", e);
+            LOGGER.error("Error occurred during recipe upload", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -316,5 +282,63 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
         return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), MAX_RETRY_COUNT, SLEEP_TIME);
+    }
+
+    private void uploadSaltConfig(SaltConnector saltConnector) throws IOException {
+        byte[] byteArray = zipSaltConfig();
+        LOGGER.info("Upload salt.zip to /tmp/salt.zip");
+        saltConnector.upload("/srv", "salt.zip", new ByteArrayInputStream(byteArray));
+    }
+
+    private byte[] zipSaltConfig() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ZipOutputStream zout = new ZipOutputStream(baos);
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Map<String, List<Resource>> structure = new TreeMap<>();
+            for (Resource resource : resolver.getResources("classpath*:salt/**")) {
+                String path = resource.getURL().getPath();
+                String dir = path.substring(path.indexOf("/salt") + "/salt".length(), path.lastIndexOf("/") + 1);
+                List<Resource> list = structure.get(dir);
+                if (list == null) {
+                    list = new ArrayList<>();
+                }
+                structure.put(dir, list);
+                if (!path.endsWith("/")) {
+                    list.add(resource);
+                }
+            }
+            for (String dir : structure.keySet()) {
+                zout.putNextEntry(new ZipEntry(dir));
+                for (Resource resource : structure.get(dir)) {
+                    LOGGER.info("Zip salt entry: {}", resource.getFilename());
+                    zout.putNextEntry(new ZipEntry(dir + resource.getFilename()));
+                    InputStream inputStream = resource.getInputStream();
+                    byte[] bytes = IOUtils.toByteArray(inputStream);
+                    zout.write(bytes);
+                    zout.closeEntry();
+                }
+            }
+            zout.close();
+            baos.close();
+        } catch (IOException e) {
+            LOGGER.error("Failed to zip salt configurations", e);
+            throw new IOException("Failed to zip salt configurations", e);
+        }
+        return baos.toByteArray();
+    }
+
+    private void uploadRecipe(SaltConnector sc, String name, String recipe, RecipeExecutionPhase phase) {
+        final byte[] recipeBytes = recipe.getBytes(StandardCharsets.UTF_8);
+        LOGGER.info("Upload '{}' recipe: {}", phase.value(), name);
+        try {
+            if (RecipeExecutionPhase.PRE.equals(phase)) {
+                sc.upload("/srv/salt/pre-recipes/scripts", name, new ByteArrayInputStream(recipeBytes));
+            } else {
+                sc.upload("/srv/salt/post-recipes/scripts", name, new ByteArrayInputStream(recipeBytes));
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Cannot upload recipe: {}", recipe);
+        }
     }
 }

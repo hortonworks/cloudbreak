@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-: ${LOGFILE:=/var/log/consul-watch/consul_handler.log}
+: ${LOGFILE:=/var/log/recipes/hdfs-home.log}
 
 create_user_home(){
 su hdfs<<EOF

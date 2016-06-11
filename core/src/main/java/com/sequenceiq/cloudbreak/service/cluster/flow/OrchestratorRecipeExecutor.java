@@ -39,7 +39,7 @@ public class OrchestratorRecipeExecutor {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public void preInstall(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         Map<String, List<RecipeModel>> recipeMap = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
                 .collect(Collectors.toMap(HostGroup::getName, h -> convert(h.getRecipes())));
@@ -48,8 +48,6 @@ public class OrchestratorRecipeExecutor {
                 gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
         try {
             hostOrchestrator.uploadRecipes(gatewayConfig, recipeMap, collectNodes(stack),
-                    clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
-            hostOrchestrator.preInstallRecipes(gatewayConfig, collectNodes(stack),
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);

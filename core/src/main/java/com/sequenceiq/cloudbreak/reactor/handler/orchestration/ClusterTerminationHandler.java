@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.reactor.handler.cluster;
+package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
 import javax.inject.Inject;
 
@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.reactor.ClusterEventHandler;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterTerminationRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterTerminationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
