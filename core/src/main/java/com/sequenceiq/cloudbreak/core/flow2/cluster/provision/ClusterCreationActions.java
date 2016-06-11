@@ -18,8 +18,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariServicesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariServicesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
 
 @Configuration

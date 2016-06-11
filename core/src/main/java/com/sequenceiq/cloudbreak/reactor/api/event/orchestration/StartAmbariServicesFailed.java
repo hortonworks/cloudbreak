@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.reactor.api.event.cluster;
+package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 

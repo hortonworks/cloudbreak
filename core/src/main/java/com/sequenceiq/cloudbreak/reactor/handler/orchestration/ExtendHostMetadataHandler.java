@@ -1,9 +1,10 @@
-package com.sequenceiq.cloudbreak.reactor;
+package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.reactor.ClusterEventHandler;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.service.stack.flow.HostMetadataSetup;

@@ -1,12 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FINALIZED_EVENT;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,210 +15,112 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
-import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.AddClusterContainersResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ConfigureSssdRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ConfigureSssdResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExecutePostRecipesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExecutePostRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExecutePreRecipesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExecutePreRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.InstallFsRecipesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.InstallFsRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.InstallRecipesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.InstallRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.InstallServicesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.InstallServicesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpdateMetadataRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpdateMetadataResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.WaitForAmbariHostsRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.WaitForAmbariHostsResult;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePreRecipesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePreRecipesResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Configuration
 public class ClusterUpscaleActions {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleActions.class);
-
     @Inject
-    private ClusterService clusterService;
+    private ClusterUpscaleFlowService clusterUpscaleFlowService;
 
-    @Inject
-    private FlowMessageService flowMessageService;
-
-    @Bean(name = "INSTALL_FS_RECIPES_STATE")
-    public Action installFsRecipesAction() {
-        return new AbstractClusterUpscaleAction<AddClusterContainersResult>(AddClusterContainersResult.class) {
+    @Bean(name = "UPSCALING_AMBARI_STATE")
+    public Action upscalingAmbariAction() {
+        return new AbstractClusterUpscaleAction<ClusterScaleTriggerEvent>(ClusterScaleTriggerEvent.class) {
+            @Override
+            protected void prepareExecution(ClusterScaleTriggerEvent payload, Map<Object, Object> variables) {
+                variables.put(HOSTGROUPNAME, payload.getHostGroupName());
+                variables.put(ADJUSTMENT, payload.getAdjustment());
+            }
 
             @Override
-            protected void doExecute(final ClusterUpscaleContext context, final AddClusterContainersResult payload, Map<Object, Object> variables)
+            protected void doExecute(final ClusterUpscaleContext context, final ClusterScaleTriggerEvent payload, Map<Object, Object> variables)
                     throws Exception {
-                flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
+                clusterUpscaleFlowService.upscalingAmbari(context.getStack());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new InstallFsRecipesRequest(context.getStack().getId(), context.getHostGroupName());
+                return new UpscaleAmbariRequest(context.getStack().getId(), context.getHostGroupName(), context.getAdjustment());
             }
+
         };
     }
 
-    @Bean(name = "WAIT_FOR_AMBARI_HOSTS_STATE")
-    public Action waitForAmbariHostsAction() {
-        return new AbstractClusterUpscaleAction<InstallFsRecipesResult>(InstallFsRecipesResult.class) {
-
+    @Bean(name = "EXECUTING_PRERECIPES_STATE")
+    public Action executingPrerecipesAction() {
+        return new AbstractClusterUpscaleAction<UpscaleAmbariResult>(UpscaleAmbariResult.class) {
             @Override
-            protected void doExecute(final ClusterUpscaleContext context, final InstallFsRecipesResult payload, Map<Object, Object> variables)
-                    throws Exception {
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new WaitForAmbariHostsRequest(context.getStack().getId(), context.getHostGroupName());
-            }
-        };
-    }
-
-    @Bean(name = "CONFIGURE_SSSD_STATE")
-    public Action configureSssdAction() {
-        return new AbstractClusterUpscaleAction<WaitForAmbariHostsResult>(WaitForAmbariHostsResult.class) {
-
-            @Override
-            protected void doExecute(final ClusterUpscaleContext context, final WaitForAmbariHostsResult payload, Map<Object, Object> variables)
+            protected void doExecute(final ClusterUpscaleContext context, final UpscaleAmbariResult payload, Map<Object, Object> variables)
                     throws Exception {
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new ConfigureSssdRequest(context.getStack().getId(), context.getHostGroupName());
+                return new UpscalePreRecipesRequest(context.getStack().getId(), context.getHostGroupName());
             }
         };
     }
 
-    @Bean(name = "INSTALL_RECIPES_STATE")
-    public Action installRecipesAction() {
-        return new AbstractClusterUpscaleAction<ConfigureSssdResult>(ConfigureSssdResult.class) {
-
-            @Override
-            protected void doExecute(final ClusterUpscaleContext context, final ConfigureSssdResult payload, Map<Object, Object> variables)
-                    throws Exception {
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new InstallRecipesRequest(context.getStack().getId(), context.getHostGroupName());
-            }
-        };
-    }
-
-    @Bean(name = "EXECUTE_PRE_RECIPES_STATE")
-    public Action executePreRecipesAction() {
-        return new AbstractClusterUpscaleAction<InstallRecipesResult>(InstallRecipesResult.class) {
-
-            @Override
-            protected void doExecute(final ClusterUpscaleContext context, final InstallRecipesResult payload, Map<Object, Object> variables)
-                    throws Exception {
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new ExecutePreRecipesRequest(context.getStack().getId(), context.getHostGroupName());
-            }
-        };
-    }
-
-    @Bean(name = "INSTALL_SERVICES_STATE")
+    @Bean(name = "UPSCALING_CLUSTER_STATE")
     public Action installServicesAction() {
-        return new AbstractClusterUpscaleAction<ExecutePreRecipesResult>(ExecutePreRecipesResult.class) {
+        return new AbstractClusterUpscaleAction<UpscalePreRecipesResult>(UpscalePreRecipesResult.class) {
 
             @Override
-            protected void doExecute(final ClusterUpscaleContext context, final ExecutePreRecipesResult payload, Map<Object, Object> variables)
+            protected void doExecute(final ClusterUpscaleContext context, final UpscalePreRecipesResult payload, Map<Object, Object> variables)
                     throws Exception {
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new InstallServicesRequest(context.getStack().getId(), context.getHostGroupName());
+                return new UpscaleClusterRequest(context.getStack().getId(), context.getHostGroupName());
             }
         };
     }
 
-    @Bean(name = "EXECUTE_POST_RECIPES_STATE")
+    @Bean(name = "EXECUTING_POSTRECIPES_STATE")
     public Action executePostRecipesAction() {
-        return new AbstractClusterUpscaleAction<InstallServicesResult>(InstallServicesResult.class) {
+        return new AbstractClusterUpscaleAction<UpscaleClusterResult>(UpscaleClusterResult.class) {
 
             @Override
-            protected void doExecute(final ClusterUpscaleContext context, final InstallServicesResult payload, Map<Object, Object> variables)
+            protected void doExecute(final ClusterUpscaleContext context, final UpscaleClusterResult payload, Map<Object, Object> variables)
                     throws Exception {
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new ExecutePostRecipesRequest(context.getStack().getId(), context.getHostGroupName());
-            }
-        };
-    }
-
-    @Bean(name = "UPDATE_METADATA_STATE")
-    public Action updateMetadataAction() {
-        return new AbstractClusterUpscaleAction<ExecutePostRecipesResult>(ExecutePostRecipesResult.class) {
-
-            @Override
-            protected void doExecute(ClusterUpscaleContext context, ExecutePostRecipesResult payload, Map<Object, Object> variables) throws Exception {
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new UpdateMetadataRequest(context.getStack().getId(), context.getHostGroupName());
+                return new UpscalePostRecipesRequest(context.getStack().getId(), context.getHostGroupName());
             }
         };
     }
 
     @Bean(name = "FINALIZE_UPSCALE_STATE")
     public Action upscaleFinishedAction() {
-        return new AbstractClusterUpscaleAction<UpdateMetadataResult>(UpdateMetadataResult.class) {
-
-            @Inject
-            private EmailSenderService emailSenderService;
+        return new AbstractClusterUpscaleAction<UpscalePostRecipesResult>(UpscalePostRecipesResult.class) {
 
             @Override
-            protected void doExecute(ClusterUpscaleContext context, UpdateMetadataResult payload, Map<Object, Object> variables) throws Exception {
-                Stack stack = context.getStack();
-                int failedHosts = payload.getFailedHosts();
-                boolean success = failedHosts == 0;
-                if (success) {
-                    LOGGER.info("Cluster upscaled successfully");
-                    clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
-                    flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
-                    if (stack.getCluster().getEmailNeeded()) {
-                        emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
-                        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
-                    }
-                } else {
-                    LOGGER.info("Cluster upscale failed. {} hosts failed to upscale", failedHosts);
-                    clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED);
-                    flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added",
-                            String.format("Ambari upscale operation failed on %d node(s).", failedHosts));
-                }
+            protected void doExecute(ClusterUpscaleContext context, UpscalePostRecipesResult payload, Map<Object, Object> variables) throws Exception {
+                clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), payload.getHostGroupName());
                 sendEvent(context.getFlowId(), FINALIZED_EVENT.stringRepresentation(), payload);
             }
 
@@ -234,48 +132,21 @@ public class ClusterUpscaleActions {
     }
 
     @Bean(name = "CLUSTER_UPSCALE_FAILED_STATE")
-    public Action clusterupscaleFailedAction() {
-        return new AbstractClusterUpscaleAction<UpscaleClusterFailedPayload>(UpscaleClusterFailedPayload.class) {
-            @Inject
-            private StackUpdater stackUpdater;
+    public Action clusterUpscaleFailedAction() {
+        return new AbstractStackFailureAction<ClusterUpscaleState, ClusterUpscaleEvent>() {
 
             @Override
-            protected void doExecute(ClusterUpscaleContext context, UpscaleClusterFailedPayload payload, Map<Object, Object> variables) throws Exception {
-                getFlow(context.getFlowId()).setFlowFailed();
-                Exception errorDetails = payload.getErrorDetails();
-                LOGGER.error("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
-                Stack stack = context.getStack();
-                clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED, errorDetails.getMessage());
-                stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, String.format("New node(s) could not be added to the cluster: %s", errorDetails));
-                flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added", errorDetails);
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+                clusterUpscaleFlowService.clusterUpscaleFailed(context.getStack(), payload.getException());
                 sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.stringRepresentation(), payload);
-            }
-
-            @Override
-            protected void initPayloadConverterMap(List<PayloadConverter<UpscaleClusterFailedPayload>> payloadConverters) {
-                payloadConverters.add(new PayloadConverter<UpscaleClusterFailedPayload>() {
-                    @Override
-                    public boolean canConvert(Class sourceClass) {
-                        return AbstractClusterScaleResult.class.isAssignableFrom(sourceClass);
-                    }
-
-                    @Override
-                    public UpscaleClusterFailedPayload convert(Object payload) {
-                        AbstractClusterScaleResult result = (AbstractClusterScaleResult) payload;
-                        return new UpscaleClusterFailedPayload(result.getStackId(), result.getHostGroupName(), result.getErrorDetails());
-                    }
-                });
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterUpscaleContext context) {
-                return null;
             }
         };
     }
 
-    private abstract class AbstractClusterUpscaleAction<P extends HostGroupPayload>
+    private abstract class AbstractClusterUpscaleAction<P extends Payload>
             extends AbstractAction<ClusterUpscaleState, ClusterUpscaleEvent, ClusterUpscaleContext, P> {
+        protected static final String HOSTGROUPNAME = "HOSTGROUPNAME";
+        protected static final String ADJUSTMENT = "ADJUSTMENT";
 
         @Inject
         private StackService stackService;
@@ -286,21 +157,23 @@ public class ClusterUpscaleActions {
 
         @Override
         protected Object getFailurePayload(P payload, Optional<ClusterUpscaleContext> flowContext, Exception ex) {
-            UpscaleClusterFailedPayload failurePayload;
-            if (flowContext.isPresent()) {
-                ClusterUpscaleContext context = flowContext.get();
-                failurePayload = new UpscaleClusterFailedPayload(context.getStack().getId(), context.getHostGroupName(), ex);
-            } else {
-                failurePayload = new UpscaleClusterFailedPayload(payload.getStackId(), null, ex);
-            }
-            return failurePayload;
+            return new StackFailureEvent(payload.getStackId(), ex);
         }
 
         @Override
         protected ClusterUpscaleContext createFlowContext(String flowId, StateContext<ClusterUpscaleState, ClusterUpscaleEvent> stateContext, P payload) {
+            Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             Stack stack = stackService.getById(payload.getStackId());
-            MDCBuilder.buildMdcContext(stack);
-            return new ClusterUpscaleContext(flowId, stack, payload.getHostGroupName());
+            MDCBuilder.buildMdcContext(stack.getCluster());
+            return new ClusterUpscaleContext(flowId, stack, getHostgroupName(variables), getAdjustment(variables));
+        }
+
+        private String getHostgroupName(Map<Object, Object> variables) {
+            return (String) variables.get(HOSTGROUPNAME);
+        }
+
+        private Integer getAdjustment(Map<Object, Object> variables) {
+            return (Integer) variables.get(ADJUSTMENT);
         }
     }
 }
