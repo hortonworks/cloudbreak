@@ -38,7 +38,7 @@ cb:
     external.id: provision-ambari
     cf.template.new.path: templates/aws-cf-stack.ftl
   
-  blueprint.defaults: hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster,hdp-ephemeral
+  blueprint.defaults: hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster,hdp-etl-edw
   template.defaults: minviable-gcp,minviable-azure,minviable-aws
   custom.user.data: |
     touch /tmp/custom-user-data
