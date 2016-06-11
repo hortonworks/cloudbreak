@@ -422,12 +422,13 @@ util-token() {
     declare desc="Generates an OAuth token with CloudbreakShell scopes"
 
     cloudbreak-config
-    local TOKEN=$(curl -siX POST \
+    local TOKEN=$(curl -sX POST \
+        -w '%{redirect_url}' \
         -H "accept: application/x-www-form-urlencoded" \
         -d credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${UAA_DEFAULT_USER_PW}'"}' \
         "${PUBLIC_IP}:8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
-           | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
-    info TOKEN=$TOKEN
+           | cut -d'&' -f 2)
+    info $TOKEN
 }
 
 util-local-dev() {
