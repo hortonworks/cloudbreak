@@ -138,7 +138,7 @@ public class ClusterDownscaleActions {
                 LOGGER.error("Error during Cluster downscale flow: " + message, payload.getErrorDetails());
                 clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED, message);
                 stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Node(s) could not be removed from the cluster: " + message);
-                flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed", message);
+                flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", message);
                 sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.stringRepresentation(), payload);
             }
 

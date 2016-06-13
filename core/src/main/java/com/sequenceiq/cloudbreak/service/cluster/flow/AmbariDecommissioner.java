@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
@@ -97,6 +98,8 @@ public class AmbariDecommissioner {
     private CloudbreakEventService eventService;
     @Inject
     private PollingService<AmbariHostsWithNames> rsPollerService;
+    @Inject
+    private PollingService<AmbariClientPollerObject> ambariClientPollingService;
     @Inject
     private DNDecommissionStatusCheckerTask dnDecommissionStatusCheckerTask;
     @Inject
@@ -223,7 +226,7 @@ public class AmbariDecommissioner {
         int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
         verifyNodeCount(replication, scalingAdjustment, filteredHostList, reservedInstances);
         if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup.getName())) {
-            downScaleCandidates = checkAndSortByAvailableSpace(ambariClient, replication, scalingAdjustment, filteredHostList);
+            downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication, scalingAdjustment, filteredHostList);
         } else {
             downScaleCandidates = filteredHostList;
         }
@@ -254,9 +257,10 @@ public class AmbariDecommissioner {
         return client.getBlueprintMap(blueprint).get(hostGroup).contains(DATANODE);
     }
 
-    private List<HostMetadata> checkAndSortByAvailableSpace(AmbariClient client, int replication, int adjustment, List<HostMetadata> filteredHostList) {
+    private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication, int adjustment,
+            List<HostMetadata> filteredHostList) {
         int removeCount = Math.abs(adjustment);
-        Map<String, Map<Long, Long>> dfsSpace = client.getDFSSpace();
+        Map<String, Map<Long, Long>> dfsSpace = getDFSSpace(stack, client);
         Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
         Map<String, Long> selectedNodes = selectNodes(sortedAscending, filteredHostList, removeCount);
         Map<String, Long> remainingNodes = removeSelected(sortedAscending, selectedNodes);
@@ -273,6 +277,18 @@ public class AmbariDecommissioner {
             );
         }
         return convert(selectedNodes, filteredHostList);
+    }
+
+    private Map<String, Map<Long, Long>> getDFSSpace(Stack stack, AmbariClient client) {
+        AmbariDFSSpaceRetrievalTask dfsSpaceTask = new AmbariDFSSpaceRetrievalTask();
+        PollingResult result = ambariClientPollingService.pollWithTimeoutSingleFailure(dfsSpaceTask, new AmbariClientPollerObject(stack, client),
+                AmbariDFSSpaceRetrievalTask.AMBARI_RETRYING_INTERVAL, AmbariDFSSpaceRetrievalTask.AMBARI_RETRYING_COUNT);
+        if (result == PollingResult.SUCCESS) {
+            return dfsSpaceTask.getDfsSpace();
+        } else {
+            throw new CloudbreakServiceException("Failed to get dfs space from ambari!");
+
+        }
     }
 
     private Map<String, Long> selectNodes(Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {

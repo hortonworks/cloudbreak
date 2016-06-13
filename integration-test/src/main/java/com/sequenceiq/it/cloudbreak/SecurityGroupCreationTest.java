@@ -14,7 +14,7 @@ public class SecurityGroupCreationTest extends AbstractCloudbreakIntegrationTest
 
     @Test
     @Parameters({ "name", "ports" })
-    public void testSecurityGroupCreation(@Optional("it-restricted-ambari") String name, @Optional("22,9443,8080") String ports) throws Exception {
+    public void testSecurityGroupCreation(@Optional("it-restricted-ambari") String name, @Optional("22,443,9443,8080") String ports) throws Exception {
         // GIVEN
         // WHEN
         SecurityGroupJson securityGroupJson = new SecurityGroupJson();

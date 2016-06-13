@@ -66,7 +66,7 @@ public class ClusterUpscaleFlowService {
         } else {
             LOGGER.info("Cluster upscale failed. {} hosts failed to upscale", numOfFailedHosts);
             clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED);
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added",
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to",
                     String.format("Ambari upscale operation failed on %d node(s).", numOfFailedHosts));
         }
     }
@@ -75,7 +75,7 @@ public class ClusterUpscaleFlowService {
         LOGGER.error("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED, errorDetails.getMessage());
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, String.format("New node(s) could not be added to the cluster: %s", errorDetails));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added", errorDetails);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
     }
 
     private int updateMetadata(Stack stack, String hostGroupName) {
