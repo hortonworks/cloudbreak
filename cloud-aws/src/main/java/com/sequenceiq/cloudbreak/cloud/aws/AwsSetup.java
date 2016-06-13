@@ -170,7 +170,8 @@ public class AwsSetup implements Setup {
         for (int i = 0; i < statement.length(); i++) {
             JSONArray action = statement.getJSONObject(i).getJSONArray("Action");
             for (int j = 0; j < action.length(); j++) {
-                if (action.get(j).toString().replaceAll(" ", "").toLowerCase().equals("iam:*")) {
+                String actionEntry = action.get(j).toString().replaceAll(" ", "").toLowerCase();
+                if ("iam:createrole".equals(actionEntry) || "iam:*".equals(actionEntry)) {
                     LOGGER.info("Role has able to operate on iam resources: {}.", action.get(j).toString());
                     return true;
                 }
