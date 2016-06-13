@@ -35,7 +35,10 @@ public class SaltApiRunPostResponse extends ITResponse {
     public Object handle(Request request, Response response) throws Exception {
         ServerAddressGenerator serverAddressGenerator = new ServerAddressGenerator(numberOfServers);
         if (request.body().contains("grains.append")) {
-            return grainsAppendResponse(serverAddressGenerator);
+            return grainsResponse(serverAddressGenerator);
+        }
+        if (request.body().contains("grains.remove")) {
+            return grainsResponse(serverAddressGenerator);
         }
         if (request.body().contains("network.interface_ip")) {
             return networkInterfaceIp(serverAddressGenerator);
@@ -99,7 +102,7 @@ public class SaltApiRunPostResponse extends ITResponse {
         return getObjectMapper().writeValueAsString(applyResponse);
     }
 
-    protected Object grainsAppendResponse(ServerAddressGenerator serverAddressGenerator) throws JsonProcessingException {
+    protected Object grainsResponse(ServerAddressGenerator serverAddressGenerator) throws JsonProcessingException {
         ApplyResponse applyResponse = new ApplyResponse();
         ArrayList<Map<String, Object>> responseList = new ArrayList<>();
 

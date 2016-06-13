@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -31,8 +32,8 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 @Component
 public class OrchestratorRecipeExecutor {
 
-    private static final String PRE_INSTALL_TAG = "recipe-pre-install:";
-    private static final String POST_INSTALL_TAG = "recipe-post-install:";
+    private static final String PRE_INSTALL_TAG = "recipe-pre-install";
+    private static final String POST_INSTALL_TAG = "recipe-post-install";
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -86,12 +87,13 @@ public class OrchestratorRecipeExecutor {
             recipe.getPlugins().keySet().stream().filter(rawRecipe -> rawRecipe.startsWith("base64://")).forEach(rawRecipe -> {
                 String decodedRecipe = new String(Base64.decodeBase64(rawRecipe.replaceFirst("base64://", "")));
                 RecipeModel recipeModel = new RecipeModel(recipe.getName());
-                if (decodedRecipe.contains(PRE_INSTALL_TAG)) {
-                    recipeModel.setPreInstall(
-                            new String(Base64.decodeBase64(decodedRecipe.substring(decodedRecipe.indexOf(PRE_INSTALL_TAG) + PRE_INSTALL_TAG.length()))));
-                } else if (decodedRecipe.contains("recipe-post-install")) {
-                    recipeModel.setPostInstall(
-                            new String(Base64.decodeBase64(decodedRecipe.substring(decodedRecipe.indexOf(POST_INSTALL_TAG) + POST_INSTALL_TAG.length()))));
+                Map<String, String> recipeMap = Stream.of(decodedRecipe.split("\n"))
+                        .collect(Collectors.toMap(s -> s.substring(0, s.indexOf(":")), s -> s.substring(s.indexOf(":") + 1)));
+                if (recipeMap.containsKey(PRE_INSTALL_TAG)) {
+                    recipeModel.setPreInstall(new String(Base64.decodeBase64(recipeMap.get(PRE_INSTALL_TAG))));
+                }
+                if (recipeMap.containsKey(POST_INSTALL_TAG)) {
+                    recipeModel.setPostInstall(new String(Base64.decodeBase64(recipeMap.get(POST_INSTALL_TAG))));
                 }
                 recipeModel.setKeyValues(recipe.getKeyValues());
                 result.add(recipeModel);

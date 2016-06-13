@@ -115,12 +115,15 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         verify(AMBARI_API_ROOT + "/clusters/ambari_cluster/requests/1", "GET").atLeast(1).verify();
         verify(AMBARI_API_ROOT + "/clusters/ambari_cluster/hosts", "GET").exactTimes(1).verify();
 
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").exactTimes(1).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.lookup_jid").bodyContains("jid=1").exactTimes(2).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(1).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").atLeast(2).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.lookup_jid").bodyContains("jid=1").atLeast(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_agent").exactTimes(1).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_server").exactTimes(1).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").exactTimes(2).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").bodyContains("recipes").exactTimes(2).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").atLeast(2).verify();
+
+        verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(1).verify();
     }
 
     private void addAmbariMappings(int numberOfServers) {
@@ -142,6 +145,10 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
         post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(numberOfServers));
+        post(SALT_BOOT_ROOT + "/file", (request, response) -> {
+            response.status(200);
+            return response;
+        });
         post(SALT_BOOT_ROOT + "/salt/server/pillar", (request, response) -> {
             GenericResponse genericResponse = new GenericResponse();
             genericResponse.setStatusCode(HttpStatus.OK.value());

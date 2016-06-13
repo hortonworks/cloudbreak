@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -93,7 +95,9 @@ public class SaltBootstrapTest {
             fail("should throw exception");
         } catch (Exception e) {
             assertTrue(CloudbreakOrchestratorFailedException.class.getSimpleName().equals(e.getClass().getSimpleName()));
-            assertEquals("There are missing nodes from salt: [" + missingNodeIp + "]", e.getMessage());
+            assertThat(e.getMessage(), containsString("10.0.0.3"));
+            assertThat(e.getMessage(), not(containsString("10.0.0.2")));
+            assertThat(e.getMessage(), not(containsString("10.0.0.1")));
         }
     }
 

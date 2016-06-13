@@ -125,31 +125,35 @@ public class RecipeEngine {
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             FileSystem fs = cluster.getFileSystem();
             if (fs != null) {
-                FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
-                List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
-                List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
-                for (Recipe recipe : fsRecipes) {
-                    boolean oneNode = false;
-                    for (Map.Entry<String, ExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
-                        if (ExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
-                            oneNode = true;
-                        }
-                    }
-                    if (oneNode) {
-                        for (HostGroup hostGroup : hostGroups) {
-                            if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
-                                hostGroup.addRecipe(recipe);
-                                break;
-                            }
-                        }
-                    } else {
-                        for (HostGroup hostGroup : hostGroups) {
-                            hostGroup.addRecipe(recipe);
-                        }
-                    }
-                }
+                addFsRecipesToHostGroups(hostGroups, blueprintText, fs);
             }
             addHDFSRecipe(cluster, blueprintText, hostGroups);
+        }
+    }
+
+    private void addFsRecipesToHostGroups(Set<HostGroup> hostGroups, String blueprintText, FileSystem fs) {
+        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
+        List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
+        List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
+        for (Recipe recipe : fsRecipes) {
+            boolean oneNode = false;
+            for (Map.Entry<String, ExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
+                if (ExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
+                    oneNode = true;
+                }
+            }
+            if (oneNode) {
+                for (HostGroup hostGroup : hostGroups) {
+                    if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
+                        hostGroup.addRecipe(recipe);
+                        break;
+                    }
+                }
+            } else {
+                for (HostGroup hostGroup : hostGroups) {
+                    hostGroup.addRecipe(recipe);
+                }
+            }
         }
     }
 
@@ -160,9 +164,7 @@ public class RecipeEngine {
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
             if (orchestratorType.containerOrchestrator()) {
                 consulRecipeExecutor.configureSssd(stack, hostMetadata, sssdPayload);
-            } else {
-                //TODO
-            }
+            } // TODO hostOrchestrator
         }
     }
 

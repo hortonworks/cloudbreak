@@ -100,12 +100,7 @@ public class SaltOrchestratorTest {
                 .withArguments(any(PillarSave.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
         verifyNew(OrchestratorBootstrapRunner.class, times(2))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-
-        Set<String> ips = new HashSet<>();
-        ips.add("10.0.0.1");
-        ips.add("10.0.0.2");
-        ips.add("10.0.0.3");
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(gatewayConfig), eq(ips));
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(gatewayConfig), eq(targets));
     }
 
     @Test
@@ -120,12 +115,7 @@ public class SaltOrchestratorTest {
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-
-        Set<String> ips = new HashSet<>();
-        ips.add("10.0.0.1");
-        ips.add("10.0.0.2");
-        ips.add("10.0.0.3");
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(gatewayConfig), eq(ips));
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(gatewayConfig), eq(targets));
     }
 
     @Test
