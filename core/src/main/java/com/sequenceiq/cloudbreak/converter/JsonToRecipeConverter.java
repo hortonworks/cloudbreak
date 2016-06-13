@@ -9,9 +9,6 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
 public class JsonToRecipeConverter extends AbstractConversionServiceAwareConverter<RecipeRequest, Recipe> {
-
-
-
     @Override
     public Recipe convert(RecipeRequest json) {
         Recipe recipe = new Recipe();

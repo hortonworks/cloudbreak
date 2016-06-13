@@ -24,6 +24,7 @@ import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.filter.LoggingFilter;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 public class RestClientUtil {
 
@@ -81,6 +82,7 @@ public class RestClientUtil {
         // tell the jersey config about the connection manager
         config.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
         config.connectorProvider(new ApacheConnectorProvider());
+        config.register(MultiPartFeature.class);
 
         ClientBuilder builder = JerseyClientBuilder.newBuilder().withConfig(config);
 
@@ -123,6 +125,7 @@ public class RestClientUtil {
         config.property(ApacheClientProperties.CONNECTION_MANAGER, connectionManager);
 
         config.connectorProvider(new ApacheConnectorProvider());
+        config.register(MultiPartFeature.class);
 
         ClientBuilder builder = JerseyClientBuilder.newBuilder().withConfig(config);
 

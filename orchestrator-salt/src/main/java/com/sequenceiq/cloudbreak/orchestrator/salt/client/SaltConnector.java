@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.client;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -9,17 +10,24 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import org.apache.http.HttpStatus;
+import org.glassfish.jersey.media.multipart.Boundary;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
 
 public class SaltConnector implements Closeable {
 
@@ -103,6 +111,20 @@ public class SaltConnector implements Closeable {
                 .post(Entity.form(form)).readEntity(clazz);
         LOGGER.info("SaltAction response: {}", response);
         return response;
+    }
+
+    public void upload(String path, String fileName, InputStream inputStream) throws IOException {
+        StreamDataBodyPart streamDataBodyPart = new StreamDataBodyPart("file", inputStream, fileName);
+        MultiPart multiPart = new FormDataMultiPart()
+                .field("path", path)
+                .bodyPart(streamDataBodyPart);
+        MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
+        contentType = Boundary.addBoundary(contentType);
+        Response response = saltTarget.path(SaltEndpoint.BOOT_FILE_UPLOAD.getContextPath()).request()
+                .post(Entity.entity(multiPart, contentType));
+        if (response.getStatus() != HttpStatus.SC_OK) {
+            throw new IOException("can't upload file, status code: " + response.getStatus());
+        }
     }
 
     private Form addAuth(Form form) {

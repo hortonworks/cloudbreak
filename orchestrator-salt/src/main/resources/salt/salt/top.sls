@@ -34,3 +34,10 @@ base:
     - match: compound
     - smartsense.gateway-init
 
+  'recipes:pre':
+    - match: grain
+    - pre-recipes.init
+
+  'recipes:post':
+    - match: grain
+    - post-recipes.init

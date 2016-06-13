@@ -11,7 +11,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
@@ -42,8 +42,8 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
         RecipeRequest recipeRequest = new RecipeRequest();
         recipeRequest.setName(name);
         recipeRequest.setDescription(description);
-        Map<String, PluginExecutionType> map = new HashMap<>();
-        map.put("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()), PluginExecutionType.ALL_NODES);
+        Map<String, ExecutionType> map = new HashMap<>();
+        map.put("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()), ExecutionType.ALL_NODES);
         recipeRequest.setPlugins(map);
         RecipeEndpoint recipeEndpoint = getCloudbreakClient().recipeEndpoint();
         String id = recipeEndpoint.postPrivate(recipeRequest).getId().toString();

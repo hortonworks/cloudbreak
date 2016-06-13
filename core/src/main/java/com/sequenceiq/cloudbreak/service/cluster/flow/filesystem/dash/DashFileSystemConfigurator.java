@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.dash;
 
-import static com.sequenceiq.cloudbreak.api.model.PluginExecutionType.ALL_NODES;
-import static com.sequenceiq.cloudbreak.api.model.PluginExecutionType.ONE_NODE;
+import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ALL_NODES;
+import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ONE_NODE;
 import static com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration.STORAGE_CONTAINER;
 import static com.sequenceiq.cloudbreak.api.model.FileSystemType.DASH;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.POST_INSTALL;

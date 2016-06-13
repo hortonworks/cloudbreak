@@ -9,6 +9,7 @@ import org.springframework.shell.core.MethodTarget;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.shell.completion.PluginExecutionType;
 
 public class PluginExecutionTypeConverter extends AbstractConverter<PluginExecutionType> {
@@ -16,10 +17,10 @@ public class PluginExecutionTypeConverter extends AbstractConverter<PluginExecut
     private static Collection<String> values;
 
     {
-        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.PluginExecutionType.values()),
-            new Function<com.sequenceiq.cloudbreak.api.model.PluginExecutionType, String>() {
+        values = Collections2.transform(Arrays.asList(ExecutionType.values()),
+            new Function<ExecutionType, String>() {
                 @Override
-                public String apply(com.sequenceiq.cloudbreak.api.model.PluginExecutionType input) {
+                public String apply(ExecutionType input) {
                     return input.name();
                 }
             });

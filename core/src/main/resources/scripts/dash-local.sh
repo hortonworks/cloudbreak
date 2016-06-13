@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-: ${LOGFILE:=/var/log/consul-watch/consul_handler.log}
+: ${LOGFILE:=/var/log/recipes/dash-local.log}
 
 : ${SOURCE_DIR:=/data/jars}
 : ${STORAGE_JAR:=dash-azure-storage-2.2.0.jar}

@@ -5,10 +5,9 @@ import java.util.List;
 public class Minion {
 
     private String address;
-
     private List<String> roles;
-
     private String server;
+    private String hostGroup;
 
     public String getAddress() {
         return address;
@@ -32,5 +31,13 @@ public class Minion {
 
     public void setServer(String server) {
         this.server = server;
+    }
+
+    public String getHostGroup() {
+        return hostGroup;
+    }
+
+    public void setHostGroup(String hostGroup) {
+        this.hostGroup = hostGroup;
     }
 }

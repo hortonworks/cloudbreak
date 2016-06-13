@@ -17,7 +17,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.validation.PluginValidator;
 import com.sequenceiq.cloudbreak.validation.ValidPlugin;
 
@@ -41,11 +41,11 @@ public class PluginValidatorTest extends AbstractValidatorTest {
 
     @Test
     public void validPluginJsonWillReturnTrue() {
-        Map<String, PluginExecutionType> plugins = new HashMap<>();
-        plugins.put("http://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
-        plugins.put("https://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
-        plugins.put("git://github.com/user/consul-plugins-plugin1.git", PluginExecutionType.ALL_NODES);
-        plugins.put("base64://" + Base64.encodeBase64String("plugin.toml:\nrecipe-pre-install:".getBytes()), PluginExecutionType.ALL_NODES);
+        Map<String, ExecutionType> plugins = new HashMap<>();
+        plugins.put("http://github.com/user/consul-plugins-plugin1.git", ExecutionType.ALL_NODES);
+        plugins.put("https://github.com/user/consul-plugins-plugin1.git", ExecutionType.ALL_NODES);
+        plugins.put("git://github.com/user/consul-plugins-plugin1.git", ExecutionType.ALL_NODES);
+        plugins.put("base64://" + Base64.encodeBase64String("plugin.toml:\nrecipe-pre-install:".getBytes()), ExecutionType.ALL_NODES);
         Assert.assertTrue(underTest.isValid(plugins, constraintValidatorContext));
     }
 
@@ -56,27 +56,27 @@ public class PluginValidatorTest extends AbstractValidatorTest {
 
     @Test
     public void inValidPluginEmptyReturnFalse() {
-        Assert.assertFalse(underTest.isValid(Collections.<String, PluginExecutionType>emptyMap(), constraintValidatorContext));
+        Assert.assertFalse(underTest.isValid(Collections.<String, ExecutionType>emptyMap(), constraintValidatorContext));
     }
 
     @Test
     public void inValidPluginUrlJsonWillReturnFalse() {
-        Map<String, PluginExecutionType> plugins = new HashMap<>();
-        plugins.put("asd://github.com/user/plugin1.git", PluginExecutionType.ALL_NODES);
+        Map<String, ExecutionType> plugins = new HashMap<>();
+        plugins.put("asd://github.com/user/plugin1.git", ExecutionType.ALL_NODES);
         Assert.assertFalse(underTest.isValid(plugins, constraintValidatorContext));
     }
 
     @Test
     public void inValidBase64MissingScriptWillReturnFalse() {
-        Map<String, PluginExecutionType> plugins = new HashMap<>();
-        plugins.put("base64://" + Base64.encodeBase64String("plugin.toml:".getBytes()), PluginExecutionType.ALL_NODES);
+        Map<String, ExecutionType> plugins = new HashMap<>();
+        plugins.put("base64://" + Base64.encodeBase64String("plugin.toml:".getBytes()), ExecutionType.ALL_NODES);
         Assert.assertFalse(underTest.isValid(plugins, constraintValidatorContext));
     }
 
     @Test
     public void inValidBase64MissingPluginDotTomlWillReturnFalse() {
-        Map<String, PluginExecutionType> plugins = new HashMap<>();
-        plugins.put("base64://" + Base64.encodeBase64String("recipe-pre-install:\nrecipe-post-install:".getBytes()), PluginExecutionType.ALL_NODES);
+        Map<String, ExecutionType> plugins = new HashMap<>();
+        plugins.put("base64://" + Base64.encodeBase64String("recipe-pre-install:\nrecipe-post-install:".getBytes()), ExecutionType.ALL_NODES);
         Assert.assertFalse(underTest.isValid(plugins, constraintValidatorContext));
     }
 }

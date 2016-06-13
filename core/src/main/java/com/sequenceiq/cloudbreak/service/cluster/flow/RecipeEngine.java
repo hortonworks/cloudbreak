@@ -1,192 +1,230 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SWARM;
+import static java.util.Arrays.asList;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
-import com.sequenceiq.cloudbreak.api.model.PluginExecutionType;
-import com.sequenceiq.cloudbreak.core.CloudbreakRecipeSetupException;
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
 public class RecipeEngine {
 
     public static final int DEFAULT_RECIPE_TIMEOUT = 15;
-    public static final String RECIPE_KEY_PREFIX = "consul-watch-plugin/";
+    private static final String SSSD_CONFIG = "sssd-config-";
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
     @Inject
-    private InstanceMetaDataRepository instanceMetadataRepository;
-
-    @Inject
     private PluginManager pluginManager;
-
     @Inject
     private TlsSecurityService tlsSecurityService;
+    @Inject
+    private OrchestratorTypeResolver orchestratorTypeResolver;
+    @Resource
+    private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+    @Inject
+    private RecipeBuilder recipeBuilder;
+    @Inject
+    private ConsulRecipeExecutor consulRecipeExecutor;
+    @Inject
+    private OrchestratorRecipeExecutor orchestratorRecipeExecutor;
+    @Inject
+    private BlueprintProcessor blueprintProcessor;
 
-    public void setupRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakSecuritySetupException {
-        Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
-        cleanupPlugins(stack, hostGroups, instances);
-        uploadConsulRecipes(stack, getRecipesInHostGroups(hostGroups));
-        setupProperties(stack, hostGroups);
-        installPlugins(stack, hostGroups, instances);
+    public void executePreInstall(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+        configureSssd(stack, null);
+        addFsRecipes(stack, hostGroups);
+        boolean recipesFound = recipesFound(hostGroups);
+        if (recipesFound) {
+            String orchestrator = stack.getOrchestrator().getType();
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
+            if (orchestratorType.containerOrchestrator()) {
+                consulRecipeExecutor.preInstall(stack, hostGroups);
+            } else {
+                orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
+                orchestratorRecipeExecutor.preInstall(stack);
+            }
+        }
     }
 
-    private void uploadConsulRecipes(Stack stack, Iterable<Recipe> recipes) throws CloudbreakSecuritySetupException {
-        HttpClientConfig clientConfig = null;
-        for (Recipe recipe : recipes) {
-            for (String plugin : recipe.getPlugins().keySet()) {
-                if (plugin.startsWith("base64://")) {
-                    Map<String, String> keyValues = new HashMap<>();
-                    keyValues.put(getPluginConsulKey(recipe, plugin), new String(Base64.decodeBase64(plugin.replaceFirst("base64://", ""))));
-                    if (clientConfig == null) {
-                        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-                        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-                        clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
+    public void executeUpscalePreInstall(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaData) throws CloudbreakException {
+        Set<HostGroup> hostGroups = Collections.singleton(hostGroup);
+        configureSssd(stack, metaData);
+        addFsRecipes(stack, hostGroups);
+        boolean recipesFound = recipesFound(hostGroups);
+        if (recipesFound) {
+            String orchestrator = stack.getOrchestrator().getType();
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
+            if (orchestratorType.containerOrchestrator()) {
+                consulRecipeExecutor.setupRecipesOnHosts(stack, hostGroup.getRecipes(), metaData);
+                consulRecipeExecutor.executePreInstall(stack, metaData);
+            } else {
+                orchestratorRecipeExecutor.preInstall(stack);
+            }
+        }
+    }
+
+    public void executePostInstall(Stack stack) throws CloudbreakException {
+        String orchestrator = stack.getOrchestrator().getType();
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
+        if (orchestratorType.containerOrchestrator()) {
+            consulRecipeExecutor.executePostInstall(stack);
+        } else {
+            orchestratorRecipeExecutor.postInstall(stack);
+        }
+    }
+
+    public void executeUpscalePostInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
+        String orchestrator = stack.getOrchestrator().getType();
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
+        if (orchestratorType.containerOrchestrator()) {
+            consulRecipeExecutor.executePostInstall(stack, hostMetadata);
+        } else {
+            orchestratorRecipeExecutor.postInstall(stack);
+        }
+    }
+
+    private void addFsRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+        String orchestrator = stack.getOrchestrator().getType();
+        if (SWARM.equals(orchestrator) || SALT.equals(orchestrator)) {
+            Cluster cluster = stack.getCluster();
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
+            FileSystem fs = cluster.getFileSystem();
+            if (fs != null) {
+                addFsRecipesToHostGroups(hostGroups, blueprintText, fs);
+            }
+            addHDFSRecipe(cluster, blueprintText, hostGroups);
+        }
+    }
+
+    private void addFsRecipesToHostGroups(Set<HostGroup> hostGroups, String blueprintText, FileSystem fs) {
+        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
+        List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
+        List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
+        for (Recipe recipe : fsRecipes) {
+            boolean oneNode = false;
+            for (Map.Entry<String, ExecutionType> pluginEntries : recipe.getPlugins().entrySet()) {
+                if (ExecutionType.ONE_NODE.equals(pluginEntries.getValue())) {
+                    oneNode = true;
+                }
+            }
+            if (oneNode) {
+                for (HostGroup hostGroup : hostGroups) {
+                    if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
+                        hostGroup.addRecipe(recipe);
+                        break;
                     }
-                    pluginManager.prepareKeyValues(clientConfig, keyValues);
+                }
+            } else {
+                for (HostGroup hostGroup : hostGroups) {
+                    hostGroup.addRecipe(recipe);
                 }
             }
         }
     }
 
-    public void setupRecipesOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
-        uploadConsulRecipes(stack, recipes);
-        Set<InstanceMetaData> instances = instanceMetadataRepository.findNotTerminatedForStack(stack.getId());
-        installPluginsOnHosts(stack, recipes, hostMetadata, instances, true);
+    private void configureSssd(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
+        if (stack.getCluster().getSssdConfig() != null) {
+            List<String> sssdPayload = generateSssdRecipePayload(stack);
+            String orchestrator = stack.getOrchestrator().getType();
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator);
+            if (orchestratorType.containerOrchestrator()) {
+                consulRecipeExecutor.configureSssd(stack, hostMetadata, sssdPayload);
+            } // TODO hostOrchestrator
+        }
     }
 
-    public void executePreInstall(Stack stack) throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
+    private List<String> generateSssdRecipePayload(Stack stack) throws CloudbreakSecuritySetupException {
+        SssdConfig config = stack.getCluster().getSssdConfig();
+        List<String> payload;
+        if (config.getConfiguration() != null) {
+            Map<String, String> keyValues = new HashMap<>();
+            String configName = SSSD_CONFIG + config.getId();
+            keyValues.put(configName, config.getConfiguration());
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
+            pluginManager.prepareKeyValues(httpClientConfig, keyValues);
+            payload = Arrays.asList(configName);
+        } else {
+            payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
+                    config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
+                    config.getKerberosServer(), config.getKerberosRealm());
+        }
+        return payload;
+    }
+
+    private boolean recipesFound(Set<HostGroup> hostGroups) {
+        for (HostGroup hostGroup : hostGroups) {
+            if (!hostGroup.getRecipes().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void addHDFSRecipe(Cluster cluster, String blueprintText, Set<HostGroup> hostGroups) {
         try {
-            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.PRE_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
-        } catch (CloudbreakServiceException e) {
-            throw new CloudbreakRecipeSetupException("Recipe pre install failed: " + e.getMessage());
-        }
-    }
-
-    public void executePreInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
-        pluginManager.triggerAndWaitForPlugins(stack,
-                ConsulPluginEvent.PRE_INSTALL,
-                DEFAULT_RECIPE_TIMEOUT,
-                AMBARI_AGENT,
-                Collections.<String>emptyList(),
-                getHostnames(hostMetadata));
-    }
-
-    public void executePostInstall(Stack stack) throws CloudbreakSecuritySetupException, CloudbreakRecipeSetupException {
-        try {
-            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.POST_INSTALL, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
-        } catch (CloudbreakServiceException e) {
-            throw new CloudbreakRecipeSetupException("Recipe post install failed: " + e.getMessage());
-        }
-    }
-
-    public void executePostInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakSecuritySetupException {
-        pluginManager.triggerAndWaitForPlugins(stack,
-                ConsulPluginEvent.POST_INSTALL,
-                DEFAULT_RECIPE_TIMEOUT,
-                AMBARI_AGENT,
-                Collections.<String>emptyList(),
-                getHostnames(hostMetadata));
-    }
-
-    private Iterable<Recipe> getRecipesInHostGroups(Set<HostGroup> hostGroups) {
-        return Iterables.concat(Collections2.transform(hostGroups, new Function<HostGroup, Set<Recipe>>() {
-            @Nullable
-            @Override
-            public Set<Recipe> apply(@Nullable HostGroup input) {
-                return input.getRecipes();
+            for (HostGroup hostGroup : hostGroups) {
+                if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
+                    String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", cluster.getUserName());
+                    RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL, ExecutionType.ONE_NODE);
+                    Recipe recipe = recipeBuilder.buildRecipes(asList(recipeScript), Collections.emptyMap()).get(0);
+                    hostGroup.addRecipe(recipe);
+                    break;
+                }
             }
-        }));
-    }
-
-    private void setupProperties(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakSecuritySetupException {
-        LOGGER.info("Setting up recipe properties.");
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
-        pluginManager.prepareKeyValues(clientConfig, getAllPropertiesFromRecipes(hostGroups));
-    }
-
-    private void installPlugins(Stack stack, Set<HostGroup> hostGroups, Set<InstanceMetaData> instances) throws CloudbreakSecuritySetupException {
-        for (HostGroup hostGroup : hostGroups) {
-            LOGGER.info("Installing plugins for recipes on hostgroup {}.", hostGroup.getName());
-            installPluginsOnHosts(stack, hostGroup.getRecipes(), hostGroup.getHostMetadata(), instances, false);
+        } catch (IOException e) {
+            LOGGER.warn("Cannot create HDFS home dir recipe", e);
         }
     }
 
-    private void installPluginsOnHosts(Stack stack, Set<Recipe> recipes, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances,
-            boolean existingHostGroup) throws CloudbreakSecuritySetupException {
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
-        for (Recipe recipe : recipes) {
-            Map<String, PluginExecutionType> plugins = new HashMap<>();
-            for (Map.Entry<String, PluginExecutionType> entry : recipe.getPlugins().entrySet()) {
-                String url = entry.getKey().startsWith("base64://") ? "consul://" + getPluginConsulKey(recipe, entry.getKey()) : entry.getKey();
-                plugins.put(url, entry.getValue());
-            }
-            Map<String, Set<String>> eventIdMap = pluginManager.installPlugins(clientConfig, plugins, getHostnames(hostMetadata), existingHostGroup);
-            pluginManager.waitForEventFinish(stack, instances, eventIdMap, recipe.getTimeout());
-        }
+    private boolean isComponentPresent(String blueprint, String component, HostGroup hostGroup) {
+        return isComponentPresent(blueprint, component, Sets.newHashSet(hostGroup));
     }
 
-    private void cleanupPlugins(Stack stack, Set<HostGroup> hostGroups, Set<InstanceMetaData> instances) throws CloudbreakSecuritySetupException {
+    private boolean isComponentPresent(String blueprint, String component, Set<HostGroup> hostGroups) {
         for (HostGroup hostGroup : hostGroups) {
-            LOGGER.info("Cleanup plugins on hostgroup {}.", hostGroup.getName());
-            cleanupPluginsOnHosts(stack, hostGroup.getHostMetadata(), instances);
-        }
-    }
-
-    private void cleanupPluginsOnHosts(Stack stack, Set<HostMetadata> hostMetadata, Set<InstanceMetaData> instances) throws CloudbreakSecuritySetupException {
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
-        Map<String, Set<String>> eventIdMap = pluginManager.cleanupPlugins(clientConfig, getHostnames(hostMetadata));
-        pluginManager.waitForEventFinish(stack, instances, eventIdMap, DEFAULT_RECIPE_TIMEOUT);
-    }
-
-    private String getPluginConsulKey(Recipe recipe, String plugin) {
-        return RECIPE_KEY_PREFIX + recipe.getName() + plugin.hashCode();
-    }
-
-    private Map<String, String> getAllPropertiesFromRecipes(Set<HostGroup> hostGroups) {
-        Map<String, String> properties = new HashMap<>();
-        for (HostGroup hostGroup : hostGroups) {
-            for (Recipe recipe : hostGroup.getRecipes()) {
-                properties.putAll(recipe.getKeyValues());
+            Set<String> components = blueprintProcessor.getComponentsInHostGroup(blueprint, hostGroup.getName());
+            if (components.contains(component)) {
+                return true;
             }
         }
-        return properties;
-    }
-
-    private Set<String> getHostnames(Set<HostMetadata> hostMetadata) {
-        return hostMetadata.stream().map(HostMetadata::getHostName).collect(Collectors.toSet());
+        return false;
     }
 
 }

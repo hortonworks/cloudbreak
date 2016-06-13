@@ -98,6 +98,10 @@ public class InstanceMetaData implements ProvisionEntity {
         return instanceGroup;
     }
 
+    public String getInstanceGroupName() {
+        return instanceGroup.getGroupName();
+    }
+
     public void setInstanceGroup(InstanceGroup instanceGroup) {
         this.instanceGroup = instanceGroup;
     }

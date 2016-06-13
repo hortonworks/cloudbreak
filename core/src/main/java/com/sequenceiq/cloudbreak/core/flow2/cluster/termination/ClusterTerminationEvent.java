@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterTerminationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 
 public enum ClusterTerminationEvent implements FlowEvent {
     TERMINATION_EVENT(FlowTriggers.CLUSTER_TERMINATION_TRIGGER_EVENT),

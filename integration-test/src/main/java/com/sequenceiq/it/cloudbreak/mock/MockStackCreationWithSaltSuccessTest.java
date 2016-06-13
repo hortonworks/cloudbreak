@@ -162,14 +162,17 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
             genericResponses.setResponses(responses);
             return genericResponses;
         }, gson()::toJson);
+        post(SALT_BOOT_ROOT + "/file", (request, response) -> {
+            response.status(200);
+            return response;
+        });
         post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(numberOfServers));
-
         get(CONSUL_API_ROOT + "/agent/members", "application/json", new ConsulMemberResponse(numberOfServers), gson()::toJson);
     }
 
     private void verifyCalls(int numberOfServers) {
         verify(SALT_BOOT_ROOT + "/health", "GET").exactTimes(1).verify();
-//        verify(SALT_BOOT_ROOT + "/salt/server/pillar", "POST").exactTimes(1).bodyContains("192.168.0.1").bodyContains("\"bootstrap_expect\":3").verify();
+        verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(1).verify();
         Verification distributeVerification = verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").exactTimes(1);
         new ServerAddressGenerator(numberOfServers).iterateOver(address -> distributeVerification.bodyContains("address\":\"" + address));
         distributeVerification.verify();

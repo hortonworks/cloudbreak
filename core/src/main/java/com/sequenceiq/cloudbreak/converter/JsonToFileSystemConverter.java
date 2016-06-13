@@ -18,7 +18,7 @@ public class JsonToFileSystemConverter extends AbstractConversionServiceAwareCon
         if (source.getProperties() != null) {
             fs.setProperties(source.getProperties());
         } else {
-            fs.setProperties(new HashMap<String, String>());
+            fs.setProperties(new HashMap<>());
         }
         return fs;
     }

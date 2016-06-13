@@ -11,7 +11,8 @@ jar {
 dependencies {
 
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  compile group: 'io.swagger',                    name: 'swagger-annotations',            version: '1.5.6'
+  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
   compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
 
   compile group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'

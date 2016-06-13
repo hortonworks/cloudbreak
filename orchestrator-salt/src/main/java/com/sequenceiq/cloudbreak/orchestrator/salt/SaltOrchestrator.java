@@ -2,20 +2,30 @@ package com.sequenceiq.cloudbreak.orchestrator.salt;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -28,17 +38,21 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorCompo
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.model.RecipeExecutionPhase;
+import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateChecker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SimpleAddRoleChecker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsChecker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -70,14 +84,15 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, Set<Node> targets, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
-        Set<String> allIPs = prepareTargets(gatewayConfig, targets);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+            uploadSaltConfig(sc);
+
             PillarSave ambariServer = new PillarSave(sc, gatewayConfig.getPrivateAddress());
             Callable<Boolean> saltPillarRunner = runner(ambariServer, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, allIPs);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, targets);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -89,9 +104,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-        Set<String> newAddresses = prepareTargets(null, targets);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, newAddresses);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, targets);
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -122,44 +136,28 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             LOGGER.info("Pillar saved, starting to set up discovery...");
             //run discovery only
-            runNewService(sc, new HighStateChecker(all, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
 
             LOGGER.info("Pillar saved, discovery has been set up with highstate");
 
             // ambari server
-            runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "ambari_server"), exitCriteriaModel);
+            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitCriteriaModel);
             // ambari agent
-            runSaltCommand(sc, new SimpleAddRoleChecker(all, allNodes, "ambari_agent"), exitCriteriaModel);
+            runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent"), exitCriteriaModel);
             // kerberos
             if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "kerberos_server"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "kerberos_server"), exitCriteriaModel);
             }
             if (configureSmartSense) {
-                runSaltCommand(sc, new SimpleAddRoleChecker(all, allNodes, "smartsense"), exitCriteriaModel);
-                runSaltCommand(sc, new SimpleAddRoleChecker(server, allNodes, "smartsense_gateway"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(all, allNodes, "smartsense"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "smartsense_gateway"), exitCriteriaModel);
             }
-            runSaltCommand(sc, new SyncGrainsChecker(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateChecker(all, allNodes), exitCriteriaModel);
+            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
-    }
-
-    private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
-            InterruptedException {
-        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner);
-        Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
-        Future<Boolean> saltJobRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltJobRunBootstrapRunner);
-        saltJobRunBootstrapFuture.get();
-    }
-
-    private void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
-            InterruptedException {
-        SaltCommandTracker saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
-        Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel);
-        Future<Boolean> saltCommandRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltCommandRunBootstrapRunner);
-        saltCommandRunBootstrapFuture.get();
     }
 
     @Override
@@ -170,6 +168,43 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.error("Error occurred during salt minion tear down", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+    }
+
+    @Override
+    public void uploadRecipes(GatewayConfig gatewayConfig, Map<String, List<RecipeModel>> recipes, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+            PillarSave scriptPillarSave = new PillarSave(sc, recipes);
+            Callable<Boolean> saltPillarRunner = runner(scriptPillarSave, exitCriteria, exitCriteriaModel);
+            Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
+            saltPillarRunnerFuture.get();
+
+            for (List<RecipeModel> recipeList : recipes.values()) {
+                for (RecipeModel model : recipeList) {
+                    if (model.getPreInstall() != null) {
+                        uploadRecipe(sc, model.getName(), model.getPreInstall(), RecipeExecutionPhase.PRE);
+                    }
+                    if (model.getPostInstall() != null) {
+                        uploadRecipe(sc, model.getName(), model.getPostInstall(), RecipeExecutionPhase.POST);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during recipe upload", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
+    public void preInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE);
+    }
+
+    @Override
+    public void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException {
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST);
     }
 
     @Override
@@ -205,15 +240,40 @@ public class SaltOrchestrator implements HostOrchestrator {
         return MAX_NODES;
     }
 
-    private Set<String> prepareTargets(GatewayConfig gatewayConfig, Set<Node> targets) {
-        Set<String> targetList = new HashSet<>();
-        if (gatewayConfig != null) {
-            targetList.add(gatewayConfig.getPrivateAddress());
+    private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
+            InterruptedException {
+        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner);
+        Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
+        Future<Boolean> saltJobRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltJobRunBootstrapRunner);
+        saltJobRunBootstrapFuture.get();
+    }
+
+    private void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
+            InterruptedException {
+        SaltCommandTracker saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
+        Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel);
+        Future<Boolean> saltCommandRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltCommandRunBootstrapRunner);
+        saltCommandRunBootstrapFuture.get();
+    }
+
+    private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase)
+            throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+            // add 'recipe' grain to all nodes
+            Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", phase.value(), Compound.CompoundType.IP), exitCriteriaModel);
+
+            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
+
+            // remove 'recipe' grain from all nodes
+            targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", phase.value(), Compound.CompoundType.IP), exitCriteriaModel);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during recipe execution", e);
+            throw new CloudbreakOrchestratorFailedException(e);
         }
-        for (Node node : targets) {
-            targetList.add(node.getPrivateIp());
-        }
-        return targetList;
     }
 
     private ParallelOrchestratorComponentRunner getParallelOrchestratorComponentRunner() {
@@ -222,5 +282,63 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
         return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), MAX_RETRY_COUNT, SLEEP_TIME);
+    }
+
+    private void uploadSaltConfig(SaltConnector saltConnector) throws IOException {
+        byte[] byteArray = zipSaltConfig();
+        LOGGER.info("Upload salt.zip to /tmp/salt.zip");
+        saltConnector.upload("/srv", "salt.zip", new ByteArrayInputStream(byteArray));
+    }
+
+    private byte[] zipSaltConfig() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ZipOutputStream zout = new ZipOutputStream(baos);
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Map<String, List<Resource>> structure = new TreeMap<>();
+            for (Resource resource : resolver.getResources("classpath*:salt/**")) {
+                String path = resource.getURL().getPath();
+                String dir = path.substring(path.indexOf("/salt") + "/salt".length(), path.lastIndexOf("/") + 1);
+                List<Resource> list = structure.get(dir);
+                if (list == null) {
+                    list = new ArrayList<>();
+                }
+                structure.put(dir, list);
+                if (!path.endsWith("/")) {
+                    list.add(resource);
+                }
+            }
+            for (String dir : structure.keySet()) {
+                zout.putNextEntry(new ZipEntry(dir));
+                for (Resource resource : structure.get(dir)) {
+                    LOGGER.info("Zip salt entry: {}", resource.getFilename());
+                    zout.putNextEntry(new ZipEntry(dir + resource.getFilename()));
+                    InputStream inputStream = resource.getInputStream();
+                    byte[] bytes = IOUtils.toByteArray(inputStream);
+                    zout.write(bytes);
+                    zout.closeEntry();
+                }
+            }
+            zout.close();
+            baos.close();
+        } catch (IOException e) {
+            LOGGER.error("Failed to zip salt configurations", e);
+            throw new IOException("Failed to zip salt configurations", e);
+        }
+        return baos.toByteArray();
+    }
+
+    private void uploadRecipe(SaltConnector sc, String name, String recipe, RecipeExecutionPhase phase) {
+        final byte[] recipeBytes = recipe.getBytes(StandardCharsets.UTF_8);
+        LOGGER.info("Upload '{}' recipe: {}", phase.value(), name);
+        try {
+            if (RecipeExecutionPhase.PRE.equals(phase)) {
+                sc.upload("/srv/salt/pre-recipes/scripts", name, new ByteArrayInputStream(recipeBytes));
+            } else {
+                sc.upload("/srv/salt/post-recipes/scripts", name, new ByteArrayInputStream(recipeBytes));
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Cannot upload recipe: {}", recipe);
+        }
     }
 }

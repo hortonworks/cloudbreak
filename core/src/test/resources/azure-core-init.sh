@@ -5,9 +5,6 @@ exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
 set -x
 
-# warming up yum in the background
-# yum -y makecache &
-
 export CLOUD_PLATFORM="AZURE_RM"
 export START_LABEL=98
 export PLATFORM_DISK_PREFIX=sd
