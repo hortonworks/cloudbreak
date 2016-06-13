@@ -217,7 +217,7 @@ haveged:
     labels:
       - traefik.enable=false
     privileged: true
-    image: sequenceiq/haveged:$DOCKER_TAG_HAVEGED
+    image: hortonworks/haveged:$DOCKER_TAG_HAVEGED
 
 consul:
     labels:
@@ -257,7 +257,7 @@ logsink:
         - SERVICE_NAME=logsink
     volumes:
         - .:/tmp
-    image: sequenceiq/socat:1.0.0
+    image: hortonworks/socat:1.0.0
     command: socat -u TCP-LISTEN:3333,reuseaddr,fork OPEN:/tmp/cbreak.log,creat,append
 
 logspout:
@@ -300,7 +300,7 @@ uaadb:
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
         - "$CB_DB_ROOT_PATH/uaadb:/var/lib/postgresql/data"
-    image: sequenceiq/uaadb:$DOCKER_TAG_UAADB
+    image: hortonworks/cloudbreak-uaa-db:$DOCKER_TAG_UAADB
 
 identity:
     labels:
@@ -319,7 +319,7 @@ identity:
     dns: $PRIVATE_IP
     volumes:
       - ./uaa.yml:/uaa/uaa.yml
-    image: sequenceiq/uaa:$DOCKER_TAG_UAA
+    image: hortonworks/cloudbreak-uaa:$DOCKER_TAG_UAA
 
 cbdb:
     labels:
@@ -331,7 +331,7 @@ cbdb:
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
         - "$CB_DB_ROOT_PATH/cbdb:/var/lib/postgresql/data"
-    image: sequenceiq/cbdb:$DOCKER_TAG_CBDB
+    image: hortonworks/cloudbreak-server-db:$DOCKER_TAG_CBDB
 
 cloudbreak:
     environment:
@@ -493,7 +493,7 @@ pcdb:
         - "$PRIVATE_IP:5433:5432"
     volumes:
         - "$CB_DB_ROOT_PATH/periscopedb:/var/lib/postgresql/data"
-    image: sequenceiq/pcdb:$DOCKER_TAG_PCDB
+    image: hortonworks/cloudbreak-autoscale-db:$DOCKER_TAG_PCDB
 
 periscope:
     environment:
