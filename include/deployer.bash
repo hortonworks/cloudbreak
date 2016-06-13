@@ -373,13 +373,13 @@ wait-for-cloudbreak() {
     info "Waiting for Cloudbreak UI (timeout: $CB_UI_MAX_WAIT)"
     
     local count=0
-    while ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/info &&  [ $((count++)) -lt $CB_UI_MAX_WAIT ] ; do
+    while ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/cb/info &&  [ $((count++)) -lt $CB_UI_MAX_WAIT ] ; do
         echo -n . 1>&2
         sleep 1;
     done
     echo 1>&2
 
-    if ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/info; then
+    if ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/cb/info; then
         error "Could not reach Cloudbreak in time."
         _exit 1
     fi
