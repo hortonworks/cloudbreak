@@ -1,5 +1,5 @@
 compose-init() {
-    deps-require docker-compose
+    deps-require docker-compose 1.7.1
     env-import CB_COMPOSE_PROJECT cbreak
     env-import CBD_LOG_NAME cbreak
     env-import ULUWATU_VOLUME_HOST /dev/null
@@ -180,6 +180,20 @@ compose-generate-yaml-force() {
         export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
     fi
     cat > ${composeFile} <<EOF
+traefik:
+  ports:
+    - 8081:8080
+    - 80:80
+    - 443:443
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./certs/:/certs/
+  image: traefik
+  command: --debug --web \
+      --defaultEntryPoints=http,https \
+      --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' \
+      --entryPoints='Name:https Address::443 TLS:/certs/client.pem,/certs/client-key.pem' \
+      --docker
 haveged:
     privileged: true
     image: sequenceiq/haveged:$DOCKER_TAG_HAVEGED
@@ -348,6 +362,11 @@ sultans:
         - SL_ADDRESS=$ULU_SULTANS_ADDRESS
         - SL_ADDRESS_RESOLVING_TIMEOUT=$ADDRESS_RESOLVING_TIMEOUT
         - SL_UAA_SERVICEID=identity.service.consul
+    labels:
+      - traefik.port=3000
+      - traefik.frontend.rule=PathPrefixStrip:/identity
+      - traefik.backend=sultans-backend
+      - traefik.frontend.priority=10
     ports:
         - 3001:3000
     volumes:
@@ -379,6 +398,11 @@ uluwatu:
         - ULU_PERISCOPE_SERVICEID=periscope.service.consul
         - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
         - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    labels:
+      - traefik.port=3000
+      - traefik.frontend.rule=Host:,$PUBLIC_IP
+      - traefik.backend=uluwatu-backend
+      - traefik.frontend.priority=5
     ports:
         - 3000:3000
     volumes:
