@@ -43,7 +43,8 @@ docker-compose:
 	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose up -d consul registrator uaadb identity cbdb cloudbreak > /dev/null
 	@rm -rf test-output
 	@echo "\n\033[1;96m--- Check cloudbreak if available\033[0m\n"
-	@docker run -t --rm --net=container:integcb_cloudbreak_1 --entrypoint /bin/bash sequenceiq/cloudbreak -c /wait_for_cloudbreak_api.sh
+	@docker pull sequenceiq/cloudbreak:root-path
+	@docker run -t --rm --net=container:integcb_cloudbreak_1 --entrypoint /bin/bash sequenceiq/cloudbreak:root-path -c /wait_for_cloudbreak_api.sh
 	@echo "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
 	@$(INTEGCB_LOCATION)/.deps/bin/docker-compose up test > test.out
 	@echo "\n\033[1;96m--- Test finished\033[0m\n"

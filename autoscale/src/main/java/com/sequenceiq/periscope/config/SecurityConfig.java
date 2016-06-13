@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.config;
 
+import static com.sequenceiq.periscope.api.AutoscaleApi.API_ROOT_CONTEXT;
+
 import java.io.IOException;
 
 import javax.inject.Inject;
@@ -97,7 +99,9 @@ public class SecurityConfig {
         public void configure(HttpSecurity http) throws Exception {
             http.addFilterAfter(new ScimAccountGroupReaderFilter(userDetailsService), AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
-                    .antMatchers("/api/v1/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks') and #oauth2.hasScope('periscope.cluster')")
+                    .antMatchers(API_ROOT_CONTEXT + "/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks') and #oauth2.hasScope('periscope.cluster')")
+                    .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
+                    .antMatchers(API_ROOT_CONTEXT + "/**").denyAll()
                     .and()
                     .csrf()
                     .disable()

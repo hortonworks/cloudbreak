@@ -1,3 +1,6 @@
+server:
+  contextPath: "/cb"
+
 spring:
   cloud:
     consul:

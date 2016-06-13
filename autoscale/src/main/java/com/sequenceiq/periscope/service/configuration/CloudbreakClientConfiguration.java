@@ -17,6 +17,9 @@ public class CloudbreakClientConfiguration {
     @Qualifier("cloudbreakUrl")
     private String cloudbreakUrl;
 
+    @Value("${cb.server.contextPath:/cb}")
+    private String cbRootContextPath;
+
     @Autowired
     @Qualifier("identityServerUrl")
     private String identityServerUrl;
@@ -29,7 +32,7 @@ public class CloudbreakClientConfiguration {
 
     @Bean
     public CloudbreakClient cloudbreakClient() {
-        return new CloudbreakClientBuilder(cloudbreakUrl, identityServerUrl, clientId).withSecret(secret).build();
+        return new CloudbreakClientBuilder(cloudbreakUrl + cbRootContextPath, identityServerUrl, clientId).withSecret(secret).build();
     }
 
 
