@@ -165,7 +165,7 @@ public class SecurityConfig {
                         .access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.recipes')")
 
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
-                    .antMatchers(API_ROOT_CONTEXT + "/connectors").permitAll()
+                    .antMatchers(API_ROOT_CONTEXT + "/connectors/**").permitAll()
 
                     .antMatchers(API_ROOT_CONTEXT + "/**").denyAll();
 
