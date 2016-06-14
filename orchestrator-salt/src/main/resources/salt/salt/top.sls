@@ -14,6 +14,10 @@ base:
     - match: pillar
     - discovery.init
 
+  'platform:AWS':
+    - match: pillar
+    - dns.init
+
   'roles:kerberos_server':
     - match: grain
     - kerberos.server
