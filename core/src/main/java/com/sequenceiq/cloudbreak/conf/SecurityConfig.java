@@ -79,7 +79,7 @@ public class SecurityConfig {
         private static final String[] NETWORK_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/networks/**"};
         private static final String[] SECURITYGROUP_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/securitygroups/**"};
         private static final String[] STACK_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/stacks/**"};
-        private static final String[] STACK_TEMPLATE_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/stacktemplates/**"};
+        private static final String[] STACK_TEMPLATE_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/clustertemplates/**"};
 
         @Value("${cb.client.id}")
         private String clientId;
