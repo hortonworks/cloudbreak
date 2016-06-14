@@ -1,6 +1,7 @@
 base:
   '*':
     - kernel.init
+    - users.init
 
   'platform:OPENSTACK':
     - match: pillar
