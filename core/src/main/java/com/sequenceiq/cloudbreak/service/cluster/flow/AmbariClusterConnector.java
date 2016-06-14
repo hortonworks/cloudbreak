@@ -263,7 +263,7 @@ public class AmbariClusterConnector {
         if (fs != null) {
             blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
         }
-        blueprintText = blueprintProcessor.addConfigEntries(blueprintText, smartSenseConfigProvider.getConfigs(stack, blueprintText), true);
+        blueprintText = smartSenseConfigProvider.addToBlueprint(stack, blueprintText);
         Image image = imageService.getImage(stack.getId());
         if (image.getHdpVersion() != null) {
             blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, image.getHdpVersion());
