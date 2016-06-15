@@ -317,31 +317,6 @@ public class AmbariClusterConnector {
         return cluster;
     }
 
-//    public Cluster resetAmbariCluster(Long stackId) throws CloudbreakException {
-//        Stack stack = stackRepository.findOneWithLists(stackId);
-//        InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
-//        Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-//        List<String> hostNames = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId());
-//        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
-//                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE.code()));
-//        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESET_AMBARI_DB_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_DB,
-//                Collections.<String>emptyList(), new HashSet<>(hostNames));
-//        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
-//                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AMBARI_DATABASE_RESET.code()));
-//        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
-//                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_RESTARTING_AMBARI_SERVER.code()));
-//        pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESET_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_SERVER,
-//                Collections.<String>emptyList(), new HashSet<>(hostNames));
-//        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
-//                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AMBARI_SERVER_RESTARTED.code()));
-//        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
-//                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_RESTARTING_AMBARI_AGENT.code()));
-//        restartAmbariAgents(stack);
-//        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(),
-//                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AMBARI_AGENT_RESTARTED.code()));
-//        return cluster;
-//    }
-
     public void changeOriginalAmbariCredentials(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), cluster.getAmbariIp());
@@ -541,20 +516,6 @@ public class AmbariClusterConnector {
                 MAX_ATTEMPTS_FOR_HOSTS,
                 AmbariOperationService.MAX_FAILURE_COUNT);
     }
-
-//    private void restartAmbariAgents(Stack stack) throws CloudbreakException {
-//        try {
-//            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
-//        } catch (PluginFailureException e) {
-//            LOGGER.warn("Ambari agent restart event couldn't finish in time, safely ignoring it", e);
-//        }
-//        PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
-//        if (isExited(hostsJoinedResult)) {
-//            throw new CancellationException("Cluster was terminated while restarting Ambari agents.");
-//        } else if (isTimeout(hostsJoinedResult)) {
-//            throw new CloudbreakException("Services could not start because host(s) could not join.");
-//        }
-//    }
 
     private boolean allServiceStopped(Map<String, Map<String, String>> hostComponentsStates) {
         boolean stopped = true;

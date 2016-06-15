@@ -22,7 +22,7 @@
                             <a href="" class="btn btn-info" role="button" data-toggle="modal" data-target="#modal-sync-cluster">
                                 <i class="fa fa-refresh fa-fw"></i><span> {{msg.active_cluster_command_sync_label}}</span>
                             </a>
-                            <a href="" class="btn btn-success" role="button" ng-show="false && activeCluster.cluster.status == 'CREATE_FAILED'" data-toggle="modal" data-target="#modal-reset-cluster" ng-click="initReinstallClusterObject()">
+                            <a href="" class="btn btn-success" role="button" ng-show="activeCluster.cluster.status == 'CREATE_FAILED'" data-toggle="modal" data-target="#modal-reset-cluster" ng-click="initReinstallClusterObject()">
                                 <i class="fa fa-undo fa-fw"></i><span> {{msg.active_cluster_command_reinstall_label}}</span>
                             </a>
                             <a href="" class="btn btn-success" role="button" ng-show="activeCluster.status == 'STOPPED' || (activeCluster.cluster.status == 'START_REQUESTED' && activeCluster.status == 'AVAILABLE')" data-toggle="modal" data-target="#modal-start-cluster">

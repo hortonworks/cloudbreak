@@ -138,21 +138,19 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             var index = 0;
             if ($rootScope.activeCluster.instanceGroups.length > 0) {
                 $rootScope.activeCluster.instanceGroups.forEach(function(value) {
-                    if (value.type != 'GATEWAY') {
-                        var tmpRecipes = $filter('filter')($rootScope.activeCluster.cluster.hostGroups, {
-                            instanceGroupName: value.group
-                        }, true)[0];
-                        hostGroups.push({
-                            name: actualBp[0].ambariBlueprint.host_groups[index].name,
+                    var tmpRecipes = $filter('filter')($rootScope.activeCluster.cluster.hostGroups, {
+                        instanceGroupName: value.group
+                    }, true)[0];
+                    hostGroups.push({
+                        name: actualBp[0].ambariBlueprint.host_groups[index].name,
+                        instanceGroupName: value.group,
+                        constraint: {
                             instanceGroupName: value.group,
-                            constraint: {
-                                instanceGroupName: value.group,
-                                hostCount: 1
-                            },
-                            recipeIds: tmpRecipes != undefined ? tmpRecipes.recipeIds : []
-                        });
-                        index++;
-                    }
+                            hostCount: 1
+                        },
+                        recipeIds: tmpRecipes != undefined ? tmpRecipes.recipeIds : []
+                    });
+                    index++;
                 });
             } else {
                 actualBp[0].ambariBlueprint.host_groups.forEach(function(bpHostGroup) {
@@ -554,8 +552,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
                     $rootScope.activeCluster = $rootScope.clusters[actClusterIndex] = success;
                     $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, {
-                        id: $rootScope.activeCluster.blueprintId
-                    })[0];
+                        id: $rootScope.activeCluster.blueprintId.toString()
+                    }, true)[0];
                     if ($rootScope.activeCluster.credentialId) {
                         $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {
                             id: $rootScope.activeCluster.credentialId

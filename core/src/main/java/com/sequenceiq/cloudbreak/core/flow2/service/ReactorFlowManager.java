@@ -97,7 +97,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterReInstall(Long stackId) {
-        String selector = FlowTriggers.CLUSTER_RESET_TRIGGER_EVENT;
+        String selector = FlowTriggers.CLUSTER_RESET_CHAIN_TRIGGER_EVENT;
         reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 

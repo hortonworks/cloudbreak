@@ -45,6 +45,10 @@ public class SaltStates {
         return applyState(sc, "ambari.agent", target).getJid();
     }
 
+    public static String ambariReset(SaltConnector sc, Target<String> target) {
+        return applyState(sc, "ambari.reset", target).getJid();
+    }
+
     public static String kerberos(SaltConnector sc, Target<String> target) {
         return applyState(sc, "kerberos.server", target).getJid();
     }
