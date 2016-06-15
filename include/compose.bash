@@ -119,7 +119,7 @@ compose-get-container() {
 compose-logs() {
     declare desc='Follow all logs in color. Separate service names by space to filter, e.g. "cbd logs cloudbreak uluwatu"'
 
-    dockerCompose logs "$@"
+    dockerCompose logs -f "$@"
 }
 
 compose-generate-check-diff() {
