@@ -56,7 +56,7 @@ stop-containers:
 	@echo "\n\033[1;96m--- Stop cbd containers"
 	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose stop;
 	@echo "\n\033[1;96m--- Save cloudbreak log to cloudbreak.log file"
-	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose logs --no-color cloudbreak >& ../cloudbreak.log & LOG_PID=$$!; sleep 5; kill $$LOG_PID
+	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose logs --no-color cloudbreak >& ../cloudbreak.log;
 
 remove-test-containers:
 	@cd $(INTEGCB_LOCATION); ./cbd kill; ./cbd delete;
