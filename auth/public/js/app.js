@@ -3,13 +3,20 @@ var $jq = jQuery.noConflict();
 
 var regApp = angular.module('regApp', ['ngRoute']);
 
+var pathArray = window.location.pathname.split('/')
+
+var basePath = ''
+if (pathArray[1] === 'identity') {
+    basePath = '/identity'
+}
+
 regApp.controller("regController", ['$scope', '$http',
     function($scope, $http) {
         $scope.signUp = function() {
             $http({
                 method: 'POST',
                 dataType: 'json',
-                url: "/register",
+                url: basePath + "/register",
                 data: {
                     email: email.value,
                     firstName: firstName.value,
@@ -40,11 +47,12 @@ regApp.controller("resetController", ['$scope', '$http',
             var url = window.location.href.split('?')
             if (url.length == 2 && url[1].split('=').length == 2 && url[1].split('=')[0] == 'email') {
                 email = url[1].split('=')[1];
-                var resetToken = window.location.pathname.split('/')[2]
+                //var resetToken = window.location.pathname.split('/')[2]
+                var resetToken = pathArray[pathArray.length - 1]
                 $http({
                     method: 'POST',
                     dataType: 'json',
-                    url: "/reset/" + resetToken,
+                    url: basePath + "/reset/" + resetToken,
                     data: {
                         password: resetPasswField.value,
                         email: email
@@ -81,7 +89,7 @@ regApp.controller("loginController", ['$scope', '$http', '$rootScope',
             $http({
                 method: 'POST',
                 dataType: 'json',
-                url: "/forget",
+                url: basePath + "/forget",
                 data: {
                     email: email.value
                 },
@@ -117,7 +125,7 @@ regApp.controller("regForAccController", ['$scope', '$http',
             $http({
                 method: 'POST',
                 dataType: 'json',
-                url: "/account/register",
+                url: basePath + "/account/register",
                 data: {
                     email: email.value,
                     firstName: firstName.value,

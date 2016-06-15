@@ -55,6 +55,23 @@ function waitingForAddressesAndContinue() {
     }
 }
 
+function debugHeaders(req) {
+  if (process.env.DEBUG) {
+    for(var key in req.headers) {
+        var value = req.headers[key];
+        console.log("[DEBUG]    HEADERS " + key + " : " + value);
+    }
+  }
+}
+
+function getBasePath(req) {
+    if (req.headers['x-forwarded-for']  !== undefined) {
+        return "/identity";
+    }
+
+    return "/";
+}
+
 function continueInit() {
     app.engine('html', cons.underscore);
 
@@ -89,6 +106,7 @@ function continueInit() {
 
     // login.html
     app.get('/', function(req, res) {
+        debugHeaders(req)
         var logout = req.query.logout
         if (logout != null && logout == 'true') {
             req.session.destroy(function() {
@@ -97,12 +115,14 @@ function continueInit() {
                 });
                 res.cookie('source', req.query.source);
                 res.render('login', {
+                    basePath: getBasePath(req),
                     errorMessage: ""
                 });
             })
         } else {
             res.cookie('source', req.query.source);
             res.render('login', {
+                basePath: getBasePath(req),
                 errorMessage: ""
             });
         }
@@ -110,6 +130,7 @@ function continueInit() {
 
     app.get('/dashboard', function(req, res) {
         res.render('dashboard', {
+            basePath: getBasePath(req),
             cloudbreakAddress: process.env.SL_CB_ADDRESS
         })
     });
@@ -123,6 +144,7 @@ function continueInit() {
         // register.html
     app.get('/register', function(req, res) {
         res.render('register', {
+            basePath: getBasePath(req),
             emailErrorMsg: emailErrorMsg,
             passwordErrorMsg: passwordErrorMsg,
             confirmPasswordErrorMsg: confirmPasswordErrorMsg,
@@ -134,7 +156,9 @@ function continueInit() {
 
     // reset.html
     app.get('/reset/:resetToken', function(req, res) {
-        res.render('reset')
+        res.render('reset', {
+            basePath: getBasePath(req)
+        })
     });
 
 
@@ -154,7 +178,7 @@ function continueInit() {
             var csrfToken = getCookieFieldValue(cookies, 'X-Uaa-Csrf');
             var username = req.body.email
             var password = req.body.password
-            var userCredentials = "username=" + username + "&password=" + encodeURIComponent(password) + "&X-Uaa-Csrf=" + csrfToken;
+            var userCredentials = "username=" + username + "&password=" + password + "&X-Uaa-Csrf=" + csrfToken;
             var options = {
                 headers: {
                     'Accept': 'application/json',
@@ -177,22 +201,24 @@ function continueInit() {
                         if (req.session.client_id == null) {
                             var sourceCookie = getCookie(req, 'source')
                             if (sourceCookie == null || sourceCookie == 'undefined') {
-                                res.redirect('dashboard')
+                                res.redirect(getBasePath(req) + '/dashboard')
                             } else {
                                 var sourceUrl = new Buffer(sourceCookie, 'base64').toString('utf-8')
                                 res.redirect(sourceUrl)
                             }
                         } else {
-                            res.redirect('confirm')
+                            res.redirect(getBasePath(req) + '/confirm')
                         }
                     } else {
                         res.render('login', {
+                            basePath: getBasePath(req),
                             errorMessage: "Incorrect email/password or account is disabled."
                         });
                     }
                 } else {
                     console.log("POST login.do - Client cannot access resource server. Check UAA address.");
                     res.render('login', {
+                        basePath: getBasePath(req),
                         errorMessage: "Client cannot access resource server."
                     });
                 }
@@ -201,15 +227,16 @@ function continueInit() {
     });
 
     app.get('/oauth/authorize', function(req, res) {
+        debugHeaders(req)
         if (req.param('client_id') && req.param('response_type') && req.param('scope') && req.param('redirect_uri')) {
             req.session.client_id = req.param('client_id')
             req.session.response_type = req.param('response_type')
             req.session.scope = req.param('scope')
             req.session.redirect_uri = req.param('redirect_uri')
             if (isUaaSession(req)) {
-                res.redirect('/confirm')
+                res.redirect(getBasePath(req) + '/confirm')
             } else {
-                res.redirect('/')
+                res.redirect(getBasePath(req) + '/')
             }
         } else {
             res.statusCode = 404
@@ -258,11 +285,13 @@ function continueInit() {
                     if (confirmResp.statusCode == 200) {
                         req.session.userScopes = confirmResp.body.auth_request.scope
                         res.render('confirm', {
+                            basePath: getBasePath(req),
                             client_id: req.session.client_id
                         })
                     } else if (confirmResp.statusCode == 302) {
                         if (endsWith(confirmResp.headers.location, '/login')) { // when redirects to UAA API login page
                             res.render('login', {
+                                basePath: getBasePath(req),
                                 errorMessage: ""
                             });
                         } else {
@@ -278,6 +307,7 @@ function continueInit() {
             res.statusCode = 500
             console.log('Invalid state at confirm.')
             res.render('login', {
+                basePath: getBasePath(req),
                 errorMessage: ""
             });
         }
@@ -308,6 +338,7 @@ function continueInit() {
                 if (err != null) {
                     console.log("POST /oauth/authorize - Client cannot access resource server. Check UAA server is running.");
                     res.render('login', {
+                        basePath: getBasePath(req),
                         errorMessage: "Client cannot access resource server. Check UAA server is running."
                     });
                 } else {
@@ -316,6 +347,7 @@ function continueInit() {
                     } else {
                         console.log('Authorization failed - ' + confirmResp.message)
                         res.render('login', {
+                            basePath: getBasePath(req),
                             errorMessage: ""
                         });
                     }
@@ -570,6 +602,7 @@ function continueInit() {
                     }
                     updateUserData(req, res, token, userData.id, updateData, updateOptions, function(updateResp) {
                         res.render('login', {
+                            basePath: getBasePath(req),
                             errorMessage: "confirmation successful"
                         });
                     })
@@ -640,6 +673,7 @@ function continueInit() {
                 isUserAdmin(req, res, userData, function(companyId) {
                     var company = companyId.split(".")[3]
                     res.render('regacc', {
+                        basePath: getBasePath(req),
                         token: req.session.acc_token,
                         email: req.session.acc_email,
                         inviter: inviter,
