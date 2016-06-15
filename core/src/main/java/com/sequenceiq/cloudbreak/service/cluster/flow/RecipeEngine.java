@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -64,10 +65,13 @@ public class RecipeEngine {
     private OrchestratorRecipeExecutor orchestratorRecipeExecutor;
     @Inject
     private BlueprintProcessor blueprintProcessor;
+    @Inject
+    private SmartSenseConfigProvider smartSenseConfigProvider;
 
     public void executePreInstall(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         configureSssd(stack, null);
         addFsRecipes(stack, hostGroups);
+        addSmartSenseRecipe(stack, hostGroups);
         boolean recipesFound = recipesFound(hostGroups);
         if (recipesFound) {
             String orchestrator = stack.getOrchestrator().getType();
@@ -210,6 +214,26 @@ public class RecipeEngine {
             }
         } catch (IOException e) {
             LOGGER.warn("Cannot create HDFS home dir recipe", e);
+        }
+    }
+
+    private void addSmartSenseRecipe(Stack stack, Set<HostGroup> hostGroups) {
+        try {
+            Cluster cluster = stack.getCluster();
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
+            if (smartSenseConfigProvider.smartSenseIsConfigurable(blueprintText)) {
+                for (HostGroup hostGroup : hostGroups) {
+                    if (isComponentPresent(blueprintText, "HST_AGENT", hostGroup)) {
+                        String script = FileReaderUtils.readFileFromClasspath("scripts/smartsense-capture-schedule.sh");
+                        RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL, ExecutionType.ONE_NODE);
+                        Recipe recipe = recipeBuilder.buildRecipes(asList(recipeScript), Collections.emptyMap()).get(0);
+                        hostGroup.addRecipe(recipe);
+                        break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Cannot create SmartSense caputre schedule setter recipe", e);
         }
     }
 
