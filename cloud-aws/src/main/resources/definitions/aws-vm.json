@@ -673,6 +673,38 @@
       }
     },
     {
+      "value": "x1.32xlarge",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "EPHEMERAL",
+            "minimumSize": 1920,
+            "maximumSize": 1920,
+            "minimumNumber": 1,
+            "maximumNumber": 2
+          },
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 1,
+            "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "SSD",
+            "minimumSize": 1,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          }
+        ],
+        "properties": {
+          "Memory": "1952.0",
+          "Cpu": "128"
+        }
+      }
+    },
+    {
       "value": "cc2.8xlarge",
       "meta": {
         "configs": [
