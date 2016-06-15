@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
+import java.io.IOException;
+import java.util.Map;
+
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
@@ -57,6 +62,8 @@ public class ServiceProviderCredentialAdapter {
                 throw new BadRequestException(message + res.getCloudCredentialStatus().getStatusReason(),
                         res.getCloudCredentialStatus().getException());
             }
+            CloudCredential cloudCredentialResponse = res.getCloudCredentialStatus().getCloudCredential();
+            mergeSmartSenseAttributeIfExists(credential, cloudCredentialResponse);
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing credential verification", e);
             throw new OperationException(e);
@@ -66,5 +73,19 @@ public class ServiceProviderCredentialAdapter {
 
     public Credential update(Credential credential) throws Exception {
         return credential;
+    }
+
+    private void mergeSmartSenseAttributeIfExists(Credential credential, CloudCredential cloudCredentialResponse) {
+        String smartSenseId = String.valueOf(cloudCredentialResponse.getParameters().get("smartSenseId"));
+        if (StringUtils.isNoneEmpty(smartSenseId)) {
+            try {
+                Json attributes = credential.getAttributes();
+                Map<String, Object> newAttributes = attributes.getMap();
+                newAttributes.put("smartSenseId", smartSenseId);
+                credential.setAttributes(new Json(newAttributes));
+            } catch (IOException e) {
+                LOGGER.error("SmartSense id could not be added to the credential as attribute.", e);
+            }
+        }
     }
 }
