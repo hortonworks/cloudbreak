@@ -21,12 +21,14 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 
@@ -52,11 +54,15 @@ public class StackToCloudStackConverter {
     }
 
     private CloudStack convert(Stack stack, Set<String> deleteRequestedInstances) {
-        List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), deleteRequestedInstances);
-        Image image = imageService.getImage(stack.getId());
-        Network network = buildNetwork(stack);
-        Security security = buildSecurity(stack);
-        return new CloudStack(instanceGroups, network, security, image, stack.getParameters());
+        try {
+            List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), deleteRequestedInstances);
+            Image image = imageService.getImage(stack.getId());
+            Network network = buildNetwork(stack);
+            Security security = buildSecurity(stack);
+            return new CloudStack(instanceGroups, network, security, image, stack.getParameters());
+        } catch (CloudbreakImageNotFoundException inf) {
+            throw new CloudbreakServiceException(inf);
+        }
     }
 
     public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, Set<String> deleteRequests) {

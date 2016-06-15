@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
@@ -50,6 +51,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -126,13 +128,14 @@ public class StackCreationService {
     }
 
     public CheckImageResult checkImage(StackContext context) {
-        Stack stack = context.getStack();
-        Image image = imageService.getImage(stack.getId());
-        CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
-                cloudStackConverter.convert(stack), image);
-        LOGGER.info("Triggering event: {}", checkImageRequest);
-        eventBus.notify(checkImageRequest.selector(), Event.wrap(checkImageRequest));
         try {
+            Stack stack = context.getStack();
+            Image image = imageService.getImage(stack.getId());
+            CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
+                    cloudStackConverter.convert(stack), image);
+            LOGGER.info("Triggering event: {}", checkImageRequest);
+            eventBus.notify(checkImageRequest.selector(), Event.wrap(checkImageRequest));
+
             CheckImageResult result = checkImageRequest.await();
             sendNotification(result, stack);
             LOGGER.info("Result: {}", result);
@@ -140,6 +143,8 @@ public class StackCreationService {
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing check image", e);
             throw new OperationException(e);
+        } catch (CloudbreakImageNotFoundException e) {
+            throw new CloudbreakServiceException(e);
         }
     }
 

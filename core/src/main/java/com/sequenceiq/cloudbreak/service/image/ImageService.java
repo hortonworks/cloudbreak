@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariCatalog;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariInfo;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.HDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -33,7 +35,6 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
 
 @Service
 @Transactional
@@ -58,11 +59,11 @@ public class ImageService {
     @Value("${cb.image.catalog.url:}")
     private String catalogUrl;
 
-    public Image getImage(Long stackId) {
+    public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         try {
             Component component = componentRepository.findComponentByStackIdComponentTypeName(stackId, ComponentType.IMAGE, IMAGE_NAME);
             if (component == null) {
-                throw new CloudbreakServiceException(String.format("Image not found: stackId: %d, componentType: %s, name: %s",
+                throw new CloudbreakImageNotFoundException(String.format("Image not found: stackId: %d, componentType: %s, name: %s",
                         stackId, ComponentType.IMAGE.name(), IMAGE_NAME));
             }
             LOGGER.debug("Image found! stackId: {}, component: {}", stackId, component);
