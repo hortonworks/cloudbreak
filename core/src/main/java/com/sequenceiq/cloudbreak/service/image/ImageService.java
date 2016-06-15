@@ -40,7 +40,7 @@ public class ImageService {
     private ImageNameUtil imageNameUtil;
 
     @Inject
-    private HdpInfoUtil hdpInfoUtil;
+    private HdpInfoSearchService hdpInfoSearchService;
 
     @Inject
     private UserDataBuilder userDataBuilder;
@@ -76,7 +76,7 @@ public class ImageService {
             String publicSssKey = stack.getCredential().getPublicKey();
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, tmpSshKey, sshUser, params,
                     stack.getRelocateDocker() == null ? false : stack.getRelocateDocker());
-            HDPInfo hdpInfo = hdpInfoUtil.getHDPInfo(ambariVersion, hdpVersion);
+            HDPInfo hdpInfo = hdpInfoSearchService.searchHDPInfo(ambariVersion, hdpVersion);
             if (hdpInfo != null) {
                 String specificImage = imageNameUtil.determineImageName(hdpInfo, platformString, stack.getRegion());
                 if (specificImage == null) {

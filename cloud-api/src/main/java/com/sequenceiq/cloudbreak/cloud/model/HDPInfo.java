@@ -5,7 +5,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class HDPInfo {
+public class HDPInfo implements Versioned {
 
     private String version;
     private HDPRepo repo;
@@ -33,5 +33,10 @@ public class HDPInfo {
 
     public void setImages(Map<String, Map<String, String>> images) {
         this.images = images;
+    }
+
+    @Override
+    public String toString() {
+        return "HDPInfo{version='" + version + "'}";
     }
 }
