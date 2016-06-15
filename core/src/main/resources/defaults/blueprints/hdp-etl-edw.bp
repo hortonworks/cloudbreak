@@ -62,12 +62,6 @@
           "name": "HIVE_SERVER"
         },
         {
-          "name": "HST_AGENT"
-        },
-        {
-          "name": "HST_SERVER"
-        },
-        {
           "name": "JOURNALNODE"
         },
         {
@@ -130,9 +124,6 @@
       "components": [
         {
           "name": "DATANODE"
-        },
-        {
-          "name": "HST_AGENT"
         },
         {
           "name": "METRICS_MONITOR"
