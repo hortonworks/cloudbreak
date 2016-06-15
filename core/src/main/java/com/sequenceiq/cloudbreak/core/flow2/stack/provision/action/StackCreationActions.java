@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachin
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
 @Configuration
@@ -84,9 +86,13 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                CloudStack cloudStack = cloudStackConverter.convert(context.getStack());
-                Image image = imageService.getImage(context.getCloudContext().getId());
-                return new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
+                try {
+                    CloudStack cloudStack = cloudStackConverter.convert(context.getStack());
+                    Image image = imageService.getImage(context.getCloudContext().getId());
+                    return new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
+                } catch (CloudbreakImageNotFoundException e) {
+                    throw new CloudbreakServiceException(e);
+                }
             }
         };
     }

@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
 @Component
@@ -40,7 +40,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         try {
             Image image = imageService.getImage(source.getId());
             stackJson.setImage(getConversionService().convert(image, ImageJson.class));
-        } catch (CloudbreakServiceException exc) {
+        } catch (CloudbreakImageNotFoundException exc) {
             LOGGER.info(exc.getMessage());
         }
         stackJson.setName(source.getName());

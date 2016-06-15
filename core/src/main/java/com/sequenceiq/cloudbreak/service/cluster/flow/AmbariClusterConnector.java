@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
@@ -156,35 +157,6 @@ public class AmbariClusterConnector {
     @Inject
     private ImageService imageService;
 
-    private enum Msg {
-        AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
-        AMBARI_CLUSTER_AMBARI_DATABASE_RESET("ambari.cluster.ambari.database.reset"),
-        AMBARI_CLUSTER_RESTARTING_AMBARI_SERVER("ambari.cluster.restarting.ambari.server"),
-        AMBARI_CLUSTER_RESTARTING_AMBARI_AGENT("ambari.cluster.restarting.ambari.agent"),
-        AMBARI_CLUSTER_AMBARI_AGENT_RESTARTED("ambari.cluster.ambari.agent.restarted"),
-        AMBARI_CLUSTER_AMBARI_SERVER_RESTARTED("ambari.cluster.ambari.server.restarted"),
-        AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup"),
-        AMBARI_CLUSTER_ADDING_NODE_TO_HOSTGROUP("ambari.cluster.adding.node.to.hostgroup"),
-        AMBARI_CLUSTER_HOST_JOIN_FAILED("ambari.cluster.host.join.failed"),
-        AMBARI_CLUSTER_INSTALL_FAILED("ambari.cluster.install.failed"),
-        AMBARI_CLUSTER_UPSCALE_FAILED("ambari.cluster.upscale.failed"),
-        AMBARI_CLUSTER_MR_SMOKE_FAILED("ambari.cluster.mr.smoke.failed"),
-        AMBARI_CLUSTER_SERVICES_STARTING("ambari.cluster.services.starting"),
-        AMBARI_CLUSTER_SERVICES_STARTED("ambari.cluster.services.started"),
-        AMBARI_CLUSTER_SERVICES_STOPPING("ambari.cluster.services.stopping"),
-        AMBARI_CLUSTER_SERVICES_STOPPED("ambari.cluster.services.stopped");
-
-        private String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
-    }
-
     public void waitForAmbariServer(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getDefaultAmbariClient(stack);
         AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, stack.getAmbariIp(), ambariClient);
@@ -259,7 +231,8 @@ public class AmbariClusterConnector {
         }
     }
 
-    private String updateBlueprintConfiguration(Stack stack, String blueprintText, RDSConfig rdsConfig, FileSystem fs) throws IOException {
+    private String updateBlueprintConfiguration(Stack stack, String blueprintText, RDSConfig rdsConfig, FileSystem fs)
+            throws IOException, CloudbreakImageNotFoundException {
         if (fs != null) {
             blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
         }
@@ -327,6 +300,23 @@ public class AmbariClusterConnector {
         return ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
     }
 
+    public Cluster credentialChangeAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakSecuritySetupException {
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+        String oldUserName = cluster.getUserName();
+        String oldPassword = cluster.getPassword();
+        AmbariClient ambariClient = getSecureAmbariClient(stack);
+        if (newUserName.equals(oldUserName)) {
+            if (!newPassword.equals(oldPassword)) {
+                ambariClient.changePassword(oldUserName, oldPassword, newPassword, true);
+            }
+        } else {
+            ambariClient.createUser(newUserName, newPassword, true);
+            ambariClient.deleteUser(oldUserName);
+        }
+        return cluster;
+    }
+
 //    public Cluster resetAmbariCluster(Long stackId) throws CloudbreakException {
 //        Stack stack = stackRepository.findOneWithLists(stackId);
 //        InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
@@ -351,23 +341,6 @@ public class AmbariClusterConnector {
 //                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AMBARI_AGENT_RESTARTED.code()));
 //        return cluster;
 //    }
-
-    public Cluster credentialChangeAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakSecuritySetupException {
-        Stack stack = stackRepository.findOneWithLists(stackId);
-        Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        String oldUserName = cluster.getUserName();
-        String oldPassword = cluster.getPassword();
-        AmbariClient ambariClient = getSecureAmbariClient(stack);
-        if (newUserName.equals(oldUserName)) {
-            if (!newPassword.equals(oldPassword)) {
-                ambariClient.changePassword(oldUserName, oldPassword, newPassword, true);
-            }
-        } else {
-            ambariClient.createUser(newUserName, newPassword, true);
-            ambariClient.deleteUser(oldUserName);
-        }
-        return cluster;
-    }
 
     public void changeOriginalAmbariCredentials(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
@@ -487,7 +460,6 @@ public class AmbariClusterConnector {
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STARTED.code()));
     }
 
-
     private Cluster handleClusterCreationSuccess(Stack stack, Cluster cluster) {
         LOGGER.info("Cluster created successfully. Cluster name: {}", cluster.getName());
         cluster.setCreationFinished(new Date().getTime());
@@ -558,6 +530,18 @@ public class AmbariClusterConnector {
         }
     }
 
+    private PollingResult waitForHostsToJoin(Stack stack) throws CloudbreakSecuritySetupException {
+        Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
+        AmbariHostsCheckerContext ambariHostsCheckerContext =
+                new AmbariHostsCheckerContext(stack, getAmbariClient(stack), hostsInCluster, stack.getFullNodeCount());
+        return ambariHostJoin.pollWithTimeout(
+                ambariHostsJoinStatusCheckerTask,
+                ambariHostsCheckerContext,
+                AMBARI_POLLING_INTERVAL,
+                MAX_ATTEMPTS_FOR_HOSTS,
+                AmbariOperationService.MAX_FAILURE_COUNT);
+    }
+
 //    private void restartAmbariAgents(Stack stack) throws CloudbreakException {
 //        try {
 //            pluginManager.triggerAndWaitForPlugins(stack, ConsulPluginEvent.RESTART_AMBARI_EVENT, DEFAULT_RECIPE_TIMEOUT, AMBARI_AGENT);
@@ -571,18 +555,6 @@ public class AmbariClusterConnector {
 //            throw new CloudbreakException("Services could not start because host(s) could not join.");
 //        }
 //    }
-
-    private PollingResult waitForHostsToJoin(Stack stack) throws CloudbreakSecuritySetupException {
-        Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
-        AmbariHostsCheckerContext ambariHostsCheckerContext =
-                new AmbariHostsCheckerContext(stack, getAmbariClient(stack), hostsInCluster, stack.getFullNodeCount());
-        return ambariHostJoin.pollWithTimeout(
-                ambariHostsJoinStatusCheckerTask,
-                ambariHostsCheckerContext,
-                AMBARI_POLLING_INTERVAL,
-                MAX_ATTEMPTS_FOR_HOSTS,
-                AmbariOperationService.MAX_FAILURE_COUNT);
-    }
 
     private boolean allServiceStopped(Map<String, Map<String, String>> hostComponentsStates) {
         boolean stopped = true;
@@ -616,7 +588,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void setBaseRepoURL(Stack stack, AmbariClient ambariClient) throws IOException {
+    private void setBaseRepoURL(Stack stack, AmbariClient ambariClient) throws IOException, CloudbreakImageNotFoundException {
         Image image = imageService.getImage(stack.getId());
         HDPRepo hdpRepo = image.getHdpRepo();
         if (hdpRepo == null) {
@@ -727,7 +699,6 @@ public class AmbariClusterConnector {
         return processingBlueprint;
     }
 
-
     private String extendHiveConfig(AmbariClient ambariClient, String processingBlueprint) {
         Map<String, Map<String, String>> config = new HashMap<>();
         Map<String, String> hiveSite = new HashMap<>();
@@ -810,6 +781,35 @@ public class AmbariClusterConnector {
                 String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
                 throw new CloudbreakServiceException("Ambari could not install services. " + errorMessage, e);
             }
+        }
+    }
+
+    private enum Msg {
+        AMBARI_CLUSTER_RESETTING_AMBARI_DATABASE("ambari.cluster.resetting.ambari.database"),
+        AMBARI_CLUSTER_AMBARI_DATABASE_RESET("ambari.cluster.ambari.database.reset"),
+        AMBARI_CLUSTER_RESTARTING_AMBARI_SERVER("ambari.cluster.restarting.ambari.server"),
+        AMBARI_CLUSTER_RESTARTING_AMBARI_AGENT("ambari.cluster.restarting.ambari.agent"),
+        AMBARI_CLUSTER_AMBARI_AGENT_RESTARTED("ambari.cluster.ambari.agent.restarted"),
+        AMBARI_CLUSTER_AMBARI_SERVER_RESTARTED("ambari.cluster.ambari.server.restarted"),
+        AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup"),
+        AMBARI_CLUSTER_ADDING_NODE_TO_HOSTGROUP("ambari.cluster.adding.node.to.hostgroup"),
+        AMBARI_CLUSTER_HOST_JOIN_FAILED("ambari.cluster.host.join.failed"),
+        AMBARI_CLUSTER_INSTALL_FAILED("ambari.cluster.install.failed"),
+        AMBARI_CLUSTER_UPSCALE_FAILED("ambari.cluster.upscale.failed"),
+        AMBARI_CLUSTER_MR_SMOKE_FAILED("ambari.cluster.mr.smoke.failed"),
+        AMBARI_CLUSTER_SERVICES_STARTING("ambari.cluster.services.starting"),
+        AMBARI_CLUSTER_SERVICES_STARTED("ambari.cluster.services.started"),
+        AMBARI_CLUSTER_SERVICES_STOPPING("ambari.cluster.services.stopping"),
+        AMBARI_CLUSTER_SERVICES_STOPPED("ambari.cluster.services.stopped");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
         }
     }
 }
