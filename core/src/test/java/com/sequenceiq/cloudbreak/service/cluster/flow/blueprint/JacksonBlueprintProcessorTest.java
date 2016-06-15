@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +15,8 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class JacksonBlueprintProcessorTest {
+
+    private static final String HOST_GROUPS_NODE = "host_groups";
 
     private JacksonBlueprintProcessor underTest = new JacksonBlueprintProcessor();
 
@@ -207,4 +211,48 @@ public class JacksonBlueprintProcessorTest {
         underTest.getComponentsInHostGroup(testBlueprint, "slave_1");
     }
 
+    @Test
+    public void testAddComponentToHostgroupsIfComponentIsMissing() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+
+        String result = underTest.addComponentToHostgroups("HST_SERVER", Arrays.asList("slave_1"), testBlueprint);
+
+        Assert.assertTrue(underTest.componentExistsInBlueprint("HST_SERVER", result));
+    }
+
+    @Test
+    public void testAddComponentToHostgroupsShouldAddComponentToEverySpecifiedHostGroupIfComponentIsMissing() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        String componentToAdd = "HST_AGENT";
+
+        String result = underTest.addComponentToHostgroups(componentToAdd, Arrays.asList("master", "slave_1"), testBlueprint);
+
+        Iterator<JsonNode> hostGroups = JsonUtil.readTree(result).path(HOST_GROUPS_NODE).elements();
+        while (hostGroups.hasNext()) {
+            JsonNode hostGroup = hostGroups.next();
+            Assert.assertTrue(componentExistsInHostgroup(componentToAdd, hostGroup));
+        }
+    }
+
+    @Test
+    public void testAddComponentToHostgroupsShouldNotModifyBlueprintIfComponentExists() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
+        String componentToAdd = "NAMENODE";
+
+        String result = underTest.addComponentToHostgroups(componentToAdd, Arrays.asList("master"), testBlueprint);
+
+        Assert.assertEquals(testBlueprint.replaceAll("\\s", ""), result);
+    }
+
+    private boolean componentExistsInHostgroup(String component, JsonNode hostGroupNode) {
+        boolean componentExists = false;
+        Iterator<JsonNode> components = hostGroupNode.path("components").elements();
+        while (components.hasNext()) {
+            if (component.equals(components.next().path("name").textValue())) {
+                componentExists = true;
+                break;
+            }
+        }
+        return componentExists;
+    }
 }

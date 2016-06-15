@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,13 +22,16 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @Component
 public class SmartSenseConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartSenseConfigProvider.class);
     private static final String SMART_SENSE_SERVER_CONFIG_FILE = "hst-server-conf";
     private static final String HST_SERVER_COMPONENT = "HST_SERVER";
+    private static final String HST_AGENT_COMPONENT = "HST_AGENT";
     private static final int FIRST_PART_LENGTH = 4;
 
     @Value("${cb.smartsense.configure:false}")
@@ -36,17 +43,45 @@ public class SmartSenseConfigProvider {
     @Inject
     private BlueprintProcessor blueprintProcessor;
 
+    @Inject
+    private HostGroupService hostGroupService;
+
     public boolean smartSenseIsConfigurable(String blueprint) {
         return configureSmartSense && blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT, blueprint);
     }
 
-    public List<BlueprintConfigurationEntry> getConfigs(Stack stack, String blueprintText) {
+    public String addToBlueprint(Stack stack, String blueprintText) {
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
-        if (smartSenseIsConfigurable(blueprintText)) {
+        if (configureSmartSense) {
             Credential credential = stack.getCredential();
+            Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
+            Set<String> hostGroupNames = hostGroups.stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
+            if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT, blueprintText)) {
+                String aHostGroupName = hostGroupNames.stream().findFirst().get();
+                blueprintText = blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, Arrays.asList(aHostGroupName), blueprintText);
+            }
+            blueprintText = blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hostGroupNames, blueprintText);
+            configs.addAll(getSmartSenseServerConfigs());
             configs.addAll(getSmartSenseConfigForAws(credential));
             configs.addAll(getSmartSenseGatewayConfigs(stack));
+            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, true);
         }
+        return blueprintText;
+    }
+
+    private Function<HostGroup, String> getHostGroupNameMapper() {
+        return new Function<HostGroup, String>() {
+                    @Override
+                    public String apply(HostGroup hostGroup) {
+                        return hostGroup.getName();
+                    }
+                };
+    }
+
+    private Collection<? extends BlueprintConfigurationEntry> getSmartSenseServerConfigs() {
+        List<BlueprintConfigurationEntry> configs = new ArrayList<>();
+        configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.account.name", "Hortonworks Data Platform AWS Marketplace"));
+        configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.notification.email", "aws-marketplace@hortonworks.com"));
         return configs;
     }
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -81,15 +82,9 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
             ObjectNode root = (ObjectNode) JsonUtil.readTree(blueprintText);
             ArrayNode hostGroupsNode = (ArrayNode) root.path(HOST_GROUPS_NODE);
             Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
-            while (hostGroups.hasNext()) {
+            while (hostGroups.hasNext() && !componentExists) {
                 JsonNode hostGroupNode = hostGroups.next();
-                Iterator<JsonNode> components = hostGroupNode.path("components").elements();
-                while (components.hasNext()) {
-                    if (component.equals(components.next().path("name").textValue())) {
-                        componentExists = true;
-                        break;
-                    }
-                }
+                componentExists = componentExistsInHostgroup(component, hostGroupNode);
             }
             return componentExists;
         } catch (IOException e) {
@@ -129,6 +124,54 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
             return JsonUtil.writeValueAsString(root);
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to modify hdp version.", e);
+        }
+    }
+
+    @Override
+    public String addComponentToHostgroups(String component, Collection<String> hostGroupNames, String blueprintText) {
+        try {
+            ObjectNode root = (ObjectNode) JsonUtil.readTree(blueprintText);
+            ArrayNode hostGroupsNode = (ArrayNode) root.path(HOST_GROUPS_NODE);
+            Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
+            while (hostGroups.hasNext()) {
+                JsonNode hostGroupNode = hostGroups.next();
+                String hostGroupName = hostGroupNode.path("name").textValue();
+                if (hostGroupNames.contains(hostGroupName) && !componentExistsInHostgroup(component, hostGroupNode)) {
+                    ArrayNode components = (ArrayNode) hostGroupNode.path("components");
+                    components.addPOJO(new ComponentElement(component));
+                }
+            }
+            return JsonUtil.writeValueAsString(root);
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to remove component('" + component + "') from the blueprint.", e);
+        }
+    }
+
+    private boolean componentExistsInHostgroup(String component, JsonNode hostGroupNode) {
+        boolean componentExists = false;
+        Iterator<JsonNode> components = hostGroupNode.path("components").elements();
+        while (components.hasNext()) {
+            if (component.equals(components.next().path("name").textValue())) {
+                componentExists = true;
+                break;
+            }
+        }
+        return componentExists;
+    }
+
+    private class ComponentElement {
+        private String name;
+
+        private ComponentElement(String component) {
+            name = component;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 }
