@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
 
 public enum ClusterCreationEvent implements FlowEvent {
     CLUSTER_CREATION_EVENT(FlowTriggers.CLUSTER_PROVISION_TRIGGER_EVENT),
+    CLUSTER_INSTALL_EVENT(FlowTriggers.CLUSTER_INSTALL_TRIGGER_EVENT),
     START_AMBARI_SERVICES_FINISHED_EVENT(EventSelectorUtil.selector(StartAmbariServicesSuccess.class)),
     START_AMBARI_SERVICES_FAILED_EVENT(EventSelectorUtil.selector(StartAmbariServicesFailed.class)),
     START_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(StartAmbariSuccess.class)),

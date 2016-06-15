@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_INSTALL_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT;
@@ -29,6 +30,7 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
     private static final List<Transition<ClusterCreationState, ClusterCreationEvent>> TRANSITIONS =
             new Transition.Builder<ClusterCreationState, ClusterCreationEvent>().defaultFailureEvent(CLUSTER_CREATION_FAILED_EVENT)
             .from(INIT_STATE).to(STARTING_AMBARI_SERVICES_STATE).event(CLUSTER_CREATION_EVENT).noFailureEvent()
+            .from(INIT_STATE).to(STARTING_AMBARI_STATE).event(CLUSTER_INSTALL_EVENT).noFailureEvent()
             .from(STARTING_AMBARI_SERVICES_STATE).to(STARTING_AMBARI_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
             .from(STARTING_AMBARI_STATE).to(INSTALLING_CLUSTER_STATE).event(START_AMBARI_FINISHED_EVENT)
@@ -59,7 +61,8 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
     @Override
     public ClusterCreationEvent[] getInitEvents() {
         return new ClusterCreationEvent[] {
-                CLUSTER_CREATION_EVENT
+                CLUSTER_CREATION_EVENT,
+                CLUSTER_INSTALL_EVENT
         };
     }
 

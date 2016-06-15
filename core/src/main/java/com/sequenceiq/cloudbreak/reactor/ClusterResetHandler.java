@@ -6,9 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterResetService;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterResetResult;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -17,9 +18,11 @@ import reactor.bus.EventBus;
 public class ClusterResetHandler implements ClusterEventHandler<ClusterResetRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterResetHandler.class);
     @Inject
-    private AmbariClusterConnector ambariClusterConnector;
-    @Inject
     private EventBus eventBus;
+    @Inject
+    private StackService stackService;
+    @Inject
+    private AmbariClusterResetService ambariClusterResetService;
 
     @Override
     public Class<ClusterResetRequest> type() {
@@ -31,10 +34,7 @@ public class ClusterResetHandler implements ClusterEventHandler<ClusterResetRequ
         ClusterResetRequest request = event.getData();
         ClusterResetResult result;
         try {
-            //TODO This feature is not working because it is relying on the recipe feature.
-            LOGGER.warn("Cluster reinstall feature is under construction. It's not working for now.");
-            underConstruction();
-            //ambariClusterConnector.resetAmbariCluster(request.getStackId());
+            ambariClusterResetService.resetCluster(request.getStackId());
             result = new ClusterResetResult(request);
         } catch (Exception e) {
             result = new ClusterResetResult(e.getMessage(), e, request);
@@ -42,7 +42,4 @@ public class ClusterResetHandler implements ClusterEventHandler<ClusterResetRequ
         eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
     }
 
-    private void underConstruction() {
-        throw new RuntimeException("Under construction. Cluster reinstall feature is not working for now.");
-    }
 }

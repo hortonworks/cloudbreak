@@ -161,6 +161,26 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public void resetAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
+            BaseSaltJobRunner baseSaltJobRunner = new BaseSaltJobRunner(target, allNodes) {
+                @Override
+                public String submit(SaltConnector saltConnector) {
+                    return SaltStates.ambariReset(saltConnector, new Compound(getTarget(), Compound.CompoundType.HOST));
+                }
+            };
+            SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(saltConnector, baseSaltJobRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
+            Future<Boolean> saltJobRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltJobRunBootstrapRunner);
+            saltJobRunBootstrapFuture.get();
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during reset", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
     public void tearDown(GatewayConfig gatewayConfig, List<String> hostnames) throws CloudbreakOrchestratorException {
         try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
             SaltStates.removeMinions(saltConnector, hostnames);

@@ -40,7 +40,10 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -137,6 +140,9 @@ public class AmbariClusterService implements ClusterService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
+    @Inject
+    private OrchestratorTypeResolver orchestratorTypeResolver;
+
     private enum Msg {
         AMBARI_CLUSTER_START_IGNORED("ambari.cluster.start.ignored"),
         AMBARI_CLUSTER_STOP_IGNORED("ambari.cluster.stop.ignored"),
@@ -153,7 +159,6 @@ public class AmbariClusterService implements ClusterService {
             return code;
         }
     }
-
 
     @Override
     @Transactional(Transactional.TxType.NEVER)
@@ -482,12 +487,21 @@ public class AmbariClusterService implements ClusterService {
         cluster.setStack(stack);
         cluster = clusterRepository.save(cluster);
 
-        if (cluster.getContainers().isEmpty()) {
+        try {
+            triggerClusterInstall(stack, cluster);
+        } catch (CloudbreakException e) {
+            throw new CloudbreakServiceException(e);
+        }
+        return stack.getCluster();
+    }
+
+    private void triggerClusterInstall(Stack stack, Cluster cluster) throws CloudbreakException {
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
+        if (orchestratorType.containerOrchestrator() && cluster.getContainers().isEmpty()) {
             flowManager.triggerClusterInstall(stack.getId());
         } else {
             flowManager.triggerClusterReInstall(stack.getId());
         }
-        return stack.getCluster();
     }
 
     private boolean validateRequest(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException {
