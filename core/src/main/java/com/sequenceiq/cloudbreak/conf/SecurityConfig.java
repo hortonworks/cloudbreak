@@ -152,7 +152,7 @@ public class SecurityConfig {
                     .antMatchers(API_ROOT_CONTEXT + "/usages/account/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
                     .antMatchers(API_ROOT_CONTEXT + "/usages/user/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
                     .antMatchers(API_ROOT_CONTEXT + "/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
-                    .antMatchers(API_ROOT_CONTEXT + "/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')")
+                    .antMatchers(API_ROOT_CONTEXT + "/subscriptions").access("#oauth2.hasScope('cloudbreak.subscribe')")
                     .antMatchers(API_ROOT_CONTEXT + "/accountpreferences/**")
                         .access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/constraints/**")

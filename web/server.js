@@ -456,13 +456,11 @@ function continueInit() {
                     }
                 }
                 proxyRestClient.methods.subscribe(subscribeArgs, function(data, response) {
-                    if (response.statusCode === 201 && data.id) {
+                    if (response.statusCode === 200 && data.id) {
                         console.log("Subscribed to Cloudbreak notifications. Subscription id: [" + data.id + "]");
                         config.subscriptionAddress = config.hostAddress
-                    } else if (response.statusCode === 409) {
-                        console.log("Subscription already exist.");
-                        config.subscriptionAddress = config.hostAddress
                     } else {
+                        console.log(response.statusCode)
                         console.log("Something unexpected happened. Couldn't subscribe to Cloudbreak notifications.")
                         console.log(data)
                     }
