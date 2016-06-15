@@ -25,15 +25,12 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 public class BlueprintLoaderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintLoaderService.class);
 
-    @Value("#{'${cb.blueprint.defaults:}'.split(',')}")
+    @Value("#{'${cb.blueprint.defaults:}'.split(';')}")
     private List<String> blueprintArray;
 
     @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
-
-    @Inject
-    private BlueprintService blueprintService;
 
     @Inject
     private BlueprintRepository blueprintRepository;
@@ -44,15 +41,17 @@ public class BlueprintLoaderService {
     public Set<Blueprint> loadBlueprints(CbUser user) {
         Set<Blueprint> blueprints = new HashSet<>();
         Set<String> blueprintNames = getDefaultBlueprintNames(user);
-        for (String blueprintName : blueprintArray) {
-            if (!blueprintName.isEmpty() && !blueprintNames.contains(blueprintName)) {
-                LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintName, user.getUsername());
+        for (String blueprintStrings : blueprintArray) {
+            String[] split = blueprintStrings.split("=");
+            if (!blueprintStrings.isEmpty() && (split.length == 2 || split.length == 1) && !blueprintNames.contains(blueprintStrings)
+                    && !split[0].isEmpty()) {
+                LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintStrings, user.getUsername());
                 try {
                     BlueprintRequest blueprintJson = new BlueprintRequest();
-                    blueprintJson.setName(blueprintName);
-                    blueprintJson.setDescription(blueprintName);
+                    blueprintJson.setName(split[0]);
+                    blueprintJson.setDescription(split[0]);
                     blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(
-                            FileReaderUtils.readFileFromClasspath(String.format("defaults/blueprints/%s.bp", blueprintName))));
+                            FileReaderUtils.readFileFromClasspath(String.format("defaults/blueprints/%s.bp", split.length == 2 ? split[1] : split[0]))));
                     Blueprint bp = conversionService.convert(blueprintJson, Blueprint.class);
                     bp.setOwner(user.getUserId());
                     bp.setAccount(user.getAccount());
