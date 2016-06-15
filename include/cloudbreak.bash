@@ -33,11 +33,11 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
     env-import DOCKER_TAG_CBDB 1.2.0
     env-import DOCKER_TAG_PCDB 1.2.0
-    env-import DOCKER_TAG_PERISCOPE 1.4.0-dev.63
-    env-import DOCKER_TAG_CLOUDBREAK 1.4.0-dev.63
-    env-import DOCKER_TAG_ULUWATU 1.4.0-dev.63
-    env-import DOCKER_TAG_SULTANS 1.4.0-dev.63
-    env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.4.0-dev.63
+    env-import DOCKER_TAG_PERISCOPE 1.4.0-dev.69
+    env-import DOCKER_TAG_CLOUDBREAK 1.4.0-dev.69
+    env-import DOCKER_TAG_ULUWATU 1.4.0-dev.69
+    env-import DOCKER_TAG_SULTANS 1.4.0-dev.69
+    env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.4.0-dev.69
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/cloudbreak-web
     env-import DOCKER_IMAGE_CLOUDBREAK_AUTH hortonworks/cloudbreak-auth
 
@@ -172,7 +172,7 @@ cloudbreak-conf-defaults() {
     env-import PUBLIC_IP
 
     env-import CB_HOST_ADDR $PUBLIC_IP
-    env-import CB_BLUEPRINT_DEFAULTS "hdp-small-default,hdp-spark-cluster,hdp-streaming-cluster,hdp-ephemeral"
+    env-import CB_BLUEPRINT_DEFAULTS "hdp-small-default;hdp-spark-cluster;hdp-streaming-cluster;hdp-ephemeral"
     env-import CB_TEMPLATE_DEFAULTS "minviable-gcp,minviable-azure,minviable-aws"
     env-import CB_LOCAL_DEV_BIND_ADDR "192.168.59.3"
     env-import ADDRESS_RESOLVING_TIMEOUT 120000
