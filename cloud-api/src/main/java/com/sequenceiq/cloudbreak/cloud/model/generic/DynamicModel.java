@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model.generic;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,4 +44,7 @@ public class DynamicModel {
         putParameter(clazz.getName(), value);
     }
 
+    public Map<String, Object> getParameters() {
+        return Collections.unmodifiableMap(parameters);
+    }
 }

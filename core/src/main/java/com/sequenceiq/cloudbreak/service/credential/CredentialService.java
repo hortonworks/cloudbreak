@@ -71,7 +71,7 @@ public class CredentialService {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
-        credentialAdapter.init(credential);
+        credential = credentialAdapter.init(credential);
         Credential savedCredential;
         try {
             savedCredential = credentialRepository.save(credential);

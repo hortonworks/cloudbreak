@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ public class AwsCredentialConnector implements CredentialConnector {
     private AwsSessionCredentialClient credentialClient;
     @Inject
     private AwsClient awsClient;
+    @Inject
+    private AwsSmartSenseIdGenerator smartSenseIdGenerator;
 
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
@@ -38,6 +41,10 @@ public class AwsCredentialConnector implements CredentialConnector {
         String roleArn = awsCredential.getRoleArn();
         String accessKey = awsCredential.getAccessKey();
         String secretKey = awsCredential.getSecretKey();
+        String smartSenseId = smartSenseIdGenerator.getSmartSenseId(awsCredential);
+        if (StringUtils.isNoneEmpty(smartSenseId)) {
+            credential.putParameter("smartSenseId", smartSenseId);
+        }
         if (isNoneEmpty(roleArn) && isNoneEmpty(accessKey) && isNoneEmpty(secretKey)) {
             String message = "Please only provide the 'role arn' or the 'access' and 'secret key'";
             return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);

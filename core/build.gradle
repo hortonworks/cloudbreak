@@ -65,7 +65,6 @@ dependencies {
     compile group: 'com.icegreen',                  name: 'greenmail',                      version: '1.4.1'
     compile group: 'org.mybatis',                   name: 'mybatis-migrations',             version: '3.2.0'
     compile group: 'com.cedarsoftware',             name: 'json-io',                        version: '4.4.0'
-    compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.10.50')      { exclude group: 'commons-logging' }
 
     compile project(':core-model')
     compile project(':orchestrator-api')
