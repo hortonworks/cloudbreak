@@ -1,6 +1,6 @@
 {
   "Blueprints": {
-    "blueprint_name": "hdp-etl-edw-tp",
+    "blueprint_name": "hdp25-etl-edw-spark2-hive2",
     "stack_name": "HDP",
     "stack_version": "2.5"
   },
