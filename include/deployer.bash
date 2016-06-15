@@ -441,6 +441,7 @@ main() {
         cmd-export start-wait-and-migrate-cmd start-wait
         cmd-export compose-kill kill
         cmd-export compose-logs logs
+        cmd-export compose-logs-tail logs-tail
         cmd-export compose-pull pull
         cmd-export compose-pull-parallel pull-parallel
         cmd-export deployer-login login
