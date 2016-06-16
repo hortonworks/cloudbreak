@@ -335,14 +335,14 @@ deployer-login() {
     echo "  $UAA_DEFAULT_USER_PW" | blue
 }
 
-start-and-migrate-cmd() {
+start-cmd() {
     declare desc="Starts Cloudbreak Deployer containers"
 
     start-requested-services "$@"
     deployer-login
 }
 
-start-wait-and-migrate-cmd() {
+start-wait-cmd() {
     declare desc="Starts Cloudbreak Deployer containers, and waits until API is available"
 
     start-requested-services "$@"
@@ -437,8 +437,8 @@ main() {
         cmd-export deployer-regenerate regenerate
         cmd-export deployer-delete delete
         cmd-export compose-ps ps
-        cmd-export start-and-migrate-cmd start
-        cmd-export start-wait-and-migrate-cmd start-wait
+        cmd-export start-cmd start
+        cmd-export start-wait-cmd start-wait
         cmd-export compose-kill kill
         cmd-export compose-logs logs
         cmd-export compose-logs-tail logs-tail
