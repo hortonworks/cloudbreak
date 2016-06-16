@@ -954,7 +954,10 @@
             "maximumNumber": 24
           }
         ],
-        "properties": {}
+        "properties": {
+          "Memory": "122.0",
+          "Cpu": "16"
+        }
       }
     },
     {
@@ -984,8 +987,8 @@
           }
         ],
         "properties": {
-          "Memory": "122.0",
-          "Cpu": "16"
+          "Memory": "244.0",
+          "Cpu": "32"
         }
       }
     },
