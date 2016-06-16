@@ -113,7 +113,7 @@ public class RestClientUtil {
         } else {
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                     .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                    .register("https", new SSLConnectionSocketFactory(CertificateTrustManager.sslContext()))
+                    .register("https", new SSLConnectionSocketFactory(CertificateTrustManager.sslContext(), CertificateTrustManager.hostnameVerifier()))
                     .build();
 
             connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);

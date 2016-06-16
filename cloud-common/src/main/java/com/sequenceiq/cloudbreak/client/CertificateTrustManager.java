@@ -5,7 +5,9 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -19,6 +21,21 @@ public class CertificateTrustManager {
 
     private CertificateTrustManager() {
     }
+
+    public static HostnameVerifier hostnameVerifier() {
+
+        // Do not verify host names
+        return new HostnameVerifier() {
+
+            @Override
+            public boolean verify(String hostname, SSLSession sslSession) {
+                LOGGER.info("verify hostname: {}", hostname);
+                return true;
+            }
+        };
+
+    }
+
 
     public static SSLContext sslContext() {
         // Create a trust manager that does not validate certificate chains
