@@ -389,7 +389,7 @@
   ,
   "Outputs" : {
     "AmbariUrl" : {
-        "Value" : { "Fn::Join" : ["", ["http://", { "Ref" : "EIP" }, ":8080/"]] }
+        "Value" : { "Fn::Join" : ["", ["https://", { "Ref" : "EIP" }, "/ambari/"]] }
     },
     "EIPAllocationID" : {
         "Value" : {"Fn::GetAtt" : [ "EIP" , "AllocationId" ]}
