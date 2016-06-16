@@ -27,7 +27,8 @@
         "AWS": {
             "ephemeral": "Ephemeral",
             "standard": "Magnetic",
-            "gp2": "General Purpose (SSD)"
+            "gp2": "General Purpose (SSD)",
+            "st1": "Throughput Optimized HDD"
         },
         "AZURE_RM": {
             "Standard_LRS": "Locally-redundant storage",

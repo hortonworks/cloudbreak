@@ -16,6 +16,11 @@ public enum VolumeParameterType {
             return metaData.getEphemeralConfig();
         }
     },
+    ST1() {
+        @Override public VolumeParameterConfig getVolumeParameterbyType(VmTypeMeta metaData) {
+            return metaData.getSt1Config();
+        }
+    },
     AUTO_ATTACHED() {
         @Override public VolumeParameterConfig getVolumeParameterbyType(VmTypeMeta metaData) {
             return metaData.getAutoAttachedConfig();

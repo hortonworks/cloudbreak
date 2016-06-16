@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
-public class AwsGroupView {
+import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters;
 
+public class AwsGroupView {
     private Integer instanceCount;
     private String type;
     private String flavor;
@@ -59,5 +60,9 @@ public class AwsGroupView {
 
     public Double getSpotPrice() {
         return spotPrice;
+    }
+
+    public Boolean getEbsOptimized() {
+        return AwsPlatformParameters.AwsDiskType.St1.value().equals(volumeType);
     }
 }

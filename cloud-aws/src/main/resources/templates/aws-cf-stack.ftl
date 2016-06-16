@@ -311,11 +311,14 @@
     "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}"  : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
       "Properties" : {
+        <#if group.ebsOptimized == true>
+        "EbsOptimized" : "true",
+        </#if>
         <#if enableInstanceProfile && !existingRole>
-         "IamInstanceProfile" : { "Ref": "S3InstanceProfile" },
+        "IamInstanceProfile" : { "Ref": "S3InstanceProfile" },
         </#if>
         <#if existingRole && enableInstanceProfile>
-         "IamInstanceProfile" : { "Ref": "RoleName" },
+        "IamInstanceProfile" : { "Ref": "RoleName" },
         </#if>
       	"BlockDeviceMappings" : [
       	  {
