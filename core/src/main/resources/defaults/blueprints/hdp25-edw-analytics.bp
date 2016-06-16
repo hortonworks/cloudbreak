@@ -51,7 +51,6 @@
         { "name": "JOURNALNODE" },
         { "name": "MAPREDUCE2_CLIENT" },
         { "name": "METRICS_COLLECTOR" },
-        { "name": "METRICS_GRAFANA" },
         { "name": "METRICS_MONITOR" },
         { "name": "MYSQL_SERVER" },
         { "name": "NAMENODE" },
