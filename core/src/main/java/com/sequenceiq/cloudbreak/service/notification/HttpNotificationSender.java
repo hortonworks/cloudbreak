@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.domain.Subscription;
 import com.sequenceiq.cloudbreak.repository.SubscriptionRepository;
 
@@ -22,8 +24,7 @@ public class HttpNotificationSender implements NotificationSender {
     @Inject
     private SubscriptionRepository subscriptionRepository;
 
-    @Inject
-    private Client restClient;
+    private Client restClient = RestClientUtil.get(new ConfigKey(false, false));
 
     @Override
     public void send(Notification notification) {
