@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -77,7 +78,9 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
                 String replacedCommand = getReplacedString(cmd);
                 CommandResult commandResult = shell.executeCommand(replacedCommand);
                 if (!commandResult.isSuccess()) {
-                    System.out.println(String.format("%s: [%s] [REASON: %s]", replacedCommand, FAILED, commandResult.getException().getMessage()));
+                    String message =
+                            Optional.ofNullable(commandResult.getException()).map(Throwable::getMessage).orElse("Unknown error, maybe command not valid.");
+                    System.out.println(String.format("%s: [%s] [REASON: %s]", replacedCommand, FAILED, message));
                     break;
                 } else {
                     System.out.println(String.format("%s: [%s]", replacedCommand, SUCCESS));
