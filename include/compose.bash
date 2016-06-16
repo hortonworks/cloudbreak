@@ -182,7 +182,6 @@ compose-generate-yaml() {
 }
 
 compose-generate-yaml-force() {
-
     declare composeFile=${1:? required: compose file path}
     debug "Generating docker-compose yaml: ${composeFile} ..."
     if [[ -z "$AWS_SECRET_ACCESS_KEY" && -n "$AWS_SECRET_KEY"  ]]; then
@@ -343,6 +342,11 @@ cloudbreak:
         - "CERT_VALIDATION=$CERT_VALIDATION"
         - "CB_HOST_DISCOVERY_CUSTOM_DOMAIN=$CB_HOST_DISCOVERY_CUSTOM_DOMAIN"
         - "CB_SMARTSENSE_CONFIGURE=$CB_SMARTSENSE_CONFIGURE"
+    labels:
+      - traefik.port=8080
+      - traefik.frontend.rule=PathPrefix:/cb/
+      - traefik.backend=cloudbreak-backend
+      - traefik.frontend.priority=10
     ports:
         - 8080:8080
     volumes:
@@ -459,6 +463,11 @@ periscope:
         - PERISCOPE_SCHEMA_MIGRATION_AUTO=$PERISCOPE_SCHEMA_MIGRATION_AUTO
         - REST_DEBUG=$REST_DEBUG
         - CERT_VALIDATION=$CERT_VALIDATION
+    labels:
+      - traefik.port=8080
+      - traefik.frontend.rule=PathPrefix:/as/
+      - traefik.backend=periscope-backend
+      - traefik.frontend.priority=10
     ports:
         - 8085:8080
     dns: $PRIVATE_IP
