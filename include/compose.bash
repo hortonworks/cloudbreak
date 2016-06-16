@@ -270,6 +270,11 @@ uaadb:
     image: sequenceiq/uaadb:$DOCKER_TAG_UAADB
 
 identity:
+    labels:
+      - traefik.port=8080
+      - traefik.frontend.rule=PathPrefixStrip:/identity
+      - traefik.backend=identity-backend
+      - traefik.frontend.priority=10
     ports:
         - 8089:8080
     environment:
@@ -379,7 +384,7 @@ sultans:
         - SL_UAA_SERVICEID=identity.service.consul
     labels:
       - traefik.port=3000
-      - traefik.frontend.rule=PathPrefixStrip:/identity
+      - traefik.frontend.rule=PathPrefixStrip:/sl
       - traefik.backend=sultans-backend
       - traefik.frontend.priority=10
     ports:
