@@ -1,11 +1,12 @@
 #!/bin/bash -e
 
-: ${LOGFILE:=/var/log/consul-watch/consul_handler.log}
+: ${LOGFILE:=/var/log/recipes/gcs-p12.log}
+: ${TARGET_DIR:=/usr/lib/hadoop/lib}
 
 main(){
-  echo "Getting p12 file from Consul's key-value store"
-  curl "http://$CONSUL_HOST:$CONSUL_HTTP_PORT/v1/kv/privateKeyEncoded?raw" | base64 -d > /usr/lib/hadoop/lib/gcp.p12
-  echo "p12 file successfully downloaded from key-value store."
+  mkdir -p $TARGET_DIR
+  echo $P12KEY | base64 -d > $TARGET_DIR/gcp.p12
+  echo "p12 file successfully saved to $TARGET_DIR/gcp.p12"
 }
 
 exec &>> "$LOGFILE"

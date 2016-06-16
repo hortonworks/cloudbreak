@@ -101,7 +101,7 @@ public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConf
     }
 
     @Override
-    protected List<FileSystemScriptConfig> getScriptConfigs() {
+    protected List<FileSystemScriptConfig> getScriptConfigs(WasbIntegratedFileSystemConfiguration fsConfig) {
         return new ArrayList<>();
     }
 }

@@ -44,11 +44,10 @@ public class DashFileSystemConfigurator extends AbstractFileSystemConfigurator<D
     }
 
     @Override
-    protected List<FileSystemScriptConfig> getScriptConfigs() {
+    protected List<FileSystemScriptConfig> getScriptConfigs(DashFileSystemConfiguration fsConfig) {
         List<FileSystemScriptConfig> scriptConfigs = new ArrayList<>();
         scriptConfigs.add(new FileSystemScriptConfig("scripts/dash-local.sh", POST_INSTALL, ALL_NODES));
         scriptConfigs.add(new FileSystemScriptConfig("scripts/dash-hdfs.sh", POST_INSTALL, ONE_NODE));
         return scriptConfigs;
     }
-
 }

@@ -1,6 +1,11 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 {%- from 'nodes/settings.sls' import host with context %}
 
+/etc/environment:
+  file.append:
+    - text: "HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/usr/lib/hadoop/lib/*"
+    - unless: cat /etc/environment | grep HADOOP_CLASSPATH
+
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:
     - source: salt://ambari/scripts/internal_hostname.sh

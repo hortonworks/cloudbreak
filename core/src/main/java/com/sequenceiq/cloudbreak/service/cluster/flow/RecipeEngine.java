@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
+import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfig
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class RecipeEngine {
@@ -129,15 +131,20 @@ public class RecipeEngine {
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             FileSystem fs = cluster.getFileSystem();
             if (fs != null) {
-                addFsRecipesToHostGroups(hostGroups, blueprintText, fs);
+                try {
+                    addFsRecipesToHostGroups(hostGroups, blueprintText, fs);
+                } catch (IOException e) {
+                    throw new CloudbreakException("can not add FS recipes to host groups", e);
+                }
             }
             addHDFSRecipe(cluster, blueprintText, hostGroups);
         }
     }
 
-    private void addFsRecipesToHostGroups(Set<HostGroup> hostGroups, String blueprintText, FileSystem fs) {
+    private void addFsRecipesToHostGroups(Set<HostGroup> hostGroups, String blueprintText, FileSystem fs) throws IOException {
         FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
-        List<RecipeScript> recipeScripts = fsConfigurator.getScripts();
+        FileSystemConfiguration fsConfiguration = getFileSystemConfiguration(fs);
+        List<RecipeScript> recipeScripts =  fsConfigurator.getScripts(fsConfiguration);
         List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
         for (Recipe recipe : fsRecipes) {
             boolean oneNode = false;
@@ -148,7 +155,7 @@ public class RecipeEngine {
             }
             if (oneNode) {
                 for (HostGroup hostGroup : hostGroups) {
-                    if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
+                    if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
                         hostGroup.addRecipe(recipe);
                         break;
                     }
@@ -159,6 +166,11 @@ public class RecipeEngine {
                 }
             }
         }
+    }
+
+    private FileSystemConfiguration getFileSystemConfiguration(FileSystem fs) throws IOException {
+        String json = JsonUtil.writeValueAsString(fs.getProperties());
+        return JsonUtil.readValue(json, FileSystemConfiguration.class);
     }
 
     private void configureSssd(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
@@ -204,7 +216,7 @@ public class RecipeEngine {
     private void addHDFSRecipe(Cluster cluster, String blueprintText, Set<HostGroup> hostGroups) {
         try {
             for (HostGroup hostGroup : hostGroups) {
-                if (isComponentPresent(blueprintText, "HDFS_CLIENT", hostGroup)) {
+                if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", cluster.getUserName());
                     RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL, ExecutionType.ONE_NODE);
                     Recipe recipe = recipeBuilder.buildRecipes(asList(recipeScript), Collections.emptyMap()).get(0);

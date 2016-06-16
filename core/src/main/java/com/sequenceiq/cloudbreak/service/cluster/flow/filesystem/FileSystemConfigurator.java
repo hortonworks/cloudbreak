@@ -20,7 +20,7 @@ public interface FileSystemConfigurator<T extends FileSystemConfiguration> {
 
     List<BlueprintConfigurationEntry> getDefaultFsProperties(T fsConfig);
 
-    List<RecipeScript> getScripts();
+    List<RecipeScript> getScripts(T fsConfig);
 
     FileSystemType getFileSystemType();
 
