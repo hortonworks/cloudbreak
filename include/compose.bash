@@ -348,6 +348,7 @@ cloudbreak:
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
         - /dev/urandom:/dev/random
+        - /etc/cloudbreak:/etc/cloudbreak
     dns: $PRIVATE_IP
     links:
         - consul
