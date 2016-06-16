@@ -1,5 +1,5 @@
 compose-init() {
-    if (docker-compose --version| grep -q 1.2.0); then
+    if (docker-compose --version 2>&1| grep -q 1.2.0); then
         echo "* removing old docker-compose binary" | yellow
         rm -f .deps/bin/docker-compose
     fi
