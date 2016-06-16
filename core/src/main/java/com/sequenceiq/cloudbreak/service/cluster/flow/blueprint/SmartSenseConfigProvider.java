@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -47,15 +48,27 @@ public class SmartSenseConfigProvider {
         if (configureSmartSense && StringUtils.isNoneEmpty(smartSenseId)) {
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
             Set<String> hostGroupNames = hostGroups.stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
-            if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT, blueprintText)) {
-                String aHostGroupName = hostGroupNames.stream().findFirst().get();
-                blueprintText = blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, Arrays.asList(aHostGroupName), blueprintText);
-            }
+            blueprintText = addSmartSenseServerToBp(blueprintText, hostGroups, hostGroupNames);
             blueprintText = blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hostGroupNames, blueprintText);
             configs.addAll(getSmartSenseServerConfigs());
             configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.smartsense.id", smartSenseId));
             configs.addAll(getSmartSenseGatewayConfigs(stack));
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, true);
+        }
+        return blueprintText;
+    }
+
+    private String addSmartSenseServerToBp(String blueprintText, Set<HostGroup> hostGroups, Set<String> hostGroupNames) {
+        if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT, blueprintText)) {
+            String aHostGroupName = hostGroupNames.stream().findFirst().get();
+            Optional<String> hostGroupWithOneNode = hostGroups.stream()
+                    .filter(hostGroup -> hostGroup.getHostMetadata().size() == 1)
+                    .map(getHostGroupNameMapper())
+                    .findFirst();
+            if (hostGroupWithOneNode.isPresent()) {
+                aHostGroupName = hostGroupWithOneNode.get();
+            }
+            blueprintText = blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, Arrays.asList(aHostGroupName), blueprintText);
         }
         return blueprintText;
     }
