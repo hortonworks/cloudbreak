@@ -71,9 +71,6 @@
           "name": "METRICS_COLLECTOR"
         },
         {
-          "name": "METRICS_GRAFANA"
-        },
-        {
           "name": "METRICS_MONITOR"
         },
         {
