@@ -1,4 +1,8 @@
 compose-init() {
+    if (docker-compose --version| grep -q 1.2.0); then
+        echo "* removing old docker-compose binary" | yellow
+        rm -f .deps/bin/docker-compose
+    fi
     deps-require docker-compose 1.7.1
     env-import CB_COMPOSE_PROJECT cbreak
     env-import CBD_LOG_NAME cbreak
