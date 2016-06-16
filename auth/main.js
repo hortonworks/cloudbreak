@@ -66,7 +66,11 @@ function debugHeaders(req) {
 
 function getBasePath(req) {
     if (req.headers['x-forwarded-for']  !== undefined) {
-        return "/identity";
+        if (process.env.SL_BASE_PATH !== undefined) {
+            return process.env.SL_BASE_PATH;
+        } else {
+           return "/sl";
+        }
     }
 
     return "/";
