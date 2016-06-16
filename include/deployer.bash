@@ -342,6 +342,15 @@ start-cmd() {
     deployer-login
 }
 
+restart-cmd() {
+    declare desc="shortcut for kill + regenerate + start"
+    
+    compose-kill
+    deployer-regenerate
+    start-requested-services
+    
+}
+
 start-wait-cmd() {
     declare desc="Starts Cloudbreak Deployer containers, and waits until API is available"
 
@@ -438,6 +447,7 @@ main() {
         cmd-export deployer-delete delete
         cmd-export compose-ps ps
         cmd-export start-cmd start
+        cmd-export restart-cmd restart
         cmd-export start-wait-cmd start-wait
         cmd-export compose-kill kill
         cmd-export compose-logs logs
