@@ -62,11 +62,14 @@ integrationtest:
         retryCount: 3
         cleanupBeforeStart: false
 
-    defaultBlueprintName: multi-node-hdfs-yarn
+    defaultBlueprintName:
 
     ambariContainer: hortonworks/ambari-agent
 
     defaultPrivateKeyFile:
+
+    openstack:
+        publicNetId:
 
     testsuite:
         threadPoolSize: 3

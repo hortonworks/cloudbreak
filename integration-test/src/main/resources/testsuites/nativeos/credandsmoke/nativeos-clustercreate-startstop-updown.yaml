@@ -20,7 +20,6 @@ tests:
     parameters:
       networkName: it-nativeos-credandsmoke-network-ssud
       subnetCIDR: 10.0.36.0/24
-      publicNetId: 290e220b-9177-4d21-9bcb-4cb18cd9c960
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
 

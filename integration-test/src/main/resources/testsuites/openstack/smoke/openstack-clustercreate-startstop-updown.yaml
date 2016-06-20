@@ -2,6 +2,7 @@
 name: OpenStack_full_smoketest
 parameters:
   cloudProvider: OPENSTACK
+  blueprintName: multi-node-hdfs-yarn
 
 tests:
   - name: init
@@ -13,7 +14,6 @@ tests:
     parameters:
       networkName: it-openstack-network-ssud
       subnetCIDR: 10.0.36.0/24
-      publicNetId: 999e09bc-cf75-4a19-98fb-c0b4ddee6d93
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
 
