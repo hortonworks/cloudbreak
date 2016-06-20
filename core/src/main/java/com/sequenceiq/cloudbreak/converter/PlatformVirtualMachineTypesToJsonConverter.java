@@ -82,6 +82,17 @@ public class PlatformVirtualMachineTypesToJsonConverter extends AbstractConversi
                 volumeParameterConfigJson.setMinimumSize(ssdConfig.minimumSize());
                 vmTypeMetaJson.getConfigs().add(volumeParameterConfigJson);
             }
+            VolumeParameterConfig st1Config = item.getMetaData().getSt1Config();
+            if (st1Config != null) {
+                VolumeParameterConfigJson volumeParameterConfigJson = new VolumeParameterConfigJson();
+                volumeParameterConfigJson.setVolumeParameterType(st1Config.volumeParameterType().name());
+                volumeParameterConfigJson.setMaximumNumber(st1Config.maximumNumber());
+                volumeParameterConfigJson.setMinimumNumber(st1Config.minimumNumber());
+                volumeParameterConfigJson.setMaximumSize(st1Config.maximumSize());
+                volumeParameterConfigJson.setMinimumSize(st1Config.minimumSize());
+                vmTypeMetaJson.getConfigs().add(volumeParameterConfigJson);
+            }
+
             result.add(new VmTypeJson(item.value(), vmTypeMetaJson));
         }
         return result;
