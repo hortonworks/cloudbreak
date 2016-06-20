@@ -13,7 +13,6 @@ tests:
     parameters:
       networkName: it-nativeos-network-ss
       subnetCIDR: 10.0.36.0/24
-      publicNetId: 8a1ca549-30cb-4fd5-9d32-84a42433558b
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
 
