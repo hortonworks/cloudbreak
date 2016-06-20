@@ -1,38 +1,6 @@
 {
   "items": [
     {
-      "value": "m3.xlarge",
-      "meta": {
-        "configs": [
-          {
-            "volumeParameterType": "EPHEMERAL",
-            "minimumSize": 40,
-            "maximumSize": 40,
-            "minimumNumber": 1,
-            "maximumNumber": 2
-          },
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 1,
-            "maximumSize": 1024,
-            "minimumNumber": 1,
-            "maximumNumber": 24
-          },
-          {
-            "volumeParameterType": "SSD",
-            "minimumSize": 1,
-            "maximumSize": 17592,
-            "minimumNumber": 1,
-            "maximumNumber": 24
-          }
-        ],
-        "properties": {
-          "Memory": "15.0",
-          "Cpu": "4"
-        }
-      }
-    },
-    {
       "value": "m3.medium",
       "meta": {
         "configs": [
@@ -49,6 +17,13 @@
             "maximumSize": 1024,
             "minimumNumber": 1,
             "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
           },
           {
             "volumeParameterType": "SSD",
@@ -83,6 +58,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -93,6 +75,45 @@
         "properties": {
           "Memory": "7.5",
           "Cpu": "2"
+        }
+      }
+    },
+    {
+      "value": "m3.xlarge",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "EPHEMERAL",
+            "minimumSize": 40,
+            "maximumSize": 40,
+            "minimumNumber": 1,
+            "maximumNumber": 2
+          },
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 1,
+            "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "SSD",
+            "minimumSize": 1,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          }
+        ],
+        "properties": {
+          "Memory": "15.0",
+          "Cpu": "4"
         }
       }
     },
@@ -111,6 +132,13 @@
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -147,6 +175,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -175,6 +210,13 @@
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -211,6 +253,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -239,6 +288,13 @@
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -275,6 +331,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -307,6 +370,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -335,6 +405,13 @@
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -371,6 +448,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -399,6 +483,13 @@
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -435,6 +526,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -465,6 +563,13 @@
             "maximumSize": 1024,
             "minimumNumber": 1,
             "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
           },
           {
             "volumeParameterType": "SSD",
@@ -499,6 +604,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -531,6 +643,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -559,6 +678,13 @@
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -595,6 +721,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -623,6 +756,13 @@
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -657,6 +797,13 @@
             "maximumSize": 1024,
             "minimumNumber": 1,
             "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
           },
           {
             "volumeParameterType": "SSD",
@@ -723,6 +870,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -753,6 +907,13 @@
             "maximumSize": 1024,
             "minimumNumber": 1,
             "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
           },
           {
             "volumeParameterType": "SSD",
@@ -787,6 +948,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -815,6 +983,13 @@
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -851,6 +1026,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -883,6 +1065,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -902,15 +1091,22 @@
         "configs": [
           {
             "volumeParameterType": "EPHEMERAL",
-            "minimumSize": 320,
-            "maximumSize": 320,
+            "minimumSize": 160,
+            "maximumSize": 160,
             "minimumNumber": 1,
-            "maximumNumber": 2
+            "maximumNumber": 1
           },
           {
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -937,12 +1133,19 @@
             "minimumSize": 320,
             "maximumSize": 320,
             "minimumNumber": 1,
-            "maximumNumber": 2
+            "maximumNumber": 1
           },
           {
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -979,6 +1182,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -1007,6 +1217,13 @@
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },
@@ -1043,6 +1260,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -1075,6 +1299,13 @@
             "maximumNumber": 24
           },
           {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
             "volumeParameterType": "SSD",
             "minimumSize": 1,
             "maximumSize": 17592,
@@ -1103,6 +1334,13 @@
             "volumeParameterType": "MAGNETIC",
             "minimumSize": 1,
             "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
             "minimumNumber": 1,
             "maximumNumber": 24
           },

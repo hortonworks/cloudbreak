@@ -93,15 +93,7 @@ public class AwsPlatformParameters implements PlatformParameters {
                                 vmSpecification.getMetaSpecification().getProperties().getMemory());
 
                 for (ConfigSpecification configSpecification : vmSpecification.getMetaSpecification().getConfigSpecification()) {
-                    if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.AUTO_ATTACHED.name())) {
-                        builder.withAutoAttachedConfig(volumeParameterConfig(configSpecification));
-                    } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.EPHEMERAL.name())) {
-                        builder.withEphemeralConfig(volumeParameterConfig(configSpecification));
-                    } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.MAGNETIC.name())) {
-                        builder.withMagneticConfig(volumeParameterConfig(configSpecification));
-                    } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.SSD.name())) {
-                        builder.withSsdConfig(volumeParameterConfig(configSpecification));
-                    }
+                    addConfig(builder, configSpecification);
                 }
                 VmTypeMeta vmTypeMeta = builder.create();
                 tmpVmTypes.add(VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta));
@@ -116,6 +108,20 @@ public class AwsPlatformParameters implements PlatformParameters {
             return vmTypes;
         }
         return sortMap(vmTypes);
+    }
+
+    private void addConfig(VmTypeMeta.VmTypeMetaBuilder builder, ConfigSpecification configSpecification) {
+        if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.AUTO_ATTACHED.name())) {
+            builder.withAutoAttachedConfig(volumeParameterConfig(configSpecification));
+        } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.EPHEMERAL.name())) {
+            builder.withEphemeralConfig(volumeParameterConfig(configSpecification));
+        } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.MAGNETIC.name())) {
+            builder.withMagneticConfig(volumeParameterConfig(configSpecification));
+        } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.SSD.name())) {
+            builder.withSsdConfig(volumeParameterConfig(configSpecification));
+        } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.ST1.name())) {
+            builder.withSt1Config(volumeParameterConfig(configSpecification));
+        }
     }
 
     private VolumeParameterConfig volumeParameterConfig(ConfigSpecification configSpecification) {
@@ -169,6 +175,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         map.put(AwsDiskType.Standard.value, VolumeParameterType.MAGNETIC);
         map.put(AwsDiskType.Gp2.value, VolumeParameterType.SSD);
         map.put(AwsDiskType.Ephemeral.value, VolumeParameterType.EPHEMERAL);
+        map.put(AwsDiskType.St1.value, VolumeParameterType.ST1);
         return map;
     }
 
@@ -223,10 +230,11 @@ public class AwsPlatformParameters implements PlatformParameters {
         return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
     }
 
-    private enum AwsDiskType {
+    public enum AwsDiskType {
         Standard("standard"),
         Ephemeral("ephemeral"),
-        Gp2("gp2");
+        Gp2("gp2"),
+        St1("st1");
 
         private final String value;
 

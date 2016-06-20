@@ -13,10 +13,10 @@ public class VmTypeMeta {
     private VolumeParameterConfig autoAttachedConfig;
     private VolumeParameterConfig ssdConfig;
     private VolumeParameterConfig ephemeralConfig;
+    private VolumeParameterConfig st1Config;
     private Map<String, String> properties = new HashMap<>();
 
     public VmTypeMeta() {
-
     }
 
     public VolumeParameterConfig getMagneticConfig() {
@@ -51,6 +51,14 @@ public class VmTypeMeta {
         this.ephemeralConfig = ephemeralConfig;
     }
 
+    public VolumeParameterConfig getSt1Config() {
+        return st1Config;
+    }
+
+    public void setSt1Config(VolumeParameterConfig st1Config) {
+        this.st1Config = st1Config;
+    }
+
     public Map<String, String> getProperties() {
         return properties;
     }
@@ -65,10 +73,10 @@ public class VmTypeMeta {
         private VolumeParameterConfig autoAttachedConfig;
         private VolumeParameterConfig ssdConfig;
         private VolumeParameterConfig ephemeralConfig;
+        private VolumeParameterConfig st1Config;
         private Map<String, String> properties = new HashMap<>();
 
         private VmTypeMetaBuilder() {
-
         }
 
         public static VmTypeMetaBuilder builder() {
@@ -115,6 +123,16 @@ public class VmTypeMeta {
             return this;
         }
 
+        public VmTypeMetaBuilder withSt1Config(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
+            this.st1Config = new VolumeParameterConfig(VolumeParameterType.ST1, minimumSize, maximumSize, minimumNumber, maximumNumber);
+            return this;
+        }
+
+        public VmTypeMetaBuilder withSt1Config(VolumeParameterConfig volumeParameterConfig) {
+            this.st1Config = volumeParameterConfig;
+            return this;
+        }
+
         public VmTypeMetaBuilder withProperty(String name, String value) {
             this.properties.put(name, value);
             return this;
@@ -148,10 +166,9 @@ public class VmTypeMeta {
             vmTypeMeta.setEphemeralConfig(this.ephemeralConfig);
             vmTypeMeta.setMagneticConfig(this.magneticConfig);
             vmTypeMeta.setSsdConfig(this.ssdConfig);
+            vmTypeMeta.setSt1Config(this.st1Config);
             vmTypeMeta.setProperties(this.properties);
             return vmTypeMeta;
         }
-
     }
-
 }
