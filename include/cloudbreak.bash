@@ -38,6 +38,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ULUWATU 1.4.0-dev.92
     env-import DOCKER_TAG_SULTANS 1.4.0-dev.92
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.4.0-dev.92
+    
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/cloudbreak-web
     env-import DOCKER_IMAGE_CLOUDBREAK_AUTH hortonworks/cloudbreak-auth
 
@@ -208,6 +209,7 @@ cloudbreak-conf-ui() {
     env-import ULU_SULTANS_ADDRESS  "https://$PUBLIC_IP/sl"
     env-import CB_HOST_ADDRESS  "http://$PUBLIC_IP:8080"
     env-import ULU_HWX_CLOUD_DEFAULT_CREDENTIAL ""
+    env-import ULU_HWX_CLOUD_DEFAULT_SSH_KEY ""
     env-import ULU_HWX_CLOUD_DEFAULT_REGION ""
     env-import ULU_HWX_CLOUD_DEFAULT_VPC_ID ""
     env-import ULU_HWX_CLOUD_DEFAULT_IGW_ID ""
