@@ -1,7 +1,8 @@
 # AZURE_RM credential name must be specified
 name: Azure RM smoke test
 parameters: {
-  cloudProvider: AZURE_RM
+  cloudProvider: AZURE_RM,
+  blueprintName: multi-node-hdfs-yarn
 }
 
 tests:
