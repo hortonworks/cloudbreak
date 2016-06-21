@@ -464,6 +464,10 @@ HINT
         -p 8080:8080 \
         -e PORT=8080 \
         -e SERVICE_NAME=cloudbreak \
+        -l traefik.port=8080 \
+        -l traefik.frontend.rule=PathPrefix:/cb/ \
+        -l traefik.backend=cloudbreak-backend \
+        -l traefik.frontend.priority=10 \
         sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:$port
 
 }
