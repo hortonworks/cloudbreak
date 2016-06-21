@@ -139,16 +139,13 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
                             + "  java -jar cloudbreak-shell.jar                  : Starts Cloudbreak Shell in interactive mode.\n"
                             + "  java -jar cloudbreak-shell.jar --cmdfile=<FILE> : Cloudbreak Shell executes commands read from the file.\n\n"
                             + "Options:\n"
-                            + "  --cloudbreak.address=<http[s]://HOSTNAME:PORT>  Address of the Cloudbreak Server"
-                            + " [default: https://cloudbreak-api.sequenceiq.com].\n"
-                            + "  --identity.address=<http[s]://HOSTNAME:PORT>    Address of the SequenceIQ identity server"
-                            + " [default: https://identity.sequenceiq.com].\n"
-                            + "  --sequenceiq.user=<USER>                        Username of the SequenceIQ user [default: user@sequenceiq.com].\n"
-                            + "  --sequenceiq.password=<PASSWORD>                Password of the SequenceIQ user [default: password].\n"
-                            + "  --cert.validation=<boolean>                     Validate SSL certificates, shall be disabled for self signed certificates"
-                            + " [default: true].\n"
-                            + "Note:\n"
-                            + "  Please specify the username and password of your SequenceIQ user."
+                            + "  --cloudbreak.address=http[s]://<HOSTNAME>[:PORT]  Address of the Cloudbreak Server\n"
+                            + "  --identity.address=http[s]://<HOSTNAME>[:PORT]    Address of the SequenceIQ identity server (not a mandatory parameter)"
+                            + " [default: cloudbreak.address + /identity].\n"
+                            + "  --sequenceiq.user=<USER>                          Username of the SequenceIQ user.\n"
+                            + "  --sequenceiq.password=<PASSWORD>                  Password of the SequenceIQ user.\n"
+                            + "  --cert.validation=<boolean>                       Validate SSL certificates, shall be disabled for self signed certificates"
+                            + " (not a mandatory parameter) [default: true]."
             );
             return;
         } else {
