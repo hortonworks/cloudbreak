@@ -7,7 +7,6 @@ import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
-import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
@@ -21,8 +20,7 @@ public class FlowLogService {
     private FlowLogRepository flowLogRepository;
 
     public FlowLog save(String flowId, String key, Payload payload, Class<?> flowType, FlowState currentState) {
-        String payloadJson = JsonWriter.objectToJson(payload);
-        FlowLog flowLog = new FlowLog(payload.getStackId(), flowId, key, payloadJson, payload.getClass(), flowType, currentState.toString());
+        FlowLog flowLog = new FlowLog(payload.getStackId(), flowId, key, null, payload.getClass(), flowType, currentState.toString());
         return flowLogRepository.save(flowLog);
     }
 
