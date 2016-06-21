@@ -15,6 +15,7 @@ import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.plugin.HistoryFileNameProvider;
 import org.springframework.shell.plugin.support.DefaultHistoryFileNameProvider;
+import org.springframework.shell.support.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -30,10 +31,12 @@ public class ShellConfiguration {
 
     private static final String CLIENT_ID = "cloudbreak_shell";
 
-    @Value("${cloudbreak.address:https://cloudbreak-api.sequenceiq.com}")
+    private static final String IDENTITY_ROOT_CONTEXT = "/identity";
+
+    @Value("${cloudbreak.address:}")
     private String cloudbreakAddress;
 
-    @Value("${identity.address:https://identity.sequenceiq.com}")
+    @Value("${identity.address:}")
     private String identityServerAddress;
 
     @Value("${sequenceiq.user:}")
@@ -62,7 +65,11 @@ public class ShellConfiguration {
     @Bean
     public CloudbreakClient cloudbreakClient() {
         try {
-            return new CloudbreakClientBuilder(cloudbreakAddress + cbRootContextPath, identityServerAddress, CLIENT_ID).withCredential(user, password).
+            String identity = identityServerAddress;
+            if (StringUtils.isEmpty(identity)) {
+                identity = cloudbreakAddress + IDENTITY_ROOT_CONTEXT;
+            }
+            return new CloudbreakClientBuilder(cloudbreakAddress + cbRootContextPath, identity, CLIENT_ID).withCredential(user, password).
                     withDebug(restDebug).withCertificateValidation(certificateValidation).build();
         } catch (SSLConnectionException e) {
             System.out.println(String.format("%s Try to start the shell with --cert.validation=false parameter.", e.getMessage()));
