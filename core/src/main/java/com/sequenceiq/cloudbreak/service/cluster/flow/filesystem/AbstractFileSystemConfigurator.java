@@ -7,18 +7,21 @@ import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeScript;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfiguration> implements FileSystemConfigurator<T> {
 
     @Override
-    public List<RecipeScript> getScripts() {
+    public List<RecipeScript> getScripts(T fsConfig) {
         List<RecipeScript> scripts = new ArrayList<>();
         try {
-            for (FileSystemScriptConfig fsScriptConfig : getScriptConfigs()) {
+            for (FileSystemScriptConfig fsScriptConfig : getScriptConfigs(fsConfig)) {
                 String script = FileReaderUtils.readFileFromClasspath(fsScriptConfig.getScriptLocation());
+                for (String key : fsScriptConfig.getProperties().keySet()) {
+                    script = script.replaceAll("\\$" + key, fsScriptConfig.getProperties().get(key));
+                }
                 scripts.add(new RecipeScript(script, fsScriptConfig.getClusterLifecycleEvent(), fsScriptConfig.getExecutionType()));
             }
         } catch (IOException e) {
@@ -53,6 +56,6 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
         return Collections.emptyMap();
     }
 
-    protected abstract List<FileSystemScriptConfig> getScriptConfigs();
+    protected abstract List<FileSystemScriptConfig> getScriptConfigs(T fsConfig);
 
 }
