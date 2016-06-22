@@ -33,6 +33,11 @@
       "yarn-site": {
         "yarn.acl.enable": "true"
       }
+    },
+    {
+      "hive-interactive-env": {
+        "llap_java_opts": "-XX:+PrintGCDetails -verbose:gc -XX:+PrintGCTimeStamps -XX:+UseNUMA -XX:+UseParallelGC -XX:+AlwaysPreTouch"
+      }
     }
   ],
   "host_groups": [
@@ -47,8 +52,8 @@
         { "name": "HIVE_CLIENT" },
         { "name": "HIVE_METASTORE" },
         { "name": "HIVE_SERVER" },
-        { "name": "HIVE_SERVER_INTERACTIVE" },
         { "name": "JOURNALNODE" },
+        { "name": "LIVY_SERVER" },
         { "name": "MAPREDUCE2_CLIENT" },
         { "name": "METRICS_COLLECTOR" },
         { "name": "METRICS_MONITOR" },
@@ -59,7 +64,6 @@
         { "name": "SECONDARY_NAMENODE" },
         { "name": "SPARK_CLIENT" },
         { "name": "SPARK_JOBHISTORYSERVER" },
-        { "name": "SQOOP" },
         { "name": "TEZ_CLIENT" },
         { "name": "WEBHCAT_SERVER" },
         { "name": "YARN_CLIENT" },
