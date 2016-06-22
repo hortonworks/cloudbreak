@@ -56,8 +56,6 @@
         { "name": "PIG" },
         { "name": "RESOURCEMANAGER" },
         { "name": "SECONDARY_NAMENODE" },
-        { "name": "SPARK_CLIENT" },
-        { "name": "SPARK_JOBHISTORYSERVER" },
         { "name": "SPARK2_CLIENT" },
         { "name": "SPARK2_JOBHISTORYSERVER" },
         { "name": "TEZ_CLIENT" },
