@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
+import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -63,6 +64,9 @@ public class ClusterController implements ClusterEndpoint {
     private FileSystemValidator fileSystemValidator;
 
     @Autowired
+    private RdsConnectionValidator rdsConnectionValidator;
+
+    @Autowired
     private StackService stackService;
 
     @Autowired
@@ -84,6 +88,7 @@ public class ClusterController implements ClusterEndpoint {
             throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
         }
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), request.getFileSystem());
+        rdsConnectionValidator.validateRdsConnection(request.getRdsConfigJson());
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stackId, user, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
                 request.getSssdConfigId());

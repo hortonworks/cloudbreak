@@ -167,4 +167,8 @@ public class OperationDescriptions {
         public static final String POST_PRIVATE = "post account preferences of admin user";
         public static final String VALIDATE = "validate account preferences of all stacks";
     }
+
+    public static class UtilityOpDescription {
+        public static final String TEST_CONNECTION = "tests a RDS connection";
+    }
 }
