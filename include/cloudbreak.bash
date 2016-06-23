@@ -27,6 +27,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
+    env-import DOCKER_TAG_POSTFIX latest
     env-import DOCKER_TAG_UAA 2.7.1
     env-import DOCKER_TAG_UAADB v2.7.1
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
@@ -89,13 +90,13 @@ cloudbreak-conf-images() {
 }
 
 cloudbreak-conf-smtp() {
-    env-import CLOUDBREAK_SMTP_SENDER_USERNAME " "
-    env-import CLOUDBREAK_SMTP_SENDER_PASSWORD " "
-    env-import CLOUDBREAK_SMTP_SENDER_HOST " "
+    env-import CLOUDBREAK_SMTP_SENDER_USERNAME "admin"
+    env-import CLOUDBREAK_SMTP_SENDER_PASSWORD "$UAA_DEFAULT_USER_PW"
+    env-import CLOUDBREAK_SMTP_SENDER_HOST "smtp.service.consul"
     env-import CLOUDBREAK_SMTP_SENDER_PORT 25
-    env-import CLOUDBREAK_SMTP_SENDER_FROM " "
+    env-import CLOUDBREAK_SMTP_SENDER_FROM "noreply@hortonworks.com"
     env-import CLOUDBREAK_SMTP_AUTH "true"
-    env-import CLOUDBREAK_SMTP_STARTTLS_ENABLE "true"
+    env-import CLOUDBREAK_SMTP_STARTTLS_ENABLE "false"
     env-import CLOUDBREAK_SMTP_TYPE "smtp"
 }
 
