@@ -6,8 +6,8 @@ var regApp = angular.module('regApp', ['ngRoute']);
 var pathArray = window.location.pathname.split('/')
 
 var basePath = ''
-if (pathArray[1] === 'identity') {
-    basePath = '/identity'
+if (pathArray[1] === 'sl') {
+    basePath = '/sl'
 }
 
 regApp.controller("regController", ['$scope', '$http',
