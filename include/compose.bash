@@ -193,19 +193,19 @@ compose-generate-yaml-force() {
     fi
     cat > ${composeFile} <<EOF
 traefik:
-  ports:
-    - 8081:8080
-    - 80:80
-    - 443:443
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - ./certs/:/certs/
-  command: --debug --web \
-      --defaultEntryPoints=http,https \
-      --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' \
-      --entryPoints='Name:https Address::443 TLS:/certs/client-ca.pem,/certs/client-ca-key.pem' \
-      --docker
+    ports:
+        - 8081:8080
+        - 80:80
+        - 443:443
+    volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - ./certs/:/certs/
     image: traefik:$DOCKER_TAG_TRAEFIK
+    command: --debug --web \
+        --defaultEntryPoints=http,https \
+        --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' \
+        --entryPoints='Name:https Address::443 TLS:/certs/client-ca.pem,/certs/client-ca-key.pem' \
+        --docker
 haveged:
     privileged: true
     image: sequenceiq/haveged:$DOCKER_TAG_HAVEGED
@@ -268,8 +268,7 @@ mail:
         - SERVICE_NAME=smtp
         - maildomain=example.com
         - smtp_user=admin:$UAA_DEFAULT_USER_PW
-    image:
-        catatnight/postfix:$DOCKER_TAG_POSTFIX
+    image: catatnight/postfix:$DOCKER_TAG_POSTFIX
 
 uaadb:
     privileged: true
