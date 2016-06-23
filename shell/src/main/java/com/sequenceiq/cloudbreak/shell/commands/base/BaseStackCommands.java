@@ -531,7 +531,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     private void validateNetwork() {
         Long networkId = shellContext.getActiveNetworkId();
-        if (networkId == null || (networkId != null && shellContext.getNetworksByProvider().get(networkId) == shellContext.getActiveCloudPlatform())) {
+        if (networkId == null || (networkId != null && shellContext.getNetworksByProvider().get(networkId).equals(shellContext.getActiveCloudPlatform()))) {
             throw new ValidationException("A network must be selected with the same cloud platform as the credential!");
         }
     }
