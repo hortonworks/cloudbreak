@@ -142,9 +142,6 @@
           "name": "HIVE_METASTORE"
         },
         {
-          "name": "ZEPPELIN_MASTER"
-        },
-        {
           "name": "HDFS_CLIENT"
         },
         {
@@ -209,4 +206,3 @@
     "stack_version": "2.4"
   }
 }
-    
