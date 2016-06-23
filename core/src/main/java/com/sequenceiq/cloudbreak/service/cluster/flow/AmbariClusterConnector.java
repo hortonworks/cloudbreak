@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigu
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -152,6 +153,8 @@ public class AmbariClusterConnector {
     private TlsSecurityService tlsSecurityService;
     @Inject
     private SmartSenseConfigProvider smartSenseConfigProvider;
+    @Inject
+    private ZeppelinConfigProvider zeppelinConfigProvider;
     @Inject
     private RDSConfigProvider rdsConfigProvider;
     @Inject
@@ -237,6 +240,7 @@ public class AmbariClusterConnector {
             blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
         }
         blueprintText = smartSenseConfigProvider.addToBlueprint(stack, blueprintText);
+        blueprintText = zeppelinConfigProvider.addToBlueprint(stack, blueprintText);
         Image image = imageService.getImage(stack.getId());
         if (image.getHdpVersion() != null) {
             blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, image.getHdpVersion());
