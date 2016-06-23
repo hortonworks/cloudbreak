@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -76,12 +78,12 @@ public class ServiceProviderCredentialAdapter {
     }
 
     private void mergeSmartSenseAttributeIfExists(Credential credential, CloudCredential cloudCredentialResponse) {
-        String smartSenseId = String.valueOf(cloudCredentialResponse.getParameters().get("smartSenseId"));
+        String smartSenseId = String.valueOf(cloudCredentialResponse.getParameters().get(SMART_SENSE_ID));
         if (StringUtils.isNoneEmpty(smartSenseId)) {
             try {
                 Json attributes = credential.getAttributes();
                 Map<String, Object> newAttributes = attributes.getMap();
-                newAttributes.put("smartSenseId", smartSenseId);
+                newAttributes.put(SMART_SENSE_ID, smartSenseId);
                 credential.setAttributes(new Json(newAttributes));
             } catch (IOException e) {
                 LOGGER.error("SmartSense id could not be added to the credential as attribute.", e);

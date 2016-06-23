@@ -2,11 +2,15 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +18,15 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -34,11 +45,20 @@ public class EmailSenderService {
     @Value("${cb.failed.cluster.installer.mail.template.path:}")
     private String failedClusterMailTemplatePath;
 
+    @Value("${cb.telemetry.mail.address:aws-marketplace@hortonworks.com}")
+    private String telemetryMailAddress;
+
+    @Value("${cb.smartsense.configure:false}")
+    private boolean configureSmartSense;
+
     @Inject
     private EmailMimeMessagePreparator emailMimeMessagePreparator;
 
     @Inject
     private JavaMailSender mailSender;
+
+    @Inject
+    private ImageService imageService;
 
     @Inject
     private Configuration freemarkerConfiguration;
@@ -130,6 +150,61 @@ public class EmailSenderService {
         CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
         sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster upscale", getEmailModel(user.getGivenName(),
                 ambariServer, State.UPSCALE_SUCCESS, clusterName));
+    }
+
+    @Async
+    public void sendTelemetryMailIfNeeded(Stack stack, Status status) {
+        Cluster cluster = stack.getCluster();
+        String smartSenseId = (String) stack.getCredential().getAttributes().getMap().get(CloudCredential.SMART_SENSE_ID);
+        Map<String, Object> telemetryMailMap = new LinkedHashMap<>();
+        if (configureSmartSense && !StringUtils.isEmpty(smartSenseId)) {
+            telemetryMailMap.put("Smartsense ID", smartSenseId);
+            telemetryMailMap.put("Cluster ID", cluster.getId());
+            telemetryMailMap.put("Cluster type", getClusterType(stack, cluster));
+            telemetryMailMap.put("Node count", stack.getFullNodeCount());
+            telemetryMailMap.put("Instance type(s)", getInstanceTypes(stack));
+            telemetryMailMap.put("Running time", getRunningTime(cluster));
+            telemetryMailMap.put("Status", status.normalizedStatusName());
+
+            StringBuilder telemetryMailBodyBuilder = new StringBuilder();
+            for (String key : telemetryMailMap.keySet()) {
+                telemetryMailBodyBuilder.append(key).append(": ").append(telemetryMailMap.get(key)).append("<br />");
+            }
+            mailSender.send(emailMimeMessagePreparator.prepareMessage(telemetryMailAddress, "Telemetry", telemetryMailBodyBuilder.toString()));
+        }
+    }
+
+    private String getClusterType(Stack stack, Cluster cluster) {
+        String hdpVersion = null;
+        try {
+            hdpVersion = imageService.getImage(stack.getId()).getHdpVersion();
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.info("cant find hdp version");
+        }
+        if (hdpVersion == null) {
+            hdpVersion = "HDP_VERSION_NOT_FOUND";
+        }
+        return hdpVersion + " : " + cluster.getBlueprint().getBlueprintName();
+    }
+
+    private static String getRunningTime(Cluster cluster) {
+        long upTime = cluster.getUpSince() == null || !cluster.isAvailable() ? 0L : new Date().getTime() - cluster.getUpSince();
+        return uptimeToFormattedString(upTime);
+    }
+
+    private static String uptimeToFormattedString(long upTime) {
+        return DurationFormatUtils.formatDuration(upTime, "HH:mm:ss");
+    }
+
+    private String getInstanceTypes(Stack stack) {
+        StringBuilder instanceTypesStringBuilder = new StringBuilder();
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            String instanceType = instanceGroup.getTemplate().getInstanceType();
+            instanceTypesStringBuilder.append("<br />").append(" - ");
+            instanceTypesStringBuilder.append(instanceGroup.getGroupName()).append(" (").append(instanceGroup.getNodeCount()).append(") : ");
+            instanceTypesStringBuilder.append(instanceType);
+        }
+        return instanceTypesStringBuilder.toString();
     }
 
     @Async

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
 
 import javax.inject.Inject;
 
@@ -44,6 +45,7 @@ public class StackTerminationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STOPPED, BillingStatus.BILLING_STOPPED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
+        emailSenderService.sendTelemetryMailIfNeeded(stack, DELETE_COMPLETED);
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
             emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
@@ -61,12 +63,14 @@ public class StackTerminationService {
             eventMessage = Msg.STACK_INFRASTRUCTURE_DELETE_FAILED;
             stackUpdater.updateStackStatus(stack.getId(), status, stackUpdateMessage);
             LOGGER.error("Error during stack termination flow: ", errorDetails);
+            emailSenderService.sendTelemetryMailIfNeeded(stack, DELETE_FAILED);
         } else {
             terminationService.finalizeTermination(stack.getId(), true);
             clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
             stackUpdateMessage = "Stack was force terminated.";
             status = DELETE_COMPLETED;
             eventMessage = Msg.STACK_FORCED_DELETE_COMPLETED;
+            emailSenderService.sendTelemetryMailIfNeeded(stack, DELETE_COMPLETED);
         }
         flowMessageService.fireEventAndLog(stack.getId(), eventMessage, status.name(), stackUpdateMessage);
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
