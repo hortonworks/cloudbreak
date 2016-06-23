@@ -46,3 +46,4 @@ base:
   'recipes:post':
     - match: grain
     - post-recipes.init
+    - users.add-to-group
