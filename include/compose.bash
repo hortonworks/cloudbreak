@@ -261,6 +261,16 @@ logspout:
     entrypoint: ["/bin/sh"]
     command: -c 'sleep 1; ROUTE_URIS=\$\$LOGSINK_PORT_3333_TCP /bin/logspout'
 
+mail:
+    ports:
+        - "$PRIVATE_IP:25:25"
+    environment:
+        - SERVICE_NAME=smtp
+        - maildomain=example.com
+        - smtp_user=admin:$UAA_DEFAULT_USER_PW
+    image:
+        catatnight/postfix:$DOCKER_TAG_POSTFIX
+
 uaadb:
     privileged: true
     ports:
