@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import javax.mail.internet.MimeMessage;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
@@ -16,14 +14,16 @@ public class EmailMimeMessagePreparator {
     private String msgFrom;
 
     public MimeMessagePreparator prepareMessage(final CbUser user, final String subject, final String body) {
-        return new MimeMessagePreparator() {
-            public void prepare(MimeMessage mimeMessage) throws Exception {
-                MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
-                message.setFrom(msgFrom);
-                message.setTo(user.getUsername());
-                message.setSubject(subject);
-                message.setText(body, true);
-            }
+        return prepareMessage(user.getUsername(), subject, body);
+    }
+
+    public MimeMessagePreparator prepareMessage(final String to, final String subject, final String body) {
+        return mimeMessage -> {
+            MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
+            message.setFrom(msgFrom);
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(body, true);
         };
     }
 }
