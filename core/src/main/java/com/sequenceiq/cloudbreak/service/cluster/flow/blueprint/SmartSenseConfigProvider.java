@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,7 +46,7 @@ public class SmartSenseConfigProvider {
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         Credential credential = stack.getCredential();
         Map<String, Object> params = credential.getAttributes().getMap();
-        String smartSenseId = String.valueOf(params.get("smartSenseId"));
+        String smartSenseId = String.valueOf(params.get(SMART_SENSE_ID));
         if (configureSmartSense && StringUtils.isNoneEmpty(smartSenseId)) {
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
             Set<String> hostGroupNames = hostGroups.stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
