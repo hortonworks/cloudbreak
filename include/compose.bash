@@ -200,12 +200,12 @@ traefik:
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - ./certs/:/certs/
-  image: traefik
   command: --debug --web \
       --defaultEntryPoints=http,https \
       --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' \
       --entryPoints='Name:https Address::443 TLS:/certs/client-ca.pem,/certs/client-ca-key.pem' \
       --docker
+    image: traefik:$DOCKER_TAG_TRAEFIK
 haveged:
     privileged: true
     image: sequenceiq/haveged:$DOCKER_TAG_HAVEGED
