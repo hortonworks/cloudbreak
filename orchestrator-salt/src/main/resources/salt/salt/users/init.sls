@@ -5,6 +5,9 @@ admin:
     - groups:
       - wheel
       - users
+    - optional_groups:
+      - hadoop
+      - hdfs
 
 /home/admin/.ssh:
   file.directory:
