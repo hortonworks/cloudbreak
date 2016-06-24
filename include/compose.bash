@@ -5,6 +5,7 @@ compose-init() {
     fi
     deps-require docker-compose 1.7.1
     env-import CB_COMPOSE_PROJECT cbreak
+    env-import COMPOSE_HTTP_TIMEOUT 120
     env-import CBD_LOG_NAME cbreak
     env-import ULUWATU_VOLUME_HOST /dev/null
     env-import ULUWATU_CONTAINER_PATH /uluwatu
@@ -25,7 +26,7 @@ compose-init() {
 
 dockerCompose() {
     debug "docker-compose -p ${CB_COMPOSE_PROJECT} $@"
-    COMPOSE_HTTP_TIMEOUT=120 docker-compose -p ${CB_COMPOSE_PROJECT} "$@"
+    docker-compose -p ${CB_COMPOSE_PROJECT} "$@"
 }
 
 compose-ps() {
