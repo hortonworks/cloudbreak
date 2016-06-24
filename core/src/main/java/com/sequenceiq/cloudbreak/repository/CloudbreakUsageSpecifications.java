@@ -20,7 +20,7 @@ public class CloudbreakUsageSpecifications {
             @Override
             public Predicate toPredicate(final Root<CloudbreakUsage> cloudbreakUsageRoot, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
-                return (since == null) ? cb.and() : cb.greaterThanOrEqualTo(cloudbreakUsageRoot.<Date>get("day"), new Date(since));
+                return (since == null) ? cb.and() : cb.greaterThanOrEqualTo(cloudbreakUsageRoot.get("day"), new Date(since));
             }
         };
     }
@@ -40,7 +40,7 @@ public class CloudbreakUsageSpecifications {
             @Override
             public Predicate toPredicate(final Root<CloudbreakUsage> cloudbreakUsageRoot, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
-                return (date == null) ? cb.and() : cb.lessThan(cloudbreakUsageRoot.<Date>get("day"), new Date(date));
+                return (date == null) ? cb.and() : cb.lessThan(cloudbreakUsageRoot.get("day"), new Date(date));
             }
         };
     }

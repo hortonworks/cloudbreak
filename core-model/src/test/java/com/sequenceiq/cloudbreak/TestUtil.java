@@ -268,7 +268,7 @@ public class TestUtil {
         Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (int i = 0; i < count; i++) {
             instanceMetaDatas.add(instanceMetaData(Long.valueOf(i + instanceGroupId), InstanceStatus.REGISTERED,
-                    instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY) ? true : false, instanceGroup));
+                    instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY), instanceGroup));
         }
         return instanceMetaDatas;
     }

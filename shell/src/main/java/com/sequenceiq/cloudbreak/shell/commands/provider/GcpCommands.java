@@ -212,7 +212,7 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "description", mandatory = false, help = "Description of the platform") String description
     ) {
         try {
-            return basePlatformCommands.create(name, description, PLATFORM, Collections.<String, String>emptyMap());
+            return basePlatformCommands.create(name, description, PLATFORM, Collections.emptyMap());
         } catch (Exception e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }

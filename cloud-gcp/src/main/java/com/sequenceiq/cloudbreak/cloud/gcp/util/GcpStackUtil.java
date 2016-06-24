@@ -97,7 +97,7 @@ public final class GcpStackUtil {
             throw new Exception(errorMessage);
         } else {
             Integer progress = operation.getProgress();
-            return (progress.intValue() != FINISHED) ? false : true;
+            return progress.intValue() == FINISHED;
         }
     }
 

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateRequest;
@@ -62,7 +63,7 @@ public class ServiceProviderMetadataAdapter {
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
         CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, cloudInstances);
         LOGGER.info("Triggering event: {}", cmr);
-        eventBus.notify(cmr.selector(CollectMetadataRequest.class), Event.wrap(cmr));
+        eventBus.notify(CloudPlatformRequest.selector(CollectMetadataRequest.class), Event.wrap(cmr));
         try {
             CollectMetadataResult res = cmr.await();
             LOGGER.info("Result: {}", res);

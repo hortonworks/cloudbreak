@@ -209,10 +209,10 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.<String>absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.absent()));
         additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE_STRATEGY, false, InstanceProfileStrategy.class,
-                Optional.<String>absent()));
-        additionalStackParameterValidations.add(new StackParamValidation(S3_ROLE, false, String.class, Optional.<String>absent()));
+                Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(S3_ROLE, false, String.class, Optional.absent()));
         return additionalStackParameterValidations;
     }
 

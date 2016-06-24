@@ -27,11 +27,8 @@ public class Priority implements Comparable<Priority> {
 
         Priority priority = (Priority) o;
 
-        if (value != priority.value) {
-            return false;
-        }
+        return value == priority.value;
 
-        return true;
     }
 
     @Override

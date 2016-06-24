@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -112,7 +111,7 @@ public class AutoscaleClient {
     }
 
     private <C> C newResource(final Class<C> resourceInterface, MultivaluedMap<String, Object> headers) {
-        return WebResourceFactory.newResource(resourceInterface, t, false, headers, Collections.<Cookie>emptyList(), EMPTY_FORM);
+        return WebResourceFactory.newResource(resourceInterface, t, false, headers, Collections.emptyList(), EMPTY_FORM);
     }
 
     public AlertEndpoint alertEndpoint() {

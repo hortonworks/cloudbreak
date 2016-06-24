@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.annotation.PostConstruct;
@@ -25,7 +24,6 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
@@ -33,17 +31,13 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.handler.ParameterGenerator;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
-import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
@@ -52,7 +46,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -65,9 +58,9 @@ import reactor.Environment;
 public class TestApplicationContext {
 
     private CloudInstance cloudInstance = new CloudInstance("instanceId",
-            new InstanceTemplate("flavor", "groupName", 1L, Collections.<Volume>emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
+            new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
     private CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
-            new InstanceTemplate("flavor", "groupName", 1L, Collections.<Volume>emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
+            new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<String, Object>()));
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -126,7 +119,7 @@ public class TestApplicationContext {
 
     @Bean
     public CloudPlatformConnectors cloudPlatformConnectors() {
-        when(cloudPlatformConnectors.get((CloudPlatformVariant) any())).thenReturn(cloudConnector);
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         return cloudPlatformConnectors;
     }
 
@@ -137,34 +130,34 @@ public class TestApplicationContext {
         when(cloudConnector.credentials()).thenReturn(credentialConnector);
         when(credentialConnector.create(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.CREATED));
         when(credentialConnector.delete(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.DELETED));
-        when(authenticator.authenticate((CloudContext) any(), (CloudCredential) any())).thenReturn(g.createAuthenticatedContext());
+        when(authenticator.authenticate(any(), any())).thenReturn(g.createAuthenticatedContext());
         when(cloudConnector.platform()).thenReturn(Platform.platform("TESTCONNECTOR"));
         when(cloudConnector.variant()).thenReturn(Variant.variant("TESTVARIANT"));
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         when(cloudConnector.instances()).thenReturn(instanceConnector);
         when(cloudConnector.metadata()).thenReturn(collector);
-        when(resourceConnector.launch((AuthenticatedContext) any(), (CloudStack) any(), (PersistenceNotifier) any(), (AdjustmentType) any(), anyLong()))
+        when(resourceConnector.launch(any(), any(), any(), any(), anyLong()))
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.CREATED)));
-        when(resourceConnector.terminate((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudResource>) any()))
+        when(resourceConnector.terminate(any(), any(), any()))
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.DELETED)));
-        when(resourceConnector.update((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudResource>) any()))
+        when(resourceConnector.update(any(), any(), any()))
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
-        when(resourceConnector.upscale((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudResource>) any()))
+        when(resourceConnector.upscale(any(), any(), any()))
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
-        when(resourceConnector.downscale((AuthenticatedContext) any(), (CloudStack) any(), (List<CloudResource>) any(), anyList()))
+        when(resourceConnector.downscale(any(), any(), any(), anyList()))
                 .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
-        when(instanceConnector.check((AuthenticatedContext) any(), (List<CloudInstance>) any()))
+        when(instanceConnector.check(any(), any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
         CloudVmInstanceStatus collectInstanceStatus = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS);
-        when(collector.collect((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
+        when(collector.collect(any(), any(), any()))
                 .thenReturn(Arrays.asList(new CloudVmMetaDataStatus(collectInstanceStatus, new CloudInstanceMetaData("privateIp", "publicIp", "hypervisor"))));
-        when(instanceConnector.start((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
+        when(instanceConnector.start(any(), any(), any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
-        when(instanceConnector.stop((AuthenticatedContext) any(), (List<CloudResource>) any(), (List<CloudInstance>) any()))
+        when(instanceConnector.stop(any(), any(), any()))
                 .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STOPPED)));
-        when(instanceConnector.getConsoleOutput((AuthenticatedContext) any(), eq(cloudInstance)))
+        when(instanceConnector.getConsoleOutput(any(), eq(cloudInstance)))
                 .thenReturn(g.getSshFingerprint() + "    RSA/n-----END SSH HOST KEY FINGERPRINTS-----");
-        when(instanceConnector.getConsoleOutput((AuthenticatedContext) any(), eq(cloudInstanceBad)))
+        when(instanceConnector.getConsoleOutput(any(), eq(cloudInstanceBad)))
                 .thenReturn("XYZ    RSA/n-----END SSH HOST KEY FINGERPRINTS-----");
         return cloudConnector;
     }

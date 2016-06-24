@@ -32,7 +32,7 @@ public class CloudbreakEventSpecifications {
             public Predicate toPredicate(final Root<CloudbreakEvent> cloudbreakEventRoot, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
                 if (since != null) {
-                    return cb.greaterThanOrEqualTo(cloudbreakEventRoot.<Date>get("eventTimestamp"), new Date(since));
+                    return cb.greaterThanOrEqualTo(cloudbreakEventRoot.get("eventTimestamp"), new Date(since));
                 } else {
                     return cb.and();
                 }

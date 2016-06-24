@@ -38,7 +38,7 @@ public class RetryUtilTest {
         runRetryTaskWithCheck();
         verify(task, times(3)).run();
         verify(check, times(3)).check();
-        verify(error, times(1)).run((Exception) any());
+        verify(error, times(1)).run(any());
     }
 
     @Test
@@ -46,7 +46,7 @@ public class RetryUtilTest {
         doThrow(new Exception()).when(task).run();
         runRetryTask();
         verify(task, times(3)).run();
-        verify(error, times(1)).run((Exception) any());
+        verify(error, times(1)).run(any());
     }
 
     @Test
@@ -56,27 +56,27 @@ public class RetryUtilTest {
                 .when(task).run();
         runRetryTask();
         verify(task, times(2)).run();
-        verify(error, times(0)).run((Exception) any());
+        verify(error, times(0)).run(any());
     }
 
     @Test
     public void testRunWithRecoverableException() throws Exception {
-        when(exceptionCheck.check((IllegalArgumentException) any())).thenReturn(true);
+        when(exceptionCheck.check(any())).thenReturn(true);
         doThrow(new IllegalArgumentException()).when(task).run();
         runRetryTaskWithExceptionCheck();
         verify(task, times(3)).run();
-        verify(exceptionCheck, times(3)).check((Exception) any());
-        verify(error, times(1)).run((Exception) any());
+        verify(exceptionCheck, times(3)).check(any());
+        verify(error, times(1)).run(any());
     }
 
     @Test
     public void testRunWithNotRecoverableException() throws Exception {
-        when(exceptionCheck.check((NullPointerException) any())).thenReturn(false);
+        when(exceptionCheck.check(any())).thenReturn(false);
         doThrow(new NullPointerException()).when(task).run();
         runRetryTaskWithExceptionCheck();
         verify(task, times(1)).run();
-        verify(exceptionCheck, times(1)).check((Exception) any());
-        verify(error, times(1)).run((Exception) any());
+        verify(exceptionCheck, times(1)).check(any());
+        verify(error, times(1)).run(any());
     }
 
     private void runRetryTask() {

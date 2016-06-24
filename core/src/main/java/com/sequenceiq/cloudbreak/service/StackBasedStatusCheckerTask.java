@@ -16,10 +16,7 @@ public abstract class StackBasedStatusCheckerTask<T extends StackContext> extend
     public boolean exitPolling(T t) {
         try {
             Stack stack = stackRepository.findByIdLazy(t.getStack().getId());
-            if (stack == null || stack.isDeleteInProgress() || stack.isDeleteCompleted()) {
-                return true;
-            }
-            return false;
+            return stack == null || stack.isDeleteInProgress() || stack.isDeleteCompleted();
         } catch (Exception ex) {
             LOGGER.error("Error occurred when check status checker exit criteria: ", ex);
             return true;

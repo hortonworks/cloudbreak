@@ -406,7 +406,7 @@ public class AmbariDecommissioner {
 
     private PollingResult waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient) {
         LOGGER.info("Waiting for DataNodes to move the blocks to other nodes. stack id: {}", stack.getId());
-        return ambariOperationService.waitForOperations(stack, ambariClient, dnDecommissionStatusCheckerTask, Collections.<String, Integer>emptyMap(),
+        return ambariOperationService.waitForOperations(stack, ambariClient, dnDecommissionStatusCheckerTask, Collections.emptyMap(),
                 DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE);
     }
 

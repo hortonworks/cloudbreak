@@ -197,7 +197,7 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the platform") String name,
             @CliOption(key = "description", mandatory = false, help = "Description of the platform") String description) {
         try {
-            return basePlatformCommands.create(name, description, PLATFORM, Collections.<String, String>emptyMap());
+            return basePlatformCommands.create(name, description, PLATFORM, Collections.emptyMap());
         } catch (Exception e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }

@@ -189,10 +189,10 @@ public class ArmPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.<String>absent()));
-        additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class, Optional.<String>of("^[a-z0-9]{0,24}$")));
+        additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class, Optional.of("^[a-z0-9]{0,24}$")));
         additionalStackParameterValidations.add(new StackParamValidation("attachedStorageOption", false, ArmAttachedStorageOption.class,
-                Optional.<String>absent()));
+                Optional.absent()));
         return additionalStackParameterValidations;
     }
 

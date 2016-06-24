@@ -17,7 +17,7 @@ import com.sequenceiq.periscope.model.AmbariStack;
 public class ClusterSecurityService {
 
     @Inject
-    private CloudbreakClient cloudbreakClient;;
+    private CloudbreakClient cloudbreakClient;
 
     @Inject
     private TlsSecurityService tlsSecurityService;

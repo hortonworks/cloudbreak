@@ -49,7 +49,7 @@ public class OfflineStateGenerator {
     private static final String OUT_PATH = "build/diagrams/flow";
 
     private static final List<FlowConfiguration<? extends FlowEvent>> CONFIGS =
-            Arrays.<FlowConfiguration<? extends FlowEvent>>asList(
+            Arrays.asList(
                     new ClusterTerminationFlowConfig(),
                     new InstanceTerminationFlowConfig(),
                     new StackCreationFlowConfig(),

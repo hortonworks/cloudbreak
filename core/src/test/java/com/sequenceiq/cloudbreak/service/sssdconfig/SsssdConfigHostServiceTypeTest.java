@@ -161,7 +161,7 @@ public class SsssdConfigHostServiceTypeTest {
         sssdConfig.setOwner(user.getUserId());
         sssdConfig.setAccount(user.getAccount());
         when(sssdConfigRepository.findOne(anyLong())).thenReturn(sssdConfig);
-        when(clusterRepository.findAllClustersBySssdConfig(anyLong())).thenReturn(Collections.<Cluster>emptySet());
+        when(clusterRepository.findAllClustersBySssdConfig(anyLong())).thenReturn(Collections.emptySet());
         underTest.delete(1L, user);
         verify(sssdConfigRepository, times(1)).findOne(anyLong());
         verify(clusterRepository, times(1)).findAllClustersBySssdConfig(anyLong());
@@ -175,7 +175,7 @@ public class SsssdConfigHostServiceTypeTest {
         sssdConfig.setOwner("owner");
         sssdConfig.setAccount("account");
         when(sssdConfigRepository.findOne(anyLong())).thenReturn(sssdConfig);
-        when(clusterRepository.findAllClustersBySssdConfig(anyLong())).thenReturn(Collections.<Cluster>emptySet());
+        when(clusterRepository.findAllClustersBySssdConfig(anyLong())).thenReturn(Collections.emptySet());
         try {
             underTest.delete(1L, user);
         } catch (Exception e) {

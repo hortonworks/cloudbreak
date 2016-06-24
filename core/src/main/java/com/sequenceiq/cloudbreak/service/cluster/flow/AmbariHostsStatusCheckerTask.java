@@ -22,10 +22,7 @@ public class AmbariHostsStatusCheckerTask extends ClusterBasedStatusCheckerTask<
         Map<String, String> unknownHostNames = t.getAmbariClient().getHostNamesByState("UNKNOWN");
         int totalNodes = healthyHostNames.size() + unHealthyHostNames.size() + alertHostNames.size() + unknownHostNames.size();
         LOGGER.info("Ambari client found {} hosts ({} needed). [Stack: '{}']", totalNodes, t.getHostsInCluster().size(), t.getStack().getId());
-        if (totalNodes >= t.getHostsInCluster().size()) {
-            return true;
-        }
-        return false;
+        return totalNodes >= t.getHostsInCluster().size();
     }
 
     @Override

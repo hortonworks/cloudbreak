@@ -24,7 +24,7 @@ public class PollInstancesStateTask extends AbstractPollTask<InstancesStatusResu
     private Set<InstanceStatus> completedStatuses;
 
     public PollInstancesStateTask(AuthenticatedContext authenticatedContext, InstanceConnector instanceConnector, List<CloudInstance> instances) {
-        this(authenticatedContext, instanceConnector, instances, Sets.<InstanceStatus>newHashSet());
+        this(authenticatedContext, instanceConnector, instances, Sets.newHashSet());
     }
 
     public PollInstancesStateTask(AuthenticatedContext authenticatedContext, InstanceConnector instanceConnector, List<CloudInstance> instances,

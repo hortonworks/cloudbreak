@@ -62,7 +62,7 @@ public class CloudFormationTemplateBuilder {
         model.put("existingRole", context.s3RoleAvailable);
         model.put("cbSubnet", isBlank(context.existingSubnetCidr) ? context.stack.getNetwork().getSubnet().getCidr() : context.existingSubnetCidr);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
-        model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() == null ? false : true);
+        model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
         if (isNoneEmpty(context.snapshotId)) {
             model.put("snapshotId", context.snapshotId);

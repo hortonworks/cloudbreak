@@ -29,6 +29,6 @@ public class TimeMonitor extends AbstractMonitor implements Monitor {
 
     @Override
     public Map<String, Object> getContext(Cluster cluster) {
-        return Collections.<String, Object>singletonMap(EvaluatorContext.CLUSTER_ID.name(), cluster.getId());
+        return Collections.singletonMap(EvaluatorContext.CLUSTER_ID.name(), cluster.getId());
     }
 }

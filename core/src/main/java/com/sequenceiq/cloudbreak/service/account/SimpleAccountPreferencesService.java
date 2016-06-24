@@ -100,7 +100,7 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
         defaultPreferences.setMaxNumberOfClusters(ZERO);
         defaultPreferences.setMaxNumberOfNodesPerCluster(ZERO);
         defaultPreferences.setMaxNumberOfClustersPerUser(ZERO);
-        defaultPreferences.setAllowedInstanceTypes(Collections.<String>emptyList());
+        defaultPreferences.setAllowedInstanceTypes(Collections.emptyList());
         defaultPreferences.setClusterTimeToLive(ZERO);
         defaultPreferences.setUserTimeToLive(ZERO);
         return repository.save(defaultPreferences);

@@ -42,7 +42,7 @@ public class StackToCloudStackConverter {
     private ImageService imageService;
 
     public CloudStack convert(Stack stack) {
-        return convert(stack, Collections.<String>emptySet());
+        return convert(stack, Collections.emptySet());
     }
 
     public CloudStack convertForDownscale(Stack stack, Set<String> deleteRequestedInstances) {
@@ -104,7 +104,7 @@ public class StackToCloudStackConverter {
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
-        List<Group> groups = buildInstanceGroups(stack.getInstanceGroupsAsList(), Collections.<String>emptySet());
+        List<Group> groups = buildInstanceGroups(stack.getInstanceGroupsAsList(), Collections.emptySet());
         List<CloudInstance> cloudInstances = new ArrayList<>();
         for (Group group : groups) {
             cloudInstances.addAll(group.getInstances());
@@ -119,7 +119,7 @@ public class StackToCloudStackConverter {
 
     public InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status) {
         Json attributes = template.getAttributes();
-        Map<String, Object> fields = attributes == null ? Collections.<String, Object>emptyMap() : attributes.getMap();
+        Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
         List<Volume> volumes = new ArrayList<>();
         for (int i = 0; i < template.getVolumeCount(); i++) {
             Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeType(), template.getVolumeSize());
@@ -132,7 +132,7 @@ public class StackToCloudStackConverter {
         com.sequenceiq.cloudbreak.domain.Network stackNetwork = stack.getNetwork();
         Subnet subnet = new Subnet(stackNetwork.getSubnetCIDR());
         Json attributes = stackNetwork.getAttributes();
-        Map<String, Object> params = attributes == null ? Collections.<String, Object>emptyMap() : attributes.getMap();
+        Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
         return new Network(subnet, params);
     }
 
