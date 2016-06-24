@@ -197,6 +197,12 @@ traefik:
         - 8081:8080
         - 80:80
         - 443:443
+    links:
+        - identity
+        - cloudbreak
+        - periscope
+        - sultans
+        - uluwatu
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
         - ./certs/:/certs/
@@ -207,10 +213,14 @@ traefik:
         --entryPoints='Name:https Address::443 TLS:/certs/client-ca.pem,/certs/client-ca-key.pem' \
         --docker
 haveged:
+    labels:
+      - traefik.enable=false
     privileged: true
     image: sequenceiq/haveged:$DOCKER_TAG_HAVEGED
 
 consul:
+    labels:
+      - traefik.enable=false
     privileged: true
     environment:
         - http_proxy=$CB_HTTP_PROXY
@@ -227,6 +237,8 @@ consul:
     command: --bootstrap --advertise $PRIVATE_IP $DOCKER_CONSUL_OPTIONS
 
 registrator:
+    labels:
+      - traefik.enable=false
     privileged: true
     volumes:
         - "/var/run/docker.sock:/tmp/docker.sock"
@@ -236,6 +248,8 @@ registrator:
     command: consul://consul:8500
 
 logsink:
+    labels:
+      - traefik.enable=false
     ports:
         - 3333
     environment:
@@ -246,6 +260,8 @@ logsink:
     command: socat -u TCP-LISTEN:3333,reuseaddr,fork OPEN:/tmp/cbreak.log,creat,append
 
 logspout:
+    labels:
+      - traefik.enable=false
     ports:
         - 8000:80
     environment:
@@ -262,6 +278,8 @@ logspout:
     command: -c 'sleep 1; ROUTE_URIS=\$\$LOGSINK_PORT_3333_TCP /bin/logspout'
 
 mail:
+    labels:
+      - traefik.enable=false
     ports:
         - "$PRIVATE_IP:25:25"
     environment:
@@ -271,6 +289,8 @@ mail:
     image: catatnight/postfix:$DOCKER_TAG_POSTFIX
 
 uaadb:
+    labels:
+      - traefik.enable=false
     privileged: true
     ports:
         - "$PRIVATE_IP:5434:5432"
@@ -301,6 +321,8 @@ identity:
     image: sequenceiq/uaa:$DOCKER_TAG_UAA
 
 cbdb:
+    labels:
+      - traefik.enable=false
     ports:
         - "$PRIVATE_IP:5432:5432"
     environment:
@@ -452,6 +474,8 @@ uluwatu:
     image: $DOCKER_IMAGE_CLOUDBREAK_WEB:$DOCKER_TAG_ULUWATU
 
 pcdb:
+    labels:
+      - traefik.enable=false
     environment:
         - SERVICE_NAME=pcdb
      #- SERVICE_NAMEE_CHECK_CMD='psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
