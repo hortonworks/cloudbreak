@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkJson implements JsonEntity {
-    @ApiModelProperty(value = ModelDescriptions.ID, required = false)
+    @ApiModelProperty(value = ModelDescriptions.ID)
     private String id;
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     @Size(max = 100, min = 1, message = "The length of the network's name has to be in range of 1 to 100")
@@ -27,7 +27,7 @@ public class NetworkJson implements JsonEntity {
             message = "The network's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     private String name;
-    @ApiModelProperty(value = ModelDescriptions.DESCRIPTION, required = false)
+    @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
     @Size(max = 1000)
     private String description;
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, required = true)

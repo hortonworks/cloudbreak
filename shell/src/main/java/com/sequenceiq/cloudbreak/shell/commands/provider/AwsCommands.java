@@ -80,16 +80,16 @@ public class AwsCommands implements CommandMarker {
     @CliCommand(value = "credential create --AWS", help = "Create a new AWS credential")
     public String createCredential(
             @CliOption(key = "name", mandatory = true, help = "Name of the credential") String name,
-            @CliOption(key = "roleArn", mandatory = false, help = "roleArn for assuming roles or use access and secret based authentication") String roleArn,
-            @CliOption(key = "accessKey", mandatory = false, help = "accessKey of the credential") String accessKey,
-            @CliOption(key = "secretKey", mandatory = false, help = "secretKey of the credential") String secretKey,
-            @CliOption(key = "sshKeyPath", mandatory = false, help = "path of a public SSH key file") File sshKeyPath,
-            @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key file") String sshKeyUrl,
-            @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the credential belongs to") Long platformId,
-            @CliOption(key = "existingKeyPairName", mandatory = false, help = "Name of an existing SSH key pair that should be exist on EC2") String keyPairName
+            @CliOption(key = "roleArn", help = "roleArn for assuming roles or use access and secret based authentication") String roleArn,
+            @CliOption(key = "accessKey", help = "accessKey of the credential") String accessKey,
+            @CliOption(key = "secretKey", help = "secretKey of the credential") String secretKey,
+            @CliOption(key = "sshKeyPath", help = "path of a public SSH key file") File sshKeyPath,
+            @CliOption(key = "sshKeyUrl", help = "URL of a public SSH key file") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
+            @CliOption(key = "publicInAccount", help = "flags if the credential is public in the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the template") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the credential belongs to") Long platformId,
+            @CliOption(key = "existingKeyPairName", help = "Name of an existing SSH key pair that should be exist on EC2") String keyPairName
     ) {
         Map<String, Object> parameters = new HashMap<>();
         if (roleArn != null) {
@@ -112,9 +112,9 @@ public class AwsCommands implements CommandMarker {
     public String createNewNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the network") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
@@ -127,9 +127,9 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "vpcID", mandatory = true, help = "The ID of the virtual private cloud (VPC)") String vpcId,
             @CliOption(key = "internetGatewayID", mandatory = true,
                     help = "The ID of the internet gateway that is attached to the VPC (configured via 'vpcID' option)") String internetGatewayId,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the network") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("vpcId", vpcId);
@@ -142,9 +142,9 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "vpcID", mandatory = true, help = "The ID of the virtual private cloud (VPC)") String vpcId,
             @CliOption(key = "subnetId", mandatory = true, help = "The ID of the subnet which belongs to the custom VPC") String subnetId,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the network") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("vpcId", vpcId);
@@ -158,13 +158,13 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "instanceType", mandatory = true, help = "instanceType of the template") AwsInstanceType instanceType,
             @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
             @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
-            @CliOption(key = "volumeType", mandatory = false, help = "volumeType of the template") AwsVolumeType volumeType,
-            @CliOption(key = "encrypted", mandatory = false, help = "use encrypted disks") Boolean encrypted,
-            @CliOption(key = "spotPrice", mandatory = false, help = "spotPrice of the template") Double spotPrice,
-            @CliOption(key = "sshLocation", mandatory = false, specifiedDefaultValue = "0.0.0.0/0", help = "sshLocation of the template") String sshLocation,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
-            @CliOption(key = "topologyId", mandatory = false, help = "Id of a topology the template belongs to") Long platformId
+            @CliOption(key = "volumeType", help = "volumeType of the template") AwsVolumeType volumeType,
+            @CliOption(key = "encrypted", help = "use encrypted disks") Boolean encrypted,
+            @CliOption(key = "spotPrice", help = "spotPrice of the template") Double spotPrice,
+            @CliOption(key = "sshLocation", specifiedDefaultValue = "0.0.0.0/0", help = "sshLocation of the template") String sshLocation,
+            @CliOption(key = "publicInAccount", help = "flags if the template is public in the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the template") String description,
+            @CliOption(key = "topologyId", help = "Id of a topology the template belongs to") Long platformId
     ) {
         return createEc2Template(name, instanceType, volumeCount, volumeSize, volumeType, encrypted, spotPrice, sshLocation, publicInAccount,
                 description, platformId);
@@ -176,13 +176,13 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "instanceType", mandatory = true, help = "instanceType of the template") AwsInstanceType instanceType,
             @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
             @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
-            @CliOption(key = "volumeType", mandatory = false, help = "volumeType of the template") AwsVolumeType volumeType,
-            @CliOption(key = "encrypted", mandatory = false, help = "use encrypted disks") Boolean encrypted,
-            @CliOption(key = "spotPrice", mandatory = false, help = "spotPrice of the template") Double spotPrice,
-            @CliOption(key = "sshLocation", mandatory = false, specifiedDefaultValue = "0.0.0.0/0", help = "sshLocation of the template") String sshLocation,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the template belongs to") Long platformId
+            @CliOption(key = "volumeType", help = "volumeType of the template") AwsVolumeType volumeType,
+            @CliOption(key = "encrypted", help = "use encrypted disks") Boolean encrypted,
+            @CliOption(key = "spotPrice", help = "spotPrice of the template") Double spotPrice,
+            @CliOption(key = "sshLocation", specifiedDefaultValue = "0.0.0.0/0", help = "sshLocation of the template") String sshLocation,
+            @CliOption(key = "publicInAccount", help = "flags if the template is public in the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the template") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("sshLocation", sshLocation == null ? "0.0.0.0/0" : sshLocation);
@@ -195,7 +195,7 @@ public class AwsCommands implements CommandMarker {
     @CliCommand(value = "platform create --AWS", help = "Create a new AWS platform configuration")
     public String createPlatform(
             @CliOption(key = "name", mandatory = true, help = "Name of the platform") String name,
-            @CliOption(key = "description", mandatory = false, help = "Description of the platform") String description) {
+            @CliOption(key = "description", help = "Description of the platform") String description) {
         try {
             return basePlatformCommands.create(name, description, PLATFORM, Collections.emptyMap());
         } catch (Exception e) {
@@ -207,20 +207,20 @@ public class AwsCommands implements CommandMarker {
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
-            @CliOption(key = "availabilityZone", mandatory = false, help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "marks the stack as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "onFailureAction", mandatory = false, help = "onFailureAction which is ROLLBACK or DO_NOTHING.") OnFailureAction onFailureAction,
-            @CliOption(key = "adjustmentType", mandatory = false, help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
-            @CliOption(key = "ambariVersion", mandatory = false, help = "Ambari version") String ambariVersion,
-            @CliOption(key = "hdpVersion", mandatory = false, help = "HDP version") String hdpVersion,
-            @CliOption(key = "threshold", mandatory = false, help = "threshold of failure") Long threshold,
-            @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
-            @CliOption(key = "orchestrator", mandatory = false, help = "select orchestrator variant version") AwsOrchestratorType orchestratorType,
-            @CliOption(key = "dedicatedInstances", mandatory = false, help = "request dedicated instances on AWS") Boolean dedicatedInstances,
-            @CliOption(key = "instanceProfileStrategy", mandatory = false, help = "seamless S3 access type", specifiedDefaultValue = "false")
+            @CliOption(key = "availabilityZone", help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
+            @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "onFailureAction", help = "onFailureAction which is ROLLBACK or DO_NOTHING.") OnFailureAction onFailureAction,
+            @CliOption(key = "adjustmentType", help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
+            @CliOption(key = "ambariVersion", help = "Ambari version") String ambariVersion,
+            @CliOption(key = "hdpVersion", help = "HDP version") String hdpVersion,
+            @CliOption(key = "threshold", help = "threshold of failure") Long threshold,
+            @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
+            @CliOption(key = "orchestrator", help = "select orchestrator variant version") AwsOrchestratorType orchestratorType,
+            @CliOption(key = "dedicatedInstances", help = "request dedicated instances on AWS") Boolean dedicatedInstances,
+            @CliOption(key = "instanceProfileStrategy", help = "seamless S3 access type", specifiedDefaultValue = "false")
             InstanceProfileStrategy instanceProfileStrategy,
-            @CliOption(key = "s3Role", mandatory = false, help = "seamless S3 access role", specifiedDefaultValue = "false") String s3Role,
-            @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
+            @CliOption(key = "s3Role", help = "seamless S3 access role", specifiedDefaultValue = "false") String s3Role,
+            @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
 
         Map<String, String> params = new HashMap<>();
         if (dedicatedInstances != null) {

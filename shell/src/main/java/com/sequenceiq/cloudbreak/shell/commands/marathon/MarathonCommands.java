@@ -87,8 +87,8 @@ public class MarathonCommands implements CommandMarker {
 
     @CliCommand(value = "marathon show", help = "Show a marathon stack")
     public String showMarathonStack(
-            @CliOption(key = "name", mandatory = false, help = "Name of the marathon stack") String name,
-            @CliOption(key = "id", mandatory = false, help = "Id of the marathon stack") Long id) {
+            @CliOption(key = "name", help = "Name of the marathon stack") String name,
+            @CliOption(key = "id", help = "Id of the marathon stack") Long id) {
         try {
             StackResponse response = null;
             if (id != null) {
@@ -108,8 +108,8 @@ public class MarathonCommands implements CommandMarker {
 
     @CliCommand(value = "marathon select", help = "Select a marathon stack")
     public String selectMarathonStack(
-            @CliOption(key = "name", mandatory = false, help = "Name of the marathon stack") String name,
-            @CliOption(key = "id", mandatory = false, help = "Id of the marathon stack") Long id) {
+            @CliOption(key = "name", help = "Name of the marathon stack") String name,
+            @CliOption(key = "id", help = "Id of the marathon stack") Long id) {
         try {
             StackResponse response = null;
             if (id != null) {
@@ -152,8 +152,8 @@ public class MarathonCommands implements CommandMarker {
 
     @CliCommand(value = "marathon terminate", help = "Terminate a marathon stack")
     public String deleteMarathonStack(
-            @CliOption(key = "name", mandatory = false, help = "Name of the marathon stack") String name,
-            @CliOption(key = "id", mandatory = false, help = "Id of the marathon stack") Long id) {
+            @CliOption(key = "name", help = "Name of the marathon stack") String name,
+            @CliOption(key = "id", help = "Id of the marathon stack") Long id) {
         try {
             if (id != null) {
                 cloudbreakClient.stackEndpoint().delete(id, true);
@@ -183,8 +183,8 @@ public class MarathonCommands implements CommandMarker {
             @CliOption(key = "cores", mandatory = true, help = "Cpu cores of the marathon constraint (0.1 - 64 core)") Double cpuCores,
             @CliOption(key = "memory", mandatory = true, help = "Memory in Mb of the marathon constraint (16mb - 128Gb)") Double memory,
             @CliOption(key = "diskSize", mandatory = true, help = "Disk in Gb of the marathon constraint (10Gb - 1000Gb)") Double disk,
-            @CliOption(key = "description", mandatory = false, help = "Description of the marathon stack") String description,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the constraint is public in the account") Boolean publicInAccount) {
+            @CliOption(key = "description", help = "Description of the marathon stack") String description,
+            @CliOption(key = "publicInAccount", help = "flags if the constraint is public in the account") Boolean publicInAccount) {
         IdJson idJson = null;
         try {
             ConstraintTemplateRequest constraintTemplateRequest = new ConstraintTemplateRequest();
@@ -218,8 +218,8 @@ public class MarathonCommands implements CommandMarker {
 
     @CliCommand(value = "marathon constraint delete", help = "Delete the marathon constraint by its id or name")
     public Object deleteMarathonTemplate(
-            @CliOption(key = "id", mandatory = false, help = "Id of the marathon template") String id,
-            @CliOption(key = "name", mandatory = false, help = "Name of the marathon template") String name) {
+            @CliOption(key = "id", help = "Id of the marathon template") String id,
+            @CliOption(key = "name", help = "Name of the marathon template") String name) {
         try {
             if (id != null) {
                 cloudbreakClient.constraintTemplateEndpoint().delete(Long.valueOf(id));
@@ -238,8 +238,8 @@ public class MarathonCommands implements CommandMarker {
 
     @CliCommand(value = "marathon constraint show", help = "Shows the marathon constraint by its id or name")
     public Object showTemplate(
-            @CliOption(key = "id", mandatory = false, help = "Id of the marathon constraint") Long id,
-            @CliOption(key = "name", mandatory = false, help = "Name of the marathon constraint") String name) {
+            @CliOption(key = "id", help = "Id of the marathon constraint") Long id,
+            @CliOption(key = "name", help = "Name of the marathon constraint") String name) {
         try {
             ConstraintTemplateResponse aPublic = getConstraintTemplateResponse(id, name);
             if (aPublic != null) {

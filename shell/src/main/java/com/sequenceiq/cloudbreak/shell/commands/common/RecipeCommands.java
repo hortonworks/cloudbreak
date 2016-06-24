@@ -78,9 +78,9 @@ public class RecipeCommands implements BaseCommands {
 
     @CliCommand(value = "recipe create --withFile", help = "Add a new recipe with either --url or --file")
     public String create(
-            @CliOption(key = "url", mandatory = false, help = "URL of the Recipe to download from") String url,
-            @CliOption(key = "file", mandatory = false, help = "File which contains the Recipe") File file,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the recipe is public in the account") Boolean publicInAccount) {
+            @CliOption(key = "url", help = "URL of the Recipe to download from") String url,
+            @CliOption(key = "file", help = "File which contains the Recipe") File file,
+            @CliOption(key = "publicInAccount", help = "flags if the recipe is public in the account") Boolean publicInAccount) {
         try {
             String json = file == null ? IOUtils.toString(new URL(url)) : IOUtils.toString(new FileInputStream(file));
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -105,7 +105,7 @@ public class RecipeCommands implements BaseCommands {
             @CliOption(key = "preInstallScriptFile", help = "Path of the pre install script file") File preInstallScriptFile,
             @CliOption(key = "postInstallScriptFile", help = "Path of the post install script file") File postInstallScriptFile,
             @CliOption(key = "timeout", help = "Timeout of the script execution") Integer timeout,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the recipe is public in the account") Boolean publicInAccount) {
+            @CliOption(key = "publicInAccount", help = "flags if the recipe is public in the account") Boolean publicInAccount) {
         if (preInstallScriptFile != null && !preInstallScriptFile.exists()) {
             return "Pre install script file not exists.";
         } else if (postInstallScriptFile != null && !postInstallScriptFile.exists()) {

@@ -1,20 +1,21 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityGroupJson {
-    @ApiModelProperty(value = ModelDescriptions.ID, required = false)
+    @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     @Size(max = 100, min = 1, message = "The length of the security group's name has to be in range of 1 to 100")
@@ -22,14 +23,14 @@ public class SecurityGroupJson {
             message = "The security group's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     private String name;
-    @ApiModelProperty(value = ModelDescriptions.OWNER, required = false)
+    @ApiModelProperty(value = ModelDescriptions.OWNER)
     private String owner;
-    @ApiModelProperty(value = ModelDescriptions.ACCOUNT, required = false)
+    @ApiModelProperty(value = ModelDescriptions.ACCOUNT)
     private String account;
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, required = false)
+    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
     @NotNull
     private boolean publicInAccount;
-    @ApiModelProperty(value = ModelDescriptions.DESCRIPTION, required = false)
+    @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
     @Size(max = 1000)
     private String description;
     @Valid

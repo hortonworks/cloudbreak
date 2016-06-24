@@ -37,8 +37,8 @@ public class HostGroupCommands implements CommandMarker {
     @CliCommand(value = "hostgroup configure", help = "Configure host groups")
     public String createHostGroup(
             @CliOption(key = "hostgroup", mandatory = true, help = "Name of the hostgroup") HostGroup hostgroup,
-            @CliOption(key = "recipeIds", mandatory = false, help = "A comma separated list of recipe ids") String recipeIds,
-            @CliOption(key = "recipeNames", mandatory = false, help = "A comma separated list of recipe names") String recipeNames) {
+            @CliOption(key = "recipeIds", help = "A comma separated list of recipe ids") String recipeIds,
+            @CliOption(key = "recipeNames", help = "A comma separated list of recipe names") String recipeNames) {
         try {
             Set<Long> recipeIdSet = new HashSet<>();
             if (recipeIds != null) {

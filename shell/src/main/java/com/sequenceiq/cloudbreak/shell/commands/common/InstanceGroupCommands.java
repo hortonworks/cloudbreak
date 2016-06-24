@@ -43,9 +43,8 @@ public class InstanceGroupCommands implements CommandMarker {
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "nodecount", mandatory = true, help = "Nodecount for instanceGroup") Integer nodeCount,
             @CliOption(key = "ambariServer", mandatory = true, help = "Ambari server will be installed here if true") boolean ambariServer,
-            @CliOption(key = "templateId", mandatory = false, help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
-            @CliOption(key = "templateName", mandatory = false, help = "TemplateName of the instanceGroup")
-                    InstanceGroupTemplateName instanceGroupTemplateName) {
+            @CliOption(key = "templateId", help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
+            @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName) {
         try {
             String templateId = null;
             if (instanceGroupTemplateId != null) {

@@ -49,9 +49,9 @@ public class ClusterRequest {
     private String kerberosAdmin;
     @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
     private String kerberosPassword;
-    @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED, required = false)
+    @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)
     private Boolean ldapRequired = false;
-    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID, required = false)
+    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
     private Long sssdConfigId;
     private Boolean validateBlueprint = true;
     @Valid
@@ -62,7 +62,7 @@ public class ClusterRequest {
     private FileSystemRequest fileSystem;
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
-    @ApiModelProperty(value = ClusterModelDescription.ENABLE_SHIPYARD, required = false)
+    @ApiModelProperty(value = ClusterModelDescription.ENABLE_SHIPYARD)
     private Boolean enableShipyard = Boolean.FALSE;
 
     public String getDescription() {

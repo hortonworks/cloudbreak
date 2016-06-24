@@ -52,31 +52,31 @@ public class ClusterCommands implements BaseCommands {
 
     @CliCommand(value = "cluster create", help = "Create a new cluster based on a blueprint and optionally a recipe")
     public String createCluster(
-            @CliOption(key = "userName", mandatory = false, unspecifiedDefaultValue = "admin", help = "Username of the Ambari server") String userName,
-            @CliOption(key = "password", mandatory = false, unspecifiedDefaultValue = "admin", help = "Password of the Ambari server") String password,
-            @CliOption(key = "description", mandatory = false, help = "Description of the blueprint") String description,
-            @CliOption(key = "stack", mandatory = false, help = "Stack definition name, like HDP") String stack,
-            @CliOption(key = "version", mandatory = false, help = "Stack definition version") String version,
-            @CliOption(key = "os", mandatory = false, help = "Stack OS to select package manager, default is RedHat") String os,
-            @CliOption(key = "stackRepoId", mandatory = false, help = "Stack repository id") String stackRepoId,
-            @CliOption(key = "stackBaseURL", mandatory = false, help = "Stack url") String stackBaseURL,
-            @CliOption(key = "utilsRepoId", mandatory = false, help = "Stack utils repoId") String utilsRepoId,
-            @CliOption(key = "utilsBaseURL", mandatory = false, help = "Stack utils URL") String utilsBaseURL,
-            @CliOption(key = "verify", mandatory = false, help = "Whether to verify the URLs or not") Boolean verify,
-            @CliOption(key = "connectionURL", mandatory = false, help = "JDBC connection URL (jdbc:<db-type>://<address>:<port>/<db>)") String connectionURL,
-            @CliOption(key = "databaseType", mandatory = false, help = "Type of the external database (MYSQL, POSTGRES)") RDSDatabase databaseType,
-            @CliOption(key = "connectionUserName", mandatory = false, help = "Username to use for the jdbc connection") String connectionUserName,
-            @CliOption(key = "connectionPassword", mandatory = false, help = "Password to use for the jdbc connection") String connectionPassword,
-            @CliOption(key = "enableSecurity", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false",
+            @CliOption(key = "userName", unspecifiedDefaultValue = "admin", help = "Username of the Ambari server") String userName,
+            @CliOption(key = "password", unspecifiedDefaultValue = "admin", help = "Password of the Ambari server") String password,
+            @CliOption(key = "description", help = "Description of the blueprint") String description,
+            @CliOption(key = "stack", help = "Stack definition name, like HDP") String stack,
+            @CliOption(key = "version", help = "Stack definition version") String version,
+            @CliOption(key = "os", help = "Stack OS to select package manager, default is RedHat") String os,
+            @CliOption(key = "stackRepoId", help = "Stack repository id") String stackRepoId,
+            @CliOption(key = "stackBaseURL", help = "Stack url") String stackBaseURL,
+            @CliOption(key = "utilsRepoId", help = "Stack utils repoId") String utilsRepoId,
+            @CliOption(key = "utilsBaseURL", help = "Stack utils URL") String utilsBaseURL,
+            @CliOption(key = "verify", help = "Whether to verify the URLs or not") Boolean verify,
+            @CliOption(key = "connectionURL", help = "JDBC connection URL (jdbc:<db-type>://<address>:<port>/<db>)") String connectionURL,
+            @CliOption(key = "databaseType", help = "Type of the external database (MYSQL, POSTGRES)") RDSDatabase databaseType,
+            @CliOption(key = "connectionUserName", help = "Username to use for the jdbc connection") String connectionUserName,
+            @CliOption(key = "connectionPassword", help = "Password to use for the jdbc connection") String connectionPassword,
+            @CliOption(key = "enableSecurity", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false",
                     help = "Kerberos security status") Boolean enableSecurity,
-            @CliOption(key = "kerberosMasterKey", mandatory = false, specifiedDefaultValue = "key", help = "Kerberos mater key") String kerberosMasterKey,
-            @CliOption(key = "kerberosAdmin", mandatory = false, specifiedDefaultValue = "admin", help = "Kerberos admin name") String kerberosAdmin,
-            @CliOption(key = "kerberosPassword", mandatory = false, specifiedDefaultValue = "admin", help = "Kerberos admin password") String kerberosPassword,
-            @CliOption(key = "ldapRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
+            @CliOption(key = "kerberosMasterKey", specifiedDefaultValue = "key", help = "Kerberos mater key") String kerberosMasterKey,
+            @CliOption(key = "kerberosAdmin", specifiedDefaultValue = "admin", help = "Kerberos admin name") String kerberosAdmin,
+            @CliOption(key = "kerberosPassword", specifiedDefaultValue = "admin", help = "Kerberos admin password") String kerberosPassword,
+            @CliOption(key = "ldapRequired", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "Start and configure LDAP authentication support for Ambari hosts") Boolean ldapRequired,
-            @CliOption(key = "configStrategy", mandatory = false, help = "Config recommendation strategy") ConfigStrategy strategy,
-            @CliOption(key = "enableShipyard", mandatory = false, help = "Run shipyard in cluster") Boolean enableShipyard,
-            @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
+            @CliOption(key = "configStrategy", help = "Config recommendation strategy") ConfigStrategy strategy,
+            @CliOption(key = "enableShipyard", help = "Run shipyard in cluster") Boolean enableShipyard,
+            @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             Set<HostGroupJson> hostGroupList = new HashSet<>();
             Set<Map.Entry<String, NodeCountEntry>> entries = (Set<Map.Entry<String, NodeCountEntry>>) (shellContext.isMarathonMode()
@@ -347,7 +347,7 @@ public class ClusterCommands implements BaseCommands {
     public String removeNode(
             @CliOption(key = "hostgroup", mandatory = true, help = "Name of the hostgroup") HostGroup hostGroup,
             @CliOption(key = "adjustment", mandatory = true, help = "The number of the nodes to be removed from the cluster.") Integer adjustment,
-            @CliOption(key = "withStackDownScale", mandatory = false, help = "Do the downscale with the stack together") Boolean withStackDownScale) {
+            @CliOption(key = "withStackDownScale", help = "Do the downscale with the stack together") Boolean withStackDownScale) {
         try {
             if (adjustment > -1) {
                 return "The adjustment value in case of node removal should be negative.";

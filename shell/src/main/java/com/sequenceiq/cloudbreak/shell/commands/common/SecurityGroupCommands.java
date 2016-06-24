@@ -35,10 +35,10 @@ public class SecurityGroupCommands implements BaseCommands {
     @CliCommand(value = "securitygroup create", help = "Creates a new security group")
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the security group") String name,
-            @CliOption(key = "description", mandatory = false, help = "Description of the security group") String description,
+            @CliOption(key = "description", help = "Description of the security group") String description,
             @CliOption(key = "rules", mandatory = true,
                     help = "Security rules in the following format: ';' separated list of <cidr>:<protocol>:<comma separated port list>") SecurityRules rules,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the securitygroup as visible for all members of the account",
+            @CliOption(key = "publicInAccount", help = "Marks the securitygroup as visible for all members of the account",
                     specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) {
         try {
             Map<String, String> tcpRules = new HashMap<>();

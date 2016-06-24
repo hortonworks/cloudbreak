@@ -115,14 +115,14 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliCommand(value = "stack delete --id", help = "Delete the stack by its id")
     public String deleteByName(
             @CliOption(key = "", mandatory = true) Long id,
-            @CliOption(key = "wait", mandatory = false, help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
+            @CliOption(key = "wait", help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
         return delete(id, null, wait);
     }
 
     @CliCommand(value = "stack delete --name", help = "Delete the stack by its name")
     public String deleteById(
             @CliOption(key = "", mandatory = true) String name,
-            @CliOption(key = "wait", mandatory = false, help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
+            @CliOption(key = "wait", help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
         return delete(null, name, wait);
     }
 
@@ -398,7 +398,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String addNode(
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be added to the stack") Integer adjustment,
-            @CliOption(key = "withClusterUpScale", mandatory = false, help = "Do the upscale with the cluster together") Boolean withClusterUpScale) {
+            @CliOption(key = "withClusterUpScale", help = "Do the upscale with the cluster together") Boolean withClusterUpScale) {
         try {
             if (adjustment < 1) {
                 return "The adjustment value in case of node addition should be at least 1.";
@@ -446,10 +446,10 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @CliCommand(value = "stack metadata", help = "Shows the stack metadata")
     public String metadata(
-            @CliOption(key = "id", mandatory = false, help = "Id of the stack") Long id,
-            @CliOption(key = "name", mandatory = false, help = "Name of the stack") String name,
-            @CliOption(key = "instancegroup", mandatory = false, help = "Instancegroup of the stack") String group,
-            @CliOption(key = "outputType", mandatory = false, help = "OutputType of the response") OutPutType outPutType) {
+            @CliOption(key = "id", help = "Id of the stack") Long id,
+            @CliOption(key = "name", help = "Name of the stack") String name,
+            @CliOption(key = "instancegroup", help = "Instancegroup of the stack") String group,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) {
         try {
             outPutType = outPutType == null ? OutPutType.RAW : outPutType;
             StackResponse stackResponse = getStackResponse(name, id);

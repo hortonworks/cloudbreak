@@ -89,12 +89,12 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "serviceAccountId", mandatory = true, help = "serviceAccountId of the credential") String serviceAccountId,
             @CliOption(key = "serviceAccountPrivateKeyPath", mandatory = true, help = "path of a service account private key (p12) file")
             File serviceAccountPrivateKeyPath,
-            @CliOption(key = "sshKeyPath", mandatory = false, help = "path of a public SSH key file") File sshKeyPath,
-            @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key url") String sshKeyUrl,
-            @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the credential belongs to") Long platformId
+            @CliOption(key = "sshKeyPath", help = "path of a public SSH key file") File sshKeyPath,
+            @CliOption(key = "sshKeyUrl", help = "URL of a public SSH key url") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
+            @CliOption(key = "publicInAccount", help = "flags if the credential is public in the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the credential") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the credential belongs to") Long platformId
     ) {
         String serviceAccountPrivateKey;
 
@@ -114,9 +114,9 @@ public class GcpCommands implements CommandMarker {
     public String createNewNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the network") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
@@ -127,9 +127,9 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
             @CliOption(key = "networkId", mandatory = true, help = "Id of a custom network") String networkId,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the network") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         if (networkId != null) {
@@ -143,9 +143,9 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "networkId", mandatory = true, help = "Id of a custom network") String networkId,
             @CliOption(key = "subnetId", mandatory = true, help = "Id of a custom subnet") String subnetId,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the network") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         if (networkId != null) {
@@ -160,10 +160,10 @@ public class GcpCommands implements CommandMarker {
     @CliCommand(value = "network create --GCP --LEGACY", help = "Create a legacy GCP network configuration without subnet")
     public String createLegacyNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
-            @CliOption(key = "networkId", mandatory = false, help = "Id of a custom network") String networkId,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "networkId", help = "Id of a custom network") String networkId,
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the network") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         if (networkId != null) {
@@ -178,10 +178,10 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "instanceType", mandatory = true, help = "type of the VM") GcpInstanceType instanceType,
             @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
             @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
-            @CliOption(key = "volumeType", mandatory = false, help = "volumeType of the template") GcpVolumeType volumeType,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the template belongs to") Long platformId
+            @CliOption(key = "volumeType", help = "volumeType of the template") GcpVolumeType volumeType,
+            @CliOption(key = "publicInAccount", help = "flags if the template is public in the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the template") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volumeType == null ? "pd-standard" : volumeType.getName(),
@@ -209,7 +209,7 @@ public class GcpCommands implements CommandMarker {
     @CliCommand(value = "platform create --GCP", help = "Create a new GCP platform configuration")
     public String createPlatform(
             @CliOption(key = "name", mandatory = true, help = "Name of the platform") String name,
-            @CliOption(key = "description", mandatory = false, help = "Description of the platform") String description
+            @CliOption(key = "description", help = "Description of the platform") String description
     ) {
         try {
             return basePlatformCommands.create(name, description, PLATFORM, Collections.emptyMap());
@@ -222,16 +222,16 @@ public class GcpCommands implements CommandMarker {
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
-            @CliOption(key = "availabilityZone", mandatory = false, help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "marks the stack as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "onFailureAction", mandatory = false, help = "onFailureAction which is ROLLBACK or DO_NOTHING.") OnFailureAction onFailureAction,
-            @CliOption(key = "adjustmentType", mandatory = false, help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
-            @CliOption(key = "ambariVersion", mandatory = false, help = "Ambari version") String ambariVersion,
-            @CliOption(key = "hdpVersion", mandatory = false, help = "HDP version") String hdpVersion,
-            @CliOption(key = "threshold", mandatory = false, help = "threshold of failure") Long threshold,
-            @CliOption(key = "orchestrator", mandatory = false, help = "select orchestrator variant version") GcpOrchestratorType orchestratorType,
-            @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
-            @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
+            @CliOption(key = "availabilityZone", help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
+            @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "onFailureAction", help = "onFailureAction which is ROLLBACK or DO_NOTHING.") OnFailureAction onFailureAction,
+            @CliOption(key = "adjustmentType", help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
+            @CliOption(key = "ambariVersion", help = "Ambari version") String ambariVersion,
+            @CliOption(key = "hdpVersion", help = "HDP version") String hdpVersion,
+            @CliOption(key = "threshold", help = "threshold of failure") Long threshold,
+            @CliOption(key = "orchestrator", help = "select orchestrator variant version") GcpOrchestratorType orchestratorType,
+            @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
+            @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         Map<String, String> params = new HashMap<>();
         if (availabilityZone == null) {
             Collection<String> availabilityZonesByRegion = shellContext.getAvailabilityZonesByRegion(shellContext.getActiveCloudPlatform(), region.getName());

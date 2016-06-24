@@ -99,11 +99,10 @@ public class SssdConfigCommands implements BaseCommands {
             @CliOption(key = "baseSearch", mandatory = true, help = "Search base of the database") String baseSearch,
             @CliOption(key = "tlsReqcert", mandatory = true, unspecifiedDefaultValue = "hard", specifiedDefaultValue = "hard",
                     help = "TLS behavior of connection") SssdTlsReqcertType tlsReqcert,
-            @CliOption(key = "adServer", mandatory = false, help = "comma-separated list of IP addresses or hostnames of the AD servers") String adServer,
-            @CliOption(key = "kerberosServer", mandatory = false,
-                    help = "comma-separated list of IP addresses or hostnames of the Kerberos servers") String kerberosServer,
-            @CliOption(key = "kerberosRealm", mandatory = false, help = "name of the Kerberos realm") String kerberosRealm,
-            @CliOption(key = "publicInAccount", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
+            @CliOption(key = "adServer", help = "comma-separated list of IP addresses or hostnames of the AD servers") String adServer,
+            @CliOption(key = "kerberosServer", help = "comma-separated list of IP addresses or hostnames of the Kerberos servers") String kerberosServer,
+            @CliOption(key = "kerberosRealm", help = "name of the Kerberos realm") String kerberosRealm,
+            @CliOption(key = "publicInAccount", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "flags if the config is public in the account") Boolean publicInAccount) {
         try {
             SssdConfigRequest request = new SssdConfigRequest();
@@ -134,7 +133,7 @@ public class SssdConfigCommands implements BaseCommands {
             @CliOption(key = "name", mandatory = true, help = "Name of the config") String name,
             @CliOption(key = "description", help = "Description of the config") String description,
             @CliOption(key = "file", mandatory = true, help = "Path of the configuration file") File configFile,
-            @CliOption(key = "publicInAccount", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
+            @CliOption(key = "publicInAccount", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "flags if the config is public in the account") Boolean publicInAccount) {
         try {
             if (configFile != null && !configFile.exists()) {

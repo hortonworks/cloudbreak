@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/blueprints")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/blueprints", description = ControllerDescription.BLUEPRINT_DESCRIPTION, position = 0)
+@Api(value = "/blueprints", description = ControllerDescription.BLUEPRINT_DESCRIPTION)
 public interface BlueprintEndpoint {
 
     @GET
