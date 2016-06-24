@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.shell.commands.marathon;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -157,7 +158,7 @@ public class MarathonCommands implements CommandMarker {
         try {
             if (id != null) {
                 cloudbreakClient.stackEndpoint().delete(id, true);
-                if (id == shellContext.getSelectedMarathonStackId()) {
+                if (Objects.equals(id, shellContext.getSelectedMarathonStackId())) {
                     shellContext.resetSelectedMarathonStackId();
                     shellContext.setHint(Hints.MARATHON_CLUSTER);
                 }
@@ -165,7 +166,7 @@ public class MarathonCommands implements CommandMarker {
             } else if (name != null) {
                 StackResponse aPublic = cloudbreakClient.stackEndpoint().getPublic(name);
                 cloudbreakClient.stackEndpoint().deletePublic(name, true);
-                if (aPublic.getId() == shellContext.getSelectedMarathonStackId()) {
+                if (Objects.equals(aPublic.getId(), shellContext.getSelectedMarathonStackId())) {
                     shellContext.resetSelectedMarathonStackId();
                 }
                 return String.format("Marathon has been deleted, name: %s", name);
