@@ -89,8 +89,6 @@ public class BlueprintValidator {
                     hostGroup.getConstraint().setHostCount(hostGroup.getConstraint().getHostCount() + adjustment);
                     try {
                         validateHostGroup(hostGroupNode, hostGroupMap, new HashMap<>());
-                    } catch (BadRequestException be) {
-                        throw be;
                     } finally {
                         hostGroup.getConstraint().setHostCount(hostGroup.getConstraint().getHostCount() - adjustment);
                     }
