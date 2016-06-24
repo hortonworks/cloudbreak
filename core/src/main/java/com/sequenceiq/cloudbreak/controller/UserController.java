@@ -26,8 +26,7 @@ public class UserController implements UserEndpoint {
     @Override
     public Boolean hasResources(String id) {
         CbUser user = authenticatedUserService.getCbUser();
-        boolean hasResources = userDetailsService.hasResources(user, id);
-        return hasResources;
+        return userDetailsService.hasResources(user, id);
     }
 
 }

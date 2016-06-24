@@ -24,7 +24,6 @@ public class CloudbreakEventController implements EventEndpoint {
     public List<CloudbreakEventsJson> get(Long since) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        List<CloudbreakEventsJson> cloudbreakEvents = cloudbreakEventsFacade.retrieveEvents(user.getUserId(), since);
-        return cloudbreakEvents;
+        return cloudbreakEventsFacade.retrieveEvents(user.getUserId(), since);
     }
 }

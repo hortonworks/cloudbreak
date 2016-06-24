@@ -70,13 +70,12 @@ public final class GcpStackUtil {
     public static GoogleCredential buildCredential(CloudCredential gcpCredential, HttpTransport httpTransport) throws IOException, GeneralSecurityException {
         PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
                 new ByteArrayInputStream(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential))), "notasecret", "privatekey", "notasecret");
-        GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport)
+        return new GoogleCredential.Builder().setTransport(httpTransport)
                 .setJsonFactory(JSON_FACTORY)
                 .setServiceAccountId(getServiceAccountId(gcpCredential))
                 .setServiceAccountScopes(SCOPES)
                 .setServiceAccountPrivateKey(pk)
                 .build();
-        return credential;
     }
 
     public static String getServiceAccountPrivateKey(CloudCredential credential) {

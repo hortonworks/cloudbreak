@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 
 public interface ParameterValidator {
 
-    <O extends Object, E extends StackParamValidation> void validate(Map<String, O> parameters, List<E> paramsList);
+    <O, E extends StackParamValidation> void validate(Map<String, O> parameters, List<E> paramsList);
 
     ValidatorType getValidatorType();
 }

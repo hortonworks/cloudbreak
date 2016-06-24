@@ -14,7 +14,7 @@ public class StackDeletionBasedExitCriteriaModel extends ExitCriteriaModel {
         return stackId;
     }
 
-    public static final ExitCriteriaModel stackDeletionBasedExitCriteriaModel(Long stackId) {
+    public static ExitCriteriaModel stackDeletionBasedExitCriteriaModel(Long stackId) {
         return new StackDeletionBasedExitCriteriaModel(stackId);
     }
 

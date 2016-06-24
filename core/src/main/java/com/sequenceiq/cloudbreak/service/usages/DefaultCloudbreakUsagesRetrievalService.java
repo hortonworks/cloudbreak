@@ -20,13 +20,12 @@ public class DefaultCloudbreakUsagesRetrievalService implements CloudbreakUsages
 
     @Override
     public List<CloudbreakUsage> findUsagesFor(CbUsageFilterParameters params) {
-        List<CloudbreakUsage> usages = usageRepository.findAll(
+        return (List<CloudbreakUsage>) usageRepository.findAll(
                 Specifications.where(CloudbreakUsageSpecifications.usagesWithStringFields("account", params.getAccount()))
                 .and(CloudbreakUsageSpecifications.usagesWithStringFields("owner", params.getOwner()))
                 .and(CloudbreakUsageSpecifications.usagesSince(params.getSince()))
                 .and(CloudbreakUsageSpecifications.usagesBefore(params.getFilterEndDate()))
                 .and(CloudbreakUsageSpecifications.usagesWithStringFields("provider", params.getCloud()))
                 .and(CloudbreakUsageSpecifications.usagesWithStringFields("region", params.getRegion())));
-        return usages;
     }
 }

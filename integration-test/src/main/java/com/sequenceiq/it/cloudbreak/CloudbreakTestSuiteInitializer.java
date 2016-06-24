@@ -129,8 +129,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private void putNetworkToContext(NetworkEndpoint endpoint, String cloudProvider, String networkName) throws Exception {
         endpoint.getPublics();
         if (StringUtils.isEmpty(networkName)) {
-            String defaultNetworkName = itProps.getDefaultNetwork(cloudProvider);
-            networkName = defaultNetworkName;
+            networkName = itProps.getDefaultNetwork(cloudProvider);
         }
         if (StringUtils.hasLength(networkName)) {
             String resourceId = endpoint.getPublic(networkName).getId();
@@ -143,8 +142,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private void putSecurityGroupToContext(SecurityGroupEndpoint endpoint, String securityGroupName) throws Exception {
         endpoint.getPublics();
         if (StringUtils.isEmpty(securityGroupName)) {
-            String defaultSecurityGroupName = itProps.getDefaultSecurityGroup();
-            securityGroupName = defaultSecurityGroupName;
+            securityGroupName = itProps.getDefaultSecurityGroup();
         }
         if (StringUtils.hasLength(securityGroupName)) {
             try {

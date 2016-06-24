@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
@@ -12,14 +17,9 @@ import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 public class DummyContainerOrchestrator implements ContainerOrchestrator {
     @Override
     public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
-        return;
     }
 
     @Override
@@ -30,17 +30,14 @@ public class DummyContainerOrchestrator implements ContainerOrchestrator {
 
     @Override
     public void startContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
-        return;
     }
 
     @Override
     public void stopContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
-        return;
     }
 
     @Override
     public void deleteContainer(List<ContainerInfo> containerInfos, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
-        return;
     }
 
     @Override
@@ -50,7 +47,7 @@ public class DummyContainerOrchestrator implements ContainerOrchestrator {
 
     @Override
     public List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     @Override
@@ -60,7 +57,6 @@ public class DummyContainerOrchestrator implements ContainerOrchestrator {
 
     @Override
     public void init(ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner, ExitCriteria exitCriteria) {
-        return;
     }
 
     @Override

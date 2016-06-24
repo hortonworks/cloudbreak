@@ -147,7 +147,6 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
                             + "  --cert.validation=<boolean>                       Validate SSL certificates, shall be disabled for self signed certificates"
                             + " (not a mandatory parameter) [default: true]."
             );
-            return;
         } else {
             if (!VersionedApplication.versionedApplication().showVersionInfo(args)) {
                 try {

@@ -45,14 +45,13 @@ public class BasicCommands implements CommandMarker {
 
     @CliCommand(value = "context", help = "Shows some context")
     public String context() {
-        String sb = getRow("blueprintId", shellContext.getBlueprintId())
+        return getRow("blueprintId", shellContext.getBlueprintId())
                 + getRow("credentialId", shellContext.getCredentialId())
                 + getRow("networkId", shellContext.getActiveNetworkId())
                 + getRow("securityGroupId", shellContext.getActiveSecurityGroupId())
                 + getRow("stackId", shellContext.getStackId())
                 + getRow("stackName", shellContext.getStackName())
                 + getRow("recipeId", shellContext.getRecipeId());
-        return sb;
     }
 
     private String getRow(String name, Object value) {

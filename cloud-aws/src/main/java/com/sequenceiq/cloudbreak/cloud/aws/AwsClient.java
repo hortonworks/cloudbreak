@@ -65,10 +65,9 @@ public class AwsClient {
     }
 
     public AmazonIdentityManagement createAmazonIdentityManagement(AwsCredentialView awsCredential) {
-        AmazonIdentityManagement iam = isRoleAssumeRequired(awsCredential)
+        return isRoleAssumeRequired(awsCredential)
                 ? new AmazonIdentityManagementClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
                 : new AmazonIdentityManagementClient(createAwsCredentials(awsCredential));
-        return iam;
     }
 
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {

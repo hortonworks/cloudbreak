@@ -170,7 +170,7 @@ public class ArmSetup implements Setup {
             }
 
         } catch (Exception e) {
-            return false;
+            // ignore
         }
         return false;
     }

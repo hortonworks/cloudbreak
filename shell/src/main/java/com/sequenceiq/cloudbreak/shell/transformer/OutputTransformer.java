@@ -22,7 +22,7 @@ public class OutputTransformer {
     @Inject
     private JsonRenderer jsonRenderer;
 
-    public <O extends Object> String render(OutPutType outPutType, O object, String... headers) throws JsonProcessingException {
+    public <O> String render(OutPutType outPutType, O object, String... headers) throws JsonProcessingException {
         if (OutPutType.JSON.equals(outPutType)) {
             return jsonRenderer.render(object);
         } else if (OutPutType.RAW.equals(outPutType)) {
@@ -47,7 +47,7 @@ public class OutputTransformer {
         }
     }
 
-    public <O extends Object> String render(O object, String... headers) throws JsonProcessingException {
+    public <O> String render(O object, String... headers) throws JsonProcessingException {
         return render(OutPutType.RAW, object, headers);
     }
 

@@ -114,7 +114,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @Override
     public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
         // TODO
-        return;
     }
 
     @Override

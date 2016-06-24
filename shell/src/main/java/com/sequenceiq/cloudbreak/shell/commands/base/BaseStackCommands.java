@@ -565,7 +565,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 shellContext.addBlueprint(blueprintId);
             }
         } catch (Exception e) {
-            return;
+            // ignore
         }
     }
 
