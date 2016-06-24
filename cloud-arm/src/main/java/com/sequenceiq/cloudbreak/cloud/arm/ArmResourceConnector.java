@@ -143,7 +143,7 @@ public class ArmResourceConnector implements ResourceConnector {
                 if (e.getStatusCode() != NOT_FOUND) {
                     throw new CloudConnectorException(e.getResponse().getData().toString(), e);
                 } else {
-                    return check(authenticatedContext, new ArrayList<CloudResource>());
+                    return check(authenticatedContext, new ArrayList<>());
                 }
             } catch (Exception e) {
                 throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getName()), e);

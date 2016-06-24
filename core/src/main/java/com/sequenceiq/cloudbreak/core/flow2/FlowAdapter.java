@@ -36,7 +36,7 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
         flowMachine.stop();
         List<? extends StateMachineAccess<S, E>> withAllRegions = flowMachine.getStateMachineAccessor().withAllRegions();
         for (StateMachineAccess<S, E> access : withAllRegions) {
-            access.resetStateMachine(new DefaultStateMachineContext<S, E>(state, null, null, null));
+            access.resetStateMachine(new DefaultStateMachineContext<>(state, null, null, null));
         }
         flowMachine.start();
     }

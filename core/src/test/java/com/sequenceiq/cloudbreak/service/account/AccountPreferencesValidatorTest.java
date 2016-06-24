@@ -58,7 +58,7 @@ public class AccountPreferencesValidatorTest {
         when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(0L);
         when(preferences.getClusterTimeToLive()).thenReturn(0L);
         when(preferences.getUserTimeToLive()).thenReturn(0L);
-        when(preferences.getAllowedInstanceTypes()).thenReturn(new ArrayList<String>());
+        when(preferences.getAllowedInstanceTypes()).thenReturn(new ArrayList<>());
     }
 
     @Test

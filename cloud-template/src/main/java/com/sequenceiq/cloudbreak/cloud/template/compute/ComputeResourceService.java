@@ -164,8 +164,8 @@ public class ComputeResourceService {
 
     private <T> Map<FutureResult, List<T>> waitForRequests(List<Future<ResourceRequestResult<T>>> futures) throws Exception {
         Map<FutureResult, List<T>> result = new HashMap<>();
-        result.put(FutureResult.FAILED, new ArrayList<T>());
-        result.put(FutureResult.SUCCESS, new ArrayList<T>());
+        result.put(FutureResult.FAILED, new ArrayList<>());
+        result.put(FutureResult.SUCCESS, new ArrayList<>());
         int requests = futures.size();
         LOGGER.info("Waiting for {} requests to finish", requests);
         try {

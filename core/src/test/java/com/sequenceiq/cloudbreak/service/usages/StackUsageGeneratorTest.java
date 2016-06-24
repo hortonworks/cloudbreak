@@ -65,7 +65,7 @@ public class StackUsageGeneratorTest {
     @Test
     public void testGenerateShouldEmptyLIstWhenNoEventExists() throws Exception {
 
-        List<CloudbreakUsage> usageList = underTest.generate(new ArrayList<CloudbreakEvent>());
+        List<CloudbreakUsage> usageList = underTest.generate(new ArrayList<>());
 
         assertTrue(usageList.isEmpty());
     }

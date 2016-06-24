@@ -187,7 +187,7 @@ public class TestUtil {
         sg.setId(id);
         sg.setName("security-group");
         sg.setPublicInAccount(true);
-        sg.setSecurityRules(new HashSet<SecurityRule>());
+        sg.setSecurityRules(new HashSet<>());
         sg.setStatus(ResourceStatus.DEFAULT);
         return sg;
     }
@@ -402,7 +402,7 @@ public class TestUtil {
             recipe.setTimeout(100);
             recipe.setPublicInAccount(true);
             recipe.setPlugins(createRecipePlugins());
-            recipe.setKeyValues(new HashMap<String, String>());
+            recipe.setKeyValues(new HashMap<>());
             recipes.add(recipe);
         }
         return recipes;

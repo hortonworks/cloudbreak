@@ -150,7 +150,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         orchestrator.setApiEndpoint("endpoint");
         orchestrator.setType("type");
         stack.setOrchestrator(orchestrator);
-        stack.setParameters(new HashMap<String, String>());
+        stack.setParameters(new HashMap<>());
         stack.setCloudPlatform("OPENSTACK");
         stack.setGatewayPort(9443);
         return stack;

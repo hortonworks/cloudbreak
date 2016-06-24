@@ -69,7 +69,7 @@ public class GcpCredentialConnector implements CredentialConnector {
                 DiskList execute = list.execute();
                 disks.addAll(execute.getItems());
             } catch (NullPointerException ex) {
-                disks.addAll(new ArrayList<Disk>());
+                disks.addAll(new ArrayList<>());
             }
         }
     }

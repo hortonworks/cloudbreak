@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerConst
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
@@ -126,10 +125,10 @@ public class ClusterContainerRunnerTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
-        when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<InstanceMetaData>());
-        when(containerService.save(anyList())).thenReturn(new ArrayList<Container>());
+        when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<>());
+        when(containerService.save(anyList())).thenReturn(new ArrayList<>());
         when(constraintFactory.getAmbariAgentConstraint(ambariServer.getHost(), null, stack.cloudPlatform(),
-                TestUtil.hostGroup(), hostGroupAdjustment.getScalingAdjustment(), new ArrayList<String>()))
+                TestUtil.hostGroup(), hostGroupAdjustment.getScalingAdjustment(), new ArrayList<>()))
                 .thenReturn(new ContainerConstraint.Builder().build());
         underTest.addClusterContainers(stack.getId(), hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
     }

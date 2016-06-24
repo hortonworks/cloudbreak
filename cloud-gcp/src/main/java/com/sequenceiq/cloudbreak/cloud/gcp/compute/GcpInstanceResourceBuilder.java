@@ -81,7 +81,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         instance.setTags(tags);
 
         Metadata metadata = new Metadata();
-        metadata.setItems(new ArrayList<Metadata.Items>());
+        metadata.setItems(new ArrayList<>());
 
         Metadata.Items sshMetaData = new Metadata.Items();
         sshMetaData.setKey("sshKeys");

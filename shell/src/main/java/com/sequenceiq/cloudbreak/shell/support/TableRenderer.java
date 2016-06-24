@@ -148,7 +148,7 @@ public final class TableRenderer {
     }
 
     private static <E> Map<String, List<String>> convert(Map<E, String> map) {
-        Map<String, List<String>> result = new HashMap<String, List<String>>(map.size());
+        Map<String, List<String>> result = new HashMap<>(map.size());
         if (map != null) {
             for (Object key : map.keySet()) {
                 if (map.get(key) != null) {
@@ -160,7 +160,7 @@ public final class TableRenderer {
     }
 
     private static <E> Map<String, List<String>> convertObjectMap(Map<String, E> map) {
-        Map<String, List<String>> result = new HashMap<String, List<String>>(map.size());
+        Map<String, List<String>> result = new HashMap<>(map.size());
         if (map != null) {
             for (String key : map.keySet()) {
                 if (map.get(key) != null) {

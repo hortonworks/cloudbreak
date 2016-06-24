@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 public class SecurityGroupToJsonConverterTest extends AbstractEntityConverterTest<SecurityGroup> {
 
@@ -48,6 +47,6 @@ public class SecurityGroupToJsonConverterTest extends AbstractEntityConverterTes
 
     @Override
     public SecurityGroup createSource() {
-        return TestUtil.securityGroup(new HashSet<SecurityRule>());
+        return TestUtil.securityGroup(new HashSet<>());
     }
 }

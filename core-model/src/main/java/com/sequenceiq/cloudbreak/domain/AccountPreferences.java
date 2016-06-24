@@ -61,7 +61,7 @@ public class AccountPreferences {
     }
 
     public List<String> getAllowedInstanceTypes() {
-        return StringUtils.isEmpty(allowedInstanceTypes) ? new ArrayList<String>() : Arrays.asList(allowedInstanceTypes.split(INSTANCE_TYPE_SEPARATOR));
+        return StringUtils.isEmpty(allowedInstanceTypes) ? new ArrayList<>() : Arrays.asList(allowedInstanceTypes.split(INSTANCE_TYPE_SEPARATOR));
     }
 
     public void setAllowedInstanceTypes(Iterable<String> allowedInstanceTypes) {

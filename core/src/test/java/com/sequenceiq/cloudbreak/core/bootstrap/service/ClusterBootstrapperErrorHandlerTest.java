@@ -85,7 +85,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         final Stack stack = TestUtil.stack();
 
         doNothing().when(eventService).fireCloudbreakEvent(anyLong(), anyString(), anyString());
-        when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<String>());
+        when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<>());
         when(instanceGroupRepository.save(any(InstanceGroup.class))).then(returnsFirstArg());
         when(instanceMetaDataRepository.save(any(InstanceMetaData.class))).then(returnsFirstArg());
         when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer(new Answer<InstanceMetaData>() {
@@ -124,12 +124,12 @@ public class ClusterBootstrapperErrorHandlerTest {
         final Stack stack = TestUtil.stack();
 
         doNothing().when(eventService).fireCloudbreakEvent(anyLong(), anyString(), anyString());
-        when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<String>());
+        when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<>());
         when(instanceGroupRepository.save(any(InstanceGroup.class))).then(returnsFirstArg());
         when(instanceMetaDataRepository.save(any(InstanceMetaData.class))).then(returnsFirstArg());
         doNothing().when(resourceRepository).delete(anyLong());
         when(resourceRepository.findByStackIdAndNameAndType(anyLong(), anyString(), any(ResourceType.class))).thenReturn(new Resource());
-        when(connector.removeInstances(any(Stack.class), anySet(), anyString())).thenReturn(new HashSet<String>());
+        when(connector.removeInstances(any(Stack.class), anySet(), anyString())).thenReturn(new HashSet<>());
         when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer(new Answer<InstanceMetaData>() {
             @Override
             public InstanceMetaData answer(InvocationOnMock invocation) {

@@ -77,7 +77,7 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public AvailabilityZones availabilityZones() {
         Map<Region, List<AvailabilityZone>> availabiltyZones = new HashMap<>();
-        availabiltyZones.put(region("local"), new ArrayList<AvailabilityZone>());
+        availabiltyZones.put(region("local"), new ArrayList<>());
         return new AvailabilityZones(availabiltyZones);
     }
 

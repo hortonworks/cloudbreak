@@ -457,7 +457,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             StackResponse stackResponse = getStackResponse(name, id);
             if (stackResponse != null && stackResponse.getInstanceGroups() != null) {
                 Map<String, List<String>> stringListMap = collectMetadata(
-                        stackResponse.getInstanceGroups() == null ? new ArrayList<InstanceGroupJson>() : stackResponse.getInstanceGroups(), group);
+                        stackResponse.getInstanceGroups() == null ? new ArrayList<>() : stackResponse.getInstanceGroups(), group);
                 return shellContext.outputTransformer().render(outPutType, stringListMap, "FIELD", "VALUE");
             }
             return "No stack specified.";

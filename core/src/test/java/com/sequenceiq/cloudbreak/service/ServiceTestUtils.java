@@ -60,11 +60,11 @@ public final class ServiceTestUtils {
     }
 
     public static Stack createStack(String owner, String account, Template template, Credential credential, Cluster cluster) {
-        return createStack(owner, account, template, credential, cluster, new HashSet<Resource>());
+        return createStack(owner, account, template, credential, cluster, new HashSet<>());
     }
 
     public static Stack createStack(Template template, Credential credential) {
-        return createStack(template, credential, new HashSet<Resource>());
+        return createStack(template, credential, new HashSet<>());
     }
 
     public static Stack createStack(Template template, Credential credential, Set<Resource> resources) {
