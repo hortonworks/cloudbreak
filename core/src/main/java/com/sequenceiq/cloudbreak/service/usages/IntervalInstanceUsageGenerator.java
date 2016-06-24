@@ -77,7 +77,7 @@ public class IntervalInstanceUsageGenerator {
     }
 
     private void doGenerateUsage(InstanceMetaData instance, Map<String, Long> dailyInstanceUsages, Calendar start, Calendar stop) throws ParseException {
-        long runningHours = 0;
+        long runningHours;
         Date startAsDate = start.getTime();
         if (isCalendarsOnTheSameDay(start, stop)) {
             runningHours = millisToCeiledHours(stop.getTimeInMillis() - start.getTimeInMillis());

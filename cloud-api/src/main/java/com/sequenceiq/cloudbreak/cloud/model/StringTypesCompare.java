@@ -42,8 +42,8 @@ public class StringTypesCompare implements Comparator<StringType> {
 
         int ia = 0;
         int ib = 0;
-        int nza = 0;
-        int nzb = 0;
+        int nza;
+        int nzb;
         char ca;
         char cb;
         int result;

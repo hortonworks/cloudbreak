@@ -130,7 +130,6 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
         given(usageRepository.count()).willReturn(0L);
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
         given(stackUsageGenerator.generate(events)).willReturn(usages);
-        Stack stack = ServiceTestUtils.createStack();
         when(stackRepository.findById(1L)).thenReturn(null);
         //WHEN
         underTest.generate();

@@ -137,7 +137,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         // GIVEN
         given(blueprintValidator.getHostGroupNode(any(Blueprint.class))).willThrow(new IOException("error"));
         // WHEN
-        ClusterResponse result = underTest.convert(getSource());
+        underTest.convert(getSource());
         // THEN
         verify(blueprintValidator, times(0)).createHostGroupMap(anySet());
 

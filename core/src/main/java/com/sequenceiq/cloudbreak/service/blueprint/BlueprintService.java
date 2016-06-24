@@ -68,7 +68,7 @@ public class BlueprintService {
     @Transactional(Transactional.TxType.NEVER)
     public Blueprint create(CbUser user, Blueprint blueprint) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        Blueprint savedBlueprint = null;
+        Blueprint savedBlueprint;
         blueprint.setOwner(user.getUserId());
         blueprint.setAccount(user.getAccount());
         try {

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import java.security.PublicKey;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,7 +14,7 @@ public class RsaPublicKeyValidator {
 
     public void validate(Credential credential) {
         try {
-            PublicKey load = PublicKeyReaderUtil.load(credential.getPublicKey());
+            PublicKeyReaderUtil.load(credential.getPublicKey());
         } catch (Exception e) {
             String errorMessage = String.format("Could not validate publickey certificate [certificate: '%s'], detailed message: %s",
                     credential.getPublicKey(), e.getMessage());

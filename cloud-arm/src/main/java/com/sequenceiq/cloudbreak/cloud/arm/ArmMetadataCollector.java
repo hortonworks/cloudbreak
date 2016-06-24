@@ -55,7 +55,7 @@ public class ArmMetadataCollector implements MetadataCollector {
                 Map networkInterface = (Map) access.getNetworkInterface(resource.getName(), networkInterfaceName);
                 List ips = (ArrayList) ((Map) networkInterface.get("properties")).get("ipConfigurations");
                 Map properties = (Map) ((Map) ips.get(0)).get("properties");
-                String publicIp = null;
+                String publicIp;
                 if (properties.get("publicIPAddress") == null) {
                     publicIp = access.getLoadBalancerIp(resource.getName(), armTemplateUtils.getLoadBalancerId(resource.getName()));
                 } else {

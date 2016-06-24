@@ -339,7 +339,6 @@ public class ShellContext {
     }
 
     public Collection<String> getOrchestratorNamesByPlatform(String platform) {
-        Collection<String> result = Lists.newArrayList();
         return orchestrators.get(platform);
     }
 

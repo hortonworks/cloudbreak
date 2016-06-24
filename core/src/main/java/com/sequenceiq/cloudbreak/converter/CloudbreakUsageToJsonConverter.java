@@ -25,7 +25,7 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
         CloudbreakUsageJson json = new CloudbreakUsageJson();
         String day = DATE_FORMAT.format(entity.getDay());
-        String cbUser = null;
+        String cbUser;
         try {
             cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID).getUsername();
         } catch (Exception ex) {

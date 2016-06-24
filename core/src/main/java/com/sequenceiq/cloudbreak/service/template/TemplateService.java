@@ -63,7 +63,7 @@ public class TemplateService {
     @Transactional(Transactional.TxType.NEVER)
     public Template create(CbUser user, Template template) {
         LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        Template savedTemplate = null;
+        Template savedTemplate;
         template.setOwner(user.getUserId());
         template.setAccount(user.getAccount());
         try {

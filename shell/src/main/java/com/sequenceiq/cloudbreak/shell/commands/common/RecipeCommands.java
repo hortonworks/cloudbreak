@@ -154,7 +154,7 @@ public class RecipeCommands implements BaseCommands {
     @Override
     public String show(Long id, String name) {
         try {
-            RecipeResponse recipeMap = null;
+            RecipeResponse recipeMap;
             if (id != null) {
                 recipeMap = shellContext.cloudbreakClient().recipeEndpoint().get(id);
             } else if (name != null) {

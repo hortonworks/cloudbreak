@@ -67,7 +67,7 @@ public class ClusterTemplateService {
     @Transactional(Transactional.TxType.NEVER)
     public ClusterTemplate create(CbUser user, ClusterTemplate clusterTemplate) {
         LOGGER.debug("Creating clusterTemplate: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        ClusterTemplate savedClusterTemplate = null;
+        ClusterTemplate savedClusterTemplate;
         clusterTemplate.setOwner(user.getUserId());
         clusterTemplate.setAccount(user.getAccount());
         try {

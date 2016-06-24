@@ -39,7 +39,7 @@ public class VersionedApplication {
         StringBuilder sb = new StringBuilder();
         BufferedReader br;
         br = new BufferedReader(new InputStreamReader(new ClassPathResource(fileName).getInputStream(), "UTF-8"));
-        String line = null;
+        String line;
         while ((line = br.readLine()) != null) {
             if (onlyVersion) {
                 if (line.startsWith("info.app.version=")) {

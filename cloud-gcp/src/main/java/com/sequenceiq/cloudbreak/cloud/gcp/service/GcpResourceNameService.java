@@ -72,7 +72,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
 
     private String instanceName(Object[] parts) {
         checkArgs(INSTANCE_NAME_PART_COUNT, parts);
-        String name = null;
+        String name;
         String stackName = String.valueOf(parts[0]);
         String instanceGroupName = WordUtils.initials(String.valueOf(parts[1]).replaceAll("_", " "));
         String privateId = String.valueOf(parts[2]);
@@ -101,7 +101,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
 
     private String gcpNetworkResourceName(Object[] parts) {
         checkArgs(1, parts);
-        String networkName = null;
+        String networkName;
         String stackName = String.valueOf(parts[0]);
         networkName = normalize(stackName);
         networkName = adjustPartLength(networkName);
@@ -112,7 +112,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
 
     private String gcpSubnetResourceName(Object[] parts) {
         checkArgs(1, parts);
-        String subnetName = null;
+        String subnetName;
         String stackName = String.valueOf(parts[0]);
         subnetName = normalize(stackName);
         subnetName = adjustPartLength(subnetName);

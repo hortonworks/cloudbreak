@@ -218,7 +218,6 @@ public class AmbariClusterHostServiceTypeTest {
         HostMetadata metadata4 = mock(HostMetadata.class);
         InstanceMetaData instanceMetaData4 = mock(InstanceMetaData.class);
         Set<HostMetadata> hostsMetaData = new HashSet<>(asList(metadata1, metadata2, metadata3, metadata4));
-        List<HostMetadata> hostsMetadataList = asList(metadata2, metadata3, metadata4);
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");

@@ -64,7 +64,7 @@ public class OpenStackResourceNameService extends CloudbreakResourceNameService 
 
     private String instanceName(Object[] parts) {
         checkArgs(INSTANCE_NAME_PART_COUNT, parts);
-        String name = null;
+        String name;
         String stackName = String.valueOf(parts[0]);
         String instanceGroupName = String.valueOf(parts[1]);
         String privateId = String.valueOf(parts[2]);
@@ -81,7 +81,7 @@ public class OpenStackResourceNameService extends CloudbreakResourceNameService 
 
     private String openStackNetworkResourceName(Object[] parts) {
         checkArgs(1, parts);
-        String networkName = null;
+        String networkName;
         String stackName = String.valueOf(parts[0]);
         networkName = normalize(stackName);
         networkName = adjustPartLength(networkName);

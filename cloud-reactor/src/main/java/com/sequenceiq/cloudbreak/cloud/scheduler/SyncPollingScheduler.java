@@ -28,7 +28,7 @@ public class SyncPollingScheduler<T> {
     }
 
     public T schedule(PollTask<T> task, int interval, int maxAttempt, int maxFailureTolerant) throws ExecutionException, InterruptedException, TimeoutException {
-        T result = null;
+        T result;
         int actualFailureTolerant = 0;
         for (int i = 0; i < maxAttempt; i++) {
             if (task.cancelled()) {

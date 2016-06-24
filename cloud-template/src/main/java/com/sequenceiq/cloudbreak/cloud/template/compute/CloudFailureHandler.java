@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -50,7 +49,6 @@ public class CloudFailureHandler {
 
     private void doRollback(AuthenticatedContext auth, List<CloudResourceStatus> failuresList, Group group, Integer fullNodeCount,
             ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, ScaleContext stx) {
-        CloudContext localStack = auth.getCloudContext();
         Set<Long> failures = failureCount(failuresList);
         if (stx.getAdjustmentType() == null && failures.size() > 0) {
             LOGGER.info("Failure policy is null so error will throw");

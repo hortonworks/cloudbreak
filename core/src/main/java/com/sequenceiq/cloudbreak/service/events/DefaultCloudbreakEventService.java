@@ -83,7 +83,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     @SuppressWarnings("unchecked")
     public List<CloudbreakEvent> cloudbreakEvents(String owner, Long since) {
-        List<CloudbreakEvent> events = null;
+        List<CloudbreakEvent> events;
         if (null == since) {
             events = eventRepository.findAll(CloudbreakEventSpecifications.eventsForUser(owner));
         } else {

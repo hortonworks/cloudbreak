@@ -34,7 +34,6 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
         String[] parts = part.split(DELIMITER);
         String trimmed = part;
         try {
-            long ts = Long.valueOf(parts[parts.length - 1]);
             trimmed = StringUtils.collectionToDelimitedString(Arrays.asList(Arrays.copyOf(parts, parts.length - 1)), DELIMITER);
         } catch (NumberFormatException nfe) {
             LOGGER.debug("No need to trim hash: {}", part);
@@ -64,8 +63,8 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
         if (base.length() > platformSpecificLength) {
             LOGGER.debug("Shortening name: {}", base);
             List<String> splitedBase = Splitter.on("-").splitToList(base);
-            String stackName = null;
-            String instanceName = null;
+            String stackName;
+            String instanceName;
             if ((splitedBase.get(0).length() - (base.length() - platformSpecificLength)) > 1) {
                 stackName = Splitter.fixedLength(splitedBase.get(0).length() - (base.length() - platformSpecificLength))
                         .splitToList(splitedBase.get(0)).get(0);
@@ -109,7 +108,7 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
         if (null == base && null == part) {
             throw new IllegalArgumentException("base and part are both null! Can't append them!");
         }
-        StringBuilder sb = null;
+        StringBuilder sb;
         if (null != base) {
             sb = new StringBuilder(base).append(DELIMITER).append(part);
         } else {

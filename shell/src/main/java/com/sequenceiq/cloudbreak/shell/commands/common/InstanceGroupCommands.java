@@ -46,7 +46,7 @@ public class InstanceGroupCommands implements CommandMarker {
             @CliOption(key = "templateId", help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
             @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName) {
         try {
-            String templateId = null;
+            String templateId;
             if (instanceGroupTemplateId != null) {
                 templateId = instanceGroupTemplateId.getName();
             } else if (instanceGroupTemplateName != null) {
