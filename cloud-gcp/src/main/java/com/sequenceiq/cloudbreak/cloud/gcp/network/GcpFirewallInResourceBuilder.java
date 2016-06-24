@@ -5,7 +5,7 @@ import static java.util.Arrays.asList;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -52,7 +52,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
 
         allowedRules.addAll(createRule(security));
 
-        firewall.setTargetTags(Arrays.asList(GcpStackUtil.getClusterTag(auth.getCloudContext())));
+        firewall.setTargetTags(Collections.singletonList(GcpStackUtil.getClusterTag(auth.getCloudContext())));
         firewall.setAllowed(allowedRules);
         firewall.setName(buildableResource.getName());
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
@@ -81,7 +81,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
             fireWall.setSourceRanges(sourceRanges);
             Operation operation = compute.firewalls().update(projectId, resourceName, fireWall).execute();
             CloudResource cloudResource = createOperationAwareCloudResource(resource, operation);
-            return checkResources(ctx, auth, asList(cloudResource)).get(0);
+            return checkResources(ctx, auth, Collections.singletonList(cloudResource)).get(0);
         } catch (IOException e) {
             throw new GcpResourceException("Failed to update resource!", GCP_FIREWALL_IN, resourceName, e);
         }

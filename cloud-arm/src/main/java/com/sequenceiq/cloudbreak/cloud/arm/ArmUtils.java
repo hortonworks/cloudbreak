@@ -68,8 +68,8 @@ public class ArmUtils {
     }
 
     public String getStackName(CloudContext cloudContext) {
-        return new String(Splitter.fixedLength(maxResourceNameLength - cloudContext.getId().toString().length())
-                .splitToList(cloudContext.getName()).get(0) + cloudContext.getId());
+        return Splitter.fixedLength(maxResourceNameLength - cloudContext.getId().toString().length())
+                .splitToList(cloudContext.getName()).get(0) + cloudContext.getId();
     }
 
     public String getLoadBalancerId(String stackName) {

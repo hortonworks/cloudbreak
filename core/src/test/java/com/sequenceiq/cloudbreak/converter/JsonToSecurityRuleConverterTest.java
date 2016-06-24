@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +23,7 @@ public class JsonToSecurityRuleConverterTest extends AbstractJsonConverterTest<S
         // WHEN
         SecurityRule result = underTest.convert(getRequest("security-group/security-rule.json"));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("securityGroup"));
+        assertAllFieldsNotNull(result, Collections.singletonList("securityGroup"));
     }
 
     @Override

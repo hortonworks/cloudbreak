@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 
 import java.util.Collections;
 import java.util.List;
@@ -93,7 +92,7 @@ public class ServiceProviderMetadataAdapter {
         }
         if (instance != null) {
             GetInstancesStateRequest<GetInstancesStateResult> stateRequest =
-                    new GetInstancesStateRequest<>(cloudContext, cloudCredential, asList(instance));
+                    new GetInstancesStateRequest<>(cloudContext, cloudCredential, Collections.singletonList(instance));
             LOGGER.info("Triggering event: {}", stateRequest);
             eventBus.notify(stateRequest.selector(), Event.wrap(stateRequest));
             try {

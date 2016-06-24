@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.messages;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -35,7 +35,7 @@ public class CloudbreakMessagesHostServiceTypeTest {
 
 
         // WHEN
-        String message = messageService.getMessage("stack.infrastructure.time", Arrays.asList(123));
+        String message = messageService.getMessage("stack.infrastructure.time", Collections.singletonList(123));
         // THEN
         Assert.assertEquals("Invalid message resolution!", "Infrastructure creation took 123 seconds", message);
 

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.ConnectException;
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +41,7 @@ public class ConsulHostServiceTypeCheckerTaskTest {
         ConsulClient client1 = new ConsulClient(raw1);
         when(raw1.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenThrow(ConnectException.class);
 
-        boolean result = task.checkStatus(new ConsulContext(stack, client1, Arrays.asList(AMBARI_SERVICE)));
+        boolean result = task.checkStatus(new ConsulContext(stack, client1, Collections.singletonList(AMBARI_SERVICE)));
 
         assertFalse(result);
     }
@@ -54,7 +54,7 @@ public class ConsulHostServiceTypeCheckerTaskTest {
         ConsulClient client1 = new ConsulClient(raw1);
         when(raw1.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenReturn(rawResponse);
 
-        boolean result = task.checkStatus(new ConsulContext(stack, client1, Arrays.asList(AMBARI_SERVICE)));
+        boolean result = task.checkStatus(new ConsulContext(stack, client1, Collections.singletonList(AMBARI_SERVICE)));
 
         assertTrue(result);
     }

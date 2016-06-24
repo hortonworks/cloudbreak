@@ -92,7 +92,7 @@ public class HeatTemplateBuilder {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < lines.length; i++) {
             // be aware of the OpenStack Heat template formatting
-            sb.append("            " + lines[i] + "\n");
+            sb.append("            ").append(lines[i]).append("\n");
         }
         return sb.toString();
     }

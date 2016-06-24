@@ -73,7 +73,7 @@ public class OpenStackUtils {
     }
 
     public String adjustStackNameLength(String stackName) {
-        return new String(Splitter.fixedLength(maxResourceNameLength).splitToList(stackName).get(0));
+        return Splitter.fixedLength(maxResourceNameLength).splitToList(stackName).get(0);
     }
 
     public boolean isExistingNetwork(Network network) {

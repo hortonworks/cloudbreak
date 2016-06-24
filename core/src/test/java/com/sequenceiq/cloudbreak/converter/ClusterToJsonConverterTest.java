@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -89,7 +90,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         // THEN
         assertEquals(1L, (long) result.getId());
         assertNotNull(result.getAmbariStackDetails());
-        assertAllFieldsNotNull(result, Arrays.asList("cluster"));
+        assertAllFieldsNotNull(result, Collections.singletonList("cluster"));
     }
 
     @Test

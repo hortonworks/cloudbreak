@@ -230,7 +230,7 @@ public class AwsCommands implements CommandMarker {
             params.put("instanceProfileStrategy", instanceProfileStrategy.toString());
         }
         if (s3Role != null && InstanceProfileStrategy.USE_EXISTING.equals(instanceProfileStrategy)) {
-            params.put("s3Role", s3Role.toString());
+            params.put("s3Role", s3Role);
         }
         if (s3Role != null && !InstanceProfileStrategy.USE_EXISTING.equals(instanceProfileStrategy)) {
             return "Please specify the role for S3 connection if you are using 'USE_EXISTING' profile type.";

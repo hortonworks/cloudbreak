@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -201,7 +200,7 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public PlatformOrchestrator orchestratorParams() {
-        return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
+        return new PlatformOrchestrator(Collections.singletonList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
     }
 
     @Override

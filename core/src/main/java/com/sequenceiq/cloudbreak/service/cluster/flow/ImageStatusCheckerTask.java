@@ -54,7 +54,7 @@ public class ImageStatusCheckerTask extends StackBasedStatusCheckerTask<ImageChe
         notification.setEventMessage(String.valueOf(result.getStatusProgressValue()));
         notification.setOwner(stack.getOwner());
         notification.setAccount(stack.getAccount());
-        notification.setCloud(stack.cloudPlatform().toString());
+        notification.setCloud(stack.cloudPlatform());
         notification.setRegion(stack.getRegion());
         notification.setStackId(stack.getId());
         notification.setStackName(stack.getName());
@@ -70,7 +70,7 @@ public class ImageStatusCheckerTask extends StackBasedStatusCheckerTask<ImageChe
 
     @Override
     public String successMessage(ImageCheckerContext t) {
-        return String.format("Image copy operation finished with success state.");
+        return "Image copy operation finished with success state.";
     }
 
 }

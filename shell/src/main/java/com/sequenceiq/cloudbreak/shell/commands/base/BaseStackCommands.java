@@ -135,11 +135,11 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         try {
             wait = wait == null ? false : wait;
             if (id != null) {
-                shellContext.cloudbreakClient().stackEndpoint().delete(Long.valueOf(id), false);
+                shellContext.cloudbreakClient().stackEndpoint().delete(id, false);
                 shellContext.setHint(Hints.CREATE_CLUSTER);
                 shellContext.removeStack(id.toString());
                 if (wait) {
-                    CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(Long.valueOf(id), Status.DELETE_COMPLETED.name());
+                    CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(id, Status.DELETE_COMPLETED.name());
                     if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                         throw shellContext.exceptionTransformer().transformToRuntimeException("Stack termination failed: " + waitResult.getReason());
                     } else {
@@ -258,7 +258,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 stackRequest.setAvailabilityZone(availabilityZone.getName());
             }
             stackRequest.setOnFailureAction(onFailureAction == null ? OnFailureAction.DO_NOTHING : OnFailureAction.valueOf(onFailureAction.name()));
-            stackRequest.setNetworkId(Long.valueOf(shellContext.getActiveNetworkId()));
+            stackRequest.setNetworkId(shellContext.getActiveNetworkId());
             FailurePolicyJson failurePolicyJson = new FailurePolicyJson();
             stackRequest.setCredentialId(Long.valueOf(shellContext.getCredentialId()));
             failurePolicyJson.setAdjustmentType(adjustmentType == null ? AdjustmentType.BEST_EFFORT : AdjustmentType.valueOf(adjustmentType.name()));

@@ -45,7 +45,7 @@ public class GcpCredentialConnector implements CredentialConnector {
             }
             listDisks(gcpContext, compute);
         } catch (GoogleJsonResponseException e) {
-            String errorMessage = String.format(e.getDetails().getMessage());
+            String errorMessage = e.getDetails().getMessage();
             LOGGER.error(errorMessage, e);
             return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
         } catch (Exception e) {

@@ -47,7 +47,7 @@ public class VersionedApplication {
                     return line;
                 }
             } else {
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             }
         }
         return sb.toString();

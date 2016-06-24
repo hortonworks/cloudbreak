@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,7 +136,8 @@ public class StackSyncService {
             } catch (CloudConnectorException e) {
                 LOGGER.warn(e.getMessage(), e);
                 eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
-                        cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED.code(), Arrays.asList(instance.getInstanceId())));
+                        cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED.code(),
+                                Collections.singletonList(instance.getInstanceId())));
                 instanceStateCounts.put(InstanceSyncState.UNKNOWN, instanceStateCounts.get(InstanceSyncState.UNKNOWN) + 1);
             }
         }
@@ -173,7 +175,7 @@ public class StackSyncService {
             instance.setInstanceStatus(InstanceStatus.FAILED);
             instanceMetaDataRepository.save(instance);
             eventService.fireCloudbreakEvent(stack.getId(), CREATE_FAILED.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_FAILED.code(), Arrays.asList(instance.getDiscoveryFQDN())));
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_FAILED.code(), Collections.singletonList(instance.getDiscoveryFQDN())));
         } else if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated() && !instance.isFailed()) {
             LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
             updateMetaDataToRunning(stack.getId(), stack.getCluster(), instance);
@@ -269,11 +271,12 @@ public class StackSyncService {
                     if (ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata)) {
                         hostMetadataRepository.delete(hostMetadata.getId());
                         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_DELETED.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
+                                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_DELETED.code(),
+                                        Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));
                     } else {
                         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                                 cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_REMOVAL_FAILED.code(),
-                                        Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
+                                        Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));
                     }
                 } else {
                     hostMetadata.setHostMetadataState(HostMetadataState.UNHEALTHY);
@@ -286,7 +289,8 @@ public class StackSyncService {
         } catch (Exception e) {
             LOGGER.error("Host cannot be deleted from cluster: ", e);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_TERMINATED.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
+                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_TERMINATED.code(),
+                            Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));
         }
     }
 
@@ -299,7 +303,8 @@ public class StackSyncService {
         instanceMetaDataRepository.save(instanceMetaData);
         instanceGroupRepository.save(instanceGroup);
         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_DELETED_CBMETADATA.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN())));
+                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_DELETED_CBMETADATA.code(),
+                        Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));
     }
 
     private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData) {

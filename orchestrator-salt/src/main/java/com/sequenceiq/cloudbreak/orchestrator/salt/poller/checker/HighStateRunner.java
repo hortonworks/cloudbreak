@@ -16,7 +16,7 @@ public class HighStateRunner extends BaseSaltJobRunner {
 
     @Override
     public String submit(SaltConnector saltConnector) {
-        return SaltStates.highstate(saltConnector).toString();
+        return SaltStates.highstate(saltConnector);
     }
 
     @Override

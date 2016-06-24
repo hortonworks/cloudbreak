@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyLong;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class JsonToInstanceGroupConverterTest extends AbstractJsonConverterTest<
         // WHEN
         InstanceGroup instanceGroup = underTest.convert(getRequest("stack/instance-group.json"));
         // THEN
-        assertAllFieldsNotNull(instanceGroup, Arrays.asList("stack"));
+        assertAllFieldsNotNull(instanceGroup, Collections.singletonList("stack"));
     }
 
     @Test(expected = AccessDeniedException.class)

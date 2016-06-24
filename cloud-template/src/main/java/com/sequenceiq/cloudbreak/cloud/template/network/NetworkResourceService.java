@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.template.network;
 
 import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
-import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -61,7 +60,8 @@ public class NetworkResourceService {
                 createResource(auth, buildableResource);
                 CloudResource resource = builder.build(context, auth, network, security, buildableResource);
                 updateResource(auth, resource);
-                PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, asList(resource), context, true);
+                PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth,
+                        Collections.singletonList(resource), context, true);
                 List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
                 results.addAll(pollerResult);
             } catch (ResourceNotNeededException e) {
@@ -84,7 +84,7 @@ public class NetworkResourceService {
                     CloudResource deletedResource = builder.delete(context, auth, resource, network);
                     if (deletedResource != null) {
                         PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
-                                builder, auth, asList(deletedResource), context, cancellable);
+                                builder, auth, Collections.singletonList(deletedResource), context, cancellable);
                         List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
                         results.addAll(pollerResult);
                     }
@@ -104,7 +104,7 @@ public class NetworkResourceService {
             CloudResourceStatus status = builder.update(context, auth, network, security, resource);
             if (status != null) {
                 PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
-                        builder, auth, asList(status.getCloudResource()), context, true);
+                        builder, auth, Collections.singletonList(status.getCloudResource()), context, true);
                 List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
                 results.addAll(pollerResult);
             }
@@ -135,7 +135,7 @@ public class NetworkResourceService {
     }
 
     private List<CloudResource> getResources(List<CloudResource> resources, ResourceType type) {
-        return getResources(resources, Arrays.asList(type));
+        return getResources(resources, Collections.singletonList(type));
     }
 
     private List<CloudResource> getResources(List<CloudResource> resources, List<ResourceType> types) {

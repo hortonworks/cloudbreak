@@ -67,14 +67,14 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
             String stackName = null;
             String instanceName = null;
             if ((splitedBase.get(0).length() - (base.length() - platformSpecificLength)) > 1) {
-                stackName = new String(Splitter.fixedLength(splitedBase.get(0).length() - (base.length() - platformSpecificLength))
-                        .splitToList(splitedBase.get(0)).get(0));
+                stackName = Splitter.fixedLength(splitedBase.get(0).length() - (base.length() - platformSpecificLength))
+                        .splitToList(splitedBase.get(0)).get(0);
                 instanceName = splitedBase.get(1);
             } else {
-                stackName = new String(Splitter.fixedLength(1).splitToList(splitedBase.get(0)).get(0));
-                instanceName = new String(Splitter.fixedLength(splitedBase.get(1).length()
+                stackName = Splitter.fixedLength(1).splitToList(splitedBase.get(0)).get(0);
+                instanceName = Splitter.fixedLength(splitedBase.get(1).length()
                         - (Math.abs(splitedBase.get(0).length() - (base.length() - platformSpecificLength))
-                        + stackName.length())).splitToList(splitedBase.get(1)).get(0));
+                        + stackName.length())).splitToList(splitedBase.get(1)).get(0);
             }
             StringBuilder shortBase = new StringBuilder(stackName + DELIMITER + instanceName);
             for (int i = 2; i < splitedBase.size(); i++) {

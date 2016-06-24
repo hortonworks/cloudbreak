@@ -191,7 +191,7 @@ public class ShellContext {
             instanceGroups.put(
                     instanceGroup.getGroup(),
                     new InstanceGroupEntry(
-                            Long.valueOf(instanceGroup.getTemplateId()),
+                            instanceGroup.getTemplateId(),
                             Integer.valueOf(instanceGroup.getNodeCount()),
                             instanceGroup.getType().name()
                     )

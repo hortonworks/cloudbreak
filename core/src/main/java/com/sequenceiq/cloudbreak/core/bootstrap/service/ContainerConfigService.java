@@ -74,7 +74,8 @@ public class ContainerConfigService {
             }
             return component.getAttributes().get(ContainerConfig.class);
         } catch (IOException e) {
-            throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s"));
+            throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s", stack.getId(),
+                    dc.getName()));
         }
     }
 
@@ -125,7 +126,8 @@ public class ContainerConfigService {
             Component component = new Component(ComponentType.CONTAINER, dc.name(), new Json(config), stack);
             return componentRepository.save(component);
         } catch (IOException e) {
-            throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s"));
+            throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s",
+                    stack.getId(), dc.getName()));
         }
     }
 

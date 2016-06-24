@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -215,7 +216,7 @@ public class JacksonBlueprintProcessorTest {
     public void testAddComponentToHostgroupsIfComponentIsMissing() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
 
-        String result = underTest.addComponentToHostgroups("HST_SERVER", Arrays.asList("slave_1"), testBlueprint);
+        String result = underTest.addComponentToHostgroups("HST_SERVER", Collections.singletonList("slave_1"), testBlueprint);
 
         Assert.assertTrue(underTest.componentExistsInBlueprint("HST_SERVER", result));
     }
@@ -239,7 +240,7 @@ public class JacksonBlueprintProcessorTest {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-without-config-block.bp");
         String componentToAdd = "NAMENODE";
 
-        String result = underTest.addComponentToHostgroups(componentToAdd, Arrays.asList("master"), testBlueprint);
+        String result = underTest.addComponentToHostgroups(componentToAdd, Collections.singletonList("master"), testBlueprint);
 
         Assert.assertEquals(testBlueprint.replaceAll("\\s", ""), result);
     }

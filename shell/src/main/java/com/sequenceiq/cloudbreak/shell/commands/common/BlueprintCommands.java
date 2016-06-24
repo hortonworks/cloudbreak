@@ -111,7 +111,7 @@ public class BlueprintCommands implements BaseCommands {
             } else if (name != null) {
                 BlueprintResponse blueprint = shellContext.cloudbreakClient().blueprintEndpoint().getPublic(name);
                 if (blueprint != null) {
-                    shellContext.addBlueprint(blueprint.getId().toString());
+                    shellContext.addBlueprint(blueprint.getId());
                     shellContext.resetMarathonHostGroups();
                     shellContext.setHint(
                             shellContext.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.CONFIGURE_INSTANCEGROUP);

@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,9 +65,9 @@ public class ParameterGenerator {
                 new HashMap<String, Object>());
 
         CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate);
-        List<SecurityRule> rules = Arrays.asList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
+        List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
         Security security = new Security(rules);
-        groups.add(new Group(name, InstanceGroupType.CORE, Arrays.asList(instance), security));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
@@ -77,8 +78,6 @@ public class ParameterGenerator {
         Subnet subnet = new Subnet("10.0.0.0/24");
         Network network = new Network(subnet);
         network.putParameter("publicNetId", "028ffc0c-63c5-4ca0-802a-3ac753eaf76c");
-
-
 
         return new CloudStack(groups, network, image, new HashMap<String, String>());
     }

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SWARM;
-import static java.util.Arrays.asList;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -136,7 +135,7 @@ public class RecipeEngine {
         List<String> payload;
         if (config.getConfiguration() != null) {
             String configName = SSSD_CONFIG + config.getId();
-            payload = Arrays.asList(configName);
+            payload = Collections.singletonList(configName);
         } else {
             payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
                     config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
@@ -160,7 +159,7 @@ public class RecipeEngine {
                 if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", cluster.getUserName());
                     RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL);
-                    Recipe recipe = recipeBuilder.buildRecipes(asList(recipeScript), Collections.emptyMap()).get(0);
+                    Recipe recipe = recipeBuilder.buildRecipes(Collections.singletonList(recipeScript), Collections.emptyMap()).get(0);
                     hostGroup.addRecipe(recipe);
                     break;
                 }
@@ -179,7 +178,7 @@ public class RecipeEngine {
                     if (isComponentPresent(blueprintText, "HST_AGENT", hostGroup)) {
                         String script = FileReaderUtils.readFileFromClasspath("scripts/smartsense-capture-schedule.sh");
                         RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL);
-                        Recipe recipe = recipeBuilder.buildRecipes(asList(recipeScript), Collections.emptyMap()).get(0);
+                        Recipe recipe = recipeBuilder.buildRecipes(Collections.singletonList(recipeScript), Collections.emptyMap()).get(0);
                         hostGroup.addRecipe(recipe);
                         break;
                     }

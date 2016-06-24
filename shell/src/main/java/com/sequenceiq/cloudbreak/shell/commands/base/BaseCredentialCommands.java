@@ -93,7 +93,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
         try {
 
             if (id != null) {
-                if (shellContext.cloudbreakClient().credentialEndpoint().get(Long.valueOf(id)) != null) {
+                if (shellContext.cloudbreakClient().credentialEndpoint().get(id) != null) {
                     shellContext.setCredential(id.toString());
                     createOrSelectTemplateHint();
                     return "Credential selected, id: " + id;
@@ -149,7 +149,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     public String show(Long id, String name) {
         try {
             if (id != null) {
-                CredentialResponse credentialResponse = shellContext.cloudbreakClient().credentialEndpoint().get(Long.valueOf(id));
+                CredentialResponse credentialResponse = shellContext.cloudbreakClient().credentialEndpoint().get(id);
                 Map<String, String> map = shellContext.responseTransformer().transformObjectToStringMap(credentialResponse);
                 return shellContext.outputTransformer().render(map, "FIELD", "VALUE");
             } else if (name != null) {
@@ -239,7 +239,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
         }
         BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
         String str;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while ((str = in.readLine()) != null) {
             sb.append(str);
         }

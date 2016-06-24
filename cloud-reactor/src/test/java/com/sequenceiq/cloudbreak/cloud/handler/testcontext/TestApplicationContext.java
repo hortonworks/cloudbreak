@@ -6,7 +6,6 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -137,24 +136,25 @@ public class TestApplicationContext {
         when(cloudConnector.instances()).thenReturn(instanceConnector);
         when(cloudConnector.metadata()).thenReturn(collector);
         when(resourceConnector.launch(any(), any(), any(), any(), anyLong()))
-                .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.CREATED)));
+                .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.CREATED)));
         when(resourceConnector.terminate(any(), any(), any()))
-                .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.DELETED)));
+                .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.DELETED)));
         when(resourceConnector.update(any(), any(), any()))
-                .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
+                .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(resourceConnector.upscale(any(), any(), any()))
-                .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
+                .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(resourceConnector.downscale(any(), any(), any(), anyList()))
-                .thenReturn(Arrays.asList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
+                .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(instanceConnector.check(any(), any()))
-                .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
+                .thenReturn(Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
         CloudVmInstanceStatus collectInstanceStatus = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS);
         when(collector.collect(any(), any(), any()))
-                .thenReturn(Arrays.asList(new CloudVmMetaDataStatus(collectInstanceStatus, new CloudInstanceMetaData("privateIp", "publicIp", "hypervisor"))));
+                .thenReturn(Collections.singletonList(new CloudVmMetaDataStatus(collectInstanceStatus, new CloudInstanceMetaData("privateIp", "publicIp",
+                        "hypervisor"))));
         when(instanceConnector.start(any(), any(), any()))
-                .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
+                .thenReturn(Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
         when(instanceConnector.stop(any(), any(), any()))
-                .thenReturn(Arrays.asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STOPPED)));
+                .thenReturn(Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STOPPED)));
         when(instanceConnector.getConsoleOutput(any(), eq(cloudInstance)))
                 .thenReturn(g.getSshFingerprint() + "    RSA/n-----END SSH HOST KEY FINGERPRINTS-----");
         when(instanceConnector.getConsoleOutput(any(), eq(cloudInstanceBad)))

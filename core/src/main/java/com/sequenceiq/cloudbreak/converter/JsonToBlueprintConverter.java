@@ -95,7 +95,7 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         }
         BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
         String str;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while ((str = in.readLine()) != null) {
             sb.append(str);
         }

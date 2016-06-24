@@ -1,18 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.template.task;
 
-import static java.util.Arrays.asList;
-
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.task.AbstractPollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
 @Component(PollComputeStatusTask.NAME)
 @Scope(value = "prototype")
@@ -32,7 +31,7 @@ public class PollComputeStatusTask extends AbstractPollTask<List<CloudVmInstance
 
     @Override
     public List<CloudVmInstanceStatus> call() throws Exception {
-        return builder.checkInstances(context, getAuthenticatedContext(), asList(instance));
+        return builder.checkInstances(context, getAuthenticatedContext(), Collections.singletonList(instance));
     }
 
     @Override

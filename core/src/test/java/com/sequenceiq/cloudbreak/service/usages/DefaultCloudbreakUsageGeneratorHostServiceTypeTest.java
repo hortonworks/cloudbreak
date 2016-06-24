@@ -93,7 +93,7 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
     @Test
     public void testGenerateShouldDeleteStackAndTheRelatedTemplatesWhenTheStackStateIsDeleteCompletedAndTemplateIsDeleted() throws Exception {
         //GIVEN
-        List<CloudbreakEvent> events = Arrays.asList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
+        List<CloudbreakEvent> events = Collections.singletonList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
         List<CloudbreakUsage> usages = new ArrayList<>();
         given(usageRepository.count()).willReturn(0L);
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
@@ -109,7 +109,7 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
         stack.setStatus(Status.DELETE_COMPLETED);
         when(stackRepository.findById(1L)).thenReturn(stack);
         when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Collections.emptyList());
-        given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(new ArrayList<CloudbreakEvent>());
+        given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(Collections.emptyList());
         doNothing().when(eventRepository).delete(anyCollection());
         //WHEN
         underTest.generate();
@@ -125,7 +125,7 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
     @Test
     public void testGenerateShouldNotDeleteStackWhenStackDoesNotExistWithId() throws Exception {
         //GIVEN
-        List<CloudbreakEvent> events = Arrays.asList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
+        List<CloudbreakEvent> events = Collections.singletonList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
         List<CloudbreakUsage> usages = new ArrayList<>();
         given(usageRepository.count()).willReturn(0L);
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
@@ -144,7 +144,7 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
     @Test
     public void testGenerateShouldNotDeleteStackWhenStackStatusIsNotDeleteCompleted() throws Exception {
         //GIVEN
-        List<CloudbreakEvent> events = Arrays.asList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
+        List<CloudbreakEvent> events = Collections.singletonList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
         List<CloudbreakUsage> usages = new ArrayList<>();
         given(usageRepository.count()).willReturn(0L);
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
@@ -164,7 +164,7 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
     @Test
     public void testGenerateShouldDeleteStackAndNotTheRelatedTemplatesWhenTheStackStateIsDeleteCompletedAndTemplateIsNotDeleted() throws Exception {
         //GIVEN
-        List<CloudbreakEvent> events = Arrays.asList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
+        List<CloudbreakEvent> events = Collections.singletonList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
         List<CloudbreakUsage> usages = new ArrayList<>();
         given(usageRepository.count()).willReturn(0L);
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
@@ -178,8 +178,8 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
         stack.setInstanceGroups(instanceGroups);
         stack.setStatus(Status.DELETE_COMPLETED);
         when(stackRepository.findById(1L)).thenReturn(stack);
-        when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Arrays.asList(stack));
-        given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(new ArrayList<CloudbreakEvent>());
+        when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Collections.singletonList(stack));
+        given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(new ArrayList<>());
         doNothing().when(eventRepository).delete(anyCollection());
         //WHEN
         underTest.generate();
@@ -195,7 +195,7 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
     @Test
     public void testGenerateShouldDeleteStackAndNotTheRelatedTemplatesWhenTheStackStateIsDeleteCompletedAndTemplateIsReferedByMoreStack() throws Exception {
         //GIVEN
-        List<CloudbreakEvent> events = Arrays.asList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
+        List<CloudbreakEvent> events = Collections.singletonList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
         List<CloudbreakUsage> usages = new ArrayList<>();
         given(usageRepository.count()).willReturn(0L);
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
@@ -225,7 +225,7 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
     @Test
     public void testGenerateShouldDeleteStackAndNotTheRelatedTemplatesWhenTheStackStateIsDeleteCompletedAndTemplateIsDeleted() throws Exception {
         //GIVEN
-        List<CloudbreakEvent> events = Arrays.asList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
+        List<CloudbreakEvent> events = Collections.singletonList(ServiceTestUtils.createEvent(1L, 3, "", new Date()));
         List<CloudbreakUsage> usages = new ArrayList<>();
         given(usageRepository.count()).willReturn(0L);
         given(eventRepository.findAll(any(Sort.class))).willReturn(events);
@@ -244,7 +244,7 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
         stack.setStatus(Status.DELETE_COMPLETED);
         when(stackRepository.findById(1L)).thenReturn(stack);
         when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Collections.emptyList());
-        given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(new ArrayList<CloudbreakEvent>());
+        given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(Collections.emptyList());
         doNothing().when(eventRepository).delete(anyCollection());
         //WHEN
         underTest.generate();

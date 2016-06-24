@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
-import static java.util.Arrays.asList;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -50,7 +48,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
-        return Arrays.asList(createNamedResource(resourceType(), resourceName));
+        return Collections.singletonList(createNamedResource(resourceType(), resourceName));
     }
 
     @Override
@@ -104,7 +102,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             if (operation.getHttpErrorStatusCode() != null) {
                 throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.get(0).getName());
             }
-            return asList(createOperationAwareCloudResource(buildableResource.get(0), operation));
+            return Collections.singletonList(createOperationAwareCloudResource(buildableResource.get(0), operation));
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
@@ -132,10 +130,10 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             boolean finished = operation == null || GcpStackUtil.analyzeOperation(operation);
             InstanceStatus status = finished ? context.isBuild() ? InstanceStatus.STARTED : InstanceStatus.STOPPED : InstanceStatus.IN_PROGRESS;
             LOGGER.info("Instance: {} status: {}", instances, status);
-            return asList(new CloudVmInstanceStatus(cloudInstance, status));
+            return Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, status));
         } catch (Exception e) {
             LOGGER.info("Failed to check instance state of {}", cloudInstance);
-            return asList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
+            return Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
         }
     }
 
@@ -201,7 +199,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                     filterResourcesByType(resources, ResourceType.GCP_RESERVED_IP).get(0).getName());
             accessConfig.setNatIP(getReservedIp.execute().getAddress());
         }
-        networkInterface.setAccessConfigs(asList(accessConfig));
+        networkInterface.setAccessConfigs(Collections.singletonList(accessConfig));
         if (subnet.isEmpty()) {
             networkInterface.setNetwork(
                     String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));
@@ -209,7 +207,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             networkInterface.setSubnetwork(
                     String.format("https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s", projectId, region.value(), networkName));
         }
-        return asList(networkInterface);
+        return Collections.singletonList(networkInterface);
     }
 
     private List<CloudResource> filterResourcesByType(Collection<CloudResource> resources, ResourceType resourceType) {
@@ -234,7 +232,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 Operation operation = stopRequest ? compute.instances().stop(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute()
                         : compute.instances().start(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute();
                 CloudInstance operationAwareCloudInstance = createOperationAwareCloudInstance(instance, operation);
-                return checkInstances(context, auth, asList(operationAwareCloudInstance)).get(0);
+                return checkInstances(context, auth, Collections.singletonList(operationAwareCloudInstance)).get(0);
             } else {
                 LOGGER.info("Instance {} is not in {} state - won't start it.", state, instanceId);
                 return null;

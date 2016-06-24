@@ -13,6 +13,7 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.START_SERVICES_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationType.STOP_SERVICES_AMBARI_PROGRESS_STATE;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
 import java.net.ConnectException;
@@ -190,7 +191,7 @@ public class AmbariDecommissioner {
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());
             if ("UNKNOWN".equals(hostState)) {
-                deleteHosts(stack, asList(data.getHostName()), new ArrayList<>(components));
+                deleteHosts(stack, singletonList(data.getHostName()), new ArrayList<>(components));
                 hostDeleted = true;
             }
         } else {

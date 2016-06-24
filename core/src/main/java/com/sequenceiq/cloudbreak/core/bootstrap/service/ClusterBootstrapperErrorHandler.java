@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -94,7 +95,8 @@ public class ClusterBootstrapperErrorHandler {
         }
         List<Node> missingNodes = selectMissingNodes(nodes, allAvailableNode);
         if (missingNodes.size() > 0) {
-            String message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES.code(), Arrays.asList(missingNodes.size()));
+            String message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES.code(),
+                    Collections.singletonList(missingNodes.size()));
             LOGGER.info(message);
             eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
 
@@ -105,7 +107,7 @@ public class ClusterBootstrapperErrorHandler {
                 ig.setNodeCount(ig.getNodeCount() - 1);
                 if (ig.getNodeCount() < 1) {
                     throw new CloudbreakOrchestratorFailedException(cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_INVALID_NODECOUNT.code(),
-                            Arrays.asList(ig.getGroupName())));
+                            Collections.singletonList(ig.getGroupName())));
                 }
                 instanceGroupRepository.save(ig);
                 message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_DELETING_NODE.code(),

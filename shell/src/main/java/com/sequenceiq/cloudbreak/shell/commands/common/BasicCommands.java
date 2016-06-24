@@ -45,15 +45,14 @@ public class BasicCommands implements CommandMarker {
 
     @CliCommand(value = "context", help = "Shows some context")
     public String context() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getRow("blueprintId", shellContext.getBlueprintId()));
-        sb.append(getRow("credentialId", shellContext.getCredentialId()));
-        sb.append(getRow("networkId", shellContext.getActiveNetworkId()));
-        sb.append(getRow("securityGroupId", shellContext.getActiveSecurityGroupId()));
-        sb.append(getRow("stackId", shellContext.getStackId()));
-        sb.append(getRow("stackName", shellContext.getStackName()));
-        sb.append(getRow("recipeId", shellContext.getRecipeId()));
-        return sb.toString();
+        String sb = getRow("blueprintId", shellContext.getBlueprintId())
+                + getRow("credentialId", shellContext.getCredentialId())
+                + getRow("networkId", shellContext.getActiveNetworkId())
+                + getRow("securityGroupId", shellContext.getActiveSecurityGroupId())
+                + getRow("stackId", shellContext.getStackId())
+                + getRow("stackName", shellContext.getStackName())
+                + getRow("recipeId", shellContext.getRecipeId());
+        return sb;
     }
 
     private String getRow(String name, Object value) {

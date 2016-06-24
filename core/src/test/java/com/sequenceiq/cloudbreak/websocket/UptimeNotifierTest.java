@@ -9,7 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class UptimeNotifierTest {
         doNothing().when(notificationSender).send(any(Notification.class));
         List<Cluster> clusters = TestUtil.generateCluster(1);
 
-        when(clusterRepository.findAll()).thenReturn(Arrays.asList(clusters.get(0)));
+        when(clusterRepository.findAll()).thenReturn(Collections.singletonList(clusters.get(0)));
         Stack stack1 = TestUtil.stack();
         when(stackRepository.findStackForCluster(anyLong())).thenReturn(stack1);
 
@@ -68,7 +68,7 @@ public class UptimeNotifierTest {
         doNothing().when(notificationSender).send(any(Notification.class));
         List<Cluster> clusters = TestUtil.generateCluster(1);
 
-        when(clusterRepository.findAll()).thenReturn(Arrays.asList(clusters.get(0)));
+        when(clusterRepository.findAll()).thenReturn(Collections.singletonList(clusters.get(0)));
 
         Stack stack2 = TestUtil.stack();
         stack2.setCluster(clusters.get(0));
@@ -90,7 +90,7 @@ public class UptimeNotifierTest {
         doNothing().when(notificationSender).send(any(Notification.class));
         List<Cluster> clusters = TestUtil.generateCluster(1);
 
-        when(clusterRepository.findAll()).thenReturn(Arrays.asList(clusters.get(0)));
+        when(clusterRepository.findAll()).thenReturn(Collections.singletonList(clusters.get(0)));
 
         Stack stack2 = TestUtil.stack();
         stack2.setCluster(clusters.get(0));

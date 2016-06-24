@@ -340,7 +340,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     private String concatToString(Collection<String> items) {
         StringBuilder sb = new StringBuilder();
         for (String item : items) {
-            sb.append(item + ",");
+            sb.append(item).append(",");
         }
         return sb.toString().substring(0, sb.toString().length() - 1);
     }

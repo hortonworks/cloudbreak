@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -30,7 +30,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
-        return Arrays.asList(createNamedResource(resourceType(), resourceName));
+        return Collections.singletonList(createNamedResource(resourceType(), resourceName));
     }
 
     @Override
@@ -51,7 +51,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
             if (operation.getHttpErrorStatusCode() != null) {
                 throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResources.get(0).getName());
             }
-            return Arrays.asList(createOperationAwareCloudResource(buildableResources.get(0), operation));
+            return Collections.singletonList(createOperationAwareCloudResource(buildableResources.get(0), operation));
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResources.get(0).getName());
         }

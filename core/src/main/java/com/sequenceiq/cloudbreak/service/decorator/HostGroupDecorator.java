@@ -162,7 +162,8 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
             HostGroup hostGroup = hostGroupOptional.get();
             Integer instanceGroupNodeCount = hostGroup.getConstraint().getInstanceGroup().getNodeCount();
             if (constraint.getHostCount() > instanceGroupNodeCount) {
-                throw new BadRequestException(String.format("The 'hostCount' of host group '%s' constraint could not be more than '%s'!"));
+                throw new BadRequestException(String.format("The 'hostCount' of host group '%s' constraint could not be more than '%s'!", subject.getName(),
+                        instanceGroupNodeCount));
             }
             hostGroup.getConstraint().setHostCount(constraint.getHostCount());
             hostGroup.setName(subject.getName());

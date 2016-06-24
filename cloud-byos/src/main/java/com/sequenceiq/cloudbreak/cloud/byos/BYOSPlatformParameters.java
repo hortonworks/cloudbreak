@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.byos;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +66,6 @@ public class BYOSPlatformParameters implements PlatformParameters {
 
     @Override
     public PlatformOrchestrator orchestratorParams() {
-        return new PlatformOrchestrator(Arrays.asList(), orchestrator(""));
+        return new PlatformOrchestrator(Collections.emptyList(), orchestrator(""));
     }
 }

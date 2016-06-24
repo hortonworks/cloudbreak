@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -96,7 +97,7 @@ public class AmbariClusterStatusUpdater {
             }
         }
         cloudbreakEventService.fireCloudbreakEvent(stackId, statusInEvent.name(), cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SYNCHRONIZED.code(),
-                Arrays.asList(statusReason)));
+                Collections.singletonList(statusReason)));
     }
 
     private boolean isUpdateEnabled(ClusterStatus clusterStatus) {

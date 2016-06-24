@@ -105,7 +105,7 @@ public class AwsCredentialConnector implements CredentialConnector {
         } catch (AmazonClientException ae) {
             if (ae.getMessage().contains("Unable to load AWS credentials")) {
                 String errorMessage =
-                        String.format("Unable to load AWS credentials: please make sure the deployer defined AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY");
+                        "Unable to load AWS credentials: please make sure the deployer defined AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY";
                 LOGGER.error(errorMessage, ae);
                 return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
             }

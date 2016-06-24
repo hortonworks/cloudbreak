@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -236,7 +237,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData4.getAmbariServer()).thenReturn(false);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
+        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", singletonList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
@@ -280,7 +281,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
+        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", singletonList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
@@ -328,7 +329,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData4.getAmbariServer()).thenReturn(false);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
+        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", singletonList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
@@ -372,7 +373,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
+        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", singletonList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);

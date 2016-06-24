@@ -37,8 +37,8 @@ public class StringTypesCompare implements Comparator<StringType> {
     }
 
     public int compare(StringType o1, StringType o2) {
-        String a = o1.value().toString();
-        String b = o2.value().toString();
+        String a = o1.value();
+        String b = o2.value();
 
         int ia = 0;
         int ib = 0;

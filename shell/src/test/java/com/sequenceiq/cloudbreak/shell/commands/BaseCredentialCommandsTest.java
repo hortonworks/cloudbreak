@@ -56,7 +56,7 @@ public class BaseCredentialCommandsTest {
         underTest = new BaseCredentialCommands(context);
         MockitoAnnotations.initMocks(this);
         dummyResult = new CredentialResponse();
-        dummyResult.setId(Long.valueOf(DUMMY_ID));
+        dummyResult.setId(DUMMY_ID);
         given(cloudbreakClient.credentialEndpoint()).willReturn(credentialEndpoint);
         given(context.outputTransformer()).willReturn(outputTransformer);
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
@@ -67,7 +67,7 @@ public class BaseCredentialCommandsTest {
 
     @Test
     public void testSelectCredentialById() throws Exception {
-        given(credentialEndpoint.get(Long.valueOf(DUMMY_ID))).willReturn(dummyResult);
+        given(credentialEndpoint.get(DUMMY_ID)).willReturn(dummyResult);
         underTest.select(DUMMY_ID, null);
         verify(context, times(1)).setCredential(anyString());
     }
@@ -94,14 +94,14 @@ public class BaseCredentialCommandsTest {
 
     @Test
     public void testShowCredentialById() throws Exception {
-        given(credentialEndpoint.get(Long.valueOf(DUMMY_ID))).willReturn(dummyResult);
+        given(credentialEndpoint.get(DUMMY_ID)).willReturn(dummyResult);
         underTest.show(DUMMY_ID, null);
         verify(credentialEndpoint, times(1)).get(anyLong());
     }
 
     @Test
     public void testShowCredentialByName() throws Exception {
-        given(credentialEndpoint.get(Long.valueOf(DUMMY_ID))).willReturn(dummyResult);
+        given(credentialEndpoint.get(DUMMY_ID)).willReturn(dummyResult);
         given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(dummyResult);
         underTest.show(null, DUMMY_NAME);
         verify(credentialEndpoint, times(0)).get(anyLong());

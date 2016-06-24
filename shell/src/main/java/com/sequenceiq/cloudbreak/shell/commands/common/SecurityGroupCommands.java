@@ -102,7 +102,7 @@ public class SecurityGroupCommands implements BaseCommands {
             Long id = securityGroupId == null ? null : securityGroupId;
             String name = securityGroupName == null ? null : securityGroupName;
             if (id != null) {
-                shellContext.cloudbreakClient().securityGroupEndpoint().delete(Long.valueOf(id));
+                shellContext.cloudbreakClient().securityGroupEndpoint().delete(id);
                 refreshSecurityGroupsInContext();
                 return String.format("SecurityGroup deleted with %s id", name);
             } else if (name != null) {
@@ -205,7 +205,7 @@ public class SecurityGroupCommands implements BaseCommands {
             Long id = groupId == null ? null : groupId;
             String name = groupName == null ? null : groupName;
             if (id != null) {
-                SecurityGroupJson securityGroupJson = shellContext.cloudbreakClient().securityGroupEndpoint().get(Long.valueOf(id));
+                SecurityGroupJson securityGroupJson = shellContext.cloudbreakClient().securityGroupEndpoint().get(id);
                 return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(securityGroupJson),
                         "FIELD", "VALUE");
             } else if (name != null) {

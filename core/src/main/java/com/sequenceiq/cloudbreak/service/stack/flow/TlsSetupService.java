@@ -94,7 +94,7 @@ public class TlsSetupService {
             try {
                 ssh.disconnect();
             } catch (IOException e) {
-                throw new CloudbreakException(String.format("Couldn't disconnect temp SSH session"), e);
+                throw new CloudbreakException("Couldn't disconnect temp SSH session", e);
             }
         }
     }
@@ -222,8 +222,8 @@ public class TlsSetupService {
 
     private void logStdOutAndStdErr(Session.Command command, String commandDesc) throws IOException {
         LOGGER.info("Standard output of {} command", commandDesc);
-        LOGGER.info(new String(IOUtils.readFully(command.getInputStream()).toString()));
+        LOGGER.info(IOUtils.readFully(command.getInputStream()).toString());
         LOGGER.info("Standard error of {} command", commandDesc);
-        LOGGER.info(new String(IOUtils.readFully(command.getErrorStream()).toString()));
+        LOGGER.info(IOUtils.readFully(command.getErrorStream()).toString());
     }
 }

@@ -92,7 +92,7 @@ public class MarathonCommands implements CommandMarker {
         try {
             StackResponse response = null;
             if (id != null) {
-                response = cloudbreakClient.stackEndpoint().get(Long.valueOf(id));
+                response = cloudbreakClient.stackEndpoint().get(id);
             } else if (name != null) {
                 response = cloudbreakClient.stackEndpoint().getPublic(name);
             }
@@ -113,7 +113,7 @@ public class MarathonCommands implements CommandMarker {
         try {
             StackResponse response = null;
             if (id != null) {
-                response = cloudbreakClient.stackEndpoint().get(Long.valueOf(id));
+                response = cloudbreakClient.stackEndpoint().get(id);
             } else if (name != null) {
                 response = cloudbreakClient.stackEndpoint().getPublic(name);
             }
@@ -156,7 +156,7 @@ public class MarathonCommands implements CommandMarker {
             @CliOption(key = "id", mandatory = false, help = "Id of the marathon stack") Long id) {
         try {
             if (id != null) {
-                cloudbreakClient.stackEndpoint().delete(Long.valueOf(id), true);
+                cloudbreakClient.stackEndpoint().delete(id, true);
                 if (id == shellContext.getSelectedMarathonStackId()) {
                     shellContext.resetSelectedMarathonStackId();
                     shellContext.setHint(Hints.MARATHON_CLUSTER);
@@ -253,7 +253,7 @@ public class MarathonCommands implements CommandMarker {
 
     private ConstraintTemplateResponse getConstraintTemplateResponse(Long id, String name) {
         if (id != null) {
-            return cloudbreakClient.constraintTemplateEndpoint().get(Long.valueOf(id));
+            return cloudbreakClient.constraintTemplateEndpoint().get(id);
         } else {
             return cloudbreakClient.constraintTemplateEndpoint().getPublic(name);
         }

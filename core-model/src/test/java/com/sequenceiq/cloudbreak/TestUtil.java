@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -100,7 +101,7 @@ public class TestUtil {
     }
 
     public static CbUser cbUser() {
-        return new CbUser("userid", "testuser", "testaccount", Arrays.asList(CbUserRole.USER), "givenname", "familyname", new Date());
+        return new CbUser("userid", "testuser", "testaccount", Collections.singletonList(CbUserRole.USER), "givenname", "familyname", new Date());
     }
 
     public static Credential awsCredential() {
