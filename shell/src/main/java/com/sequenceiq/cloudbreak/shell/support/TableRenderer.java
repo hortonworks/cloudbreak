@@ -150,7 +150,7 @@ public final class TableRenderer {
     private static <E> Map<String, List<String>> convert(Map<E, String> map) {
         Map<String, List<String>> result = new HashMap<>(map.size());
         if (map != null) {
-            for (Object key : map.keySet()) {
+            for (E key : map.keySet()) {
                 if (map.get(key) != null) {
                     result.put(key.toString(), singletonList(map.get(key)));
                 }
