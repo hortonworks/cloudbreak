@@ -30,10 +30,7 @@ public class ConfigKey {
 
         ConfigKey configKey = (ConfigKey) o;
 
-        if (secure != configKey.secure) {
-            return false;
-        }
-        return debug == configKey.debug;
+        return secure == configKey.secure && debug == configKey.debug;
     }
 
     @Override

@@ -32,10 +32,7 @@ public class CloudPlatformVariant {
 
         CloudPlatformVariant that = (CloudPlatformVariant) o;
 
-        if (!platform.equals(that.platform)) {
-            return false;
-        }
-        return variant.equals(that.variant);
+        return platform.equals(that.platform) && variant.equals(that.variant);
 
     }
 
