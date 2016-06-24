@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -81,7 +82,7 @@ public class StackDecorator implements Decorator<Stack> {
     private void prepareOrchestratorIfNotExist(Stack subject, Credential credential) {
         if (subject.getOrchestrator() == null) {
             PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
-            Orchestrator orchestrator = orchestrators.getDefaults().get(credential.cloudPlatform());
+            Orchestrator orchestrator = orchestrators.getDefaults().get(Platform.platform(credential.cloudPlatform()));
             com.sequenceiq.cloudbreak.domain.Orchestrator orchestratorObject = new com.sequenceiq.cloudbreak.domain.Orchestrator();
             orchestratorObject.setType(orchestrator.value());
             subject.setOrchestrator(orchestratorObject);
