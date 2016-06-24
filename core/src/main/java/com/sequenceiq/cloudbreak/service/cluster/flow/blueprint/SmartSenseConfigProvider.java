@@ -76,7 +76,7 @@ public class SmartSenseConfigProvider {
     }
 
     private Function<HostGroup, String> getHostGroupNameMapper() {
-        return hostGroup -> hostGroup.getName();
+        return HostGroup::getName;
     }
 
     private Collection<? extends BlueprintConfigurationEntry> getSmartSenseServerConfigs() {

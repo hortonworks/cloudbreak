@@ -305,8 +305,6 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 }
             }
             return String.format("Stack creation started with id: '%s' and name: '%s'", id.getId(), name);
-        } catch (ValidationException ex) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

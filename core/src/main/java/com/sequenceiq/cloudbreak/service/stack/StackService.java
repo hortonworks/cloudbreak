@@ -25,7 +25,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
@@ -471,10 +470,10 @@ public class StackService {
 
     private void validateHostGroupAdjustment(final InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
-        HostGroup hostGroup = Iterables.find(stack.getCluster().getHostGroups(), input -> {
+        HostGroup hostGroup = stack.getCluster().getHostGroups().stream().filter(input -> {
             // TODO: why instancegroups?
             return input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup());
-        });
+        }).findFirst().get();
         if (hostGroup == null) {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));

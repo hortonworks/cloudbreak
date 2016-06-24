@@ -70,8 +70,8 @@ public class ComputeResourceService {
         List<ComputeResourceBuilder> builders = resourceBuilders.compute(cloudContext.getPlatform());
         for (Group group : getOrderedCopy(groups)) {
             List<CloudInstance> instances = group.getInstances();
-            for (int i = 0; i < instances.size(); i++) {
-                ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instances.get(i).getTemplate().getPrivateId(), group, ctx, auth, image);
+            for (CloudInstance instance : instances) {
+                ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instance.getTemplate().getPrivateId(), group, ctx, auth, image);
                 Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(thread);
                 futures.add(future);
                 if (isRequestFullWithCloudPlatform(builders.size(), futures.size(), ctx)) {

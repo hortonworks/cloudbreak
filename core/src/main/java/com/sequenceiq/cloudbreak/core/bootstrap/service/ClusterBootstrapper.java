@@ -283,12 +283,12 @@ public class ClusterBootstrapper {
             throws CloudbreakException, CloudbreakOrchestratorException {
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(SWARM);
         List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator.getMaxBootstrapNodes(), gatewayInstance.getPublicIpWrapper());
-        for (int i = 0; i < nodeMap.size(); i++) {
-            containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i),
+        for (Set<Node> aNodeMap : nodeMap) {
+            containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), aNodeMap,
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
             PollingResult newNodesAvailabilityPolling = containerClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
                     containerClusterAvailabilityCheckerTask,
-                    new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
+                    new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, aNodeMap),
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(newNodesAvailabilityPolling, "Polling of new nodes availability was cancelled.");
