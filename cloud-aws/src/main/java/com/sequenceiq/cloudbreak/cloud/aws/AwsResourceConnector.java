@@ -194,8 +194,8 @@ public class AwsResourceConnector implements ResourceConnector {
         List<CloudResource> cloudResources = new ArrayList<>();
         if (mapPublicIpOnLaunch) {
             String eipAllocationId = getElasticIpAllocationId(cFStackName, client);
-            List<String> instanceIds = cfStackUtil.getInstanceIds(amazonASClient, cfStackUtil.getAutoscalingGroupName(ac, client, stack.getGroups().get(0)
-                    .getName()));
+            Group gateWay = stack.getGroups().stream().filter(group -> group.getType() == InstanceGroupType.GATEWAY).findFirst().get();
+            List<String> instanceIds = cfStackUtil.getInstanceIds(amazonASClient, cfStackUtil.getAutoscalingGroupName(ac, client, gateWay.getName()));
             associateElasticIpToInstance(amazonEC2Client, eipAllocationId, instanceIds);
         }
         AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
