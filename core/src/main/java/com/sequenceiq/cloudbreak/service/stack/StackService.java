@@ -368,7 +368,7 @@ public class StackService {
                 eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
             } else if (stack.infrastructureIsEphemeral()) {
                 throw new BadRequestException(
-                        String.format("Cannot stop a stack if the volumeType is Ephemeral.", stack.getId()));
+                        String.format("Cannot stop a stack '%s' if the volumeType is Ephemeral.", stack.getId()));
             } else if (!stack.isAvailable() && !stack.isStopFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
