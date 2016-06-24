@@ -2,14 +2,13 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.gcs;
 
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ALL_NODES;
 import static com.sequenceiq.cloudbreak.api.model.FileSystemType.GCS;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.PRE_INSTALL;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.POST_INSTALL;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
@@ -26,14 +25,13 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
         String privateKey = getPrivateKey(fsConfig);
         Map<String, String> properties = Collections.singletonMap("P12KEY", privateKey);
         List<FileSystemScriptConfig> fsScriptConfigs = new ArrayList<>();
-        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-connector.sh", PRE_INSTALL, ALL_NODES));
-        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-p12.sh", PRE_INSTALL, ALL_NODES, properties));
+        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-connector.sh", POST_INSTALL, ALL_NODES));
+        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-p12.sh", POST_INSTALL, ALL_NODES, properties));
         return fsScriptConfigs;
     }
 
     private String getPrivateKey(GcsFileSystemConfiguration fsConfig) {
-        String privateKeyEncoded = fsConfig.getPrivateKeyEncoded();
-        return Base64.encodeBase64String(privateKeyEncoded.getBytes());
+        return fsConfig.getPrivateKeyEncoded();
     }
 
     @Override
