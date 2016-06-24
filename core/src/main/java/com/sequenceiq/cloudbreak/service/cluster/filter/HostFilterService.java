@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.filter;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,20 +40,16 @@ public class HostFilterService {
 
     public List<HostMetadata> filterHostsForDecommission(Cluster cluster, Set<HostMetadata> hosts, String hostGroup) throws CloudbreakSecuritySetupException {
         List<HostMetadata> filteredList = new ArrayList<>(hosts);
-        try {
-            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(cluster.getStack().getId(), cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getStack().getGatewayPort(), cluster.getUserName(),
-                    cluster.getPassword());
-            Map<String, String> config = configurationService.getConfiguration(ambariClient, hostGroup);
-            for (HostFilter hostFilter : hostFilters) {
-                try {
-                    filteredList = hostFilter.filter(cluster.getId(), config, filteredList);
-                } catch (HostFilterException e) {
-                    LOGGER.warn("Filter didn't succeed, moving to next filter", e);
-                }
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(cluster.getStack().getId(), cluster.getAmbariIp());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getStack().getGatewayPort(), cluster.getUserName(),
+                cluster.getPassword());
+        Map<String, String> config = configurationService.getConfiguration(ambariClient, hostGroup);
+        for (HostFilter hostFilter : hostFilters) {
+            try {
+                filteredList = hostFilter.filter(cluster.getId(), config, filteredList);
+            } catch (HostFilterException e) {
+                LOGGER.warn("Filter didn't succeed, moving to next filter", e);
             }
-        } catch (ConnectException e) {
-            LOGGER.error("Error retrieving the configuration from Ambari, no host filtering is provided", e);
         }
         return filteredList;
     }

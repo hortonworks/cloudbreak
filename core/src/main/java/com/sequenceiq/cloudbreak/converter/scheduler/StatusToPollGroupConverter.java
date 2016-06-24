@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.converter.scheduler;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.api.model.Status;
 
 @Component
 public class StatusToPollGroupConverter extends AbstractConversionServiceAwareConverter<Status, PollGroup> {

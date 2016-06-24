@@ -115,14 +115,14 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliCommand(value = "stack delete --id", help = "Delete the stack by its id")
     public String deleteByName(
             @CliOption(key = "", mandatory = true) Long id,
-            @CliOption(key = "wait", mandatory = false, help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) throws Exception {
+            @CliOption(key = "wait", mandatory = false, help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
         return delete(id, null, wait);
     }
 
     @CliCommand(value = "stack delete --name", help = "Delete the stack by its name")
     public String deleteById(
             @CliOption(key = "", mandatory = true) String name,
-            @CliOption(key = "wait", mandatory = false, help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) throws Exception {
+            @CliOption(key = "wait", mandatory = false, help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
         return delete(null, name, wait);
     }
 
@@ -316,7 +316,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
     }
 
-    private String stop(StackResponse stackResponse) throws Exception {
+    private String stop(StackResponse stackResponse) {
         shellContext.addStack(stackResponse.getId().toString(), stackResponse.getName());
         prepareCluster(stackResponse.getId().toString());
         UpdateStackJson updateStackJson = new UpdateStackJson();
@@ -346,16 +346,16 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @CliCommand(value = "stack stop --id", help = "Stop the stack by its id")
-    public String stopById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+    public String stopById(@CliOption(key = "", mandatory = true) Long id) {
         return stop(id, null);
     }
 
     @CliCommand(value = "stack stop --name", help = "Stop the stack by its name")
-    public String stopByName(@CliOption(key = "", mandatory = true)String name) throws Exception {
+    public String stopByName(@CliOption(key = "", mandatory = true)String name) {
         return stop(null, name);
     }
 
-    private String start(StackResponse stackResponse) throws Exception {
+    private String start(StackResponse stackResponse) {
         shellContext.addStack(stackResponse.getId().toString(), stackResponse.getName());
         prepareCluster(stackResponse.getId().toString());
         UpdateStackJson updateStackJson = new UpdateStackJson();
@@ -385,12 +385,12 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @CliCommand(value = "stack start --id", help = "Start the stack by its id")
-    public String startById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+    public String startById(@CliOption(key = "", mandatory = true) Long id) {
         return start(id, null);
     }
 
     @CliCommand(value = "stack start --name", help = "Start the stack by its name")
-    public String startByName(@CliOption(key = "", mandatory = true)String name) throws Exception {
+    public String startByName(@CliOption(key = "", mandatory = true)String name) {
         return start(null, name);
     }
 

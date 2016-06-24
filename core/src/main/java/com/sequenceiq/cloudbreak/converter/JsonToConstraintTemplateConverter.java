@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
-import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
 
 @Component
 public class JsonToConstraintTemplateConverter extends AbstractConversionServiceAwareConverter<ConstraintTemplateRequest, ConstraintTemplate> {

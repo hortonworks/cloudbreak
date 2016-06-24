@@ -6,9 +6,9 @@ import java.util.List;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sequenceiq.it.spark.ITResponse;
 import com.sequenceiq.it.spark.ambari.model.Clusters;
 import com.sequenceiq.it.spark.ambari.model.Hosts;
-import com.sequenceiq.it.spark.ITResponse;
 
 import spark.Request;
 import spark.Response;

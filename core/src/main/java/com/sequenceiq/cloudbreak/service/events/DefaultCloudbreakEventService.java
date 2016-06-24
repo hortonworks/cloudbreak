@@ -41,7 +41,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private CloudbreakEventHandler cloudbreakEventHandler;
 
     @PostConstruct
-    public void setup() throws Exception {
+    public void setup() {
         reactor.on(Selectors.$(CLOUDBREAK_EVENT), cloudbreakEventHandler);
     }
 

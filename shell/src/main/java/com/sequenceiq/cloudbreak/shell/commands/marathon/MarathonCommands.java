@@ -263,8 +263,7 @@ public class MarathonCommands implements CommandMarker {
     public String createHostGroup(
             @CliOption(key = "hostgroup", mandatory = true, help = "Name of the hostgroup") HostGroup hostgroup,
             @CliOption(key = "nodecount", mandatory = true, help = "Count of the nodes in the hostgroup") Integer nodecount,
-            @CliOption(key = "constraintName", mandatory = true, help = "Name of the constraint") ConstraintName constraintTemplateName)
-            throws Exception {
+            @CliOption(key = "constraintName", mandatory = true, help = "Name of the constraint") ConstraintName constraintTemplateName) {
         try {
             ConstraintTemplateResponse constraintTemplateResponse = getConstraintTemplateResponse(null, constraintTemplateName.getName());
             if (constraintTemplateResponse != null) {
@@ -282,7 +281,7 @@ public class MarathonCommands implements CommandMarker {
     }
 
     @CliCommand(value = "marathon hostgroup show", help = "Show hostgroups")
-    public String listHostGroup() throws Exception {
+    public String listHostGroup() {
         try {
             return shellContext.outputTransformer().render(shellContext.getHostGroups(), "hostgroup");
         } catch (Exception ex) {

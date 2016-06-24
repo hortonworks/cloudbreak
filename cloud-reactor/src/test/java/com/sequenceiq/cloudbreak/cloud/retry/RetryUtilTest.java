@@ -42,24 +42,6 @@ public class RetryUtilTest {
     }
 
     @Test
-    public void testRunWithException() throws Exception {
-        doThrow(new Exception()).when(task).run();
-        runRetryTask();
-        verify(task, times(3)).run();
-        verify(error, times(1)).run(any());
-    }
-
-    @Test
-    public void testRunWithOneException() throws Exception {
-        doThrow(new Exception())
-                .doNothing()
-                .when(task).run();
-        runRetryTask();
-        verify(task, times(2)).run();
-        verify(error, times(0)).run(any());
-    }
-
-    @Test
     public void testRunWithRecoverableException() throws Exception {
         when(exceptionCheck.check(any())).thenReturn(true);
         doThrow(new IllegalArgumentException()).when(task).run();

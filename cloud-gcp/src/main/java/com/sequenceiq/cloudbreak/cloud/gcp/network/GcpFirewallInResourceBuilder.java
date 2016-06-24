@@ -71,7 +71,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
     }
 
     @Override
-    public CloudResourceStatus update(GcpContext ctx, AuthenticatedContext auth, Network network, Security security, CloudResource resource) throws Exception {
+    public CloudResourceStatus update(GcpContext ctx, AuthenticatedContext auth, Network network, Security security, CloudResource resource) {
         String projectId = ctx.getProjectId();
         Compute compute = ctx.getCompute();
         String resourceName = resource.getName();

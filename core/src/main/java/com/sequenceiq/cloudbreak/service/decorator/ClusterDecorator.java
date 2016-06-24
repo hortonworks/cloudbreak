@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import javax.inject.Inject;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
@@ -16,8 +19,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterDecorator implements Decorator<Cluster> {

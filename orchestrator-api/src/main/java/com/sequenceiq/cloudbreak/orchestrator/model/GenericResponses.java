@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-
 import java.util.List;
+
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 
 public class GenericResponses {
 

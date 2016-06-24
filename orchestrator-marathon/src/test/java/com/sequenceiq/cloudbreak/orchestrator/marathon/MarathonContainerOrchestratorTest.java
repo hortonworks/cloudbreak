@@ -1,12 +1,5 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon;
 
-import com.google.common.collect.ImmutableMap;
-import mesosphere.marathon.client.Marathon;
-import mesosphere.marathon.client.MarathonClient;
-import mesosphere.marathon.client.model.v2.App;
-import mesosphere.marathon.client.model.v2.Container;
-import mesosphere.marathon.client.model.v2.Docker;
-import mesosphere.marathon.client.utils.MarathonException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -14,6 +7,15 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableMap;
+
+import mesosphere.marathon.client.Marathon;
+import mesosphere.marathon.client.MarathonClient;
+import mesosphere.marathon.client.model.v2.App;
+import mesosphere.marathon.client.model.v2.Container;
+import mesosphere.marathon.client.model.v2.Docker;
+import mesosphere.marathon.client.utils.MarathonException;
 
 @RunWith(MockitoJUnitRunner.class)
 @Ignore
@@ -23,7 +25,7 @@ public class MarathonContainerOrchestratorTest {
     private Marathon client;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         client = MarathonClient.getInstance("http://172.16.252.31:8080");
     }
 

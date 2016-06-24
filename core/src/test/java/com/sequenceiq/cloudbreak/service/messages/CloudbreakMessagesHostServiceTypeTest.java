@@ -18,7 +18,7 @@ public class CloudbreakMessagesHostServiceTypeTest {
     private CloudbreakMessagesService messageService;
 
     @Test
-    public void shouldResolveMessageIfCodeProvided() throws Exception {
+    public void shouldResolveMessageIfCodeProvided() {
         // GIVEN
 
         // WHEN
@@ -30,7 +30,7 @@ public class CloudbreakMessagesHostServiceTypeTest {
     }
 
     @Test
-    public void shouldResolveCodeAndMergeArgs() throws Exception {
+    public void shouldResolveCodeAndMergeArgs() {
         // GIVEN
 
 

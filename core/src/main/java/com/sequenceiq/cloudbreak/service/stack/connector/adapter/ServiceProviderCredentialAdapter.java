@@ -73,7 +73,7 @@ public class ServiceProviderCredentialAdapter {
         return credential;
     }
 
-    public Credential update(Credential credential) throws Exception {
+    public Credential update(Credential credential) {
         return credential;
     }
 

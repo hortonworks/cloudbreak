@@ -220,21 +220,21 @@ public class SaltOrchestratorTest {
     }
 
     @Test
-    public void getMissingNodesTest() throws Exception {
+    public void getMissingNodesTest() {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
         assertThat(saltOrchestrator.getMissingNodes(gatewayConfig, targets), hasSize(0));
     }
 
     @Test
-    public void getAvailableNodesTest() throws Exception {
+    public void getAvailableNodesTest() {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
         assertThat(saltOrchestrator.getAvailableNodes(gatewayConfig, targets), hasSize(0));
     }
 
     @Test
-    public void isBootstrapApiAvailableTest() throws Exception {
+    public void isBootstrapApiAvailableTest() {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
@@ -247,7 +247,7 @@ public class SaltOrchestratorTest {
     }
 
     @Test
-    public void isBootstrapApiAvailableFailTest() throws Exception {
+    public void isBootstrapApiAvailableFailTest() {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 

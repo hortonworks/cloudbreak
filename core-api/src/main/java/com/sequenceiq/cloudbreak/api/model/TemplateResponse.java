@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 

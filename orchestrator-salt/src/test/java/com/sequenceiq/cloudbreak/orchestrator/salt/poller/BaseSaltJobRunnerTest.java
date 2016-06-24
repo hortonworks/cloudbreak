@@ -22,7 +22,7 @@ public class BaseSaltJobRunnerTest {
     private BaseSaltJobRunner baseSaltJobRunner;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
@@ -30,7 +30,7 @@ public class BaseSaltJobRunnerTest {
     }
 
     @Test
-    public void collectMissingNodesAllNodeAndSaltNodeWithPrefix() throws Exception {
+    public void collectMissingNodesAllNodeAndSaltNodeWithPrefix() {
         Set<Node> allNode = allNodeWithPostFix();
         baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
             @Override
@@ -49,7 +49,7 @@ public class BaseSaltJobRunnerTest {
     }
 
     @Test
-    public void collectMissingNodesAllNodeWithoutPrefixSaltNodeWithPrefix() throws Exception {
+    public void collectMissingNodesAllNodeWithoutPrefixSaltNodeWithPrefix() {
         Set<Node> allNode = allNodeWithoutPostFix();
         baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
             @Override
@@ -68,7 +68,7 @@ public class BaseSaltJobRunnerTest {
     }
 
     @Test
-    public void collectMissingNodesAllNodeAndSaltNodeWithoutPrefix() throws Exception {
+    public void collectMissingNodesAllNodeAndSaltNodeWithoutPrefix() {
         Set<Node> allNode = allNodeWithoutPostFix();
         baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
             @Override
@@ -87,7 +87,7 @@ public class BaseSaltJobRunnerTest {
     }
 
     @Test
-    public void collectMissingNodesAllNodeWithPrefixAndSaltNodeWithoutPrefix() throws Exception {
+    public void collectMissingNodesAllNodeWithPrefixAndSaltNodeWithoutPrefix() {
         Set<Node> allNode = allNodeWithoutPostFix();
         baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
             @Override
@@ -106,7 +106,7 @@ public class BaseSaltJobRunnerTest {
     }
 
     @Test
-    public void collectNodesTest() throws Exception {
+    public void collectNodesTest() {
         Set<Node> allNode = allNodeWithPostFix();
         baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
             @Override

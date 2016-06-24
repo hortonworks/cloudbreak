@@ -44,8 +44,7 @@ public abstract class AbstractOpenStackNetworkResourceBuilder extends AbstractOp
     }
 
     @Override
-    public CloudResourceStatus update(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource)
-            throws Exception {
+    public CloudResourceStatus update(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource) {
         return null;
     }
 

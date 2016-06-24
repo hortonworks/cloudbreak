@@ -120,14 +120,14 @@ public class NetworkResourceService {
         return getResources(resources, types);
     }
 
-    protected CloudResource createResource(AuthenticatedContext auth, CloudResource buildableResource) throws Exception {
+    protected CloudResource createResource(AuthenticatedContext auth, CloudResource buildableResource) {
         if (buildableResource.isPersistent()) {
             resourceNotifier.notifyAllocation(buildableResource, auth.getCloudContext());
         }
         return buildableResource;
     }
 
-    protected CloudResource updateResource(AuthenticatedContext auth, CloudResource buildableResource) throws Exception {
+    protected CloudResource updateResource(AuthenticatedContext auth, CloudResource buildableResource) {
         if (buildableResource.isPersistent()) {
             resourceNotifier.notifyUpdate(buildableResource, auth.getCloudContext());
         }

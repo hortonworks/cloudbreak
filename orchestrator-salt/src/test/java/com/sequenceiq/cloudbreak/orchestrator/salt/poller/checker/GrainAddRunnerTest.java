@@ -33,7 +33,7 @@ public class GrainAddRunnerTest {
     private Set<Node> allNode;
 
     @Test
-    public void submitTest() throws Exception {
+    public void submitTest() {
         targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");

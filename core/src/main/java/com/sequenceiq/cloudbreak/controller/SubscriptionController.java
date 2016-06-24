@@ -5,11 +5,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.SubscriptionEndpoint;
+import com.sequenceiq.cloudbreak.api.model.IdJson;
+import com.sequenceiq.cloudbreak.api.model.SubscriptionRequest;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Subscription;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
-import com.sequenceiq.cloudbreak.api.model.SubscriptionRequest;
 import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
 
 @Component

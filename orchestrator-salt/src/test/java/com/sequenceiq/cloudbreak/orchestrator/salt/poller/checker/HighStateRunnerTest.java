@@ -27,7 +27,7 @@ public class HighStateRunnerTest {
     private Set<Node> allNode;
 
     @Test
-    public void submit() throws Exception {
+    public void submit() {
         targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
@@ -52,7 +52,7 @@ public class HighStateRunnerTest {
     }
 
     @Test
-    public void stateType() throws Exception {
+    public void stateType() {
         assertEquals(StateType.HIGH, new HighStateRunner(targets, allNode).stateType());
     }
 

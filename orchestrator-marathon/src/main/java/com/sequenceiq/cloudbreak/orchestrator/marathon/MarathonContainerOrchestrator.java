@@ -109,12 +109,12 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+    public void startContainer(List<ContainerInfo> info, OrchestrationCredential cred) {
 
     }
 
     @Override
-    public void stopContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+    public void stopContainer(List<ContainerInfo> info, OrchestrationCredential cred) {
 
     }
 

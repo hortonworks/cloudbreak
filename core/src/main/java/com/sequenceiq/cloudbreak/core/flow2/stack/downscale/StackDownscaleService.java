@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -40,8 +39,7 @@ public class StackDownscaleService {
         flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(), Math.abs(adjustment));
     }
 
-    public void finishStackDownscale(StackScalingFlowContext context, String instanceGroupName, Set<String> instanceIds)
-            throws CloudbreakSecuritySetupException {
+    public void finishStackDownscale(StackScalingFlowContext context, String instanceGroupName, Set<String> instanceIds) {
         Stack stack = context.getStack();
         stackScalingService.updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Downscale of the cluster infrastructure finished successfully.");

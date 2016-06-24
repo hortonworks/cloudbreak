@@ -44,7 +44,7 @@ public class BlueprintCommandsTest {
     private BlueprintResponse dummyResult;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         underTest = new BlueprintCommands(mockContext);

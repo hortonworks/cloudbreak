@@ -16,7 +16,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -235,13 +234,8 @@ public class AmbariDecommissioner {
     }
 
     private int getReplicationFactor(AmbariClient ambariClient, String hostGroup) {
-        try {
-            Map<String, String> configuration = configurationService.getConfiguration(ambariClient, hostGroup);
-            return Integer.parseInt(configuration.get(ConfigParam.DFS_REPLICATION.key()));
-        } catch (ConnectException e) {
-            LOGGER.error("Cannot connect to Ambari to get the configuration", e);
-            throw new BadRequestException("Cannot connect to Ambari");
-        }
+        Map<String, String> configuration = configurationService.getConfiguration(ambariClient, hostGroup);
+        return Integer.parseInt(configuration.get(ConfigParam.DFS_REPLICATION.key()));
     }
 
     private void verifyNodeCount(int replication, int scalingAdjustment, List<HostMetadata> filteredHostList, int reservedInstances) {
@@ -400,7 +394,7 @@ public class AmbariDecommissioner {
         deleteHosts(stack, hostList, new ArrayList<>(components));
     }
 
-    private PollingResult waitForHostsToLeave(Stack stack, AmbariClient ambariClient, List<String> hostNames) throws CloudbreakSecuritySetupException {
+    private PollingResult waitForHostsToLeave(Stack stack, AmbariClient ambariClient, List<String> hostNames) {
         return ambariHostLeave.pollWithTimeout(hostsLeaveStatusCheckerTask, new AmbariHostsWithNames(stack, ambariClient, hostNames),
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS, AmbariOperationService.MAX_FAILURE_COUNT);
     }
@@ -465,7 +459,7 @@ public class AmbariDecommissioner {
         }
     }
 
-    private PollingResult startServicesIfNeeded(Stack stack, AmbariClient ambariClient, String blueprint) throws CloudbreakException {
+    private PollingResult startServicesIfNeeded(Stack stack, AmbariClient ambariClient, String blueprint) {
         Map<String, Integer> stringIntegerMap = new HashMap<>();
         Map<String, String> componentsCategory = ambariClient.getComponentsCategory(blueprint);
         Map<String, Map<String, String>> hostComponentsStates = ambariClient.getHostComponentsStates();

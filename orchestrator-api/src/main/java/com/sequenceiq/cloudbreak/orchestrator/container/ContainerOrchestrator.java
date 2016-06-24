@@ -19,9 +19,9 @@ public interface ContainerOrchestrator extends ContainerOrchestrationBootstrap {
     List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
-    void startContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException;
+    void startContainer(List<ContainerInfo> info, OrchestrationCredential cred);
 
-    void stopContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException;
+    void stopContainer(List<ContainerInfo> info, OrchestrationCredential cred);
 
     void deleteContainer(List<ContainerInfo> containerInfos, OrchestrationCredential cred) throws CloudbreakOrchestratorException;
 

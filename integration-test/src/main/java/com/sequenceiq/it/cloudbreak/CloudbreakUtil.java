@@ -36,19 +36,19 @@ public class CloudbreakUtil {
         }
     }
 
-    public static void waitAndCheckStackStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) throws Exception {
+    public static void waitAndCheckStackStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) {
         waitAndCheckStatus(cloudbreakClient, stackId, desiredStatus, "status");
     }
 
-    public static void waitAndCheckClusterStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) throws Exception {
+    public static void waitAndCheckClusterStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) {
         waitAndCheckStatus(cloudbreakClient, stackId, desiredStatus, "clusterStatus");
     }
 
-    public static WaitResult waitForStackStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) throws Exception {
+    public static WaitResult waitForStackStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) {
         return waitForStatus(cloudbreakClient, stackId, desiredStatus, "status");
     }
 
-    public static WaitResult waitForClusterStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) throws Exception {
+    public static WaitResult waitForClusterStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) {
         return waitForStatus(cloudbreakClient, stackId, desiredStatus, "clusterStatus");
     }
 
@@ -59,7 +59,7 @@ public class CloudbreakUtil {
     }
 
     public static void checkClusterAvailability(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
-            boolean checkAmbari) throws Exception {
+            boolean checkAmbari) {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
 
         Assert.assertEquals(stackResponse.getCluster().getStatus(), "AVAILABLE", "The cluster hasn't been started!");
@@ -76,8 +76,7 @@ public class CloudbreakUtil {
         }
     }
 
-    public static void checkClusterStopped(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassword)
-            throws Exception {
+    public static void checkClusterStopped(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassword) {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
 
         Assert.assertEquals(stackResponse.getCluster().getStatus(), "STOPPED", "The cluster is not stopped!");
@@ -97,7 +96,7 @@ public class CloudbreakUtil {
         }
     }
 
-    private static void waitAndCheckStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus, String statusPath) throws Exception {
+    private static void waitAndCheckStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus, String statusPath) {
         for (int i = 0; i < 3; i++) {
             WaitResult waitResult = waitForStatus(cloudbreakClient, stackId, desiredStatus, statusPath);
             if (waitResult == WaitResult.FAILED) {
@@ -109,7 +108,7 @@ public class CloudbreakUtil {
         }
     }
 
-    private static WaitResult waitForStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus, String statusPath) throws Exception {
+    private static WaitResult waitForStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus, String statusPath) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         String stackStatus = null;
         int retryCount = 0;

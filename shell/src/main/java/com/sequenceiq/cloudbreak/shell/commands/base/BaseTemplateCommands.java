@@ -178,7 +178,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
         return shellContext;
     }
 
-    private void createOrSelectBlueprintHint() throws Exception {
+    private void createOrSelectBlueprintHint() {
         if (shellContext.isCredentialAccessible() && shellContext.isBlueprintAccessible()) {
             shellContext.setHint(Hints.CONFIGURE_INSTANCEGROUP);
         } else if (!shellContext.isBlueprintAccessible()) {

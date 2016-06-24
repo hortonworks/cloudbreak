@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.event.platform;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class GetPlatformVariantsRequest extends CloudPlatformRequest<GetPlatformVariantsResult> {

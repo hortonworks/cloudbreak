@@ -29,8 +29,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
@@ -82,7 +80,7 @@ public class ClusterContainerRunnerTest {
     private ClusterContainerRunner underTest;
 
     @Before
-    public void setUp() throws CloudbreakException {
+    public void setUp() {
         ReflectionTestUtils.setField(containerConfigService, "ambariAgent", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "ambariServer", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "registratorDockerImageName", "sequence/testcont:0.1.1");
@@ -94,7 +92,7 @@ public class ClusterContainerRunnerTest {
 
     @Test(expected = CloudbreakException.class)
     public void runNewNodesClusterContainersWhenContainerRunnerFailed()
-            throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
+            throws CloudbreakException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
@@ -135,7 +133,7 @@ public class ClusterContainerRunnerTest {
 
     @Test(expected = CancellationException.class)
     public void runNewNodesClusterContainersWhenContainerRunnerCancelled()
-            throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
+            throws CloudbreakException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);

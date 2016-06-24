@@ -13,7 +13,7 @@ public class VersionComparatorTest {
     private VersionComparator underTest;
 
     @Before
-    public void setup() throws IOException {
+    public void setup() {
         underTest = new VersionComparator();
     }
 

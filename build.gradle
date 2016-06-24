@@ -1,16 +1,17 @@
+import com.github.zafarkhaja.semver.Version
 import org.ajoberstar.gradle.git.release.opinion.Strategies
 import org.ajoberstar.gradle.git.release.opinion.Strategies.BuildMetadata
 import org.ajoberstar.gradle.git.release.opinion.Strategies.PreRelease
 import org.ajoberstar.gradle.git.release.semver.ChangeScope
 import org.ajoberstar.gradle.git.release.semver.PartialSemVerStrategy
-import org.ajoberstar.gradle.git.release.semver.SemVerStrategyState
 import org.ajoberstar.gradle.git.release.semver.SemVerStrategy
+import org.ajoberstar.gradle.git.release.semver.SemVerStrategyState
 import org.ajoberstar.gradle.git.release.semver.TagUtil
 import org.ajoberstar.grgit.Grgit
-import com.github.zafarkhaja.semver.Version
 
-
-import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.*
+import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.all
+import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.closure
+import static org.ajoberstar.gradle.git.release.semver.StrategyUtil.parseIntOrZero
 
 final class VersionUtils {
   final static Version getNearestPreReleaseVersion(Grgit grgit, SemVerStrategyState state, String label) {

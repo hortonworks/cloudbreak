@@ -32,7 +32,7 @@ public class ClusterSecurityService {
         }
     }
 
-    private boolean hasAccess(String userId, String account, String ambariAddress) throws Exception {
+    private boolean hasAccess(String userId, String account, String ambariAddress) {
         AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
         ambariAddressJson.setAmbariAddress(ambariAddress);
         StackResponse stack = cloudbreakClient.stackEndpoint().getStackForAmbari(ambariAddressJson);

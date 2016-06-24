@@ -251,7 +251,7 @@ public class ShellContext {
         return isPropertyAvailable(PropertyKey.CREDENTIAL_ID);
     }
 
-    public void setCredential(String id) throws Exception {
+    public void setCredential(String id) {
         CredentialResponse credential = cloudbreakClient.credentialEndpoint().get(Long.valueOf(id));
         this.activeCloudPlatform = credential.getCloudPlatform();
         List<TemplateResponse> templateResponses = new ArrayList<>();
@@ -415,7 +415,7 @@ public class ShellContext {
         addProperty(PropertyKey.SSSDCONFIG_ACCESSIBLE, ACCESSIBLE);
     }
 
-    public void addSssdConfig(String id) throws Exception {
+    public void addSssdConfig(String id) {
         addProperty(PropertyKey.SSSDCONFIG_ID, id);
         setSssdConfigAccessible();
     }

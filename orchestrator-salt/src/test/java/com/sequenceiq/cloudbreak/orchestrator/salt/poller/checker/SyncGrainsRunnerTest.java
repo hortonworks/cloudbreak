@@ -32,7 +32,7 @@ public class SyncGrainsRunnerTest {
     private Set<Node> allNode;
 
     @Test
-    public void submit() throws Exception {
+    public void submit() {
         targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");

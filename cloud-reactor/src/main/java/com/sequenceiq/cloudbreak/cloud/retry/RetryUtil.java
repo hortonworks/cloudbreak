@@ -64,7 +64,7 @@ public class RetryUtil implements Runnable {
         }
     }
 
-    private void runChecker() throws Exception {
+    private void runChecker() {
         if (check != null && !check.check()) {
             runRetry();
         }

@@ -61,7 +61,7 @@ public class ComputeResourceService {
     }
 
     private List<CloudResourceStatus> buildResources(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image, Boolean upscale,
-            AdjustmentType adjustmentType, Long threshold) throws Exception {
+            AdjustmentType adjustmentType, Long threshold) {
         List<CloudResourceStatus> results = new ArrayList<>();
         int fullNodeCount = getFullNodeCount(groups);
 
@@ -92,7 +92,7 @@ public class ComputeResourceService {
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, boolean cancellable) throws Exception {
+            List<CloudResource> resources, boolean cancellable) {
         List<CloudResourceStatus> results = new ArrayList<>();
         List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         Platform platform = auth.getCloudContext().getPlatform();
@@ -134,7 +134,7 @@ public class ComputeResourceService {
     }
 
     private List<CloudVmInstanceStatus> stopStart(ResourceBuilderContext context,
-            AuthenticatedContext auth, List<CloudResource> resources, List<CloudInstance> instances) throws Exception {
+            AuthenticatedContext auth, List<CloudResource> resources, List<CloudInstance> instances) {
         List<CloudVmInstanceStatus> results = new ArrayList<>();
         List<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
         Platform platform = auth.getCloudContext().getPlatform();
@@ -162,7 +162,7 @@ public class ComputeResourceService {
         return results;
     }
 
-    private <T> Map<FutureResult, List<T>> waitForRequests(List<Future<ResourceRequestResult<T>>> futures) throws Exception {
+    private <T> Map<FutureResult, List<T>> waitForRequests(List<Future<ResourceRequestResult<T>>> futures) {
         Map<FutureResult, List<T>> result = new HashMap<>();
         result.put(FutureResult.FAILED, new ArrayList<>());
         result.put(FutureResult.SUCCESS, new ArrayList<>());

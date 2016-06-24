@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.service;
 
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 public abstract class StackBasedStatusCheckerTask<T extends StackContext> extends SimpleStatusCheckerTask<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBasedStatusCheckerTask.class);

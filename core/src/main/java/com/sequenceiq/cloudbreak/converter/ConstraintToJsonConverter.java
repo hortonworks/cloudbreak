@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
+import com.sequenceiq.cloudbreak.domain.Constraint;
 
 @Component
 public class ConstraintToJsonConverter extends AbstractConversionServiceAwareConverter<Constraint, ConstraintJson> {

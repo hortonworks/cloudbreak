@@ -18,7 +18,7 @@ public class DockerClientUtil {
     private DockerClientUtil() {
     }
 
-    public static void createContainer(DockerClient client, CreateContainerCmd cmd, String node) throws Exception {
+    public static void createContainer(DockerClient client, CreateContainerCmd cmd, String node) {
         String name = cmd.getName();
         try {
             InspectContainerResponse inspectResponse = inspect(client, name);

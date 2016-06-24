@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
+import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
+import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeMetaJson;
 import com.sequenceiq.cloudbreak.api.model.VolumeParameterConfigJson;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
-import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.converter.util.PlatformConverterUtil;
 

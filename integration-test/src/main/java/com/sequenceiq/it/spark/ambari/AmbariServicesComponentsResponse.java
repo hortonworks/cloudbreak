@@ -1,8 +1,8 @@
 package com.sequenceiq.it.spark.ambari;
 
+import com.sequenceiq.it.spark.ITResponse;
 import com.sequenceiq.it.spark.ambari.model.RootServiceComponents;
 import com.sequenceiq.it.spark.ambari.model.Services;
-import com.sequenceiq.it.spark.ITResponse;
 
 import spark.Request;
 import spark.Response;

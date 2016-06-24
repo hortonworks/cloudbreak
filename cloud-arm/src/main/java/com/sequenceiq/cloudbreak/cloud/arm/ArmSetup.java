@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.arm;
 import static com.sequenceiq.cloudbreak.cloud.arm.ArmStorage.IMAGES;
 import static com.sequenceiq.cloudbreak.cloud.arm.ArmUtils.NOT_FOUND;
 
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
@@ -175,7 +174,7 @@ public class ArmSetup implements Setup {
         return false;
     }
 
-    private boolean storageContainsImage(AzureRMClient client, String groupName, String storageName, String image) throws URISyntaxException, StorageException {
+    private boolean storageContainsImage(AzureRMClient client, String groupName, String storageName, String image) {
         List<ListBlobItem> listBlobItems = client.listBlobInStorage(groupName, storageName, IMAGES);
         for (ListBlobItem listBlobItem : listBlobItems) {
             if (getNameFromConnectionString(listBlobItem.getUri().getPath()).equals(image.split("/")[image.split("/").length - 1])) {

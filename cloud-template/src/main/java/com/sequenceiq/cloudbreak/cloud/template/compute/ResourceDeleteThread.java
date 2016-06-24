@@ -70,7 +70,7 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
         return new ResourceRequestResult<>(FutureResult.SUCCESS, Collections.singletonList(status));
     }
 
-    private void deleteResource() throws InterruptedException {
+    private void deleteResource() {
         resourceNotifier.notifyDeletion(resource, auth.getCloudContext());
     }
 

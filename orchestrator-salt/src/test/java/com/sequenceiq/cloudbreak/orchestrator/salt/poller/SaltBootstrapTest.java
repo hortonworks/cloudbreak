@@ -37,7 +37,7 @@ public class SaltBootstrapTest {
     private Map<String, String> networkMap;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         saltConnector = mock(SaltConnector.class);
         gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "10-0-0-1.example.com",
                 9443, "certDir", "serverCert", "clientCert", "clientKey");

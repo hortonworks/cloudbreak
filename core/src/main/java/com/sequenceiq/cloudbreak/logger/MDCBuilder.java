@@ -2,8 +2,9 @@ package com.sequenceiq.cloudbreak.logger;
 
 import java.lang.reflect.Field;
 
-import com.sequenceiq.cloudbreak.domain.CbUser;
 import org.slf4j.MDC;
+
+import com.sequenceiq.cloudbreak.domain.CbUser;
 
 public class MDCBuilder {
 

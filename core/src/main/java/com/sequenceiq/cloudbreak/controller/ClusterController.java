@@ -130,7 +130,7 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     @Override
-    public void delete(Long stackId) throws Exception {
+    public void delete(Long stackId) {
         CbUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);

@@ -46,7 +46,7 @@ public class SaltJobIdTrackerTest {
     private ArgumentCaptor<Target<String>> targetCaptor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 

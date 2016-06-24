@@ -113,7 +113,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private void putBlueprintToContextIfExist(BlueprintEndpoint endpoint, String blueprintName) throws Exception {
+    private void putBlueprintToContextIfExist(BlueprintEndpoint endpoint, String blueprintName) {
         endpoint.getPublics();
         if (StringUtils.isEmpty(blueprintName)) {
             blueprintName = defaultBlueprintName;
@@ -126,7 +126,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private void putNetworkToContext(NetworkEndpoint endpoint, String cloudProvider, String networkName) throws Exception {
+    private void putNetworkToContext(NetworkEndpoint endpoint, String cloudProvider, String networkName) {
         endpoint.getPublics();
         if (StringUtils.isEmpty(networkName)) {
             networkName = itProps.getDefaultNetwork(cloudProvider);
@@ -139,7 +139,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private void putSecurityGroupToContext(SecurityGroupEndpoint endpoint, String securityGroupName) throws Exception {
+    private void putSecurityGroupToContext(SecurityGroupEndpoint endpoint, String securityGroupName) {
         endpoint.getPublics();
         if (StringUtils.isEmpty(securityGroupName)) {
             securityGroupName = itProps.getDefaultSecurityGroup();
@@ -156,7 +156,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private void putStackToContextIfExist(StackEndpoint endpoint, String stackName) throws Exception {
+    private void putStackToContextIfExist(StackEndpoint endpoint, String stackName) {
         if (StringUtils.hasLength(stackName)) {
             String resourceId = endpoint.getPublic(stackName).getId().toString();
             if (resourceId != null) {
@@ -165,7 +165,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private void putCredentialToContext(CredentialEndpoint endpoint, String cloudProvider, String credentialName) throws Exception {
+    private void putCredentialToContext(CredentialEndpoint endpoint, String cloudProvider, String credentialName) {
         if (StringUtils.isEmpty(credentialName)) {
             String defaultCredentialName = itProps.getCredentialName(cloudProvider);
             if (!"__ignored__".equals(defaultCredentialName)) {
@@ -180,7 +180,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private List<InstanceGroup> createInstanceGroups(TemplateEndpoint endpoint, List<String[]> instanceGroupStrings) throws Exception {
+    private List<InstanceGroup> createInstanceGroups(TemplateEndpoint endpoint, List<String[]> instanceGroupStrings) {
         List<InstanceGroup> instanceGroups = new ArrayList<>();
         for (String[] instanceGroupStr : instanceGroupStrings) {
             String type = instanceGroupStr.length == WITH_TYPE_LENGTH ? instanceGroupStr[WITH_TYPE_LENGTH - 1] : "CORE";
@@ -200,7 +200,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     @AfterSuite(alwaysRun = true)
     @Parameters("cleanUp")
-    public void cleanUp(@Optional("true") boolean cleanUp) throws Exception {
+    public void cleanUp(@Optional("true") boolean cleanUp) {
         if (isCleanUpNeeded(cleanUp)) {
             CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
             String stackId = itContext.getCleanUpParameter(CloudbreakITContextConstants.STACK_ID);

@@ -7,8 +7,8 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
-import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 import com.sequenceiq.periscope.service.ClusterService;
 

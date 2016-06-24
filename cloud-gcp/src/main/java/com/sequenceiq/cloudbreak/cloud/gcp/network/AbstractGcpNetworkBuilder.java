@@ -20,7 +20,7 @@ public abstract class AbstractGcpNetworkBuilder extends AbstractGcpResourceBuild
 
     @Override
     public CloudResourceStatus update(GcpContext context, AuthenticatedContext auth,
-            Network network, Security security, CloudResource resource) throws Exception {
+            Network network, Security security, CloudResource resource) {
         return null;
     }
 

@@ -15,10 +15,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.periscope.doc.ApiDescription;
 import com.sequenceiq.periscope.api.model.AmbariJson;
 import com.sequenceiq.periscope.api.model.ClusterJson;
 import com.sequenceiq.periscope.api.model.StateJson;
+import com.sequenceiq.periscope.doc.ApiDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

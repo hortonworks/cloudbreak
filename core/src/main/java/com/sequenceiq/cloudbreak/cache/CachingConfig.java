@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cache;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cache.CacheManager;

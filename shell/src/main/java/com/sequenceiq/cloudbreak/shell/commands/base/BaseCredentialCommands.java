@@ -225,7 +225,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
         return shellContext;
     }
 
-    protected void createOrSelectTemplateHint() throws Exception {
+    protected void createOrSelectTemplateHint() {
         if (shellContext.cloudbreakClient().credentialEndpoint().getPublics().isEmpty()) {
             shellContext.setHint(Hints.ADD_BLUEPRINT);
         } else {

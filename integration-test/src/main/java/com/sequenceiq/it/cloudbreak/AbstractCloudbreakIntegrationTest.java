@@ -43,7 +43,7 @@ public abstract class AbstractCloudbreakIntegrationTest extends AbstractTestNGSp
     private SuiteContext suiteContext;
 
     @BeforeClass
-    public void checkContextParameters(ITestContext testContext) throws Exception {
+    public void checkContextParameters(ITestContext testContext) {
         itContext = suiteContext.getItContext(testContext.getSuite().getName());
         if (itContext.getContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, Boolean.class)
                 && !CollectionUtils.isEmpty(itContext.getContextParam(CloudbreakITContextConstants.FAILED_TESTS, List.class))) {

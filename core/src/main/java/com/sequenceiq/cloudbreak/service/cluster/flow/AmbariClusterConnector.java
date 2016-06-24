@@ -40,7 +40,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
-import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -679,8 +678,7 @@ public class AmbariClusterConnector {
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private Map<String, List<Map<String, String>>> buildHostGroupAssociations(Set<HostGroup> hostGroups)
-            throws InvalidHostGroupHostAssociation {
+    private Map<String, List<Map<String, String>>> buildHostGroupAssociations(Set<HostGroup> hostGroups) {
         Map<String, List<Map<String, String>>> hostGroupMappings = new HashMap<>();
         LOGGER.info("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (HostGroup hostGroup : hostGroups) {
