@@ -25,7 +25,7 @@ compose-init() {
 
 dockerCompose() {
     debug "docker-compose -p ${CB_COMPOSE_PROJECT} $@"
-    docker-compose -p ${CB_COMPOSE_PROJECT} "$@"
+    COMPOSE_HTTP_TIMEOUT=120 docker-compose -p ${CB_COMPOSE_PROJECT} "$@"
 }
 
 compose-ps() {
