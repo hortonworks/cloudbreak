@@ -227,12 +227,7 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     private Supplier<CloudConnectorException> getCloudConnectorExceptionSupplier(String msg) {
-        return new Supplier<CloudConnectorException>() {
-            @Override
-            public CloudConnectorException get() {
-                return new CloudConnectorException(msg);
-            }
-        };
+        return () -> new CloudConnectorException(msg);
     }
 
     private void suspendAutoScaling(AuthenticatedContext ac, CloudStack stack) {

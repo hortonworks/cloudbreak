@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.validation;
 
 import java.util.Arrays;
-import java.util.function.ToIntFunction;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -45,12 +44,7 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
         private final int[] parts;
 
         Ip(String ip) {
-            parts = Arrays.asList(ip.split("\\.")).stream().mapToInt(new ToIntFunction<String>() {
-                @Override
-                public int applyAsInt(String value) {
-                    return Integer.parseInt(value);
-                }
-            }).toArray();
+            parts = Arrays.asList(ip.split("\\.")).stream().mapToInt(value -> Integer.parseInt(value)).toArray();
         }
 
         @Override

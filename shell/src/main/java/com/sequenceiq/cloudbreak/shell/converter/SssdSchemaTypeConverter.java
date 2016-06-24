@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.sequenceiq.cloudbreak.shell.completion.SssdSchemaType;
 
@@ -16,13 +15,7 @@ public class SssdSchemaTypeConverter extends AbstractConverter<SssdSchemaType> {
     private static Collection<String> values;
 
     {
-        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.SssdSchemaType.values()),
-            new Function<com.sequenceiq.cloudbreak.api.model.SssdSchemaType, String>() {
-                @Override
-                public String apply(com.sequenceiq.cloudbreak.api.model.SssdSchemaType input) {
-                    return input.name();
-                }
-            });
+        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.SssdSchemaType.values()), input -> input.name());
     }
 
     @Override

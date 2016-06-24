@@ -68,12 +68,7 @@ public final class TableRenderer {
                     }
                 });
             } else {
-                Collections.sort(entries, new Comparator<Map.Entry<String, List<String>>>() {
-                    @Override
-                    public int compare(Map.Entry<String, List<String>> a, Map.Entry<String, List<String>> b) {
-                        return a.getKey().compareToIgnoreCase(b.getKey());
-                    }
-                });
+                Collections.sort(entries, (a, b) -> a.getKey().compareToIgnoreCase(b.getKey()));
             }
             for (Map.Entry<String, List<String>> entry : entries) {
                 if (entry.getValue() != null) {
