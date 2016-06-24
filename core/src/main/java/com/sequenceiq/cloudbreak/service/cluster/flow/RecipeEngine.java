@@ -170,7 +170,7 @@ public class RecipeEngine {
 
     private FileSystemConfiguration getFileSystemConfiguration(FileSystem fs) throws IOException {
         String json = JsonUtil.writeValueAsString(fs.getProperties());
-        return JsonUtil.readValue(json, FileSystemConfiguration.class);
+        return (FileSystemConfiguration) JsonUtil.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
     }
 
     private void configureSssd(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
