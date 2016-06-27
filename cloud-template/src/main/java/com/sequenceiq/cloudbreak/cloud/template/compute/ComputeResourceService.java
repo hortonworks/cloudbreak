@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
@@ -178,11 +177,7 @@ public class ComputeResourceService {
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
-            if (e instanceof CancellationException) {
-                throw e;
-            } else {
-                LOGGER.error("Failed to execute the request", e);
-            }
+            LOGGER.error("Failed to execute the request", e);
         }
         LOGGER.info("{} requests have finished, continue with next group", requests);
         futures.clear();

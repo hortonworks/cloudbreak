@@ -15,7 +15,7 @@ public class SssdTlsReqcertTypeConverter extends AbstractConverter<SssdTlsReqcer
     private static Collection<String> values;
 
     {
-        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType.values()), input -> input.name());
+        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType.values()), Enum::name);
     }
 
     @Override

@@ -44,7 +44,7 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
         private final int[] parts;
 
         Ip(String ip) {
-            parts = Arrays.asList(ip.split("\\.")).stream().mapToInt(value -> Integer.parseInt(value)).toArray();
+            parts = Arrays.asList(ip.split("\\.")).stream().mapToInt(Integer::parseInt).toArray();
         }
 
         @Override

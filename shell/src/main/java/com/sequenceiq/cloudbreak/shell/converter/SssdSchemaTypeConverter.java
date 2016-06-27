@@ -15,7 +15,7 @@ public class SssdSchemaTypeConverter extends AbstractConverter<SssdSchemaType> {
     private static Collection<String> values;
 
     {
-        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.SssdSchemaType.values()), input -> input.name());
+        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.SssdSchemaType.values()), Enum::name);
     }
 
     @Override

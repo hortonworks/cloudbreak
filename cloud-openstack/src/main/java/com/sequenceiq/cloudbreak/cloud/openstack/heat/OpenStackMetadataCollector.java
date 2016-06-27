@@ -47,7 +47,7 @@ public class OpenStackMetadataCollector implements MetadataCollector {
         String stackName = authenticatedContext.getCloudContext().getName();
         String heatStackId = resource.getName();
 
-        List<InstanceTemplate> templates = Lists.transform(vms, input -> input.getTemplate());
+        List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);
 
         Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, from -> {
             return utils.getPrivateInstanceId(from.getGroupName(), Long.toString(from.getPrivateId()));

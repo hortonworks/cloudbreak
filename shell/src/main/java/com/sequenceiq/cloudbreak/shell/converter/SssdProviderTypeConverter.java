@@ -15,7 +15,7 @@ public class SssdProviderTypeConverter extends AbstractConverter<SssdProviderTyp
     private static Collection<String> values;
 
     {
-        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.SssdProviderType.values()), input -> input.name());
+        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.SssdProviderType.values()), Enum::name);
     }
 
     @Override
