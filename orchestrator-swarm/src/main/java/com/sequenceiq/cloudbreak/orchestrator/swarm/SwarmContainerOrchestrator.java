@@ -68,7 +68,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
      * @param gatewayConfig     Config used to access the gateway instance
      * @param nodes             Nodes that must be added to the Swarm cluster
      * @param consulServerCount Number of Consul servers in the cluster
-     * @return The API address of the container orchestrator
      */
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount,
