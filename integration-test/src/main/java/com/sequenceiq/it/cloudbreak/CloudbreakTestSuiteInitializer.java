@@ -76,7 +76,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             "stackName", "networkName", "securityGroupName" })
     public void initCloudbreakSuite(@Optional("") String cloudbreakServer, @Optional("") String cloudProvider, @Optional("") String credentialName,
             @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName,
-            @Optional("") String stackName, @Optional("") String networkName, @Optional("") String securityGroupName) throws Exception {
+            @Optional("") String stackName, @Optional("") String networkName, @Optional("") String securityGroupName) {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);

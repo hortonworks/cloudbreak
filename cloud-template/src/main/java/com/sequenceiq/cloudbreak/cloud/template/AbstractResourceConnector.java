@@ -100,7 +100,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack,
-            List<CloudResource> resources, List<CloudInstance> vms) throws Exception {
+            List<CloudResource> resources, List<CloudInstance> vms) {
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
 

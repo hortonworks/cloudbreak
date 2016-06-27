@@ -50,12 +50,11 @@ public class ComputeResourceService {
     private CloudFailureHandler cloudFailureHandler;
 
     public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image,
-            AdjustmentType adjustmentType, Long threshold) throws Exception {
+            AdjustmentType adjustmentType, Long threshold) {
         return buildResources(ctx, auth, groups, image, false, adjustmentType, threshold);
     }
 
-    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image)
-            throws Exception {
+    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image) {
         return buildResources(ctx, auth, groups, image, true, AdjustmentType.BEST_EFFORT, null);
     }
 
@@ -115,12 +114,12 @@ public class ComputeResourceService {
     }
 
     public List<CloudVmInstanceStatus> stopInstances(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, List<CloudInstance> cloudInstances) throws Exception {
+            List<CloudResource> resources, List<CloudInstance> cloudInstances) {
         return stopStart(context, auth, resources, cloudInstances);
     }
 
     public List<CloudVmInstanceStatus> startInstances(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, List<CloudInstance> cloudInstances) throws Exception {
+            List<CloudResource> resources, List<CloudInstance> cloudInstances) {
         return stopStart(context, auth, resources, cloudInstances);
     }
 

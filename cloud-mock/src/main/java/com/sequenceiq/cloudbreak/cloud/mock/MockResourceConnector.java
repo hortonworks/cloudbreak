@@ -45,7 +45,7 @@ public class MockResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
-            List<CloudInstance> vms) throws Exception {
+            List<CloudInstance> vms) {
         return new ArrayList<>();
     }
 }
