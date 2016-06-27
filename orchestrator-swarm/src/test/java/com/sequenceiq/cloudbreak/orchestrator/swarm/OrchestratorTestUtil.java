@@ -35,7 +35,7 @@ public class OrchestratorTestUtil {
     public static Set<Node> generateNodes(int count) {
         Set<Node> nodes = new HashSet<>();
         for (int i = 0; i < count; i++) {
-            nodes.add(node(Long.valueOf(i)));
+            nodes.add(node((long) i));
         }
         return nodes;
     }

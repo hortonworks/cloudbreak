@@ -55,7 +55,7 @@ public class AwsPlatformParameters implements PlatformParameters {
     public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
     public static final String S3_ROLE = "s3Role";
 
-    private static final Integer START_LABEL = Integer.valueOf(97);
+    private static final Integer START_LABEL = 97;
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
     private static final int DEFAULT_REGION_TYPE_POSITION = 4;
     private static final int DEFAULT_VM_TYPE_POSITION = 21;

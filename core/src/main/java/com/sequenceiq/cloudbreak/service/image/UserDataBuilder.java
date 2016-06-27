@@ -55,7 +55,7 @@ public class UserDataBuilder {
         model.put("sshUser", sshUser);
         model.put("publicSshKey", publicSssKey);
         model.put("customUserData", userDataBuilderParams.getCustomData());
-        model.put("relocateDocker", relocate.booleanValue());
+        model.put("relocateDocker", relocate);
         return build(model);
     }
 

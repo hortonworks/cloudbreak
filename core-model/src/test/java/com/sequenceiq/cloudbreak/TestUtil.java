@@ -269,7 +269,7 @@ public class TestUtil {
     public static Set<InstanceMetaData> generateInstanceMetaDatas(int count, Long instanceGroupId, InstanceGroup instanceGroup) {
         Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (int i = 0; i < count; i++) {
-            instanceMetaDatas.add(instanceMetaData(Long.valueOf(i + instanceGroupId), InstanceStatus.REGISTERED,
+            instanceMetaDatas.add(instanceMetaData(i + instanceGroupId, InstanceStatus.REGISTERED,
                     instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY), instanceGroup));
         }
         return instanceMetaDatas;
@@ -443,7 +443,7 @@ public class TestUtil {
     public static List<CloudbreakUsage> generateAzureCloudbreakUsages(int count) {
         List<CloudbreakUsage> cloudbreakUsages = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            cloudbreakUsages.add(gcpCloudbreakUsage(Long.valueOf(i)));
+            cloudbreakUsages.add(gcpCloudbreakUsage((long) i));
         }
         return cloudbreakUsages;
     }
@@ -470,7 +470,7 @@ public class TestUtil {
     public static List<CloudbreakEvent> generateGcpCloudbreakEvents(int count) {
         List<CloudbreakEvent> cloudbreakEvents = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            cloudbreakEvents.add(gcpCloudbreakEvent(Long.valueOf(i)));
+            cloudbreakEvents.add(gcpCloudbreakEvent((long) i));
         }
         return cloudbreakEvents;
     }
@@ -541,7 +541,7 @@ public class TestUtil {
         Set<InstanceGroup> instanceGroups = new HashSet<>();
         instanceGroups.add(instanceGroup(0L, InstanceGroupType.GATEWAY, gcpTemplate(1L), count[0]));
         for (int i = 1; i < count.length; i++) {
-            instanceGroups.add(instanceGroup(Long.valueOf(i), InstanceGroupType.CORE, gcpTemplate(1L), count[i]));
+            instanceGroups.add(instanceGroup((long) i, InstanceGroupType.CORE, gcpTemplate(1L), count[i]));
         }
         return instanceGroups;
     }
@@ -549,7 +549,7 @@ public class TestUtil {
     public static List<Resource> generateGcpResources(int count) {
         List<Resource> resources = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            resources.add(gcpResource(Long.valueOf(i), "master"));
+            resources.add(gcpResource((long) i, "master"));
         }
         return resources;
     }

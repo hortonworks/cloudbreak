@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
 public class OpenStackParameters implements PlatformParameters {
-    private static final Integer START_LABEL = Integer.valueOf(97);
+    private static final Integer START_LABEL = 97;
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("vd", START_LABEL);
 
     @Override

@@ -95,7 +95,7 @@ public class CloudFailureHandler {
     }
 
     private double calculatePercentage(Integer failedResourceRequestResults, Integer fullNodeCount) {
-        return Double.valueOf((fullNodeCount + failedResourceRequestResults) / fullNodeCount) * ONE_HUNDRED;
+        return (double) ((fullNodeCount + failedResourceRequestResults) / fullNodeCount) * ONE_HUNDRED;
     }
 
     private void handleExceptions(AuthenticatedContext auth, List<CloudResourceStatus> cloudResourceStatuses, Group group,

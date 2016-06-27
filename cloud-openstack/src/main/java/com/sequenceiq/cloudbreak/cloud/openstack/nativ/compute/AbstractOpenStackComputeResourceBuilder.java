@@ -77,7 +77,7 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
     protected InstanceTemplate getInstanceTemplate(Group group, long privateId) {
         for (CloudInstance instance : group.getInstances()) {
             InstanceTemplate template = instance.getTemplate();
-            if (template.getPrivateId().longValue() == privateId) {
+            if (template.getPrivateId() == privateId) {
                 return template;
             }
         }
