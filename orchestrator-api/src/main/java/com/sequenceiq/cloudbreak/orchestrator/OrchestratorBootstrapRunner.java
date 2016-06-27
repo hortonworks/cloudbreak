@@ -84,7 +84,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
     private boolean isExitNeeded() {
         boolean exitNeeded = false;
         if (exitCriteriaModel != null && exitCriteria != null) {
-            LOGGER.debug("exitCriteriaModel: {}, exitCriteria: {}", exitCriteriaModel, exitNeeded);
+            LOGGER.debug("exitCriteriaModel: {}, exitCriteria: {}", exitCriteriaModel, exitCriteria);
             exitNeeded = exitCriteria.isExitNeeded(exitCriteriaModel);
         }
         LOGGER.debug("isExitNeeded: {}", exitNeeded);

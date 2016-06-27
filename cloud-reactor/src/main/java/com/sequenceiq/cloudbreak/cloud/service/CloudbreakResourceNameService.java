@@ -21,7 +21,7 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
     private static final String DATE_FORMAT = "yyyyMMddHHmmss";
 
     protected void checkArgs(int argCnt, Object... parts) {
-        if (null == parts && parts.length != argCnt) {
+        if (null == parts || parts.length < argCnt) {
             throw new IllegalStateException("No suitable name parts provided to generate resource name!");
         }
     }

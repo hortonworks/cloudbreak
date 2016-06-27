@@ -101,11 +101,11 @@ public final class GcpStackUtil {
     }
 
     public static String checkForErrors(Operation operation) {
-        String msg = null;
         if (operation == null) {
             LOGGER.error("Operation is null!");
-            return msg;
+            return null;
         }
+        String msg = null;
         if (operation.getError() != null) {
             StringBuilder error = new StringBuilder();
             if (operation.getError().getErrors() != null) {

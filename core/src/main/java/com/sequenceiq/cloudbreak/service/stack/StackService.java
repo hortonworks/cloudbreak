@@ -491,7 +491,7 @@ public class StackService {
     private void validateInstanceGroup(Stack stack, String instanceGroupName) {
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         if (instanceGroup == null) {
-            throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroup));
+            throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroupName));
         }
         if (isGateway(instanceGroup.getInstanceGroupType())) {
             throw new BadRequestException("The Ambari server instance group modification is not enabled.");

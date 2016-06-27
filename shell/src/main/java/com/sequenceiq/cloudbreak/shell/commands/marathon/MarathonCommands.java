@@ -119,10 +119,7 @@ public class MarathonCommands implements CommandMarker {
                 response = cloudbreakClient.stackEndpoint().getPublic(name);
             }
             if (response == null) {
-                if (!BYOS.equals(response.getPlatformVariant())) {
-                    return "Not a marathon stack was specified.";
-                }
-                return "Marathon stack not exist.";
+                return "Marathon stack not exist or not a marathon stack was specified.";
             } else {
                 shellContext.setSelectedMarathonStackId(response.getId());
                 shellContext.setSelectedMarathonStackName(response.getName());
@@ -186,7 +183,7 @@ public class MarathonCommands implements CommandMarker {
             @CliOption(key = "diskSize", mandatory = true, help = "Disk in Gb of the marathon constraint (10Gb - 1000Gb)") Double disk,
             @CliOption(key = "description", help = "Description of the marathon stack") String description,
             @CliOption(key = "publicInAccount", help = "flags if the constraint is public in the account") Boolean publicInAccount) {
-        IdJson idJson = null;
+        IdJson idJson;
         try {
             ConstraintTemplateRequest constraintTemplateRequest = new ConstraintTemplateRequest();
             constraintTemplateRequest.setName(name);
@@ -200,10 +197,10 @@ public class MarathonCommands implements CommandMarker {
             } else {
                 idJson = cloudbreakClient.constraintTemplateEndpoint().postPrivate(constraintTemplateRequest);
             }
+            return "Marathon template was created with id: " + idJson.getId();
         } catch (Exception ex) {
-            exceptionTransformer.transformToRuntimeException(ex);
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
-        return "Marathon template was created with id: " + idJson.getId();
     }
 
     @CliCommand(value = "marathon constraint list", help = "Shows the currently available marathon constraints")

@@ -396,7 +396,7 @@ public class AwsResourceConnector implements ResourceConnector {
             AmazonCloudFormationClient client = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
                     ac.getCloudContext().getLocation().getRegion().value());
             String cFStackName = getCloudFormationStackResource(resources).getName();
-            LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", ac.getCloudContext().getId(), cFStackName);
+            LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", cFStackName, ac.getCloudContext().getId());
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
             try {
                 client.describeStacks(describeStacksRequest);

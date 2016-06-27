@@ -119,13 +119,13 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
     }
 
     private HostGroup getHostGroup(Long stackId, Constraint constraint, ConstraintJson constraintJson, HostGroup subject, CbUser user) {
+        if (constraintJson == null) {
+            throw new BadRequestException("The constraint field must be set in the reinstall request!");
+        }
         HostGroup result = subject;
         final String instanceGroupName = constraintJson.getInstanceGroupName();
         final String constraintTemplateName = constraintJson.getConstraintTemplateName();
         Cluster cluster = clusterService.retrieveClusterByStackId(stackId);
-        if (constraintJson == null) {
-            throw new BadRequestException("The constraint field must be set in the reinstall request!");
-        }
         Constraint decoratedConstraint = decorateConstraint(stackId, user, constraint, instanceGroupName, constraintTemplateName);
         if (!isEmpty(instanceGroupName)) {
             result = getHostGroupByInstanceGroupName(decoratedConstraint, subject, cluster, instanceGroupName);

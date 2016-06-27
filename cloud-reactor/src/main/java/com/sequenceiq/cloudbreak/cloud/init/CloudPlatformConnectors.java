@@ -96,14 +96,7 @@ public class CloudPlatformConnectors {
 
     public CloudConnector get(CloudPlatformVariant variant) {
         CloudConnector cc = map.get(variant);
-        if (cc == null) {
-            return getDefault(variant.getPlatform());
-        }
-        if (cc == null) {
-            throw new IllegalArgumentException(String.format("There is no cloud connector for: '%s'; available connectors: %s",
-                    variant, map.keySet()));
-        }
-        return cc;
+        return cc == null ? getDefault(variant.getPlatform()) : cc;
     }
 
     public PlatformVariants getPlatformVariants() {

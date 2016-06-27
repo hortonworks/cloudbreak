@@ -177,8 +177,8 @@ public class ArmUtils {
                     return;
                 }
                 String[] range = destinationPortRange.split("-");
-                port443Found = port443Found ? port443Found : isPortFound(PORT_443, range);
-                port22Found = port22Found ? port22Found : isPortFound(PORT_22, range);
+                port443Found = port443Found || isPortFound(PORT_443, range);
+                port22Found = port22Found || isPortFound(PORT_22, range);
                 if (port22Found && port443Found) {
                     return;
                 }

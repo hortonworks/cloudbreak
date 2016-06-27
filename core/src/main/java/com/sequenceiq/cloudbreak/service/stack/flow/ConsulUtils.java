@@ -129,11 +129,11 @@ public final class ConsulUtils {
         }
     }
 
-    public static Boolean putKVValue(List<ConsulClient> clients, String key, String value, PutParams putParams) {
+    public static boolean putKVValue(List<ConsulClient> clients, String key, String value, PutParams putParams) {
         for (ConsulClient client : clients) {
-            Boolean result = putKVValue(client, key, value, putParams);
+            boolean result = putKVValue(client, key, value, putParams);
             if (result) {
-                return result;
+                return true;
             }
         }
         return false;

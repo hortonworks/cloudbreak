@@ -72,6 +72,7 @@ public class AmbariClusterStatusUpdater {
             ClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
                     clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword()), blueprintName);
             updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
+
         }
     }
 

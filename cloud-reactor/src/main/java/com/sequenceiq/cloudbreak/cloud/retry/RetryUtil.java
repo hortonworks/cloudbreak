@@ -71,7 +71,7 @@ public class RetryUtil implements Runnable {
     }
 
     private void runExceptionChecker(Exception e) {
-        if (exceptionCheck == null || (exceptionCheck != null && exceptionCheck.check(e))) {
+        if (exceptionCheck == null || exceptionCheck.check(e)) {
             runRetry();
         } else {
             runErrorHandler(e);

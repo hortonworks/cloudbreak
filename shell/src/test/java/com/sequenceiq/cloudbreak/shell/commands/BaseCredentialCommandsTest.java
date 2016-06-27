@@ -9,8 +9,6 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.anyString;
 
-import java.io.File;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Answers;
@@ -139,12 +137,4 @@ public class BaseCredentialCommandsTest {
         verify(credentialEndpoint, times(0)).delete(anyLong());
         verify(credentialEndpoint, times(0)).deletePublic(anyString());
     }
-
-    private String getAbsolutePath(String path) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(path).getFile());
-        return file.getAbsolutePath();
-    }
-
-
 }

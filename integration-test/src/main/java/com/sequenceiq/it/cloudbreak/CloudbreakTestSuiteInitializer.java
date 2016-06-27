@@ -146,10 +146,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
         if (StringUtils.hasLength(securityGroupName)) {
             try {
-                String resourceId = endpoint.getPublic(securityGroupName).getId().toString();
-                if (resourceId != null) {
-                    itContext.putContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID, resourceId);
-                }
+                Long resourceId = endpoint.getPublic(securityGroupName).getId();
+                itContext.putContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID, resourceId.toString());
             } catch (Exception e) {
                 LOG.warn("Could not set security group id", e);
             }
@@ -158,10 +156,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     private void putStackToContextIfExist(StackEndpoint endpoint, String stackName) {
         if (StringUtils.hasLength(stackName)) {
-            String resourceId = endpoint.getPublic(stackName).getId().toString();
-            if (resourceId != null) {
-                itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, resourceId);
-            }
+            Long resourceId = endpoint.getPublic(stackName).getId();
+            itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, resourceId.toString());
         }
     }
 
@@ -173,10 +169,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             }
         }
         if (StringUtils.hasLength(credentialName)) {
-            String resourceId = endpoint.getPublic(credentialName).getId().toString();
-            if (resourceId != null) {
-                itContext.putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, resourceId);
-            }
+            Long resourceId = endpoint.getPublic(credentialName).getId();
+            itContext.putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, resourceId.toString());
         }
     }
 
@@ -230,6 +224,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     private boolean isCleanUpNeeded(boolean cleanUp) {
         boolean noTestsFailed = CollectionUtils.isEmpty(itContext.getContextParam(CloudbreakITContextConstants.FAILED_TESTS, List.class));
-        return cleanUp && (cleanUpOnFailure || (!cleanUpOnFailure && noTestsFailed));
+        return cleanUp && (cleanUpOnFailure || noTestsFailed);
     }
 }

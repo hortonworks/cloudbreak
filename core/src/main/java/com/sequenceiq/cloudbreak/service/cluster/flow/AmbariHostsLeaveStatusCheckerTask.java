@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 
 @Component
 public class AmbariHostsLeaveStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariHostsWithNames> {
@@ -23,7 +24,7 @@ public class AmbariHostsLeaveStatusCheckerTask extends ClusterBasedStatusChecker
             Map<String, String> hostStatuses = ambariClient.getHostStatuses();
             for (String hostName : hostNames) {
                 String status = hostStatuses.get(hostName);
-                if (!LEFT_STATE.equals(status) || status == null) {
+                if (!LEFT_STATE.equals(status)) {
                     LOGGER.info("{} didn't leave the cluster yet", hostName);
                     return false;
                 }
