@@ -161,12 +161,6 @@ public-ip-resolver-command() {
     declare desc="Generates command to resolve public IP"
     
     if is_linux; then
-        # on openstack
-        if curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-hostname | grep -q novalocal ; then
-            echo "curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-ipv4"
-            return
-        fi
-        
         # on gce
         if curl -m 1 -f -s -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
             echo "curl -m 1 -f -s -H \"Metadata-Flavor: Google\" 169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip"
@@ -174,13 +168,23 @@ public-ip-resolver-command() {
         fi
         
         # on amazon
-        if curl -m 1 -f -s 169.254.169.254/latest/ &>/dev/null ; then
+        if curl -m 1 -f -s 169.254.169.254/latest/dynamic &>/dev/null ; then
             if curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-hostname &>/dev/null ; then
                 echo "curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-hostname"
             else
-                warn "Public hostname not found setting up loopback as public IP"
+                warn "Public hostname not found setting up loopback as PUBLLIC_IP"
                 echo "echo 127.0.0.1"
-                #echo $(curl 169.254.169.254/latest/meta-data/local-ipv4)
+            fi
+            return
+        fi
+        
+        # on openstack
+        if curl -m 1 -f -s 169.254.169.254/latest &>/dev/null ; then
+            if [[ -n "$(curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-ipv4)" ]]; then
+                echo "curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-ipv4"
+            else
+                warn "Public ip not found setting up private as PUBLLIC_IP"
+                echo "curl -m 1 -f -s 169.254.169.254/latest/meta-data/local-ipv4"
             fi
             return
         fi
