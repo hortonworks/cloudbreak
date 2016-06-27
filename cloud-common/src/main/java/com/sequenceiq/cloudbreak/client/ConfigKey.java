@@ -21,11 +21,10 @@ public class ConfigKey {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
         if (o == null || getClass() != o.getClass()) {
             return false;
+        } else if (this == o) {
+            return true;
         }
 
         ConfigKey configKey = (ConfigKey) o;
