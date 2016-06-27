@@ -64,16 +64,14 @@ public class AmbariClusterStatusUpdater {
                     cluster == null ? "" : cluster.getStatus()));
             LOGGER.warn(msg);
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), msg);
-        } else {
+        } else if (cluster != null && cluster.getAmbariIp() != null) {
             Long stackId = stack.getId();
-            String blueprintName = cluster != null ? cluster.getBlueprint().getBlueprintName() : null;
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
-            if (cluster.getAmbariIp() != null) {
-                clusterService.updateClusterMetadata(stackId);
-                ClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
-                        clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword()), blueprintName);
-                updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
-            }
+            clusterService.updateClusterMetadata(stackId);
+            String blueprintName = cluster.getBlueprint().getBlueprintName();
+            ClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
+                    clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword()), blueprintName);
+            updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
         }
     }
 
