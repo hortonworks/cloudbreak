@@ -173,7 +173,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                 future.get();
             }
         } catch (Exception ex) {
-            String msg = String.format("Failed to delete containers: '%s'.", Arrays.toString(containerInfo.toArray(new String[containerInfo.size()])));
+            String msg = String.format("Failed to delete containers: '%s'.", Arrays.toString(containerInfo.toArray(new ContainerInfo[containerInfo.size()])));
             throw new CloudbreakOrchestratorFailedException(msg, ex);
         }
     }
