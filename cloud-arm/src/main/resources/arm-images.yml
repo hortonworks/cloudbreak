@@ -1,15 +1,14 @@
-
 azure_rm:
-  East Asia: https://sequenceiqeastasia2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  East US: https://sequenceiqeastus2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  Central US: https://sequenceiqcentralus2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  North Europe: https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  South Central US: https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  North Central US: https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  East US 2: https://sequenceiqeastus22.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  Japan East: https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  Japan West: https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  Southeast Asia: https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  West US: https://sequenceiqwestus2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  West Europe: https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
-  Brazil South: https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-2016-06-23-07-16.vhd
+  East Asia: https://sequenceiqeastasia2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  East US: https://sequenceiqeastus2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  Central US: https://sequenceiqcentralus2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  North Europe: https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  South Central US: https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  North Central US: https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  East US 2: https://sequenceiqeastus22.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  Japan East: https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  Japan West: https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  Southeast Asia: https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  West US: https://sequenceiqwestus2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  West Europe: https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
+  Brazil South: https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-2016-06-27-02-12.vhd
