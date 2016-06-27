@@ -78,7 +78,7 @@ public class ClusterCreationService {
     }
 
     public void handleClusterCreationFailure(Stack stack, Exception exception) {
-        Cluster cluster = stack.getCluster();
+        Cluster cluster = clusterService.getById(stack.getCluster().getId());
         clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, exception.getMessage());
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), exception.getMessage());

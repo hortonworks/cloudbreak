@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -240,9 +241,11 @@ public class AmbariClusterConnector {
         }
         blueprintText = smartSenseConfigProvider.addToBlueprint(stack, blueprintText);
         blueprintText = zeppelinConfigProvider.addToBlueprint(stack, blueprintText);
-        Image image = imageService.getImage(stack.getId());
-        if (image.getHdpVersion() != null) {
-            blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, image.getHdpVersion());
+        if (!OrchestratorConstants.MARATHON.equals(stack.getOrchestrator().getType())) {
+            Image image = imageService.getImage(stack.getId());
+            if (image.getHdpVersion() != null) {
+                blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, image.getHdpVersion());
+            }
         }
         if (rdsConfig != null) {
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, rdsConfigProvider.getConfigs(rdsConfig), true);
@@ -553,8 +556,11 @@ public class AmbariClusterConnector {
     }
 
     private void setBaseRepoURL(Stack stack, AmbariClient ambariClient) throws IOException, CloudbreakImageNotFoundException {
-        Image image = imageService.getImage(stack.getId());
-        HDPRepo hdpRepo = image.getHdpRepo();
+        HDPRepo hdpRepo = null;
+        if (!OrchestratorConstants.MARATHON.equals(stack.getOrchestrator().getType())) {
+            Image image = imageService.getImage(stack.getId());
+            hdpRepo = image.getHdpRepo();
+        }
         if (hdpRepo == null) {
             AmbariStackDetails ambStack = stack.getCluster().getAmbariStackDetails();
             if (ambStack != null) {

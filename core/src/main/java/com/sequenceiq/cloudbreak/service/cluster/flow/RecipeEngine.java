@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -60,32 +62,44 @@ public class RecipeEngine {
     private SmartSenseConfigProvider smartSenseConfigProvider;
 
     public void executePreInstall(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
-        configureSssd(stack, null);
-        addFsRecipes(stack, hostGroups);
-        addSmartSenseRecipe(stack, hostGroups);
-        boolean recipesFound = recipesFound(hostGroups);
-        if (recipesFound) {
-            orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
-            orchestratorRecipeExecutor.preInstall(stack);
+        Orchestrator orchestrator = stack.getOrchestrator();
+        if (recipesSupportedOnOrchestrator(orchestrator)) {
+            configureSssd(stack, null);
+            addFsRecipes(stack, hostGroups);
+            addSmartSenseRecipe(stack, hostGroups);
+            boolean recipesFound = recipesFound(hostGroups);
+            if (recipesFound) {
+                orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
+                orchestratorRecipeExecutor.preInstall(stack);
+            }
         }
     }
 
     public void executeUpscalePreInstall(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaData) throws CloudbreakException {
-        Set<HostGroup> hostGroups = Collections.singleton(hostGroup);
-        configureSssd(stack, metaData);
-        addFsRecipes(stack, hostGroups);
-        boolean recipesFound = recipesFound(hostGroups);
-        if (recipesFound) {
-            orchestratorRecipeExecutor.preInstall(stack);
+        Orchestrator orchestrator = stack.getOrchestrator();
+        if (recipesSupportedOnOrchestrator(orchestrator)) {
+            Set<HostGroup> hostGroups = Collections.singleton(hostGroup);
+            configureSssd(stack, metaData);
+            addFsRecipes(stack, hostGroups);
+            boolean recipesFound = recipesFound(hostGroups);
+            if (recipesFound) {
+                orchestratorRecipeExecutor.preInstall(stack);
+            }
         }
     }
 
     public void executePostInstall(Stack stack) throws CloudbreakException {
-        orchestratorRecipeExecutor.postInstall(stack);
+        Orchestrator orchestrator = stack.getOrchestrator();
+        if (recipesSupportedOnOrchestrator(orchestrator)) {
+            orchestratorRecipeExecutor.postInstall(stack);
+        }
     }
 
     public void executeUpscalePostInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
-        orchestratorRecipeExecutor.postInstall(stack);
+        Orchestrator orchestrator = stack.getOrchestrator();
+        if (recipesSupportedOnOrchestrator(orchestrator)) {
+            orchestratorRecipeExecutor.postInstall(stack);
+        }
     }
 
     private void addFsRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
@@ -203,4 +217,7 @@ public class RecipeEngine {
         return false;
     }
 
+    private boolean recipesSupportedOnOrchestrator(Orchestrator orchestrator) {
+        return !OrchestratorConstants.MARATHON.equals(orchestrator.getType());
+    }
 }

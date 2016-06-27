@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -41,7 +42,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setAvailabilityZone(source.getAvailabilityZone());
         stack.setOnFailureActionAction(source.getOnFailureAction());
         stack.setStatus(Status.REQUESTED);
-        stack.setInstanceGroups(convertInstanceGroups(source.getInstanceGroups(), stack));
+        stack.setInstanceGroups(convertInstanceGroups(source, stack));
         stack.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicy.class));
         stack.setParameters(getValidParameters(source));
         stack.setCreated(Calendar.getInstance().getTimeInMillis());
@@ -66,7 +67,8 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         return params;
     }
 
-    private Set<InstanceGroup> convertInstanceGroups(List<InstanceGroupJson> instanceGroupJsons, Stack stack) {
+    private Set<InstanceGroup> convertInstanceGroups(StackRequest source, Stack stack) {
+        List<InstanceGroupJson> instanceGroupJsons = source.getInstanceGroups();
         Set<InstanceGroup> convertedSet = (Set<InstanceGroup>) getConversionService().convert(instanceGroupJsons, TypeDescriptor.forObject(instanceGroupJsons),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroup.class)));
         boolean gatewaySpecified = false;
@@ -80,7 +82,8 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
                 throw new BadRequestException("Only 1 Ambari server can be specified");
             }
         }
-        if (!gatewaySpecified) {
+        boolean orchestratorIsMarathon = OrchestratorConstants.MARATHON.equals(source.getOrchestrator().getType());
+        if (!gatewaySpecified && !orchestratorIsMarathon) {
             throw new BadRequestException("Ambari server must be specified");
         }
         return convertedSet;

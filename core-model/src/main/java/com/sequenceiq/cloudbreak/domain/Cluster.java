@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
                 name = "Cluster.findOneWithLists",
                 query = "SELECT c FROM Cluster c "
                         + "LEFT JOIN FETCH c.hostGroups "
+                        + "LEFT JOIN FETCH c.containers "
                         + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Cluster.findByStatuses",

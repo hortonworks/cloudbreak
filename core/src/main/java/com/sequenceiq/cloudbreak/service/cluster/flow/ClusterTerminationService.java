@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -111,7 +110,7 @@ public class ClusterTerminationService {
     }
 
     private void deleteClusterHostGroupsWithItsMetadata(Cluster cluster) {
-        Set<HostGroup> hostGroups = new HashSet<>(cluster.getHostGroups());
+        Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
         List<Constraint> constraintsToDelete = new LinkedList<>();
         for (HostGroup hg : hostGroups) {
             hg.getRecipes().clear();

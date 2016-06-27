@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -60,7 +61,9 @@ public class ClusterServiceRunner {
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         if (orchestratorType.containerOrchestrator()) {
             Map<String, List<Container>> containers = containerRunner.runClusterContainers(stack);
-            HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack);
+            Container ambariServerContainer = containers.get(DockerContainer.AMBARI_SERVER.name()).stream().findFirst().get();
+            String ambariServerIp = ambariServerContainer.getHost();
+            HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, ambariServerIp);
             clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
             Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
             for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
@@ -73,7 +76,10 @@ public class ClusterServiceRunner {
             clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup);
         } else if (orchestratorType.hostOrchestrator()) {
             hostRunner.runAmbariServices(stack);
-            HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack);
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            String gatewayPublicIp = gatewayInstance.getPublicIpWrapper();
+            HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayPublicIp);
             clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
             Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
             for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
@@ -90,13 +96,11 @@ public class ClusterServiceRunner {
         }
     }
 
-    private HttpClientConfig buildAmbariClientConfig(Stack stack) throws CloudbreakSecuritySetupException {
+    private HttpClientConfig buildAmbariClientConfig(Stack stack, String gatewayPublicIp) throws CloudbreakSecuritySetupException {
         Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
         newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
         newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
         instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        return tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
+        return tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayPublicIp);
     }
 }
