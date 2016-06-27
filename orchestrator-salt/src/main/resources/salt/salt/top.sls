@@ -47,3 +47,7 @@ base:
     - match: grain
     - post-recipes.init
     - users.add-to-group
+
+  'I@platform:AWS and G@recipes:post':
+    - match: compound
+    - slider.init

@@ -1,11 +1,11 @@
 aws:
-  ap-northeast-1: ami-72ec1b13
-  ap-northeast-2: ami-d05b90be
-  ap-southeast-1: ami-4fb5672c
-  ap-southeast-2: ami-0a1b3369
-  eu-central-1: ami-3d02ea52
-  eu-west-1: ami-dcb820af
-  sa-east-1: ami-d5f560b9
-  us-east-1: ami-0a4c8e67
-  us-west-1: ami-5d6b2f3d
-  us-west-2: ami-c9b572a9
+  ap-northeast-1: ami-dc5badbd
+  ap-northeast-2: ami-fd6aa193
+  ap-southeast-1: ami-9c16c4ff
+  ap-southeast-2: ami-53a08830
+  eu-central-1: ami-518b603e
+  eu-west-1: ami-a27ae1d1
+  sa-east-1: ami-aaeb7ec6
+  us-east-1: ami-6f14db02
+  us-west-1: ami-7dd99d1d
+  us-west-2: ami-8daa6ced
