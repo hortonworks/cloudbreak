@@ -99,6 +99,7 @@ cloudbreak-conf-smtp() {
     env-import CLOUDBREAK_SMTP_AUTH "true"
     env-import CLOUDBREAK_SMTP_STARTTLS_ENABLE "false"
     env-import CLOUDBREAK_SMTP_TYPE "smtp"
+    env-import CLOUDBREAK_TELEMETRY_MAIL_ADDRESS "aws-marketplace@hortonworks.com"
 }
 
 is_linux() {
