@@ -208,6 +208,8 @@ public class ModelDescriptions {
         public static final String INSTANCE_HOURS = "hours since the instance is running";
         public static final String INSTANCE_TYPE = "type of instance";
         public static final String INSTANCE_GROUP = "group name of instance";
+        public static final String BLUEPRINT_ID = "id of the blueprint";
+        public static final String BLUEPRINT_NAME = "name of the blueprint";
     }
 
     public static class EventModelDescription {
