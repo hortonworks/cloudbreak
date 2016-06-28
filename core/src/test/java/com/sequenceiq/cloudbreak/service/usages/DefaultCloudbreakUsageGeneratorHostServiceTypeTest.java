@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -107,7 +108,7 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
         stack.setInstanceGroups(instanceGroups);
         stack.setStatus(Status.DELETE_COMPLETED);
         when(stackRepository.findById(1L)).thenReturn(stack);
-        when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Arrays.asList(stack));
+        when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Collections.emptyList());
         given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(new ArrayList<CloudbreakEvent>());
         doNothing().when(eventRepository).delete(anyCollection());
         //WHEN
@@ -242,7 +243,7 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
         stack.setInstanceGroups(instanceGroups);
         stack.setStatus(Status.DELETE_COMPLETED);
         when(stackRepository.findById(1L)).thenReturn(stack);
-        when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Arrays.asList(stack));
+        when(stackRepository.findAllStackForTemplate(template.getId())).thenReturn(Collections.emptyList());
         given(eventRepository.findCloudbreakEventsForStack(any(Long.class))).willReturn(new ArrayList<CloudbreakEvent>());
         doNothing().when(eventRepository).delete(anyCollection());
         //WHEN

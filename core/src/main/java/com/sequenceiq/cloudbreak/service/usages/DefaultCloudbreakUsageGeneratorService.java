@@ -119,6 +119,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     }
 
     private void deleteTerminatedStacks(Set<Long> stackIds) {
+        Set<Long> removedTemplates = new HashSet<>();
         for (Long stackId : stackIds) {
             Stack stack = stackRepository.findById(stackId);
             if (stack != null && stack.isDeleteCompleted()) {
@@ -131,7 +132,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
                     orchestratorId = stack.getOrchestrator().getId();
                 }
                 stackRepository.delete(stack);
-                deleteTemplatesOfStack(stack);
+                deleteTemplatesOfStack(stack, removedTemplates);
                 if (fsId != null) {
                     fileSystemRepository.delete(fsId);
                 }
@@ -143,13 +144,14 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         }
     }
 
-    private void deleteTemplatesOfStack(Stack stack) {
+    private void deleteTemplatesOfStack(Stack stack, Set<Long> removedTemplates) {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             Template template = instanceGroup.getTemplate();
             if (template != null) {
                 List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
-                if (template.isDeleted() && allStackForTemplate.size() <= 1) {
+                if (template.isDeleted() && allStackForTemplate.isEmpty() && !removedTemplates.contains(template.getId())) {
                     templateRepository.delete(template);
+                    removedTemplates.add(template.getId());
                 }
             }
         }
