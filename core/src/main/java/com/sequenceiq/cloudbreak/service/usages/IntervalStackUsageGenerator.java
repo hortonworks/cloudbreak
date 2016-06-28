@@ -112,6 +112,8 @@ public class IntervalStackUsageGenerator {
         usage.setStackName(event.getStackName());
         usage.setInstanceType(instanceType);
         usage.setInstanceGroup(groupName);
+        usage.setBlueprintId(event.getBlueprintId());
+        usage.setBlueprintName(event.getBlueprintName());
         return usage;
     }
 

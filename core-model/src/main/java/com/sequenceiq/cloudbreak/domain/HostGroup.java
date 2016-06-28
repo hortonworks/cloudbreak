@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,9 +15,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @NamedQueries({
@@ -55,7 +55,7 @@ public class HostGroup {
     @ManyToOne
     private Cluster cluster;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     private Constraint constraint;
 
     @OneToMany(mappedBy = "hostGroup", cascade = CascadeType.ALL, orphanRemoval = true)
