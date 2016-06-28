@@ -40,6 +40,10 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     private String instanceGroup;
 
+    private Long blueprintId;
+
+    private String blueprintName;
+
     public Long getId() {
         return id;
     }
@@ -136,6 +140,22 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.availabilityZone = availabilityZone;
     }
 
+    public Long getBlueprintId() {
+        return blueprintId;
+    }
+
+    public void setBlueprintId(Long blueprintId) {
+        this.blueprintId = blueprintId;
+    }
+
+    public String getBlueprintName() {
+        return blueprintName;
+    }
+
+    public void setBlueprintName(String blueprintName) {
+        this.blueprintName = blueprintName;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudbreakUsage{");
@@ -151,6 +171,8 @@ public class CloudbreakUsage implements ProvisionEntity {
         sb.append(", stackName='").append(stackName).append('\'');
         sb.append(", instanceType='").append(instanceType).append('\'');
         sb.append(", instanceGroup='").append(instanceGroup).append('\'');
+        sb.append(", blueprintId='").append(blueprintId).append('\'');
+        sb.append(", blueprintName='").append(blueprintName).append('\'');
         sb.append(", costs='").append(costs).append('\'');
         sb.append('}');
         return sb.toString();

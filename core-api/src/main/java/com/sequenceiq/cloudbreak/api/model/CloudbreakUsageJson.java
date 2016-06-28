@@ -47,6 +47,12 @@ public class CloudbreakUsageJson implements JsonEntity {
     @ApiModelProperty(UsageModelDescription.INSTANCE_GROUP)
     private String instanceGroup;
 
+    @ApiModelProperty(UsageModelDescription.BLUEPRINT_ID)
+    private Long blueprintId;
+
+    @ApiModelProperty(UsageModelDescription.BLUEPRINT_NAME)
+    private String blueprintName;
+
     public String getOwner() {
         return owner;
     }
@@ -149,5 +155,21 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
+    }
+
+    public Long getBlueprintId() {
+        return blueprintId;
+    }
+
+    public void setBlueprintId(Long blueprintId) {
+        this.blueprintId = blueprintId;
+    }
+
+    public String getBlueprintName() {
+        return blueprintName;
+    }
+
+    public void setBlueprintName(String blueprintName) {
+        this.blueprintName = blueprintName;
     }
 }
