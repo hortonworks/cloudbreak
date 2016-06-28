@@ -20,7 +20,7 @@ patch:
       - pkg: patch
       - file: /etc/smartsense/conf/security.py.diff
 
-execute-patch:
+execute-smartsense-patch:
   cmd.run:
     - name: /etc/smartsense/conf/smartsense-agent-patch.sh
     - watch:
