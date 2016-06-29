@@ -245,10 +245,10 @@ util-cloudbreak-shell-remote(){
     echo "If you want to run CloudbreakShell on your local machine then please copy and paste the next command:"
     echo docker run -it \
         --rm --name cloudbreak-shell \
-        -e CLOUDBREAK_ADDRESS=https://$PUBLIC_IP \
-        -e IDENTITY_ADDRESS=https://$PUBLIC_IP/identity \
-        -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
-        -e SEQUENCEIQ_PASSWORD=$UAA_DEFAULT_USER_PW \
+        -e CLOUDBREAK_ADDRESS=\'https://$PUBLIC_IP\' \
+        -e IDENTITY_ADDRESS=\'https://$PUBLIC_IP/identity\' \
+        -e SEQUENCEIQ_USER=\'$UAA_DEFAULT_USER_EMAIL\' \
+        -e SEQUENCEIQ_PASSWORD=\'$UAA_DEFAULT_USER_PW\' \
         -w /data \
         -v $PWD:/data \
         sequenceiq/cb-shell:$DOCKER_TAG_CLOUDBREAK_SHELL --cert.validation=false
