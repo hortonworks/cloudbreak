@@ -59,9 +59,6 @@ import reactor.bus.EventBus;
 public class AmbariClusterConnectorTest {
 
     @Mock
-    private PluginManager pluginManager;
-
-    @Mock
     private TlsSecurityService tlsSecurityService;
 
     @Mock

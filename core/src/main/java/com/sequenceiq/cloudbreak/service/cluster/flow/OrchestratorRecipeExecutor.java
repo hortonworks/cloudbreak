@@ -84,8 +84,8 @@ public class OrchestratorRecipeExecutor {
     private List<RecipeModel> convert(Set<Recipe> recipes) {
         List<RecipeModel> result = new ArrayList<>();
         for (Recipe recipe : recipes) {
-            recipe.getPlugins().keySet().stream().filter(rawRecipe -> rawRecipe.startsWith("base64://")).forEach(rawRecipe -> {
-                String decodedRecipe = new String(Base64.decodeBase64(rawRecipe.replaceFirst("base64://", "")));
+            recipe.getPlugins().stream().filter(rawRecipe -> rawRecipe.getContent().startsWith("base64://")).forEach(rawRecipe -> {
+                String decodedRecipe = new String(Base64.decodeBase64(rawRecipe.getContent().replaceFirst("base64://", "")));
                 RecipeModel recipeModel = new RecipeModel(recipe.getName());
                 Map<String, String> recipeMap = Stream.of(decodedRecipe.split("\n"))
                         .collect(Collectors.toMap(s -> s.substring(0, s.indexOf(":")), s -> s.substring(s.indexOf(":") + 1)));

@@ -1,20 +1,15 @@
 package com.sequenceiq.cloudbreak.validation;
 
-
-import java.util.Map;
+import java.util.Set;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.codec.binary.Base64;
 
-import com.sequenceiq.cloudbreak.api.model.ExecutionType;
+public class PluginValidator implements ConstraintValidator<ValidPlugin, Set<String>> {
 
-public class PluginValidator implements ConstraintValidator<ValidPlugin, Map<String, ExecutionType>> {
-
-    private static final String RECIPE_KEY_PREFIX = "consul-watch-plugin/";
-    private static final String URL_PATTERN = "^(http|https|git|consul|base64)://.*";
-    private static final String CONSUL_PATTERN = "^consul://" + RECIPE_KEY_PREFIX + "([a-z][-a-z0-9]*[a-z0-9])";
+    private static final String URL_PATTERN = "^(consul|base64)://.*";
     private static final String SCRIPT_PATTERN = "^(recipe-pre-install|recipe-post-install):.*";
 
     @Override
@@ -22,16 +17,15 @@ public class PluginValidator implements ConstraintValidator<ValidPlugin, Map<Str
     }
 
     @Override
-    public boolean isValid(Map<String, ExecutionType> plugins, ConstraintValidatorContext cxt) {
+    public boolean isValid(Set<String> plugins, ConstraintValidatorContext cxt) {
         if (plugins == null || plugins.isEmpty()) {
             return false;
         }
-        for (String url : plugins.keySet()) {
-            if (!url.matches(URL_PATTERN)) {
+        for (String plugin : plugins) {
+            if (!plugin.matches(URL_PATTERN)) {
                 return false;
-            } else if (url.startsWith("consul://") && !url.matches(CONSUL_PATTERN)) {
-                return false;
-            } else if (url.startsWith("base64://") && !isValidBase64Plugin(url.replaceFirst("base64://", ""))) {
+            }
+            if (plugin.startsWith("base64://") && !isValidBase64Plugin(plugin.replaceFirst("base64://", ""))) {
                 return false;
             }
         }

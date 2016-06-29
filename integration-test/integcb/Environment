@@ -1,1 +1,1 @@
-#export DOCKER_MACHINE=test
+export DOCKER_MACHINE=test

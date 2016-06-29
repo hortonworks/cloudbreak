@@ -68,7 +68,7 @@
                                     <div class="help-block" ng-hide="ambariServerSelected()"><i class="fa fa-warning"></i> {{msg.cluster_form_hostgroup_ambari_warning}}</div>
                                 </div>
                             </div>
-                            <div class="form-group" ng-hide="instanceGroup.type=='GATEWAY' || $root.recipes.length === 0 || cluster.orchestrator.type === 'SALT'">
+                            <div class="form-group" ng-hide="$root.recipes.length === 0">
                                <label class="col-sm-3 control-label" for="recipenames{{$index}}">Recipes</label>
                                 <div class="col-sm-8">
                                     <div id="recipenames{{$index}}" name="recipenames{{$index}}">

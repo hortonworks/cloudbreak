@@ -32,9 +32,6 @@
                 <div class="col-md-3">
                     <select class="form-control" id="recipetype" name="recipetype" ng-options="recipeType.key as recipeType.value for recipeType in $root.config.RECIPE_TYPE.content_types" ng-model="recipeType"></select>
                 </div>
-                <div class="col-md-3">
-                    <select class="form-control" id="recipeexecutiontype" name="recipeexecutiontype" ng-options="executionType as $root.displayNames.getPropertyName('recipes', executionType) for executionType in $root.settings.recipe.executionTypes" ng-model="recipePlugin.type" required></select>
-                </div>
             </div>
         </div>
     </div>
@@ -71,34 +68,6 @@
         </div>
     </div>
 
-    <div class="form-group" ng-show="recipeType == 'URL'" ng-class="{ 'has-error': recipeCreationForm.recipeurl.$dirty && recipeCreationForm.recipeurl.$invalid }">
-        <label class="col-sm-3 control-label" for="recipeurl" style="border-bottom: 0"></label>
-        <div class="col-sm-9">
-            <input type="text" class="form-control" name="recipeurl" id="recipeurl" ng-model="recipePlugin.url" placeholder="{{msg.recipe_plugin_url_placeholder}}" ng-pattern="/^(http|https|git):\/\/.*\.[a-z]{2,4}.*|^base64://[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=]+/" required>
-            <div class="help-block" ng-show="recipeCreationForm.recipeurl.$dirty && recipeCreationForm.recipeurl.$invalid"><i class="fa fa-warning"></i> {{msg.recipe_plugin_url_invalid}}
-            </div>
-        </div>
-    </div>
-
-    <div class="form-group" ng-show="recipeType == 'URL'">
-        <label class="col-sm-3 control-label" for="recipeproperties" style="border-bottom: 0">{{msg.properties_label}}</label>
-        <div class="col-sm-9">
-            <div class="row">
-                <a class="btn" type="button" value="Input" ng-click="addRecipeProperty()"><i class="fa fa-plus fa-fw"></i></a>
-            </div>
-            <div id="recipeproperties" name="recipeproperties" class="row" ng-repeat="prop in recipePropertyList" style="margin-top: 10px;">
-                <div class="col-md-4" ng-class="{ 'has-error': recipeCreationForm['property' + $index].$dirty && recipeCreationForm['property' + $index].$invalid }">
-                    <input type="text" class="form-control" name="property{{$index}}" id="property{{$index}}" ng-model="prop.name" placeholder="{{msg.recipe_property_placeholder}}" ng-minlength="3" ng-required="recipeType == 'URL'">
-                </div>
-                <div class="col-md-4">
-                    <input type="text" class="form-control" name="value{{$index}}" id="value{{$index}}" ng-model="prop.value">
-                </div>
-                <div>
-                    <a class="btn" type="button" value="Input" ng-click="deleteRecipeProperty($index)"><i class="fa fa-minus fa-fw"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="recipe_public">{{msg.public_in_account_label}}</label>
         <div class="col-sm-9">

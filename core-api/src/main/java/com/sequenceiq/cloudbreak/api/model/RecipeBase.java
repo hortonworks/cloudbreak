@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -33,7 +34,7 @@ abstract class RecipeBase implements JsonEntity {
 
     @ValidPlugin
     @ApiModelProperty(value = RecipeModelDescription.PLUGINS, required = true)
-    private Map<String, ExecutionType> plugins;
+    private Set<String> plugins;
 
     @JsonProperty("properties")
     @ApiModelProperty(value = RecipeModelDescription.PROPERTIES)
@@ -63,11 +64,11 @@ abstract class RecipeBase implements JsonEntity {
         this.timeout = timeout;
     }
 
-    public Map<String, ExecutionType> getPlugins() {
+    public Set<String> getPlugins() {
         return plugins;
     }
 
-    public void setPlugins(Map<String, ExecutionType> plugins) {
+    public void setPlugins(Set<String> plugins) {
         this.plugins = plugins;
     }
 
