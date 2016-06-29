@@ -461,6 +461,8 @@ public class TestUtil {
         cloudbreakUsage.setRegion("Central US");
         cloudbreakUsage.setStackName("usagestack");
         cloudbreakUsage.setStackId(1L);
+        cloudbreakUsage.setBlueprintId(1L);
+        cloudbreakUsage.setBlueprintName("blueprint");
         return cloudbreakUsage;
     }
 
