@@ -4,14 +4,16 @@ import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAUL
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.ExecutionType;
+import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
@@ -33,7 +35,7 @@ public class ConsulRecipeBuilder implements RecipeBuilder {
                     .append("[plugin.config]\n[plugin.compatibility]").toString();
             StringBuilder pluginContentBuilder = new StringBuilder();
             pluginContentBuilder.append("plugin.toml:").append(Base64.encodeBase64String(tomlContent.getBytes())).append("\n");
-            Map<String, ExecutionType> plugins = new HashMap<>();
+            Set<Plugin> plugins = new HashSet<>();
             switch (script.getClusterLifecycleEvent()) {
                 case PRE_INSTALL:
                     pluginContentBuilder.append("recipe-pre-install:").append(Base64.encodeBase64String(script.getScript().getBytes())).append("\n");
@@ -44,7 +46,7 @@ public class ConsulRecipeBuilder implements RecipeBuilder {
                 default:
                     throw new UnsupportedOperationException("Cluster lifecycle event " + script.getClusterLifecycleEvent() + " is not supported");
             }
-            plugins.put("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()), script.getExecutionType());
+            plugins.add(new Plugin("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes())));
             recipe.setPlugins(plugins);
             recipe.setTimeout(DEFAULT_RECIPE_TIMEOUT);
             if (index == 0) {

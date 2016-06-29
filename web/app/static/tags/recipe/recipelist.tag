@@ -42,22 +42,19 @@
                 <thead>
                     <tr>
                         <th class="text-center">{{msg.content_label}}</th>
-                        <th class="text-center">{{msg.exec_type_label}}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(key, value) in recipe.plugins">
+                    <tr ng-repeat="plugin in recipe.plugins">
                         <td data-title="'pluginkey'" class="col-md-4 text-center">
-                            <ul ng-if="recipe.pluginContents[key]" class="nav">
-                                <li ng-repeat="(file, content) in recipe.pluginContents[key]">
+                            <ul ng-if="recipe.pluginContents[plugin]" class="nav">
+                                <li ng-repeat="(file, content) in recipe.pluginContents[plugin]">
                                     {{file}}
                                     <br />
                                     <textarea disabled style="width: 100%; height: 200px;">{{content}}</textarea>
                                 </li>
                             </ul>
-                            <a ng-if="!recipe.pluginContents[key]" href="{{key}}" target="_blank">{{key}}</a>
                         </td>
-                        <td data-title="'pluginValue'" class="col-md-3 text-center" style="width: 1%;">{{$root.displayNames.getPropertyName('recipes', value)}}</td>
                     </tr>
                 </tbody>
             </table>
