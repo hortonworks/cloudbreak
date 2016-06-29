@@ -22,6 +22,9 @@ public class InstanceGroupToJsonConverter extends AbstractConversionServiceAware
         instanceGroupJson.setTemplateId(entity.getTemplate().getId());
         instanceGroupJson.setType(entity.getInstanceGroupType());
         instanceGroupJson.setMetadata(convertEntitiesToJson(entity.getInstanceMetaData()));
+        if (entity.getSecurityGroup() != null) {
+            instanceGroupJson.setSecurityGroupId(entity.getSecurityGroup().getId());
+        }
         return instanceGroupJson;
     }
 

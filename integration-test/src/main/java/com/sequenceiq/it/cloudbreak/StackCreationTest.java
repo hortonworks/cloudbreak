@@ -47,11 +47,11 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
             instanceGroupJson.setNodeCount(ig.getNodeCount());
             instanceGroupJson.setTemplateId(Long.valueOf(ig.getTemplateId()));
             instanceGroupJson.setType(InstanceGroupType.valueOf(ig.getType()));
+            instanceGroupJson.setSecurityGroupId(Long.valueOf(itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID)));
             igMap.add(instanceGroupJson);
         }
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
-        String securityGroupId = itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID);
         StackRequest stackRequest = new StackRequest();
         stackRequest.setName(stackName);
         stackRequest.setCredentialId(Long.valueOf(credentialId));
@@ -62,7 +62,6 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         failurePolicyJson.setThreshold(threshold);
         stackRequest.setFailurePolicy(failurePolicyJson);
         stackRequest.setNetworkId(Long.valueOf(networkId));
-        stackRequest.setSecurityGroupId(Long.valueOf(securityGroupId));
         stackRequest.setPlatformVariant(variant);
         stackRequest.setAvailabilityZone(availabilityZone);
         stackRequest.setInstanceGroups(igMap);

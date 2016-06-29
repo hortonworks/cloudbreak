@@ -46,10 +46,6 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Stack findByIdWithSecurityConfig(@Param("id") Long id);
 
-    Stack findByIdWithSecurityGroup(@Param("id") Long id);
-
-    List<Stack> findAllBySecurityGroup(@Param("securityGroupId") Long securityGroupId);
-
     List<Stack> findAllAlive();
 
     List<Stack> findByStatuses(@Param("statuses") List<Status> statuses);

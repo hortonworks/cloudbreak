@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
-import com.sequenceiq.cloudbreak.cloud.arm.view.ArmStackView;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmSecurityView;
+import com.sequenceiq.cloudbreak.cloud.arm.view.ArmStackView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -66,7 +66,7 @@ public class ArmTemplateBuilder {
             model.put("region", cloudContext.getLocation().getRegion().value());
             model.put("subnet1Prefix", network.getSubnet().getCidr());
             model.put("groups", armStack.getGroups());
-            model.put("securities", new ArmSecurityView(cloudStack.getSecurity()));
+            model.put("securities", new ArmSecurityView(cloudStack.getCloudSecurity()));
             model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.CORE)));
             model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.GATEWAY)));
             model.put("disablePasswordAuthentication", !armCredentialView.passwordAuthenticationRequired());

@@ -90,7 +90,6 @@ public class MockStackCreationWithSwarmSuccessTest extends AbstractMockIntegrati
         failurePolicyJson.setThreshold(threshold);
         stackRequest.setFailurePolicy(failurePolicyJson);
         stackRequest.setNetworkId(Long.valueOf(networkId));
-        stackRequest.setSecurityGroupId(Long.valueOf(securityGroupId));
         stackRequest.setPlatformVariant(variant);
         stackRequest.setAvailabilityZone(availabilityZone);
         stackRequest.setInstanceGroups(igMap);

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Component
@@ -17,6 +18,9 @@ public class JsonToInstanceGroupConverter extends AbstractConversionServiceAware
 
     @Inject
     private TemplateService templateService;
+
+    @Inject
+    private SecurityGroupService securityGroupService;
 
     @Override
     public InstanceGroup convert(InstanceGroupJson json) {
@@ -26,6 +30,14 @@ public class JsonToInstanceGroupConverter extends AbstractConversionServiceAware
         instanceGroup.setInstanceGroupType(json.getType());
         if (isGateway(instanceGroup.getInstanceGroupType()) && instanceGroup.getNodeCount() != instanceGroup.getInstanceGroupType().getFixedNodeCount()) {
             throw new BadRequestException(String.format("Gateway has to be exactly %s node.", instanceGroup.getInstanceGroupType().getFixedNodeCount()));
+        }
+        try {
+            if (json.getSecurityGroupId() != null) {
+                instanceGroup.setSecurityGroup(securityGroupService.get(json.getSecurityGroupId()));
+            }
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(String.format("Access to securitygroup '%s' is denied or securitygroup doesn't exist.",
+                    json.getSecurityGroupId()), e);
         }
         try {
             instanceGroup.setTemplate(templateService.get(json.getTemplateId()));

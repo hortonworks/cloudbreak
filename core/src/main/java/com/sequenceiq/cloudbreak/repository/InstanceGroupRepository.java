@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.List;
+
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -11,5 +13,7 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
     InstanceGroup findOne(@Param("id") Long id);
 
     InstanceGroup findOneByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
+
+    List<InstanceGroup> findAllBySecurityGroup(@Param("securityGroupId") Long securityGroupId);
 
 }

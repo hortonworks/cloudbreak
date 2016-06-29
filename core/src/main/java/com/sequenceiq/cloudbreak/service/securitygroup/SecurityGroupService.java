@@ -18,8 +18,8 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Service
@@ -31,7 +31,7 @@ public class SecurityGroupService {
     private SecurityGroupRepository groupRepository;
 
     @Inject
-    private StackRepository stackRepository;
+    private InstanceGroupRepository instanceGroupRepository;
 
     @Transactional(Transactional.TxType.NEVER)
     public SecurityGroup create(CbUser user, SecurityGroup securityGroup) {
@@ -101,7 +101,7 @@ public class SecurityGroupService {
     }
 
     private void delete(CbUser user, SecurityGroup securityGroup) {
-        if (stackRepository.findAllBySecurityGroup(securityGroup.getId()).isEmpty()) {
+        if (instanceGroupRepository.findAllBySecurityGroup(securityGroup.getId()).isEmpty()) {
             if (!user.getUserId().equals(securityGroup.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
                 throw new BadRequestException("Public SecurityGroups can only be deleted by owners or account admins.");
             } else {

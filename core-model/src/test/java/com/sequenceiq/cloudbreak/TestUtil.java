@@ -147,7 +147,6 @@ public class TestUtil {
         stack.setAccount("account");
         stack.setId(1L);
         stack.setInstanceGroups(generateGcpInstanceGroups(3));
-        stack.setSecurityGroup(securityGroup(1L));
         stack.setStatusReason("statusReason");
         stack.setRegion("region");
         stack.setCreated(123L);
@@ -183,7 +182,7 @@ public class TestUtil {
         return orchestrator;
     }
 
-    private static SecurityGroup securityGroup(long id) {
+    public static SecurityGroup securityGroup(long id) {
         SecurityGroup sg = new SecurityGroup();
         sg.setId(id);
         sg.setName("security-group");
@@ -231,6 +230,7 @@ public class TestUtil {
         instanceGroup.setGroupName("is" + id);
         instanceGroup.setInstanceGroupType(instanceGroupType);
         instanceGroup.setTemplate(template);
+        instanceGroup.setSecurityGroup(securityGroup(1L));
         instanceGroup.setInstanceMetaData(generateInstanceMetaDatas(1, id, instanceGroup));
         return instanceGroup;
     }

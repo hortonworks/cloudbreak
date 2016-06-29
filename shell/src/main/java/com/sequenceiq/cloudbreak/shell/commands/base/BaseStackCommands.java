@@ -258,7 +258,6 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 stackRequest.setAvailabilityZone(availabilityZone.getName());
             }
             stackRequest.setOnFailureAction(onFailureAction == null ? OnFailureAction.DO_NOTHING : OnFailureAction.valueOf(onFailureAction.name()));
-            stackRequest.setSecurityGroupId(Long.valueOf(shellContext.getActiveSecurityGroupId()));
             stackRequest.setNetworkId(Long.valueOf(shellContext.getActiveNetworkId()));
             FailurePolicyJson failurePolicyJson = new FailurePolicyJson();
             stackRequest.setCredentialId(Long.valueOf(shellContext.getCredentialId()));
@@ -281,6 +280,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 instanceGroupJson.setTemplateId(instanceGroupEntry.getTemplateId());
                 instanceGroupJson.setNodeCount(instanceGroupEntry.getNodeCount());
                 instanceGroupJson.setGroup(stringObjectEntry.getKey());
+                instanceGroupJson.setSecurityGroupId(Long.valueOf(shellContext.getActiveSecurityGroupId()));
                 instanceGroupJsonList.add(instanceGroupJson);
             }
             stackRequest.setInstanceGroups(instanceGroupJsonList);

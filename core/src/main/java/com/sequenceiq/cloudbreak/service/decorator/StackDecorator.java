@@ -41,15 +41,13 @@ public class StackDecorator implements Decorator<Stack> {
 
     private enum DecorationData {
         CREDENTIAL_ID,
-        NETWORK_ID,
-        SECURITY_GROUP_ID
+        NETWORK_ID
     }
 
     @Override
     public Stack decorate(Stack subject, Object... data) {
         Object credentialId = data[DecorationData.CREDENTIAL_ID.ordinal()];
         if (credentialId != null) {
-            Object securityGroupId = data[DecorationData.SECURITY_GROUP_ID.ordinal()];
             Object networkId = data[DecorationData.NETWORK_ID.ordinal()];
             if (subject.getInstanceGroups() == null || networkId == null) {
                 throw new BadRequestException("Instance groups and network must be specified!");
@@ -57,9 +55,6 @@ public class StackDecorator implements Decorator<Stack> {
             Credential credential = credentialService.get((Long) credentialId);
             subject.setCloudPlatform(credential.cloudPlatform());
             subject.setCredential(credential);
-            if (securityGroupId != null) {
-                subject.setSecurityGroup(securityGroupService.get((Long) securityGroupId));
-            }
 
             subject.setNetwork(networkService.getById((Long) networkId));
             if (subject.getOrchestrator() != null && (subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)) {
