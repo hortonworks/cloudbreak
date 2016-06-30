@@ -69,12 +69,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
                         + "LEFT JOIN FETCH s.securityConfig "
                         + "WHERE s.id= :id"),
         @NamedQuery(
-                name = "Stack.findByIdWithSecurityGroup",
-                query = "SELECT s FROM Stack s "
-                        + "LEFT JOIN FETCH s.securityGroup sg "
-                        + "LEFT JOIN FETCH sg.securityRules "
-                        + "WHERE s.id= :id"),
-        @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
                 query = "SELECT distinct c FROM Stack c "
                         + "LEFT JOIN FETCH c.instanceGroups ig "
@@ -191,13 +185,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
                         + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE t.network.id= :networkId "),
         @NamedQuery(
-                name = "Stack.findAllBySecurityGroup",
-                query = "SELECT t FROM Stack t "
-                        + "LEFT JOIN FETCH t.resources "
-                        + "LEFT JOIN FETCH t.instanceGroups ig "
-                        + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE t.securityGroup.id= :securityGroupId "),
-        @NamedQuery(
                 name = "Stack.findAllAlive",
                 query = "SELECT s FROM Stack s "
                         + "WHERE s.status <> 'DELETE_COMPLETED' "),
@@ -263,8 +250,6 @@ public class Stack implements ProvisionEntity {
     private Long version;
     @ManyToOne
     private Network network;
-    @ManyToOne
-    private SecurityGroup securityGroup;
     @OneToOne
     private Orchestrator orchestrator;
     private Long created;
@@ -578,14 +563,6 @@ public class Stack implements ProvisionEntity {
             }
         }
         return null;
-    }
-
-    public SecurityGroup getSecurityGroup() {
-        return securityGroup;
-    }
-
-    public void setSecurityGroup(SecurityGroup securityGroup) {
-        this.securityGroup = securityGroup;
     }
 
     public int getGateWayNodeCount() {

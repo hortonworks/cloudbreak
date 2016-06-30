@@ -45,10 +45,6 @@ public abstract class StackBase implements JsonEntity {
     @Valid
     @ApiModelProperty(required = true)
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
-//    @NotNull
-    @ApiModelProperty(value = StackModelDescription.SECURITY_GROUP_ID, required = true)
-    private Long securityGroupId;
-//    @NotNull
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
     private Long networkId;
     @ApiModelProperty(value = StackModelDescription.RELOCATE_DOCKER, required = false)
@@ -137,14 +133,6 @@ public abstract class StackBase implements JsonEntity {
 
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
-    }
-
-    public Long getSecurityGroupId() {
-        return securityGroupId;
-    }
-
-    public void setSecurityGroupId(Long securityGroupId) {
-        this.securityGroupId = securityGroupId;
     }
 
     public String getPlatformVariant() {

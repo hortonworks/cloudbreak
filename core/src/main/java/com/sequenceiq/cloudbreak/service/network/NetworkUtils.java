@@ -39,6 +39,7 @@ import java.util.List;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.cloud.model.EndpointRule;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
@@ -95,15 +96,16 @@ public final class NetworkUtils {
         if (stack.isPresent()) {
             Stack stackInstance = stack.get();
             List<EndpointRule> aclRules = createACLRules(stackInstance);
-            for (SecurityRule rule : stackInstance.getSecurityGroup().getSecurityRules()) {
-                for (String portNumber : rule.getPorts()) {
-                    Port port = getPortByPortNumberAndProtocol(portNumber, rule.getProtocol());
-                    if (port != null) {
-                        result.add(new Port(port.getExposedService(), portNumber, portNumber, rule.getProtocol(), aclRules));
+            for (InstanceGroup instanceGroup : stackInstance.getInstanceGroups()) {
+                for (SecurityRule rule : instanceGroup.getSecurityGroup().getSecurityRules()) {
+                    for (String portNumber : rule.getPorts()) {
+                        Port port = getPortByPortNumberAndProtocol(portNumber, rule.getProtocol());
+                        if (port != null) {
+                            result.add(new Port(port.getExposedService(), portNumber, portNumber, rule.getProtocol(), aclRules));
+                        }
                     }
                 }
             }
-
         } else {
             result.addAll(ports);
         }
@@ -113,8 +115,10 @@ public final class NetworkUtils {
 
     private static List<EndpointRule> createACLRules(Stack stack) {
         List<EndpointRule> rules = new LinkedList<>();
-        for (SecurityRule rule : stack.getSecurityGroup().getSecurityRules()) {
-            rules.add(new EndpointRule(EndpointRule.Action.PERMIT.getText(), rule.getCidr()));
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            for (SecurityRule rule : instanceGroup.getSecurityGroup().getSecurityRules()) {
+                rules.add(new EndpointRule(EndpointRule.Action.PERMIT.getText(), rule.getCidr()));
+            }
         }
         EndpointRule internalRule = new EndpointRule(EndpointRule.Action.PERMIT.toString(), stack.getNetwork().getSubnetCIDR());
         rules.add(internalRule);

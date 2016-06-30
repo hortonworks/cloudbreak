@@ -52,7 +52,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), null, true);
 
         //network
-        List<CloudResourceStatus> networkStatuses = networkResourceService.buildResources(context, auth, stack.getNetwork(), stack.getSecurity());
+        List<CloudResourceStatus> networkStatuses = networkResourceService.buildResources(context, auth, stack.getNetwork(), stack.getCloudSecurity());
         context.addNetworkResources(getCloudResources(networkStatuses));
 
         //compute
@@ -123,7 +123,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
         //network
         List<CloudResource> networkResources = networkResourceService.getNetworkResources(platform, resources);
-        return networkResourceService.update(context, auth, stack.getNetwork(), stack.getSecurity(), networkResources);
+        return networkResourceService.update(context, auth, stack.getNetwork(), stack.getCloudSecurity(), networkResources);
     }
 
     @Override
@@ -147,7 +147,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
                 iterator.remove();
             }
         }
-        return new Group(scalingGroup.getName(), scalingGroup.getType(), instances);
+        return new Group(scalingGroup.getName(), scalingGroup.getType(), instances, scalingGroup.getSecurity());
     }
 
     private Group getGroup(List<Group> groups, String groupName) {

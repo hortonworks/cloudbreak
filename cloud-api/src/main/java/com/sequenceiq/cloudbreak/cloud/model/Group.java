@@ -10,11 +10,13 @@ public class Group {
     private final String name;
     private final InstanceGroupType type;
     private final List<CloudInstance> instances;
+    private final Security security;
 
-    public Group(String name, InstanceGroupType type, List<CloudInstance> instances) {
+    public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security) {
         this.name = name;
         this.type = type;
         this.instances = ImmutableList.copyOf(instances);
+        this.security = security;
     }
 
     public String getName() {
@@ -29,4 +31,7 @@ public class Group {
         return instances;
     }
 
+    public Security getSecurity() {
+        return security;
+    }
 }

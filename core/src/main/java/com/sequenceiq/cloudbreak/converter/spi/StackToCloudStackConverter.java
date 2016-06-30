@@ -58,8 +58,7 @@ public class StackToCloudStackConverter {
             List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), deleteRequestedInstances);
             Image image = imageService.getImage(stack.getId());
             Network network = buildNetwork(stack);
-            Security security = buildSecurity(stack);
-            return new CloudStack(instanceGroups, network, security, image, stack.getParameters());
+            return new CloudStack(instanceGroups, network, image, stack.getParameters());
         } catch (CloudbreakImageNotFoundException inf) {
             throw new CloudbreakServiceException(inf);
         }
@@ -86,9 +85,22 @@ public class StackToCloudStackConverter {
                     instances.add(buildInstance(null, template, instanceGroup.getGroupName(), privateId++, InstanceStatus.CREATE_REQUESTED));
                 }
             }
-            groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances));
+            groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances, buildSecurity(instanceGroup)));
         }
         return groups;
+    }
+
+    private Security buildSecurity(InstanceGroup ig) {
+        List<SecurityRule> rules = new ArrayList<>();
+        if (ig.getSecurityGroup() == null) {
+            return new Security(rules);
+        }
+        Long id = ig.getSecurityGroup().getId();
+        List<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityRuleRepository.findAllBySecurityGroupId(id);
+        for (com.sequenceiq.cloudbreak.domain.SecurityRule securityRule : securityRules) {
+            rules.add(new SecurityRule(securityRule.getCidr(), securityRule.getPorts(), securityRule.getProtocol()));
+        }
+        return new Security(rules);
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
@@ -122,19 +134,6 @@ public class StackToCloudStackConverter {
         Json attributes = stackNetwork.getAttributes();
         Map<String, Object> params = attributes == null ? Collections.<String, Object>emptyMap() : attributes.getMap();
         return new Network(subnet, params);
-    }
-
-    private Security buildSecurity(Stack stack) {
-        List<SecurityRule> rules = new ArrayList<>();
-        if (stack.getSecurityGroup() == null) {
-            return new Security(rules);
-        }
-        Long id = stack.getSecurityGroup().getId();
-        List<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityRuleRepository.findAllBySecurityGroupId(id);
-        for (com.sequenceiq.cloudbreak.domain.SecurityRule securityRule : securityRules) {
-            rules.add(new SecurityRule(securityRule.getCidr(), securityRule.getPorts(), securityRule.getProtocol()));
-        }
-        return new Security(rules);
     }
 
     private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {

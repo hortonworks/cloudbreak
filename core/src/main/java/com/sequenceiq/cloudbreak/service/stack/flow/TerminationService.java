@@ -19,8 +19,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -39,6 +41,9 @@ public class TerminationService {
 
     @Inject
     private StackRepository stackRepository;
+
+    @Inject
+    private InstanceGroupRepository instanceGroupRepository;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -65,8 +70,8 @@ public class TerminationService {
             }
             stack.setCredential(null);
             stack.setNetwork(null);
-            stack.setSecurityGroup(null);
             stack.setName(terminatedName);
+            terminateInstanceGroups(stack);
             terminateMetaDataInstances(stack);
             stackRepository.save(stack);
             stackUpdater.updateStackStatus(stackId, DELETE_COMPLETED, "Stack was terminated successfully.");
@@ -74,6 +79,14 @@ public class TerminationService {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);
         }
+    }
+
+    private void terminateInstanceGroups(Stack stack) {
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            instanceGroup.setSecurityGroup(null);
+            instanceGroupRepository.save(instanceGroup);
+        }
+
     }
 
     private void terminateMetaDataInstances(Stack stack) {

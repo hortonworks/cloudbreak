@@ -24,7 +24,11 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
         @NamedQuery(name = "InstanceGroup.findOneByGroupNameInStack",
                 query = "SELECT i from InstanceGroup i "
                         + "WHERE i.stack.id = :stackId "
-                        + "AND i.groupName = :groupName")
+                        + "AND i.groupName = :groupName"),
+        @NamedQuery(
+                name = "InstanceGroup.findAllBySecurityGroup",
+                query = "SELECT t FROM InstanceGroup t "
+                        + "WHERE t.securityGroup.id= :securityGroupId ")
 })
 public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup> {
 
@@ -34,6 +38,8 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     private Long id;
     @OneToOne
     private Template template;
+    @OneToOne
+    private SecurityGroup securityGroup;
     private Integer nodeCount;
     private String groupName;
     @Enumerated(EnumType.STRING)
@@ -91,6 +97,14 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
             }
         }
         return resultSet;
+    }
+
+    public SecurityGroup getSecurityGroup() {
+        return securityGroup;
+    }
+
+    public void setSecurityGroup(SecurityGroup securityGroup) {
+        this.securityGroup = securityGroup;
     }
 
     public Set<InstanceMetaData> getAllInstanceMetaData() {

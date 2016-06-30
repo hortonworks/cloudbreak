@@ -287,7 +287,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 if ($scope.cluster.instanceGroups) {
                     angular.forEach($scope.cluster.instanceGroups, function(ig) {
                         if (ig.group === hg.name) {
-                            hg.constraint.hostCount = ig.nodeCount
+                            hg.constraint.hostCount = ig.nodeCount;
+                            ig.securityGroupId = $scope.cluster.securityGroupId;
                         }
                     });
                 }
@@ -555,13 +556,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         id: $rootScope.activeCluster.blueprintId.toString()
                     }, true)[0];
                     if (typeof($rootScope.activeCluster.credentialId) !== "undefined" && $rootScope.activeCluster.credentialId) {
-                        if (typeof($rootScope.activeCluster.cloudPlatform) === "undefined" || !$rootScope.activeCluster.cloudPlatform) {
-                            $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {
-                                id: $rootScope.activeCluster.credentialId
-                            }, true)[0];
-                            if (typeof($rootScope.activeClusterCredential) !== "undefined") {
-                                $rootScope.activeCluster.cloudPlatform = $rootScope.activeClusterCredential.cloudPlatform
-                            }
+                        $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, { id: $rootScope.activeCluster.credentialId}, true)[0];
+                        if (typeof($rootScope.activeClusterCredential) !== "undefined") {
+                            $rootScope.activeCluster.cloudPlatform = $rootScope.activeClusterCredential.cloudPlatform
                         }
                     } else {
                         $rootScope.activeCluster.cloudPlatform = $rootScope.activeCluster.orchestrator.type
@@ -572,9 +569,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                             id: $rootScope.activeCluster.networkId
                         })[0];
                     }
-                    if ($rootScope.activeCluster.securityGroupId) {
+                    if ($rootScope.activeCluster.instanceGroups && $rootScope.activeCluster.instanceGroups.length > 0) {
                         $rootScope.activeClusterSecurityGroup = $filter('filter')($rootScope.securitygroups, {
-                            id: $rootScope.activeCluster.securityGroupId
+                            id: $rootScope.activeCluster.instanceGroups[0].securityGroupId
                         })[0];
                     }
                     $scope.newCredential = {};

@@ -2,5 +2,6 @@
   "type" : "GATEWAY",
   "group" : "groupName",
   "nodeCount" : 1,
-  "templateId" : 51
+  "templateId" : 51,
+  "securityGroupId" : 1
 }

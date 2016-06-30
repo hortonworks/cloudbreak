@@ -26,6 +26,8 @@ public class InstanceGroupJson implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = InstanceGroupModelDescription.TEMPLATE_ID, required = true)
     private Long templateId;
+    @ApiModelProperty(value = InstanceGroupModelDescription.SECURITY_GROUP_ID, required = true)
+    private Long securityGroupId;
     @Min(value = 1, message = "The node count has to be greater than 0")
     @Max(value = 100000, message = "The node count has to be less than 100000")
     @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
@@ -74,6 +76,14 @@ public class InstanceGroupJson implements JsonEntity {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public Long getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(Long securityGroupId) {
+        this.securityGroupId = securityGroupId;
     }
 
     @JsonProperty("metadata")

@@ -64,8 +64,9 @@ public class ParameterGenerator {
                 new HashMap<String, Object>());
 
         CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate);
-
-        groups.add(new Group(name, InstanceGroupType.CORE, Arrays.asList(instance)));
+        List<SecurityRule> rules = Arrays.asList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
+        Security security = new Security(rules);
+        groups.add(new Group(name, InstanceGroupType.CORE, Arrays.asList(instance), security));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
@@ -77,10 +78,9 @@ public class ParameterGenerator {
         Network network = new Network(subnet);
         network.putParameter("publicNetId", "028ffc0c-63c5-4ca0-802a-3ac753eaf76c");
 
-        List<SecurityRule> rules = Arrays.asList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
-        Security security = new Security(rules);
 
-        return new CloudStack(groups, network, security, image, new HashMap<String, String>());
+
+        return new CloudStack(groups, network, image, new HashMap<String, String>());
     }
 
     public String getSshFingerprint() {
