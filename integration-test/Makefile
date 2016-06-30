@@ -1,4 +1,4 @@
-include integcb/Profile
+include integcb/Environment
 
 INTEGCB_LOCATION := integcb
 
@@ -32,19 +32,20 @@ create-image:
 
 create-cloudbreak-context:
 	@echo "\n\033[1;96m--- Create cloudbreak context\033[0m\n"
+	@cp $(INTEGCB_LOCATION)/Profile_template $(INTEGCB_LOCATION)/Profile
+	@./fill_public_ip.sh
 	@cd $(INTEGCB_LOCATION); ./cbd delete;
 	@cd $(INTEGCB_LOCATION); ./cbd regenerate;
 	@$(INTEGCB_LOCATION)/.deps/bin/docker-compose stop; $(INTEGCB_LOCATION)/.deps/bin/docker-compose kill
 
 docker-compose:
-	@echo "\n\033[1;96m--- Stop and remove running cbd containers\033[0m\n"
-	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose stop; .deps/bin/docker-compose kill
+	@echo "\n\033[1;96m--- Kill running cbd containers\033[0m\n"
+	@cd $(INTEGCB_LOCATION); ./cbd kill
+	@echo "\n\033[1;96m--- Kill running test container\033[0m\n"
+	@$(INTEGCB_LOCATION)/.deps/bin/docker-compose down
 	@echo "\n\033[1;96m--- Start cloudbreak\033[0m\n"
-	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose up -d consul registrator uaadb identity cbdb cloudbreak > /dev/null
+	@cd $(INTEGCB_LOCATION); ./cbd start-wait consul registrator uaadb identity cbdb cloudbreak
 	@rm -rf test-output
-	@echo "\n\033[1;96m--- Check cloudbreak if available\033[0m\n"
-	@docker pull sequenceiq/cloudbreak:root-path
-	@docker run -t --rm --net=container:integcb_cloudbreak_1 --entrypoint /bin/bash sequenceiq/cloudbreak:root-path -c /wait_for_cloudbreak_api.sh
 	@echo "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
 	@$(INTEGCB_LOCATION)/.deps/bin/docker-compose up test > test.out
 	@echo "\n\033[1;96m--- Test finished\033[0m\n"
