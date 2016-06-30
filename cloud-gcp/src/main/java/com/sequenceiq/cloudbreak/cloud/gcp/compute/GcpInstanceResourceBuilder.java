@@ -77,7 +77,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Tags tags = new Tags();
         List<String> tagList = new ArrayList<>();
-        tagList.add(group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", ""));
+        String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
+        tagList.add(groupname);
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tags.setItems(tagList);
         instance.setTags(tags);

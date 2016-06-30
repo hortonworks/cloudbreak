@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.gcp.network;
+package com.sequenceiq.cloudbreak.cloud.gcp.group;
 
 import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_FIREWALL_IN;
 import static java.util.Arrays.asList;
@@ -18,27 +18,28 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
-public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
+public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
 
-    private static final int ORDER = 3;
+    private static final int ORDER = 0;
 
     @Override
-    public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
+    public CloudResource create(GcpContext context, AuthenticatedContext auth, Group group, Network network) {
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }
 
     @Override
-    public CloudResource build(GcpContext context, AuthenticatedContext auth, Network network, Security security, CloudResource buildableResource)
+    public CloudResource build(GcpContext context, AuthenticatedContext auth, Group group, Network network, Security security, CloudResource buildableResource)
             throws Exception {
         String projectId = context.getProjectId();
 
@@ -52,7 +53,8 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
 
         allowedRules.addAll(createRule(security));
 
-        firewall.setTargetTags(Arrays.asList(GcpStackUtil.getClusterTag(auth.getCloudContext())));
+        String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
+        firewall.setTargetTags(Arrays.asList(groupname));
         firewall.setAllowed(allowedRules);
         firewall.setName(buildableResource.getName());
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
@@ -71,9 +73,10 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
     }
 
     @Override
-    public CloudResourceStatus update(GcpContext ctx, AuthenticatedContext auth, Network network, Security security, CloudResource resource) throws Exception {
-        String projectId = ctx.getProjectId();
-        Compute compute = ctx.getCompute();
+    public CloudResourceStatus update(GcpContext context, AuthenticatedContext auth, Group group, Network network, Security security, CloudResource resource)
+            throws Exception {
+        String projectId = context.getProjectId();
+        Compute compute = context.getCompute();
         String resourceName = resource.getName();
         try {
             Firewall fireWall = compute.firewalls().get(projectId, resourceName).execute();
@@ -81,7 +84,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpNetworkBuilder {
             fireWall.setSourceRanges(sourceRanges);
             Operation operation = compute.firewalls().update(projectId, resourceName, fireWall).execute();
             CloudResource cloudResource = createOperationAwareCloudResource(resource, operation);
-            return checkResources(ctx, auth, asList(cloudResource)).get(0);
+            return checkResources(context, auth, asList(cloudResource)).get(0);
         } catch (IOException e) {
             throw new GcpResourceException("Failed to update resource!", GCP_FIREWALL_IN, resourceName, e);
         }

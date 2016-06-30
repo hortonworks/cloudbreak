@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
+import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
 
@@ -37,6 +38,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
     @Inject
     private NetworkResourceService networkResourceService;
+    @Inject
+    private GroupResourceService groupResourceService;
     @Inject
     private ComputeResourceService computeResourceService;
     @Inject
@@ -55,11 +58,16 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         List<CloudResourceStatus> networkStatuses = networkResourceService.buildResources(context, auth, stack.getNetwork(), stack.getCloudSecurity());
         context.addNetworkResources(getCloudResources(networkStatuses));
 
+        //group
+        List<CloudResourceStatus> groupStatuses = groupResourceService.buildResources(context, auth, stack.getGroups(), stack.getNetwork(),
+                stack.getCloudSecurity());
+        networkStatuses.addAll(groupStatuses);
+
         //compute
         List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack.getGroups(), stack.getImage(),
                 adjustmentType, threshold);
-
         networkStatuses.addAll(computeStatuses);
+
         return networkStatuses;
     }
 
@@ -74,10 +82,14 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         //compute
         List<CloudResourceStatus> computeStatuses = computeResourceService.deleteResources(context, auth, cloudResources, false);
 
+        //group
+        List<CloudResourceStatus> groupStatuses = groupResourceService.deleteResources(context, auth, cloudResources, stack.getNetwork(), false);
+        computeStatuses.addAll(groupStatuses);
+
         //network
         List<CloudResourceStatus> networkStatuses = networkResourceService.deleteResources(context, auth, cloudResources, stack.getNetwork(), false);
-
         computeStatuses.addAll(networkStatuses);
+
         return computeStatuses;
     }
 
@@ -92,9 +104,12 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         //network
         context.addNetworkResources(networkResourceService.getNetworkResources(platform, resources));
 
-        //compute
         Group scalingGroup = getScalingGroup(getGroup(stack.getGroups(), getGroupName(stack)));
 
+        //group
+        context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(platform, resources));
+
+        //compute
         return computeResourceService.buildResourcesForUpscale(context, auth, Collections.singletonList(scalingGroup), stack.getImage());
     }
 
@@ -121,9 +136,16 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), resources, true);
 
+        //group
+        List<CloudResource> groupResources = groupResourceService.getGroupResources(platform, resources);
+        List<CloudResourceStatus> groupStatuses = groupResourceService.update(context, auth, stack.getNetwork(), stack.getCloudSecurity(), groupResources);
+
         //network
         List<CloudResource> networkResources = networkResourceService.getNetworkResources(platform, resources);
-        return networkResourceService.update(context, auth, stack.getNetwork(), stack.getCloudSecurity(), networkResources);
+        List<CloudResourceStatus> networkStatuses = networkResourceService.update(context, auth, stack.getNetwork(), stack.getCloudSecurity(), networkResources);
+
+        groupStatuses.addAll(networkStatuses);
+        return groupStatuses;
     }
 
     @Override

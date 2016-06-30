@@ -49,7 +49,8 @@ public class CloudFormationTemplateBuilder {
                             encrypted.equals(Boolean.TRUE),
                             instanceTemplate.getVolumeSize(),
                             instanceTemplate.getVolumeType(),
-                            getSpotPrice(instanceTemplate)
+                            getSpotPrice(instanceTemplate),
+                            group.getSecurity().getRules()
                     )
             );
         }
@@ -57,7 +58,6 @@ public class CloudFormationTemplateBuilder {
         model.put("existingVPC", context.existingVPC);
         model.put("existingIGW", context.existingIGW);
         model.put("existingSubnet", isNoneEmpty(context.existingSubnetCidr));
-        model.put("securityRules", context.stack.getCloudSecurity());
         model.put("enableInstanceProfile", context.enableInstanceProfile || context.s3RoleAvailable);
         model.put("existingRole", context.s3RoleAvailable);
         model.put("cbSubnet", isBlank(context.existingSubnetCidr) ? context.stack.getNetwork().getSubnet().getCidr() : context.existingSubnetCidr);
