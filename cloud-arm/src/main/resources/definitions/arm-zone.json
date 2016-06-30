@@ -51,6 +51,14 @@
     {
       "name": "Japan West",
       "zones": []
+    },
+    {
+      "name": "Canada East",
+      "zones": []
+    },
+    {
+      "name": "Canada Central",
+      "zones": []
     }
   ]
 }
