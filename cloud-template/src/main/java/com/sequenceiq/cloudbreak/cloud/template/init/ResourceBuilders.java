@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.OrderedBuilder;
 
@@ -25,13 +26,17 @@ public class ResourceBuilders {
     private List<NetworkResourceBuilder> network;
     @Inject
     private List<ComputeResourceBuilder> compute;
+    @Inject
+    private List<GroupResourceBuilder> group;
     private Map<Platform, List<NetworkResourceBuilder>> networkChain = new HashMap<>();
+    private Map<Platform, List<GroupResourceBuilder>> groupChain = new HashMap<>();
     private Map<Platform, List<ComputeResourceBuilder>> computeChain = new HashMap<>();
 
     @PostConstruct
     public void init() {
         BuilderComparator comparator = new BuilderComparator();
         initNetwork(comparator);
+        initGroup(comparator);
         initCompute(comparator);
     }
 
@@ -41,6 +46,10 @@ public class ResourceBuilders {
 
     public List<ComputeResourceBuilder> compute(Platform platform) {
         return new ArrayList<>(computeChain.get(platform));
+    }
+
+    public List<GroupResourceBuilder> group(Platform platform) {
+        return new ArrayList<>(groupChain.get(platform));
     }
 
     private void initNetwork(BuilderComparator comparator) {
@@ -61,6 +70,18 @@ public class ResourceBuilders {
             if (chain == null) {
                 chain = new LinkedList<>();
                 this.computeChain.put(builder.platform(), chain);
+            }
+            chain.add(builder);
+            Collections.sort(chain, comparator);
+        }
+    }
+
+    private void initGroup(BuilderComparator comparator) {
+        for (GroupResourceBuilder builder : group) {
+            List<GroupResourceBuilder> chain = this.groupChain.get(builder.platform());
+            if (chain == null) {
+                chain = new LinkedList<>();
+                this.groupChain.put(builder.platform(), chain);
             }
             chain.add(builder);
             Collections.sort(chain, comparator);

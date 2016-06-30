@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkJson implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.ID)
-    private String id;
+    private Long id;
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     @Size(max = 100, min = 1, message = "The length of the network's name has to be in range of 1 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
@@ -46,12 +46,12 @@ public class NetworkJson implements JsonEntity {
     private Long topologyId;
 
     @JsonProperty("id")
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
     @JsonIgnore
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

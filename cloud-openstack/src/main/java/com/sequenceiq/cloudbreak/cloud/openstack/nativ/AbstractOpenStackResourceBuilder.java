@@ -37,23 +37,29 @@ public abstract class AbstractOpenStackResourceBuilder implements CloudPlatformA
         return openStackClient.createOSClient(auth);
     }
 
-    protected CloudResource createNamedResource(ResourceType resourceType, String name) {
+    protected CloudResource createNamedResource(ResourceType resourceType, String group, String name) {
         return new CloudResource.Builder()
                 .name(name)
+                .group(group)
                 .type(resourceType)
                 .status(CommonStatus.REQUESTED)
                 .build();
     }
 
-    protected CloudResource createPersistedResource(CloudResource namedResource, String reference) {
-        return createPersistedResource(namedResource, reference, Maps.newHashMap());
+    protected CloudResource createPersistedResource(CloudResource namedResource, String group, String reference) {
+        return createPersistedResource(namedResource, group, reference, Maps.newHashMap());
     }
 
-    protected CloudResource createPersistedResource(CloudResource namedResource, String reference, Map<String, Object> params) {
+    protected CloudResource createPersistedResource(CloudResource namedResource, String reference) {
+        return createPersistedResource(namedResource, null, reference, Maps.newHashMap());
+    }
+
+    protected CloudResource createPersistedResource(CloudResource namedResource, String group, String reference, Map<String, Object> params) {
         return new CloudResource.Builder()
                 .cloudResource(namedResource)
                 .reference(reference)
                 .status(CommonStatus.CREATED)
+                .group(group)
                 .params(params)
                 .build();
     }

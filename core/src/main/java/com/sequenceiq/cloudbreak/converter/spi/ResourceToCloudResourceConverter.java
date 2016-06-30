@@ -15,6 +15,7 @@ public class ResourceToCloudResourceConverter extends AbstractConversionServiceA
                 .name(resource.getResourceName())
                 .reference(resource.getResourceReference())
                 .status(resource.getResourceStatus())
+                .group(resource.getInstanceGroup())
                 .build();
     }
 }

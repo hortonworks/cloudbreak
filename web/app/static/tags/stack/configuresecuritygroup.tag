@@ -1,19 +1,8 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="selectClusterNetwork">{{msg.cluster_form_network_label}}</label>
     <div class="col-sm-8">
-        <select class="form-control" id="selectClusterNetwork" ng-model="cluster.networkId" ng-required="activeCredential !== undefined">
-            <option ng-repeat="network in $root.networks | filter:filterByTopology | filter:{cloudPlatform: activeCredential.cloudPlatform} | orderBy:'name'" value="{{network.id}}">{{network.name}}</option>
+        <select class="form-control" id="selectClusterNetwork" name="selectClusterNetwork" ng-model="cluster.networkId" ng-required="activeCredential !== undefined" ng-options="network.id as network.name for network in $root.networks | filter:filterByTopology | filter:{cloudPlatform: activeCredential.cloudPlatform} | orderBy:'name'">
         </select>
-    </div>
-</div>
-<div class="form-group">
-    <label class="col-sm-3 control-label" for="select-cluster-securitygroup">{{msg.cluster_form_securitygroup_label}}</label>
-    <div class="col-sm-8">
-        <select class="form-control" id="select-cluster-securitygroup" ng-model="cluster.securityGroupId" ng-required="activeCredential !== undefined">
-            <option ng-repeat="securitygroup in $root.securitygroups | orderBy:'name'" value="{{securitygroup.id}}">{{securitygroup.name}}</option>
-        </select>
-        <div class="help-block" ng-show="isExistingVpc()"><i class="fa fa-warning"></i> {{msg.cluster_form_securitygroup_existingvpc}}
-        </div>
     </div>
 </div>
 <div class="form-group" name="cluster_security1">
@@ -77,7 +66,7 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId || (selectSssd.show && !cluster.sssdConfigId)" ng-click="showWizardActualElement('configureHostGroups')">{{msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i></button>
+                <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.networkId || (selectSssd.show && !cluster.sssdConfigId)" ng-click="showWizardActualElement('configureHostGroups')">{{msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i></button>
             </div>
         </div>
     </div>

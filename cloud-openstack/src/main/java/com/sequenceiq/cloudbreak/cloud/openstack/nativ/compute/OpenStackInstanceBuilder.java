@@ -85,7 +85,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             }
             ServerCreate serverCreate = serverCreateBuilder.build();
             Server server = osClient.compute().servers().boot(serverCreate);
-            return Collections.singletonList(createPersistedResource(resource, server.getId(),
+            return Collections.singletonList(createPersistedResource(resource, group.getName(), server.getId(),
                     Collections.singletonMap(OpenStackConstants.SERVER, server)));
         } catch (OS4JException ex) {
             LOGGER.error("Failed to create OpenStack instance with privateId: {}", privateId, ex);

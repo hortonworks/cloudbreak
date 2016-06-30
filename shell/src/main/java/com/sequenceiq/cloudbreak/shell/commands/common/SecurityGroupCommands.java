@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.http.MethodNotSupportedException;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
@@ -82,7 +83,6 @@ public class SecurityGroupCommands implements BaseCommands {
                 id = shellContext.cloudbreakClient().securityGroupEndpoint().postPrivate(securityGroupJson);
             }
             shellContext.putSecurityGroup(id.getId(), name);
-            shellContext.setActiveSecurityGroupId(id.getId());
             setHint();
             return String.format(CREATE_SUCCESS_MSG, id.getId(), name);
         } catch (Exception ex) {
@@ -128,36 +128,14 @@ public class SecurityGroupCommands implements BaseCommands {
         return delete(null, name);
     }
 
-    @CliAvailabilityIndicator(value = { "securitygroup select --id", "securitygroup select --name" })
     @Override
     public boolean selectAvailable() {
-        return !shellContext.getSecurityGroups().isEmpty() && !shellContext.isMarathonMode();
+        return false;
     }
 
     @Override
-    public String select(Long secId, String secName) {
-        if (secId == null && secName == null) {
-            return "Both ID and name cannot be null";
-        }
-        String message = "No security group has been selected";
-        Long id = secId == null ? null : secId;
-        String name = secName == null ? null : secName;
-        Map<Long, String> securityGroups = shellContext.getSecurityGroups();
-        if (id != null && securityGroups.containsKey(id)) {
-            shellContext.setActiveSecurityGroupId(id);
-            setHint();
-            message = "Security group has been selected with id: " + id;
-        } else if (securityGroups.containsValue(name)) {
-            for (Long groupId : securityGroups.keySet()) {
-                if (securityGroups.get(groupId).equals(name)) {
-                    shellContext.setActiveSecurityGroupId(groupId);
-                    setHint();
-                    message = "Security group has been selected with name: " + name;
-                    break;
-                }
-            }
-        }
-        return message;
+    public String select(Long secId, String secName) throws MethodNotSupportedException {
+        throw new MethodNotSupportedException("Select is not supported on securitygroups");
     }
 
     @CliCommand(value = "securitygroup select --id", help = "Delete the securitygroup by its id")
@@ -240,9 +218,6 @@ public class SecurityGroupCommands implements BaseCommands {
         Set<SecurityGroupJson> publics = shellContext.cloudbreakClient().securityGroupEndpoint().getPublics();
         for (SecurityGroupJson securityGroup : publics) {
             shellContext.putSecurityGroup(securityGroup.getId(), securityGroup.getName());
-        }
-        if (!shellContext.getSecurityGroups().containsKey(shellContext.getActiveSecurityGroupId())) {
-            shellContext.setActiveSecurityGroupId(null);
         }
     }
 

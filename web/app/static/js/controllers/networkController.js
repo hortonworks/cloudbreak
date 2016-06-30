@@ -79,7 +79,7 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
         }
 
         function handleNetworkCreationSuccess(result) {
-            $scope.network.id = result.id;
+            $scope.network.id = result.id.toString();
             $rootScope.networks.push($scope.network);
             $scope.showSuccess($rootScope.msg.network_creation_success + $scope.network.name);
             collapseCreateNetworkFormPanel();

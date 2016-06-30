@@ -58,6 +58,8 @@ public class ArmTemplateBuilder {
             String rootDiskStorage = armStorage.getImageStorageName(armCredentialView, cloudContext,
                     armStorage.getPersistentStorageName(cloudStack.getParameters()),
                     armStorage.getArmAttachedStorageOption(cloudStack.getParameters()));
+            ArmSecurityView armSecurityView = new ArmSecurityView(cloudStack.getGroups());
+
             model.put("storage_account_name", rootDiskStorage);
             model.put("image_storage_container_name", ArmStorage.IMAGES);
             model.put("storage_container_name", armStorage.getDiskContainerName(cloudContext));
@@ -66,7 +68,8 @@ public class ArmTemplateBuilder {
             model.put("region", cloudContext.getLocation().getRegion().value());
             model.put("subnet1Prefix", network.getSubnet().getCidr());
             model.put("groups", armStack.getGroups());
-            model.put("securities", new ArmSecurityView(cloudStack.getCloudSecurity()));
+            model.put("igs", armStack.getInstanceGroups());
+            model.put("securities", armSecurityView.getPorts());
             model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.CORE)));
             model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.GATEWAY)));
             model.put("disablePasswordAuthentication", !armCredentialView.passwordAuthenticationRequired());

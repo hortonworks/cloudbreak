@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.openstack.nativ.network;
+package com.sequenceiq.cloudbreak.cloud.openstack.nativ.group;
 
 import javax.inject.Inject;
 
@@ -13,17 +13,17 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
-import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
-public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackNetworkResourceBuilder {
+public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGroupResourceBuilder {
     private static final int MAX_PORT = 65535;
     private static final int MIN_PORT = 1;
 
@@ -31,7 +31,8 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackNetw
     private OpenStackUtils utils;
 
     @Override
-    public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource)
+    public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Group group, Network network, Security security,
+            CloudResource resource)
             throws Exception {
         try {
             OSClient osClient = createOSClient(auth);
@@ -50,8 +51,7 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackNetw
             securityGroupService.createRule(createRule(securityGroupId, IPProtocol.TCP, subnetCidr, MIN_PORT, MAX_PORT));
             securityGroupService.createRule(createRule(securityGroupId, IPProtocol.UDP, subnetCidr, MIN_PORT, MAX_PORT));
             securityGroupService.createRule(createRule(securityGroupId, IPProtocol.ICMP, "0.0.0.0/0"));
-            context.putParameter(OpenStackConstants.SECURITYGROUP_ID, securityGroupId);
-            return createPersistedResource(resource, securityGroup.getId());
+            return createPersistedResource(resource, group.getName(), securityGroup.getId());
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("SecurityGroup creation failed", resourceType(), resource.getName(), ex);
         }
@@ -97,5 +97,10 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackNetw
 
     private IPProtocol getProtocol(String protocolStr) {
         return IPProtocol.value(protocolStr);
+    }
+
+    @Override
+    public int order() {
+        return 0;
     }
 }

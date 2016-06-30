@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Service
 public class GcpReservedIpResourceBuilder extends AbstractGcpNetworkBuilder {
 
-    private static final int ORDER = 4;
+    private static final int ORDER = 3;
 
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {

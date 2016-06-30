@@ -144,7 +144,7 @@ ${core_user_data}
       <#else>
         - subnet_id: { get_resource: app_subnet }
       </#if>
-      security_groups: [ { get_resource: server_security_group } ]
+      security_groups: [ { get_resource: security_group_${agent.instance.groupName} } ]
 
   <#if assignFloatingIp>
   ambari_server_floatingip_${agent.instanceId}:
@@ -153,15 +153,17 @@ ${core_user_data}
       floating_network_id: { get_param: public_net_id }
       port_id: { get_resource: ambari_app_port_${agent.instanceId} }
   </#if>
-  </#list>     
+  </#list>
 
-  server_security_group:
+  <#list groups as group>
+
+  security_group_${group.name}:
     type: OS::Neutron::SecurityGroup
     properties:
       description: Cloudbreak security group
-      name: cb-sec-group_${cb_stack_name}
+      name: cb-sec-group_${cb_stack_name}_${group.name}
       rules: [
-        <#list rules as r>
+        <#list group.security.rules as r>
         <#list r.getPorts() as p>
         {remote_ip_prefix: ${r.cidr},
         protocol: ${r.protocol},
@@ -179,6 +181,8 @@ ${core_user_data}
         port_range_max: 65535},
         {remote_ip_prefix: 0.0.0.0/0,
         protocol: icmp}]
+
+  </#list>
 
 outputs:
   <#list agents as agent>

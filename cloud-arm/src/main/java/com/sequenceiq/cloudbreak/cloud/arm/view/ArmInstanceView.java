@@ -20,12 +20,14 @@ public class ArmInstanceView {
     private InstanceGroupType type;
     private String attachedDiskStorage;
     private String attachedDiskStorageType;
+    private String groupName;
 
-    public ArmInstanceView(InstanceTemplate instance, InstanceGroupType type, String attachedDiskStorage, String attachedDiskStorageType) {
+    public ArmInstanceView(InstanceTemplate instance, InstanceGroupType type, String attachedDiskStorage, String attachedDiskStorageType, String groupName) {
         this.instance = instance;
         this.type = type;
         this.attachedDiskStorage = attachedDiskStorage;
         this.attachedDiskStorageType = attachedDiskStorageType;
+        this.groupName = groupName;
     }
 
     /**
@@ -63,6 +65,10 @@ public class ArmInstanceView {
             index++;
         }
         return list;
+    }
+
+    public String getGroupName() {
+        return groupName;
     }
 
     public String getAttachedDiskStorageName() {

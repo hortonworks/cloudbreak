@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
@@ -45,7 +44,7 @@ public class HeatTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String build(String stackName, List<Group> groups, Security security, Image instanceUserData, boolean existingNetwork,
+    public String build(String stackName, List<Group> groups, Image instanceUserData, boolean existingNetwork,
                         boolean existingSubnet, boolean assignFloatingIp) {
         try {
             List<NovaInstanceView> novaInstances = new OpenStackGroupView(groups).getFlatNovaView();
@@ -54,7 +53,7 @@ public class HeatTemplateBuilder {
             model.put("agents", novaInstances);
             model.put("core_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.CORE)));
             model.put("gateway_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.GATEWAY)));
-            model.put("rules", security.getRules());
+            model.put("groups", groups);
             model.put("existingNetwork", existingNetwork);
             model.put("existingSubnet", existingSubnet);
             model.put("assignFloatingIp", assignFloatingIp);

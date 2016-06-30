@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.shell.commands.common.InstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
+import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupId;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
@@ -34,6 +35,7 @@ public class InstanceGroupCommandsTest {
     private InstanceGroup hostGroup = new InstanceGroup("master");
     private InstanceGroupTemplateId dummyTemplateId = new InstanceGroupTemplateId(DUMMY_TEMPLATE_ID);
     private InstanceGroupTemplateName dummyTemplateName = new InstanceGroupTemplateName(DUMMY_TEMPLATE);
+    private SecurityGroupId dummySecurityGroupId = new SecurityGroupId("1");
 
     @InjectMocks
     private InstanceGroupCommands underTest;
@@ -68,21 +70,21 @@ public class InstanceGroupCommandsTest {
 
     @Test
     public void testConfigureByTemplateId() throws Exception {
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, dummyTemplateId, null);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, dummyTemplateId, null, dummySecurityGroupId, null);
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }
 
     @Test
     public void testConfigureByTemplateName() throws Exception {
         given(mockClient.getPublic(DUMMY_TEMPLATE)).willReturn(dummyResult);
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName, dummySecurityGroupId, null);
         verify(mockClient, times(1)).getPublic(anyString());
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }
 
     @Test
     public void testConfigureByTemplateIdAndName() throws Exception {
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, dummyTemplateId, dummyTemplateName);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, dummyTemplateId, dummyTemplateName, dummySecurityGroupId, null);
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
         verify(mockClient, times(0)).getPublic(anyString());
     }
@@ -90,7 +92,7 @@ public class InstanceGroupCommandsTest {
     @Test
     public void testConfigureByTemplateNameWhenTemplateNotFound() throws Exception {
         given(mockClient.getPublic(DUMMY_TEMPLATE)).willReturn(null);
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName, dummySecurityGroupId, null);
         verify(mockClient, times(1)).getPublic(anyString());
         verify(mockContext, times(0)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }

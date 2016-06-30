@@ -185,9 +185,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }, true);
                 var instanceGroups = [];
                 var hostGroups = [];
+                var sgroupsActiveId = null;
+                if ($rootScope.securitygroups && $rootScope.securitygroups.length != 0) {
+                    var sgroups = $filter('orderBy')($rootScope.securitygroups, 'name', false);
+                    sgroupsActiveId = sgroups[0].id;
+                }
                 actualBp[0].ambariBlueprint.host_groups.forEach(function(k) {
                     instanceGroups.push({
                         templateId: tmpTemplateId,
+                        securityGroupId: sgroupsActiveId,
                         group: k.name,
                         nodeCount: 1,
                         type: "CORE"
@@ -201,6 +207,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         recipeIds: []
                     })
                 });
+
+
                 $scope.cluster.instanceGroups = instanceGroups;
                 $scope.cluster.hostGroups = hostGroups;
                 $scope.cluster.activeGroup = $filter('orderBy')($scope.cluster.instanceGroups, 'group', false)[0].group;
@@ -288,7 +296,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     angular.forEach($scope.cluster.instanceGroups, function(ig) {
                         if (ig.group === hg.name) {
                             hg.constraint.hostCount = ig.nodeCount;
-                            ig.securityGroupId = $scope.cluster.securityGroupId;
                         }
                     });
                 }
@@ -731,7 +738,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 delete $scope.cluster.blueprintId;
                 setFileSystem();
                 setNetwork();
-                setSecurityGroup();
                 setRegion();
                 initWizard();
                 setPlatformVariant();
@@ -817,13 +823,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.orchestrator.type = $rootScope.params.defaultOrchestrators[$rootScope.activeCredential.cloudPlatform];
             }
          }
-
-        function setSecurityGroup() {
-            if ($rootScope.securitygroups && $rootScope.securitygroups.length != 0) {
-                var sgroups = $filter('orderBy')($rootScope.securitygroups, 'name', false);
-                $scope.cluster.securityGroupId = sgroups[0].id;
-            }
-        }
 
         $rootScope.$watch('activeCluster.metadata', function() {
             if ($rootScope.activeCluster.metadata != null) {
@@ -1042,7 +1041,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             setFileSystem();
             initWizard();
             setNetwork();
-            setSecurityGroup();
             setRegion();
             setPlatformVariant();
             setOrchestrator();

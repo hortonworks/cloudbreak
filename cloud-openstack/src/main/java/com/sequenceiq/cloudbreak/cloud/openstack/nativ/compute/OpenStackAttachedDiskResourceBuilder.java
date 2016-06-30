@@ -51,7 +51,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
         final String stackName = cloudContext.getName();
         for (int i = 0; i < instanceView.getVolumes().size(); i++) {
             final String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
-            CloudResource resource = createNamedResource(resourceType(), resourceName);
+            CloudResource resource = createNamedResource(resourceType(), groupName, resourceName);
             resource.putParameter(VOLUME_VIEW, instanceView.getVolumes().get(i));
             cloudResources.add(resource);
         }
@@ -74,7 +74,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
                     try {
                         final OSClient osClient = createOSClient(auth);
                         osVolume = osClient.blockStorage().volumes().create(osVolume);
-                        CloudResource newRes = createPersistedResource(cloudResource, osVolume.getId());
+                        CloudResource newRes = createPersistedResource(cloudResource, group.getName(), osVolume.getId());
                         newRes.putParameter(OpenStackConstants.VOLUME_MOUNT_POINT, volumeView.getDevice());
                         syncedResources.add(newRes);
                     } catch (OS4JException ex) {

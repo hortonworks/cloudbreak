@@ -194,7 +194,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     }
 
     private void createHintAndAddNetworkToContext(Long id, String provider) {
-        shellContext.setHint(Hints.SELECT_SECURITY_GROUP);
+        shellContext.setHint(Hints.CREATE_STACK);
         shellContext.putNetwork(id, provider);
         shellContext.setActiveNetworkId(id);
     }

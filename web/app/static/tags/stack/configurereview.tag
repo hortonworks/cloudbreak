@@ -77,7 +77,7 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label" for="sl_securitygroup_active">{{msg.cluster_form_securitygroup_label}}: </label>
                                 <div class="securitygroupselect col-sm-9">
-                                    <a id="sl_securitygroup_active" class="securitygroupselect form-control-static review-a" ng-repeat="securitygroup in $root.securitygroups|filter: { id: cluster.securityGroupId }:true" segment="#panel-securitygroup-collapse{{securitygroup.id}}">{{securitygroup.name}}</a>
+                                    <a id="sl_securitygroup_active" class="securitygroupselect form-control-static review-a" ng-repeat="securitygroup in $root.securitygroups|filter: { id: group.securityGroupId }:true" segment="#panel-securitygroup-collapse{{securitygroup.id}}">{{securitygroup.name}}</a>
                                 </div>
                             </div>
 

@@ -12,7 +12,7 @@ public class NetworkToJsonConverter extends AbstractConversionServiceAwareConver
     @Override
     public NetworkJson convert(Network source) {
         NetworkJson json = new NetworkJson();
-        json.setId(source.getId().toString());
+        json.setId(source.getId());
         json.setCloudPlatform(source.cloudPlatform());
         json.setName(source.getName());
         json.setDescription(source.getDescription());

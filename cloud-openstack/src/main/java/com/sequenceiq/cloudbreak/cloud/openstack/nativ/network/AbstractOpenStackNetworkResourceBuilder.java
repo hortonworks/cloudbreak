@@ -26,7 +26,6 @@ public abstract class AbstractOpenStackNetworkResourceBuilder extends AbstractOp
     static {
         Map<Class<? extends AbstractOpenStackNetworkResourceBuilder>, Integer> map = Maps.newHashMap();
         map.put(OpenStackNetworkResourceBuilder.class, 0);
-        map.put(OpenStackSecurityGroupResourceBuilder.class, 0);
         map.put(OpenStackSubnetResourceBuilder.class, 1);
         map.put(OpenStackRouterResourceBuilder.class, 2);
         ORDER = Collections.unmodifiableMap(map);
@@ -40,7 +39,7 @@ public abstract class AbstractOpenStackNetworkResourceBuilder extends AbstractOp
     @Override
     public CloudResource create(OpenStackContext context, AuthenticatedContext auth, Network network) {
         String resourceName = resourceNameService.resourceName(resourceType(), context.getName());
-        return createNamedResource(resourceType(), resourceName);
+        return createNamedResource(resourceType(), null, resourceName);
     }
 
     @Override
