@@ -64,7 +64,7 @@ docker-check-docker-machine() {
         echo "  brew install docker-machine" | blue
         _exit 127
     fi
-    if [[ "$(docker-machine status)" == "Running" ]]; then
+    if [[ "$(docker-machine status $DOCKER_MACHINE)" == "Running" ]]; then
       if [[ "$(docker-machine active)" == "$DOCKER_MACHINE" ]]; then
           info "docker-machine env init: OK"
       else
@@ -98,7 +98,7 @@ docker-getversion() {
 docker-check-client-version() {
     local ver=$(docker --version 2> /dev/null)
     local numver=$(docker-getversion $ver)
-    
+
     if [ $numver -lt 180 ]; then
         local target=$(which docker 2>/dev/null || true)
         : ${target:=/usr/local/bin/docker}
@@ -158,4 +158,3 @@ docker-kill-all-sidekicks() {
     debug "kill all exited container labeled as: cbreak.sidekick"
     ( docker rm -f $(docker ps -qa -f 'label=cbreak.sidekick' -f status=exited ) & ) &>/dev/null
 }
-
