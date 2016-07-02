@@ -19,7 +19,7 @@ public class ClusterDeletionBasedExitCriteriaModel extends ExitCriteriaModel {
         return clusterId;
     }
 
-    public static final ExitCriteriaModel clusterDeletionBasedExitCriteriaModel(Long stackId, Long clusterId) {
+    public static ExitCriteriaModel clusterDeletionBasedExitCriteriaModel(Long stackId, Long clusterId) {
         return new ClusterDeletionBasedExitCriteriaModel(stackId, clusterId);
     }
 

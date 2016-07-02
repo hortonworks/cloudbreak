@@ -191,8 +191,8 @@ public class ShellContext {
             instanceGroups.put(
                     instanceGroup.getGroup(),
                     new InstanceGroupEntry(
-                            Long.valueOf(instanceGroup.getTemplateId()),
-                            Integer.valueOf(instanceGroup.getNodeCount()),
+                            instanceGroup.getTemplateId(),
+                            instanceGroup.getNodeCount(),
                             instanceGroup.getType().name()
                     )
             );
@@ -251,7 +251,7 @@ public class ShellContext {
         return isPropertyAvailable(PropertyKey.CREDENTIAL_ID);
     }
 
-    public void setCredential(String id) throws Exception {
+    public void setCredential(String id) {
         CredentialResponse credential = cloudbreakClient.credentialEndpoint().get(Long.valueOf(id));
         this.activeCloudPlatform = credential.getCloudPlatform();
         List<TemplateResponse> templateResponses = new ArrayList<>();
@@ -339,7 +339,6 @@ public class ShellContext {
     }
 
     public Collection<String> getOrchestratorNamesByPlatform(String platform) {
-        Collection<String> result = Lists.newArrayList();
         return orchestrators.get(platform);
     }
 
@@ -415,7 +414,7 @@ public class ShellContext {
         addProperty(PropertyKey.SSSDCONFIG_ACCESSIBLE, ACCESSIBLE);
     }
 
-    public void addSssdConfig(String id) throws Exception {
+    public void addSssdConfig(String id) {
         addProperty(PropertyKey.SSSDCONFIG_ID, id);
         setSssdConfigAccessible();
     }

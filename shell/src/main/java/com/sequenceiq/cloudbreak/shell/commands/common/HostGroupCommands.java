@@ -8,7 +8,6 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
@@ -38,9 +37,8 @@ public class HostGroupCommands implements CommandMarker {
     @CliCommand(value = "hostgroup configure", help = "Configure host groups")
     public String createHostGroup(
             @CliOption(key = "hostgroup", mandatory = true, help = "Name of the hostgroup") HostGroup hostgroup,
-            @CliOption(key = "recipeIds", mandatory = false, help = "A comma separated list of recipe ids") String recipeIds,
-            @CliOption(key = "recipeNames", mandatory = false, help = "A comma separated list of recipe names") String recipeNames)
-            throws Exception {
+            @CliOption(key = "recipeIds", help = "A comma separated list of recipe ids") String recipeIds,
+            @CliOption(key = "recipeNames", help = "A comma separated list of recipe names") String recipeNames) {
         try {
             Set<Long> recipeIdSet = new HashSet<>();
             if (recipeIds != null) {
@@ -67,25 +65,22 @@ public class HostGroupCommands implements CommandMarker {
     }
 
     private Set<Long> getRecipeIds(String inputs, final RecipeParameterType type) {
-        return FluentIterable.from(Splitter.on(",").omitEmptyStrings().trimResults().split(inputs)).transform(new Function<String, Long>() {
-            @Override
-            public Long apply(String input) {
-                try {
-                    RecipeResponse resp = null;
-                    switch (type) {
-                        case ID:
-                            resp = shellContext.cloudbreakClient().recipeEndpoint().get(Long.valueOf(input));
-                            break;
-                        case NAME:
-                            resp = shellContext.cloudbreakClient().recipeEndpoint().getPublic(input);
-                            break;
-                        default:
-                            throw new UnsupportedOperationException();
-                    }
-                    return resp.getId();
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage());
+        return FluentIterable.from(Splitter.on(",").omitEmptyStrings().trimResults().split(inputs)).transform(input -> {
+            try {
+                RecipeResponse resp = null;
+                switch (type) {
+                    case ID:
+                        resp = shellContext.cloudbreakClient().recipeEndpoint().get(Long.valueOf(input));
+                        break;
+                    case NAME:
+                        resp = shellContext.cloudbreakClient().recipeEndpoint().getPublic(input);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
                 }
+                return resp.getId();
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
             }
         }).toSet();
     }

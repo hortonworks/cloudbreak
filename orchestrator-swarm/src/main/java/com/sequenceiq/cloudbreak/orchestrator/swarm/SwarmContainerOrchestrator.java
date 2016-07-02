@@ -68,7 +68,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
      * @param gatewayConfig     Config used to access the gateway instance
      * @param nodes             Nodes that must be added to the Swarm cluster
      * @param consulServerCount Number of Consul servers in the cluster
-     * @return The API address of the container orchestrator
      */
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount,
@@ -114,7 +113,6 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     @Override
     public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
         // TODO
-        return;
     }
 
     @Override
@@ -146,12 +144,12 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void startContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+    public void startContainer(List<ContainerInfo> info, OrchestrationCredential cred) {
 
     }
 
     @Override
-    public void stopContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
+    public void stopContainer(List<ContainerInfo> info, OrchestrationCredential cred) {
 
     }
 
@@ -175,7 +173,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
                 future.get();
             }
         } catch (Exception ex) {
-            String msg = String.format("Failed to delete containers: '%s'.", Arrays.toString(containerInfo.toArray(new String[containerInfo.size()])));
+            String msg = String.format("Failed to delete containers: '%s'.", Arrays.toString(containerInfo.toArray(new ContainerInfo[containerInfo.size()])));
             throw new CloudbreakOrchestratorFailedException(msg, ex);
         }
     }
@@ -340,7 +338,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     private String concatToString(Collection<String> items) {
         StringBuilder sb = new StringBuilder();
         for (String item : items) {
-            sb.append(item + ",");
+            sb.append(item).append(",");
         }
         return sb.toString().substring(0, sb.toString().length() - 1);
     }

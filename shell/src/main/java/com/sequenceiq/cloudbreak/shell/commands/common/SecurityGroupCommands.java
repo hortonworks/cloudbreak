@@ -35,11 +35,11 @@ public class SecurityGroupCommands implements BaseCommands {
     @CliCommand(value = "securitygroup create", help = "Creates a new security group")
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the security group") String name,
-            @CliOption(key = "description", mandatory = false, help = "Description of the security group") String description,
+            @CliOption(key = "description", help = "Description of the security group") String description,
             @CliOption(key = "rules", mandatory = true,
                     help = "Security rules in the following format: ';' separated list of <cidr>:<protocol>:<comma separated port list>") SecurityRules rules,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the securitygroup as visible for all members of the account",
-                    specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) throws Exception {
+            @CliOption(key = "publicInAccount", help = "Marks the securitygroup as visible for all members of the account",
+                    specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) {
         try {
             Map<String, String> tcpRules = new HashMap<>();
             Map<String, String> udpRules = new HashMap<>();
@@ -102,7 +102,7 @@ public class SecurityGroupCommands implements BaseCommands {
             Long id = securityGroupId == null ? null : securityGroupId;
             String name = securityGroupName == null ? null : securityGroupName;
             if (id != null) {
-                shellContext.cloudbreakClient().securityGroupEndpoint().delete(Long.valueOf(id));
+                shellContext.cloudbreakClient().securityGroupEndpoint().delete(id);
                 refreshSecurityGroupsInContext();
                 return String.format("SecurityGroup deleted with %s id", name);
             } else if (name != null) {
@@ -205,7 +205,7 @@ public class SecurityGroupCommands implements BaseCommands {
             Long id = groupId == null ? null : groupId;
             String name = groupName == null ? null : groupName;
             if (id != null) {
-                SecurityGroupJson securityGroupJson = shellContext.cloudbreakClient().securityGroupEndpoint().get(Long.valueOf(id));
+                SecurityGroupJson securityGroupJson = shellContext.cloudbreakClient().securityGroupEndpoint().get(id);
                 return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(securityGroupJson),
                         "FIELD", "VALUE");
             } else if (name != null) {
@@ -235,7 +235,7 @@ public class SecurityGroupCommands implements BaseCommands {
         return shellContext;
     }
 
-    private void refreshSecurityGroupsInContext() throws Exception {
+    private void refreshSecurityGroupsInContext() {
         shellContext.getSecurityGroups().clear();
         Set<SecurityGroupJson> publics = shellContext.cloudbreakClient().securityGroupEndpoint().getPublics();
         for (SecurityGroupJson securityGroup : publics) {

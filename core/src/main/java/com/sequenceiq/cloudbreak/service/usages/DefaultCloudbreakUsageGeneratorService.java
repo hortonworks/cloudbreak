@@ -103,7 +103,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         for (CloudbreakEvent cbEvent : userStackEvents) {
             LOGGER.debug("Processing stack {} for user {}", cbEvent.getStackId(), cbEvent.getOwner());
             if (!stackIdToCbEventMap.containsKey(cbEvent.getStackId())) {
-                stackIdToCbEventMap.put(cbEvent.getStackId(), new ArrayList<CloudbreakEvent>());
+                stackIdToCbEventMap.put(cbEvent.getStackId(), new ArrayList<>());
             }
             stackIdToCbEventMap.get(cbEvent.getStackId()).add(cbEvent);
         }

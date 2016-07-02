@@ -31,7 +31,7 @@ public class ClusterPlatformInitializer {
     private EventBus eventBus;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         validateSelectors();
         LOGGER.info("Registering ClusterEventHandler");
         for (ClusterEventHandler handler : handlers) {

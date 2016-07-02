@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,7 +49,7 @@ public class GcpPlatformParameters implements PlatformParameters {
     private static final int DEFAULT_VM_TYPE_POSITION = 14;
     private static final float THOUSAND = 1000.0f;
     private static final int TEN = 10;
-    private static final Integer START_LABEL = Integer.valueOf(97);
+    private static final Integer START_LABEL = 97;
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
 
     @Value("${cb.gcp.vm.parameter.definition.path:}")
@@ -201,7 +200,7 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public PlatformOrchestrator orchestratorParams() {
-        return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
+        return new PlatformOrchestrator(Collections.singletonList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
     }
 
     @Override

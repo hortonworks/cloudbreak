@@ -4,8 +4,8 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters;
 
 public class AwsInstanceProfileView {
 

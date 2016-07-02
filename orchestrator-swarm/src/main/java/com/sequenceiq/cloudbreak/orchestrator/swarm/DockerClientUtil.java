@@ -18,7 +18,7 @@ public class DockerClientUtil {
     private DockerClientUtil() {
     }
 
-    public static void createContainer(DockerClient client, CreateContainerCmd cmd, String node) throws Exception {
+    public static void createContainer(DockerClient client, CreateContainerCmd cmd, String node) {
         String name = cmd.getName();
         try {
             InspectContainerResponse inspectResponse = inspect(client, name);
@@ -50,7 +50,7 @@ public class DockerClientUtil {
                 LOGGER.warn("Container {} is still running on node: {}! Trying to remove it again.", name, node);
                 remove(client, inspectResponse, name, node);
             }
-            throw new CloudbreakOrchestratorFailedException(String.format("Container {} is still running on node: {}!", name, node));
+            throw new CloudbreakOrchestratorFailedException(String.format("Container %s is still running on node: %s!", name, node));
         } catch (NotFoundException ex) {
             LOGGER.info("Container '{}' has already been deleted from node '{}'.", name, node);
         }

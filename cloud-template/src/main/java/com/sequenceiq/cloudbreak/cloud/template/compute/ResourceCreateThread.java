@@ -1,5 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
+import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
+import static java.lang.String.format;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -16,18 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
-import static java.lang.String.format;
 
 @Component(ResourceCreateThread.NAME)
 @Scope(value = "prototype")
@@ -98,7 +100,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
         return new ResourceRequestResult<>(FutureResult.SUCCESS, results);
     }
 
-    private List<CloudResource> createResource(AuthenticatedContext auth, List<CloudResource> cloudResources) throws Exception {
+    private List<CloudResource> createResource(AuthenticatedContext auth, List<CloudResource> cloudResources) {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
                 resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext());
@@ -107,7 +109,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
         return cloudResources;
     }
 
-    private List<CloudResource> updateResource(AuthenticatedContext auth, List<CloudResource> cloudResources) throws Exception {
+    private List<CloudResource> updateResource(AuthenticatedContext auth, List<CloudResource> cloudResources) {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
                 resourceNotifier.notifyUpdate(cloudResource, auth.getCloudContext());

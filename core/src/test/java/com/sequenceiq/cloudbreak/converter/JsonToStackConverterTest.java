@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 import org.junit.Before;
@@ -19,7 +20,6 @@ import org.springframework.core.convert.TypeDescriptor;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
-import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -50,11 +50,11 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
 
         // GIVEN
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<>(Arrays.asList(instanceGroup)));
+                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
-        given(stackParameterService.getStackParams(any(StackRequest.class))).willReturn(new ArrayList<StackParamValidation>());
+        given(stackParameterService.getStackParams(any(StackRequest.class))).willReturn(new ArrayList<>());
         // WHEN
         Stack stack = underTest.convert(getRequest("stack/stack.json"));
         // THEN

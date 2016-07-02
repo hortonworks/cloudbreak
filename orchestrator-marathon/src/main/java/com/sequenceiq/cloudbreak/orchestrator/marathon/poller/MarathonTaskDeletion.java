@@ -1,15 +1,17 @@
 package com.sequenceiq.cloudbreak.orchestrator.marathon.poller;
 
-import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import mesosphere.marathon.client.Marathon;
-import mesosphere.marathon.client.model.v2.Task;
-import mesosphere.marathon.client.utils.MarathonException;
+import java.util.Collection;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Set;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+
+import mesosphere.marathon.client.Marathon;
+import mesosphere.marathon.client.model.v2.Task;
+import mesosphere.marathon.client.utils.MarathonException;
 
 public class MarathonTaskDeletion implements OrchestratorBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarathonAppDeletion.class);

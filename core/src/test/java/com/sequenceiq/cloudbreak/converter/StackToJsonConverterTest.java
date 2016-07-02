@@ -6,6 +6,7 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -65,7 +66,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("platformVariant"));
+        assertAllFieldsNotNull(result, Collections.singletonList("platformVariant"));
     }
 
     @Test
@@ -149,7 +150,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         orchestrator.setApiEndpoint("endpoint");
         orchestrator.setType("type");
         stack.setOrchestrator(orchestrator);
-        stack.setParameters(new HashMap<String, String>());
+        stack.setParameters(new HashMap<>());
         stack.setCloudPlatform("OPENSTACK");
         stack.setGatewayPort(9443);
         return stack;

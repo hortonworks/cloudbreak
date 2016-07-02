@@ -39,7 +39,7 @@ public class DNSServiceAddressResolver implements ServiceAddressResolver {
     }
 
     private String dnsSrvLookup(String query) throws ServiceAddressResolvingException {
-        String result = null;
+        String result;
         try {
             Record[] records = new Lookup(query, Type.SRV).run();
             if (records != null && records.length > 0) {

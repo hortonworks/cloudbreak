@@ -31,15 +31,15 @@ public class CloudbreakShellUtil {
         }
     }
 
-    public WaitResult waitAndCheckStackStatus(Long stackId, String desiredStatus) throws Exception {
+    public WaitResult waitAndCheckStackStatus(Long stackId, String desiredStatus) {
         return waitAndCheckStatus(stackId, desiredStatus, "status");
     }
 
-    public WaitResult waitAndCheckClusterStatus(Long stackId, String desiredStatus) throws Exception {
+    public WaitResult waitAndCheckClusterStatus(Long stackId, String desiredStatus) {
         return waitAndCheckStatus(stackId, desiredStatus, "clusterStatus");
     }
 
-    private WaitResult waitAndCheckStatus(Long stackId, String desiredStatus, String statusPath) throws Exception {
+    private WaitResult waitAndCheckStatus(Long stackId, String desiredStatus, String statusPath) {
         for (int i = 0; i < MAX_ATTEMPT; i++) {
             WaitResult waitResult = waitForStatus(stackId, desiredStatus, statusPath);
             if (waitResult.getWaitResultStatus().equals(WaitResultStatus.FAILED)) {
@@ -49,7 +49,7 @@ public class CloudbreakShellUtil {
         return new WaitResult(WaitResultStatus.SUCCESSFUL, "");
     }
 
-    private WaitResult waitForStatus(Long stackId, String desiredStatus, String statusPath) throws Exception {
+    private WaitResult waitForStatus(Long stackId, String desiredStatus, String statusPath) {
         WaitResult waitResult = new WaitResult(WaitResultStatus.SUCCESSFUL, "");
         String status = null;
         String statusReason;

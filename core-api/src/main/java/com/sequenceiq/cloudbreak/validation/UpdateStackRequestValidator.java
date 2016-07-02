@@ -10,7 +10,6 @@ public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpd
 
     @Override
     public void initialize(ValidUpdateStackRequest constraintAnnotation) {
-        return;
     }
 
     @Override

@@ -30,9 +30,7 @@ public abstract class AbstractConversionServiceAwareConverter<S, T> implements C
         }
     }
 
-    public T convert(S source) {
-        return convert(source);
-    }
+    public abstract T convert(S source);
 
     public List<T> convert(Collection<S> sources) {
         List<T> targets = new ArrayList<>();

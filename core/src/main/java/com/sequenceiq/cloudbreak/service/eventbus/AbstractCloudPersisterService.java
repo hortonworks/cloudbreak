@@ -67,8 +67,8 @@ public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
         return annotation.entityClass();
     }
 
-    protected <T> T getRepositoryForEntity(Class clazz) {
-        T repo = (T) repositoryMap.get(clazz);
+    protected <R> R getRepositoryForEntity(Class clazz) {
+        R repo = (R) repositoryMap.get(clazz);
         if (repo == null) {
             throw new IllegalStateException("No repository found for the entityClass:" + clazz);
         }

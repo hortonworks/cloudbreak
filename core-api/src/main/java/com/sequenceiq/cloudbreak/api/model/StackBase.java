@@ -26,7 +26,7 @@ public abstract class StackBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
-    @ApiModelProperty(value = StackModelDescription.AVAILABILITY_ZONE, required = false)
+    @ApiModelProperty(value = StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
 //    @NotNull
     @ApiModelProperty(value = StackModelDescription.REGION, required = true)
@@ -47,7 +47,7 @@ public abstract class StackBase implements JsonEntity {
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
     private Long networkId;
-    @ApiModelProperty(value = StackModelDescription.RELOCATE_DOCKER, required = false)
+    @ApiModelProperty(value = StackModelDescription.RELOCATE_DOCKER)
     private Boolean relocateDocker;
 
     @ApiModelProperty(StackModelDescription.PARAMETERS)

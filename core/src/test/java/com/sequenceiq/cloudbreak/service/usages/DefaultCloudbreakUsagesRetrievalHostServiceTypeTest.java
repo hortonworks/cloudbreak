@@ -7,7 +7,7 @@ import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class DefaultCloudbreakUsagesRetrievalHostServiceTypeTest {
     @Test
     public void testFindUsagesFor() {
         // GIVEN
-        given(cloudbreakUsageRepository.findAll(any(Specification.class))).willReturn(Arrays.asList(usage));
+        given(cloudbreakUsageRepository.findAll(any(Specification.class))).willReturn(Collections.singletonList(usage));
         // WHEN
         List<CloudbreakUsage> result = underTest.findUsagesFor(filterParameters);
         // THEN

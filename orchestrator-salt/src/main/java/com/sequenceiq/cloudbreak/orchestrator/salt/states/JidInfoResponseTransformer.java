@@ -13,8 +13,8 @@ public class JidInfoResponseTransformer {
     }
 
     public static Map<String, Map<String, RunnerInfoObject>> getHighStates(Map map) {
-        Map<String, List<Map<String, Map<String, Map<String, Map<String, Object>>>>>> tmp = map;
-        Map<String, Map<String, Map<String, Object>>> stringMapMap = tmp.get("return").get(0).get("data");
+        Map<String, Map<String, Map<String, Object>>> stringMapMap =
+                ((Map<String, List<Map<String, Map<String, Map<String, Map<String, Object>>>>>>) map).get("return").get(0).get("data");
         Map<String, Map<String, RunnerInfoObject>> result = new HashMap<>();
 
         for (Map.Entry<String, Map<String, Map<String, Object>>> stringMapEntry : stringMapMap.entrySet()) {
@@ -25,8 +25,8 @@ public class JidInfoResponseTransformer {
     }
 
     public static Map<String, Map<String, RunnerInfoObject>> getSimpleStates(Map map) {
-        Map<String, List<Map<String, Map<String, Map<String, Object>>>>> tmp = map;
-        Map<String, Map<String, Map<String, Object>>> stringMapMap = tmp.get("return").get(0);
+        Map<String, Map<String, Map<String, Object>>> stringMapMap =
+                ((Map<String, List<Map<String, Map<String, Map<String, Object>>>>>) map).get("return").get(0);
 
         Map<String, Map<String, RunnerInfoObject>> result = new HashMap<>();
 

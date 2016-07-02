@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.shell;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,8 +28,8 @@ import com.sequenceiq.cloudbreak.api.model.NetworkJson;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Configuration
@@ -119,7 +118,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         }
     }
 
-    private void init() throws Exception {
+    private void init() {
         //cloudbreak.health();
         initResourceAccessibility();
         initPlatformVariants();
@@ -130,7 +129,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         if ((args.length == 1 && ("--help".equals(args[0]) || "-h".equals(args[0]))) || args.length == 0) {
             System.out.println(
@@ -147,7 +146,6 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
                             + "  --cert.validation=<boolean>                       Validate SSL certificates, shall be disabled for self signed certificates"
                             + " (not a mandatory parameter) [default: true]."
             );
-            return;
         } else {
             if (!VersionedApplication.versionedApplication().showVersionInfo(args)) {
                 try {
@@ -160,7 +158,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         }
     }
 
-    private void initResourceAccessibility() throws Exception {
+    private void initResourceAccessibility() {
         if (!cloudbreakClient.credentialEndpoint().getPublics().isEmpty()) {
             context.setCredentialAccessible();
         }

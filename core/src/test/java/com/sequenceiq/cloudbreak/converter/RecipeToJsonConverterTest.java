@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +24,7 @@ public class RecipeToJsonConverterTest extends AbstractEntityConverterTest<Recip
         // WHEN
         RecipeResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("id"));
+        assertAllFieldsNotNull(result, Collections.singletonList("id"));
     }
 
     @Override

@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.shell.core.Completion;
 import org.springframework.shell.core.MethodTarget;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.sequenceiq.cloudbreak.shell.completion.SssdTlsReqcertType;
 
@@ -16,13 +15,7 @@ public class SssdTlsReqcertTypeConverter extends AbstractConverter<SssdTlsReqcer
     private static Collection<String> values;
 
     {
-        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType.values()),
-            new Function<com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType, String>() {
-                @Override
-                public String apply(com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType input) {
-                    return input.name();
-                }
-            });
+        values = Collections2.transform(Arrays.asList(com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType.values()), Enum::name);
     }
 
     @Override

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
@@ -110,7 +111,7 @@ public class AwsMetaDataCollectorTest {
         when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
 
-        List<String> gatewayIds = Arrays.asList("i-1");
+        List<String> gatewayIds = Collections.singletonList("i-1");
         when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq("cbgateway-AAA")))
                 .thenReturn(gatewayIds);
 
@@ -123,7 +124,7 @@ public class AwsMetaDataCollectorTest {
         when(instance.getPrivateIpAddress()).thenReturn("privateIp");
         when(instance.getPublicIpAddress()).thenReturn("publicIp");
 
-        List<Reservation> gatewayReservations = Arrays.asList(getReservation(instance));
+        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance));
 
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
@@ -151,7 +152,7 @@ public class AwsMetaDataCollectorTest {
         when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
 
-        List<String> gatewayIds = Arrays.asList("i-1");
+        List<String> gatewayIds = Collections.singletonList("i-1");
         when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq("cbgateway-AAA")))
                 .thenReturn(gatewayIds);
 
@@ -166,9 +167,9 @@ public class AwsMetaDataCollectorTest {
         Tag tag = new Tag();
         tag.setKey("cbname");
         tag.setValue("somevalue");
-        when(instance.getTags()).thenReturn(Arrays.asList(tag));
+        when(instance.getTags()).thenReturn(Collections.singletonList(tag));
 
-        List<Reservation> gatewayReservations = Arrays.asList(getReservation(instance));
+        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance));
 
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
@@ -197,7 +198,7 @@ public class AwsMetaDataCollectorTest {
         when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
 
-        List<String> gatewayIds = Arrays.asList("i-1");
+        List<String> gatewayIds = Collections.singletonList("i-1");
         when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq("cbgateway-AAA")))
                 .thenReturn(gatewayIds);
 
@@ -210,7 +211,7 @@ public class AwsMetaDataCollectorTest {
         when(instance.getPrivateIpAddress()).thenReturn("privateIp");
         when(instance.getPublicIpAddress()).thenReturn("publicIp");
 
-        List<Reservation> gatewayReservations = Arrays.asList(getReservation(instance));
+        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance));
 
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
@@ -258,7 +259,7 @@ public class AwsMetaDataCollectorTest {
         when(instance2.getPrivateIpAddress()).thenReturn("privateIp2");
         when(instance2.getPublicIpAddress()).thenReturn("publicIp2");
 
-        List<Reservation> gatewayReservations = Arrays.asList(getReservation(instance1, instance2));
+        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance1, instance2));
 
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
@@ -304,14 +305,14 @@ public class AwsMetaDataCollectorTest {
         Tag tag = new Tag();
         tag.setKey("cbname");
         tag.setValue("somevalue");
-        when(instance1.getTags()).thenReturn(Arrays.asList(tag));
+        when(instance1.getTags()).thenReturn(Collections.singletonList(tag));
 
         Instance instance2 = Mockito.mock(Instance.class);
         when(instance2.getInstanceId()).thenReturn("i-new");
         when(instance2.getPrivateIpAddress()).thenReturn("privateIp2");
         when(instance2.getPublicIpAddress()).thenReturn("publicIp2");
 
-        List<Reservation> gatewayReservations = Arrays.asList(getReservation(instance1, instance2));
+        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance1, instance2));
 
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 

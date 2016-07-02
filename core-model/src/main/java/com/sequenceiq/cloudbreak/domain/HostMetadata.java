@@ -88,8 +88,14 @@ public class HostMetadata {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj, "hostGroup");
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else if (this == o) {
+            return true;
+        }
+
+        return EqualsBuilder.reflectionEquals(this, o, "hostGroup");
     }
 
 }

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
-import static java.util.Arrays.asList;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 
 @Component(ResourceStopStartThread.NAME)
@@ -71,7 +71,7 @@ public class ResourceStopStartThread implements Callable<ResourceRequestResult<L
     }
 
     private List<CloudVmInstanceStatus> createResult(InstanceStatus status) {
-        return asList(new CloudVmInstanceStatus(instance, status));
+        return Collections.singletonList(new CloudVmInstanceStatus(instance, status));
     }
 
 }

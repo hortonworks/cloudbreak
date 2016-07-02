@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.marathon.poller;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.model.v2.App;
 

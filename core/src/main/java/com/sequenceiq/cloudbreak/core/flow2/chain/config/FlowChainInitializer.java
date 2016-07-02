@@ -9,8 +9,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.chain.FlowEventChainFactory;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler;
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowEventChainFactory;
 
 import reactor.bus.EventBus;
 import reactor.bus.selector.Selectors;

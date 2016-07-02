@@ -49,7 +49,7 @@ public class OfflineStateGenerator {
     private static final String OUT_PATH = "build/diagrams/flow";
 
     private static final List<FlowConfiguration<? extends FlowEvent>> CONFIGS =
-            Arrays.<FlowConfiguration<? extends FlowEvent>>asList(
+            Arrays.asList(
                     new ClusterTerminationFlowConfig(),
                     new InstanceTerminationFlowConfig(),
                     new StackCreationFlowConfig(),
@@ -129,7 +129,7 @@ public class OfflineStateGenerator {
         String style = "solid";
         if (source == target) {
             color = "blue";
-        } else if (event.name().indexOf("FAIL") != -1 || event.name().indexOf("ERROR") != -1) {
+        } else if (event.name().contains("FAIL") || event.name().contains("ERROR")) {
             color = "red";
             style = "dashed";
         }

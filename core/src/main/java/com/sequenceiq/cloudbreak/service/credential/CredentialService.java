@@ -118,7 +118,7 @@ public class CredentialService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Credential update(Long id) throws Exception {
+    public Credential update(Long id) {
         Credential credential = get(id);
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));

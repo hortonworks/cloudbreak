@@ -28,11 +28,10 @@ public final class TableRenderer {
      * number of columns.
      *
      * @param rows                  rows of the table
-     * @param sortByFirstColumn     sortByFirstColumn rows by the first column
      * @param headers               headers of the table
      * @return the formatted table
      */
-    public  <E extends Object> String renderSingleMapWithSortedColumn(Map<E, String> rows, String... headers) {
+    public  <E> String renderSingleMapWithSortedColumn(Map<E, String> rows, String... headers) {
         return renderMultiValueMap(convert(rows), true, headers);
     }
 
@@ -69,12 +68,7 @@ public final class TableRenderer {
                     }
                 });
             } else {
-                Collections.sort(entries, new Comparator<Map.Entry<String, List<String>>>() {
-                    @Override
-                    public int compare(Map.Entry<String, List<String>> a, Map.Entry<String, List<String>> b) {
-                        return a.getKey().compareToIgnoreCase(b.getKey());
-                    }
-                });
+                Collections.sort(entries, (a, b) -> a.getKey().compareToIgnoreCase(b.getKey()));
             }
             for (Map.Entry<String, List<String>> entry : entries) {
                 if (entry.getValue() != null) {
@@ -87,7 +81,7 @@ public final class TableRenderer {
         return format(table);
     }
 
-    public <E extends Object> String renderObjectValueMap(Map<String, E> rows, String mainHeader) {
+    public <E> String renderObjectValueMap(Map<String, E> rows, String mainHeader) {
         Table table = new Table();
         List<String> mainHeaders = new ArrayList<>();
         if (rows != null) {
@@ -153,10 +147,10 @@ public final class TableRenderer {
         return table;
     }
 
-    private static <E extends Object> Map<String, List<String>> convert(Map<E, String> map) {
-        Map<String, List<String>> result = new HashMap<String, List<String>>(map.size());
+    private static <E> Map<String, List<String>> convert(Map<E, String> map) {
+        Map<String, List<String>> result = new HashMap<>();
         if (map != null) {
-            for (Object key : map.keySet()) {
+            for (E key : map.keySet()) {
                 if (map.get(key) != null) {
                     result.put(key.toString(), singletonList(map.get(key)));
                 }
@@ -165,8 +159,8 @@ public final class TableRenderer {
         return result;
     }
 
-    private static <E extends Object> Map<String, List<String>> convertObjectMap(Map<String, E> map) {
-        Map<String, List<String>> result = new HashMap<String, List<String>>(map.size());
+    private static <E> Map<String, List<String>> convertObjectMap(Map<String, E> map) {
+        Map<String, List<String>> result = new HashMap<>();
         if (map != null) {
             for (String key : map.keySet()) {
                 if (map.get(key) != null) {

@@ -18,20 +18,16 @@ public class Priority implements Comparable<Priority> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
         if (o == null || getClass() != o.getClass()) {
             return false;
+        } else if (this == o) {
+            return true;
         }
 
         Priority priority = (Priority) o;
 
-        if (value != priority.value) {
-            return false;
-        }
+        return value == priority.value;
 
-        return true;
     }
 
     @Override

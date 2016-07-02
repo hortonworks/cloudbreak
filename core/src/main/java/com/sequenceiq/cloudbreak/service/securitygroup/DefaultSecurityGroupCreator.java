@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.service.network.ExposedService.HTTPS;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SSH;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -80,7 +80,7 @@ public class DefaultSecurityGroupCreator {
     private void addSecurityGroup(CbUser user, Set<SecurityGroup> securityGroups, String name, List<Port> securityGroupPorts, String securityGroupDesc) {
         SecurityGroup onlySshAndSsl = createSecurityGroup(user, name, securityGroupDesc);
         SecurityRule sshAndSslRule = createSecurityRule(concatenatePorts(securityGroupPorts), onlySshAndSsl);
-        onlySshAndSsl.setSecurityRules(new HashSet<>(Arrays.asList(sshAndSslRule)));
+        onlySshAndSsl.setSecurityRules(new HashSet<>(Collections.singletonList(sshAndSslRule)));
         securityGroups.add(securityGroupService.create(user, onlySshAndSsl));
     }
 

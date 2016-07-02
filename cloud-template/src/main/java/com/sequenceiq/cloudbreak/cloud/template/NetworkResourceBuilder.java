@@ -73,7 +73,7 @@ public interface NetworkResourceBuilder<C extends ResourceBuilderContext> extend
     /**
      * This functionality is not in use currently, but in the future it will be possible to update an existing resource.
      */
-    CloudResourceStatus update(C context, AuthenticatedContext auth, Network network, Security security, CloudResource resource) throws Exception;
+    CloudResourceStatus update(C context, AuthenticatedContext auth, Network network, Security security, CloudResource resource);
 
     /**
      * Responsible to delete the provided cloud resource by {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)} from the

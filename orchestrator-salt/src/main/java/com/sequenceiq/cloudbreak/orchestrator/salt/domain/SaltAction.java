@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 
 public class SaltAction {
 

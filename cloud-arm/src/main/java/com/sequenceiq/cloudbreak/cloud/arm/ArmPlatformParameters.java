@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -111,7 +110,7 @@ public class ArmPlatformParameters implements PlatformParameters {
                 Integer.valueOf(configSpecification.getMinimumSize()),
                 Integer.valueOf(configSpecification.getMaximumSize()),
                 Integer.valueOf(configSpecification.getMinimumNumber()),
-                Integer.valueOf(configSpecification.getMaximumNumberWithLimit()));
+                configSpecification.getMaximumNumberWithLimit());
     }
 
     private Map<Region, List<AvailabilityZone>> readRegions() {
@@ -189,10 +188,10 @@ public class ArmPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.<String>absent()));
-        additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class, Optional.<String>of("^[a-z0-9]{0,24}$")));
+        additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class, Optional.of("^[a-z0-9]{0,24}$")));
         additionalStackParameterValidations.add(new StackParamValidation("attachedStorageOption", false, ArmAttachedStorageOption.class,
-                Optional.<String>absent()));
+                Optional.absent()));
         return additionalStackParameterValidations;
     }
 
@@ -203,6 +202,6 @@ public class ArmPlatformParameters implements PlatformParameters {
 
     @Override
     public PlatformOrchestrator orchestratorParams() {
-        return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
+        return new PlatformOrchestrator(Collections.singletonList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
     }
 }

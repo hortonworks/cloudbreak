@@ -41,10 +41,11 @@ public class KeyStoreUtil {
 
     public static KeyStore createTrustStore(final String serverCertPath) throws Exception {
         File serverCertFile = new File(serverCertPath);
-        BufferedReader reader = new BufferedReader(new FileReader(serverCertFile));
+        BufferedReader reader = null;
         PEMParser pemParser = null;
 
         try {
+            reader = new BufferedReader(new FileReader(serverCertFile));
             pemParser = new PEMParser(reader);
             X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
             Certificate caCertificate = new JcaX509CertificateConverter().getCertificate(certificateHolder);
@@ -60,17 +61,18 @@ public class KeyStoreUtil {
             }
 
             if (reader != null) {
-                pemParser.close();
+                reader.close();
             }
         }
     }
 
     private static Certificate loadCertificate(final String certPath) throws IOException, CertificateException {
         File certificate = new File(certPath);
-        BufferedReader reader = new BufferedReader(new FileReader(certificate));
+        BufferedReader reader = null;
         PEMParser pemParser = null;
 
         try {
+            reader = new BufferedReader(new FileReader(certificate));
             pemParser = new PEMParser(reader);
             X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
             return new JcaX509CertificateConverter().getCertificate(certificateHolder);
@@ -80,7 +82,7 @@ public class KeyStoreUtil {
             }
 
             if (reader != null) {
-                pemParser.close();
+                reader.close();
             }
         }
 
@@ -88,11 +90,11 @@ public class KeyStoreUtil {
 
     private static KeyPair loadPrivateKey(final String clientKeyPath) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         File privateKeyFile = new File(clientKeyPath);
-        BufferedReader reader = new BufferedReader(new FileReader(privateKeyFile));
-
+        BufferedReader reader = null;
         PEMParser pemParser = null;
 
         try {
+            reader = new BufferedReader(new FileReader(privateKeyFile));
             pemParser = new PEMParser(reader);
 
             PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
@@ -116,7 +118,7 @@ public class KeyStoreUtil {
             }
 
             if (reader != null) {
-                pemParser.close();
+                reader.close();
             }
         }
 

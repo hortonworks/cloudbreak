@@ -130,7 +130,7 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     @Override
-    public void delete(Long stackId) throws Exception {
+    public void delete(Long stackId) {
         CbUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
@@ -209,7 +209,7 @@ public class ClusterController implements ClusterEndpoint {
         }
         if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword())) {
             throw new BadRequestException(String.format(
-                    "Cluster actual password does not match in the request, please pass the real password.", stackId,
+                    "Cluster actual password does not match in the request, please pass the real password on Stack '%s' with status '%s'.", stackId,
                     stack.getStatus()));
         }
         LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}, password: {}",

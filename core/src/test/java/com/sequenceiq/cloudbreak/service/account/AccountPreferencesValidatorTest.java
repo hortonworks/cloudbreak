@@ -50,7 +50,7 @@ public class AccountPreferencesValidatorTest {
     private AccountPreferencesValidator underTest;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         when(stack.getAccount()).thenReturn("");
         when(accountPreferencesService.getByAccount("")).thenReturn(preferences);
         when(preferences.getMaxNumberOfNodesPerCluster()).thenReturn(0L);
@@ -58,7 +58,7 @@ public class AccountPreferencesValidatorTest {
         when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(0L);
         when(preferences.getClusterTimeToLive()).thenReturn(0L);
         when(preferences.getUserTimeToLive()).thenReturn(0L);
-        when(preferences.getAllowedInstanceTypes()).thenReturn(new ArrayList<String>());
+        when(preferences.getAllowedInstanceTypes()).thenReturn(new ArrayList<>());
     }
 
     @Test

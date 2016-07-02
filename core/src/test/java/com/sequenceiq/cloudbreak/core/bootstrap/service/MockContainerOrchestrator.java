@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -27,24 +27,20 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
 
     @Override
     public void init(ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner, ExitCriteria exitCriteria) {
-        return;
     }
 
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        return;
     }
 
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
-        return;
     }
 
     @Override
     public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
-        return;
     }
 
     @Override
@@ -54,28 +50,25 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void startContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
-        return;
+    public void startContainer(List<ContainerInfo> info, OrchestrationCredential cred) {
     }
 
     @Override
-    public void stopContainer(List<ContainerInfo> info, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
-        return;
+    public void stopContainer(List<ContainerInfo> info, OrchestrationCredential cred) {
     }
 
     @Override
     public void deleteContainer(List<ContainerInfo> containerInfos, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
-        return;
     }
 
     @Override
     public List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     @Override
     public List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     @Override

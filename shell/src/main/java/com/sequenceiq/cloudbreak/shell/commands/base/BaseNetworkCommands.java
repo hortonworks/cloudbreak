@@ -195,13 +195,13 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
         return shellContext;
     }
 
-    private void createHintAndAddNetworkToContext(Long id, String provider) throws Exception {
+    private void createHintAndAddNetworkToContext(Long id, String provider) {
         shellContext.setHint(Hints.SELECT_SECURITY_GROUP);
         shellContext.putNetwork(id, provider);
         shellContext.setActiveNetworkId(id);
     }
 
-    private void refreshNetworksInContext() throws Exception {
+    private void refreshNetworksInContext() {
         shellContext.getNetworksByProvider().clear();
         Set<NetworkJson> publics = shellContext.cloudbreakClient().networkEndpoint().getPublics();
         for (NetworkJson network : publics) {

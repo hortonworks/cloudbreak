@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import java.security.PublicKey;
-
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
 @Component
 public class OpenSshPublicKeyValidator {
@@ -14,7 +13,7 @@ public class OpenSshPublicKeyValidator {
 
     public void validate(String publicKey) {
         try {
-            PublicKey load = PublicKeyReaderUtil.loadOpenSsh(publicKey);
+            PublicKeyReaderUtil.loadOpenSsh(publicKey);
         } catch (Exception e) {
             String errorMessage = String.format("Could not validate publickey certificate [certificate: '%s'], detailed message: %s",
                     publicKey, e.getMessage());

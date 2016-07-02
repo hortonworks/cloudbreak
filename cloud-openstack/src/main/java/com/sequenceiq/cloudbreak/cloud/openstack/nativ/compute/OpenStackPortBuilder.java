@@ -34,7 +34,7 @@ public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilde
                     .securityGroup(context.getStringParameter(OpenStackConstants.SECURITYGROUP_ID))
                     .build();
             port = osClient.networking().port().create(port);
-            return Collections.singletonList(createPersistedResource(resource, port.getId(), Collections.<String, Object>singletonMap(
+            return Collections.singletonList(createPersistedResource(resource, port.getId(), Collections.singletonMap(
                     OpenStackConstants.PORT_ID, port.getId())));
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Port creation failed", resourceType(), resource.getName(), ex);

@@ -45,7 +45,7 @@ public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
 
     @BeforeSuite(dependsOnMethods = "initSuiteMap", groups = "suiteInit")
     @Parameters({ "uaaServer", "uaaUser", "uaaPassword" })
-    public void initTestSuite(@Optional("") String uaaServer, @Optional("") String uaaUser, @Optional("") String uaaPassword) throws Exception {
+    public void initTestSuite(@Optional("") String uaaServer, @Optional("") String uaaUser, @Optional("") String uaaPassword) {
         uaaServer = getString(uaaServer, defaultUaaServer);
         uaaUser = getString(uaaUser, defaultUaaUser);
         uaaPassword = getString(uaaPassword, defaultUaaPassword);

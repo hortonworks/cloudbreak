@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
 
@@ -100,7 +99,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     private Map<String, String> prepareServiceEndpointsMap(Set<HostGroup> hostGroups, Blueprint blueprint, String ambariIp, Boolean shipyardEnabled) {
         Map<String, String> result = new HashMap<>();
 
-        List<Port> ports = NetworkUtils.getPorts(Optional.<Stack>absent());
+        List<Port> ports = NetworkUtils.getPorts(Optional.absent());
         collectPortsOfAdditionalServices(result, ambariIp, shipyardEnabled);
         try {
             JsonNode hostGroupsNode = blueprintValidator.getHostGroupNode(blueprint);

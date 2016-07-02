@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
@@ -51,17 +50,16 @@ public class ComputeResourceService {
     private CloudFailureHandler cloudFailureHandler;
 
     public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image,
-            AdjustmentType adjustmentType, Long threshold) throws Exception {
+            AdjustmentType adjustmentType, Long threshold) {
         return buildResources(ctx, auth, groups, image, false, adjustmentType, threshold);
     }
 
-    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image)
-            throws Exception {
+    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image) {
         return buildResources(ctx, auth, groups, image, true, AdjustmentType.BEST_EFFORT, null);
     }
 
     private List<CloudResourceStatus> buildResources(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image, Boolean upscale,
-            AdjustmentType adjustmentType, Long threshold) throws Exception {
+            AdjustmentType adjustmentType, Long threshold) {
         List<CloudResourceStatus> results = new ArrayList<>();
         int fullNodeCount = getFullNodeCount(groups);
 
@@ -70,8 +68,8 @@ public class ComputeResourceService {
         List<ComputeResourceBuilder> builders = resourceBuilders.compute(cloudContext.getPlatform());
         for (Group group : getOrderedCopy(groups)) {
             List<CloudInstance> instances = group.getInstances();
-            for (int i = 0; i < instances.size(); i++) {
-                ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instances.get(i).getTemplate().getPrivateId(), group, ctx, auth, image);
+            for (CloudInstance instance : instances) {
+                ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instance.getTemplate().getPrivateId(), group, ctx, auth, image);
                 Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(thread);
                 futures.add(future);
                 if (isRequestFullWithCloudPlatform(builders.size(), futures.size(), ctx)) {
@@ -92,7 +90,7 @@ public class ComputeResourceService {
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, boolean cancellable) throws Exception {
+            List<CloudResource> resources, boolean cancellable) {
         List<CloudResourceStatus> results = new ArrayList<>();
         List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         Platform platform = auth.getCloudContext().getPlatform();
@@ -116,12 +114,12 @@ public class ComputeResourceService {
     }
 
     public List<CloudVmInstanceStatus> stopInstances(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, List<CloudInstance> cloudInstances) throws Exception {
+            List<CloudResource> resources, List<CloudInstance> cloudInstances) {
         return stopStart(context, auth, resources, cloudInstances);
     }
 
     public List<CloudVmInstanceStatus> startInstances(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudResource> resources, List<CloudInstance> cloudInstances) throws Exception {
+            List<CloudResource> resources, List<CloudInstance> cloudInstances) {
         return stopStart(context, auth, resources, cloudInstances);
     }
 
@@ -134,7 +132,7 @@ public class ComputeResourceService {
     }
 
     private List<CloudVmInstanceStatus> stopStart(ResourceBuilderContext context,
-            AuthenticatedContext auth, List<CloudResource> resources, List<CloudInstance> instances) throws Exception {
+            AuthenticatedContext auth, List<CloudResource> resources, List<CloudInstance> instances) {
         List<CloudVmInstanceStatus> results = new ArrayList<>();
         List<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
         Platform platform = auth.getCloudContext().getPlatform();
@@ -162,10 +160,10 @@ public class ComputeResourceService {
         return results;
     }
 
-    private <T> Map<FutureResult, List<T>> waitForRequests(List<Future<ResourceRequestResult<T>>> futures) throws Exception {
+    private <T> Map<FutureResult, List<T>> waitForRequests(List<Future<ResourceRequestResult<T>>> futures) {
         Map<FutureResult, List<T>> result = new HashMap<>();
-        result.put(FutureResult.FAILED, new ArrayList<T>());
-        result.put(FutureResult.SUCCESS, new ArrayList<T>());
+        result.put(FutureResult.FAILED, new ArrayList<>());
+        result.put(FutureResult.SUCCESS, new ArrayList<>());
         int requests = futures.size();
         LOGGER.info("Waiting for {} requests to finish", requests);
         try {
@@ -178,11 +176,7 @@ public class ComputeResourceService {
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
-            if (e instanceof CancellationException) {
-                throw e;
-            } else {
-                LOGGER.error("Failed to execute the request", e);
-            }
+            LOGGER.error("Failed to execute the request", e);
         }
         LOGGER.info("{} requests have finished, continue with next group", requests);
         futures.clear();

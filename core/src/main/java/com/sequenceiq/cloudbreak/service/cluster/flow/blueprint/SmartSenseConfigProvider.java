@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,13 +70,13 @@ public class SmartSenseConfigProvider {
             if (hostGroupWithOneNode.isPresent()) {
                 aHostGroupName = hostGroupWithOneNode.get();
             }
-            blueprintText = blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, Arrays.asList(aHostGroupName), blueprintText);
+            blueprintText = blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, Collections.singletonList(aHostGroupName), blueprintText);
         }
         return blueprintText;
     }
 
     private Function<HostGroup, String> getHostGroupNameMapper() {
-        return hostGroup -> hostGroup.getName();
+        return HostGroup::getName;
     }
 
     private Collection<? extends BlueprintConfigurationEntry> getSmartSenseServerConfigs() {

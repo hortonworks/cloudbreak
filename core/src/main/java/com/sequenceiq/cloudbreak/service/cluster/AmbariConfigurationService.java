@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,7 @@ public class AmbariConfigurationService {
         }
     }
 
-    public Map<String, String> getConfiguration(AmbariClient ambariClient, String hostGroup) throws ConnectException {
+    public Map<String, String> getConfiguration(AmbariClient ambariClient, String hostGroup) {
         Map<String, String> configuration = new HashMap<>();
         Set<Map.Entry<String, Map<String, String>>> serviceConfigs = ambariClient.getServiceConfigMapByHostGroup(hostGroup).entrySet();
         for (Map.Entry<String, Map<String, String>> serviceEntry : serviceConfigs) {

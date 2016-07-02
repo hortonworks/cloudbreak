@@ -54,7 +54,7 @@ public class InstanceTerminationService {
                 hostName, instanceGroupName);
     }
 
-    public void finishInstanceTermination(InstanceTerminationContext context, RemoveInstanceResult payload) throws Exception {
+    public void finishInstanceTermination(InstanceTerminationContext context, RemoveInstanceResult payload) {
         Stack stack = context.getStack();
         InstanceMetaData instanceMetaData = context.getInstanceMetaData();
         String instanceId = instanceMetaData.getInstanceId();

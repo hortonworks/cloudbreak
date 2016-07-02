@@ -16,10 +16,7 @@ public class NeutronNetworkView {
     }
 
     public boolean assignFloatingIp() {
-        if (getPublicNetId() == null || getPublicNetId().isEmpty()) {
-            return false;
-        }
-        return true;
+        return !(getPublicNetId() == null || getPublicNetId().isEmpty());
     }
 
     public String getPublicNetId() {

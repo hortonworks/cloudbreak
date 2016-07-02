@@ -70,13 +70,12 @@ public final class GcpStackUtil {
     public static GoogleCredential buildCredential(CloudCredential gcpCredential, HttpTransport httpTransport) throws IOException, GeneralSecurityException {
         PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
                 new ByteArrayInputStream(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential))), "notasecret", "privatekey", "notasecret");
-        GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport)
+        return new GoogleCredential.Builder().setTransport(httpTransport)
                 .setJsonFactory(JSON_FACTORY)
                 .setServiceAccountId(getServiceAccountId(gcpCredential))
                 .setServiceAccountScopes(SCOPES)
                 .setServiceAccountPrivateKey(pk)
                 .build();
-        return credential;
     }
 
     public static String getServiceAccountPrivateKey(CloudCredential credential) {
@@ -97,16 +96,16 @@ public final class GcpStackUtil {
             throw new Exception(errorMessage);
         } else {
             Integer progress = operation.getProgress();
-            return (progress.intValue() != FINISHED) ? false : true;
+            return progress == FINISHED;
         }
     }
 
     public static String checkForErrors(Operation operation) {
-        String msg = null;
         if (operation == null) {
             LOGGER.error("Operation is null!");
-            return msg;
+            return null;
         }
+        String msg = null;
         if (operation.getError() != null) {
             StringBuilder error = new StringBuilder();
             if (operation.getError().getErrors() != null) {

@@ -31,12 +31,12 @@ public class BootstrapManTest {
 
     private Set<Node> nodes = new HashSet<>();
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         BootstrapManTest t = new BootstrapManTest();
         t.build();
     }
 
-    public void build() throws Exception {
+    public void build() {
 
         SwarmContainerOrchestrator o = new SwarmContainerOrchestrator();
         o.init(new SingleContainerRunner(), new NoExit());

@@ -21,19 +21,15 @@ public class ConfigKey {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
         if (o == null || getClass() != o.getClass()) {
             return false;
+        } else if (this == o) {
+            return true;
         }
 
         ConfigKey configKey = (ConfigKey) o;
 
-        if (secure != configKey.secure) {
-            return false;
-        }
-        return debug == configKey.debug;
+        return secure == configKey.secure && debug == configKey.debug;
     }
 
     @Override

@@ -44,8 +44,8 @@ public class CloudFormationStackUtil {
     }
 
     public String getCfStackName(AuthenticatedContext ac) {
-        return String.format("%s-%s", new String(Splitter.fixedLength(maxResourceNameLength - (ac.getCloudContext().getId().toString().length() + 1))
-                .splitToList(ac.getCloudContext().getName()).get(0)), ac.getCloudContext().getId());
+        return String.format("%s-%s", Splitter.fixedLength(maxResourceNameLength - (ac.getCloudContext().getId().toString().length() + 1))
+                .splitToList(ac.getCloudContext().getName()).get(0), ac.getCloudContext().getId());
     }
 
     public List<String> getInstanceIds(AmazonAutoScalingClient amazonASClient, String asGroupName) {

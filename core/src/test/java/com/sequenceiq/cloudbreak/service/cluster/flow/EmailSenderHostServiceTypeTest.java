@@ -33,7 +33,6 @@ import com.google.common.io.CharStreams;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
@@ -63,7 +62,7 @@ public class EmailSenderHostServiceTypeTest {
         greenMail.setUser("demouser", "demopwd");
         greenMail.start();
 
-        cbUser = new CbUser("sdf", "testuser", "testaccount", new ArrayList<CbUserRole>(), "familyname", "givenName", new Date());
+        cbUser = new CbUser("sdf", "testuser", "testaccount", new ArrayList<>(), "familyname", "givenName", new Date());
         ReflectionTestUtils.setField(emailSenderService, "msgFrom", "no-reply@sequenceiq.com");
         ReflectionTestUtils.setField(emailSenderService, "freemarkerConfiguration", freemarkerConfiguration());
 

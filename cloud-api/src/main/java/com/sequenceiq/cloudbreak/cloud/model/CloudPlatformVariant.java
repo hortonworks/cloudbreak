@@ -23,19 +23,15 @@ public class CloudPlatformVariant {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
         if (o == null || getClass() != o.getClass()) {
             return false;
+        } else if (this == o) {
+            return true;
         }
 
         CloudPlatformVariant that = (CloudPlatformVariant) o;
 
-        if (!platform.equals(that.platform)) {
-            return false;
-        }
-        return variant.equals(that.variant);
+        return platform.equals(that.platform) && variant.equals(that.variant);
 
     }
 

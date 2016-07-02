@@ -21,7 +21,7 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
     private static final String DATE_FORMAT = "yyyyMMddHHmmss";
 
     protected void checkArgs(int argCnt, Object... parts) {
-        if (null == parts && parts.length != argCnt) {
+        if (null == parts || parts.length < argCnt) {
             throw new IllegalStateException("No suitable name parts provided to generate resource name!");
         }
     }
@@ -34,7 +34,6 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
         String[] parts = part.split(DELIMITER);
         String trimmed = part;
         try {
-            long ts = Long.valueOf(parts[parts.length - 1]);
             trimmed = StringUtils.collectionToDelimitedString(Arrays.asList(Arrays.copyOf(parts, parts.length - 1)), DELIMITER);
         } catch (NumberFormatException nfe) {
             LOGGER.debug("No need to trim hash: {}", part);
@@ -64,17 +63,17 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
         if (base.length() > platformSpecificLength) {
             LOGGER.debug("Shortening name: {}", base);
             List<String> splitedBase = Splitter.on("-").splitToList(base);
-            String stackName = null;
-            String instanceName = null;
+            String stackName;
+            String instanceName;
             if ((splitedBase.get(0).length() - (base.length() - platformSpecificLength)) > 1) {
-                stackName = new String(Splitter.fixedLength(splitedBase.get(0).length() - (base.length() - platformSpecificLength))
-                        .splitToList(splitedBase.get(0)).get(0));
+                stackName = Splitter.fixedLength(splitedBase.get(0).length() - (base.length() - platformSpecificLength))
+                        .splitToList(splitedBase.get(0)).get(0);
                 instanceName = splitedBase.get(1);
             } else {
-                stackName = new String(Splitter.fixedLength(1).splitToList(splitedBase.get(0)).get(0));
-                instanceName = new String(Splitter.fixedLength(splitedBase.get(1).length()
+                stackName = Splitter.fixedLength(1).splitToList(splitedBase.get(0)).get(0);
+                instanceName = Splitter.fixedLength(splitedBase.get(1).length()
                         - (Math.abs(splitedBase.get(0).length() - (base.length() - platformSpecificLength))
-                        + stackName.length())).splitToList(splitedBase.get(1)).get(0));
+                        + stackName.length())).splitToList(splitedBase.get(1)).get(0);
             }
             StringBuilder shortBase = new StringBuilder(stackName + DELIMITER + instanceName);
             for (int i = 2; i < splitedBase.size(); i++) {
@@ -109,7 +108,7 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
         if (null == base && null == part) {
             throw new IllegalArgumentException("base and part are both null! Can't append them!");
         }
-        StringBuilder sb = null;
+        StringBuilder sb;
         if (null != base) {
             sb = new StringBuilder(base).append(DELIMITER).append(part);
         } else {

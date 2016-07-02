@@ -51,7 +51,7 @@ public class MailSenderConfig {
 
     @Bean
     public JavaMailSender mailSender() {
-        JavaMailSender mailSender = null;
+        JavaMailSender mailSender;
         if (isMailSendingConfigured()) {
             mailSender = new JavaMailSenderImpl();
             ((JavaMailSenderImpl) mailSender).setHost(host);

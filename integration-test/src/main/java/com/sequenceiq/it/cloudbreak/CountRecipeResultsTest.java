@@ -55,12 +55,9 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
         try {
             for (final String file : files) {
                 for (final String ip : publicIps) {
-                    futures.add(executorService.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (findFile(ip, file)) {
-                                count.incrementAndGet();
-                            }
+                    futures.add(executorService.submit(() -> {
+                        if (findFile(ip, file)) {
+                            count.incrementAndGet();
                         }
                     }));
                 }

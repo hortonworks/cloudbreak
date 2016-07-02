@@ -30,7 +30,7 @@ public class CloudPlatformInitializer {
     private EventBus eventBus;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         validateSelectors();
         LOGGER.info("Registering CloudPlatformEventHandlers");
         for (CloudPlatformEventHandler handler : handlers) {

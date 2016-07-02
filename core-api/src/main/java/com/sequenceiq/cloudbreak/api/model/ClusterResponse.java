@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public class ClusterResponse {
@@ -37,9 +38,9 @@ public class ClusterResponse {
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
     private String password;
     private boolean secure;
-    @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED, required = false)
+    @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)
     private Boolean ldapRequired = false;
-    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID, required = false)
+    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
     private Long sssdConfigId;
     private Set<HostGroupJson> hostGroups;
     private AmbariStackDetailsJson ambariStackDetails;

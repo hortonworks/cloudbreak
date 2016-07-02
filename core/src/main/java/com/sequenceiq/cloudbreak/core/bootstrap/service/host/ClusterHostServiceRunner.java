@@ -118,7 +118,7 @@ public class ClusterHostServiceRunner {
         return null;
     }
 
-    private Set<Node> collectNodes(Stack stack) throws CloudbreakException, CloudbreakOrchestratorException {
+    private Set<Node> collectNodes(Stack stack) {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {

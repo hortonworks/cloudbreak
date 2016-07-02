@@ -23,7 +23,6 @@ public class HostClusterAvailabilityCheckerTask extends StackBasedStatusCheckerT
 
     @Override
     public void handleTimeout(HostOrchestratorClusterContext t) {
-        return;
     }
 
     @Override

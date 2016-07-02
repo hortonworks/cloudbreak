@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
@@ -40,17 +39,10 @@ public class ArmMetadataCollector implements MetadataCollector {
         final CloudResource resource = armTemplateUtils.getTemplateResource(resources);
         List<CloudVmMetaDataStatus> results = new ArrayList<>();
 
-        List<InstanceTemplate> templates = Lists.transform(vms, new Function<CloudInstance, InstanceTemplate>() {
-            @Override
-            public InstanceTemplate apply(CloudInstance input) {
-                return input.getTemplate();
-            }
-        });
+        List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);
 
-        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, new Function<InstanceTemplate, String>() {
-            public String apply(InstanceTemplate from) {
-                return armTemplateUtils.getPrivateInstanceId(resource.getName(), from.getGroupName(), Long.toString(from.getPrivateId()));
-            }
+        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, from -> {
+            return armTemplateUtils.getPrivateInstanceId(resource.getName(), from.getGroupName(), Long.toString(from.getPrivateId()));
         });
 
         try {
@@ -63,7 +55,7 @@ public class ArmMetadataCollector implements MetadataCollector {
                 Map networkInterface = (Map) access.getNetworkInterface(resource.getName(), networkInterfaceName);
                 List ips = (ArrayList) ((Map) networkInterface.get("properties")).get("ipConfigurations");
                 Map properties = (Map) ((Map) ips.get(0)).get("properties");
-                String publicIp = null;
+                String publicIp;
                 if (properties.get("publicIPAddress") == null) {
                     publicIp = access.getLoadBalancerIp(resource.getName(), armTemplateUtils.getLoadBalancerId(resource.getName()));
                 } else {

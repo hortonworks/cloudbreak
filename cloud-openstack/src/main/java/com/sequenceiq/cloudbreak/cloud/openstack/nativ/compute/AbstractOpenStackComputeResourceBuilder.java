@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.compute;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +42,7 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
     public List<CloudResource> create(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = resourceNameService.resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
-        return Arrays.asList(createNamedResource(resourceType(), resourceName));
+        return Collections.singletonList(createNamedResource(resourceType(), resourceName));
     }
 
     @Override
@@ -78,7 +77,7 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
     protected InstanceTemplate getInstanceTemplate(Group group, long privateId) {
         for (CloudInstance instance : group.getInstances()) {
             InstanceTemplate template = instance.getTemplate();
-            if (template.getPrivateId().longValue() == privateId) {
+            if (template.getPrivateId() == privateId) {
                 return template;
             }
         }

@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
@@ -26,8 +25,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
@@ -371,7 +368,7 @@ public class StackService {
                 eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
             } else if (stack.infrastructureIsEphemeral()) {
                 throw new BadRequestException(
-                        String.format("Cannot stop a stack if the volumeType is Ephemeral.", stack.getId()));
+                        String.format("Cannot stop a stack '%s' if the volumeType is Ephemeral.", stack.getId()));
             } else if (!stack.isAvailable() && !stack.isStopFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
@@ -473,13 +470,10 @@ public class StackService {
 
     private void validateHostGroupAdjustment(final InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
-        HostGroup hostGroup = Iterables.find(stack.getCluster().getHostGroups(), new Predicate<HostGroup>() {
-            @Override
-            public boolean apply(@Nullable HostGroup input) {
-                // TODO: why instancegroups?
-                return input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup());
-            }
-        });
+        HostGroup hostGroup = stack.getCluster().getHostGroups().stream().filter(input -> {
+            // TODO: why instancegroups?
+            return input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup());
+        }).findFirst().get();
         if (hostGroup == null) {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
@@ -497,7 +491,7 @@ public class StackService {
     private void validateInstanceGroup(Stack stack, String instanceGroupName) {
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         if (instanceGroup == null) {
-            throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroup));
+            throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getId(), instanceGroupName));
         }
         if (isGateway(instanceGroup.getInstanceGroupType())) {
             throw new BadRequestException("The Ambari server instance group modification is not enabled.");

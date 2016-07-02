@@ -115,14 +115,14 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliCommand(value = "stack delete --id", help = "Delete the stack by its id")
     public String deleteByName(
             @CliOption(key = "", mandatory = true) Long id,
-            @CliOption(key = "wait", mandatory = false, help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) throws Exception {
+            @CliOption(key = "wait", help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
         return delete(id, null, wait);
     }
 
     @CliCommand(value = "stack delete --name", help = "Delete the stack by its name")
     public String deleteById(
             @CliOption(key = "", mandatory = true) String name,
-            @CliOption(key = "wait", mandatory = false, help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) throws Exception {
+            @CliOption(key = "wait", help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
         return delete(null, name, wait);
     }
 
@@ -135,11 +135,11 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         try {
             wait = wait == null ? false : wait;
             if (id != null) {
-                shellContext.cloudbreakClient().stackEndpoint().delete(Long.valueOf(id), false);
+                shellContext.cloudbreakClient().stackEndpoint().delete(id, false);
                 shellContext.setHint(Hints.CREATE_CLUSTER);
                 shellContext.removeStack(id.toString());
                 if (wait) {
-                    CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(Long.valueOf(id), Status.DELETE_COMPLETED.name());
+                    CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(id, Status.DELETE_COMPLETED.name());
                     if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                         throw shellContext.exceptionTransformer().transformToRuntimeException("Stack termination failed: " + waitResult.getReason());
                     } else {
@@ -258,7 +258,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 stackRequest.setAvailabilityZone(availabilityZone.getName());
             }
             stackRequest.setOnFailureAction(onFailureAction == null ? OnFailureAction.DO_NOTHING : OnFailureAction.valueOf(onFailureAction.name()));
-            stackRequest.setNetworkId(Long.valueOf(shellContext.getActiveNetworkId()));
+            stackRequest.setNetworkId(shellContext.getActiveNetworkId());
             FailurePolicyJson failurePolicyJson = new FailurePolicyJson();
             stackRequest.setCredentialId(Long.valueOf(shellContext.getCredentialId()));
             failurePolicyJson.setAdjustmentType(adjustmentType == null ? AdjustmentType.BEST_EFFORT : AdjustmentType.valueOf(adjustmentType.name()));
@@ -305,8 +305,6 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 }
             }
             return String.format("Stack creation started with id: '%s' and name: '%s'", id.getId(), name);
-        } catch (ValidationException ex) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -318,7 +316,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
     }
 
-    private String stop(StackResponse stackResponse) throws Exception {
+    private String stop(StackResponse stackResponse) {
         shellContext.addStack(stackResponse.getId().toString(), stackResponse.getName());
         prepareCluster(stackResponse.getId().toString());
         UpdateStackJson updateStackJson = new UpdateStackJson();
@@ -348,16 +346,16 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @CliCommand(value = "stack stop --id", help = "Stop the stack by its id")
-    public String stopById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+    public String stopById(@CliOption(key = "", mandatory = true) Long id) {
         return stop(id, null);
     }
 
     @CliCommand(value = "stack stop --name", help = "Stop the stack by its name")
-    public String stopByName(@CliOption(key = "", mandatory = true)String name) throws Exception {
+    public String stopByName(@CliOption(key = "", mandatory = true)String name) {
         return stop(null, name);
     }
 
-    private String start(StackResponse stackResponse) throws Exception {
+    private String start(StackResponse stackResponse) {
         shellContext.addStack(stackResponse.getId().toString(), stackResponse.getName());
         prepareCluster(stackResponse.getId().toString());
         UpdateStackJson updateStackJson = new UpdateStackJson();
@@ -387,12 +385,12 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @CliCommand(value = "stack start --id", help = "Start the stack by its id")
-    public String startById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+    public String startById(@CliOption(key = "", mandatory = true) Long id) {
         return start(id, null);
     }
 
     @CliCommand(value = "stack start --name", help = "Start the stack by its name")
-    public String startByName(@CliOption(key = "", mandatory = true)String name) throws Exception {
+    public String startByName(@CliOption(key = "", mandatory = true)String name) {
         return start(null, name);
     }
 
@@ -400,7 +398,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String addNode(
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be added to the stack") Integer adjustment,
-            @CliOption(key = "withClusterUpScale", mandatory = false, help = "Do the upscale with the cluster together") Boolean withClusterUpScale) {
+            @CliOption(key = "withClusterUpScale", help = "Do the upscale with the cluster together") Boolean withClusterUpScale) {
         try {
             if (adjustment < 1) {
                 return "The adjustment value in case of node addition should be at least 1.";
@@ -448,16 +446,16 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @CliCommand(value = "stack metadata", help = "Shows the stack metadata")
     public String metadata(
-            @CliOption(key = "id", mandatory = false, help = "Id of the stack") Long id,
-            @CliOption(key = "name", mandatory = false, help = "Name of the stack") String name,
-            @CliOption(key = "instancegroup", mandatory = false, help = "Instancegroup of the stack") String group,
-            @CliOption(key = "outputType", mandatory = false, help = "OutputType of the response") OutPutType outPutType) {
+            @CliOption(key = "id", help = "Id of the stack") Long id,
+            @CliOption(key = "name", help = "Name of the stack") String name,
+            @CliOption(key = "instancegroup", help = "Instancegroup of the stack") String group,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) {
         try {
             outPutType = outPutType == null ? OutPutType.RAW : outPutType;
             StackResponse stackResponse = getStackResponse(name, id);
             if (stackResponse != null && stackResponse.getInstanceGroups() != null) {
                 Map<String, List<String>> stringListMap = collectMetadata(
-                        stackResponse.getInstanceGroups() == null ? new ArrayList<InstanceGroupJson>() : stackResponse.getInstanceGroups(), group);
+                        stackResponse.getInstanceGroups() == null ? new ArrayList<>() : stackResponse.getInstanceGroups(), group);
                 return shellContext.outputTransformer().render(outPutType, stringListMap, "FIELD", "VALUE");
             }
             return "No stack specified.";
@@ -531,7 +529,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     private void validateNetwork() {
         Long networkId = shellContext.getActiveNetworkId();
-        if (networkId == null || (networkId != null && shellContext.getNetworksByProvider().get(networkId).equals(shellContext.getActiveCloudPlatform()))) {
+        if (networkId == null || shellContext.getNetworksByProvider().get(networkId).equals(shellContext.getActiveCloudPlatform())) {
             throw new ValidationException("A network must be selected with the same cloud platform as the credential!");
         }
     }
@@ -565,7 +563,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 shellContext.addBlueprint(blueprintId);
             }
         } catch (Exception e) {
-            return;
+            // ignore
         }
     }
 

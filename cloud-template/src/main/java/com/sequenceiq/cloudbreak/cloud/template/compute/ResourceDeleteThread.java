@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
-import static java.util.Arrays.asList;
-
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -21,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 
@@ -60,7 +59,7 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
             CloudResource deletedResource = builder.delete(context, auth, resource);
             if (deletedResource != null) {
                 PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory
-                        .newPollResourceTask(builder, auth, asList(deletedResource), context, cancellable);
+                        .newPollResourceTask(builder, auth, Collections.singletonList(deletedResource), context, cancellable);
                 List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
                 deleteResource();
                 return new ResourceRequestResult<>(FutureResult.SUCCESS, pollerResult);
@@ -68,10 +67,10 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
         }
         deleteResource();
         CloudResourceStatus status = new CloudResourceStatus(resource, ResourceStatus.DELETED);
-        return new ResourceRequestResult<>(FutureResult.SUCCESS, asList(status));
+        return new ResourceRequestResult<>(FutureResult.SUCCESS, Collections.singletonList(status));
     }
 
-    private void deleteResource() throws InterruptedException {
+    private void deleteResource() {
         resourceNotifier.notifyDeletion(resource, auth.getCloudContext());
     }
 

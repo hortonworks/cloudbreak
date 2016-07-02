@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.store;
 
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 
 public final class InMemoryStateStore {
 

@@ -101,7 +101,7 @@ public class BaseStackCommandsTest {
     }
 
     @Test
-    public void showStackByIdWhichIsExist() throws Exception {
+    public void showStackByIdWhichIsExist() {
         given(stackEndpoint.get(anyLong())).willReturn(stackResponse());
         given(responseTransformer.transformObjectToStringMap(anyMap())).willReturn(ImmutableMap.of("id", "1L", "name", "test1"));
 
@@ -114,14 +114,14 @@ public class BaseStackCommandsTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void showStackByIdWhichIsNotExist() throws Exception {
+    public void showStackByIdWhichIsNotExist() {
         given(stackEndpoint.get(anyLong())).willThrow(new NotFoundException("not found"));
 
         underTest.show(51L, null);
     }
 
     @Test
-    public void showStackByNameWhichIsExist() throws Exception {
+    public void showStackByNameWhichIsExist() {
         given(stackEndpoint.getPublic(anyString())).willReturn(stackResponse());
         given(responseTransformer.transformObjectToStringMap(anyMap())).willReturn(ImmutableMap.of("id", "1L", "name", "test1"));
 
@@ -134,7 +134,7 @@ public class BaseStackCommandsTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void showStackByNameWhichIsNotExistThenThowNotFoundException() throws Exception {
+    public void showStackByNameWhichIsNotExistThenThowNotFoundException() {
         given(stackEndpoint.getPublic(anyString())).willThrow(new NotFoundException("not found"));
 
         underTest.show(null, "test1");

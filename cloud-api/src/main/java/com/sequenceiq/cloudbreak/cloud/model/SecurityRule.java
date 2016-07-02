@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Arrays;
+
 public class SecurityRule {
 
     private final String cidr;
@@ -28,7 +30,7 @@ public class SecurityRule {
     public String toString() {
         final StringBuilder sb = new StringBuilder("SecurityRule{");
         sb.append("cidr='").append(cidr).append('\'');
-        sb.append(", ports='").append(ports).append('\'');
+        sb.append(", ports='").append(Arrays.toString(ports)).append('\'');
         sb.append(", protocol='").append(protocol).append('\'');
         sb.append('}');
         return sb.toString();

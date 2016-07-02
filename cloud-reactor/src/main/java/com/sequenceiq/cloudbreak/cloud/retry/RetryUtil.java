@@ -64,14 +64,14 @@ public class RetryUtil implements Runnable {
         }
     }
 
-    private void runChecker() throws Exception {
+    private void runChecker() {
         if (check != null && !check.check()) {
             runRetry();
         }
     }
 
     private void runExceptionChecker(Exception e) {
-        if (exceptionCheck == null || (exceptionCheck != null && exceptionCheck.check(e))) {
+        if (exceptionCheck == null || exceptionCheck.check(e)) {
             runRetry();
         } else {
             runErrorHandler(e);

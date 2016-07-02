@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -70,7 +71,7 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
         } catch (Exception e) {
             UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request);
             request.getResult().onNext(result);
-            eventBus.notify(result.failureSelector(UpscaleStackResult.class), new Event(upscaleStackRequestEvent.getHeaders(), result));
+            eventBus.notify(CloudPlatformResult.failureSelector(UpscaleStackResult.class), new Event(upscaleStackRequestEvent.getHeaders(), result));
         }
     }
 

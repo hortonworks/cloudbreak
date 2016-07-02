@@ -17,7 +17,6 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -29,7 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -74,17 +72,17 @@ public class UserDataBuilderTest {
 
             @Override
             public DiskTypes diskTypes() {
-                return new DiskTypes(new ArrayList<DiskType>(), DiskType.diskType(""), new HashMap<String, VolumeParameterType>());
+                return new DiskTypes(new ArrayList<>(), DiskType.diskType(""), new HashMap<>());
             }
 
             @Override
             public Regions regions() {
-                return new Regions(new ArrayList<Region>(), Region.region(""));
+                return new Regions(new ArrayList<>(), Region.region(""));
             }
 
             @Override
             public AvailabilityZones availabilityZones() {
-                return new AvailabilityZones(new HashMap<Region, List<AvailabilityZone>>());
+                return new AvailabilityZones(new HashMap<>());
             }
 
             @Override
@@ -105,7 +103,7 @@ public class UserDataBuilderTest {
 
             @Override
             public VmTypes vmTypes() {
-                return new VmTypes(new ArrayList<VmType>(), VmType.vmType(""));
+                return new VmTypes(new ArrayList<>(), VmType.vmType(""));
             }
         };
     }

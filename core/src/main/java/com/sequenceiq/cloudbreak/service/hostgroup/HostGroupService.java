@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -14,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import org.springframework.stereotype.Service;
 
 @Service
 @Transactional

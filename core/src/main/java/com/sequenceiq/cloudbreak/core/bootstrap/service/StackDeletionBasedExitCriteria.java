@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 @Service
 public class StackDeletionBasedExitCriteria implements ExitCriteria {

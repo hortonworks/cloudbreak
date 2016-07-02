@@ -67,7 +67,7 @@ public class DockerClientUtilTest {
     }
 
     @Test
-    public void removeContainerIExistWhenInspectReturnWithNull() throws Exception {
+    public void removeContainerIExistWhenInspectReturnWithNull() {
         when(client.inspectContainerCmd(anyString())).thenReturn(inspectContainerCmd);
         when(inspectContainerCmd.exec()).thenReturn(null);
         when(createContainerCmd.getName()).thenReturn("ambari-server");
@@ -79,7 +79,7 @@ public class DockerClientUtilTest {
     }
 
     @Test
-    public void removeContainerIExistWhenInspectDropNotFoundException() throws Exception {
+    public void removeContainerIExistWhenInspectDropNotFoundException() {
         when(client.inspectContainerCmd(anyString())).thenThrow(new NotFoundException("notfound"));
         when(createContainerCmd.getName()).thenReturn("ambari-server");
 
@@ -90,7 +90,7 @@ public class DockerClientUtilTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void removeContainerIExistWhenInspectDropActualException() throws Exception {
+    public void removeContainerIExistWhenInspectDropActualException() {
         when(client.inspectContainerCmd(anyString())).thenThrow(new IllegalArgumentException("illegal argument"));
         when(createContainerCmd.getName()).thenReturn("ambari-server");
 
@@ -98,7 +98,7 @@ public class DockerClientUtilTest {
     }
 
     @Test
-    public void removeContainerIExistWhenInspectReturnWithValueThenRemoveContainer() throws Exception {
+    public void removeContainerIExistWhenInspectReturnWithValueThenRemoveContainer() {
         when(client.inspectContainerCmd(anyString())).thenReturn(inspectContainerCmd);
         when(inspectContainerCmd.exec()).thenReturn(inspectContainerResponse);
         when(inspectContainerResponse.getId()).thenReturn("xx666xx");
@@ -141,7 +141,7 @@ public class DockerClientUtilTest {
     }
 
     @Test
-    public void createContainerWhenEverythingWorksFine() throws Exception {
+    public void createContainerWhenEverythingWorksFine() {
         when(createContainerResponse.getId()).thenReturn("xxx666xxx");
         when(client.inspectContainerCmd(anyString())).thenReturn(inspectContainerCmd);
         when(inspectContainerCmd.exec()).thenReturn(inspectContainerResponse);

@@ -27,11 +27,8 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerConst
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
@@ -83,7 +80,7 @@ public class ClusterContainerRunnerTest {
     private ClusterContainerRunner underTest;
 
     @Before
-    public void setUp() throws CloudbreakException {
+    public void setUp() {
         ReflectionTestUtils.setField(containerConfigService, "ambariAgent", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "ambariServer", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "registratorDockerImageName", "sequence/testcont:0.1.1");
@@ -95,7 +92,7 @@ public class ClusterContainerRunnerTest {
 
     @Test(expected = CloudbreakException.class)
     public void runNewNodesClusterContainersWhenContainerRunnerFailed()
-            throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
+            throws CloudbreakException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
@@ -126,17 +123,17 @@ public class ClusterContainerRunnerTest {
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
-        when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<InstanceMetaData>());
-        when(containerService.save(anyList())).thenReturn(new ArrayList<Container>());
+        when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<>());
+        when(containerService.save(anyList())).thenReturn(new ArrayList<>());
         when(constraintFactory.getAmbariAgentConstraint(ambariServer.getHost(), null, stack.cloudPlatform(),
-                TestUtil.hostGroup(), hostGroupAdjustment.getScalingAdjustment(), new ArrayList<String>()))
+                TestUtil.hostGroup(), hostGroupAdjustment.getScalingAdjustment(), new ArrayList<>()))
                 .thenReturn(new ContainerConstraint.Builder().build());
         underTest.addClusterContainers(stack.getId(), hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
     }
 
     @Test(expected = CancellationException.class)
     public void runNewNodesClusterContainersWhenContainerRunnerCancelled()
-            throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorCancelledException {
+            throws CloudbreakException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);

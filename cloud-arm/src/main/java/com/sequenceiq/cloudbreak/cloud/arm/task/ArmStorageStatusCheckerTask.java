@@ -51,10 +51,7 @@ public class ArmStorageStatusCheckerTask extends PollBooleanStateTask {
         } catch (Exception ex) {
             LOGGER.warn("Error has happened while polling storage account: {}", ex.getMessage());
         }
-        if (storageCheckerContext.getExpectedStatus() == status) {
-            return true;
-        }
-        return false;
+        return storageCheckerContext.getExpectedStatus() == status;
     }
 
     public enum StorageStatus {

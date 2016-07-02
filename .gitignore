@@ -8,7 +8,6 @@ gradle
 .idea
 *.iml
 .apib
-*.iml
 .DS_Store
 *.jks
 atlassian*
@@ -37,8 +36,6 @@ cloud-break.cbh
 *.ear
 
 hs_err_pid
-/build
-
 node_modules/
 npm-debug.log
 start-local.sh

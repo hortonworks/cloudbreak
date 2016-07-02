@@ -15,7 +15,7 @@ public class Port {
     private final List<EndpointRule> aclRules;
 
     public Port(ExposedService exposedService, String port, String protocol) {
-        this(exposedService, port, port, protocol, new ArrayList<EndpointRule>());
+        this(exposedService, port, port, protocol, new ArrayList<>());
     }
 
     public Port(ExposedService exposedService, String port, String localPort, String protocol, List<EndpointRule> aclRules) {

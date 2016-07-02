@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.testng.Assert;
 import org.testng.annotations.Optional;
@@ -24,7 +24,7 @@ public class SecurityGroupCreationTest extends AbstractCloudbreakIntegrationTest
         securityRuleJson.setProtocol("tcp");
         securityRuleJson.setSubnet("0.0.0.0/0");
         securityRuleJson.setPorts(ports);
-        securityGroupJson.setSecurityRules(Arrays.asList(securityRuleJson));
+        securityGroupJson.setSecurityRules(Collections.singletonList(securityRuleJson));
 
         String id = getCloudbreakClient().securityGroupEndpoint().postPrivate(securityGroupJson).getId().toString();
         // THEN

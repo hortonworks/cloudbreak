@@ -30,7 +30,7 @@ public class ReactorEventHandlerInitializer {
     private EventBus eventBus;
 
     @PostConstruct
-    public void init() throws Exception {
+    public void init() {
         validateSelectors();
         LOGGER.info("Registering ReactorEventHandlers");
         for (ReactorEventHandler handler : handlers) {

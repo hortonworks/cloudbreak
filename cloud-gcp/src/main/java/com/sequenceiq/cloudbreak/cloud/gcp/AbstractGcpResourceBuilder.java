@@ -134,14 +134,14 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
     protected CloudResource createOperationAwareCloudResource(CloudResource resource, Operation operation) {
         return new CloudResource.Builder()
                 .cloudResource(resource)
-                .params(Collections.<String, Object>singletonMap(OPERATION_ID, operation.getName()))
+                .params(Collections.singletonMap(OPERATION_ID, operation.getName()))
                 .persistent(false)
                 .build();
     }
 
     protected CloudInstance createOperationAwareCloudInstance(CloudInstance instance, Operation operation) {
         return new CloudInstance(instance.getInstanceId(), instance.getTemplate(),
-                Collections.<String, Object>singletonMap(OPERATION_ID, operation.getName()));
+                Collections.singletonMap(OPERATION_ID, operation.getName()));
     }
 
     protected void exceptionHandler(GoogleJsonResponseException ex, String name, ResourceType resourceType) {

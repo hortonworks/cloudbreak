@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.model;
 
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public class CertificateResponse {

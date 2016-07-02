@@ -49,9 +49,7 @@ public abstract class AbstractMockIntegrationTest extends AbstractCloudbreakInte
 
     protected void initSpark() {
         before((req, res) -> res.type("application/json"));
-        after((request, response) -> {
-            requestResponseMap.put(Call.fromRequest(request), response);
-        });
+        after((request, response) -> requestResponseMap.put(Call.fromRequest(request), response));
     }
 
     @AfterClass

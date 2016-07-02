@@ -2,8 +2,8 @@ package com.sequenceiq.it.spark.ambari;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.sequenceiq.it.spark.ambari.model.Requests;
 import com.sequenceiq.it.spark.ITResponse;
+import com.sequenceiq.it.spark.ambari.model.Requests;
 
 import spark.Request;
 

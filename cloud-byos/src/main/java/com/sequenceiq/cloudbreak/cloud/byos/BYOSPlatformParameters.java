@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.byos;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -11,11 +10,9 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
-import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
@@ -35,7 +32,7 @@ public class BYOSPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(Collections.<DiskType>emptyList(), DiskType.diskType(""), diskMappings());
+        return new DiskTypes(Collections.emptyList(), DiskType.diskType(""), diskMappings());
     }
 
     private Map<String, VolumeParameterType> diskMappings() {
@@ -44,17 +41,17 @@ public class BYOSPlatformParameters implements PlatformParameters {
 
     @Override
     public Regions regions() {
-        return new Regions(Collections.<Region>emptyList(), Region.region(""));
+        return new Regions(Collections.emptyList(), Region.region(""));
     }
 
     @Override
     public VmTypes vmTypes() {
-        return new VmTypes(Collections.<VmType>emptyList(), VmType.vmType(""));
+        return new VmTypes(Collections.emptyList(), VmType.vmType(""));
     }
 
     @Override
     public AvailabilityZones availabilityZones() {
-        return new AvailabilityZones(Collections.<Region, List<AvailabilityZone>>emptyMap());
+        return new AvailabilityZones(Collections.emptyMap());
     }
 
     @Override
@@ -69,6 +66,6 @@ public class BYOSPlatformParameters implements PlatformParameters {
 
     @Override
     public PlatformOrchestrator orchestratorParams() {
-        return new PlatformOrchestrator(Arrays.<Orchestrator>asList(), orchestrator(""));
+        return new PlatformOrchestrator(Collections.emptyList(), orchestrator(""));
     }
 }

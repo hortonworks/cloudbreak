@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import javax.validation.constraints.NotNull;
-
 import java.util.Map;
+
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

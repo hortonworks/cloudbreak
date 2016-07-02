@@ -10,12 +10,12 @@ import java.util.concurrent.Future;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestratorCluster;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.LogVolumePath;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public class OrchestratorTestUtil {
 
@@ -35,7 +35,7 @@ public class OrchestratorTestUtil {
     public static Set<Node> generateNodes(int count) {
         Set<Node> nodes = new HashSet<>();
         for (int i = 0; i < count; i++) {
-            nodes.add(node(Long.valueOf(i)));
+            nodes.add(node((long) i));
         }
         return nodes;
     }

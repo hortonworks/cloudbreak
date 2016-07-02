@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.Recipe;
 
 public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterTest<HostGroup> {
 
@@ -50,7 +49,7 @@ public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterT
     @Test
     public void testConvertWithoutRecipes() {
         // GIVEN
-        getSource().setRecipes(new HashSet<Recipe>());
+        getSource().setRecipes(new HashSet<>());
         // WHEN
         HostGroupJson result = underTest.convert(getSource());
         // THEN

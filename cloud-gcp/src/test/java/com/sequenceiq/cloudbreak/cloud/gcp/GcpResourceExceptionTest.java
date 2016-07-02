@@ -24,7 +24,7 @@ public class GcpResourceExceptionTest {
     }
 
     @Test
-    public void shouldMessageBeWellFormattedWhenUsingCustomConstructor() throws Exception {
+    public void shouldMessageBeWellFormattedWhenUsingCustomConstructor() {
         //GIVEN
 
         //WHEN

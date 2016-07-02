@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,7 +55,7 @@ public class AwsPlatformParameters implements PlatformParameters {
     public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
     public static final String S3_ROLE = "s3Role";
 
-    private static final Integer START_LABEL = Integer.valueOf(97);
+    private static final Integer START_LABEL = 97;
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
     private static final int DEFAULT_REGION_TYPE_POSITION = 4;
     private static final int DEFAULT_VM_TYPE_POSITION = 21;
@@ -130,7 +129,7 @@ public class AwsPlatformParameters implements PlatformParameters {
                 Integer.valueOf(configSpecification.getMinimumSize()),
                 Integer.valueOf(configSpecification.getMaximumSize()),
                 Integer.valueOf(configSpecification.getMinimumNumber()),
-                Integer.valueOf(configSpecification.getMaximumNumberWithLimit()));
+                configSpecification.getMaximumNumberWithLimit());
     }
 
     private Map<Region, List<AvailabilityZone>> readRegions() {
@@ -209,10 +208,10 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.<String>absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.absent()));
         additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE_STRATEGY, false, InstanceProfileStrategy.class,
-                Optional.<String>absent()));
-        additionalStackParameterValidations.add(new StackParamValidation(S3_ROLE, false, String.class, Optional.<String>absent()));
+                Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(S3_ROLE, false, String.class, Optional.absent()));
         return additionalStackParameterValidations;
     }
 
@@ -227,7 +226,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @Override
     public PlatformOrchestrator orchestratorParams() {
-        return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
+        return new PlatformOrchestrator(Collections.singletonList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
     }
 
     public enum AwsDiskType {

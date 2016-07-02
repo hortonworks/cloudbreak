@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -112,8 +111,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
             if (UserFilterField.USERNAME.equals(filterField)) {
                 userNode = root.get("resources").get(0);
             }
-            for (Iterator<JsonNode> iterator = userNode.get("groups").iterator(); iterator.hasNext();) {
-                JsonNode node = iterator.next();
+            for (JsonNode node : userNode.get("groups")) {
                 String group = node.get("display").asText();
                 if (group.startsWith("sequenceiq.account")) {
                     String[] parts = group.split("\\.");

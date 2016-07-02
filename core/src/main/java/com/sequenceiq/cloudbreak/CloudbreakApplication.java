@@ -17,7 +17,7 @@ public class CloudbreakApplication {
 
     public static void main(String[] args) {
         if (!versionedApplication().showVersionInfo(args)) {
-            ConfigurableApplicationContext context = null;
+            ConfigurableApplicationContext context;
             if (args.length == 0) {
                 context = SpringApplication.run(CloudbreakApplication.class);
             } else {

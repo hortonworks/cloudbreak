@@ -23,7 +23,6 @@ public class ContainerClusterAvailabilityCheckerTask extends StackBasedStatusChe
 
     @Override
     public void handleTimeout(ContainerOrchestratorClusterContext t) {
-        return;
     }
 
     @Override

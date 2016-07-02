@@ -90,9 +90,9 @@ public class HeatTemplateBuilder {
     private String formatUserData(String userData) {
         String[] lines = userData.split("\n");
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < lines.length; i++) {
+        for (String line : lines) {
             // be aware of the OpenStack Heat template formatting
-            sb.append("            " + lines[i] + "\n");
+            sb.append("            ").append(line).append("\n");
         }
         return sb.toString();
     }

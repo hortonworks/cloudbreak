@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +116,7 @@ public class SaltConnectorTest {
 
     //@Test
     public void testRunNetIf() {
-        List<String> targets = Arrays.asList("10.0.0.5");
+        List<String> targets = Collections.singletonList("10.0.0.5");
         String targetIps = "S@" + targets.stream().collect(Collectors.joining(" or S@"));
         NetworkInterfaceResponse response = SaltStates.networkInterfaceIP(client, new Compound(targetIps));
         Assert.assertNotNull(response.getResultGroupByHost());
@@ -123,7 +124,7 @@ public class SaltConnectorTest {
 
     //@Test
     public void testRunDeleteMinions() {
-        List<String> targets = Arrays.asList("10.0.0.5");
+        List<String> targets = Collections.singletonList("10.0.0.5");
         Object object = SaltStates.removeMinions(client, targets);
         Assert.assertNotNull(object);
     }

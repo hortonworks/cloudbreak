@@ -86,7 +86,6 @@ public class ReactorFlowManager {
     public void triggerForcedTermination(Long stackId) {
         String selector = FlowTriggers.STACK_FORCE_TERMINATE_TRIGGER_EVENT;
         StackEvent event = new StackEvent(selector, stackId);
-        StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
         reactor.notify(selector, eventFactory.createEvent(event, selector));
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEvent(event, Flow2Handler.FLOW_CANCEL));
     }

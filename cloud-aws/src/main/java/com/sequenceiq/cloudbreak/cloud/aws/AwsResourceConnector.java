@@ -10,6 +10,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_I
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -90,7 +91,7 @@ public class AwsResourceConnector implements ResourceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceConnector.class);
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
-    private static final List<String> CAPABILITY_IAM = Arrays.asList("CAPABILITY_IAM");
+    private static final List<String> CAPABILITY_IAM = Collections.singletonList("CAPABILITY_IAM");
 
     private static final List<String> SUSPENDED_PROCESSES = Arrays.asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
             "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
@@ -143,7 +144,7 @@ public class AwsResourceConnector implements ResourceConnector {
         boolean mapPublicIpOnLaunch = true;
         if (existingVPC && existingSubnet) {
             DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
-            describeSubnetsRequest.setSubnetIds(Arrays.asList(awsNetworkView.getExistingSubnet()));
+            describeSubnetsRequest.setSubnetIds(Collections.singletonList(awsNetworkView.getExistingSubnet()));
             DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(describeSubnetsRequest);
             if (!describeSubnetsResult.getSubnets().isEmpty()) {
                 mapPublicIpOnLaunch = describeSubnetsResult.getSubnets().get(0).isMapPublicIpOnLaunch();
@@ -226,12 +227,7 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     private Supplier<CloudConnectorException> getCloudConnectorExceptionSupplier(String msg) {
-        return new Supplier<CloudConnectorException>() {
-            @Override
-            public CloudConnectorException get() {
-                return new CloudConnectorException(msg);
-            }
-        };
+        return () -> new CloudConnectorException(msg);
     }
 
     private void suspendAutoScaling(AuthenticatedContext ac, CloudStack stack) {
@@ -400,7 +396,7 @@ public class AwsResourceConnector implements ResourceConnector {
             AmazonCloudFormationClient client = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
                     ac.getCloudContext().getLocation().getRegion().value());
             String cFStackName = getCloudFormationStackResource(resources).getName();
-            LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", ac.getCloudContext().getId(), cFStackName);
+            LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", cFStackName, ac.getCloudContext().getId());
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
             try {
                 client.describeStacks(describeStacksRequest);
@@ -409,7 +405,7 @@ public class AwsResourceConnector implements ResourceConnector {
                     AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                             ac.getCloudContext().getLocation().getRegion().value());
                     releaseReservedIp(amazonEC2Client, resources);
-                    return Arrays.asList();
+                    return Collections.emptyList();
                 } else {
                     throw e;
                 }
@@ -520,7 +516,7 @@ public class AwsResourceConnector implements ResourceConnector {
         scheduleStatusChecks(stack, ac, cloudFormationClient);
         suspendAutoScaling(ac, stack);
 
-        return Arrays.asList(new CloudResourceStatus(getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
+        return Collections.singletonList(new CloudResourceStatus(getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }
 
     @Override

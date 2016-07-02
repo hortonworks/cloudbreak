@@ -19,11 +19,10 @@ public abstract class StringType {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
         if (o == null || getClass() != o.getClass()) {
             return false;
+        } else if (this == o) {
+            return true;
         }
         StringType that = (StringType) o;
         return !(value != null ? !value.equals(that.value) : that.value != null);

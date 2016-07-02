@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -82,31 +81,27 @@ public class StackScalingService {
                 hostMetadataRepository.delete(hostMetadata);
                 eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
-                                Arrays.asList(instanceMetaData.getInstanceId())));
+                                Collections.singletonList(instanceMetaData.getInstanceId())));
             } catch (Exception e) {
                 LOGGER.error("Host cannot be deleted from cluster: ", e);
                 eventService.fireCloudbreakEvent(stack.getId(), Status.DELETE_FAILED.name(),
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETE_FAILED.code(),
-                                Arrays.asList(instanceMetaData.getInstanceId())));
+                                Collections.singletonList(instanceMetaData.getInstanceId())));
 
             }
         } else {
             LOGGER.info("Host cannot be deleted because it is not exist: ", instanceMetaData.getInstanceId());
             eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_NOT_FOUND.code(),
-                            Arrays.asList(instanceMetaData.getInstanceId())));
+                            Collections.singletonList(instanceMetaData.getInstanceId())));
 
         }
     }
 
-    public void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) throws CloudbreakSecuritySetupException {
+    public void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
         instanceGroup.setNodeCount(nodeCount);
         instanceGroupRepository.save(instanceGroup);
-
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayInstance.getPublicIpWrapper());
 
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {

@@ -177,7 +177,7 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testDeleteSssdConfigById() throws Exception {
-        doNothing().when(sssdConfigEndpoint).delete(Long.valueOf(CONFIG_ID));
+        doNothing().when(sssdConfigEndpoint).delete(CONFIG_ID);
         underTest.delete(CONFIG_ID, null);
         verify(sssdConfigEndpoint, times(1)).delete(anyLong());
     }
@@ -191,7 +191,7 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testDeleteSssdConfigByIdAndName() throws Exception {
-        doNothing().when(sssdConfigEndpoint).delete(Long.valueOf(CONFIG_ID));
+        doNothing().when(sssdConfigEndpoint).delete(CONFIG_ID);
         underTest.delete(CONFIG_ID, CONFIG_NAME);
         verify(sssdConfigEndpoint, times(0)).deletePublic(anyString());
         verify(sssdConfigEndpoint, times(1)).delete(anyLong());

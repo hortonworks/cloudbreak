@@ -45,7 +45,7 @@ public class GcpCredentialConnector implements CredentialConnector {
             }
             listDisks(gcpContext, compute);
         } catch (GoogleJsonResponseException e) {
-            String errorMessage = String.format(e.getDetails().getMessage());
+            String errorMessage = e.getDetails().getMessage();
             LOGGER.error(errorMessage, e);
             return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
         } catch (Exception e) {
@@ -69,7 +69,7 @@ public class GcpCredentialConnector implements CredentialConnector {
                 DiskList execute = list.execute();
                 disks.addAll(execute.getItems());
             } catch (NullPointerException ex) {
-                disks.addAll(new ArrayList<Disk>());
+                disks.addAll(new ArrayList<>());
             }
         }
     }

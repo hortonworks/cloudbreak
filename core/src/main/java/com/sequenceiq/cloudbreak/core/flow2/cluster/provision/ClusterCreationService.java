@@ -94,7 +94,7 @@ public class ClusterCreationService {
         }
 
         emailSenderService.sendTelemetryMailIfNeeded(stack, CREATE_FAILED);
-        if (cluster.getEmailNeeded()) {
+        if (cluster != null && cluster.getEmailNeeded()) {
             emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
         }

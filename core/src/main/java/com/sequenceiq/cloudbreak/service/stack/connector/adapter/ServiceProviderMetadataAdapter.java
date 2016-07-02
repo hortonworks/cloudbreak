@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateRequest;
@@ -62,7 +62,7 @@ public class ServiceProviderMetadataAdapter {
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
         CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, cloudInstances);
         LOGGER.info("Triggering event: {}", cmr);
-        eventBus.notify(cmr.selector(CollectMetadataRequest.class), Event.wrap(cmr));
+        eventBus.notify(CloudPlatformRequest.selector(CollectMetadataRequest.class), Event.wrap(cmr));
         try {
             CollectMetadataResult res = cmr.await();
             LOGGER.info("Result: {}", res);
@@ -92,7 +92,7 @@ public class ServiceProviderMetadataAdapter {
         }
         if (instance != null) {
             GetInstancesStateRequest<GetInstancesStateResult> stateRequest =
-                    new GetInstancesStateRequest<>(cloudContext, cloudCredential, asList(instance));
+                    new GetInstancesStateRequest<>(cloudContext, cloudCredential, Collections.singletonList(instance));
             LOGGER.info("Triggering event: {}", stateRequest);
             eventBus.notify(stateRequest.selector(), Event.wrap(stateRequest));
             try {

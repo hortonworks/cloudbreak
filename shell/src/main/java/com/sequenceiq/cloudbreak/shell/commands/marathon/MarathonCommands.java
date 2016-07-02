@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.shell.commands.marathon;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -87,12 +88,12 @@ public class MarathonCommands implements CommandMarker {
 
     @CliCommand(value = "marathon show", help = "Show a marathon stack")
     public String showMarathonStack(
-            @CliOption(key = "name", mandatory = false, help = "Name of the marathon stack") String name,
-            @CliOption(key = "id", mandatory = false, help = "Id of the marathon stack") Long id) {
+            @CliOption(key = "name", help = "Name of the marathon stack") String name,
+            @CliOption(key = "id", help = "Id of the marathon stack") Long id) {
         try {
             StackResponse response = null;
             if (id != null) {
-                response = cloudbreakClient.stackEndpoint().get(Long.valueOf(id));
+                response = cloudbreakClient.stackEndpoint().get(id);
             } else if (name != null) {
                 response = cloudbreakClient.stackEndpoint().getPublic(name);
             }
@@ -108,20 +109,17 @@ public class MarathonCommands implements CommandMarker {
 
     @CliCommand(value = "marathon select", help = "Select a marathon stack")
     public String selectMarathonStack(
-            @CliOption(key = "name", mandatory = false, help = "Name of the marathon stack") String name,
-            @CliOption(key = "id", mandatory = false, help = "Id of the marathon stack") Long id) {
+            @CliOption(key = "name", help = "Name of the marathon stack") String name,
+            @CliOption(key = "id", help = "Id of the marathon stack") Long id) {
         try {
             StackResponse response = null;
             if (id != null) {
-                response = cloudbreakClient.stackEndpoint().get(Long.valueOf(id));
+                response = cloudbreakClient.stackEndpoint().get(id);
             } else if (name != null) {
                 response = cloudbreakClient.stackEndpoint().getPublic(name);
             }
             if (response == null) {
-                if (!BYOS.equals(response.getPlatformVariant())) {
-                    return "Not a marathon stack was specified.";
-                }
-                return "Marathon stack not exist.";
+                return "Marathon stack not exist or not a marathon stack was specified.";
             } else {
                 shellContext.setSelectedMarathonStackId(response.getId());
                 shellContext.setSelectedMarathonStackName(response.getName());
@@ -152,12 +150,12 @@ public class MarathonCommands implements CommandMarker {
 
     @CliCommand(value = "marathon terminate", help = "Terminate a marathon stack")
     public String deleteMarathonStack(
-            @CliOption(key = "name", mandatory = false, help = "Name of the marathon stack") String name,
-            @CliOption(key = "id", mandatory = false, help = "Id of the marathon stack") Long id) {
+            @CliOption(key = "name", help = "Name of the marathon stack") String name,
+            @CliOption(key = "id", help = "Id of the marathon stack") Long id) {
         try {
             if (id != null) {
-                cloudbreakClient.stackEndpoint().delete(Long.valueOf(id), true);
-                if (id == shellContext.getSelectedMarathonStackId()) {
+                cloudbreakClient.stackEndpoint().delete(id, true);
+                if (Objects.equals(id, shellContext.getSelectedMarathonStackId())) {
                     shellContext.resetSelectedMarathonStackId();
                     shellContext.setHint(Hints.MARATHON_CLUSTER);
                 }
@@ -165,7 +163,7 @@ public class MarathonCommands implements CommandMarker {
             } else if (name != null) {
                 StackResponse aPublic = cloudbreakClient.stackEndpoint().getPublic(name);
                 cloudbreakClient.stackEndpoint().deletePublic(name, true);
-                if (aPublic.getId() == shellContext.getSelectedMarathonStackId()) {
+                if (Objects.equals(aPublic.getId(), shellContext.getSelectedMarathonStackId())) {
                     shellContext.resetSelectedMarathonStackId();
                 }
                 return String.format("Marathon has been deleted, name: %s", name);
@@ -183,9 +181,9 @@ public class MarathonCommands implements CommandMarker {
             @CliOption(key = "cores", mandatory = true, help = "Cpu cores of the marathon constraint (0.1 - 64 core)") Double cpuCores,
             @CliOption(key = "memory", mandatory = true, help = "Memory in Mb of the marathon constraint (16mb - 128Gb)") Double memory,
             @CliOption(key = "diskSize", mandatory = true, help = "Disk in Gb of the marathon constraint (10Gb - 1000Gb)") Double disk,
-            @CliOption(key = "description", mandatory = false, help = "Description of the marathon stack") String description,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the constraint is public in the account") Boolean publicInAccount) {
-        IdJson idJson = null;
+            @CliOption(key = "description", help = "Description of the marathon stack") String description,
+            @CliOption(key = "publicInAccount", help = "flags if the constraint is public in the account") Boolean publicInAccount) {
+        IdJson idJson;
         try {
             ConstraintTemplateRequest constraintTemplateRequest = new ConstraintTemplateRequest();
             constraintTemplateRequest.setName(name);
@@ -199,10 +197,10 @@ public class MarathonCommands implements CommandMarker {
             } else {
                 idJson = cloudbreakClient.constraintTemplateEndpoint().postPrivate(constraintTemplateRequest);
             }
+            return "Marathon template was created with id: " + idJson.getId();
         } catch (Exception ex) {
-            exceptionTransformer.transformToRuntimeException(ex);
+            throw exceptionTransformer.transformToRuntimeException(ex);
         }
-        return "Marathon template was created with id: " + idJson.getId();
     }
 
     @CliCommand(value = "marathon constraint list", help = "Shows the currently available marathon constraints")
@@ -218,8 +216,8 @@ public class MarathonCommands implements CommandMarker {
 
     @CliCommand(value = "marathon constraint delete", help = "Delete the marathon constraint by its id or name")
     public Object deleteMarathonTemplate(
-            @CliOption(key = "id", mandatory = false, help = "Id of the marathon template") String id,
-            @CliOption(key = "name", mandatory = false, help = "Name of the marathon template") String name) {
+            @CliOption(key = "id", help = "Id of the marathon template") String id,
+            @CliOption(key = "name", help = "Name of the marathon template") String name) {
         try {
             if (id != null) {
                 cloudbreakClient.constraintTemplateEndpoint().delete(Long.valueOf(id));
@@ -238,8 +236,8 @@ public class MarathonCommands implements CommandMarker {
 
     @CliCommand(value = "marathon constraint show", help = "Shows the marathon constraint by its id or name")
     public Object showTemplate(
-            @CliOption(key = "id", mandatory = false, help = "Id of the marathon constraint") Long id,
-            @CliOption(key = "name", mandatory = false, help = "Name of the marathon constraint") String name) {
+            @CliOption(key = "id", help = "Id of the marathon constraint") Long id,
+            @CliOption(key = "name", help = "Name of the marathon constraint") String name) {
         try {
             ConstraintTemplateResponse aPublic = getConstraintTemplateResponse(id, name);
             if (aPublic != null) {
@@ -253,7 +251,7 @@ public class MarathonCommands implements CommandMarker {
 
     private ConstraintTemplateResponse getConstraintTemplateResponse(Long id, String name) {
         if (id != null) {
-            return cloudbreakClient.constraintTemplateEndpoint().get(Long.valueOf(id));
+            return cloudbreakClient.constraintTemplateEndpoint().get(id);
         } else {
             return cloudbreakClient.constraintTemplateEndpoint().getPublic(name);
         }
@@ -263,8 +261,7 @@ public class MarathonCommands implements CommandMarker {
     public String createHostGroup(
             @CliOption(key = "hostgroup", mandatory = true, help = "Name of the hostgroup") HostGroup hostgroup,
             @CliOption(key = "nodecount", mandatory = true, help = "Count of the nodes in the hostgroup") Integer nodecount,
-            @CliOption(key = "constraintName", mandatory = true, help = "Name of the constraint") ConstraintName constraintTemplateName)
-            throws Exception {
+            @CliOption(key = "constraintName", mandatory = true, help = "Name of the constraint") ConstraintName constraintTemplateName) {
         try {
             ConstraintTemplateResponse constraintTemplateResponse = getConstraintTemplateResponse(null, constraintTemplateName.getName());
             if (constraintTemplateResponse != null) {
@@ -282,7 +279,7 @@ public class MarathonCommands implements CommandMarker {
     }
 
     @CliCommand(value = "marathon hostgroup show", help = "Show hostgroups")
-    public String listHostGroup() throws Exception {
+    public String listHostGroup() {
         try {
             return shellContext.outputTransformer().render(shellContext.getHostGroups(), "hostgroup");
         } catch (Exception ex) {

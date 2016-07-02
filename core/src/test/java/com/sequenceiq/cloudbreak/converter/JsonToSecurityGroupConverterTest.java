@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +36,7 @@ public class JsonToSecurityGroupConverterTest extends AbstractJsonConverterTest<
     public void testConvert() {
         // GIVEN
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(Sets.newConcurrentHashSet(Arrays.asList(new SecurityRule())));
+                .willReturn(Sets.newConcurrentHashSet(Collections.singletonList(new SecurityRule())));
         // WHEN
         SecurityGroup result = underTest.convert(getRequest("security-group/security-group.json"));
         // THEN

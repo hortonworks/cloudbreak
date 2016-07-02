@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -154,7 +154,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         t.setKey(TAG_NAME);
         t.setValue(tagName);
         CreateTagsRequest ctr = new CreateTagsRequest();
-        ctr.setTags(Arrays.asList(t));
+        ctr.setTags(Collections.singletonList(t));
         ctr.withResources(instance.getInstanceId());
         amazonEC2Client.createTags(ctr);
     }

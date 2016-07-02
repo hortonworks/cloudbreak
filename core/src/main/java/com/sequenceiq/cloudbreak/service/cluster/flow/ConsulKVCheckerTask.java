@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +30,7 @@ public class ConsulKVCheckerTask extends StackBasedStatusCheckerTask<ConsulKVChe
         int matchingKeys = 0;
         int notFoundKeys = 0;
         for (String key : keys) {
-            String value = ConsulUtils.getKVValue(Arrays.asList(client), key, null);
+            String value = ConsulUtils.getKVValue(Collections.singletonList(client), key, null);
             if (value != null) {
                 if (value.equals(failValue)) {
                     failedKeys.add(key);

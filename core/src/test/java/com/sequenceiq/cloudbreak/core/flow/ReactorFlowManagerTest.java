@@ -42,7 +42,7 @@ public class ReactorFlowManagerTest {
     private ReactorFlowManager flowManager;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         reset(reactor);
         reset(eventFactory);
         when(reactor.notify((Object) anyObject(), any(Event.class))).thenReturn(new EventBus(new ThreadPoolExecutorDispatcher(1, 1)));
@@ -50,7 +50,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void shouldReturnTheNextFailureTransition() throws Exception {
+    public void shouldReturnTheNextFailureTransition() {
         Long stackId = 1L;
         InstanceGroupAdjustmentJson instanceGroupAdjustment = new InstanceGroupAdjustmentJson();
         HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();

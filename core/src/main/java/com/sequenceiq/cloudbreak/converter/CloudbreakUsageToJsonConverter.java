@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
+import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -25,7 +25,7 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
         CloudbreakUsageJson json = new CloudbreakUsageJson();
         String day = DATE_FORMAT.format(entity.getDay());
-        String cbUser = null;
+        String cbUser;
         try {
             cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID).getUsername();
         } catch (Exception ex) {

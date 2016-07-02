@@ -124,6 +124,6 @@ public interface ResourceConnector {
      * @throws Exception in case of any error
      */
     List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext,
-            CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) throws Exception;
+            CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms);
 
 }

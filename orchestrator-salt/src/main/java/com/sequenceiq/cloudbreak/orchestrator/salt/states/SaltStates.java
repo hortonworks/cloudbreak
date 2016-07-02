@@ -115,9 +115,8 @@ public class SaltStates {
 
     private static void logRunnerInfos(Map.Entry<String, Map<String, RunnerInfoObject>> stringMapEntry) {
         stringMapEntry.getValue().entrySet().stream().sorted((o1, o2) -> Integer.compare(o1.getValue().getRunNum(), o2.getValue().getRunNum()))
-                .forEach(stringRunnerInfoObjectEntry -> {
-                    LOGGER.info("Runner info: {} --- {}", stringRunnerInfoObjectEntry.getKey(), stringRunnerInfoObjectEntry.getValue().getComment());
-        });
+                .forEach(stringRunnerInfoObjectEntry ->
+                        LOGGER.info("Runner info: {} --- {}", stringRunnerInfoObjectEntry.getKey(), stringRunnerInfoObjectEntry.getValue().getComment()));
     }
 
     public static boolean jobIsRunning(SaltConnector sc, String jid, Target<String> target) {

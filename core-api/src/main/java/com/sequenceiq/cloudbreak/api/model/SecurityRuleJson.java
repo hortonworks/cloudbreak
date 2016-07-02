@@ -4,6 +4,7 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -11,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityRuleJson implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.ID, required = false)
+    @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
     @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.SUBNET, required = true)
     @Pattern(regexp =
@@ -24,7 +25,7 @@ public class SecurityRuleJson implements JsonEntity {
     private String ports;
     @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.PROTOCOL, required = true)
     private String protocol;
-    @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.MODIFIABLE, required = false)
+    @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.MODIFIABLE)
     private boolean modifiable;
 
     public SecurityRuleJson() {

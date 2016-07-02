@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -47,17 +46,10 @@ public class OpenStackNativeMetaDataCollector implements MetadataCollector {
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
 
-        List<InstanceTemplate> templates = Lists.transform(vms, new Function<CloudInstance, InstanceTemplate>() {
-            @Override
-            public InstanceTemplate apply(CloudInstance input) {
-                return input.getTemplate();
-            }
-        });
+        List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);
 
-        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, new Function<InstanceTemplate, String>() {
-            public String apply(InstanceTemplate from) {
-                return utils.getPrivateInstanceId(from.getGroupName(), Long.toString(from.getPrivateId()));
-            }
+        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, from -> {
+            return utils.getPrivateInstanceId(from.getGroupName(), Long.toString(from.getPrivateId()));
         });
 
         OSClient client = openStackClient.createOSClient(authenticatedContext);

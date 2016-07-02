@@ -39,9 +39,9 @@ public class BlueprintCommands implements BaseCommands {
     public String create(
             @CliOption(key = "description", mandatory = true, help = "Description of the blueprint to download from") String description,
             @CliOption(key = "name", mandatory = true, help = "Name of the blueprint to download from") String name,
-            @CliOption(key = "url", mandatory = false, help = "URL of the blueprint to download from") String url,
-            @CliOption(key = "file", mandatory = false, help = "File which contains the blueprint") File file,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the blueprint is public in the account") Boolean publicInAccount) {
+            @CliOption(key = "url", help = "URL of the blueprint to download from") String url,
+            @CliOption(key = "file", help = "File which contains the blueprint") File file,
+            @CliOption(key = "publicInAccount", help = "flags if the blueprint is public in the account") Boolean publicInAccount) {
         try {
             String message;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
@@ -111,7 +111,7 @@ public class BlueprintCommands implements BaseCommands {
             } else if (name != null) {
                 BlueprintResponse blueprint = shellContext.cloudbreakClient().blueprintEndpoint().getPublic(name);
                 if (blueprint != null) {
-                    shellContext.addBlueprint(blueprint.getId().toString());
+                    shellContext.addBlueprint(blueprint.getId());
                     shellContext.resetMarathonHostGroups();
                     shellContext.setHint(
                             shellContext.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.CONFIGURE_INSTANCEGROUP);

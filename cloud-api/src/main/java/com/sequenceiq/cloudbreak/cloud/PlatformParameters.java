@@ -77,7 +77,7 @@ public interface PlatformParameters {
      */
     PlatformOrchestrator orchestratorParams();
 
-    default <S extends StringType, O extends Object> Map<S, O> sortMap(Map<S, O> unsortMap) {
+    default <S extends StringType, O> Map<S, O> sortMap(Map<S, O> unsortMap) {
         Map<S, O> treeMap = new TreeMap<>(
                 new Comparator<S>() {
                     @Override

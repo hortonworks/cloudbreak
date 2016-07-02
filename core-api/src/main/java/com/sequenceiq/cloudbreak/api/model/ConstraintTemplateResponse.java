@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import javax.validation.constraints.NotNull;
+
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.constraints.NotNull;
 
 @ApiModel
 public class ConstraintTemplateResponse extends ConstraintTemplateBase {

@@ -64,7 +64,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
     public Collection<String> getPlatformVariantByType(String type) {
         PlatformVariants pv = cloudParameterService.getPlatformVariants();
         Collection<String> strings = conversionService.convert(pv, PlatformVariantsJson.class).getPlatformToVariants().get(type.toUpperCase());
-        return strings == null ? new ArrayList<String>() : strings;
+        return strings == null ? new ArrayList<>() : strings;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
         PlatformDisks diskTypes = cloudParameterService.getDiskTypes();
         Collection<String> strings = conversionService.convert(diskTypes, PlatformDisksJson.class)
                 .getDiskTypes().get(type.toUpperCase());
-        return strings == null ? new ArrayList<String>() : strings;
+        return strings == null ? new ArrayList<>() : strings;
     }
 
     @Override
@@ -92,7 +92,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
         PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
         Collection<String> strings = conversionService.convert(orchestrators, PlatformOrchestratorsJson.class)
                 .getOrchestrators().get(type.toUpperCase());
-        return strings == null ? new ArrayList<String>() : strings;
+        return strings == null ? new ArrayList<>() : strings;
     }
 
     @Override
@@ -106,7 +106,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
         PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes();
         Collection<VmTypeJson> vmTypes = conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class)
                 .getVirtualMachines().get(type.toUpperCase());
-        return vmTypes == null ? new ArrayList<VmTypeJson>() : vmTypes;
+        return vmTypes == null ? new ArrayList<>() : vmTypes;
     }
 
     @Override
@@ -120,7 +120,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
         PlatformRegions pv = cloudParameterService.getRegions();
         Collection<String> regions = conversionService.convert(pv, PlatformRegionsJson.class)
                 .getRegions().get(type.toUpperCase());
-        return regions == null ? new ArrayList<String>() : regions;
+        return regions == null ? new ArrayList<>() : regions;
     }
 
     @Override
@@ -128,7 +128,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
         PlatformRegions pv = cloudParameterService.getRegions();
         Map<String, Collection<String>> azs = conversionService.convert(pv, PlatformRegionsJson.class)
                 .getAvailabilityZones().get(type.toUpperCase());
-        return azs == null ? new HashMap<String, Collection<String>>() : azs;
+        return azs == null ? new HashMap<>() : azs;
     }
 
 }

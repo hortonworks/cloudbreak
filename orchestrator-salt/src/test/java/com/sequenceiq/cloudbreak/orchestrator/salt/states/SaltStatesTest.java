@@ -57,7 +57,7 @@ public class SaltStatesTest {
     private ArgumentCaptor<List<String>> minionIdsCaptor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Set<String> targets = new HashSet<>();
         targets.add("10-0-0-1.example.com");
         targets.add("10-0-0-2.example.com");
@@ -67,13 +67,13 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void pingTest() throws Exception {
+    public void pingTest() {
         SaltStates.ping(saltConnector, target);
         verify(saltConnector, times(1)).run(eq(target), eq("test.ping"), eq(LOCAL), eq(PingResponse.class));
     }
 
     @Test
-    public void ambariServerTest() throws Exception {
+    public void ambariServerTest() {
         String jobId = "1";
         ApplyResponse applyResponse = createApplyResponse(jobId);
         when(saltConnector.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, "ambari.server")).thenReturn(applyResponse);
@@ -83,7 +83,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void ambariAgentTest() throws Exception {
+    public void ambariAgentTest() {
         String jobId = "2";
         ApplyResponse applyResponse = createApplyResponse(jobId);
         when(saltConnector.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, "ambari.agent")).thenReturn(applyResponse);
@@ -93,7 +93,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void kerberosTest() throws Exception {
+    public void kerberosTest() {
         String jobId = "3";
         ApplyResponse applyResponse = createApplyResponse(jobId);
         when(saltConnector.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, "kerberos.server")).thenReturn(applyResponse);
@@ -113,20 +113,20 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void addRoleTest() throws Exception {
+    public void addRoleTest() {
         String role = "ambari-server";
         SaltStates.addGrain(saltConnector, target, "roles", role);
         verify(saltConnector, times(1)).run(eq(target), eq("grains.append"), eq(LOCAL), eq(ApplyResponse.class), eq("roles"), eq(role));
     }
 
     @Test
-    public void syncGrainsTest() throws Exception {
+    public void syncGrainsTest() {
         SaltStates.syncGrains(saltConnector, target);
         verify(saltConnector, times(1)).run(eq(Glob.ALL), eq("saltutil.sync_grains"), eq(LOCAL), eq(ApplyResponse.class));
     }
 
     @Test
-    public void highstateTest() throws Exception {
+    public void highstateTest() {
         String jobId = "1";
         ApplyResponse response = new ApplyResponse();
         List<Map<String, Object>> result = new ArrayList<>();
@@ -188,7 +188,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void jobIsRunningTest() throws Exception {
+    public void jobIsRunningTest() {
         String jid = "3";
         RunningJobsResponse runningJobsResponse = new RunningJobsResponse();
         List<Map<String, Map<String, Object>>> result = new ArrayList<>();
@@ -206,13 +206,13 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void networkInterfaceIPTest() throws Exception {
+    public void networkInterfaceIPTest() {
         SaltStates.networkInterfaceIP(saltConnector, target);
         verify(saltConnector, times(1)).run(any(), eq("network.interface_ip"), eq(LOCAL), eq(NetworkInterfaceResponse.class), eq("eth0"));
     }
 
     @Test
-    public void removeMinionsTest() throws Exception {
+    public void removeMinionsTest() {
         List<String> hostNames = new ArrayList<>();
         hostNames.add("10-0-0-1.example.com");
         hostNames.add("10-0-0-2.example.com");
@@ -246,7 +246,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void resolveHostNameToMinionHostNameTest() throws Exception {
+    public void resolveHostNameToMinionHostNameTest() {
         NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
         List<Map<String, String>> result = new ArrayList<>();
         Map<String, String> resultMap = new HashMap<>();

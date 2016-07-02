@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.arm.task;
 
 import static com.sequenceiq.cloudbreak.cloud.arm.ArmUtils.NOT_FOUND;
 
-import java.util.Map;
-
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +32,7 @@ public class ArmVirtualMachineDeleteStatusCheckerTask extends PollBooleanStateTa
     public Boolean call() {
         AzureRMClient client = armClient.getClient(virtualMachineCheckerContext.getArmCredentialView());
         try {
-            Map virtualMachine = client.getVirtualMachine(virtualMachineCheckerContext.getGroupName(),
+            client.getVirtualMachine(virtualMachineCheckerContext.getGroupName(),
                     virtualMachineCheckerContext.getVirtualMachine());
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != NOT_FOUND) {
@@ -43,7 +41,7 @@ public class ArmVirtualMachineDeleteStatusCheckerTask extends PollBooleanStateTa
                 return true;
             }
         } catch (Exception ex) {
-            return false;
+            // ignore
         }
         return false;
     }

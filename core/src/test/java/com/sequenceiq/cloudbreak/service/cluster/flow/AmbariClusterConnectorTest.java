@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
@@ -125,14 +124,14 @@ public class AmbariClusterConnectorTest {
         blueprint = TestUtil.blueprint();
         cluster = TestUtil.cluster(blueprint, stack, 1L);
         stack.setCluster(cluster);
-        cluster.setHostGroups(new HashSet<HostGroup>());
+        cluster.setHostGroups(new HashSet<>());
         cluster.setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenReturn(httpClientConfig);
         when(ambariClient.extendBlueprintGlobalConfiguration(anyString(), anyMap())).thenReturn("");
-        when(hostMetadataRepository.findHostsInCluster(anyLong())).thenReturn(new HashSet<HostMetadata>());
+        when(hostMetadataRepository.findHostsInCluster(anyLong())).thenReturn(new HashSet<>());
         when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn(blueprint.getBlueprintText());
         when(ambariClient.addBlueprint(anyString())).thenReturn("");
-        when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<String, Map<String, Map<String, String>>>());
+        when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<>());
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), anyString(), anyString())).thenReturn(ambariClient);
         when(ambariClientProvider.getDefaultAmbariClient(any(HttpClientConfig.class), anyInt())).thenReturn(ambariClient);
         when(hostsPollingService.pollWithTimeoutSingleFailure(any(AmbariHostsStatusCheckerTask.class), any(AmbariHostsCheckerContext.class), anyInt(),

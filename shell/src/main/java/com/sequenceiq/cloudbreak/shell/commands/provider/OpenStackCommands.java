@@ -80,20 +80,20 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "userName", mandatory = true, help = "Username of the credential") String userName,
             @CliOption(key = "password", mandatory = true, help = "password of the credential") String password,
             @CliOption(key = "endPoint", mandatory = true, help = "endPoint of the credential") String endPoint,
-            @CliOption(key = "tenantName", mandatory = false, help = "tenantName of the credential for cb-keystone-v2") String tenantName,
-            @CliOption(key = "userDomain", mandatory = false, help = "userDomain of the credential for cb-keystone-v3*") String userDomain,
-            @CliOption(key = "keystoneAuthScope", mandatory = false, help = "keystoneAuthScope of the credential for cb-keystone-v3*") String keystoneAuthScope,
-            @CliOption(key = "domainName", mandatory = false, help = "domainName of the credential for cb-keystone-v3-default-scope") String domainName,
-            @CliOption(key = "projectDomainName", mandatory = false, help = "projectDomainName of the credential for cb-keystone-v3-project-scope")
+            @CliOption(key = "tenantName", help = "tenantName of the credential for cb-keystone-v2") String tenantName,
+            @CliOption(key = "userDomain", help = "userDomain of the credential for cb-keystone-v3*") String userDomain,
+            @CliOption(key = "keystoneAuthScope", help = "keystoneAuthScope of the credential for cb-keystone-v3*") String keystoneAuthScope,
+            @CliOption(key = "domainName", help = "domainName of the credential for cb-keystone-v3-default-scope") String domainName,
+            @CliOption(key = "projectDomainName", help = "projectDomainName of the credential for cb-keystone-v3-project-scope")
             String projectDomainName,
-            @CliOption(key = "projectName", mandatory = false, help = "projectName of the credential for cb-keystone-v3-project-scope") String projectName,
-            @CliOption(key = "sshKeyPath", mandatory = false, help = "path of a public SSH key file") File sshKeyPath,
-            @CliOption(key = "sshKeyUrl", mandatory = false, help = "URL of a public SSH key file") String sshKeyUrl,
-            @CliOption(key = "sshKeyString", mandatory = false, help = "Raw data of a public SSH key file") String sshKeyString,
-            @CliOption(key = "facing", mandatory = false, help = "URL perspective in which the API is accessing data") OpenStackFacing facing,
-            @CliOption(key = "description", mandatory = false, help = "Description of the credential") String description,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the credential is public in the account") Boolean publicInAccount,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the credential belongs to") Long platformId
+            @CliOption(key = "projectName", help = "projectName of the credential for cb-keystone-v3-project-scope") String projectName,
+            @CliOption(key = "sshKeyPath", help = "path of a public SSH key file") File sshKeyPath,
+            @CliOption(key = "sshKeyUrl", help = "URL of a public SSH key file") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
+            @CliOption(key = "facing", help = "URL perspective in which the API is accessing data") OpenStackFacing facing,
+            @CliOption(key = "description", help = "Description of the credential") String description,
+            @CliOption(key = "publicInAccount", help = "flags if the credential is public in the account") Boolean publicInAccount,
+            @CliOption(key = "platformId", help = "Id of a platform the credential belongs to") Long platformId
     ) {
         String selector = null;
         String keyStoneVersion = null;
@@ -137,10 +137,10 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "networkId", mandatory = true, help = "ID of the custom network to use") String networkId,
             @CliOption(key = "subnetId", mandatory = true, help = "ID of the custom subnet to use") String subnetId,
-            @CliOption(key = "publicNetID", mandatory = false, help = "ID of the available and desired OpenStack public network") String publicNetID,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "publicNetID", help = "ID of the available and desired OpenStack public network") String publicNetID,
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the network") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("networkId", networkId);
@@ -155,10 +155,10 @@ public class OpenStackCommands implements CommandMarker {
     public String createNewNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
-            @CliOption(key = "publicNetID", mandatory = false, help = "ID of the available and desired OpenStack public network") String publicNetID,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "publicNetID", help = "ID of the available and desired OpenStack public network") String publicNetID,
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the network") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         if (publicNetID != null) {
@@ -173,10 +173,10 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
             @CliOption(key = "networkId", mandatory = true, help = "ID of the custom network to use") String networkId,
             @CliOption(key = "routerId", mandatory = true, help = "ID of the custom router to use") String routerId,
-            @CliOption(key = "publicNetID", mandatory = false, help = "ID of the available and desired OpenStack public network") String publicNetID,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the network") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "publicNetID", help = "ID of the available and desired OpenStack public network") String publicNetID,
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the network") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("networkId", networkId);
@@ -193,9 +193,9 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "instanceType", mandatory = true, help = "instanceType of the template") String instanceType,
             @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
             @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "flags if the template is public in the account") Boolean publicInAccount,
-            @CliOption(key = "description", mandatory = false, help = "Description of the template") String description,
-            @CliOption(key = "platformId", mandatory = false, help = "Id of a platform the template belongs to") Long platformId
+            @CliOption(key = "publicInAccount", help = "flags if the template is public in the account") Boolean publicInAccount,
+            @CliOption(key = "description", help = "Description of the template") String description,
+            @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
         if (volumeCount < 1) {
@@ -210,9 +210,9 @@ public class OpenStackCommands implements CommandMarker {
     @CliCommand(value = "platform create --OPENSTACK", help = "Create a new OpenStack platform configuration")
     public String createPlatform(
             @CliOption(key = "name", mandatory = true, help = "Name of the platform") String name,
-            @CliOption(key = "description", mandatory = false, help = "Description of the platform") String description,
-            @CliOption(key = "url", mandatory = false, help = "URL of the topology mapping file to download from") String url,
-            @CliOption(key = "file", mandatory = false, help = "File which contains the topology mapping") File file
+            @CliOption(key = "description", help = "Description of the platform") String description,
+            @CliOption(key = "url", help = "URL of the topology mapping file to download from") String url,
+            @CliOption(key = "file", help = "File which contains the topology mapping") File file
     ) {
         try {
             return basePlatformCommands.create(name, description, "OPENSTACK", basePlatformCommands.convertMappingFile(file, url));
@@ -225,16 +225,16 @@ public class OpenStackCommands implements CommandMarker {
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
-            @CliOption(key = "availabilityZone", mandatory = false, help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
-            @CliOption(key = "publicInAccount", mandatory = false, help = "marks the stack as visible for all members of the account") Boolean publicInAccount,
-            @CliOption(key = "ambariVersion", mandatory = false, help = "Ambari version") String ambariVersion,
-            @CliOption(key = "hdpVersion", mandatory = false, help = "HDP version") String hdpVersion,
-            @CliOption(key = "onFailureAction", mandatory = false, help = "onFailureAction which is ROLLBACK or DO_NOTHING.") OnFailureAction onFailureAction,
-            @CliOption(key = "adjustmentType", mandatory = false, help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
-            @CliOption(key = "threshold", mandatory = false, help = "threshold of failure") Long threshold,
-            @CliOption(key = "orchestrator", mandatory = false, help = "select orchestrator variant version") OpenStackOrchestratorType orchestratorType,
-            @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
-            @CliOption(key = "wait", mandatory = false, help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
+            @CliOption(key = "availabilityZone", help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
+            @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "ambariVersion", help = "Ambari version") String ambariVersion,
+            @CliOption(key = "hdpVersion", help = "HDP version") String hdpVersion,
+            @CliOption(key = "onFailureAction", help = "onFailureAction which is ROLLBACK or DO_NOTHING.") OnFailureAction onFailureAction,
+            @CliOption(key = "adjustmentType", help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
+            @CliOption(key = "threshold", help = "threshold of failure") Long threshold,
+            @CliOption(key = "orchestrator", help = "select orchestrator variant version") OpenStackOrchestratorType orchestratorType,
+            @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
+            @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         Map<String, String> params = new HashMap<>();
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
                 false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, params);

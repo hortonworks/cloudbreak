@@ -46,7 +46,7 @@ public abstract class AbstractOpenStackResourceBuilder implements CloudPlatformA
     }
 
     protected CloudResource createPersistedResource(CloudResource namedResource, String reference) {
-        return createPersistedResource(namedResource, reference, Maps.<String, Object>newHashMap());
+        return createPersistedResource(namedResource, reference, Maps.newHashMap());
     }
 
     protected CloudResource createPersistedResource(CloudResource namedResource, String reference, Map<String, Object> params) {

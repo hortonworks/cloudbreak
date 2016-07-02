@@ -23,8 +23,8 @@ import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.validation.UpdateStackRequestValidator;
 
@@ -38,7 +38,7 @@ public class UpdateStackRequestValidatorTest {
     public void setUp() {
         underTest = new UpdateStackRequestValidator();
         constraintValidatorContext = new ConstraintValidatorContextImpl(
-                new ArrayList<String>(), null,
+                new ArrayList<>(), null,
                 PathImpl.createRootPath(),
                 new DummyConstraintDescriptor()
         );

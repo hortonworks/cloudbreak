@@ -38,7 +38,7 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            CloudbreakUtil.checkResponse("DownscaleCluster", getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson));
+            CloudbreakUtil.checkResponse("DownscaleCluster", getCloudbreakClient().clusterEndpoint().put((long) stackIntId, updateClusterJson));
             CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
 
             UpdateStackJson updateStackJson = new UpdateStackJson();
@@ -47,7 +47,7 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setWithClusterEvent(false);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            CloudbreakUtil.checkResponse("DownscaleStack", getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson));
+            CloudbreakUtil.checkResponse("DownscaleStack", getCloudbreakClient().stackEndpoint().put((long) stackIntId, updateStackJson));
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         } else {
             UpdateStackJson updateStackJson = new UpdateStackJson();
@@ -56,7 +56,7 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setWithClusterEvent(false);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            CloudbreakUtil.checkResponse("UpscaleStack", getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson));
+            CloudbreakUtil.checkResponse("UpscaleStack", getCloudbreakClient().stackEndpoint().put((long) stackIntId, updateStackJson));
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
 
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
@@ -65,7 +65,7 @@ public class ScalingTest extends AbstractCloudbreakIntegrationTest {
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            CloudbreakUtil.checkResponse("UpscaleCluster", getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson));
+            CloudbreakUtil.checkResponse("UpscaleCluster", getCloudbreakClient().clusterEndpoint().put((long) stackIntId, updateClusterJson));
             CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         }
         // THEN

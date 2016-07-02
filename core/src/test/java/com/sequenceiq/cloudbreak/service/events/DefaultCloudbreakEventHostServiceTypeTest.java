@@ -44,7 +44,7 @@ public class DefaultCloudbreakEventHostServiceTypeTest {
     private ArgumentCaptor<CloudbreakEvent> captor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         eventService = new DefaultCloudbreakEventService();
         MockitoAnnotations.initMocks(this);
     }

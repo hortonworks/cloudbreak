@@ -119,7 +119,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
     public String delete(Long id, String name) {
         try {
             if (id != null) {
-                shellContext.cloudbreakClient().topologyEndpoint().delete(Long.valueOf(id), false);
+                shellContext.cloudbreakClient().topologyEndpoint().delete(id, false);
                 return String.format("Platform has been deleted, id: %s", id);
             } else if (name != null) {
                 Long idForName = getIdForName(shellContext.cloudbreakClient().topologyEndpoint().getPublics(), name);

@@ -61,7 +61,7 @@ public class BlueprintValidator {
         Set<String> hostGroupsInBlueprint = getHostGroupsFromBlueprint(hostGroupsNode);
 
         if (!hostGroupsInRequest.containsAll(hostGroupsInBlueprint) || !hostGroupsInBlueprint.containsAll(hostGroupsInRequest)) {
-            throw new BadRequestException(String.format("The host groups in the blueprint must match the hostgroups in the request."));
+            throw new BadRequestException("The host groups in the blueprint must match the hostgroups in the request.");
         }
 
         if (!instanceGroups.isEmpty()) {
@@ -89,8 +89,6 @@ public class BlueprintValidator {
                     hostGroup.getConstraint().setHostCount(hostGroup.getConstraint().getHostCount() + adjustment);
                     try {
                         validateHostGroup(hostGroupNode, hostGroupMap, new HashMap<>());
-                    } catch (BadRequestException be) {
-                        throw be;
                     } finally {
                         hostGroup.getConstraint().setHostCount(hostGroup.getConstraint().getHostCount() - adjustment);
                     }

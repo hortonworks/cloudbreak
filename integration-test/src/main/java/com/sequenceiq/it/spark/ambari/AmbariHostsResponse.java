@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.it.spark.ambari.model.Hosts;
 import com.sequenceiq.it.spark.ITResponse;
+import com.sequenceiq.it.spark.ambari.model.Hosts;
 
 import spark.Request;
 import spark.Response;

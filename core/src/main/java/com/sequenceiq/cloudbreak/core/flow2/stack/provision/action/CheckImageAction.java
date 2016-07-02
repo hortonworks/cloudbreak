@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
-import reactor.fn.Consumer;
 import reactor.fn.timer.Timer;
 
 @Component("CheckImageAction")
@@ -77,12 +76,8 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     }
 
     private void repeat(final StackContext context) {
-        timer.submit(new Consumer<Long>() {
-            @Override
-            public void accept(Long aLong) {
-                sendEvent(context.getFlowId(), new StackEvent(StackCreationEvent.IMAGE_COPY_CHECK_EVENT.stringRepresentation(), context.getStack().getId()));
-            }
-        }, REPEAT_TIME, TimeUnit.MILLISECONDS);
+        timer.submit(aLong -> sendEvent(context.getFlowId(), new StackEvent(StackCreationEvent.IMAGE_COPY_CHECK_EVENT.stringRepresentation(),
+                context.getStack().getId())), REPEAT_TIME, TimeUnit.MILLISECONDS);
     }
 
     private int getFaultNum(Map<Object, Object> variables) {

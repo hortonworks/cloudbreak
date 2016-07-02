@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.util.Properties;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-
-import java.util.Properties;
 
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +56,7 @@ public class DatabaseConfig {
     }
 
     @Bean
-    public PlatformTransactionManager transactionManager() throws Exception {
+    public PlatformTransactionManager transactionManager() {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
         jpaTransactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
         jpaTransactionManager.afterPropertiesSet();

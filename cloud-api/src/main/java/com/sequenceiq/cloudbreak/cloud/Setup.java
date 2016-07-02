@@ -16,7 +16,7 @@ public interface Setup {
      * Creates the VM if it is not available. Some platform does not allow to start a VM from a central image but it forces the user to copy the image to
      * its own storage.
      * <p/>
-     * To check whether the image copy is finished use {@link #checkImageStatus(AuthenticatedContext, Image)}
+     * To check whether the image copy is finished use {@link #checkImageStatus(AuthenticatedContext, CloudStack, Image)}
      *
      * @param authenticatedContext the context which already contains the authenticated client
      * @param stack                stack the definition of infrastucture that needs to be launched

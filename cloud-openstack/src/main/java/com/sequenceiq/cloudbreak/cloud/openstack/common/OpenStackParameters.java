@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,7 +32,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
 public class OpenStackParameters implements PlatformParameters {
-    private static final Integer START_LABEL = Integer.valueOf(97);
+    private static final Integer START_LABEL = 97;
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("vd", START_LABEL);
 
     @Override
@@ -78,7 +77,7 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public AvailabilityZones availabilityZones() {
         Map<Region, List<AvailabilityZone>> availabiltyZones = new HashMap<>();
-        availabiltyZones.put(region("local"), new ArrayList<AvailabilityZone>());
+        availabiltyZones.put(region("local"), new ArrayList<>());
         return new AvailabilityZones(availabiltyZones);
     }
 
@@ -94,7 +93,7 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Override
     public PlatformOrchestrator orchestratorParams() {
-        return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
+        return new PlatformOrchestrator(Collections.singletonList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
     }
 
     @Override

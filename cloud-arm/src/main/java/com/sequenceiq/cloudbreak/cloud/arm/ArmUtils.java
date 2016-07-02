@@ -68,8 +68,8 @@ public class ArmUtils {
     }
 
     public String getStackName(CloudContext cloudContext) {
-        return new String(Splitter.fixedLength(maxResourceNameLength - cloudContext.getId().toString().length())
-                .splitToList(cloudContext.getName()).get(0) + cloudContext.getId());
+        return Splitter.fixedLength(maxResourceNameLength - cloudContext.getId().toString().length())
+                .splitToList(cloudContext.getName()).get(0) + cloudContext.getId();
     }
 
     public String getLoadBalancerId(String stackName) {
@@ -177,8 +177,8 @@ public class ArmUtils {
                     return;
                 }
                 String[] range = destinationPortRange.split("-");
-                port443Found = port443Found ? port443Found : isPortFound(PORT_443, range);
-                port22Found = port22Found ? port22Found : isPortFound(PORT_22, range);
+                port443Found = port443Found || isPortFound(PORT_443, range);
+                port22Found = port22Found || isPortFound(PORT_22, range);
                 if (port22Found && port443Found) {
                     return;
                 }

@@ -22,7 +22,7 @@ abstract class AbstractValidatorTest {
 
     ConstraintValidatorContext.ConstraintViolationBuilder getConstraintViolationBuilder() {
         return new ConstraintValidatorContextImpl(
-                new ArrayList<String>(), null,
+                new ArrayList<>(), null,
                 PathImpl.createRootPath(),
                 new DummyConstraintDescriptor()
         ).buildConstraintViolationWithTemplate("dummytemplate");

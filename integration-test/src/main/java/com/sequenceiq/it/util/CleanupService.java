@@ -34,7 +34,7 @@ public class CleanupService {
     @Inject
     private ITProps itProps;
 
-    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient) throws Exception {
+    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient) {
         if (cleanedUp) {
             return;
         }
@@ -84,7 +84,7 @@ public class CleanupService {
         }
     }
 
-    public boolean deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) throws Exception {
+    public boolean deleteCredential(CloudbreakClient cloudbreakClient, String credentialId) {
         boolean result = false;
         if (credentialId != null) {
             cloudbreakClient.credentialEndpoint().delete(Long.valueOf(credentialId));
@@ -93,7 +93,7 @@ public class CleanupService {
         return result;
     }
 
-    public boolean deleteTemplate(CloudbreakClient cloudbreakClient, String templateId) throws Exception {
+    public boolean deleteTemplate(CloudbreakClient cloudbreakClient, String templateId) {
         boolean result = false;
         if (templateId != null) {
             cloudbreakClient.templateEndpoint().delete(Long.valueOf(templateId));
@@ -102,7 +102,7 @@ public class CleanupService {
         return result;
     }
 
-    public boolean deleteNetwork(CloudbreakClient cloudbreakClient, String networkId) throws Exception {
+    public boolean deleteNetwork(CloudbreakClient cloudbreakClient, String networkId) {
         boolean result = false;
         if (networkId != null) {
             cloudbreakClient.networkEndpoint().delete(Long.valueOf(networkId));
@@ -111,7 +111,7 @@ public class CleanupService {
         return result;
     }
 
-    public boolean deleteSecurityGroup(CloudbreakClient cloudbreakClient, String securityGroupId) throws Exception {
+    public boolean deleteSecurityGroup(CloudbreakClient cloudbreakClient, String securityGroupId) {
         boolean result = false;
         if (securityGroupId != null) {
             SecurityGroupEndpoint securityGroupEndpoint = cloudbreakClient.securityGroupEndpoint();
@@ -124,7 +124,7 @@ public class CleanupService {
         return result;
     }
 
-    public boolean deleteBlueprint(CloudbreakClient cloudbreakClient, String blueprintId) throws Exception {
+    public boolean deleteBlueprint(CloudbreakClient cloudbreakClient, String blueprintId) {
         boolean result = false;
         if (blueprintId != null) {
             cloudbreakClient.blueprintEndpoint().delete(Long.valueOf(blueprintId));
@@ -133,7 +133,7 @@ public class CleanupService {
         return result;
     }
 
-    public boolean deleteStackAndWait(CloudbreakClient cloudbreakClient, String stackId) throws Exception {
+    public boolean deleteStackAndWait(CloudbreakClient cloudbreakClient, String stackId) {
         boolean deleted = false;
         for (int i = 0; i < cleanUpRetryCount; i++) {
             if (deleteStack(cloudbreakClient, stackId)) {
@@ -152,7 +152,7 @@ public class CleanupService {
         return deleted;
     }
 
-    public boolean deleteStack(CloudbreakClient cloudbreakClient, String stackId) throws Exception {
+    public boolean deleteStack(CloudbreakClient cloudbreakClient, String stackId) {
         boolean result = false;
         if (stackId != null) {
             cloudbreakClient.stackEndpoint().delete(Long.valueOf(stackId), false);
@@ -161,7 +161,7 @@ public class CleanupService {
         return result;
     }
 
-    public boolean deleteRecipe(CloudbreakClient cloudbreakClient, Long recipeId) throws Exception {
+    public boolean deleteRecipe(CloudbreakClient cloudbreakClient, Long recipeId) {
         cloudbreakClient.recipeEndpoint().delete(recipeId);
         return true;
     }

@@ -4,5 +4,5 @@ public enum StatusRequest {
     SYNC,
     FULL_SYNC,
     STOPPED,
-    STARTED;
+    STARTED
 }

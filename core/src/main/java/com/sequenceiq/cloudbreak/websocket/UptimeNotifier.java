@@ -53,7 +53,7 @@ public class UptimeNotifier {
         if (stack.getCredential() == null) {
             notification.setCloud("null");
         } else {
-            notification.setCloud(stack.getCredential().cloudPlatform().toString());
+            notification.setCloud(stack.getCredential().cloudPlatform());
         }
         if (stack.getCluster() == null || stack.getCluster().getBlueprint() == null) {
             notification.setBlueprintId(null);

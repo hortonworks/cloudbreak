@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.UserEndpoint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.api.model.UserRequest;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Component
@@ -26,8 +26,7 @@ public class UserController implements UserEndpoint {
     @Override
     public Boolean hasResources(String id) {
         CbUser user = authenticatedUserService.getCbUser();
-        boolean hasResources = userDetailsService.hasResources(user, id);
-        return hasResources;
+        return userDetailsService.hasResources(user, id);
     }
 
 }

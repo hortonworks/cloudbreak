@@ -14,7 +14,7 @@ public class CloudCredential extends DynamicModel {
     private final String loginUserName;
 
     public CloudCredential(Long id, String name, String publicKey, String loginUserName) {
-        this(id, name, publicKey, loginUserName, new HashMap<String, Object>());
+        this(id, name, publicKey, loginUserName, new HashMap<>());
     }
 
     public CloudCredential(Long id, String name, String publicKey, String loginUserName, Map<String, Object> parameters) {

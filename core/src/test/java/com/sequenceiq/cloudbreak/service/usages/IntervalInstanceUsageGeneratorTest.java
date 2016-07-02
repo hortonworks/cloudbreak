@@ -208,7 +208,7 @@ public class IntervalInstanceUsageGeneratorTest {
         Map<String, Long> result = underTest.getInstanceHours(instance, intervalStart, intervalEnd);
 
         assertEquals(result.size(), 1);
-        assertEquals(Long.valueOf(1), result.values().toArray()[0]);
+        assertEquals(1L, result.values().toArray()[0]);
     }
 
     @Test
@@ -229,7 +229,7 @@ public class IntervalInstanceUsageGeneratorTest {
         Map<String, Long> result = underTest.getInstanceHours(instance, intervalStart, intervalEnd);
 
         assertEquals(result.size(), 1);
-        assertEquals(Long.valueOf(3), result.values().toArray()[0]);
+        assertEquals(3L, result.values().toArray()[0]);
     }
 
     @Test
@@ -249,8 +249,8 @@ public class IntervalInstanceUsageGeneratorTest {
         Map<String, Long> result = underTest.getInstanceHours(instance, intervalStart, intervalEnd);
 
         assertEquals(result.size(), 2);
-        assertEquals(Long.valueOf(12), result.values().toArray()[0]);
-        assertEquals(Long.valueOf(12), result.values().toArray()[1]);
+        assertEquals(12L, result.values().toArray()[0]);
+        assertEquals(12L, result.values().toArray()[1]);
     }
 
     @Test

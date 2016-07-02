@@ -78,6 +78,6 @@ public class AwsCloudformationStatusCheckerTask extends PollBooleanStateTask {
                 }
             }
         }
-        return cause.getResourceStatusReason();
+        return cause == null ? "unknown" : cause.getResourceStatusReason();
     }
 }
