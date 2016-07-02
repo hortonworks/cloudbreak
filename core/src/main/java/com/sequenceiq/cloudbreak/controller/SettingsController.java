@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.SettingsEndpoint;
-import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
@@ -28,9 +27,7 @@ public class SettingsController implements SettingsEndpoint {
     }
 
     private Map<String, Object> bundleRecipeSettings() {
-        Map<String, Object> recipe = new HashMap<>();
-        recipe.put("executionTypes", ExecutionType.values());
-        return recipe;
+        return new HashMap<>();
     }
 
     @Override

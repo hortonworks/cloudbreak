@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import java.util.Map;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,11 +14,10 @@ import javax.persistence.Id;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 
 @Entity
 @Table(name = "recipe", uniqueConstraints = {
@@ -57,11 +56,9 @@ public class Recipe implements ProvisionEntity {
 
     private String description;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyColumn(name = "plugin")
-    @Column(name = "execution_type")
-    @Enumerated(EnumType.STRING)
-    private Map<String, ExecutionType> plugins;
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Plugin> plugins;
+
     private Integer timeout;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -107,11 +104,11 @@ public class Recipe implements ProvisionEntity {
         this.keyValues = keyValues;
     }
 
-    public Map<String, ExecutionType> getPlugins() {
+    public Set<Plugin> getPlugins() {
         return plugins;
     }
 
-    public void setPlugins(Map<String, ExecutionType> plugins) {
+    public void setPlugins(Set<Plugin> plugins) {
         this.plugins = plugins;
     }
 

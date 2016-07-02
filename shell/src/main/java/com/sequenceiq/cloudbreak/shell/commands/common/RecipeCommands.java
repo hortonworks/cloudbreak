@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,7 +16,6 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
@@ -124,9 +124,8 @@ public class RecipeCommands implements BaseCommands {
                 addScriptContent(pluginContentBuilder, "recipe-post-install", postInstallScriptFile);
             }
 
-            Map<String, ExecutionType> plugins = new HashMap<>();
-            plugins.put("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()),
-                    ExecutionType.valueOf(executionType.getName()));
+            Set<String> plugins = new HashSet<>();
+            plugins.add("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()));
 
             RecipeRequest recipeRequest = new RecipeRequest();
             recipeRequest.setName(name);

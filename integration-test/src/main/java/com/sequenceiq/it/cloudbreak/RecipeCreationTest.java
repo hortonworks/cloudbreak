@@ -11,7 +11,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
@@ -42,9 +41,9 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
         RecipeRequest recipeRequest = new RecipeRequest();
         recipeRequest.setName(name);
         recipeRequest.setDescription(description);
-        Map<String, ExecutionType> map = new HashMap<>();
-        map.put("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()), ExecutionType.ALL_NODES);
-        recipeRequest.setPlugins(map);
+        Set<String> list = new HashSet<>();
+        list.add("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()));
+        recipeRequest.setPlugins(list);
         RecipeEndpoint recipeEndpoint = getCloudbreakClient().recipeEndpoint();
         String id = recipeEndpoint.postPrivate(recipeRequest).getId().toString();
 
@@ -54,7 +53,7 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
     private void addRecipeToContext(Long id) {
         IntegrationTestContext itContext = getItContext();
         Set<Long> recipeIds = itContext.getContextParam(CloudbreakITContextConstants.RECIPE_ID, Set.class);
-        recipeIds = recipeIds == null ? new HashSet<Long>() : recipeIds;
+        recipeIds = recipeIds == null ? new HashSet<>() : recipeIds;
         recipeIds.add(id);
         itContext.putContextParam(CloudbreakITContextConstants.RECIPE_ID, recipeIds);
     }

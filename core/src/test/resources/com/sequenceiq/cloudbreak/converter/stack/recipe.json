@@ -5,8 +5,8 @@
   "properties": {
     "recipes.gcp-p12.p12-encoded": "<base64-encoded-p12-file>"
   },
-  "plugins": {
-    "https://github.com/sequenceiq/consul-plugins-gcs-connector.git": "ONE_NODE",
-    "https://github.com/sequenceiq/consul-plugins-gcp-p12.git": "ALL_NODES"
-  }
+  "plugins": [
+    "https://github.com/sequenceiq/consul-plugins-gcs-connector.git",
+    "https://github.com/sequenceiq/consul-plugins-gcp-p12.git"
+  ]
 }

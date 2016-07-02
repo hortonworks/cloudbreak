@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.shell.converter.NetworkNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.OpenStackFacingConverter;
 import com.sequenceiq.cloudbreak.shell.converter.OpenStackOrchestratorTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.PlatformVariantConverter;
-import com.sequenceiq.cloudbreak.shell.converter.PluginExecutionTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityGroupIdConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityGroupNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityRulesConverter;
@@ -223,11 +222,6 @@ public class ConverterConfiguration {
     @Bean
     Converter azureVolumeTypeConverter() {
         return new AzureVolumeTypeConverter();
-    }
-
-    @Bean
-    Converter getPluginExecutionTypeConverter() {
-        return new PluginExecutionTypeConverter();
     }
 
     @Bean
