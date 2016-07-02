@@ -31,8 +31,19 @@ main(){
     curl -o "$SOURCE_JAR" "https://www.dash-update.net/client/Latest/StorageSDK2.0/$STORAGE_JAR";
   fi
 
-  echo "Replacing azure-storage.jar with $STORAGE_JAR"
-  find / -name "azure-storage*.jar" | while read line; do echo "Replacing $line"; \cp -f "$SOURCE_JAR" "${line%azure*}"; rm -f $line; done
+  needRestart=false
+  jarfiles=( $(find / -name "azure-storage*.jar") )
+  if [ ${#jarfiles[@]} -gt 0 ]; then
+    echo "Replacing azure-storage.jar with $STORAGE_JAR"
+    needRestart=true
+    for jarfile in ${jarfiles[@]}; do
+      echo "Replacing $jarfile"
+      cp -f "$SOURCE_JAR" "${jarfile%azure*}"
+      rm -f $jarfile
+    done
+  else
+    echo "Replacing azure-storage.jar with $STORAGE_JAR already done, skip it."
+  fi
 
   tar_files=$(find / -regextype posix-extended -regex "^(.*$MR_TAR_NAME|.*$TEZ_TAR_NAME)$")
   for tar_file in $tar_files; do
@@ -44,22 +55,35 @@ main(){
       echo "Extracting $tar_file."
       tar -xzf $tar_file
 
-      echo "Replacing azure-storage.jar with $STORAGE_JAR."
-      find . -name "azure-storage*.jar" | while read line; do echo "Replacing $line"; \cp -f $SOURCE_JAR ${line%azure*}; rm -f $line; done
+      jarfiles=( $(find . -name "azure-storage*.jar") )
+      if [ ${#jarfiles[@]} -gt 0 ]; then
+        needRestart=true
+        echo "Replacing azure-storage.jar with $STORAGE_JAR in $tar_file."
+        for jarfile in ${jarfiles[@]}; do
+          echo "Replacing $jarfile"
+          cp -f $SOURCE_JAR ${jarfile%azure*}
+          rm -f $jarfile
+        done
+        echo "Removing $tar_file."
+        rm -f "$tar_file"
 
-      echo "Removing $tar_file."
-      rm -f "$tar_file"
-
-      echo "Creating new $MR_TAR_NAME with the replaced libs."
-      tar -zcf "$tar_file" $(ls)
+        echo "Creating new $tar_file with the replaced libs."
+        tar -zcf "$tar_file" $(ls)
+      else
+        echo "Replacing azure-storage.jar with $STORAGE_JAR already done in $tar_file, skip it."
+      fi
 
       echo "Cleaning up extracted directory."
       cd .. && rm -rf $TMP_EXTRACT_DIR
     fi
   done
 
-  restart_services
-  set_spark_cp
+  if [ "$needRestart" = true ]; then
+    restart_services
+    set_spark_cp
+  else
+    echo "No jar was replaced, no restart needed"
+  fi
 }
 
 exec &>> "$LOGFILE"
