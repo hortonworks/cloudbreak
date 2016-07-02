@@ -1,8 +1,8 @@
 #!/bin/bash
 
 setup_cbclient_cert() {
-  ${sudopre} sudo ${sudocheck} mkdir -p /etc/certs
-  ${sudopre} sudo ${sudocheck} cp /tmp/cb-client.pem /etc/certs
+  sudo mkdir -p /etc/certs
+  sudo cp /tmp/cb-client.pem /etc/certs
 }
 
 waiting_for_docker() {
@@ -19,18 +19,16 @@ waiting_for_docker() {
 }
 
 create_certificates() {
-  ${sudopre} sudo ${sudocheck} docker run --rm -v /etc/certs:/certs ehazlett/cert-tool:0.0.3 -d /certs -o=gateway -s localhost -s 127.0.0.1 -s ${publicIp}
+  sudo docker run --rm -v /etc/certs:/certs ehazlett/cert-tool:0.0.3 -d /certs -o=gateway -s localhost -s 127.0.0.1 -s ${publicIp}
   while [ ! -f /etc/certs/server-key.pem ] || [ ! -f /etc/certs/server.pem ]; do
     sleep 1
   done
-  ${sudopre} sudo ${sudocheck} mv /etc/certs/server-key.pem /etc/certs/server.key
-  ${sudopre} sudo ${sudocheck} sh -c 'cat /etc/certs/ca.pem >> /etc/certs/server.pem'
-  ${sudopre} sudo ${sudocheck} rm /etc/certs/client-key.pem /etc/certs/client.pem /etc/certs/ca-key.pem
-  ${sudopre} sudo ${sudocheck} cp /etc/certs/server.pem /tmp/server.pem
+  sudo rm /etc/certs/client-key.pem /etc/certs/client.pem /etc/certs/ca-key.pem
+  sudo cp /etc/certs/server.pem /tmp/server.pem
 }
 
 start_nginx_container() {
-  ${sudopre} sudo ${sudocheck} docker run --name gateway -e PORT=${sslPort} -d --net=host --restart=always -v /etc/certs:/certs sequenceiq/cb-gateway-nginx:0.6
+  sudo docker run --name gateway -e PORT=${sslPort} -d --net=host --restart=always -v /etc/certs:/certs sequenceiq/cb-gateway-nginx:0.6
 }
 
 setup_tls() {
