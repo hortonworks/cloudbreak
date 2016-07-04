@@ -1,4 +1,4 @@
-nstall-smartsense-hst:
+install-smartsense-hst:
   pkg.installed:
     - name: smartsense-hst
 
@@ -10,8 +10,6 @@ nstall-smartsense-hst:
     - watch:
       - pkg: smartsense-hst
 
-start-gateway:
-  cmd.run:
-    - name: hst gateway start
-    - watch:
-      - file: /etc/hst/conf/hst-gateway.ini
+hst-gateway:
+  service.disabled:
+      - name: hst-gateway

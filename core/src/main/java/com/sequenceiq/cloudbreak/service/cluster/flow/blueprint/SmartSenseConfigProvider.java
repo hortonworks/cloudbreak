@@ -54,7 +54,6 @@ public class SmartSenseConfigProvider {
             blueprintText = blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hostGroupNames, blueprintText);
             configs.addAll(getSmartSenseServerConfigs());
             configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.smartsense.id", smartSenseId));
-            configs.addAll(getSmartSenseGatewayConfigs(stack));
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, true);
         }
         return blueprintText;
@@ -81,16 +80,8 @@ public class SmartSenseConfigProvider {
 
     private Collection<? extends BlueprintConfigurationEntry> getSmartSenseServerConfigs() {
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
-        configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.account.name", "Hortonworks Data Platform AWS Marketplace"));
+        configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.account.name", "Hortonworks_Cloud_HDP"));
         configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.notification.email", "aws-marketplace@hortonworks.com"));
-        return configs;
-    }
-
-    private Collection<? extends BlueprintConfigurationEntry> getSmartSenseGatewayConfigs(Stack stack) {
-        List<BlueprintConfigurationEntry> configs = new ArrayList<>();
-        String privateIp = stack.getGatewayInstanceGroup().getInstanceMetaData().stream().findFirst().get().getPrivateIp();
-        configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "gateway.host", privateIp));
-        configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "gateway.enabled", "true"));
         return configs;
     }
 }
