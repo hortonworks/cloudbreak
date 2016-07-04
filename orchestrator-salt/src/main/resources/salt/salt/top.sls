@@ -35,10 +35,6 @@ base:
     - match: compound
     - smartsense.init
 
-  'I@platform:AWS and G@roles:smartsense_gateway':
-    - match: compound
-    - smartsense.gateway-init
-
   'recipes:pre':
     - match: grain
     - pre-recipes.init

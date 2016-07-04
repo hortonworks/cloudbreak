@@ -1,27 +1,18 @@
 smartsense-hst:
   pkg.installed: []
 
-patch:
-  pkg.installed: []
-
-/etc/smartsense/conf/security.py.diff:
+/etc/hst/conf/hst-gateway.ini:
   file.managed:
     - makedirs: True
-    - source: salt://smartsense/scripts/security.py.diff
-    - mode: 755
-
-/etc/smartsense/conf/smartsense-agent-patch.sh:
-  file.managed:
-    - makedirs: True
-    - source: salt://smartsense/scripts/smartsense-agent-patch.sh
+    - source: salt://smartsense/gateway/hst-gateway.ini
     - mode: 755
     - watch:
       - pkg: smartsense-hst
-      - pkg: patch
-      - file: /etc/smartsense/conf/security.py.diff
 
-execute-smartsense-patch:
-  cmd.run:
-    - name: /etc/smartsense/conf/smartsense-agent-patch.sh
-    - watch:
-      - file: /etc/smartsense/conf/smartsense-agent-patch.sh
+hst-gateway:
+  service.disabled:
+    - name: hst-gateway
+
+hst:
+  service.enabled:
+    - name: hst
