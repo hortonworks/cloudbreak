@@ -19,6 +19,7 @@ public class ModelDescriptions {
         public static final String BLUEPRINT_NAME = "gathered from blueprintName field from the blueprint JSON";
         public static final String AMBARI_BLUEPRINT = "ambari blueprint JSON, set this or the url field";
         public static final String HOST_GROUP_COUNT = "number of host groups";
+        public static final String STATUS = "status of the blueprint";
     }
 
     public static class CredentialModelDescription {

@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -16,6 +18,8 @@ public class BlueprintResponse extends BlueprintBase {
     private Integer hostGroupCount;
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
+    @ApiModelProperty(value = BlueprintModelDescription.STATUS)
+    private ResourceStatus status;
 
     public String getBlueprintName() {
         return blueprintName;
@@ -48,5 +52,13 @@ public class BlueprintResponse extends BlueprintBase {
 
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
+    }
+
+    public ResourceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ResourceStatus status) {
+        this.status = status;
     }
 }
