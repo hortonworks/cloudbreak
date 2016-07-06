@@ -132,7 +132,7 @@ cloudbreak-delete-dbs() {
 
     cloudbreak-conf-db
     if is_linux; then
-        rm -rf /var/lib/cloudbreak/*
+        rm -rf ${CB_DB_ROOT_PATH:? required}
     else
         local sshcommand='boot2docker ssh'
         if [[ -n "$DOCKER_MACHINE" ]]; then
