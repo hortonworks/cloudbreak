@@ -99,6 +99,12 @@ public class ModelDescriptions {
         public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
     }
 
+    public static class AmbariRepoDetailsDescription {
+        public static final String VERSION = "version of the Ambari";
+        public static final String AMBARI_BASE_URL = "url of the Ambari repository";
+        public static final String AMBARI_REPO_GPG_KEY = "gpg key of the Ambari repository";
+    }
+
     public static class AmbariStackDetailsDescription {
         public static final String STACK = "name of the stack, like HDP";
         public static final String VERSION = "version of the stack";

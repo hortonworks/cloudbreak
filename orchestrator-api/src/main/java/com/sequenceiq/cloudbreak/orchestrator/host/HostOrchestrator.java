@@ -17,7 +17,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     void init(ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner, ExitCriteria exitCriteria);
 
-    void bootstrap(GatewayConfig gatewayConfig, Set<Node> targets, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
+    void bootstrap(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
     void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;

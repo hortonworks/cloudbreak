@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
-import com.sequenceiq.cloudbreak.repository.ComponentRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 
 @Service
 public class ContainerConfigService {
@@ -61,11 +61,11 @@ public class ContainerConfigService {
     private String rethinkDbImageName;
 
     @Inject
-    private ComponentRepository componentRepository;
+    private ComponentConfigProvider componentConfigProvider;
 
     public ContainerConfig get(Stack stack, DockerContainer dc) {
         try {
-            Component component = componentRepository.findComponentByStackIdComponentTypeName(stack.getId(), ComponentType.CONTAINER, dc.name());
+            Component component = componentConfigProvider.getComponent(stack.getId(), ComponentType.CONTAINER, dc.name());
             if (component == null) {
                 component = create(stack, dc);
                 LOGGER.info("Container component definition created: {}", component);
@@ -123,7 +123,7 @@ public class ContainerConfigService {
             }
 
             Component component = new Component(ComponentType.CONTAINER, dc.name(), new Json(config), stack);
-            return componentRepository.save(component);
+            return componentConfigProvider.store(component);
         } catch (IOException e) {
             throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s"));
         }
