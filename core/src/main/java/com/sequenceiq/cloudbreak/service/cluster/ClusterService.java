@@ -13,12 +13,13 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 public interface ClusterService {
 
-    Cluster create(CbUser user, Long stackId, Cluster clusterRequest);
+    Cluster create(CbUser user, Long stackId, Cluster clusterRequest, List<Component> component);
 
     void delete(CbUser user, Long stackId);
 

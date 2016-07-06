@@ -92,7 +92,7 @@ public class SaltOrchestratorTest {
         PowerMockito.whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
         PowerMockito.whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
 
-        saltOrchestrator.bootstrap(gatewayConfig, targets, 0, exitCriteriaModel);
+        saltOrchestrator.bootstrap(gatewayConfig, targets, exitCriteriaModel);
 
         verify(parallelOrchestratorComponentRunner, times(2)).submit(any(OrchestratorBootstrapRunner.class));
 

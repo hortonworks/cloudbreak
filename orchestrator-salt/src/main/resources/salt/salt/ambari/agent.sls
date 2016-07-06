@@ -1,6 +1,18 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 {%- from 'nodes/settings.sls' import host with context %}
 
+{% if not ambari.is_predefined_repo %}
+
+include:
+  - ambari.repo
+
+ambari-agent:
+  pkg.latest:
+    - require:
+      - sls: ambari.repo
+
+{% endif %}
+
 /etc/environment:
   file.append:
     - text: "HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/usr/lib/hadoop/lib/*"

@@ -32,7 +32,7 @@ public interface ClusterEndpoint {
     @Path("{id}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterOpDescription.POST_FOR_STACK, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
-    Response post(@PathParam(value = "id") Long id, @Valid ClusterRequest request);
+    Response post(@PathParam(value = "id") Long id, @Valid ClusterRequest request) throws Exception;
 
     @GET
     @Path("{id}/cluster")
