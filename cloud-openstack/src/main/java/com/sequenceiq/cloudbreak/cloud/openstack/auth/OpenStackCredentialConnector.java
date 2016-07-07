@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
 import static java.lang.String.format;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Keypair;
 import org.slf4j.Logger;
@@ -12,8 +14,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackSmartSenseIdGenerator;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 
 @Service
@@ -23,10 +27,17 @@ public class OpenStackCredentialConnector implements CredentialConnector {
 
     @Inject
     private OpenStackClient openStackClient;
+    @Inject
+    private OpenStackSmartSenseIdGenerator smartSenseIdGenerator;
 
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
-        return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.VERIFIED);
+        CloudCredential credential = authenticatedContext.getCloudCredential();
+        String smartSenseId = smartSenseIdGenerator.getSmartSenseId();
+        if (StringUtils.isNoneEmpty(smartSenseId)) {
+            credential.putParameter(SMART_SENSE_ID, smartSenseId);
+        }
+        return new CloudCredentialStatus(credential, CredentialStatus.VERIFIED);
     }
 
     @Override
