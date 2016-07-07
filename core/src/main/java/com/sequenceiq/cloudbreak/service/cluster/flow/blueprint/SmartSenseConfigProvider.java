@@ -45,16 +45,18 @@ public class SmartSenseConfigProvider {
     public String addToBlueprint(Stack stack, String blueprintText) {
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         Credential credential = stack.getCredential();
-        Map<String, Object> params = credential.getAttributes().getMap();
-        String smartSenseId = String.valueOf(params.get(SMART_SENSE_ID));
-        if (configureSmartSense && StringUtils.isNoneEmpty(smartSenseId)) {
-            Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
-            Set<String> hostGroupNames = hostGroups.stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
-            blueprintText = addSmartSenseServerToBp(blueprintText, hostGroups, hostGroupNames);
-            blueprintText = blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hostGroupNames, blueprintText);
-            configs.addAll(getSmartSenseServerConfigs());
-            configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.smartsense.id", smartSenseId));
-            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, true);
+        if (credential != null) {
+            Map<String, Object> params = credential.getAttributes().getMap();
+            String smartSenseId = String.valueOf(params.get(SMART_SENSE_ID));
+            if (configureSmartSense && StringUtils.isNoneEmpty(smartSenseId)) {
+                Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
+                Set<String> hostGroupNames = hostGroups.stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
+                blueprintText = addSmartSenseServerToBp(blueprintText, hostGroups, hostGroupNames);
+                blueprintText = blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hostGroupNames, blueprintText);
+                configs.addAll(getSmartSenseServerConfigs());
+                configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.smartsense.id", smartSenseId));
+                blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, true);
+            }
         }
         return blueprintText;
     }

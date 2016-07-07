@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -155,22 +156,25 @@ public class EmailSenderService {
     @Async
     public void sendTelemetryMailIfNeeded(Stack stack, Status status) {
         Cluster cluster = stack.getCluster();
-        String smartSenseId = (String) stack.getCredential().getAttributes().getMap().get(CloudCredential.SMART_SENSE_ID);
-        Map<String, Object> telemetryMailMap = new LinkedHashMap<>();
-        if (configureSmartSense && !StringUtils.isEmpty(smartSenseId)) {
-            telemetryMailMap.put("Smartsense ID", smartSenseId);
-            telemetryMailMap.put("Cluster ID", cluster.getId());
-            telemetryMailMap.put("Cluster type", getClusterType(stack, cluster));
-            telemetryMailMap.put("Node count", stack.getFullNodeCount());
-            telemetryMailMap.put("Instance type(s)", getInstanceTypes(stack));
-            telemetryMailMap.put("Running time", getRunningTime(cluster));
-            telemetryMailMap.put("Status", status.normalizedStatusName());
+        Credential credential = stack.getCredential();
+        if (credential != null) {
+            String smartSenseId = (String) credential.getAttributes().getMap().get(CloudCredential.SMART_SENSE_ID);
+            Map<String, Object> telemetryMailMap = new LinkedHashMap<>();
+            if (configureSmartSense && !StringUtils.isEmpty(smartSenseId)) {
+                telemetryMailMap.put("Smartsense ID", smartSenseId);
+                telemetryMailMap.put("Cluster ID", cluster.getId());
+                telemetryMailMap.put("Cluster type", getClusterType(stack, cluster));
+                telemetryMailMap.put("Node count", stack.getFullNodeCount());
+                telemetryMailMap.put("Instance type(s)", getInstanceTypes(stack));
+                telemetryMailMap.put("Running time", getRunningTime(cluster));
+                telemetryMailMap.put("Status", status.normalizedStatusName());
 
-            StringBuilder telemetryMailBodyBuilder = new StringBuilder();
-            for (String key : telemetryMailMap.keySet()) {
-                telemetryMailBodyBuilder.append(key).append(": ").append(telemetryMailMap.get(key)).append("<br />");
+                StringBuilder telemetryMailBodyBuilder = new StringBuilder();
+                for (String key : telemetryMailMap.keySet()) {
+                    telemetryMailBodyBuilder.append(key).append(": ").append(telemetryMailMap.get(key)).append("<br />");
+                }
+                mailSender.send(emailMimeMessagePreparator.prepareMessage(telemetryMailAddress, "Telemetry", telemetryMailBodyBuilder.toString()));
             }
-            mailSender.send(emailMimeMessagePreparator.prepareMessage(telemetryMailAddress, "Telemetry", telemetryMailBodyBuilder.toString()));
         }
     }
 

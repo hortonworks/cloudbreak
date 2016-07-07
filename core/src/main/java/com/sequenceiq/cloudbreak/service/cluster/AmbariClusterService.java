@@ -596,7 +596,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public Cluster getById(Long id) {
-        Cluster cluster = clusterRepository.findOne(id);
+        Cluster cluster = clusterRepository.findOneWithLists(id);
         if (cluster == null) {
             throw new NotFoundException(String.format("Cluster '%s' not found", id));
         }

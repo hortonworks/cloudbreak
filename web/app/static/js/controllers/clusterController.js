@@ -405,6 +405,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     kerberosPassword: $scope.cluster.kerberosPassword || null,
                     validateBlueprint: $scope.cluster.validateBlueprint,
                     fileSystem: $scope.cluster.fileSystem || null,
+                    configStrategy: $scope.cluster.configStrategy || null,
                     ambariStackDetails: $scope.cluster.ambariStackDetails === 'undefined' ? null : $scope.cluster.ambariStackDetails
                 }
                 Cluster.save({
@@ -1144,6 +1145,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.ambariServerSelected = function() {
             var result = false
+            var activeStack = $rootScope.activeStack;
+            if (activeStack && activeStack.orchestrator && activeStack.orchestrator.type === "MARATHON") {
+                return true;
+            }
             angular.forEach($scope.cluster.instanceGroups, function(ig) {
                 if (ig.type === 'GATEWAY') {
                     result = true
