@@ -150,15 +150,36 @@ function continueInit() {
     identityServerClient.registerMethod("retrieveToken", config.identityServerAddress + "oauth/token", "POST");
 
     var proxyRestClient = new restClient.Client();
-
+    proxyRestClient.on('requestTimeout', function (req) {
+        console.error("A request has expired: " + req);
+        req.abort();
+    });
+    proxyRestClient.on('responseTimeout', function (res) {
+        console.error("Response has expired: " + res);
+    });
     proxyRestClient.registerMethod("subscribe", config.cloudbreakAddress + "/subscriptions", "POST");
 
     // cloudbreak config ===========================================================
 
-    var cbRequestArgs = {
-        headers: {
-            "Content-Type": "application/json"
+    var getCbRequestArgs = function(token, data) {
+        var args = {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            requestConfig: {
+                timeout: 2000
+            },
+            responseConfig: {
+                timeout: 5000
+            }
+        };
+
+        if (data) {
+            args.data = data;
         }
+
+        return args;
     }
 
     // routes ======================================================================
@@ -254,38 +275,11 @@ function continueInit() {
         });
     }
 
-    // file download
-
-    app.get('*/credentials/certificate/*', function(req, res) {
-        if (req.body) {
-            cbRequestArgs.data = req.body;
-        }
-        cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-        proxyRestClient.get(config.cloudbreakAddress + req.url, cbRequestArgs, function(data, response) {
-            if (data != null) {
-                res.setHeader('Content-disposition', 'attachment; filename=azure.cer');
-                res.setHeader('Content-type', 'application/x-x509-ca-cert');
-                res.charset = 'UTF-8';
-                res.write(data);
-                res.end();
-            } else {
-                res.statusCode = 404
-                res.json({
-                    error: {
-                        status: 404,
-                        message: 'Cannot download azure certificate.'
-                    }
-                })
-            }
-        });
-    });
-
     // delete user
 
     app.delete('/users/:userId', function(req, res) {
-        var token = req.session.token
         var userId = req.param('userId')
-        cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
+        var cbRequestArgs = getCbRequestArgs(req.session.token, req.body);
         proxyRestClient.get(config.cloudbreakAddress + req.url + "/resources", cbRequestArgs, function(data, response) {
             if (data === false) {
                 proxyRestClient.delete(config.sultansAddress + 'users/' + userId, cbRequestArgs, function(data, response) {
@@ -380,10 +374,7 @@ function continueInit() {
     }
 
     function proxyCloudbreakRequest(req, res, method) {
-        if (req.body) {
-            cbRequestArgs.data = req.body;
-        }
-        cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
+        var cbRequestArgs = getCbRequestArgs(req.session.token, req.body);
         method(cloudbreakApi + req.url, cbRequestArgs, function(data, response) {
             eliminateConfidentialParametersFromCredentials(req, data);
             res.status(response.statusCode).send(data);
@@ -402,10 +393,7 @@ function continueInit() {
     }
 
     function proxySultansRequest(req, res, method) {
-        if (req.body) {
-            cbRequestArgs.data = req.body;
-        }
-        cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
+        var cbRequestArgs = getCbRequestArgs(req.session.token, req.body);
         var req_url = req.url.replace("/sultans/", "");
         console.log("Sultans request to: " + config.sultansAddress + req_url);
         method(config.sultansAddress + req_url, cbRequestArgs, function(data, response) {
@@ -416,10 +404,7 @@ function continueInit() {
     }
 
     function proxyPeriscopeRequest(req, res, method) {
-        if (req.body) {
-            cbRequestArgs.data = req.body;
-        }
-        cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
+        var cbRequestArgs = getCbRequestArgs(req.session.token, req.body);
         var req_url = req.url.replace("/periscope/", "");
         var periscopeApi = concatAndResolveUrl(config.periscopeAddress) + config.periscopeApiRootContext + "/" + req_url;
 
