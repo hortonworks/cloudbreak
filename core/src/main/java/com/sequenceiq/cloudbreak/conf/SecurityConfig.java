@@ -137,7 +137,7 @@ public class SecurityConfig {
                         .access("#oauth2.hasScope('cloudbreak.stacks.read') or #oauth2.hasScope('cloudbreak.stacks')"
                                 + " or #oauth2.hasScope('cloudbreak.autoscale')")
 
-                    .antMatchers("/users/**").access("#oauth2.hasScope('openid')")
+                    .antMatchers(API_ROOT_CONTEXT + "/users/**").access("#oauth2.hasScope('openid')")
                     .antMatchers(BLUEPRINT_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.blueprints')")
                     .antMatchers(TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(CREDENTIAL_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.credentials')")

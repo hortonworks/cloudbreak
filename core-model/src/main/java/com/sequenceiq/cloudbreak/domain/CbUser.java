@@ -7,13 +7,13 @@ import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 
 public class CbUser {
 
-    private String userId;
-    private String username;
-    private String account;
-    private List<CbUserRole> roles;
-    private String givenName;
-    private String familyName;
-    private Date created;
+    private final String userId;
+    private final String username;
+    private final String account;
+    private final List<CbUserRole> roles;
+    private final String givenName;
+    private final String familyName;
+    private final Date created;
 
     public CbUser(String userId, String username, String account, List<CbUserRole> roles, String givenName, String familyName, Date created) {
         this.userId = userId;
@@ -27,10 +27,6 @@ public class CbUser {
 
     public String getUserId() {
         return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
     public String getUsername() {
