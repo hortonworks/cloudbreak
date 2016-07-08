@@ -41,6 +41,16 @@ public class ClusterCreationService {
     @Inject
     private ClusterTerminationService clusterTerminationService;
 
+    public void bootstrappingMachines(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_BOOTSTRAP, UPDATE_IN_PROGRESS.name());
+    }
+
+    public void collectingHostMetadata(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
+    }
+
     public void startingAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());

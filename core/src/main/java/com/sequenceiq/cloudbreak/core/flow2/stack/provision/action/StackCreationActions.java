@@ -41,10 +41,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
@@ -167,48 +163,16 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new StackEvent(StackCreationEvent.BOOTSTRAP_MACHINES_EVENT.stringRepresentation(), context.getStack().getId());
-            }
-        };
-    }
-
-    @Bean(name = "BOOTSTRAPING_MACHINES_STATE")
-    public Action bootstrappingMachinesAction() {
-        return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
-            @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.bootstrappingMachines(context.getStack());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackContext context) {
-                return new BootstrapMachinesRequest(context.getStack().getId());
-            }
-        };
-    }
-
-    @Bean(name = "COLLECTING_HOST_METADATA_STATE")
-    public Action collectingHostMetadataAction() {
-        return new AbstractStackCreationAction<BootstrapMachinesSuccess>(BootstrapMachinesSuccess.class) {
-            @Override
-            protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.collectingHostMetadata(context.getStack());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackContext context) {
-                return new HostMetadataSetupRequest(context.getStack().getId());
+                return new StackEvent(StackCreationEvent.TLS_SETUP_FINISHED_EVENT.stringRepresentation(), context.getStack().getId());
             }
         };
     }
 
     @Bean(name = "STACK_CREATION_FINISHED_STATE")
     public Action stackCreationFinishedAction() {
-        return new AbstractStackCreationAction<HostMetadataSetupSuccess>(HostMetadataSetupSuccess.class) {
+        return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.stackCreationFinished(context.getStack());
                 sendEvent(context);
             }
