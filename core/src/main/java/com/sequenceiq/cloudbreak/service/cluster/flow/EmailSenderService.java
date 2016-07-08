@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -51,6 +52,15 @@ public class EmailSenderService {
     @Value("${cb.smartsense.configure:false}")
     private boolean configureSmartSense;
 
+    @Value("${hwx.cloud.template.version:}")
+    private String templateVersion;
+
+    @Value("${aws.instance.id:}")
+    private String awsInstanceId;
+
+    @Value("${aws.account.id:}")
+    private String accountId;
+
     @Inject
     private EmailMimeMessagePreparator emailMimeMessagePreparator;
 
@@ -65,6 +75,8 @@ public class EmailSenderService {
 
     @Inject
     private UserDetailsService userDetailsService;
+
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private enum State {
         PROVISIONING_SUCCESS("SUCCESS", "Cloudbreak Cluster Install Success",
@@ -158,6 +170,10 @@ public class EmailSenderService {
         String smartSenseId = (String) stack.getCredential().getAttributes().getMap().get(CloudCredential.SMART_SENSE_ID);
         Map<String, Object> telemetryMailMap = new LinkedHashMap<>();
         if (configureSmartSense && !StringUtils.isEmpty(smartSenseId)) {
+            telemetryMailMap.put("Date", dateFormat.format(new Date()));
+            if (accountId != null) {
+                telemetryMailMap.put("Account ID", accountId);
+            }
             telemetryMailMap.put("Smartsense ID", smartSenseId);
             telemetryMailMap.put("Cluster ID", cluster.getId());
             telemetryMailMap.put("Cluster type", getClusterType(stack, cluster));
@@ -165,6 +181,13 @@ public class EmailSenderService {
             telemetryMailMap.put("Instance type(s)", getInstanceTypes(stack));
             telemetryMailMap.put("Running time", getRunningTime(cluster));
             telemetryMailMap.put("Status", status.normalizedStatusName());
+            if (templateVersion != null) {
+                telemetryMailMap.put("Version", templateVersion);
+            }
+            if (awsInstanceId != null) {
+                telemetryMailMap.put("Controller Instance ID", awsInstanceId);
+            }
+            telemetryMailMap.put("Master Instance ID", getMasterInstanceId(stack));
 
             StringBuilder telemetryMailBodyBuilder = new StringBuilder();
             for (String key : telemetryMailMap.keySet()) {
@@ -205,6 +228,10 @@ public class EmailSenderService {
             instanceTypesStringBuilder.append(instanceType);
         }
         return instanceTypesStringBuilder.toString();
+    }
+
+    private String getMasterInstanceId(Stack stack) {
+        return stack.getGatewayInstanceGroup().getAllInstanceMetaData().iterator().next().getInstanceId();
     }
 
     @Async
