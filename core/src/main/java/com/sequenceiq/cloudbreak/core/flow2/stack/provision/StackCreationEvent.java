@@ -7,11 +7,6 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
-import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesFailed;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupFailed;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 
 public enum StackCreationEvent implements FlowEvent {
     START_CREATION_EVENT(FlowTriggers.STACK_PROVISION_TRIGGER_EVENT),
@@ -28,11 +23,7 @@ public enum StackCreationEvent implements FlowEvent {
     COLLECT_METADATA_FAILED_EVENT(CollectMetadataResult.failureSelector(CollectMetadataResult.class)),
     SSHFINGERPRINTS_EVENT(GetSSHFingerprintsResult.selector(GetSSHFingerprintsResult.class)),
     SSHFINGERPRINTS_FAILED_EVENT(GetSSHFingerprintsResult.failureSelector(GetSSHFingerprintsResult.class)),
-    BOOTSTRAP_MACHINES_EVENT("BOOTSTRAP_MACHINES_EVENT"),
-    BOOTSTRAP_MACHINES_FINISHED_EVENT(EventSelectorUtil.selector(BootstrapMachinesSuccess.class)),
-    BOOTSTRAP_MACHINES_FAILED_EVENT(EventSelectorUtil.selector(BootstrapMachinesFailed.class)),
-    HOST_METADATASETUP_FINISHED_EVENT(EventSelectorUtil.selector(HostMetadataSetupSuccess.class)),
-    HOST_METADATASETUP_FAILED_EVENT(EventSelectorUtil.selector(HostMetadataSetupFailed.class)),
+    TLS_SETUP_FINISHED_EVENT("TLS_SETUP_FINISHED_EVENT"),
     STACK_CREATION_FAILED_EVENT("STACK_CREATION_FAILED"),
     STACK_CREATION_FINISHED_EVENT("STACK_CREATION_FINISHED"),
     STACKCREATION_FAILURE_HANDLED_EVENT("STACK_CREATION_FAILHANDLED");
