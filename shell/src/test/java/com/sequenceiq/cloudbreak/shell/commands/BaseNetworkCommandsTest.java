@@ -77,7 +77,7 @@ public class BaseNetworkCommandsTest {
 
         String select = underTest.select(51L, null);
 
-        Assert.assertEquals(select, "Network could not be found.");
+        Assert.assertEquals(select, "Network not found.");
     }
 
     @Test

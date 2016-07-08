@@ -84,18 +84,16 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     @Override
     public String select(Long idOfNetwork, String networkName) {
         try {
-            String msg = "Network could not be found.";
-            Long id = idOfNetwork == null ? null : idOfNetwork;
-            String name = networkName == null ? null : networkName;
-            if (id != null && shellContext.getNetworksByProvider().containsKey(id)) {
-                String provider = shellContext.getNetworksByProvider().get(id);
-                createHintAndAddNetworkToContext(id, provider);
-                msg = "Network is selected with id: " + id;
-            } else if (name != null) {
-                NetworkJson aPublic = shellContext.cloudbreakClient().networkEndpoint().getPublic(name);
+            String msg = "Network not found.";
+            if (idOfNetwork != null && shellContext.getNetworksByProvider().containsKey(idOfNetwork)) {
+                String provider = shellContext.getNetworksByProvider().get(idOfNetwork);
+                createHintAndAddNetworkToContext(idOfNetwork, provider);
+                msg = "Network is selected with id: " + idOfNetwork;
+            } else if (networkName != null) {
+                NetworkJson aPublic = shellContext.cloudbreakClient().networkEndpoint().getPublic(networkName);
                 if (aPublic != null) {
-                    createHintAndAddNetworkToContext(Long.valueOf(aPublic.getId()), name);
-                    msg = "Network is selected with name: " + name;
+                    createHintAndAddNetworkToContext(Long.valueOf(aPublic.getId()), aPublic.getCloudPlatform());
+                    msg = "Network is selected with name: " + networkName;
                 }
             }
             return msg;
