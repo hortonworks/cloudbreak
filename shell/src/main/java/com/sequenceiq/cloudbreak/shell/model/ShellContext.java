@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.shell.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -403,7 +404,7 @@ public class ShellContext {
     }
 
     public Map<Long, String> getNetworksByProvider() {
-        return networksByProvider;
+        return Collections.unmodifiableMap(networksByProvider);
     }
 
     public boolean isSssdConfigAccessible() {
