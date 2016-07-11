@@ -12,26 +12,64 @@ import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
 
 @Configuration
 public class ClusterCreationActions {
     @Inject
     private ClusterCreationService clusterCreationService;
 
+    @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
+    public Action bootstrappingMachinesAction() {
+        return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                clusterCreationService.bootstrappingMachines(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new BootstrapMachinesRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "COLLECTING_HOST_METADATA_STATE")
+    public Action collectingHostMetadataAction() {
+        return new AbstractStackCreationAction<BootstrapMachinesSuccess>(BootstrapMachinesSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) throws Exception {
+                clusterCreationService.collectingHostMetadata(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new HostMetadataSetupRequest(context.getStack().getId());
+            }
+        };
+    }
+
     @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
     public Action startingAmbariServicesAction() {
-        return new AbstractClusterAction<StackEvent>(StackEvent.class) {
+        return new AbstractClusterAction<HostMetadataSetupSuccess>(HostMetadataSetupSuccess.class) {
             @Override
-            protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingAmbariServices(context.getStack(), context.getCluster());
                 sendEvent(context);
             }

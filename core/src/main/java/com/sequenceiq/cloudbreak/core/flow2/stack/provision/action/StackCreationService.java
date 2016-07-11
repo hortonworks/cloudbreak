@@ -151,8 +151,7 @@ public class StackCreationService {
     public Stack setupMetadata(StackContext context, CollectMetadataResult collectMetadataResult) {
         Stack stack = context.getStack();
         metadatSetupService.saveInstanceMetaData(stack, collectMetadataResult.getResults(), InstanceStatus.CREATED);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED, BillingStatus.BILLING_STARTED.name());
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, AVAILABLE.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, UPDATE_IN_PROGRESS.name());
         LOGGER.debug("Metadata setup DONE.");
         return stackService.getById(stack.getId());
     }
@@ -166,17 +165,9 @@ public class StackCreationService {
         return stackService.getById(stack.getId());
     }
 
-    public void bootstrappingMachines(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_BOOTSTRAP, UPDATE_IN_PROGRESS.name());
-    }
-
-    public void collectingHostMetadata(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
-    }
-
     public void stackCreationFinished(Stack stack) {
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED_BILLING, BillingStatus.BILLING_STARTED.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED, AVAILABLE.name());
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
     }
 
