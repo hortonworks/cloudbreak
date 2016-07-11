@@ -437,7 +437,7 @@ util-token() {
 }
 
 util-local-dev() {
-    declare desc="Stops cloudbreak container, and starts an ambassador for cbreak in IntelliJ (def port:9090)"
+    declare desc="Stops cloudbreak and periscope container, and starts an ambassador for cbreak and periscope in IntelliJ (def cb: port:9090, peri: port: 8085)"
     declare port=${1:-9091}
 
     cloudbreak-config
@@ -449,13 +449,17 @@ util-local-dev() {
 
     debug stopping original cloudbreak container
     dockerCompose stop cloudbreak
+    dockerCompose stop periscope
+
+    docker rm -f cloudbreak-proxy || :
+    docker rm -f periscope-proxy || :
 
     create-migrate-log
     migrate-one-db cbdb up
     migrate-one-db cbdb pending
 
     debug starting an ambassador to be registered as cloudbreak.service.consul.
-    debug "all traffic to ambassador will be proxied to localhost (192.168.59.3):$port"
+    debug "all traffic to ambassador will be proxied to localhost"
 
 : << HINT
 sed -i  "s/cb.db.port.5432.tcp.addr=[^ ]*/cb.db.port.5432.tcp.addr=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' cbreak_cbdb_1)/" \
@@ -472,5 +476,16 @@ HINT
         -l traefik.backend=cloudbreak-backend \
         -l traefik.frontend.priority=10 \
         sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:$port
+
+    docker run -d \
+        --name periscope-proxy \
+        -p 8085:8085 \
+        -e PORT=8085 \
+        -e SERVICE_NAME=periscope \
+        -l traefik.port=8085 \
+        -l traefik.frontend.rule=PathPrefix:/as/ \
+        -l traefik.backend=periscope-backend \
+        -l traefik.frontend.priority=10 \
+        sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:8085
 
 }
