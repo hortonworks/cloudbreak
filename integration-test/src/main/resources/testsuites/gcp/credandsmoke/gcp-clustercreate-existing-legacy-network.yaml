@@ -1,0 +1,71 @@
+name: Gcp_simple_smoketest_cred
+parameters:
+  cloudProvider: GCP
+  blueprintName: hdp-small-default
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  # integratontest.gcpcredential params must be set in application.yml
+  - name: gcp_credential_test
+    parameters:
+      credentialName: its-gcp-credandsmoke-cred
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpCredentialCreationTest
+
+  - name: create vpc network
+    parameters:
+      networkName: existing-vpc-network
+      networkType: LAGACY_NETWORK
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpCreateVirtualNetworkTest
+
+  - name: create gateway template
+    parameters:
+      gcpName: it-gcp-credandsmoke-gateway
+      gcpInstanceType: n1-standard-4
+      volumeType: pd-standard
+      volumeCount: 1
+      volumeSize: 30
+      templateAdditions: "cbgateway,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create master template
+    parameters:
+      gcpName: it-gcp-credandsmoke-master
+      gcpInstanceType: n1-highmem-8
+      volumeType: pd-standard
+      volumeCount: 2
+      volumeSize: 100
+      templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create slave template
+    parameters:
+      gcpName: it-gcp-credandsmoke-slave
+      gcpInstanceType: n1-highcpu-4
+      volumeType: pd-ssd
+      volumeCount: 3
+      volumeSize: 500
+      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-gcp-cred
+      region: europe-west1
+      availabilityZone: europe-west1-b
+      clusterName: it-gcp-cred
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: delete vpc
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpDeleteVpcTest

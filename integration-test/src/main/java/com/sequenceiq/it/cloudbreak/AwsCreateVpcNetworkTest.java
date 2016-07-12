@@ -30,34 +30,35 @@ import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.sequenceiq.cloudbreak.api.model.NetworkJson;
 
-public class AwsCreateExistingVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
+public class AwsCreateVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
 
     private static final List<StackStatus> FAILED_STATUSES = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCreateExistingVpcNetworkTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCreateVpcNetworkTest.class);
     private static final int MAX_TRY = 30;
 
     @Test
-    @Parameters({ "networkName", "description", "publicInAccount", "regionName", "vpcStackName", "vpcName" })
+    @Parameters({ "networkName", "description", "publicInAccount", "regionName", "vpcStackName", "vpcName", "existingSubnet" })
     public void createNetwork(String networkName, @Optional("") String description, @Optional("false") boolean publicInAccount,
-            String regionName, @Optional("it-vpc-stack") String vpcStackName, @Optional("it-vpc") String vpcName) {
+            String regionName, @Optional("it-vpc-stack") String vpcStackName, @Optional("it-vpc") String vpcName, boolean existingSubnet) {
         AmazonCloudFormationClient client = new AmazonCloudFormationClient();
         client.setRegion(RegionUtils.getRegion(regionName));
 
-        String vpcId;
-        String subnetId;
+        Map<String, Object> networkMap = new HashMap<>();
 
-        try (InputStream vpcJsonInputStream = getClass().getResourceAsStream("/cloudformation/public_vpc.json")) {
+        String vpcCreationJson = existingSubnet ?  "public_vpc_with_subnet.json" : "public_vpc_wihout_subnet.json";
+
+        try (InputStream vpcJsonInputStream = getClass().getResourceAsStream("/cloudformation/" + vpcCreationJson)) {
             String vpcCFTemplateString = IOUtils.toString(vpcJsonInputStream);
             CreateStackRequest stackRequest = createStackRequest(vpcStackName, vpcName, vpcCFTemplateString);
             client.createStack(stackRequest);
 
             List<Output> outputForRequest = getOutputForRequest(vpcStackName, client);
-            vpcId = outputForRequest.get(0).getOutputValue();
-            subnetId = outputForRequest.get(1).getOutputValue();
-
-            if (vpcId.isEmpty() || subnetId.isEmpty()) {
-                LOGGER.error("vpcId or subnetId is empty");
-                throw new RuntimeException();
+            if (existingSubnet) {
+                networkMap.put("vpcId", outputForRequest.get(0).getOutputValue());
+                networkMap.put("subnetId", outputForRequest.get(1).getOutputValue());
+            } else {
+                networkMap.put("vpcId", outputForRequest.get(1).getOutputValue());
+                networkMap.put("internetGatewayId", outputForRequest.get(0).getOutputValue());
             }
         } catch (IOException e) {
             LOGGER.error("can't read vpc cloudformation template file");
@@ -67,10 +68,10 @@ public class AwsCreateExistingVpcNetworkTest extends AbstractCloudbreakIntegrati
         NetworkJson networkJson = new NetworkJson();
         networkJson.setName(networkName);
         networkJson.setDescription(description);
-        Map<String, Object> map = new HashMap<>();
-        map.put("vpcId", vpcId);
-        map.put("subnetId", subnetId);
-        networkJson.setParameters(map);
+        networkJson.setParameters(networkMap);
+        if (!existingSubnet) {
+            networkJson.setSubnetCIDR("10.0.0.0/24");
+        }
         networkJson.setCloudPlatform("AWS");
         networkJson.setPublicInAccount(publicInAccount);
         String id = getCloudbreakClient().networkEndpoint().postPrivate(networkJson).getId().toString();
