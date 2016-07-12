@@ -37,7 +37,7 @@ tests:
       volumeType: ssd
       volumeCount: 1
       volumeSize: 10
-      templateAdditions: "cbgateway,1,GATEWAY"
+      templateAdditions: "host_group_master_1,1,GATEWAY"
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
@@ -48,7 +48,7 @@ tests:
       volumeType: ephemeral
       volumeCount: 1
       volumeSize: 40
-      templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
+      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
