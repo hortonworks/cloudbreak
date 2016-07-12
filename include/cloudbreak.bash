@@ -451,8 +451,8 @@ util-local-dev() {
     dockerCompose stop cloudbreak
     dockerCompose stop periscope
 
-    docker rm -f cloudbreak-proxy || :
-    docker rm -f periscope-proxy || :
+    docker rm -f cloudbreak-proxy 2> /dev/null || :
+    docker rm -f periscope-proxy 2> /dev/null || :
 
     create-migrate-log
     migrate-one-db cbdb up
