@@ -23,6 +23,10 @@ import reactor.bus.EventBus;
 public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload> implements Action<S, E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAction.class);
 
+    private static final String FLOW_START_TIME = "FLOW_START_TIME";
+    private static final String FLOW_STATE_NAME = "FLOW_STATE_NAME";
+    private static final int MS_PER_SEC = 1000;
+
     @Inject
     private EventBus eventBus;
     @Inject
@@ -48,9 +52,17 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
         C flowContext = null;
         try {
-            prepareExecution(payload, context.getExtendedState().getVariables());
+            Map<Object, Object> variables = context.getExtendedState().getVariables();
+            prepareExecution(payload, variables);
             flowContext = createFlowContext(flowId, context, payload);
-            doExecute(flowContext, payload, context.getExtendedState().getVariables());
+            Object flowStartTime = variables.get(FLOW_START_TIME);
+            if (flowStartTime != null) {
+                LOGGER.info("Stack: {}, flow state: {}, execution took {} sec", payload.getStackId(),
+                        variables.get(FLOW_STATE_NAME), (System.currentTimeMillis() - (long) flowStartTime) / MS_PER_SEC);
+            }
+            doExecute(flowContext, payload, variables);
+            variables.put(FLOW_STATE_NAME, context.getStateMachine().getState().getId());
+            variables.put(FLOW_START_TIME, System.currentTimeMillis());
         } catch (Exception ex) {
             LOGGER.error("Error during execution of " + getClass().getName(), ex);
             if (failureEvent != null) {
