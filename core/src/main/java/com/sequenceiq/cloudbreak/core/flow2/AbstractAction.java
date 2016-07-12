@@ -24,6 +24,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAction.class);
 
     private static final String FLOW_START_TIME = "FLOW_START_TIME";
+    private static final String FLOW_START_EXEC_TIME = "FLOW_START_EXEC_TIME";
     private static final String FLOW_STATE_NAME = "FLOW_STATE_NAME";
     private static final int MS_PER_SEC = 1000;
 
@@ -57,11 +58,16 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             flowContext = createFlowContext(flowId, context, payload);
             Object flowStartTime = variables.get(FLOW_START_TIME);
             if (flowStartTime != null) {
-                LOGGER.info("Stack: {}, flow state: {}, execution took {} sec", payload.getStackId(),
-                        variables.get(FLOW_STATE_NAME), (System.currentTimeMillis() - (long) flowStartTime) / MS_PER_SEC);
+                Object execTime = variables.get(FLOW_START_EXEC_TIME);
+                long flowElapsed = (System.currentTimeMillis() - (long) flowStartTime) / MS_PER_SEC;
+                long execElapsed = (System.currentTimeMillis() - (long) execTime) / MS_PER_SEC;
+                LOGGER.info("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getStackId(),
+                        variables.get(FLOW_STATE_NAME), execElapsed > flowElapsed ? "doExec" : "service",
+                        execElapsed > flowElapsed ? execElapsed : flowElapsed);
             }
-            doExecute(flowContext, payload, variables);
             variables.put(FLOW_STATE_NAME, context.getStateMachine().getState().getId());
+            variables.put(FLOW_START_EXEC_TIME, System.currentTimeMillis());
+            doExecute(flowContext, payload, variables);
             variables.put(FLOW_START_TIME, System.currentTimeMillis());
         } catch (Exception ex) {
             LOGGER.error("Error during execution of " + getClass().getName(), ex);
@@ -118,6 +124,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     protected abstract C createFlowContext(String flowId, StateContext<S, E> stateContext, P payload);
 
     protected abstract void doExecute(C context, P payload, Map<Object, Object> variables) throws Exception;
+
     protected abstract Object getFailurePayload(P payload, Optional<C> flowContext, Exception ex);
 
     private P convertPayload(Object payload) {
