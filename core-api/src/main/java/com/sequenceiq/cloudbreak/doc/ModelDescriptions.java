@@ -19,6 +19,7 @@ public class ModelDescriptions {
         public static final String BLUEPRINT_NAME = "gathered from blueprintName field from the blueprint JSON";
         public static final String AMBARI_BLUEPRINT = "ambari blueprint JSON, set this or the url field";
         public static final String HOST_GROUP_COUNT = "number of host groups";
+        public static final String STATUS = "status of the blueprint";
     }
 
     public static class CredentialModelDescription {
@@ -96,6 +97,12 @@ public class ModelDescriptions {
         public static final String LDAP_REQUIRED = "flag for default LDAP support";
         public static final String SSSDCONFIG_ID = "SSSD config id for the cluster";
         public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
+    }
+
+    public static class AmbariRepoDetailsDescription {
+        public static final String VERSION = "version of the Ambari";
+        public static final String AMBARI_BASE_URL = "url of the Ambari repository";
+        public static final String AMBARI_REPO_GPG_KEY = "gpg key of the Ambari repository";
     }
 
     public static class AmbariStackDetailsDescription {

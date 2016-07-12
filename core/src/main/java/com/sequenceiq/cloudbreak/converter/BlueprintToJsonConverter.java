@@ -27,6 +27,7 @@ public class BlueprintToJsonConverter extends AbstractConversionServiceAwareConv
         blueprintJson.setPublicInAccount(entity.isPublicInAccount());
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
+        blueprintJson.setStatus(entity.getStatus());
         try {
             blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
         } catch (Exception e) {

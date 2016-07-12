@@ -67,7 +67,6 @@ public class ClusterCreationService {
 
     public void startingAmbari(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Ambari cluster is now starting.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTING, UPDATE_IN_PROGRESS.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
     }
 

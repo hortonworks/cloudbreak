@@ -1,5 +1,27 @@
 {%- from 'ambari/settings.sls' import ambari with context %}
 
+{% if not ambari.is_predefined_repo %}
+
+include:
+  - ambari.repo
+
+haveged:
+  pkg.installed: []
+  service.running:
+    - enable: True
+
+ambari-server:
+  pkg.latest:
+    - require:
+      - sls: ambari.repo
+
+{% endif %}
+
+/var/lib/ambari-server/jdbc-drivers:
+  cmd.run:
+    - name: cp -R /opt/jdbc-drivers /var/lib/ambari-server/jdbc-drivers
+    - unless: ls -1 /var/lib/ambari-server/jdbc-drivers
+
 /opt/ambari-server/ambari-server-init.sh:
   file.managed:
     - makedirs: True

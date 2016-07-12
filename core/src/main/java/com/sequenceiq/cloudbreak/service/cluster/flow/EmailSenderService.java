@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -23,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -52,6 +52,15 @@ public class EmailSenderService {
     @Value("${cb.smartsense.configure:false}")
     private boolean configureSmartSense;
 
+    @Value("${hwx.cloud.template.version:}")
+    private String templateVersion;
+
+    @Value("${aws.instance.id:}")
+    private String awsInstanceId;
+
+    @Value("${aws.account.id:}")
+    private String accountId;
+
     @Inject
     private EmailMimeMessagePreparator emailMimeMessagePreparator;
 
@@ -67,41 +76,15 @@ public class EmailSenderService {
     @Inject
     private UserDetailsService userDetailsService;
 
-    private enum State {
-        PROVISIONING_SUCCESS("SUCCESS", "Cloudbreak Cluster Install Success",
-                "Your cluster '%s' is ready to use. You can log into the Ambari UI %s:8080 using the configured username/password."),
-        PROVISIONING_FAILURE("FAILED", "Cloudbreak Cluster Install Failed",
-                "Something went terribly wrong - we are happy to help, please let us know your cluster details, "
-                        + "time, etc - and we will check the logs and get a fix for you."),
-        START_SUCCESS("SUCCESS", "Cloudbreak Cluster Start Success",
-                "Your cluster '%s' is ready to use after the start. You can log into the Ambari UI %s:8080 using the configured username/password."),
-        START_FAILURE("FAILED", "Cloudbreak Cluster Start Failed",
-                "Failed to start your cluster: %s - we are happy to help, please let us know your cluster details, time, etc - and we will check the"
-                        + " logs and get a fix for you."),
-        STOP_SUCCESS("SUCCESS", "Cloudbreak Cluster Stop Success",
-                "Your cluster '%s' was successfully stopped. If you want to use again just restart."),
-        STOP_FAILURE("FAILED", "Cloudbreak Cluster Stop Failed",
-                "Failed to stop your cluster: %s - we are happy to help, please let us know your cluster details, time, etc - and we will check the "
-                        + "logs and get a fix for you."),
-        UPSCALE_SUCCESS("SUCCESS", "Cloudbreak Cluster Upscale Success",
-                "Your cluster '%s' is ready to use after the upscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
-        DOWN_SCALE_SUCCESS("SUCCESS", "Cloudbreak Cluster Downscale Success",
-                "Your cluster '%s' is ready to use after the downscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
-        TERMINATION_SUCCESS("SUCCESS", "Cloudbreak Cluster Termination Success",
-                "Your cluster '%s' was successfully terminated."),
-        TERMINATION_FAILURE("FAILED", "Cloudbreak Cluster Termination Failed",
-                "Failed to terminate your cluster: '%s'. Please try again... - we are happy to help, please let us know your cluster details, time, "
-                        + "etc - and we will check the logs and get a fix for you.");
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        private final String status;
-        private final String title;
-        private final String text;
+    private static String getRunningTime(Cluster cluster) {
+        long upTime = cluster.getUpSince() == null || !cluster.isAvailable() ? 0L : new Date().getTime() - cluster.getUpSince();
+        return uptimeToFormattedString(upTime);
+    }
 
-        State(String status, String title, String text) {
-            this.status = status;
-            this.title = title;
-            this.text = text;
-        }
+    private static String uptimeToFormattedString(long upTime) {
+        return DurationFormatUtils.formatDuration(upTime, "HH:mm:ss");
     }
 
     @Async
@@ -156,25 +139,33 @@ public class EmailSenderService {
     @Async
     public void sendTelemetryMailIfNeeded(Stack stack, Status status) {
         Cluster cluster = stack.getCluster();
-        Credential credential = stack.getCredential();
-        if (credential != null) {
-            String smartSenseId = (String) credential.getAttributes().getMap().get(CloudCredential.SMART_SENSE_ID);
-            Map<String, Object> telemetryMailMap = new LinkedHashMap<>();
-            if (configureSmartSense && !StringUtils.isEmpty(smartSenseId)) {
-                telemetryMailMap.put("Smartsense ID", smartSenseId);
-                telemetryMailMap.put("Cluster ID", cluster.getId());
-                telemetryMailMap.put("Cluster type", getClusterType(stack, cluster));
-                telemetryMailMap.put("Node count", stack.getFullNodeCount());
-                telemetryMailMap.put("Instance type(s)", getInstanceTypes(stack));
-                telemetryMailMap.put("Running time", getRunningTime(cluster));
-                telemetryMailMap.put("Status", status.normalizedStatusName());
-
-                StringBuilder telemetryMailBodyBuilder = new StringBuilder();
-                for (String key : telemetryMailMap.keySet()) {
-                    telemetryMailBodyBuilder.append(key).append(": ").append(telemetryMailMap.get(key)).append("<br />");
-                }
-                mailSender.send(emailMimeMessagePreparator.prepareMessage(telemetryMailAddress, "Telemetry", telemetryMailBodyBuilder.toString()));
+        String smartSenseId = (String) stack.getCredential().getAttributes().getMap().get(CloudCredential.SMART_SENSE_ID);
+        Map<String, Object> telemetryMailMap = new LinkedHashMap<>();
+        if (configureSmartSense && !StringUtils.isEmpty(smartSenseId)) {
+            telemetryMailMap.put("Date", dateFormat.format(new Date()));
+            if (accountId != null) {
+                telemetryMailMap.put("Account ID", accountId);
             }
+            telemetryMailMap.put("Smartsense ID", smartSenseId);
+            telemetryMailMap.put("Cluster ID", cluster.getId());
+            telemetryMailMap.put("Cluster type", getClusterType(stack, cluster));
+            telemetryMailMap.put("Node count", stack.getFullNodeCount());
+            telemetryMailMap.put("Instance type(s)", getInstanceTypes(stack));
+            telemetryMailMap.put("Running time", getRunningTime(cluster));
+            telemetryMailMap.put("Status", status.normalizedStatusName());
+            if (templateVersion != null) {
+                telemetryMailMap.put("Version", templateVersion);
+            }
+            if (awsInstanceId != null) {
+                telemetryMailMap.put("Controller Instance ID", awsInstanceId);
+            }
+            telemetryMailMap.put("Master Instance ID", getMasterInstanceId(stack));
+
+            StringBuilder telemetryMailBodyBuilder = new StringBuilder();
+            for (String key : telemetryMailMap.keySet()) {
+                telemetryMailBodyBuilder.append(key).append(": ").append(telemetryMailMap.get(key)).append("<br />");
+            }
+            mailSender.send(emailMimeMessagePreparator.prepareMessage(telemetryMailAddress, "Telemetry", telemetryMailBodyBuilder.toString()));
         }
     }
 
@@ -191,15 +182,6 @@ public class EmailSenderService {
         return hdpVersion + " : " + cluster.getBlueprint().getBlueprintName();
     }
 
-    private static String getRunningTime(Cluster cluster) {
-        long upTime = cluster.getUpSince() == null || !cluster.isAvailable() ? 0L : new Date().getTime() - cluster.getUpSince();
-        return uptimeToFormattedString(upTime);
-    }
-
-    private static String uptimeToFormattedString(long upTime) {
-        return DurationFormatUtils.formatDuration(upTime, "HH:mm:ss");
-    }
-
     private String getInstanceTypes(Stack stack) {
         StringBuilder instanceTypesStringBuilder = new StringBuilder();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
@@ -209,6 +191,10 @@ public class EmailSenderService {
             instanceTypesStringBuilder.append(instanceType);
         }
         return instanceTypesStringBuilder.toString();
+    }
+
+    private String getMasterInstanceId(Stack stack) {
+        return stack.getGatewayInstanceGroup().getAllInstanceMetaData().iterator().next().getInstanceId();
     }
 
     @Async
@@ -232,7 +218,6 @@ public class EmailSenderService {
                 ambariServer, State.TERMINATION_FAILURE, clusterName));
     }
 
-
     private void sendEmail(CbUser user, String template, String subject, Map<String, Object> model) {
         try {
             String emailBody = processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
@@ -254,5 +239,42 @@ public class EmailSenderService {
         model.put("state", state);
         model.put("clusterName", clusterName);
         return model;
+    }
+
+    private enum State {
+        PROVISIONING_SUCCESS("SUCCESS", "Cloudbreak Cluster Install Success",
+                "Your cluster '%s' is ready to use. You can log into the Ambari UI %s:8080 using the configured username/password."),
+        PROVISIONING_FAILURE("FAILED", "Cloudbreak Cluster Install Failed",
+                "Something went terribly wrong - we are happy to help, please let us know your cluster details, "
+                        + "time, etc - and we will check the logs and get a fix for you."),
+        START_SUCCESS("SUCCESS", "Cloudbreak Cluster Start Success",
+                "Your cluster '%s' is ready to use after the start. You can log into the Ambari UI %s:8080 using the configured username/password."),
+        START_FAILURE("FAILED", "Cloudbreak Cluster Start Failed",
+                "Failed to start your cluster: %s - we are happy to help, please let us know your cluster details, time, etc - and we will check the"
+                        + " logs and get a fix for you."),
+        STOP_SUCCESS("SUCCESS", "Cloudbreak Cluster Stop Success",
+                "Your cluster '%s' was successfully stopped. If you want to use again just restart."),
+        STOP_FAILURE("FAILED", "Cloudbreak Cluster Stop Failed",
+                "Failed to stop your cluster: %s - we are happy to help, please let us know your cluster details, time, etc - and we will check the "
+                        + "logs and get a fix for you."),
+        UPSCALE_SUCCESS("SUCCESS", "Cloudbreak Cluster Upscale Success",
+                "Your cluster '%s' is ready to use after the upscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
+        DOWN_SCALE_SUCCESS("SUCCESS", "Cloudbreak Cluster Downscale Success",
+                "Your cluster '%s' is ready to use after the downscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
+        TERMINATION_SUCCESS("SUCCESS", "Cloudbreak Cluster Termination Success",
+                "Your cluster '%s' was successfully terminated."),
+        TERMINATION_FAILURE("FAILED", "Cloudbreak Cluster Termination Failed",
+                "Failed to terminate your cluster: '%s'. Please try again... - we are happy to help, please let us know your cluster details, time, "
+                        + "etc - and we will check the logs and get a fix for you.");
+
+        private final String status;
+        private final String title;
+        private final String text;
+
+        State(String status, String title, String text) {
+            this.status = status;
+            this.title = title;
+            this.text = text;
+        }
     }
 }

@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -62,6 +63,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
@@ -143,6 +145,9 @@ public class AmbariClusterService implements ClusterService {
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
+    @Inject
+    private ComponentConfigProvider componentConfigProvider;
+
     private enum Msg {
         AMBARI_CLUSTER_START_IGNORED("ambari.cluster.start.ignored"),
         AMBARI_CLUSTER_STOP_IGNORED("ambari.cluster.stop.ignored"),
@@ -162,7 +167,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     @Transactional(Transactional.TxType.NEVER)
-    public Cluster create(CbUser user, Long stackId, Cluster cluster) {
+    public Cluster create(CbUser user, Long stackId, Cluster cluster, List<Component> components) {
         Stack stack = stackService.get(stackId);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
@@ -186,6 +191,7 @@ public class AmbariClusterService implements ClusterService {
         cluster.setAccount(user.getAccount());
         stack.setCluster(cluster);
         try {
+            componentConfigProvider.store(components);
             cluster = clusterRepository.save(cluster);
             InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(cluster.getStatus()));
         } catch (DataIntegrityViolationException ex) {
