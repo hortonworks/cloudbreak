@@ -17,3 +17,5 @@ CREATE TABLE plugin (
 -- SQL to undo the change goes here.
 
 DROP TABLE plugin;
+
+DROP SEQUENCE  IF EXISTS  plugin_id_seq;
