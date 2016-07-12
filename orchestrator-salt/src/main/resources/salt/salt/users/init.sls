@@ -19,4 +19,3 @@ admin:
   file.copy:
     - source: /home/cloudbreak/.ssh/authorized_keys
     - user: admin
-    - unless: ls -1 /home/admin/.ssh/authorized_keys

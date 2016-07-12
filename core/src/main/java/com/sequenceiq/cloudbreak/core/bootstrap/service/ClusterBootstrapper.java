@@ -136,7 +136,7 @@ public class ClusterBootstrapper {
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
-            hostOrchestrator.bootstrap(gatewayConfig, nodes, stack.getConsulServers(), clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
+            hostOrchestrator.bootstrap(gatewayConfig, nodes, clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
 
             PollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
                     hostClusterAvailabilityCheckerTask,

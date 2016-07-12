@@ -9,6 +9,7 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
+import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -55,6 +56,11 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "userName", mandatory = false, unspecifiedDefaultValue = "admin", help = "Username of the Ambari server") String userName,
             @CliOption(key = "password", mandatory = false, unspecifiedDefaultValue = "admin", help = "Password of the Ambari server") String password,
             @CliOption(key = "description", mandatory = false, help = "Description of the blueprint") String description,
+            @CliOption(key = "ambariVersion", help = "Ambari version: 2.4.0.0-748") String ambariVersion,
+            @CliOption(key = "ambariRepoBaseURL",
+                    help = "Ambari repo base url: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates") String ambariRepoBaseURL,
+            @CliOption(key = "ambariRepoGpgKey",
+                    help = "Ambari repo GPG key url") String ambariRepoGpgKey,
             @CliOption(key = "stack", mandatory = false, help = "Stack definition name, like HDP") String stack,
             @CliOption(key = "version", mandatory = false, help = "Stack definition version") String version,
             @CliOption(key = "os", mandatory = false, help = "Stack OS to select package manager, default is RedHat") String os,
@@ -134,6 +140,17 @@ public class ClusterCommands implements BaseCommands {
                 clusterRequest.setSssdConfigId(Long.valueOf(shellContext.getSssdConfigId()));
             }
             clusterRequest.setValidateBlueprint(false);
+
+            if (ambariVersion != null || ambariRepoBaseURL != null || ambariRepoGpgKey != null) {
+                if (ambariVersion == null || ambariRepoBaseURL == null || ambariRepoGpgKey == null) {
+                    return "ambariVersion, ambariRepoBaseURL and ambariRepoGpgKey must be set.";
+                }
+                AmbariRepoDetailsJson ambariRepoDetailsJson = new AmbariRepoDetailsJson();
+                ambariRepoDetailsJson.setVersion(ambariVersion);
+                ambariRepoDetailsJson.setBaseUrl(ambariRepoBaseURL);
+                ambariRepoDetailsJson.setGpgKeyUrl(ambariRepoGpgKey);
+                clusterRequest.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
+            }
 
             AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
             ambariStackDetailsJson.setOs(os);

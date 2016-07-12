@@ -111,6 +111,12 @@ cb:
   nginx:
     port: 9443
 
+  ambari:
+    repo:
+      version: 2.4.0.0-748
+      baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS
+      gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+
   smartsense.configure: false
   smartsense.id.pattern: A-9990%s-C-%s
 
