@@ -41,7 +41,7 @@
                 <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureFileSystem')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_filesystem_tag}}</button>
             </div>
             <div class="btn-group" role="group" ng-show="activeCredential.cloudPlatform != 'AZURE_RM' && activeCredential.cloudPlatform != 'GCP'">
-                <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId || !cluster.blueprintId" ng-click="showWizardActualElement('configureHostGroups')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_blueprint_tag}}</button>
+                <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.networkId || !cluster.blueprintId" ng-click="showWizardActualElement('configureHostGroups')"><i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_blueprint_tag}}</button>
             </div>
             <div class="btn-group" role="group" style="opacity: 0;">
                 <button type="button" class="btn btn-sm btn-default"></button>

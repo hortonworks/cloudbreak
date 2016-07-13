@@ -48,7 +48,6 @@ public class BasicCommands implements CommandMarker {
         return getRow("blueprintId", shellContext.getBlueprintId())
                 + getRow("credentialId", shellContext.getCredentialId())
                 + getRow("networkId", shellContext.getActiveNetworkId())
-                + getRow("securityGroupId", shellContext.getActiveSecurityGroupId())
                 + getRow("stackId", shellContext.getStackId())
                 + getRow("stackName", shellContext.getStackName())
                 + getRow("recipeId", shellContext.getRecipeId());

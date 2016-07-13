@@ -31,10 +31,10 @@ public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilde
                     .tenantId(context.getStringParameter(OpenStackConstants.TENANT_ID))
                     .networkId(context.getStringParameter(OpenStackConstants.NETWORK_ID))
                     .fixedIp(null, context.getStringParameter(OpenStackConstants.SUBNET_ID))
-                    .securityGroup(context.getStringParameter(OpenStackConstants.SECURITYGROUP_ID))
+                    .securityGroup(context.getGroupResources(group.getName()).get(0).getReference())
                     .build();
             port = osClient.networking().port().create(port);
-            return Collections.singletonList(createPersistedResource(resource, port.getId(), Collections.singletonMap(
+            return Collections.singletonList(createPersistedResource(resource, group.getName(), port.getId(), Collections.singletonMap(
                     OpenStackConstants.PORT_ID, port.getId())));
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Port creation failed", resourceType(), resource.getName(), ex);

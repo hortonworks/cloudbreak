@@ -49,7 +49,8 @@ public class CloudFormationTemplateBuilder {
                             encrypted.equals(Boolean.TRUE),
                             instanceTemplate.getVolumeSize(),
                             instanceTemplate.getVolumeType(),
-                            getSpotPrice(instanceTemplate)
+                            getSpotPrice(instanceTemplate),
+                            group.getSecurity().getRules()
                     )
             );
         }
@@ -57,7 +58,6 @@ public class CloudFormationTemplateBuilder {
         model.put("existingVPC", context.existingVPC);
         model.put("existingIGW", context.existingIGW);
         model.put("existingSubnet", isNoneEmpty(context.existingSubnetCidr));
-        model.put("securityRules", context.stack.getCloudSecurity());
         model.put("enableInstanceProfile", context.enableInstanceProfile || context.s3RoleAvailable);
         model.put("existingRole", context.s3RoleAvailable);
         model.put("cbSubnet", isBlank(context.existingSubnetCidr) ? context.stack.getNetwork().getSubnet().getCidr() : context.existingSubnetCidr);
@@ -71,7 +71,8 @@ public class CloudFormationTemplateBuilder {
             model.put("roleName", awsInstanceProfileView.getS3Role());
         }
         try {
-            return processTemplateIntoString(freemarkerConfiguration.getTemplate(context.templatePath, "UTF-8"), model);
+            String template = processTemplateIntoString(freemarkerConfiguration.getTemplate(context.templatePath, "UTF-8"), model);
+            return template.replaceAll("\\t|\\n| [\\s]+", "");
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process CloudFormation freemarker template", e);
         }

@@ -152,17 +152,10 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="form-group">
-                                                    <label class="col-sm-2 control-label" for="sl_sg_active">Security Group: </label>
-                                                    <div class="templateselect col-sm-9">
-                                                        <a id="sl_sg_active" class="templateselect form-control-static review-a" ng-repeat="securitygroup in $root.securitygroups|filter: { id: group.securityGroupId }:true" segment="#panel-template-collapse{{securitygroup.id}}">{{securitygroup.name}}</a>
-                                                    </div>
-                                                </div>
-
-                                                <div class="form-group" ng-show="activeCluster.securityGroupId">
+                                                <div class="form-group" ng-show="group.securityGroupId">
                                                     <label class="col-sm-2 control-label" for="sl_securitygroup_active">{{msg.cluster_form_securitygroup_label}}: </label>
                                                     <div class="securitygroupselect col-sm-9">
-                                                        <a id="sl_securitygroup_active" class="securitygroupselect form-control-static review-a" ng-repeat="securitygroup in $root.securitygroups|filter: { id: $root.activeCluster.securityGroupId }:true" segment="#panel-securitygroup-collapse{{securitygroup.id}}">{{securitygroup.name}}</a>
+                                                        <a id="sl_securitygroup_active" class="securitygroupselect form-control-static review-a" ng-repeat="securitygroup in $root.securitygroups|filter: { id: group.securityGroupId }:true" segment="#panel-securitygroup-collapse{{securitygroup.id}}">{{securitygroup.name}}</a>
                                                     </div>
                                                 </div>
                                                 <div class="form-group">

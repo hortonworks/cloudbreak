@@ -123,7 +123,7 @@
                 <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureReview')">{{msg.cluster_form_ambari_launch_tag}} <i class="fa fa-angle-double-right"></i></button>
             </div>
             <div class="btn-group" role="group" ng-show="showAdvancedOptionForm">
-                <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.securityGroupId || !cluster.networkId || !cluster.blueprintId" ng-click="showWizardActualElement('configureFailureAction')">{{msg.cluster_form_ambari_failure_tag}} <i class="fa fa-angle-double-right"></i></button>
+                <button type="button" class="btn btn-sm btn-default" ng-disabled="!cluster.name || !cluster.region || !cluster.networkId || !cluster.blueprintId" ng-click="showWizardActualElement('configureFailureAction')">{{msg.cluster_form_ambari_failure_tag}} <i class="fa fa-angle-double-right"></i></button>
             </div>
         </div>
     </div>

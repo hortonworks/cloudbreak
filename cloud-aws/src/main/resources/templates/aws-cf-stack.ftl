@@ -348,7 +348,7 @@
 			</#list>
       	],
         "ImageId"        : { "Ref" : "AMI" },
-        "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
+        "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" } ],
         "InstanceType"   : "${group.flavor}",
         "KeyName"        : { "Ref" : "KeyName" },
         <#if group.spotPrice??>
@@ -362,9 +362,8 @@
         </#if>
       }
     },
-    </#list>
 
-    "ClusterNodeSecurityGroup" : {
+    "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Allow access from web and bastion as well as outbound HTTP and HTTPS traffic",
@@ -374,18 +373,18 @@
         "VpcId" : { "Ref" : "VPC" },
         </#if>
         "SecurityGroupIngress" : [
-          <#list securityRules.rules as r>
+          <#list group.rules as r>
             <#list r.ports as p>
-                { "IpProtocol" : "${r.protocol}", "FromPort" : "${p}", "ToPort" : "${p}", "CidrIp" : "${r.cidr}"} ,
+              { "IpProtocol" : "${r.protocol}", "FromPort" : "${p}", "ToPort" : "${p}", "CidrIp" : "${r.cidr}"} ,
             </#list>
-		  </#list>
-		  { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "${cbSubnet}"} ,
-          { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${cbSubnet}"} ,
-          { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${cbSubnet}"}
+          </#list>
+        { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "${cbSubnet}"} ,
+        { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${cbSubnet}"} ,
+        { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${cbSubnet}"}
         ]
       }
-    }
-    
+    }<#if (group_index + 1) != instanceGroups?size>,</#if>
+    </#list>
   }
   
   <#if mapPublicIpOnLaunch>

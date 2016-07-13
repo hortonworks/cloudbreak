@@ -11,8 +11,6 @@ public enum Hints {
     ADD_BLUEPRINT("Add a blueprint with the 'blueprint add' command"),
     SELECT_BLUEPRINT("Add a blueprint with the 'blueprint add' command or select an existing one with 'blueprint select'"),
     SELECT_NETWORK("Use 'network list' to list available networks, a network could be selected by 'network select' or created by 'network create' command"),
-    SELECT_SECURITY_GROUP("Use 'securitygroup list' to list the available security groups, a group could be selected by 'securitygroup select'"
-            + " or created by 'securitygroup create' command"),
     CREATE_STACK("Create a stack based on a template with the 'stack create' command"),
     SELECT_STACK("Create a stack based on a template with the 'stack create' command or select an existing one with 'stack select'"),
     CREATE_CLUSTER("Create a cluster with the 'cluster create' command or configure the recipes with 'hostgroup configure' command"),

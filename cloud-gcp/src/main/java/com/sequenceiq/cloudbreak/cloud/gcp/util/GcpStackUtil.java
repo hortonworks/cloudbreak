@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
@@ -219,6 +220,10 @@ public final class GcpStackUtil {
 
     public static String getClusterTag(CloudContext cloudContext) {
         return cloudContext.getName() + cloudContext.getId();
+    }
+
+    public static String getGroupClusterTag(CloudContext cloudContext, Group group) {
+        return group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "") + cloudContext.getId();
     }
 
     private static String[] createParts(String splittable) {

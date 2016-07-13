@@ -53,7 +53,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
         boolean assignFloatingIp = assignFloatingIp(stack);
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
         String heatTemplate = heatTemplateBuilder.build(
-                stackName, stack.getGroups(), stack.getCloudSecurity(), stack.getImage(), existingNetwork, existingSubnetCidr != null, assignFloatingIp);
+                stackName, stack.getGroups(), stack.getImage(), existingNetwork, existingSubnetCidr != null, assignFloatingIp);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
                 authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
 
@@ -129,7 +129,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
         boolean assignFloatingIp = assignFloatingIp(stack);
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
         String heatTemplate = heatTemplateBuilder.build(
-                stackName, stack.getGroups(), stack.getCloudSecurity(), stack.getImage(), existingNetwork, existingSubnetCidr != null, assignFloatingIp);
+                stackName, stack.getGroups(), stack.getImage(), existingNetwork, existingSubnetCidr != null, assignFloatingIp);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
                 authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
@@ -143,7 +143,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
         boolean assignFloatingIp = assignFloatingIp(stack);
         String existingSubnetCidr = getExistingSubnetCidr(auth, stack);
         String heatTemplate = heatTemplateBuilder.build(
-                stackName, stack.getGroups(), stack.getCloudSecurity(), stack.getImage(), existingNetwork, existingSubnetCidr != null, assignFloatingIp);
+                stackName, stack.getGroups(), stack.getImage(), existingNetwork, existingSubnetCidr != null, assignFloatingIp);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
                 auth, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
         return updateHeatStack(auth, resources, heatTemplate, parameters);
@@ -156,7 +156,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
         boolean assignFloatingIp = assignFloatingIp(stack);
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
         String heatTemplate = heatTemplateBuilder.build(
-                stackName, stack.getGroups(), stack.getCloudSecurity(), stack.getImage(), existingNetwork, existingSubnetCidr != null, assignFloatingIp);
+                stackName, stack.getGroups(), stack.getImage(), existingNetwork, existingSubnetCidr != null, assignFloatingIp);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
                 authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);

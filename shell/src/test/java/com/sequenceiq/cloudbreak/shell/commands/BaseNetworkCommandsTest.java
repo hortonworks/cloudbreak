@@ -139,7 +139,7 @@ public class BaseNetworkCommandsTest {
     private NetworkJson networkJson() {
         NetworkJson networkJson = new NetworkJson();
         networkJson.setName("test1");
-        networkJson.setId("50");
+        networkJson.setId(50L);
         return networkJson;
     }
 

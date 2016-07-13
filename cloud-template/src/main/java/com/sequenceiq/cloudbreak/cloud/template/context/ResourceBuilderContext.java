@@ -17,6 +17,7 @@ public class ResourceBuilderContext extends DynamicModel {
     private String name;
     private int parallelResourceRequest;
     private Queue<CloudResource> networkResources = new ConcurrentLinkedQueue<>();
+    private Map<String, List<CloudResource>> groupResources = new HashMap<>();
     private Map<Long, List<CloudResource>> computeResources = new HashMap<>();
     private boolean build;
 
@@ -53,6 +54,19 @@ public class ResourceBuilderContext extends DynamicModel {
 
     public void addNetworkResources(List<CloudResource> resources) {
         this.networkResources.addAll(resources);
+    }
+
+    public List<CloudResource> getGroupResources(String groupName) {
+        return groupResources.get(groupName);
+    }
+
+    public synchronized void addGroupResources(String groupName, List<CloudResource> resources) {
+        List<CloudResource> list = groupResources.get(groupName);
+        if (list == null) {
+            list = new ArrayList<>();
+            groupResources.put(groupName, list);
+        }
+        list.addAll(resources);
     }
 
     public synchronized void addComputeResources(long index, List<CloudResource> resources) {

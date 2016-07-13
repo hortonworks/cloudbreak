@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.context;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
                         openStackContext.putParameter(OpenStackConstants.NETWORK_ID, resource.getReference());
                         break;
                     case OPENSTACK_SECURITY_GROUP:
-                        openStackContext.putParameter(OpenStackConstants.SECURITYGROUP_ID, resource.getReference());
+                        openStackContext.addGroupResources(resource.getGroup(), Arrays.asList(resource));
                         break;
                     default:
                         LOGGER.debug("Resource is not used during context build: {}", resource);

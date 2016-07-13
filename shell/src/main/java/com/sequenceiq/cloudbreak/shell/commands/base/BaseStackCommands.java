@@ -232,7 +232,6 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         return shellContext.isCredentialAvailable()
                 && shellContext.getActiveCloudPlatform().equals(platform)
                 && shellContext.getActiveNetworkId() != null
-                && shellContext.getActiveSecurityGroupId() != null
                 && (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
                 && shellContext.getActiveHostGroups().size() != 0) && !shellContext.isMarathonMode();
     }
@@ -243,7 +242,6 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             String platform, String ambariVersion, String hdpVersion, Map<String, String> params) {
         try {
             validateNetwork();
-            validateSecurityGroup();
             validateRegion(region);
             validateInstanceGroups();
             validateAvailabilityZone(region, availabilityZone);
@@ -280,7 +278,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 instanceGroupJson.setTemplateId(instanceGroupEntry.getTemplateId());
                 instanceGroupJson.setNodeCount(instanceGroupEntry.getNodeCount());
                 instanceGroupJson.setGroup(stringObjectEntry.getKey());
-                instanceGroupJson.setSecurityGroupId(Long.valueOf(shellContext.getActiveSecurityGroupId()));
+                instanceGroupJson.setSecurityGroupId(instanceGroupEntry.getSecurityGroupId());
                 instanceGroupJsonList.add(instanceGroupJson);
             }
             stackRequest.setInstanceGroups(instanceGroupJsonList);
@@ -531,13 +529,6 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         Long networkId = shellContext.getActiveNetworkId();
         if (networkId == null || !shellContext.getNetworksByProvider().get(networkId).equals(shellContext.getActiveCloudPlatform())) {
             throw new ValidationException("A network must be selected with the same cloud platform as the credential!");
-        }
-    }
-
-    private void validateSecurityGroup() {
-        Long securityGroupId = shellContext.getActiveSecurityGroupId();
-        if (securityGroupId == null) {
-            throw new ValidationException("A security group must be selected");
         }
     }
 

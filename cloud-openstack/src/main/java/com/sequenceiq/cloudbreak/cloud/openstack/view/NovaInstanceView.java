@@ -62,6 +62,10 @@ public class NovaInstanceView {
         }
     }
 
+    public InstanceTemplate getInstance() {
+        return instance;
+    }
+
     private Map<String, String> generateMetadata() {
         Map<String, String> metadata = new HashMap<>();
         metadata.put(OpenStackUtils.CB_INSTANCE_GROUP_NAME, instance.getGroupName());
