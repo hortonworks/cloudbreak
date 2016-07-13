@@ -430,14 +430,18 @@ public class TestUtil {
         return configs;
     }
 
-    public static Blueprint blueprint() {
+    public static Blueprint blueprint(String name) {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
         blueprint.setBlueprintText("{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
-        blueprint.setName("multi-node-yarn");
+        blueprint.setName(name);
         blueprint.setBlueprintName("multi-node-yarn");
         blueprint.setStatus(ResourceStatus.DEFAULT);
         return blueprint;
+    }
+
+    public static Blueprint blueprint() {
+        return blueprint("multi-node-yarn");
     }
 
     public static List<CloudbreakUsage> generateAzureCloudbreakUsages(int count) {
