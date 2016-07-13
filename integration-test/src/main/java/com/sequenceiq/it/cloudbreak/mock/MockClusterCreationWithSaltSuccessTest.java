@@ -7,6 +7,7 @@ import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.put;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -44,6 +46,8 @@ import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
+import com.sequenceiq.it.util.ServerAddressGenerator;
+import com.sequenceiq.it.verification.Verification;
 
 
 public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrationTest {
@@ -103,6 +107,15 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
 
+        verifyCalls(numberOfServers);
+    }
+
+    private void verifyCalls(int numberOfServers) {
+        verify(SALT_BOOT_ROOT + "/health", "GET").exactTimes(1).verify();
+        Verification distributeVerification = verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").exactTimes(1);
+        new ServerAddressGenerator(numberOfServers).iterateOver(address -> distributeVerification.bodyContains("address\":\"" + address));
+        distributeVerification.verify();
+
         verify(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", "GET").exactTimes(1).verify();
         verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
         verify(AMBARI_API_ROOT + "/check", "GET").exactTimes(1).verify();
@@ -123,7 +136,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").bodyContains("recipes").exactTimes(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").atLeast(2).verify();
 
-        verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(1).verify();
+        verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(2).verify();
     }
 
     private void addAmbariMappings(int numberOfServers) {
@@ -143,6 +156,11 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
 
     private void addSaltMappings(int numberOfServers) {
         ObjectMapper objectMapper = new ObjectMapper();
+        get(SALT_BOOT_ROOT + "/health", (request, response) -> {
+            GenericResponse genericResponse = new GenericResponse();
+            genericResponse.setStatusCode(HttpStatus.OK.value());
+            return genericResponse;
+        }, gson()::toJson);
         objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
         post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(numberOfServers));
         post(SALT_BOOT_ROOT + "/file", (request, response) -> {
@@ -153,6 +171,23 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
             GenericResponse genericResponse = new GenericResponse();
             genericResponse.setStatusCode(HttpStatus.OK.value());
             return genericResponse;
+        }, gson()::toJson);
+        post(SALT_BOOT_ROOT + "/salt/action/distribute", (request, response) -> {
+            GenericResponses genericResponses = new GenericResponses();
+            genericResponses.setResponses(new ArrayList<>());
+            return genericResponses;
+        }, gson()::toJson);
+        post(SALT_BOOT_ROOT + "/hostname/distribute", (request, response) -> {
+            GenericResponses genericResponses = new GenericResponses();
+            ArrayList<GenericResponse> responses = new ArrayList<>();
+            new ServerAddressGenerator(numberOfServers).iterateOver(address -> {
+                GenericResponse genericResponse = new GenericResponse();
+                genericResponse.setAddress(address);
+                genericResponse.setStatus("host-" + address.replace(".", "-"));
+                responses.add(genericResponse);
+            });
+            genericResponses.setResponses(responses);
+            return genericResponses;
         }, gson()::toJson);
     }
 
