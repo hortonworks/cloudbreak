@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Iterator;
 
 import javax.inject.Inject;
 
@@ -18,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -26,6 +26,9 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
 
     @Inject
     private JsonHelper jsonHelper;
+
+    @Inject
+    private BlueprintUtils blueprintUtils;
 
     @Override
     public Blueprint convert(BlueprintRequest json) {
@@ -48,8 +51,8 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         blueprint.setStatus(ResourceStatus.USER_MANAGED);
         try {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
-            blueprint.setBlueprintName(getBlueprintName(root));
-            blueprint.setHostGroupCount(countHostGroups(root));
+            blueprint.setBlueprintName(blueprintUtils.getBlueprintName(root));
+            blueprint.setHostGroupCount(blueprintUtils.countHostGroups(root));
         } catch (IOException e) {
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
         }
@@ -66,8 +69,8 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         validateBlueprint(blueprint.getBlueprintText());
         try {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
-            blueprint.setBlueprintName(getBlueprintName(root));
-            blueprint.setHostGroupCount(countHostGroups(root));
+            blueprint.setBlueprintName(blueprintUtils.getBlueprintName(root));
+            blueprint.setHostGroupCount(blueprintUtils.countHostGroups(root));
         } catch (IOException e) {
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
         }
@@ -75,19 +78,7 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         return blueprint;
     }
 
-    private String getBlueprintName(JsonNode root) {
-        return root.get("Blueprints").get("blueprint_name").asText();
-    }
 
-    private int countHostGroups(JsonNode root) {
-        int hostGroupCount = 0;
-        Iterator<JsonNode> hostGroups = root.get("host_groups").elements();
-        while (hostGroups.hasNext()) {
-            hostGroups.next();
-            hostGroupCount++;
-        }
-        return hostGroupCount;
-    }
 
     private String readUrl(String url) throws IOException {
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
