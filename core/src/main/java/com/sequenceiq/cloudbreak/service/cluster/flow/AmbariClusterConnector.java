@@ -217,7 +217,7 @@ public class AmbariClusterConnector {
 
             recipeEngine.executePostInstall(stack);
 
-            executeSmokeTest(stack, ambariClient);
+//            executeSmokeTest(stack, ambariClient);
             //TODO https://hortonworks.jira.com/browse/BUG-51920
             startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
             triggerSmartSenseCapture(ambariClient, blueprintText);
