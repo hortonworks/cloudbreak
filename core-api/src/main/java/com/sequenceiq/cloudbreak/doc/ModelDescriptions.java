@@ -107,6 +107,16 @@ public class ModelDescriptions {
         public static final String AMBARI_REPO_GPG_KEY = "gpg key of the Ambari repository";
     }
 
+    public static class AmbariDatabaseDetailsDescription {
+        public static final String VENDOR = "vendor of the Ambari database";
+        public static final String NAME = "name of the Ambari database";
+        public static final String HOST = "host of the Ambari database";
+        public static final String PORT = "port of the Ambari database";
+        public static final String SCHEMA = "schema of the Ambari database";
+        public static final String USER_NAME = "user name for the Ambari database";
+        public static final String PASSWORD = "password for the Ambari database";
+    }
+
     public static class AmbariStackDetailsDescription {
         public static final String STACK = "name of the stack, like HDP";
         public static final String VERSION = "version of the stack";

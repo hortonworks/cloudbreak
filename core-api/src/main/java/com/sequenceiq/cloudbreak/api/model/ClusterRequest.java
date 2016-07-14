@@ -61,6 +61,8 @@ public class ClusterRequest {
     @Valid
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
     @Valid
+    private AmbariDatabaseDetailsJson ambariDatabaseDetailsJson;
+    @Valid
     private RDSConfigJson rdsConfigJson;
     @Valid
     private FileSystemRequest fileSystem;
@@ -179,6 +181,14 @@ public class ClusterRequest {
 
     public void setAmbariRepoDetailsJson(AmbariRepoDetailsJson ambariRepoDetailsJson) {
         this.ambariRepoDetailsJson = ambariRepoDetailsJson;
+    }
+
+    public AmbariDatabaseDetailsJson getAmbariDatabaseDetailsJson() {
+        return ambariDatabaseDetailsJson;
+    }
+
+    public void setAmbariDatabaseDetailsJson(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson) {
+        this.ambariDatabaseDetailsJson = ambariDatabaseDetailsJson;
     }
 
     public RDSConfigJson getRdsConfigJson() {

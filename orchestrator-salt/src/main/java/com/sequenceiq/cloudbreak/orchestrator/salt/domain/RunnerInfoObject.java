@@ -21,6 +21,10 @@ public class RunnerInfoObject {
     public RunnerInfoObject() {
     }
 
+    public RunnerInfoObject(boolean result) {
+        this.result = result;
+    }
+
     public String getComment() {
         return comment;
     }

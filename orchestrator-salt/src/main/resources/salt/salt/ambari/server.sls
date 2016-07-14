@@ -26,6 +26,9 @@ ambari-server:
   file.managed:
     - makedirs: True
     - source: salt://ambari/scripts/ambari-server-init.sh
+    - template: jinja
+    - context:
+      ambari_database: {{ ambari.ambari_database }}
     - mode: 744
 
 set_install_timeout:
