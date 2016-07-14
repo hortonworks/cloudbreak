@@ -351,7 +351,6 @@ cloudbreak:
         - "CB_AWS_AMI_MAP=$CB_AWS_AMI_MAP"
         - "CB_OPENSTACK_IMAGE=$CB_OPENSTACK_IMAGE"
         - "CB_HBM2DDL_STRATEGY=$CB_HBM2DDL_STRATEGY"
-        - "CB_HOST_ADDR=$CB_HOST_ADDR"
         - "CB_SMTP_SENDER_USERNAME=$CLOUDBREAK_SMTP_SENDER_USERNAME"
         - "CB_SMTP_SENDER_PASSWORD=$CLOUDBREAK_SMTP_SENDER_PASSWORD"
         - "CB_SMTP_SENDER_HOST=$CLOUDBREAK_SMTP_SENDER_HOST"
@@ -472,7 +471,7 @@ uluwatu:
         - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
     labels:
       - traefik.port=3000
-      - traefik.frontend.rule=Host:,$PUBLIC_IP
+      - traefik.frontend.rule=Host:$PUBLIC_IP,$(curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null)
       - traefik.backend=uluwatu-backend
       - traefik.frontend.priority=5
     ports:
