@@ -134,7 +134,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         if (StringUtils.hasLength(networkName)) {
             Long resourceId = endpoint.getPublic(networkName).getId();
             if (resourceId != null) {
-                itContext.putContextParam(CloudbreakITContextConstants.NETWORK_ID, resourceId);
+                itContext.putContextParam(CloudbreakITContextConstants.NETWORK_ID, resourceId.toString());
             }
         }
     }
