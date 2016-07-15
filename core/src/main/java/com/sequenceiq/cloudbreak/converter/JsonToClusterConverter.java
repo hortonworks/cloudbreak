@@ -4,11 +4,9 @@ import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
-import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -31,11 +29,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setKerberosPassword(source.getKerberosPassword());
         cluster.setLdapRequired(source.getLdapRequired());
         cluster.setConfigStrategy(source.getConfigStrategy());
-        AmbariStackDetailsJson ambariStackDetails = source.getAmbariStackDetails();
         cluster.setEnableShipyard(source.getEnableShipyard());
-        if (ambariStackDetails != null) {
-            cluster.setAmbariStackDetails(getConversionService().convert(ambariStackDetails, AmbariStackDetails.class));
-        }
         RDSConfigJson rdsConfigJson = source.getRdsConfigJson();
         if (rdsConfigJson != null) {
             cluster.setRdsConfig(getConversionService().convert(rdsConfigJson, RDSConfig.class));

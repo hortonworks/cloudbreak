@@ -81,14 +81,17 @@ public class ImageService {
             List<Component> components = new ArrayList<>();
             Image image;
             if (hdpInfo == null) {
-                image = new Image(imageName, userData, null, null);
+                image = new Image(imageName, userData);
             } else {
                 AmbariRepo ambariRepo = new AmbariRepo();
                 ambariRepo.setPredefined(Boolean.TRUE);
                 Component ambariRepoComponent = new Component(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(),
                         new Json(ambariRepo), stack);
                 components.add(ambariRepoComponent);
-                image = new Image(imageName, userData, hdpInfo.getRepo(), hdpInfo.getVersion());
+                Component hdpRepoComponent = new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
+                        new Json(hdpInfo.getRepo()), stack);
+                components.add(hdpRepoComponent);
+                image = new Image(imageName, userData);
             }
             Component component = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
             components.add(component);

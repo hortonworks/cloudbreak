@@ -14,7 +14,6 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
-import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 
@@ -40,18 +39,6 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "ambariStackDetails", "fileSystem", "sssdConfig", "certDir", "rdsConfig"));
-    }
-
-    @Test
-    public void testConvertWithAmbariStackDetails() {
-        // GIVEN
-        ClusterRequest clusterRequest = getRequest("stack/cluster-with-ambari-stack-details.json");
-        given(conversionService.convert(clusterRequest.getAmbariStackDetails(), AmbariStackDetails.class)).willReturn(new AmbariStackDetails());
-        // WHEN
-        Cluster result = underTest.convert(clusterRequest);
-        // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "fileSystem", "sssdConfig", "certDir", "rdsConfig"));
     }
 
     @Test

@@ -4,22 +4,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 
-public class JsonToAmbariStackDetailsConverterTest extends AbstractJsonConverterTest<AmbariStackDetailsJson> {
-
-    private JsonToAmbariStackDetailsConverter underTest;
+public class JsonToHDPRepoConverterTest extends AbstractJsonConverterTest<AmbariStackDetailsJson> {
+    private JsonToHDPRepoConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new JsonToAmbariStackDetailsConverter();
+        underTest = new JsonToHDPRepoConverter();
     }
 
     @Test
     public void testConvert() {
         // GIVEN
         // WHEN
-        AmbariStackDetails result = underTest.convert(getRequest("stack/ambari-stack-details.json"));
+        HDPRepo result = underTest.convert(getRequest("stack/ambari-stack-details.json"));
         // THEN
         assertAllFieldsNotNull(result);
     }

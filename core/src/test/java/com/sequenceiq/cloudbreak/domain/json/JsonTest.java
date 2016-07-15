@@ -17,9 +17,9 @@ public class JsonTest {
     public void testMembers() throws JsonProcessingException {
         Map<InstanceGroupType, String> userData = new HashMap<>();
         userData.put(InstanceGroupType.CORE, "CORE");
-        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, null, null);
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData);
         Json json = new Json(image);
-        Assert.assertEquals("{\"imageName\":\"cb-centos66-amb200-2015-05-25\",\"userdata\":{\"CORE\":\"CORE\"},\"hdpRepo\":null,\"hdpVersion\":null}",
+        Assert.assertEquals("{\"imageName\":\"cb-centos66-amb200-2015-05-25\",\"userdata\":{\"CORE\":\"CORE\"}}",
                 json.getValue());
     }
 
@@ -28,7 +28,7 @@ public class JsonTest {
     public void testMultipleSerialisation() throws IOException {
         Map<InstanceGroupType, String> userData = new HashMap<>();
         userData.put(InstanceGroupType.CORE, "CORE");
-        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, null, null);
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData);
         Json json = new Json(image);
         String expected = json.getValue();
         Image covertedAgain = json.get(Image.class);

@@ -128,9 +128,6 @@ public class Cluster implements ProvisionEntity {
     private Set<Container> containers = new HashSet<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private AmbariStackDetails ambariStackDetails;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private RDSConfig rdsConfig;
 
     @ManyToOne
@@ -309,14 +306,6 @@ public class Cluster implements ProvisionEntity {
 
     public void setSssdConfig(SssdConfig sssdConfig) {
         this.sssdConfig = sssdConfig;
-    }
-
-    public AmbariStackDetails getAmbariStackDetails() {
-        return ambariStackDetails;
-    }
-
-    public void setAmbariStackDetails(AmbariStackDetails ambariStackDetails) {
-        this.ambariStackDetails = ambariStackDetails;
     }
 
     public RDSConfig getRdsConfig() {

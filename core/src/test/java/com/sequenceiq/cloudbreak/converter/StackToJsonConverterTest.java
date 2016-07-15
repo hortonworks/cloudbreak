@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -50,7 +49,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
     public void setUp() throws CloudbreakImageNotFoundException {
         underTest = new StackToJsonConverter();
         MockitoAnnotations.initMocks(this);
-        when(imageService.getImage(anyLong())).thenReturn(new Image("testimage", new HashMap<>(), new HDPRepo(), "2.2.4"));
+        when(imageService.getImage(anyLong())).thenReturn(new Image("testimage", new HashMap<>()));
     }
 
     @Test
