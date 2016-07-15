@@ -67,12 +67,12 @@ public class AwsCommands implements CommandMarker {
         return basePlatformCommands.createPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = { "network create --AWS --NEW_SUBNET", "network create --AWS --NEW", "network create --AWS --EXISTING_SUBNET" })
+    @CliAvailabilityIndicator(value = {"network create --AWS --NEW_SUBNET", "network create --AWS --NEW", "network create --AWS --EXISTING_SUBNET"})
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = { "credential create --AWS", "template create --EC2" })
+    @CliAvailabilityIndicator(value = {"credential create --AWS", "template create --EC2"})
     public boolean createCredentialAvailable() {
         return baseCredentialCommands.createCredentialAvailable(PLATFORM);
     }
@@ -213,6 +213,7 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "adjustmentType", mandatory = false, help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
             @CliOption(key = "ambariVersion", mandatory = false, help = "Ambari version") String ambariVersion,
             @CliOption(key = "hdpVersion", mandatory = false, help = "HDP version") String hdpVersion,
+            @CliOption(key = "imageCatalog", mandatory = false, help = "custom image catalog URL") String imageCatalog,
             @CliOption(key = "threshold", mandatory = false, help = "threshold of failure") Long threshold,
             @CliOption(key = "platformVariant", mandatory = false, help = "select platform variant version") PlatformVariant platformVariant,
             @CliOption(key = "orchestrator", mandatory = false, help = "select orchestrator variant version") AwsOrchestratorType orchestratorType,
@@ -236,6 +237,7 @@ public class AwsCommands implements CommandMarker {
             return "Please specify the role for S3 connection if you are using 'USE_EXISTING' profile type.";
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold, false,
-                wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, params);
+                wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
+                ambariVersion, hdpVersion, imageCatalog, params);
     }
 }
