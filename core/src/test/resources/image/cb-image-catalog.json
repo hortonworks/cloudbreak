@@ -178,7 +178,7 @@
     {
       "ambari": {
         "cb_versions": [
-          "1.4"
+          "1.4-rc1"
         ],
         "version": "2.5.0.0-222",
         "repo": {
