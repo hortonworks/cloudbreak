@@ -71,8 +71,8 @@ public class GcpCommands implements CommandMarker {
         return basePlatformCommands.createPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = { "network create --GCP --NEW", "network create --GCP --NEW_SUBNET",
-            "network create --GCP --EXISTING_SUBNET", "network create --GCP --LEGACY" })
+    @CliAvailabilityIndicator(value = {"network create --GCP --NEW", "network create --GCP --NEW_SUBNET",
+            "network create --GCP --EXISTING_SUBNET", "network create --GCP --LEGACY"})
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM);
     }
@@ -228,6 +228,7 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "adjustmentType", help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
             @CliOption(key = "ambariVersion", help = "Ambari version") String ambariVersion,
             @CliOption(key = "hdpVersion", help = "HDP version") String hdpVersion,
+            @CliOption(key = "imageCatalog", help = "custom image catalog URL") String imageCatalog,
             @CliOption(key = "threshold", help = "threshold of failure") Long threshold,
             @CliOption(key = "orchestrator", help = "select orchestrator variant version") GcpOrchestratorType orchestratorType,
             @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
@@ -238,7 +239,8 @@ public class GcpCommands implements CommandMarker {
             availabilityZone = new StackAvailabilityZone(availabilityZonesByRegion.iterator().next());
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, params);
+                false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion,
+                hdpVersion, imageCatalog, params);
     }
 
 }

@@ -65,7 +65,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         }
     }
 
-    @CliAvailabilityIndicator({ "stack show --id", "stack show --name" })
+    @CliAvailabilityIndicator({"stack show --id", "stack show --name"})
     @Override
     public boolean showAvailable() {
         return !shellContext.isMarathonMode();
@@ -96,7 +96,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = { "stack delete --id", "stack delete --name" })
+    @CliAvailabilityIndicator(value = {"stack delete --id", "stack delete --name"})
     @Override
     public boolean deleteAvailable() {
         return !shellContext.isMarathonMode();
@@ -171,7 +171,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = { "stack select --id", "stack select --name" })
+    @CliAvailabilityIndicator(value = {"stack select --id", "stack select --name"})
     @Override
     public boolean selectAvailable() {
         return shellContext.isStackAccessible() && !shellContext.isMarathonMode();
@@ -223,7 +223,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @CliCommand(value = "stack select --name", help = "Delete the stack by its name")
     @Override
-    public String selectByName(@CliOption(key = "", mandatory = true)String name) throws Exception {
+    public String selectByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return select(null, name);
     }
 
@@ -239,7 +239,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @Override
     public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, Boolean publicInAccount, OnFailureAction onFailureAction,
             AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, Boolean wait, PlatformVariant platformVariant, String orchestrator,
-            String platform, String ambariVersion, String hdpVersion, Map<String, String> params) {
+            String platform, String ambariVersion, String hdpVersion, String imageCatalog, Map<String, String> params) {
         try {
             validateNetwork();
             validateRegion(region);
@@ -267,6 +267,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setParameters(params);
             stackRequest.setAmbariVersion(ambariVersion);
             stackRequest.setHdpVersion(hdpVersion);
+            stackRequest.setImageCatalog(imageCatalog);
             OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
             orchestratorRequest.setType(orchestrator);
             stackRequest.setOrchestrator(orchestratorRequest);
@@ -309,7 +310,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     }
 
-    @CliAvailabilityIndicator({ "stack node", "stack stop --id", "stack stop --name", "stack start --id", "stack start --name" })
+    @CliAvailabilityIndicator({"stack node", "stack stop --id", "stack stop --name", "stack start --id", "stack start --name"})
     public boolean nodeAvailable() {
         return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
     }
@@ -349,7 +350,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @CliCommand(value = "stack stop --name", help = "Stop the stack by its name")
-    public String stopByName(@CliOption(key = "", mandatory = true)String name) {
+    public String stopByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return stop(null, name);
     }
 
@@ -388,7 +389,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @CliCommand(value = "stack start --name", help = "Start the stack by its name")
-    public String startByName(@CliOption(key = "", mandatory = true)String name) {
+    public String startByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return start(null, name);
     }
 

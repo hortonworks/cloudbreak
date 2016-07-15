@@ -18,6 +18,8 @@ public class StackRequest extends StackBase {
     private String ambariVersion;
     @ApiModelProperty(value = StackModelDescription.HDP_VERSION)
     private String hdpVersion;
+    @ApiModelProperty(value = StackModelDescription.IMAGE_CATALOG)
+    private String imageCatalog;
 
     public OrchestratorRequest getOrchestrator() {
         return orchestrator;
@@ -41,5 +43,13 @@ public class StackRequest extends StackBase {
 
     public void setHdpVersion(String hdpVersion) {
         this.hdpVersion = hdpVersion;
+    }
+
+    public String getImageCatalog() {
+        return imageCatalog;
+    }
+
+    public void setImageCatalog(String imageCatalog) {
+        this.imageCatalog = imageCatalog;
     }
 }

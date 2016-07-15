@@ -64,7 +64,7 @@ public class OpenStackCommands implements CommandMarker {
         return basePlatformCommands.createPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = { "network create --OPENSTACK --NEW", "network create --OPENSTACK --EXISTING", "network create --OPENSTACK --NEW_SUBNET" })
+    @CliAvailabilityIndicator(value = {"network create --OPENSTACK --NEW", "network create --OPENSTACK --EXISTING", "network create --OPENSTACK --NEW_SUBNET"})
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM);
     }
@@ -229,6 +229,7 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "ambariVersion", help = "Ambari version") String ambariVersion,
             @CliOption(key = "hdpVersion", help = "HDP version") String hdpVersion,
+            @CliOption(key = "imageCatalog", help = "custom image catalog URL") String imageCatalog,
             @CliOption(key = "onFailureAction", help = "onFailureAction which is ROLLBACK or DO_NOTHING.") OnFailureAction onFailureAction,
             @CliOption(key = "adjustmentType", help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
             @CliOption(key = "threshold", help = "threshold of failure") Long threshold,
@@ -237,6 +238,7 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         Map<String, String> params = new HashMap<>();
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, params);
+                false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
+                ambariVersion, hdpVersion, imageCatalog, params);
     }
 }

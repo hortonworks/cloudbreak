@@ -16,13 +16,19 @@ public class ImageCatalogProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
 
-    @Value("${cb.image.catalog.url:}")
-    private String catalogUrl;
+    @Value("${cb.image.catalog.url}")
+    private String defaultCatalogUrl;
 
-    public CloudbreakImageCatalog getImageCatalog() {
-        if (catalogUrl == null) {
+    public CloudbreakImageCatalog getImageCatalog(String customImageCatalog) {
+        if (defaultCatalogUrl == null && customImageCatalog == null) {
+            LOGGER.warn("No image catalog was defined!");
             return null;
         }
+        String catalogUrl = defaultCatalogUrl;
+        if (customImageCatalog != null) {
+            catalogUrl = customImageCatalog;
+        }
+        LOGGER.info("Used Image Catalog: {}", catalogUrl);
         try {
             if (catalogUrl.startsWith("http")) {
                 Client client = RestClientUtil.get();
@@ -37,4 +43,7 @@ public class ImageCatalogProvider {
         return null;
     }
 
+    public String getDefaultCatalogUrl() {
+        return defaultCatalogUrl;
+    }
 }

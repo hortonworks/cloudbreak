@@ -199,6 +199,7 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "adjustmentType", help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
             @CliOption(key = "ambariVersion", help = "Ambari version") String ambariVersion,
             @CliOption(key = "hdpVersion", help = "HDP version") String hdpVersion,
+            @CliOption(key = "imageCatalog", help = "custom image catalog URL") String imageCatalog,
             @CliOption(key = "threshold", help = "threshold of failure") Long threshold,
             @CliOption(key = "diskPerStorage", help = "disk per Storage Account on Azure") Integer diskPerStorage,
             @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
@@ -235,6 +236,6 @@ public class AzureCommands implements CommandMarker {
                 params.put("persistentStorage", "cbstore");
             }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                relocateDocker, wait, platformVariant, orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, params);
+                relocateDocker, wait, platformVariant, orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, imageCatalog, params);
     }
 }

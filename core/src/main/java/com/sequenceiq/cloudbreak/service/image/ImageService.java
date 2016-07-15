@@ -56,7 +56,8 @@ public class ImageService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public void create(Stack stack, PlatformParameters params, String ambariVersion, String hdpVersion) {
+    public void create(Stack stack, PlatformParameters params, String ambariVersion, String hdpVersion, String imageCatalog)
+            throws CloudbreakImageNotFoundException {
         try {
             Platform platform = platform(stack.cloudPlatform());
             String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
@@ -66,7 +67,7 @@ public class ImageService {
             String publicSssKey = stack.getCredential().getPublicKey();
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, tmpSshKey, sshUser, params,
                     stack.getRelocateDocker() == null ? false : stack.getRelocateDocker());
-            HDPInfo hdpInfo = hdpInfoSearchService.searchHDPInfo(ambariVersion, hdpVersion);
+            HDPInfo hdpInfo = hdpInfoSearchService.searchHDPInfo(ambariVersion, hdpVersion, imageCatalog);
             if (hdpInfo != null) {
                 String specificImage = imageNameUtil.determineImageName(hdpInfo, platformString, stack.getRegion());
                 if (specificImage == null) {

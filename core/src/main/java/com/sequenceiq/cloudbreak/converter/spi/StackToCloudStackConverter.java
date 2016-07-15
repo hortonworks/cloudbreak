@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -28,12 +30,13 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 
 @Component
 public class StackToCloudStackConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackToCloudStackConverter.class);
 
     @Inject
     private SecurityRuleRepository securityRuleRepository;
@@ -54,14 +57,15 @@ public class StackToCloudStackConverter {
     }
 
     private CloudStack convert(Stack stack, Set<String> deleteRequestedInstances) {
+        Image image = null;
+        List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), deleteRequestedInstances);
         try {
-            List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), deleteRequestedInstances);
-            Image image = imageService.getImage(stack.getId());
-            Network network = buildNetwork(stack);
-            return new CloudStack(instanceGroups, network, image, stack.getParameters());
-        } catch (CloudbreakImageNotFoundException inf) {
-            throw new CloudbreakServiceException(inf);
+            image = imageService.getImage(stack.getId());
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.info(e.getMessage());
         }
+        Network network = buildNetwork(stack);
+        return new CloudStack(instanceGroups, network, image, stack.getParameters());
     }
 
     public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, Set<String> deleteRequests) {
