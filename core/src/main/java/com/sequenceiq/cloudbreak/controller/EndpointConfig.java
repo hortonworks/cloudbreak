@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.mapper.AccessDeniedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.AuthenticationCredentialsNotFoundExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.BadRequestExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.CloudbreakApiExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.ConstraintViolationExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.ConversionFailedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.DataIntegrityViolationExceptionMapper;
@@ -54,6 +55,7 @@ public class EndpointConfig extends ResourceConfig {
         register(AccessDeniedExceptionMapper.class);
         register(AuthenticationCredentialsNotFoundExceptionMapper.class);
         register(BadRequestExceptionMapper.class);
+        register(CloudbreakApiExceptionMapper.class);
         register(ConstraintViolationExceptionMapper.class);
         register(ConversionFailedExceptionMapper.class);
         register(DuplicatedKeyValueExceptionMapper.class);

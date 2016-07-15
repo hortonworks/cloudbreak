@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariCatalog;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakImageCatalog;
 import com.sequenceiq.cloudbreak.cloud.model.HDPInfo;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 
 @Service
 public class HdpInfoSearchService {
@@ -27,11 +28,18 @@ public class HdpInfoSearchService {
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
 
-    public HDPInfo searchHDPInfo(String ambariVersion, String hdpVersion) {
+    public HDPInfo searchHDPInfo(String ambariVersion, String hdpVersion, String imageCatalogUrl) throws CloudbreakImageNotFoundException {
         HDPInfo hdpInfo = null;
         if (ambariVersion != null && hdpVersion != null) {
-            CloudbreakImageCatalog imageCatalog = imageCatalogProvider.getImageCatalog();
+            CloudbreakImageCatalog imageCatalog = imageCatalogProvider.getImageCatalog(imageCatalogUrl);
             hdpInfo = prefixSearch(imageCatalog, cbVersion, ambariVersion, hdpVersion);
+            if (hdpInfo == null) {
+                throw new CloudbreakImageNotFoundException(
+                        String.format("Failed to determine VM image from catalog! Cloudbreak version: %s, "
+                                        + "Ambari version: %s, HDP Version: %s, Image Catalog Url: %s",
+                                cbVersion, ambariVersion, hdpVersion,
+                                imageCatalogUrl != null ? imageCatalogUrl : imageCatalogProvider.getDefaultCatalogUrl()));
+            }
         }
         return hdpInfo;
     }
