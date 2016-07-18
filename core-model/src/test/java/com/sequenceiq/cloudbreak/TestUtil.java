@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -213,8 +212,8 @@ public class TestUtil {
     public static Set<InstanceGroup> generateGcpInstanceGroups(int count) {
         Set<InstanceGroup> instanceGroups = new HashSet<>();
         instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, openstackTemplate(1L)));
-        for (int i = 0; i < count - 1; i++) {
-            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, openstackTemplate(1L)));
+        for (int i = 2; i < count + 1; i++) {
+            instanceGroups.add(instanceGroup(Integer.toUnsignedLong(i), InstanceGroupType.CORE, openstackTemplate(1L)));
         }
         return instanceGroups;
     }
@@ -248,18 +247,18 @@ public class TestUtil {
         return network;
     }
 
-    public static InstanceMetaData instanceMetaData(Long id, InstanceStatus instanceStatus, boolean ambariServer, InstanceGroup instanceGroup) {
-        Random random = new Random();
+    public static InstanceMetaData instanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
+            InstanceGroup instanceGroup) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(instanceStatus);
         instanceMetaData.setAmbariServer(ambariServer);
         instanceMetaData.setConsulServer(true);
         instanceMetaData.setSshPort(22);
-        instanceMetaData.setDiscoveryFQDN("test" + id);
-        instanceMetaData.setInstanceId("test" + id);
-        instanceMetaData.setPrivateIp("1.1.1." + (id + Math.abs(random.nextInt(255))));
-        instanceMetaData.setPublicIp("2.2.2." + (id + Math.abs(random.nextInt(255))));
-        instanceMetaData.setId(id);
+        instanceMetaData.setDiscoveryFQDN("test-" + instanceGroupId + "-" + serverNumber);
+        instanceMetaData.setInstanceId("test-" + instanceGroupId + "-" + serverNumber);
+        instanceMetaData.setPrivateIp("1.1." + instanceGroupId + "." + serverNumber);
+        instanceMetaData.setPublicIp("2.2." + instanceGroupId + "." + serverNumber);
+        instanceMetaData.setId(instanceGroupId + serverNumber);
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setStartDate(new Date().getTime());
         return instanceMetaData;
@@ -267,8 +266,8 @@ public class TestUtil {
 
     public static Set<InstanceMetaData> generateInstanceMetaDatas(int count, Long instanceGroupId, InstanceGroup instanceGroup) {
         Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
-        for (int i = 0; i < count; i++) {
-            instanceMetaDatas.add(instanceMetaData(i + instanceGroupId, InstanceStatus.REGISTERED,
+        for (int i = 1; i <= count; i++) {
+            instanceMetaDatas.add(instanceMetaData(Integer.toUnsignedLong(i), instanceGroupId, InstanceStatus.REGISTERED,
                     instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY), instanceGroup));
         }
         return instanceMetaDatas;

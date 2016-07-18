@@ -6,6 +6,7 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -112,6 +113,10 @@ public class ClusterBootstrapperTest {
 
     @Before
     public void setUp() throws CloudbreakException {
+        reset(stackRepository, orchestratorRepository, containerBootstrapApiPollingService, hostBootstrapApiPollingService, tlsSecurityService,
+                containerBootstrapApiCheckerTask, containerOrchestratorResolver, containerClusterAvailabilityPollingService,
+                hostClusterAvailabilityPollingService, containerClusterAvailabilityCheckerTask, clusterBootstrapperErrorHandler, hostOrchestratorResolver,
+                containerConfigService, orchestratorTypeResolver);
         when(orchestratorTypeResolver.resolveType(anyString())).thenReturn(OrchestratorType.CONTAINER);
         ReflectionTestUtils.setField(containerConfigService, "munchausenImageName", "sequence/testcont:0.1.1");
     }
@@ -148,7 +153,6 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenTimeOutComesInClusterAvailabilityPoller() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
-
         when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());

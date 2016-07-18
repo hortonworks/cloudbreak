@@ -27,14 +27,14 @@ public class MetaDataToJsonConverterTest extends AbstractEntityConverterTest<Ins
         // WHEN
         InstanceMetaDataJson result = underTest.convert(getSource());
         // THEN
-        assertEquals("test1", result.getDiscoveryFQDN());
+        assertEquals("test-1-1", result.getDiscoveryFQDN());
         assertTrue(result.getAmbariServer());
         assertAllFieldsNotNull(result);
     }
 
     @Override
     public InstanceMetaData createSource() {
-        return TestUtil.instanceMetaData(1L, InstanceStatus.REGISTERED, true,
+        return TestUtil.instanceMetaData(1L, 1L, InstanceStatus.REGISTERED, true,
                 TestUtil.instanceGroup(1L, InstanceGroupType.GATEWAY, TestUtil.gcpTemplate(1L)));
     }
 }

@@ -57,7 +57,7 @@ public class InstanceGroupToJsonConverterTest extends AbstractEntityConverterTes
     }
 
     private Set<InstanceMetaData> getInstanceMetaData(InstanceGroup instanceGroup) {
-        InstanceMetaData metadata = TestUtil.instanceMetaData(1L, InstanceStatus.REGISTERED, false, instanceGroup);
+        InstanceMetaData metadata = TestUtil.instanceMetaData(1L, 1L, InstanceStatus.REGISTERED, false, instanceGroup);
         return Sets.newHashSet(metadata);
     }
 }
