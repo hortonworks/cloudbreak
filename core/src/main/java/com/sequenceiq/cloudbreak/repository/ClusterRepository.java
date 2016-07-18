@@ -6,8 +6,8 @@ import java.util.Set;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 
 @EntityType(entityClass = Cluster.class)
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
@@ -26,4 +26,5 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     List<Cluster> findAllClustersForConstraintTemplate(@Param("id") Long id);
 
+    Set<Cluster> findAllClustersByRDSConfig(@Param("id") Long rdsConfigId);
 }

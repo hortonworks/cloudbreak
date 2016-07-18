@@ -14,16 +14,14 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 public class RdsConnectionValidator {
 
     public void validateRdsConnection(RDSConfigJson rdsConfigJson) {
-        if (rdsConfigJson != null) {
-            Properties connectionProps = new Properties();
-            connectionProps.put("user", rdsConfigJson.getConnectionUserName());
-            connectionProps.put("password", rdsConfigJson.getConnectionPassword());
-            try {
-                Connection conn = DriverManager.getConnection(rdsConfigJson.getConnectionURL(), connectionProps);
-                conn.close();
-            } catch (SQLException e) {
-                throw new BadRequestException("Failed to connect to RDS: " + e.getMessage(), e);
-            }
+        Properties connectionProps = new Properties();
+        connectionProps.put("user", rdsConfigJson.getConnectionUserName());
+        connectionProps.put("password", rdsConfigJson.getConnectionPassword());
+        try {
+            Connection conn = DriverManager.getConnection(rdsConfigJson.getConnectionURL(), connectionProps);
+            conn.close();
+        } catch (SQLException e) {
+            throw new BadRequestException("Failed to connect to RDS: " + e.getMessage(), e);
         }
     }
 }

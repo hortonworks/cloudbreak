@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -85,6 +87,9 @@ public class ClusterController implements ClusterEndpoint {
     private SssdConfigService sssdConfigService;
 
     @Autowired
+    private RdsConfigService rdsConfigService;
+
+    @Autowired
     private ComponentConfigProvider componentConfigProvider;
 
     @Override
@@ -100,10 +105,15 @@ public class ClusterController implements ClusterEndpoint {
             throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
         }
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), request.getFileSystem());
-        rdsConnectionValidator.validateRdsConnection(request.getRdsConfigJson());
+        validateRdsConfigParams(request);
+        if (request.getRdsConfigJson() != null) {
+            rdsConnectionValidator.validateRdsConnection(request.getRdsConfigJson());
+            RDSConfig rdsConfig = rdsConfigService.create(user, conversionService.convert(request.getRdsConfigJson(), RDSConfig.class));
+            request.setRdsConfigId(rdsConfig.getId());
+        }
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stackId, user, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
-                request.getSssdConfigId());
+                request.getSssdConfigId(), request.getRdsConfigId());
         if (cluster.isLdapRequired() && cluster.getSssdConfig() == null) {
             cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
         }
@@ -243,5 +253,11 @@ public class ClusterController implements ClusterEndpoint {
         LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}, password: {}",
                 stackId, userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
         clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
+    }
+
+    private void validateRdsConfigParams(ClusterRequest request) {
+        if (request.getRdsConfigJson() != null && request.getRdsConfigId() != null) {
+            throw new BadRequestException("Both rdsConfig and rdsConfigId cannot be set in the same request.");
+        }
     }
 }

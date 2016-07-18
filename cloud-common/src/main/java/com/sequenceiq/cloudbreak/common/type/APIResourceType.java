@@ -12,5 +12,6 @@ public enum APIResourceType {
     NETWORK,
     TOPOLOGY,
     SECURITY_GROUP,
-    CLUSTER_TEMPLATE
+    CLUSTER_TEMPLATE,
+    RDS_CONFIG
 }

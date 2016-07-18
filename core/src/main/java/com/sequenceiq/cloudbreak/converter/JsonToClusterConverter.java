@@ -7,11 +7,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 @Component
 public class JsonToClusterConverter extends AbstractConversionServiceAwareConverter<ClusterRequest, Cluster> {
@@ -37,10 +35,6 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             cluster.setAmbariStackDetails(getConversionService().convert(ambariStackDetails, AmbariStackDetails.class));
         }
         cluster.setEmailTo(source.getEmailTo());
-        RDSConfigJson rdsConfigJson = source.getRdsConfigJson();
-        if (rdsConfigJson != null) {
-            cluster.setRdsConfig(getConversionService().convert(rdsConfigJson, RDSConfig.class));
-        }
         FileSystemBase fileSystem = source.getFileSystem();
         if (fileSystem != null) {
             cluster.setFileSystem(getConversionService().convert(fileSystem, FileSystem.class));

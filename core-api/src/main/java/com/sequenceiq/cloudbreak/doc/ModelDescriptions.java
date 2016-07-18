@@ -99,6 +99,7 @@ public class ModelDescriptions {
         public static final String LDAP_REQUIRED = "flag for default LDAP support";
         public static final String SSSDCONFIG_ID = "SSSD config id for the cluster";
         public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
+        public static final String RDSCONFIG_ID = "RDS configuration id for the cluster";
     }
 
     public static class AmbariRepoDetailsDescription {
@@ -123,6 +124,7 @@ public class ModelDescriptions {
         public static final String DB_TYPE = "Type of the external database (allowed values: MYSQL, POSTGRES)";
         public static final String USERNAME = "Username to use for the jdbc connection";
         public static final String PASSWORD = "Password to use for the jdbc connection";
+        public static final String NAME = "Name of the RDS configuration resource";
     }
 
     public static class FileSystem {

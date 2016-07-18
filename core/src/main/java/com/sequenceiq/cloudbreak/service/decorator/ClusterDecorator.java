@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import javax.inject.Inject;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
@@ -11,13 +14,13 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterDecorator implements Decorator<Cluster> {
@@ -28,7 +31,8 @@ public class ClusterDecorator implements Decorator<Cluster> {
         BLUEPRINT_ID,
         HOSTGROUP_JSONS,
         VALIDATE_BLUEPRINT,
-        SSSDCONFIG_ID
+        SSSDCONFIG_ID,
+        RDSCONFIG_ID;
     }
 
     @Inject
@@ -48,6 +52,9 @@ public class ClusterDecorator implements Decorator<Cluster> {
 
     @Inject
     private SssdConfigService sssdConfigService;
+
+    @Inject
+    private RdsConfigService rdsConfigService;
 
     @Override
     public Cluster decorate(Cluster subject, Object... data) {
@@ -69,6 +76,11 @@ public class ClusterDecorator implements Decorator<Cluster> {
         if (data[DecorationData.SSSDCONFIG_ID.ordinal()] != null) {
             SssdConfig config = sssdConfigService.get((Long) data[DecorationData.SSSDCONFIG_ID.ordinal()]);
             subject.setSssdConfig(config);
+        }
+        Long rdsConfigId = (Long) data[DecorationData.RDSCONFIG_ID.ordinal()];
+        if (data[DecorationData.RDSCONFIG_ID.ordinal()] != null) {
+            RDSConfig rdsConfig = rdsConfigService.get(rdsConfigId);
+            subject.setRdsConfig(rdsConfig);
         }
         return subject;
     }

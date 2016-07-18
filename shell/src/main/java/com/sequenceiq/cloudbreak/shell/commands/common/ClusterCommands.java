@@ -170,6 +170,7 @@ public class ClusterCommands implements BaseCommands {
 
             if (connectionURL != null && connectionUserName != null && connectionPassword != null && databaseType != null) {
                 RDSConfigJson rdsConfigJson = new RDSConfigJson();
+                rdsConfigJson.setName(clusterRequest.getName());
                 rdsConfigJson.setConnectionURL(connectionURL);
                 rdsConfigJson.setDatabaseType(databaseType);
                 rdsConfigJson.setConnectionUserName(connectionUserName);

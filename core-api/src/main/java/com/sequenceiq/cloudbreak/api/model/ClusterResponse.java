@@ -43,7 +43,8 @@ public class ClusterResponse {
     private Long sssdConfigId;
     private Set<HostGroupJson> hostGroups;
     private AmbariStackDetailsJson ambariStackDetails;
-    private RDSConfigJson rdsConfigJson;
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_ID)
+    private Long rdsConfigId;
     @ApiModelProperty(ClusterModelDescription.SERVICE_ENDPOINT_MAP)
     private Map<String, String> serviceEndPoints = new HashMap<>();
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
@@ -180,12 +181,12 @@ public class ClusterResponse {
         this.ambariStackDetails = ambariStackDetails;
     }
 
-    public RDSConfigJson getRdsConfigJson() {
-        return rdsConfigJson;
+    public Long getRdsConfigId() {
+        return rdsConfigId;
     }
 
-    public void setRdsConfigJson(RDSConfigJson rdsConfigJson) {
-        this.rdsConfigJson = rdsConfigJson;
+    public void setRdsConfigId(Long rdsConfigId) {
+        this.rdsConfigId = rdsConfigId;
     }
 
     public String getUserName() {
