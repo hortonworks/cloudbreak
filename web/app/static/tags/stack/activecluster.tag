@@ -565,7 +565,7 @@
                             <div class="form-group">
                                 <label class="col-sm-4 control-label" for="newPassword">{{msg.cluster_form_ambari_old_password_label}}</label>
                                 <div class="col-sm-8">
-                                    <input type="password" name="oldPassword" class="form-control" id="oldPassword" ng-model="newCredential.oldPassword" placeholder="{{msg.cluster_form_ambari_password_placeholder}}" ng-minlength="5" ng-maxlength="50" required>
+                                    <input type="password" name="oldPassword" class="form-control" id="oldPassword" ng-model="newCredential.oldPassword" placeholder="{{msg.cluster_form_ambari_password_placeholder}}" ng-minlength="5" ng-maxlength="100" required>
                                 </div>
                             </div>
                         </div>
@@ -573,7 +573,7 @@
                             <div class="form-group">
                                 <label class="col-sm-4 control-label" for="newPassword">{{msg.cluster_form_ambari_new_password_label}}</label>
                                 <div class="col-sm-8">
-                                    <input type="password" name="newPassword" class="form-control" id="newPassword" ng-model="newCredential.newPassword" placeholder="{{msg.cluster_form_ambari_password_placeholder}}" ng-minlength="5" ng-maxlength="50" required>
+                                    <input type="password" name="newPassword" class="form-control" id="newPassword" ng-model="newCredential.newPassword" placeholder="{{msg.cluster_form_ambari_password_placeholder}}" ng-minlength="5" ng-maxlength="100" required>
                                 </div>
                             </div>
                         </div>
@@ -581,7 +581,7 @@
                             <div class="form-group" ng-class="{ 'has-error': changeCredential.newPasswordforce.$dirty && changeCredential.newPasswordforce.$invalid }">
                                 <label class="col-sm-4 control-label" for="newPasswordforce">{{msg.cluster_form_ambari_new_password_label}}</label>
                                 <div class="col-sm-8">
-                                    <input type="password" name="newPasswordforce" match="newCredential.newPassword" class="form-control" id="newPasswordforce" ng-model="newCredential.newPasswordforce" placeholder="{{msg.cluster_form_ambari_password_placeholder}}" ng-minlength="5" ng-maxlength="50" required>
+                                    <input type="password" name="newPasswordforce" match="newCredential.newPassword" class="form-control" id="newPasswordforce" ng-model="newCredential.newPasswordforce" placeholder="{{msg.cluster_form_ambari_password_placeholder}}" ng-minlength="5" ng-maxlength="100" required>
                                     <div class="help-block" ng-show="changeCredential.newPasswordforce.$dirty && changeCredential.newPasswordforce.$invalid"><i class="fa fa-warning"></i> {{msg.error_change_credentail_cluster}}
                                     </div>
                                 </div>

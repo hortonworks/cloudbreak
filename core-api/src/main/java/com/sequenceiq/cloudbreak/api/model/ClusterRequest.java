@@ -40,7 +40,7 @@ public class ClusterRequest {
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME, required = true)
     private String userName;
     @NotNull
-    @Size(max = 50, min = 5, message = "The length of the password has to be in range of 5 to 50")
+    @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
     private String password;
     @Size(max = 50, min = 3, message = "The length of the Kerberos password has to be in range of 3 to 50")
