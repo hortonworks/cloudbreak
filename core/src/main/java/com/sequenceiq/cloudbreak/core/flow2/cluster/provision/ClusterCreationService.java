@@ -81,7 +81,7 @@ public class ClusterCreationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_BUILT, AVAILABLE.name(), stack.getAmbariIp());
         emailSenderService.sendTelemetryMailIfNeeded(stack, AVAILABLE);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stack.getAmbariIp(), cluster.getName());
+            emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stack.getCluster().getEmailTo(), stack.getAmbariIp(), cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
     }
@@ -104,7 +104,7 @@ public class ClusterCreationService {
 
         emailSenderService.sendTelemetryMailIfNeeded(stack, CREATE_FAILED);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), cluster.getName());
+            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stack.getCluster().getEmailTo(), cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
     }

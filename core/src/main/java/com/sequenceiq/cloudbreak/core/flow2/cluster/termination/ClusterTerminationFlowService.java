@@ -51,7 +51,7 @@ public class ClusterTerminationFlowService {
         InMemoryStateStore.deleteCluster(cluster.getId());
         stackUpdater.updateStackStatus(cluster.getStack().getId(), AVAILABLE);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendTerminationSuccessEmail(cluster.getOwner(), cluster.getAmbariIp(), cluster.getName());
+            emailSenderService.sendTerminationSuccessEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
             flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_COMPLETED.name());
         }
     }
@@ -66,7 +66,7 @@ public class ClusterTerminationFlowService {
         clusterService.updateCluster(cluster);
         flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendTerminationFailureEmail(cluster.getOwner(), cluster.getAmbariIp(), cluster.getName());
+            emailSenderService.sendTerminationFailureEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
             flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
         }
     }

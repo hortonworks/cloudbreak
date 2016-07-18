@@ -43,7 +43,8 @@ public class ClusterStopService {
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "The Ambari cluster could not be stopped: " + errorReason);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOP_FAILED, Status.AVAILABLE.name(), errorReason);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), cluster.getName());
+            emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
+                    stack.getAmbariIp(), cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.STOP_FAILED.name());
         }
     }
