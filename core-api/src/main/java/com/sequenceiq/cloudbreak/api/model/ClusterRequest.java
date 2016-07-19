@@ -32,6 +32,8 @@ public class ClusterRequest {
     private Set<HostGroupJson> hostGroups;
     @ApiModelProperty(ClusterModelDescription.EMAIL_NEEDED)
     private Boolean emailNeeded = Boolean.FALSE;
+    @ApiModelProperty(ClusterModelDescription.EMAIL_TO)
+    private String emailTo;
     private Boolean enableSecurity = Boolean.FALSE;
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
@@ -225,5 +227,13 @@ public class ClusterRequest {
 
     public void setEnableShipyard(Boolean enableShipyard) {
         this.enableShipyard = enableShipyard;
+    }
+
+    public String getEmailTo() {
+        return emailTo;
+    }
+
+    public void setEmailTo(String emailTo) {
+        this.emailTo = emailTo;
     }
 }

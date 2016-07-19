@@ -92,6 +92,7 @@ public class ModelDescriptions {
         public static final String BLUEPRINT_ID = "blueprint id for the cluster";
         public static final String HOURS = "duration - how long the cluster is running in hours";
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";
+        public static final String EMAIL_TO = "send email to the requested address";
         public static final String EMAIL_NEEDED = "send email about the result of the cluster installation";
         public static final String SERVICE_ENDPOINT_MAP = "most important services in the cluster";
         public static final String CONFIG_STRATEGY = "config recommendation strategy";

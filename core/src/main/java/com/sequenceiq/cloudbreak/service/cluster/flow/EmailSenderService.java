@@ -19,6 +19,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -116,51 +117,51 @@ public class EmailSenderService {
     }
 
     @Async
-    public void sendProvisioningSuccessEmail(String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster installation", getEmailModel(user.getGivenName(),
+    public void sendProvisioningSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster installation", getEmailModel(user.getGivenName(),
                 ambariServer, State.PROVISIONING_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendProvisioningFailureEmail(String email, String clusterName) {
-        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, failedClusterMailTemplatePath, clusterName + " cluster installation", getEmailModel(user.getGivenName(),
+    public void sendProvisioningFailureEmail(String owner, String email, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, failedClusterMailTemplatePath, clusterName + " cluster installation", getEmailModel(user.getGivenName(),
                 null, State.PROVISIONING_FAILURE, clusterName));
     }
 
     @Async
-    public void sendStartSuccessEmail(String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster start", getEmailModel(user.getGivenName(),
+    public void sendStartSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster start", getEmailModel(user.getGivenName(),
                 ambariServer, State.START_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendStartFailureEmail(String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, failedClusterMailTemplatePath, clusterName + " cluster start", getEmailModel(user.getGivenName(),
+    public void sendStartFailureEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, failedClusterMailTemplatePath, clusterName + " cluster start", getEmailModel(user.getGivenName(),
                 ambariServer, State.START_FAILURE, clusterName));
     }
 
     @Async
-    public void sendStopSuccessEmail(String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster stop", getEmailModel(user.getGivenName(),
+    public void sendStopSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster stop", getEmailModel(user.getGivenName(),
                 ambariServer, State.STOP_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendStopFailureEmail(String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, failedClusterMailTemplatePath, clusterName + " cluster stop", getEmailModel(user.getGivenName(),
+    public void sendStopFailureEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, failedClusterMailTemplatePath, clusterName + " cluster stop", getEmailModel(user.getGivenName(),
                 ambariServer, State.STOP_FAILURE, clusterName));
     }
 
     @Async
-    public void sendUpscaleSuccessEmail(String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster upscale", getEmailModel(user.getGivenName(),
+    public void sendUpscaleSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster upscale", getEmailModel(user.getGivenName(),
                 ambariServer, State.UPSCALE_SUCCESS, clusterName));
     }
 
@@ -235,32 +236,32 @@ public class EmailSenderService {
     }
 
     @Async
-    public void sendDownScaleSuccessEmail(String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster downscale", getEmailModel(user.getGivenName(),
+    public void sendDownScaleSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster downscale", getEmailModel(user.getGivenName(),
                 ambariServer, State.DOWN_SCALE_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendTerminationSuccessEmail(String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, successClusterMailTemplatePath, clusterName + " cluster termination", getEmailModel(user.getGivenName(),
+    public void sendTerminationSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster termination", getEmailModel(user.getGivenName(),
                 ambariServer, State.TERMINATION_SUCCESS, clusterName));
     }
 
     @Async
-    public void sendTerminationFailureEmail(String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(email, UserFilterField.USERID);
-        sendEmail(user, failedClusterMailTemplatePath, clusterName + " cluster termination", getEmailModel(user.getGivenName(),
+    public void sendTerminationFailureEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, failedClusterMailTemplatePath, clusterName + " cluster termination", getEmailModel(user.getGivenName(),
                 ambariServer, State.TERMINATION_FAILURE, clusterName));
     }
 
 
-    private void sendEmail(CbUser user, String template, String subject, Map<String, Object> model) {
+    private void sendEmail(CbUser user, String mail, String template, String subject, Map<String, Object> model) {
         try {
             String emailBody = processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
             LOGGER.debug("Sending email. Content: {}", emailBody);
-            mailSender.send(emailMimeMessagePreparator.prepareMessage(user, String.format("Cloudbreak - %s", subject), emailBody));
+            mailSender.send(emailMimeMessagePreparator.prepareMessage(Strings.isNullOrEmpty(mail) ? user.getUsername() : mail, subject, emailBody));
         } catch (Exception e) {
             LOGGER.error("Could not send email. User: {}", user.getUserId());
             throw new CloudbreakServiceException(e);
