@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
@@ -11,8 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -25,9 +21,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
@@ -89,23 +85,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         ClusterResponse result = underTest.convert(getSource());
         // THEN
         assertEquals(1L, (long) result.getId());
-        assertNotNull(result.getAmbariStackDetails());
-        assertAllFieldsNotNull(result, Collections.singletonList("cluster"));
-    }
-
-    @Test
-    public void testConvertWithoutAmbariStackDetails() throws IOException {
-        // GIVEN
-        mockAll();
-        getSource().setAmbariStackDetails(null);
-        getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
-        given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
-        // WHEN
-        ClusterResponse result = underTest.convert(getSource());
-        // THEN
-        assertEquals(1L, (long) result.getId());
-        assertNull(result.getAmbariStackDetails());
-        assertAllFieldsNotNull(result, Arrays.asList("ambariStackDetails", "cluster"));
+        assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "ambariStackDetails"));
     }
 
     @Test
@@ -129,7 +109,6 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         ClusterResponse result = underTest.convert(getSource());
         // THEN
         assertEquals(1L, (long) result.getId());
-        assertNotNull(result.getAmbariStackDetails());
     }
 
     @Test
@@ -156,7 +135,6 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         given(jsonNode.iterator()).willReturn(mockIterator);
         given(mockIterator.hasNext()).willReturn(true).willReturn(false);
         given(mockIterator.next()).willReturn(jsonNode);
-        given(conversionService.convert(getSource().getAmbariStackDetails(), AmbariStackDetailsJson.class)).willReturn(new AmbariStackDetailsJson());
         given(conversionService.convert(getSource().getRdsConfig(), RDSConfigJson.class)).willReturn(new RDSConfigJson());
         given(blueprintValidator.getHostGroupName(jsonNode)).willReturn("slave_1");
         given(blueprintValidator.createHostGroupMap(any(Set.class))).willReturn(hostGroupMap);

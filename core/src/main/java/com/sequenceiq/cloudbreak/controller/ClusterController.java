@@ -24,13 +24,13 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -109,6 +109,7 @@ public class ClusterController implements ClusterEndpoint {
         }
         List<Component> components = new ArrayList<>();
         components = addAmbariRepoConfig(components, request, stack);
+        components = addHDPRepoConfig(components, request, stack);
         clusterService.create(user, stackId, cluster, components);
         return Response.status(Response.Status.ACCEPTED).build();
     }
@@ -195,6 +196,18 @@ public class ClusterController implements ClusterEndpoint {
         return components;
     }
 
+    private List<Component> addHDPRepoConfig(List<Component> components, ClusterRequest request, Stack stack) throws JsonProcessingException {
+        if (componentConfigProvider.getHDPRepo(stack.getId()) == null) {
+            AmbariStackDetailsJson ambariStackDetailsJson = request.getAmbariStackDetails();
+            if (ambariStackDetailsJson != null) {
+                HDPRepo hdpRepo = conversionService.convert(ambariStackDetailsJson, HDPRepo.class);
+                Component component = new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(), new Json(hdpRepo), stack);
+                components.add(component);
+            }
+        }
+        return components;
+    }
+
     private void clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterJson updateJson, Stack stack)
             throws CloudbreakSecuritySetupException {
         if (!stack.isAvailable()) {
@@ -222,11 +235,11 @@ public class ClusterController implements ClusterEndpoint {
             hostGroups.add(hostGroup);
         }
         AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();
-        AmbariStackDetails ambariStackDetails = null;
+        HDPRepo hdpRepo = null;
         if (stackDetails != null) {
-            ambariStackDetails = conversionService.convert(stackDetails, AmbariStackDetails.class);
+            hdpRepo = conversionService.convert(stackDetails, HDPRepo.class);
         }
-        clusterService.recreate(stackId, updateJson.getBlueprintId(), hostGroups, updateJson.getValidateBlueprint(), ambariStackDetails);
+        clusterService.recreate(stackId, updateJson.getBlueprintId(), hostGroups, updateJson.getValidateBlueprint(), hdpRepo);
     }
 
     private void ambariUserNamePasswordChange(Long stackId, Stack stack, UserNamePasswordJson userNamePasswordJson) {

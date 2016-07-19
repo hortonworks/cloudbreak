@@ -16,14 +16,12 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -67,10 +65,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setLdapRequired(source.isLdapRequired());
         if (source.getSssdConfig() != null) {
             clusterResponse.setSssdConfigId(source.getSssdConfig().getId());
-        }
-        AmbariStackDetails ambariStackDetails = source.getAmbariStackDetails();
-        if (ambariStackDetails != null) {
-            clusterResponse.setAmbariStackDetails(getConversionService().convert(ambariStackDetails, AmbariStackDetailsJson.class));
         }
         RDSConfig rdsConfig = source.getRdsConfig();
         if (rdsConfig != null) {

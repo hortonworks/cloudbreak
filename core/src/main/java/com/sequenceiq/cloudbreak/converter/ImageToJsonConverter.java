@@ -12,7 +12,6 @@ public class ImageToJsonConverter extends AbstractConversionServiceAwareConverte
     public ImageJson convert(Image source) {
         ImageJson imageJson = new ImageJson();
         imageJson.setImageName(source.getImageName());
-        imageJson.setHdpVersion(source.getHdpVersion());
         return imageJson;
     }
 

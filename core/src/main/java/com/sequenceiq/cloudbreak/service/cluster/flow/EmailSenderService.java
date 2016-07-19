@@ -21,12 +21,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
@@ -75,6 +76,9 @@ public class EmailSenderService {
 
     @Inject
     private UserDetailsService userDetailsService;
+
+    @Inject
+    private ComponentConfigProvider componentConfigProvider;
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -172,8 +176,11 @@ public class EmailSenderService {
     private String getClusterType(Stack stack, Cluster cluster) {
         String hdpVersion = null;
         try {
-            hdpVersion = imageService.getImage(stack.getId()).getHdpVersion();
-        } catch (CloudbreakImageNotFoundException e) {
+            HDPRepo repo = componentConfigProvider.getHDPRepo(stack.getId());
+            if (repo != null) {
+                hdpVersion = repo.getHdpVersion();
+            }
+        } catch (CloudbreakServiceException e) {
             LOGGER.info("cant find hdp version");
         }
         if (hdpVersion == null) {

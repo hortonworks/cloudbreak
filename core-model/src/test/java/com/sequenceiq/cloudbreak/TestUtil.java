@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
@@ -347,8 +346,6 @@ public class TestUtil {
         cluster.setPassword("admin");
         cluster.setSssdConfig(sssdConfig);
         cluster.setEnableShipyard(true);
-        AmbariStackDetails ambariStackDetails = new AmbariStackDetails();
-        cluster.setAmbariStackDetails(ambariStackDetails);
         RDSConfig rdsConfig = new RDSConfig();
         cluster.setRdsConfig(rdsConfig);
         cluster.setHostGroups(hostGroups(cluster));
@@ -506,19 +503,6 @@ public class TestUtil {
         plugin.add(new Plugin("first"));
         plugin.add(new Plugin("second"));
         return plugin;
-    }
-
-    public static AmbariStackDetails ambariStackDetails() {
-        AmbariStackDetails ambariStackDetails = new AmbariStackDetails();
-        ambariStackDetails.setOs("dummyOs");
-        ambariStackDetails.setStack("dummyStack");
-        ambariStackDetails.setStackBaseURL("dummyStackBaseUrl");
-        ambariStackDetails.setStackRepoId("dummyStackRepoId");
-        ambariStackDetails.setUtilsBaseURL("dummyUtilsBaseUrl");
-        ambariStackDetails.setUtilsRepoId("dummyUtilsRepoId");
-        ambariStackDetails.setVerify(true);
-        ambariStackDetails.setVersion("0.1.0");
-        return ambariStackDetails;
     }
 
     public static FailurePolicy failurePolicy() {

@@ -20,6 +20,9 @@ public class HDPInfo implements Versioned {
     }
 
     public HDPRepo getRepo() {
+        if (repo != null) {
+            repo.setHdpVersion(version);
+        }
         return repo;
     }
 

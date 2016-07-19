@@ -15,17 +15,11 @@ public class Image {
 
     private final String imageName;
     private final Map<InstanceGroupType, String> userdata;
-    private final HDPRepo hdpRepo;
-    private final String hdpVersion;
 
     public Image(@JsonProperty("imageName") String imageName,
-            @JsonProperty("userdata") Map<InstanceGroupType, String> userdata,
-            @JsonProperty("hdpRepo") HDPRepo hdpRepo,
-            @JsonProperty("hdpVersion") String hdpVersion) {
+            @JsonProperty("userdata") Map<InstanceGroupType, String> userdata) {
         this.imageName = imageName;
         this.userdata = ImmutableMap.copyOf(userdata);
-        this.hdpRepo = hdpRepo;
-        this.hdpVersion = hdpVersion;
     }
 
     public String getImageName() {
@@ -38,13 +32,5 @@ public class Image {
 
     public Map<InstanceGroupType, String> getUserdata() {
         return userdata;
-    }
-
-    public HDPRepo getHdpRepo() {
-        return hdpRepo;
-    }
-
-    public String getHdpVersion() {
-        return hdpVersion;
     }
 }

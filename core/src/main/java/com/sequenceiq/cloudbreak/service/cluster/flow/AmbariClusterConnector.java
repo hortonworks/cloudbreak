@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -56,7 +55,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
-import com.sequenceiq.cloudbreak.domain.AmbariStackDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -72,6 +70,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
@@ -105,7 +104,6 @@ public class AmbariClusterConnector {
     private static final String PRINCIPAL = "/admin";
     private static final String FQDN = "fqdn";
     private static final String ADMIN = "admin";
-    private static final String REPO_ID_TAG = "repoid";
 
     @Inject
     private StackRepository stackRepository;
@@ -159,6 +157,8 @@ public class AmbariClusterConnector {
     private RDSConfigProvider rdsConfigProvider;
     @Inject
     private ImageService imageService;
+    @Inject
+    private ComponentConfigProvider componentConfigProvider;
 
     public void waitForAmbariServer(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getDefaultAmbariClient(stack);
@@ -242,9 +242,9 @@ public class AmbariClusterConnector {
         blueprintText = smartSenseConfigProvider.addToBlueprint(stack, blueprintText);
         blueprintText = zeppelinConfigProvider.addToBlueprint(stack, blueprintText);
         if (!OrchestratorConstants.MARATHON.equals(stack.getOrchestrator().getType())) {
-            Image image = imageService.getImage(stack.getId());
-            if (image.getHdpVersion() != null) {
-                blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, image.getHdpVersion());
+            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stack.getId());
+            if (hdpRepo != null && hdpRepo.getHdpVersion() != null) {
+                blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, hdpRepo.getHdpVersion());
             }
         }
         if (rdsConfig != null) {
@@ -558,42 +558,31 @@ public class AmbariClusterConnector {
     private void setBaseRepoURL(Stack stack, AmbariClient ambariClient) throws IOException, CloudbreakImageNotFoundException {
         HDPRepo hdpRepo = null;
         if (!OrchestratorConstants.MARATHON.equals(stack.getOrchestrator().getType())) {
-            Image image = imageService.getImage(stack.getId());
-            hdpRepo = image.getHdpRepo();
+            hdpRepo = componentConfigProvider.getHDPRepo(stack.getId());
         }
-        if (hdpRepo == null) {
-            AmbariStackDetails ambStack = stack.getCluster().getAmbariStackDetails();
-            if (ambStack != null) {
-                LOGGER.info("Use specific Ambari repository: {}", ambStack);
-                try {
-                    String stackType = ambStack.getStack();
-                    String version = ambStack.getVersion();
-                    String os = ambStack.getOs();
-                    boolean verify = ambStack.isVerify();
-                    addRepository(ambariClient, stackType, version, os, ambStack.getStackRepoId(), ambStack.getStackBaseURL(), verify);
-                    addRepository(ambariClient, stackType, version, os, ambStack.getUtilsRepoId(), ambStack.getUtilsBaseURL(), verify);
-                } catch (HttpResponseException e) {
-                    String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
-                    String msg = String.format("Cannot use the specified Ambari stack: %s. Error: %s", ambStack.toString(), exceptionErrorMsg);
-                    throw new BadRequestException(msg, e);
+        if (hdpRepo != null) {
+            try {
+                LOGGER.info("Use specific Ambari repository: {}", hdpRepo);
+                Map<String, String> stackRepo = hdpRepo.getStack();
+                Map<String, String> utilRepo = hdpRepo.getUtil();
+                String stackRepoId = stackRepo.remove(HDPRepo.REPO_ID_TAG);
+                String utilRepoId = utilRepo.remove(HDPRepo.REPO_ID_TAG);
+                String[] typeVersion = stackRepoId.split("-");
+                String stackType = typeVersion[0];
+                String version = typeVersion[1];
+                for (String os : stackRepo.keySet()) {
+                    addRepository(ambariClient, stackType, version, os, stackRepoId, stackRepo.get(os), hdpRepo.isVerify());
                 }
-            } else {
-                LOGGER.info("Using latest HDP repository");
+                for (String os : utilRepo.keySet()) {
+                    addRepository(ambariClient, stackType, version, os, utilRepoId, utilRepo.get(os), hdpRepo.isVerify());
+                }
+            } catch (HttpResponseException e) {
+                String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
+                String msg = String.format("Cannot use the specified Ambari stack: %s. Error: %s", hdpRepo.toString(), exceptionErrorMsg);
+                throw new BadRequestException(msg, e);
             }
         } else {
-            Map<String, String> stackRepo = hdpRepo.getStack();
-            Map<String, String> utilRepo = hdpRepo.getUtil();
-            String stackRepoId = stackRepo.remove(REPO_ID_TAG);
-            String utilRepoId = utilRepo.remove(REPO_ID_TAG);
-            String[] typeVersion = stackRepoId.split("-");
-            String stackType = typeVersion[0];
-            String version = typeVersion[1];
-            for (String os : stackRepo.keySet()) {
-                addRepository(ambariClient, stackType, version, os, stackRepoId, stackRepo.get(os), true);
-            }
-            for (String os : utilRepo.keySet()) {
-                addRepository(ambariClient, stackType, version, os, utilRepoId, utilRepo.get(os), true);
-            }
+            LOGGER.info("Using latest HDP repository");
         }
     }
 
