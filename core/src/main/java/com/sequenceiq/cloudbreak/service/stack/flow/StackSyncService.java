@@ -296,7 +296,8 @@ public class StackSyncService {
 
     private void updateMetaDataToTerminated(Stack stack, InstanceMetaData instanceMetaData) {
         InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
-        instanceGroup.setNodeCount(instanceGroup.getNodeCount() - 1);
+        List<InstanceMetaData> aliveInstancesInInstanceGroup = instanceMetaDataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId());
+        instanceGroup.setNodeCount(aliveInstancesInInstanceGroup.size() - 1);
         long timeInMillis = Calendar.getInstance().getTimeInMillis();
         instanceMetaData.setTerminationDate(timeInMillis);
         instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
