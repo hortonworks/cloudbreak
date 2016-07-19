@@ -72,7 +72,8 @@ tests:
       clusterName: it-mock-cluster,
       checkAmbari: false,
       mockPort: 9443,
-      orchestrator: SALT
+      orchestrator: SALT,
+      emailNeeded: true
     }
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockStackCreationWithSaltSuccessTest
