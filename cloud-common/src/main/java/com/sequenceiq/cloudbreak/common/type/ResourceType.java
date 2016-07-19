@@ -26,5 +26,8 @@ public enum ResourceType {
     GCP_INSTANCE,
 
     // ARM
-    ARM_TEMPLATE
+    ARM_TEMPLATE,
+
+    // MOCK
+    MOCK_INSTANCE
 }

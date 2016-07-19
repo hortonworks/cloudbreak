@@ -14,6 +14,7 @@ public class CloudbreakITContextConstants {
     public static final String SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED = "SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED";
     public static final String AMBARI_USER_ID = "AMBARI_USER";
     public static final String AMBARI_PASSWORD_ID = "AMBARI_PASSWORD";
+    public static final String ADDITIONAL_NODES = "ADDITIONAL_NODES";
 
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
 

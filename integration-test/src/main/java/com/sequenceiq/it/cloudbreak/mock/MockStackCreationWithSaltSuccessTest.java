@@ -100,8 +100,6 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
             map.put("persistentStorage", persistentStorage);
         }
         stackRequest.setParameters(map);
-        int numberOfServers = getServerCount(instanceGroups);
-
         port(mockPort);
         addSPIEndpoints(sshPort);
         initSpark();
@@ -113,24 +111,10 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId);
-
-        verifyCalls(numberOfServers);
     }
 
     private void addSPIEndpoints(int sshPort) {
         post(MOCK_ROOT + "/cloud_metadata_statuses", new CloudMetaDataStatuses(mockServerAddress, sshPort), gson()::toJson);
-    }
-
-    private void verifyCalls(int numberOfServers) {
-
-    }
-
-    private int getServerCount(List<InstanceGroup> instanceGroups) {
-        int numberOfServers = 0;
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            numberOfServers += instanceGroup.getNodeCount();
-        }
-        return numberOfServers;
     }
 
 }

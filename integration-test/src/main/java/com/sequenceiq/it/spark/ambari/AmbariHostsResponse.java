@@ -23,7 +23,7 @@ public class AmbariHostsResponse extends ITResponse {
         response.type("text/plain");
         List<Map<String, ?>> itemList = new ArrayList<>();
         for (int i = 1; i <= serverNumber; i++) {
-            Hosts hosts = new Hosts(Collections.singletonList("host" + i), "HEALTHY");
+            Hosts hosts = new Hosts("host" + i, "HEALTHY");
             itemList.add(Collections.singletonMap("Hosts", hosts));
         }
 

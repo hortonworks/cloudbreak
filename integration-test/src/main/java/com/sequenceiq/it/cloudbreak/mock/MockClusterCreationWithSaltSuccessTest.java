@@ -36,7 +36,6 @@ import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.HostGroup;
-import com.sequenceiq.it.spark.ambari.AmbariBlueprintsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
@@ -142,12 +141,12 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
     private void addAmbariMappings(int numberOfServers) {
         get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
         post(AMBARI_API_ROOT + "/views/:view/versions/1.0.0/instances/*", new EmptyAmbariResponse());
-        get(AMBARI_API_ROOT + "/clusters", new AmbariClusterResponse(numberOfServers));
+        get(AMBARI_API_ROOT + "/clusters", new AmbariClusterResponse());
         post(AMBARI_API_ROOT + "/clusters/:cluster/requests", new AmbariClusterRequestsResponse());
         post(AMBARI_API_ROOT + "/clusters/:cluster", new EmptyAmbariResponse(), gson()::toJson);
         get(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", new AmbariServicesComponentsResponse(), gson()::toJson);
         get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(numberOfServers), gson()::toJson);
-        get(AMBARI_API_ROOT + "/blueprints/*", new AmbariBlueprintsResponse());
+        get(AMBARI_API_ROOT + "/blueprints/*", (request, response) -> responseFromJsonFile("blueprint/hdp-small-default.bp"));
         post(AMBARI_API_ROOT + "/blueprints/*", new EmptyAmbariResponse());
         put(AMBARI_API_ROOT + "/users/admin", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
