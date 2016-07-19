@@ -61,7 +61,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 public class SaltOrchestrator implements HostOrchestrator {
 
     private static final int MAX_NODES = 5000;
-    private static final int MAX_RETRY_COUNT = 60;
+    private static final int MAX_RETRY_COUNT = 90;
     private static final int SLEEP_TIME = 10000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
