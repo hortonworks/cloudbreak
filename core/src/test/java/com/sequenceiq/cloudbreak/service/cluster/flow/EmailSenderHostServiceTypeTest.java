@@ -14,6 +14,7 @@ import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,8 +67,8 @@ public class EmailSenderHostServiceTypeTest {
         ReflectionTestUtils.setField(emailSenderService, "msgFrom", "no-reply@sequenceiq.com");
         ReflectionTestUtils.setField(emailSenderService, "freemarkerConfiguration", freemarkerConfiguration());
 
-        ReflectionTestUtils.setField(emailSenderService, "successClusterMailTemplatePath", "templates/launch-cluster-installer-mail-success.ftl");
-        ReflectionTestUtils.setField(emailSenderService, "failedClusterMailTemplatePath", "templates/launch-cluster-installer-mail-fail.ftl");
+        ReflectionTestUtils.setField(emailSenderService, "successClusterMailTemplatePath", "templates/cluster-installer-mail-success.ftl");
+        ReflectionTestUtils.setField(emailSenderService, "failedClusterMailTemplatePath", "templates/cluster-installer-mail-fail.ftl");
 
         JavaMailSender mailSender = new JavaMailSenderImpl();
         ((JavaMailSenderImpl) mailSender).setHost("localhost");
@@ -103,8 +104,7 @@ public class EmailSenderHostServiceTypeTest {
     @Test
     public void testSendTerminationSuccessEmail() throws IOException, MessagingException {
         // GIVEN
-        String content = getFileContent("mail/termination-success-email").replaceAll("\\n", "");
-        String subject = String.format("%s cluster termination", NAME_OF_THE_CLUSTER);
+        String subject = "Your cluster has been terminated";
         // WHEN
         emailSenderService.sendTerminationSuccessEmail("xxx", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
         // THEN
@@ -113,15 +113,14 @@ public class EmailSenderHostServiceTypeTest {
 
         Assert.assertEquals(1, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
-        Assert.assertTrue(String.valueOf(messages[0].getContent()).replaceAll("\\n", "").replaceAll("\\r", "").contains(content));
-
+        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString(cbUser.getGivenName()));
+        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("successfully terminated"));
     }
 
     @Test
     public void testSendTerminationFailureEmail() throws IOException, MessagingException {
         // GIVEN
-        String content = getFileContent("mail/termination-failure-email").replaceAll("\\n", "");
-        String subject = String.format("%s cluster termination", NAME_OF_THE_CLUSTER);
+        String subject = "Cluster termination failed";
         //WHEN
         emailSenderService.sendTerminationFailureEmail("xxx", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
         //THEN
@@ -130,15 +129,14 @@ public class EmailSenderHostServiceTypeTest {
 
         Assert.assertEquals(1, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
-        Assert.assertTrue(String.valueOf(messages[0].getContent()).replaceAll("\\n", "").replaceAll("\\r", "").contains(content));
-
+        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString(cbUser.getGivenName()));
+        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("Failed to terminate your cluster"));
     }
 
     @Test
     public void testSendProvisioningFailureEmail() throws IOException, MessagingException {
         //GIVEN
-        String content = getFileContent("mail/provisioning-failure-email").replaceAll("\\n", "");
-        String subject = String.format("%s cluster installation", NAME_OF_THE_CLUSTER);
+        String subject = "Cluster install failed";
         //WHEN
         emailSenderService.sendProvisioningFailureEmail("xxx", "xxx", NAME_OF_THE_CLUSTER);
         //THEN
@@ -147,7 +145,8 @@ public class EmailSenderHostServiceTypeTest {
 
         Assert.assertEquals(1, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
-        Assert.assertTrue(String.valueOf(messages[0].getContent()).replaceAll("\\n", "").replaceAll("\\r", "").contains(content));
+        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString(cbUser.getGivenName()));
+        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("Something went terribly wrong"));
     }
     @Ignore
     @Test
@@ -158,7 +157,7 @@ public class EmailSenderHostServiceTypeTest {
         greenMail = new GreenMail(ServerSetupTest.SMTPS);
         greenMail.start();
         //GIVEN
-        String content = getFileContent("mail/provisioning-success-email").replaceAll("\\n", "");
+        String content = getFileContent("mail/cluster-installer-mail-success").replaceAll("\\n", "");
         String subject = String.format("%s cluster installation", NAME_OF_THE_CLUSTER);
         //WHEN
         emailSenderService.sendProvisioningSuccessEmail("test@example.com", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
@@ -175,8 +174,7 @@ public class EmailSenderHostServiceTypeTest {
     @Test
     public void testSendProvisioningSuccessEmailSmtp() throws IOException, MessagingException {
         //GIVEN
-        String content = getFileContent("mail/provisioning-success-email").replaceAll("\\n", "");
-        String subject = String.format("%s cluster installation", NAME_OF_THE_CLUSTER);
+        String subject = "Your cluster is ready";
         emailSenderService.sendProvisioningSuccessEmail("xxx@alma.com", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
 
         //THEN
@@ -185,8 +183,8 @@ public class EmailSenderHostServiceTypeTest {
 
         Assert.assertEquals(1, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
-        Assert.assertTrue(String.valueOf(messages[0].getContent()).replaceAll("\\n", "").replaceAll("\\r", "").contains(content));
-
+        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString(cbUser.getGivenName()));
+        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("Your cluster '" + NAME_OF_THE_CLUSTER + "' is ready"));
     }
 
     Configuration freemarkerConfiguration() throws IOException, TemplateException {
