@@ -10,6 +10,7 @@
   "kerberosAdmin" : "admin",
   "kerberosPassword" : "passw",
   "validateBlueprint" : true,
+  "emailTo": "admin@example.com",
   "fileSystem" : {
     "name": "teszt",
     "type": "DASH",

@@ -120,6 +120,7 @@ public class Cluster implements ProvisionEntity {
     private SssdConfig sssdConfig;
 
     private Boolean emailNeeded;
+    private String emailTo;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostGroup> hostGroups = new HashSet<>();
@@ -410,6 +411,14 @@ public class Cluster implements ProvisionEntity {
                 || STOP_IN_PROGRESS.equals(status)
                 || START_IN_PROGRESS.equals(status)
                 || DELETE_IN_PROGRESS.equals(status);
+    }
+
+    public String getEmailTo() {
+        return emailTo;
+    }
+
+    public void setEmailTo(String emailTo) {
+        this.emailTo = emailTo;
     }
 
     public ConfigStrategy getConfigStrategy() {

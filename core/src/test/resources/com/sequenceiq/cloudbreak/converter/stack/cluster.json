@@ -10,5 +10,6 @@
   "kerberosAdmin" : "admin",
   "kerberosPassword" : "passw",
   "ldapRequired" : false,
+  "emailTo": "admin@example.com",
   "validateBlueprint" : true
 }

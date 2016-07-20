@@ -5,17 +5,11 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.CbUser;
-
 @Service
 public class EmailMimeMessagePreparator {
 
     @Value("${cb.smtp.sender.from:}")
     private String msgFrom;
-
-    public MimeMessagePreparator prepareMessage(final CbUser user, final String subject, final String body) {
-        return prepareMessage(user.getUsername(), subject, body);
-    }
 
     public MimeMessagePreparator prepareMessage(final String to, final String subject, final String body) {
         return mimeMessage -> {

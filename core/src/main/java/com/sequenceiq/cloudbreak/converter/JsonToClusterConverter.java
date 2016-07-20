@@ -30,6 +30,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setLdapRequired(source.getLdapRequired());
         cluster.setConfigStrategy(source.getConfigStrategy());
         cluster.setEnableShipyard(source.getEnableShipyard());
+        cluster.setEmailTo(source.getEmailTo());
         RDSConfigJson rdsConfigJson = source.getRdsConfigJson();
         if (rdsConfigJson != null) {
             cluster.setRdsConfig(getConversionService().convert(rdsConfigJson, RDSConfig.class));

@@ -60,7 +60,8 @@ public class ClusterUpscaleFlowService {
             clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
             if (stack.getCluster().getEmailNeeded()) {
-                emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
+                emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
+                        stack.getAmbariIp(), stack.getCluster().getName());
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
             }
         } else {

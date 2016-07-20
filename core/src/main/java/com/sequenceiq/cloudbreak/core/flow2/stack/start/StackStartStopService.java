@@ -82,7 +82,8 @@ public class StackStartStopService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STOPPED, BillingStatus.BILLING_STOPPED.name());
 
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-            emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
+            emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
+                    stack.getAmbariIp(), stack.getCluster().getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, Status.STOPPED.name());
         }
     }
@@ -107,7 +108,8 @@ public class StackStartStopService {
         if (stack.getCluster() != null) {
             clusterService.updateClusterStatusByStackId(stack.getId(), STOPPED);
             if (stack.getCluster().getEmailNeeded()) {
-                emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
+                emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
+                        stack.getAmbariIp(), stack.getCluster().getName());
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, stackStatus.name());
             }
         }

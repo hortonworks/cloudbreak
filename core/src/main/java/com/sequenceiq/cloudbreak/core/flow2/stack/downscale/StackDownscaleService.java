@@ -46,7 +46,8 @@ public class StackDownscaleService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name());
 
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-            emailSenderService.sendDownScaleSuccessEmail(stack.getCluster().getOwner(), stack.getAmbariIp(), stack.getCluster().getName());
+            emailSenderService.sendDownScaleSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
+                    stack.getAmbariIp(), stack.getCluster().getName());
             flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
     }

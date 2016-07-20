@@ -104,9 +104,9 @@ public class EmailSenderHostServiceTypeTest {
     public void testSendTerminationSuccessEmail() throws IOException, MessagingException {
         // GIVEN
         String content = getFileContent("mail/termination-success-email").replaceAll("\\n", "");
-        String subject = String.format("Cloudbreak - %s cluster termination", NAME_OF_THE_CLUSTER);
+        String subject = String.format("%s cluster termination", NAME_OF_THE_CLUSTER);
         // WHEN
-        emailSenderService.sendTerminationSuccessEmail("xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
+        emailSenderService.sendTerminationSuccessEmail("xxx", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
         // THEN
         greenMail.waitForIncomingEmail(5000, 1);
         Message[] messages = greenMail.getReceivedMessages();
@@ -121,9 +121,9 @@ public class EmailSenderHostServiceTypeTest {
     public void testSendTerminationFailureEmail() throws IOException, MessagingException {
         // GIVEN
         String content = getFileContent("mail/termination-failure-email").replaceAll("\\n", "");
-        String subject = String.format("Cloudbreak - %s cluster termination", NAME_OF_THE_CLUSTER);
+        String subject = String.format("%s cluster termination", NAME_OF_THE_CLUSTER);
         //WHEN
-        emailSenderService.sendTerminationFailureEmail("xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
+        emailSenderService.sendTerminationFailureEmail("xxx", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
         //THEN
         greenMail.waitForIncomingEmail(5000, 1);
         Message[] messages = greenMail.getReceivedMessages();
@@ -138,9 +138,9 @@ public class EmailSenderHostServiceTypeTest {
     public void testSendProvisioningFailureEmail() throws IOException, MessagingException {
         //GIVEN
         String content = getFileContent("mail/provisioning-failure-email").replaceAll("\\n", "");
-        String subject = String.format("Cloudbreak - %s cluster installation", NAME_OF_THE_CLUSTER);
+        String subject = String.format("%s cluster installation", NAME_OF_THE_CLUSTER);
         //WHEN
-        emailSenderService.sendProvisioningFailureEmail("xxx", NAME_OF_THE_CLUSTER);
+        emailSenderService.sendProvisioningFailureEmail("xxx", "xxx", NAME_OF_THE_CLUSTER);
         //THEN
         greenMail.waitForIncomingEmail(5000, 1);
         Message[] messages = greenMail.getReceivedMessages();
@@ -159,9 +159,9 @@ public class EmailSenderHostServiceTypeTest {
         greenMail.start();
         //GIVEN
         String content = getFileContent("mail/provisioning-success-email").replaceAll("\\n", "");
-        String subject = String.format("Cloudbreak - %s cluster installation", NAME_OF_THE_CLUSTER);
+        String subject = String.format("%s cluster installation", NAME_OF_THE_CLUSTER);
         //WHEN
-        emailSenderService.sendProvisioningSuccessEmail("test@example.com", "123.123.123.123", NAME_OF_THE_CLUSTER);
+        emailSenderService.sendProvisioningSuccessEmail("test@example.com", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
 
         //THEN
         greenMail.waitForIncomingEmail(5000, 1);
@@ -176,8 +176,8 @@ public class EmailSenderHostServiceTypeTest {
     public void testSendProvisioningSuccessEmailSmtp() throws IOException, MessagingException {
         //GIVEN
         String content = getFileContent("mail/provisioning-success-email").replaceAll("\\n", "");
-        String subject = String.format("Cloudbreak - %s cluster installation", NAME_OF_THE_CLUSTER);
-        emailSenderService.sendProvisioningSuccessEmail("xxx@alma.com", "123.123.123.123", NAME_OF_THE_CLUSTER);
+        String subject = String.format("%s cluster installation", NAME_OF_THE_CLUSTER);
+        emailSenderService.sendProvisioningSuccessEmail("xxx@alma.com", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
 
         //THEN
         greenMail.waitForIncomingEmail(5000, 1);
