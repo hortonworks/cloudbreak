@@ -37,6 +37,7 @@ import freemarker.template.Configuration;
 @Service
 public class EmailSenderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailSenderService.class);
+    private static final String CLUSTER_READY_SUBJECT = "Your cluster is ready";
 
     @Value("${cb.smtp.sender.from:}")
     private String msgFrom;
@@ -55,6 +56,9 @@ public class EmailSenderService {
 
     @Value("${hwx.cloud.template.version:}")
     private String templateVersion;
+
+    @Value("${hwx.cloud.address:}")
+    private String cloudAddress;
 
     @Value("${aws.instance.id:}")
     private String awsInstanceId;
@@ -80,28 +84,28 @@ public class EmailSenderService {
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private enum State {
-        PROVISIONING_SUCCESS("SUCCESS", "Cloudbreak Cluster Install Success",
-                "Your cluster '%s' is ready to use. You can log into the Ambari UI %s:8080 using the configured username/password."),
-        PROVISIONING_FAILURE("FAILED", "Cloudbreak Cluster Install Failed",
+        PROVISIONING_SUCCESS("SUCCESS", "Cluster Install Success",
+                "Your cluster '%s' is ready"),
+        PROVISIONING_FAILURE("FAILED", "Cluster Install Failed",
                 "Something went terribly wrong - we are happy to help, please let us know your cluster details, "
                         + "time, etc - and we will check the logs and get a fix for you."),
-        START_SUCCESS("SUCCESS", "Cloudbreak Cluster Start Success",
-                "Your cluster '%s' is ready to use after the start. You can log into the Ambari UI %s:8080 using the configured username/password."),
-        START_FAILURE("FAILED", "Cloudbreak Cluster Start Failed",
+        START_SUCCESS("SUCCESS", "Cluster Start Success",
+                "Your cluster '%s' is ready"),
+        START_FAILURE("FAILED", "Cluster Start Failed",
                 "Failed to start your cluster: %s - we are happy to help, please let us know your cluster details, time, etc - and we will check the"
                         + " logs and get a fix for you."),
-        STOP_SUCCESS("SUCCESS", "Cloudbreak Cluster Stop Success",
+        STOP_SUCCESS("SUCCESS", "Cluster Stop Success",
                 "Your cluster '%s' was successfully stopped. If you want to use again just restart."),
-        STOP_FAILURE("FAILED", "Cloudbreak Cluster Stop Failed",
+        STOP_FAILURE("FAILED", "Cluster Stop Failed",
                 "Failed to stop your cluster: %s - we are happy to help, please let us know your cluster details, time, etc - and we will check the "
                         + "logs and get a fix for you."),
-        UPSCALE_SUCCESS("SUCCESS", "Cloudbreak Cluster Upscale Success",
-                "Your cluster '%s' is ready to use after the upscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
-        DOWN_SCALE_SUCCESS("SUCCESS", "Cloudbreak Cluster Downscale Success",
-                "Your cluster '%s' is ready to use after the downscale. You can log into the Ambari UI %s:8080 using the configured username/password."),
-        TERMINATION_SUCCESS("SUCCESS", "Cloudbreak Cluster Termination Success",
+        UPSCALE_SUCCESS("SUCCESS", "Cluster Upscale Success",
+                "Your cluster '%s' is ready"),
+        DOWN_SCALE_SUCCESS("SUCCESS", "Cluster Downscale Success",
+                "Your cluster '%s' is ready"),
+        TERMINATION_SUCCESS("SUCCESS", "Cluster Termination Success",
                 "Your cluster '%s' was successfully terminated."),
-        TERMINATION_FAILURE("FAILED", "Cloudbreak Cluster Termination Failed",
+        TERMINATION_FAILURE("FAILED", "Cluster Termination Failed",
                 "Failed to terminate your cluster: '%s'. Please try again... - we are happy to help, please let us know your cluster details, time, "
                         + "etc - and we will check the logs and get a fix for you.");
 
@@ -116,53 +120,77 @@ public class EmailSenderService {
         }
     }
 
+    private boolean isHwxCloud() {
+        return !Strings.isNullOrEmpty(templateVersion);
+    }
+
     @Async
     public void sendProvisioningSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster installation", getEmailModel(user.getGivenName(),
+        sendEmail(user, email, successClusterMailTemplatePath, CLUSTER_READY_SUBJECT, getEmailModel(user.getGivenName(),
                 ambariServer, State.PROVISIONING_SUCCESS, clusterName));
     }
 
     @Async
     public void sendProvisioningFailureEmail(String owner, String email, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, failedClusterMailTemplatePath, clusterName + " cluster installation", getEmailModel(user.getGivenName(),
+        sendEmail(user, email, failedClusterMailTemplatePath, "Cluster install failed", getEmailModel(user.getGivenName(),
                 null, State.PROVISIONING_FAILURE, clusterName));
     }
 
     @Async
     public void sendStartSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster start", getEmailModel(user.getGivenName(),
+        sendEmail(user, email, successClusterMailTemplatePath, CLUSTER_READY_SUBJECT, getEmailModel(user.getGivenName(),
                 ambariServer, State.START_SUCCESS, clusterName));
     }
 
     @Async
     public void sendStartFailureEmail(String owner, String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, failedClusterMailTemplatePath, clusterName + " cluster start", getEmailModel(user.getGivenName(),
+        sendEmail(user, email, failedClusterMailTemplatePath, "Cluster start failed", getEmailModel(user.getGivenName(),
                 ambariServer, State.START_FAILURE, clusterName));
     }
 
     @Async
     public void sendStopSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster stop", getEmailModel(user.getGivenName(),
+        sendEmail(user, email, successClusterMailTemplatePath, "Your cluster has been stopped", getEmailModel(user.getGivenName(),
                 ambariServer, State.STOP_SUCCESS, clusterName));
     }
 
     @Async
     public void sendStopFailureEmail(String owner, String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, failedClusterMailTemplatePath, clusterName + " cluster stop", getEmailModel(user.getGivenName(),
+        sendEmail(user, email, failedClusterMailTemplatePath, "Cluster stop failed", getEmailModel(user.getGivenName(),
                 ambariServer, State.STOP_FAILURE, clusterName));
     }
 
-    @Async
     public void sendUpscaleSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster upscale", getEmailModel(user.getGivenName(),
+        sendEmail(user, email, successClusterMailTemplatePath, CLUSTER_READY_SUBJECT, getEmailModel(user.getGivenName(),
                 ambariServer, State.UPSCALE_SUCCESS, clusterName));
+    }
+
+    @Async
+    public void sendDownScaleSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, successClusterMailTemplatePath, CLUSTER_READY_SUBJECT, getEmailModel(user.getGivenName(),
+                ambariServer, State.DOWN_SCALE_SUCCESS, clusterName));
+    }
+
+    @Async
+    public void sendTerminationSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, successClusterMailTemplatePath, "Your cluster has been terminated", getEmailModel(user.getGivenName(),
+                ambariServer, State.TERMINATION_SUCCESS, clusterName));
+    }
+
+    @Async
+    public void sendTerminationFailureEmail(String owner, String email, String ambariServer, String clusterName) {
+        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
+        sendEmail(user, email, failedClusterMailTemplatePath, "Cluster termination failed", getEmailModel(user.getGivenName(),
+                ambariServer, State.TERMINATION_FAILURE, clusterName));
     }
 
     @Async
@@ -172,7 +200,7 @@ public class EmailSenderService {
         Map<String, Object> telemetryMailMap = new LinkedHashMap<>();
         if (configureSmartSense && !StringUtils.isEmpty(smartSenseId)) {
             telemetryMailMap.put("Date", dateFormat.format(new Date()));
-            if (accountId != null) {
+            if (Strings.isNullOrEmpty(accountId)) {
                 telemetryMailMap.put("Account ID", accountId);
             }
             telemetryMailMap.put("Smartsense ID", smartSenseId);
@@ -182,10 +210,10 @@ public class EmailSenderService {
             telemetryMailMap.put("Instance type(s)", getInstanceTypes(stack));
             telemetryMailMap.put("Running time", getRunningTime(cluster));
             telemetryMailMap.put("Status", status.normalizedStatusName());
-            if (templateVersion != null) {
+            if (Strings.isNullOrEmpty(templateVersion)) {
                 telemetryMailMap.put("Version", templateVersion);
             }
-            if (awsInstanceId != null) {
+            if (Strings.isNullOrEmpty(awsInstanceId)) {
                 telemetryMailMap.put("Controller Instance ID", awsInstanceId);
             }
             telemetryMailMap.put("Master Instance ID", getMasterInstanceId(stack));
@@ -235,28 +263,6 @@ public class EmailSenderService {
         return stack.getGatewayInstanceGroup().getAllInstanceMetaData().iterator().next().getInstanceId();
     }
 
-    @Async
-    public void sendDownScaleSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster downscale", getEmailModel(user.getGivenName(),
-                ambariServer, State.DOWN_SCALE_SUCCESS, clusterName));
-    }
-
-    @Async
-    public void sendTerminationSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, successClusterMailTemplatePath, clusterName + " cluster termination", getEmailModel(user.getGivenName(),
-                ambariServer, State.TERMINATION_SUCCESS, clusterName));
-    }
-
-    @Async
-    public void sendTerminationFailureEmail(String owner, String email, String ambariServer, String clusterName) {
-        CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, failedClusterMailTemplatePath, clusterName + " cluster termination", getEmailModel(user.getGivenName(),
-                ambariServer, State.TERMINATION_FAILURE, clusterName));
-    }
-
-
     private void sendEmail(CbUser user, String mail, String template, String subject, Map<String, Object> model) {
         try {
             String emailBody = processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
@@ -271,12 +277,13 @@ public class EmailSenderService {
     private Map<String, Object> getEmailModel(String name, String server, State state, String clusterName) {
         Map<String, Object> model = new HashMap<>();
         model.put("status", state.status);
-        model.put("server", server);
         model.put("name", name);
         model.put("text", String.format(state.text, clusterName, server));
         model.put("title", state.title);
         model.put("state", state);
         model.put("clusterName", clusterName);
+        model.put("hwx_cloud", isHwxCloud());
+        model.put("server", isHwxCloud() ? cloudAddress : server);
         return model;
     }
 }
