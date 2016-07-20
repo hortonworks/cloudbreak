@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
-import com.amazonaws.services.autoscaling.model.Activity;
-import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
@@ -18,7 +16,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
 @Component(ASGroupStatusCheckerTask.NAME)
@@ -27,8 +24,6 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "aSGroupStatusCheckerTask";
 
     private static final int INSTANCE_RUNNING = 16;
-    private static final int COMPLETED = 100;
-    private static final String CANCELLED = "Cancelled";
     private static final Logger LOGGER = LoggerFactory.getLogger(ASGroupStatusCheckerTask.class);
 
     private String autoScalingGroupName;
@@ -55,14 +50,6 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
         List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(amazonASClient, autoScalingGroupName);
         if (instanceIds.size() < requiredInstances) {
             LOGGER.debug("Instances in AS group: {}, needed: {}", instanceIds.size(), requiredInstances);
-            DescribeScalingActivitiesRequest describeScalingActivitiesRequest =
-                    new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName);
-            List<Activity> activities = amazonASClient.describeScalingActivities(describeScalingActivitiesRequest).getActivities();
-            for (Activity activity : activities) {
-                if (activity.getProgress().equals(COMPLETED) && CANCELLED.equals(activity.getStatusCode())) {
-                    throw new CancellationException(activity.getStatusMessage());
-                }
-            }
             return false;
         }
         DescribeInstanceStatusResult describeResult = amazonEC2Client.describeInstanceStatus(new DescribeInstanceStatusRequest().withInstanceIds(instanceIds));
