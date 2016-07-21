@@ -152,6 +152,10 @@ public class ClusterCommands implements BaseCommands {
                 clusterRequest.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
             }
 
+            if (shellContext.getAmbariDatabaseDetailsJson() != null) {
+                clusterRequest.setAmbariDatabaseDetailsJson(shellContext.getAmbariDatabaseDetailsJson());
+            }
+
             AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();
             ambariStackDetailsJson.setOs(os);
             ambariStackDetailsJson.setStack(stack);
@@ -183,6 +187,7 @@ public class ClusterCommands implements BaseCommands {
             cloudbreakShellUtil.checkResponse("createCluster", shellContext.cloudbreakClient().clusterEndpoint().post(Long.valueOf(stackId), clusterRequest));
             shellContext.setHint(Hints.NONE);
             shellContext.resetFileSystemConfiguration();
+            shellContext.resetAmbariDatabaseDetailsJson();
             if (wait) {
                 CloudbreakShellUtil.WaitResult waitResult =
                         cloudbreakShellUtil.waitAndCheckClusterStatus(Long.valueOf(stackId), Status.AVAILABLE.name());

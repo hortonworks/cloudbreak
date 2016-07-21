@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -110,6 +112,7 @@ public class ClusterController implements ClusterEndpoint {
         List<Component> components = new ArrayList<>();
         components = addAmbariRepoConfig(components, request, stack);
         components = addHDPRepoConfig(components, request, stack);
+        components = addAmbariDatabaseConfig(components, request, stack);
         clusterService.create(user, stackId, cluster, components);
         return Response.status(Response.Status.ACCEPTED).build();
     }
@@ -205,6 +208,18 @@ public class ClusterController implements ClusterEndpoint {
                 components.add(component);
             }
         }
+        return components;
+    }
+
+    private List<Component> addAmbariDatabaseConfig(List<Component> components, ClusterRequest request, Stack stack) throws JsonProcessingException {
+        AmbariDatabaseDetailsJson ambariRepoDetailsJson = request.getAmbariDatabaseDetailsJson();
+        if (ambariRepoDetailsJson == null) {
+            ambariRepoDetailsJson = new AmbariDatabaseDetailsJson();
+        }
+        AmbariDatabase ambariDatabase = conversionService.convert(ambariRepoDetailsJson, AmbariDatabase.class);
+        Component component = new Component(ComponentType.AMBARI_DATABASE_DETAILS, ComponentType.AMBARI_DATABASE_DETAILS.name(), new Json(ambariDatabase),
+                stack);
+        components.add(component);
         return components;
     }
 

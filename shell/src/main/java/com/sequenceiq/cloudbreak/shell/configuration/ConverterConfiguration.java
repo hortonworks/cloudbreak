@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.shell.converter.AzureInstanceTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.AzureOrchestratorTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.AzureVolumeTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.ConstraintNameConverter;
+import com.sequenceiq.cloudbreak.shell.converter.DatabaseVendorConverter;
 import com.sequenceiq.cloudbreak.shell.converter.GcpInstanceTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.GcpOrchestratorTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.GcpVolumeTypeConverter;
@@ -267,5 +268,10 @@ public class ConverterConfiguration {
     @Bean
     Converter azureOrchestratorTypeConverter() {
         return new AzureOrchestratorTypeConverter();
+    }
+
+    @Bean
+    Converter databaseVendorConverter() {
+        return new DatabaseVendorConverter();
     }
 }

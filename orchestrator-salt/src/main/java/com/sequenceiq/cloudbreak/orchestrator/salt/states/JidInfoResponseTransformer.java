@@ -13,12 +13,20 @@ public class JidInfoResponseTransformer {
     }
 
     public static Map<String, Map<String, RunnerInfoObject>> getHighStates(Map map) {
-        Map<String, Map<String, Map<String, Object>>> stringMapMap =
-                ((Map<String, List<Map<String, Map<String, Map<String, Map<String, Object>>>>>>) map).get("return").get(0).get("data");
+        Map<String, Object> stringObjectMap = ((Map<String, List<Map<String, Map<String, Object>>>>) map).get("return").get(0).get("data");
         Map<String, Map<String, RunnerInfoObject>> result = new HashMap<>();
-
-        for (Map.Entry<String, Map<String, Map<String, Object>>> stringMapEntry : stringMapMap.entrySet()) {
-            result.put(stringMapEntry.getKey(), runnerInfoObjects(stringMapEntry.getValue()));
+        for (Map.Entry<String, Object> stringObjectEntry : stringObjectMap.entrySet()) {
+            if (stringObjectEntry.getValue() instanceof Map) {
+                Map<String, Map<String, Object>> mapValue = (Map<String, Map<String, Object>>) stringObjectEntry.getValue();
+                result.put(stringObjectEntry.getKey(), runnerInfoObjects(mapValue));
+            } else if (stringObjectEntry.getValue() instanceof List) {
+                List<String> listValue = (List<String>) stringObjectEntry.getValue();
+                if (!listValue.isEmpty()) {
+                    throw new RuntimeException("Salt execution went wrong: " + listValue.get(0));
+                }
+            } else {
+                throw new UnsupportedOperationException("Not supported Salt response: " + stringObjectEntry.getValue().getClass());
+            }
         }
 
         return result;

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -63,7 +64,19 @@ public class ComponentConfigProvider {
             }
             return component.getAttributes().get(AmbariRepo.class);
         } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to read image", e);
+            throw new CloudbreakServiceException("Failed to read Ambari repo", e);
+        }
+    }
+
+    public AmbariDatabase getAmbariDatabase(Long stackId) {
+        try {
+            Component component = getComponent(stackId, ComponentType.AMBARI_DATABASE_DETAILS, ComponentType.AMBARI_DATABASE_DETAILS.name());
+            if (component == null) {
+                return null;
+            }
+            return component.getAttributes().get(AmbariDatabase.class);
+        } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to read Ambari database", e);
         }
     }
 
