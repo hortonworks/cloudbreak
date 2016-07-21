@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 public enum DatabaseVendor {
-    EMBEDDED("embedded", ""),
     POSTGRES("postgres", "Postgres"),
     MYSQL("mysql", "MySQL"),
     MARIADB("mysql", "MySQL"),
-    MSSQL("mssql", "SQLServer"),
-    ORACLE("oracle", "Oracle"),
-    SQLANYWHERE("sqlanywhere", "SQLAnywhere");
+//    MSSQL("mssql", "SQLServer"),
+//    ORACLE("oracle", "Oracle"),
+//    SQLANYWHERE("sqlanywhere", "SQLAnywhere"),
+    EMBEDDED("embedded", "");
 
     private final String value;
     private final String fancyName;
