@@ -112,7 +112,6 @@ public class ModelDescriptions {
         public static final String NAME = "name of the Ambari database";
         public static final String HOST = "host of the Ambari database";
         public static final String PORT = "port of the Ambari database";
-        public static final String SCHEMA = "schema of the Ambari database";
         public static final String USER_NAME = "user name for the Ambari database";
         public static final String PASSWORD = "password for the Ambari database";
     }
