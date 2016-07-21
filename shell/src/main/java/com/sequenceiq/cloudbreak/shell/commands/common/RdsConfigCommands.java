@@ -36,6 +36,7 @@ public class RdsConfigCommands implements BaseCommands {
             @CliOption(key = "connectionUrl", mandatory = true, help = "JDBC connection URL for the RDS") String connectionUrl,
             @CliOption(key = "connectionUserName", mandatory = true, help = "Username to use for the connection") String connectionUsername,
             @CliOption(key = "connectionPassword", mandatory = true, help = "Password to use for the connection") String connectionPassword,
+            @CliOption(key = "hdpVersion", mandatory = true, help = "Compatible HDP version for the RDS configuration") String hdpVersion,
             @CliOption(key = "publicInAccount", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "flags if the config is public in the account") Boolean publicInAccount) {
         try {
@@ -45,6 +46,7 @@ public class RdsConfigCommands implements BaseCommands {
             rdsConfig.setConnectionURL(connectionUrl);
             rdsConfig.setConnectionUserName(connectionUsername);
             rdsConfig.setConnectionPassword(connectionPassword);
+            rdsConfig.setHdpVersion(hdpVersion);
             IdJson id;
             if (publicInAccount) {
                 id = shellContext.cloudbreakClient().rdsConfigEndpoint().postPublic(rdsConfig);
@@ -120,6 +122,7 @@ public class RdsConfigCommands implements BaseCommands {
             map.put("databaseType", response.getDatabaseType().toString());
             map.put("connectionUrl", response.getConnectionURL());
             map.put("connectionUsername", response.getConnectionUserName());
+            map.put("hdpVersion", response.getHdpVersion());
             return shellContext.outputTransformer().render(map, "FIELD", "INFO");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);

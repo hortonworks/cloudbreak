@@ -27,6 +27,9 @@ public class RDSConfigJson {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.PASSWORD, required = true)
     private String connectionPassword;
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.HDPVERSION, required = true)
+    private String hdpVersion;
 
     public String getName() {
         return name;
@@ -66,5 +69,13 @@ public class RDSConfigJson {
 
     public void setConnectionPassword(String connectionPassword) {
         this.connectionPassword = connectionPassword;
+    }
+
+    public String getHdpVersion() {
+        return hdpVersion;
+    }
+
+    public void setHdpVersion(String hdpVersion) {
+        this.hdpVersion = hdpVersion;
     }
 }

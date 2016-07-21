@@ -29,9 +29,11 @@ ALTER TABLE rdsconfig
 UPDATE rdsconfig SET creationdate=(SELECT creationfinished FROM cluster WHERE cluster.rdsconfig_id=rdsconfig.id)
  WHERE (SELECT creationfinished FROM cluster WHERE cluster.rdsconfig_id=rdsconfig.id) IS NOT NULL;
 
+ALTER TABLE rdsconfig
+ ADD COLUMN hdpversion varchar(255) DEFAULT 'HDP 2.5';
+
 ALTER TABLE ONLY rdsconfig
  ADD CONSTRAINT uk_rdsconfig_account_name UNIQUE (account, name);
-
 
 
 -- //@UNDO
@@ -43,5 +45,6 @@ ALTER TABLE rdsconfig
  DROP COLUMN owner,
  DROP COLUMN account,
  DROP COLUMN status,
- DROP COLUMN creationdate;
+ DROP COLUMN creationdate,
+ DROP COLUMN hdpversion;
 

@@ -20,6 +20,7 @@ public class JsonToRDSConfigConverter extends AbstractConversionServiceAwareConv
         rdsConfig.setCreationDate(new Date().getTime());
         rdsConfig.setDatabaseType(source.getDatabaseType());
         rdsConfig.setStatus(ResourceStatus.USER_MANAGED);
+        rdsConfig.setHdpVersion(source.getHdpVersion());
         return rdsConfig;
     }
 }

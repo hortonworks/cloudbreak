@@ -87,6 +87,7 @@ public class RDSConfig {
     private String connectionUserName;
     private String connectionPassword;
     private Long creationDate;
+    private String hdpVersion;
 
     private String owner;
     private String account;
@@ -153,6 +154,14 @@ public class RDSConfig {
 
     public void setCreationDate(Long creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public String getHdpVersion() {
+        return hdpVersion;
+    }
+
+    public void setHdpVersion(String hdpVersion) {
+        this.hdpVersion = hdpVersion;
     }
 
     public String getAccount() {

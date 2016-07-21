@@ -21,6 +21,7 @@ public class RDSConfigToJsonConverter extends AbstractConversionServiceAwareConv
         json.setPublicInAccount(source.isPublicInAccount());
         json.setCreationDate(source.getCreationDate());
         json.setClusterNames(source.getClusters().stream().map(cluster -> cluster.getName()).collect(Collectors.toSet()));
+        json.setHdpVersion(source.getHdpVersion());
         return json;
     }
 }

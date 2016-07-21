@@ -125,6 +125,7 @@ public class ModelDescriptions {
         public static final String USERNAME = "Username to use for the jdbc connection";
         public static final String PASSWORD = "Password to use for the jdbc connection";
         public static final String NAME = "Name of the RDS configuration resource";
+        public static final String HDPVERSION = "HDP version for the RDS configuration";
     }
 
     public static class FileSystem {
