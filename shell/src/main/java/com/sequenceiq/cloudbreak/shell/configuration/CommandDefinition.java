@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.shell.commands.common.BlueprintCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.ClusterCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.HostGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.InstanceGroupCommands;
+import com.sequenceiq.cloudbreak.shell.commands.common.RdsConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RecipeCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.SecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.SssdConfigCommands;
@@ -77,6 +78,12 @@ public class CommandDefinition {
     SssdConfigCommands sssdConfigCommands() {
         return new SssdConfigCommands(shellContext);
     }
+
+    @Bean
+    RdsConfigCommands rdsConfigCommands() {
+        return new RdsConfigCommands(shellContext);
+    }
+
 
     @Bean
     BaseStackCommands stackCommands() {

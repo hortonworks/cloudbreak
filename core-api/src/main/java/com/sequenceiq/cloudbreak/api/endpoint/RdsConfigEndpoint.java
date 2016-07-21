@@ -32,7 +32,7 @@ public interface RdsConfigEndpoint {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES)
-    RDSConfigJson get(@PathParam(value = "id") Long id);
+    RDSConfigResponse get(@PathParam(value = "id") Long id);
 
     @DELETE
     @Path("{id}")
@@ -80,7 +80,7 @@ public interface RdsConfigEndpoint {
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES)
-    RDSConfigJson getPublic(@PathParam(value = "name") String name);
+    RDSConfigResponse getPublic(@PathParam(value = "name") String name);
 
     @DELETE
     @Path("account/{name}")

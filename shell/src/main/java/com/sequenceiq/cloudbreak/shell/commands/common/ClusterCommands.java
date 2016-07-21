@@ -139,6 +139,13 @@ public class ClusterCommands implements BaseCommands {
             if (shellContext.getSssdConfigId() != null) {
                 clusterRequest.setSssdConfigId(Long.valueOf(shellContext.getSssdConfigId()));
             }
+            if (shellContext.getRdsConfigId() != null) {
+                if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null) {
+                    return "--connectionURL, --databaseType, --connectionUserName, --connectionPassword switches "
+                            + "cannot be used if an RDS config is already selected with 'rdsconfig select'";
+                }
+                clusterRequest.setRdsConfigId(Long.valueOf(shellContext.getRdsConfigId()));
+            }
             clusterRequest.setValidateBlueprint(false);
 
             if (ambariVersion != null || ambariRepoBaseURL != null || ambariRepoGpgKey != null) {
