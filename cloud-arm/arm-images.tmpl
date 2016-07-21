@@ -1,7 +1,7 @@
 {{$atlas:=httpget "https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cloudbreak/azure-arm.image/search" | json | pointer "/versions/0"}}
 azure_rm:
   East Asia: https://sequenceiqeastasia2.blob.core.windows.net/images/{{ $atlas.metadata.image_name }}.vhd
-  East US: https://sequenceiqeastus2.blob.core.windows.net/images/{{ $atlas.metadata.image_name }}.vhd
+  East US: https://sequenceiqeastus12.blob.core.windows.net/images/{{ $atlas.metadata.image_name }}.vhd
   Central US: https://sequenceiqcentralus2.blob.core.windows.net/images/{{ $atlas.metadata.image_name }}.vhd
   North Europe: https://sequenceiqnortheurope2.blob.core.windows.net/images/{{ $atlas.metadata.image_name }}.vhd
   South Central US: https://sequenceiqouthcentralus2.blob.core.windows.net/images/{{ $atlas.metadata.image_name }}.vhd

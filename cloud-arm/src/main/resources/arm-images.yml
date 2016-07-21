@@ -1,7 +1,7 @@
 
 azure_rm:
   East Asia: https://sequenceiqeastasia2.blob.core.windows.net/images/cb-2016-07-12-09-10.vhd
-  East US: https://sequenceiqeastus2.blob.core.windows.net/images/cb-2016-07-12-09-10.vhd
+  East US: https://sequenceiqeastus12.blob.core.windows.net/images/cb-2016-07-12-09-10.vhd
   Central US: https://sequenceiqcentralus2.blob.core.windows.net/images/cb-2016-07-12-09-10.vhd
   North Europe: https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-2016-07-12-09-10.vhd
   South Central US: https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-2016-07-12-09-10.vhd
