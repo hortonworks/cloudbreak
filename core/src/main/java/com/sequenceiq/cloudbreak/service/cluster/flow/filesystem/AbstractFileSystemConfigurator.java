@@ -22,7 +22,7 @@ public abstract class AbstractFileSystemConfigurator<T extends FileSystemConfigu
                 for (String key : fsScriptConfig.getProperties().keySet()) {
                     script = script.replaceAll("\\$" + key, fsScriptConfig.getProperties().get(key));
                 }
-                scripts.add(new RecipeScript(script, fsScriptConfig.getClusterLifecycleEvent(), fsScriptConfig.getExecutionType()));
+                scripts.add(new RecipeScript(script, fsScriptConfig.getClusterLifecycleEvent()));
             }
         } catch (IOException e) {
             throw new FileSystemConfigException("Filesystem configuration scripts cannot be read.", e);

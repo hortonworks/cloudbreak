@@ -21,7 +21,6 @@ import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
@@ -67,7 +66,7 @@ public class RecipeCommandsTest {
         dummyResult = new RecipeResponse();
         dummyResult.setId(RECIPE_ID);
         dummyResult.setTimeout(1);
-        dummyResult.setPlugins(Collections.<String, ExecutionType>emptyMap());
+        dummyResult.setPlugins(Collections.emptySet());
         dummyResult.setProperties(Collections.<String, String>emptyMap());
         given(cloudbreakClient.recipeEndpoint()).willReturn(recipeEndpoint);
         given(recipeEndpoint.postPrivate(any(RecipeRequest.class))).willReturn(new IdJson(1L));

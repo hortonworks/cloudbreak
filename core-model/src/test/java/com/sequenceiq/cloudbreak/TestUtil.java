@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -23,7 +22,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
@@ -46,6 +44,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -496,10 +495,10 @@ public class TestUtil {
         return cloudbreakEvent;
     }
 
-    private static Map<String, ExecutionType> createRecipePlugins() {
-        Map<String, ExecutionType> plugin = new HashMap<>();
-        plugin.put("all-node-plugin", ExecutionType.ALL_NODES);
-        plugin.put("one-node-plugin", ExecutionType.ONE_NODE);
+    private static Set<Plugin> createRecipePlugins() {
+        Set<Plugin> plugin = new HashSet<>();
+        plugin.add(new Plugin("first"));
+        plugin.add(new Plugin("second"));
         return plugin;
     }
 

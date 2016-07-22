@@ -34,6 +34,7 @@ public class RecipeService {
         recipe.setOwner(user.getUserId());
         recipe.setAccount(user.getAccount());
         try {
+            recipe.getPlugins().stream().forEach(plugin -> plugin.setRecipe(recipe));
             return recipeRepository.save(recipe);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.RECIPE, recipe.getName(), ex);

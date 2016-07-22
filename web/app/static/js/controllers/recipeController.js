@@ -7,22 +7,20 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
 
         var decorateBase64Plugins = function(recipe) {
             recipe.pluginContents = {};
-            for (var p in recipe.plugins) {
-                if (p.indexOf("base64://") === 0) {
-                    var lines = recipe.pluginContents[p] = {};
-                    var files = $base64.decode(p.substring(9)).split('\n');
-                    for (var f = 0; f < files.length; f++) {
-                        var file = files[f];
-                        if (file) {
-                            var content = file.split(":");
-                            if ("plugin.toml" != content[0]) {
-                                lines[content[0]] = $base64.decode(content[1]);
-                            }
+            recipe.plugins.forEach(function (p) {
+                var lines = recipe.pluginContents[p] = {};
+                var files = $base64.decode(p.substring(9)).split('\n');
+                for (var f = 0; f < files.length; f++) {
+                    var file = files[f];
+                    if (file) {
+                        var content = file.split(":");
+                        if ("plugin.toml" != content[0]) {
+                            lines[content[0]] = $base64.decode(content[1]);
                         }
                     }
                 }
-            }
-        }
+            });
+        };
 
         $rootScope.recipes = AccountRecipe.query(function() {
             for (var i = 0; i < $rootScope.recipes.length; i++) {
@@ -33,7 +31,8 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
 
         $scope.createRecipe = function() {
             $scope.recipeCreationForm.$setPristine();
-            $scope.recipe.plugins[$scope.recipePlugin.url] = $scope.recipePlugin.type;
+            $scope.recipe.plugins = [];
+            $scope.recipe.plugins.push($scope.recipePlugin.url);
             angular.forEach($scope.recipePropertyList, function(item) {
                 $scope.recipe.properties[item.name] = item.value;
             });
@@ -130,8 +129,7 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
             $scope.recipePropertyList = [];
             $scope.recipePublicInAccount = false;
             $scope.recipePlugin = {
-                url: "",
-                type: "ALL_NODES"
+                url: ""
             };
             $scope.recipe = {
                 name: "",
