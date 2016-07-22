@@ -13,7 +13,7 @@ public class ExceptionTransformer {
             if (((ClientErrorException) e).getResponse() != null && ((ClientErrorException) e).getResponse().hasEntity()) {
                 String response = ((ClientErrorException) e).getResponse().readEntity(String.class);
                 if (response != null) {
-                    String[] split = response.replaceAll("}", "").replaceAll("\\{", "").split("\"");
+                    String[] split = response.replaceAll("}", "").replaceAll("\\{", "").replaceAll("\\\\\"", "'").split("\"");
                     String splitResponse = split[split.length - 1];
                     if (StringUtils.isEmpty(response)) {
                         return new RuntimeException(response);

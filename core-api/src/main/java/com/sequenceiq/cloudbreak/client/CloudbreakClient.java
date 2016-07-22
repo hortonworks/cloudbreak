@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.ConstraintTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SssdConfigEndpoint;
@@ -69,6 +70,7 @@ public class CloudbreakClient {
     private NetworkEndpoint networkEndpoint;
     private RecipeEndpoint recipeEndpoint;
     private SssdConfigEndpoint sssdConfigEndpoint;
+    private RdsConfigEndpoint rdsConfigEndpoint;
     private AccountPreferencesEndpoint accountPreferencesEndpoint;
     private BlueprintEndpoint blueprintEndpoint;
     private ClusterEndpoint clusterEndpoint;
@@ -134,6 +136,7 @@ public class CloudbreakClient {
         this.networkEndpoint = newResource(NetworkEndpoint.class, headers);
         this.recipeEndpoint = newResource(RecipeEndpoint.class, headers);
         this.sssdConfigEndpoint = newResource(SssdConfigEndpoint.class, headers);
+        this.rdsConfigEndpoint = newResource(RdsConfigEndpoint.class, headers);
         this.accountPreferencesEndpoint = newResource(AccountPreferencesEndpoint.class, headers);
         this.blueprintEndpoint = newResource(BlueprintEndpoint.class, headers);
         this.clusterEndpoint = newResource(ClusterEndpoint.class, headers);
@@ -205,6 +208,11 @@ public class CloudbreakClient {
     public SssdConfigEndpoint sssdConfigEndpoint() {
         refresh();
         return sssdConfigEndpoint;
+    }
+
+    public RdsConfigEndpoint rdsConfigEndpoint() {
+        refresh();
+        return rdsConfigEndpoint;
     }
 
     public AccountPreferencesEndpoint accountPreferencesEndpoint() {

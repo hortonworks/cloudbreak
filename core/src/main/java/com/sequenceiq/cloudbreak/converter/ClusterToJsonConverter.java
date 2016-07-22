@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
@@ -68,7 +67,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         }
         RDSConfig rdsConfig = source.getRdsConfig();
         if (rdsConfig != null) {
-            clusterResponse.setRdsConfigJson(getConversionService().convert(rdsConfig, RDSConfigJson.class));
+            clusterResponse.setRdsConfigId(rdsConfig.getId());
         }
         clusterResponse.setAmbariServerIp(source.getAmbariIp());
         clusterResponse.setUserName(source.getUserName());

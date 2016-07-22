@@ -13,6 +13,9 @@ import io.swagger.annotations.ApiModelProperty;
 public class RDSConfigJson {
 
     @NotNull
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.NAME, required = true)
+    private String name;
+    @NotNull
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.CONNECTION_URL, required = true)
     private String connectionURL;
     @NotNull
@@ -24,6 +27,17 @@ public class RDSConfigJson {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.PASSWORD, required = true)
     private String connectionPassword;
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.HDPVERSION, required = true)
+    private String hdpVersion;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getConnectionURL() {
         return connectionURL;
@@ -55,5 +69,13 @@ public class RDSConfigJson {
 
     public void setConnectionPassword(String connectionPassword) {
         this.connectionPassword = connectionPassword;
+    }
+
+    public String getHdpVersion() {
+        return hdpVersion;
+    }
+
+    public void setHdpVersion(String hdpVersion) {
+        this.hdpVersion = hdpVersion;
     }
 }

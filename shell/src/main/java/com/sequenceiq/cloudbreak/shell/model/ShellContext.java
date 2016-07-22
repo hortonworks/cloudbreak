@@ -52,6 +52,7 @@ public class ShellContext {
     private String activeCloudPlatform;
     private Map<Long, String> networksByProvider = new HashMap<>();
     private Map<Long, String> securityGroups = new HashMap<>();
+    private Map<Long, String> rdsConfigs = new HashMap<>();
     private Long activeNetworkId;
     private FileSystemType fileSystemType;
     private Map<String, Object> fileSystemParameters = new HashMap<>();
@@ -361,6 +362,10 @@ public class ShellContext {
         return isPropertyAvailable(PropertyKey.BLUEPRINT_ACCESSIBLE);
     }
 
+    public boolean isRdsConfigAccessible() {
+        return isPropertyAvailable(PropertyKey.RDSCONFIG_ACCESSIBLE);
+    }
+
     public void setCredentialAccessible() {
         addProperty(PropertyKey.CREDENTIAL_ACCESSIBLE, ACCESSIBLE);
     }
@@ -409,6 +414,10 @@ public class ShellContext {
         return Collections.unmodifiableMap(networksByProvider);
     }
 
+    public Map<Long, String> getRdsConfigs() {
+        return rdsConfigs;
+    }
+
     public boolean isSssdConfigAccessible() {
         return isPropertyAvailable(PropertyKey.SSSDCONFIG_ACCESSIBLE);
     }
@@ -422,8 +431,21 @@ public class ShellContext {
         setSssdConfigAccessible();
     }
 
+    public void addRdsConfig(String rdsConfigId) {
+        addProperty(PropertyKey.RDSCONFIG_ID, rdsConfigId);
+        setSssdConfigAccessible();
+    }
+
+    public void setRdsConfigAccessible() {
+        addProperty(PropertyKey.RDSCONFIG_ACCESSIBLE, ACCESSIBLE);
+    }
+
     public String getSssdConfigId() {
         return getLastPropertyValue(PropertyKey.SSSDCONFIG_ID);
+    }
+
+    public String getRdsConfigId() {
+        return getLastPropertyValue(PropertyKey.RDSCONFIG_ID);
     }
 
     public void putNetwork(Long id, String provider) {
@@ -432,6 +454,10 @@ public class ShellContext {
 
     public void putNetworks(Map<Long, String> networksByProvider) {
         this.networksByProvider.putAll(networksByProvider);
+    }
+
+    public void putRdsConfig(Long id, String name) {
+        rdsConfigs.put(id, name);
     }
 
     public void putSecurityGroup(Long id, String name) {
@@ -579,6 +605,9 @@ public class ShellContext {
         STACK_ACCESSIBLE,
         RECIPE_ACCESSIBLE,
         SSSDCONFIG_ACCESSIBLE,
-        SSSDCONFIG_ID
+        SSSDCONFIG_ID,
+        RDSCONFIG_ACCESSIBLE,
+        RDSCONFIG_ID,
+        RDSCONFIG_NAME
     }
 }

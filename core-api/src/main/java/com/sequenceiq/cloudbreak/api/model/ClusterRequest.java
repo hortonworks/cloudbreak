@@ -60,6 +60,8 @@ public class ClusterRequest {
     private AmbariStackDetailsJson ambariStackDetails;
     @Valid
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
+    @ApiModelProperty(value = ClusterModelDescription.RDSCONFIG_ID, required = true)
+    private Long rdsConfigId;
     @Valid
     private AmbariDatabaseDetailsJson ambariDatabaseDetailsJson;
     @Valid
@@ -189,6 +191,14 @@ public class ClusterRequest {
 
     public void setAmbariDatabaseDetailsJson(AmbariDatabaseDetailsJson ambariDatabaseDetailsJson) {
         this.ambariDatabaseDetailsJson = ambariDatabaseDetailsJson;
+    }
+
+    public Long getRdsConfigId() {
+        return rdsConfigId;
+    }
+
+    public void setRdsConfigId(Long rdsConfigId) {
+        this.rdsConfigId = rdsConfigId;
     }
 
     public RDSConfigJson getRdsConfigJson() {
