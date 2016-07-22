@@ -8,13 +8,14 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariDatabaseDeta
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariDatabaseDetailsDescription.VENDOR;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("AmbariDatabaseDetailsJson")
+@ApiModel("AmbariDatabaseDetails")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AmbariDatabaseDetailsJson {
 
@@ -25,6 +26,7 @@ public class AmbariDatabaseDetailsJson {
     @ApiModelProperty(value = NAME, required = true)
     private String name;
     @NotNull
+    @Pattern(regexp = "^[a-zA-Z0-9]([a-zA-Z0-9-\\.]+)$", message = "The hostname must be valid")
     @ApiModelProperty(value = HOST, required = true)
     private String host;
     @NotNull

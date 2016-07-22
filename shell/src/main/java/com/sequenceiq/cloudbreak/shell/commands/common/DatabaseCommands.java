@@ -38,7 +38,16 @@ public class DatabaseCommands implements CommandMarker {
         databaseDetails.setName(name);
         databaseDetails.setUserName(username);
         databaseDetails.setPassword(password);
-        shellContext.setAmbariDatabaseDetailsJson(databaseDetails);
-        return String.format("%s://%s:%s@%s:%d/%s", vendor, username, password, host, port, name);
+        try {
+            String error = shellContext.cloudbreakClient().utilEndpoint().testAmbariDatabase(databaseDetails).getError();
+            if (error == null) {
+                shellContext.setAmbariDatabaseDetailsJson(databaseDetails);
+                return String.format("%s://%s:%s@%s:%d/%s", databaseDetails.getVendor().value(), username, password, host, port, name);
+            }
+            return error;
+        } catch (Exception ex) {
+            shellContext.resetAmbariDatabaseDetailsJson();
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
+        }
     }
 }

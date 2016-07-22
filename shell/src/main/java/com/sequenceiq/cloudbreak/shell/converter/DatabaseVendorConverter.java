@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.shell.converter;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.shell.core.Completion;
@@ -15,7 +14,7 @@ public class DatabaseVendorConverter extends AbstractConverter<DatabaseVendor> {
     private static Collection<String> values;
 
     {
-        values = Collections2.transform(EnumSet.complementOf(EnumSet.of(com.sequenceiq.cloudbreak.api.model.DatabaseVendor.EMBEDDED)), Enum::name);
+        values = Collections2.transform(com.sequenceiq.cloudbreak.api.model.DatabaseVendor.availableVendors(), Enum::name);
     }
 
     @Override

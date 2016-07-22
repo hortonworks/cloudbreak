@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.UtilEndpoint;
+import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.RdsTestResult;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
@@ -26,5 +28,10 @@ public class UtilController implements UtilEndpoint {
             rdsTestResult.setConnectionResult(e.getMessage());
         }
         return rdsTestResult;
+    }
+
+    @Override
+    public AmbariDatabaseTestResult testAmbariDatabase(@Valid AmbariDatabaseDetailsJson ambariDatabaseDetailsJson) {
+        return new AmbariDatabaseTestResult();
     }
 }

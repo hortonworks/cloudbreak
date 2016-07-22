@@ -222,7 +222,7 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     private List<Component> addAmbariDatabaseConfig(List<Component> components, ClusterRequest request, Stack stack) throws JsonProcessingException {
-        AmbariDatabaseDetailsJson ambariRepoDetailsJson = request.getAmbariDatabaseDetailsJson();
+        AmbariDatabaseDetailsJson ambariRepoDetailsJson = request.getAmbariDatabaseDetails();
         if (ambariRepoDetailsJson == null) {
             ambariRepoDetailsJson = new AmbariDatabaseDetailsJson();
         }
