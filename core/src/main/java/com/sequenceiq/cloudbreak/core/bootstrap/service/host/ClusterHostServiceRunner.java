@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -77,8 +78,10 @@ public class ClusterHostServiceRunner {
             servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
             AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stack.getId());
             if (ambariRepo != null) {
-                servicePillar.put("ambari", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
+                servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
             }
+            AmbariDatabase ambariDb = componentConfigProvider.getAmbariDatabase(stack.getId());
+            servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
             SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
             hostOrchestrator.runService(gatewayConfig, nodes, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {

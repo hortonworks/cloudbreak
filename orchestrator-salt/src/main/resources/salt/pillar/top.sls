@@ -9,3 +9,7 @@ base:
   'roles:kerberos_server':
     - match: grain
     - kerberos.init
+
+  'roles:ambari_server':
+    - match: grain
+    - ambari.database

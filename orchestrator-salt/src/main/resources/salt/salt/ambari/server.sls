@@ -17,6 +17,13 @@ ambari-server:
 
 {% endif %}
 
+{% if ambari.ambari_database.vendor == 'mysql' %}
+install-mariadb:
+  pkg.latest:
+    - pkgs:
+      - mariadb
+{% endif %}
+
 /var/lib/ambari-server/jdbc-drivers:
   cmd.run:
     - name: cp -R /opt/jdbc-drivers /var/lib/ambari-server/jdbc-drivers
@@ -26,6 +33,9 @@ ambari-server:
   file.managed:
     - makedirs: True
     - source: salt://ambari/scripts/ambari-server-init.sh
+    - template: jinja
+    - context:
+      ambari_database: {{ ambari.ambari_database }}
     - mode: 744
 
 set_install_timeout:

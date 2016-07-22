@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.shell.commands.base.BaseTemplateCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.BasicCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.BlueprintCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.ClusterCommands;
+import com.sequenceiq.cloudbreak.shell.commands.common.DatabaseCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.HostGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.InstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RecipeCommands;
@@ -91,6 +92,11 @@ public class CommandDefinition {
     @Bean
     InstanceGroupCommands instanceGroupCommands() {
         return new InstanceGroupCommands(shellContext);
+    }
+
+    @Bean
+    DatabaseCommands databaseCommands() {
+        return new DatabaseCommands(shellContext);
     }
 
     @Bean

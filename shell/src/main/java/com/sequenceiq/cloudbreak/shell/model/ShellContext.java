@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
@@ -59,6 +60,7 @@ public class ShellContext {
     private String selectedMarathonStackName;
     private Set<String> constraintTemplates = new HashSet<>();
     private Map<String, MarathonHostgroupEntry> marathonHostgroups = new HashMap<>();
+    private AmbariDatabaseDetailsJson ambariDatabaseDetailsJson;
 
     @Inject
     private CloudbreakClient cloudbreakClient;
@@ -82,8 +84,8 @@ public class ShellContext {
         this.hostGroups = new HashMap<>();
         this.activeHostGroups = new HashSet<>();
         this.activeInstanceGroups = new HashSet<>();
-        constraintTemplates = new HashSet<>();
-        marathonHostgroups = new HashMap<>();
+        this.constraintTemplates = new HashSet<>();
+        this.marathonHostgroups = new HashMap<>();
     }
 
     public ResponseTransformer responseTransformer() {
@@ -552,6 +554,18 @@ public class ShellContext {
 
     public void setOrchestrators(Map<String, Collection<String>> orchestrators) {
         this.orchestrators = orchestrators;
+    }
+
+    public void setAmbariDatabaseDetailsJson(AmbariDatabaseDetailsJson details) {
+        this.ambariDatabaseDetailsJson = details;
+    }
+
+    public AmbariDatabaseDetailsJson getAmbariDatabaseDetailsJson() {
+        return ambariDatabaseDetailsJson;
+    }
+
+    public void resetAmbariDatabaseDetailsJson() {
+        this.ambariDatabaseDetailsJson = null;
     }
 
     private enum PropertyKey {
