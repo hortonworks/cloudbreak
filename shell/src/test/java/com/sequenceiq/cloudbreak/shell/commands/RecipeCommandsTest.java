@@ -67,7 +67,7 @@ public class RecipeCommandsTest {
         dummyResult.setId(RECIPE_ID);
         dummyResult.setTimeout(1);
         dummyResult.setPlugins(Collections.emptySet());
-        dummyResult.setProperties(Collections.emptyMap());
+        dummyResult.setProperties(Collections.<String, String>emptyMap());
         given(cloudbreakClient.recipeEndpoint()).willReturn(recipeEndpoint);
         given(recipeEndpoint.postPrivate(any(RecipeRequest.class))).willReturn(new IdJson(1L));
         given(recipeEndpoint.postPublic(any(RecipeRequest.class))).willReturn(new IdJson(1L));

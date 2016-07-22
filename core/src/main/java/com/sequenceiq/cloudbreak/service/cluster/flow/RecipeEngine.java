@@ -149,7 +149,7 @@ public class RecipeEngine {
         List<String> payload;
         if (config.getConfiguration() != null) {
             String configName = SSSD_CONFIG + config.getId();
-            payload = Collections.singletonList(configName);
+                    payload = Collections.singletonList(configName);
         } else {
             payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
                     config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
