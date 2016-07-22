@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
@@ -10,7 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -87,7 +85,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         ClusterResponse result = underTest.convert(getSource());
         // THEN
         assertEquals(1L, (long) result.getId());
-        assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "rdsConfigId"));
+        assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "ambariStackDetails", "rdsConfigId"));
     }
 
     @Test
