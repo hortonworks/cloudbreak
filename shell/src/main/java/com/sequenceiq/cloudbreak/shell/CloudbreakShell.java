@@ -26,11 +26,12 @@ import org.springframework.shell.event.ShellStatus;
 import org.springframework.shell.event.ShellStatusListener;
 
 import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 @Configuration
@@ -161,21 +162,12 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
     }
 
     private void initResourceAccessibility() throws Exception {
-        if (!cloudbreakClient.credentialEndpoint().getPublics().isEmpty()) {
-            context.setCredentialAccessible();
-        }
-        if (!cloudbreakClient.blueprintEndpoint().getPublics().isEmpty()) {
-            context.setBlueprintAccessible();
-        }
-        if (!cloudbreakClient.stackEndpoint().getPublics().isEmpty()) {
-            context.setStackAccessible();
-        }
-        if (!cloudbreakClient.recipeEndpoint().getPublics().isEmpty()) {
-            context.setRecipeAccessible();
-        }
-        if (!cloudbreakClient.sssdConfigEndpoint().getPublics().isEmpty()) {
-            context.setSssdConfigAccessible();
-        }
+        initCredentialAccessibility();
+        initBlueprintAccessibility();
+        initStackAccessibility();
+        initRecipeAccessibility();
+        initSssdConfigAccessibility();
+        initRdsConfigAccessibility();
         Set<NetworkJson> publics = cloudbreakClient.networkEndpoint().getPublics();
         for (NetworkJson network : publics) {
             context.putNetwork(Long.valueOf(network.getId()), network.getCloudPlatform());
@@ -183,6 +175,46 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         Set<SecurityGroupJson> securityGroups = cloudbreakClient.securityGroupEndpoint().getPublics();
         for (SecurityGroupJson securityGroup : securityGroups) {
             context.putSecurityGroup(securityGroup.getId(), securityGroup.getName());
+        }
+        Set<RDSConfigResponse> rdsConfigResponses = cloudbreakClient.rdsConfigEndpoint().getPublics();
+        for (RDSConfigResponse rdsConfig: rdsConfigResponses) {
+            context.putRdsConfig(Long.valueOf(rdsConfig.getId()), rdsConfig.getName());
+        }
+    }
+
+    private void initCredentialAccessibility() {
+        if (!cloudbreakClient.credentialEndpoint().getPublics().isEmpty()) {
+            context.setCredentialAccessible();
+        }
+    }
+
+    private void initBlueprintAccessibility() {
+        if (!cloudbreakClient.blueprintEndpoint().getPublics().isEmpty()) {
+            context.setBlueprintAccessible();
+        }
+    }
+
+    private void initStackAccessibility() {
+        if (!cloudbreakClient.stackEndpoint().getPublics().isEmpty()) {
+            context.setStackAccessible();
+        }
+    }
+
+    private void initRecipeAccessibility() {
+        if (!cloudbreakClient.recipeEndpoint().getPublics().isEmpty()) {
+            context.setRecipeAccessible();
+        }
+    }
+
+    private void initSssdConfigAccessibility() {
+        if (!cloudbreakClient.sssdConfigEndpoint().getPublics().isEmpty()) {
+            context.setSssdConfigAccessible();
+        }
+    }
+
+    private void initRdsConfigAccessibility() {
+        if (!cloudbreakClient.rdsConfigEndpoint().getPublics().isEmpty()) {
+            context.setRdsConfigAccessible();
         }
     }
 

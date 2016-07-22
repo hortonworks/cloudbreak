@@ -171,4 +171,17 @@ public class OperationDescriptions {
     public static class UtilityOpDescription {
         public static final String TEST_CONNECTION = "tests a RDS connection";
     }
+
+    public static class RdsConfigOpDescription {
+        public static final String POST_PRIVATE = "create RDS configuration as private resource";
+        public static final String POST_PUBLIC = "create RDS configuration as public resource";
+        public static final String GET_PRIVATE = "retrieve private RDS configurations";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) RDS configurations";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private RDS configuration by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) RDS configuration by name";
+        public static final String GET_BY_ID = "retrieve RDS configuration by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private RDS configuration by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private RDS configuration by name";
+        public static final String DELETE_BY_ID = "delete RDS configuration by id";
+    }
 }

@@ -39,6 +39,8 @@ import com.sequenceiq.cloudbreak.shell.converter.NetworkNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.OpenStackFacingConverter;
 import com.sequenceiq.cloudbreak.shell.converter.OpenStackOrchestratorTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.PlatformVariantConverter;
+import com.sequenceiq.cloudbreak.shell.converter.RdsConfigIdConverter;
+import com.sequenceiq.cloudbreak.shell.converter.RdsConfigNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityGroupIdConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityGroupNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.SecurityRulesConverter;
@@ -228,6 +230,17 @@ public class ConverterConfiguration {
     Converter getSssdProviderTypeConverter() {
         return new SssdProviderTypeConverter();
     }
+
+    @Bean
+    Converter getRdsIdConverter() {
+        return new RdsConfigIdConverter();
+    }
+
+    @Bean
+    Converter getRdsNameConverter() {
+        return new RdsConfigNameConverter();
+    }
+
 
     @Bean
     Converter getSssdSchemaTypeConverter() {

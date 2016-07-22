@@ -47,6 +47,10 @@ import com.sequenceiq.cloudbreak.api.model.Status;
                 query = "SELECT c FROM Cluster c "
                         + "WHERE c.blueprint.id= :id"),
         @NamedQuery(
+                name = "Cluster.findAllClustersByRDSConfig",
+                query = "SELECT c FROM Cluster c "
+                        + "WHERE c.rdsConfig.id= :id"),
+        @NamedQuery(
                 name = "Cluster.findAllClustersBySssdConfig",
                 query = "SELECT c FROM Cluster c "
                         + "WHERE c.sssdConfig.id= :id"),
@@ -130,7 +134,7 @@ public class Cluster implements ProvisionEntity {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private AmbariStackDetails ambariStackDetails;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToOne
     private RDSConfig rdsConfig;
 
     @ManyToOne
