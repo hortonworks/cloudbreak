@@ -595,7 +595,7 @@
                             <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
                         </div>
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="changeClusterCredential(activeCluster)"><i class="fa fa-key fa-fw"></i>{{msg.active_cluster_command_credential_short_label}}</button>
+                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-disabled="changeCredential.$invalid" ng-click="changeClusterCredential(activeCluster)"><i class="fa fa-key fa-fw"></i>{{msg.active_cluster_command_credential_short_label}}</button>
                         </div>
                     </div>
                 </div>
