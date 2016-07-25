@@ -41,8 +41,8 @@
                                 <label class="col-sm-3 control-label" for="sl_ambariServerIp">{{msg.active_cluster_ambari_address_label}}</label>
                                 <div class="col-sm-9">
                                     <div ng-if="activeCluster.cluster.ambariServerIp != null">
-                                        <a ng-if="activeCluster.orchestrator.type !== 'MARATHON'" target="_blank" class="form-control-static review-a" href="https://{{activeCluster.cluster.ambariServerIp}}/ambari/">https://{{activeCluster.cluster.ambariServerIp}}/ambari/</a>
-                                        <a ng-if="activeCluster.orchestrator.type === 'MARATHON'" target="_blank" class="form-control-static review-a" href="http://{{activeCluster.cluster.ambariServerIp}}:8080">http://{{activeCluster.cluster.ambariServerIp}}:8080</a>
+                                        <a ng-if="noProxyBeforeAmbari()" target="_blank" class="form-control-static review-a" href="http://{{activeCluster.cluster.ambariServerIp}}:8080">http://{{activeCluster.cluster.ambariServerIp}}:8080</a>
+                                        <a ng-if="!noProxyBeforeAmbari()" target="_blank" class="form-control-static review-a" href="https://{{activeCluster.cluster.ambariServerIp}}/ambari/">https://{{activeCluster.cluster.ambariServerIp}}/ambari/</a>
                                     </div>
                                     <div ng-if="activeCluster.cluster.ambariServerIp == null">
                                         <a target="_blank" class="form-control-static review-a" href="">{{msg.active_cluster_ambari_not_available_label}}</a>

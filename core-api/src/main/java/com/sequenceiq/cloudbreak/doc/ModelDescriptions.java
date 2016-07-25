@@ -54,6 +54,10 @@ public class ModelDescriptions {
         public static final String HDPVERSION = "hdp version of image";
     }
 
+    public static class CloudbreakDetailsModelDescription {
+        public static final String VERSION = "version of the Cloudbreak that provisioned the stack";
+    }
+
     public static class StackModelDescription {
         public static final String STACK_ID = "id of the stack";
         public static final String IMAGE = "image of the stack";
@@ -82,6 +86,7 @@ public class ModelDescriptions {
         public static final String AMBARI_VERSION = "specific version of ambari";
         public static final String HDP_VERSION = "specific version of HDP";
         public static final String IMAGE_CATALOG = "custom image catalog URL";
+        public static final String CLOUDBREAK_DETAILS = "details of the Cloudbreak that provisioned the stack";
     }
 
     public static class ClusterModelDescription {

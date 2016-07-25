@@ -40,6 +40,8 @@ public class StackResponse extends StackBase {
     private Integer gatewayPort;
     @ApiModelProperty(StackModelDescription.IMAGE)
     private ImageJson image;
+    @ApiModelProperty(StackModelDescription.CLOUDBREAK_DETAILS)
+    private CloudbreakDetailsJson cloudbreakDetails;
 
     public String getAccount() {
         return account;
@@ -136,5 +138,13 @@ public class StackResponse extends StackBase {
 
     public void setImage(ImageJson image) {
         this.image = image;
+    }
+
+    public CloudbreakDetailsJson getCloudbreakDetails() {
+        return cloudbreakDetails;
+    }
+
+    public void setCloudbreakDetails(CloudbreakDetailsJson cloudbreakDetails) {
+        this.cloudbreakDetails = cloudbreakDetails;
     }
 }

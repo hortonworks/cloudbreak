@@ -3,18 +3,20 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
-## [v1.5.0-dev.55]
+## [v1.5.0-dev.61]
 
 ### Fixed
 
 - ClusterBootstrapperTest randomly fails
 - slider does not work with ssl on python 2.7.9+
+- fix Ambari address on UI for clusters that provisioned by an older version of Cloudbreak
 
 ### Added
 
 - added HDP version field to RDS config
 - ability to configure remote MySQL database for Ambari
 - ability to configure remote Postgres database for Ambari
+- stacks/clusters are associated with Cloudbreak version
 
 ### Changed
 
