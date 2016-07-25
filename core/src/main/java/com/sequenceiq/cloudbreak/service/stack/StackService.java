@@ -25,13 +25,16 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
+import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -45,12 +48,14 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -62,6 +67,7 @@ import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -113,9 +119,14 @@ public class StackService {
     private ImageNameUtil imageNameUtil;
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
+    @Inject
+    private ComponentConfigProvider componentConfigProvider;
 
     @Value("${cb.nginx.port:9443}")
     private int nginxPort;
+
+    @Value("${info.app.version:}")
+    private String cbVersion;
 
     @Autowired
     @Qualifier("conversionService")
@@ -275,6 +286,7 @@ public class StackService {
                 savedStack.setCreated(new Date().getTime());
                 stackRepository.save(savedStack);
             }
+            addCloudbreakDetailsForStack(stack);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
         } catch (CloudbreakSecuritySetupException e) {
@@ -543,6 +555,16 @@ public class StackService {
 
         public String code() {
             return code;
+        }
+    }
+
+    private void addCloudbreakDetailsForStack(Stack stack) {
+        CloudbreakDetails cbDetails = new CloudbreakDetails(cbVersion);
+        try {
+            Component cbDetailsComponent = new Component(ComponentType.CLOUDBREAK_DETAILS, ComponentType.CLOUDBREAK_DETAILS.name(), new Json(cbDetails), stack);
+            componentConfigProvider.store(cbDetailsComponent);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Could not create Cloudbreak details component.", e);
         }
     }
 }

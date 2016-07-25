@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -77,6 +78,18 @@ public class ComponentConfigProvider {
             return component.getAttributes().get(AmbariDatabase.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read Ambari database", e);
+        }
+    }
+
+    public CloudbreakDetails getCloudbreakDetails(Long stackId) {
+        try {
+            Component component = getComponent(stackId, ComponentType.CLOUDBREAK_DETAILS, ComponentType.CLOUDBREAK_DETAILS.name());
+            if (component == null) {
+                return null;
+            }
+            return component.getAttributes().get(CloudbreakDetails.class);
+        } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to read Cloudbreak details for stack.", e);
         }
     }
 
