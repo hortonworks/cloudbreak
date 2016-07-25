@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -272,6 +273,11 @@ public class ClusterController implements ClusterEndpoint {
             throw new BadRequestException(String.format(
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
                     stack.getStatus()));
+        }
+        if (Optional.ofNullable(userNamePasswordJson.getOldPassword()).orElse("").isEmpty()) {
+            throw new BadRequestException(String.format("The old password of the Stack '%s' is missing.", stackId));
+        } else if (Optional.ofNullable(userNamePasswordJson.getPassword()).orElse("").isEmpty()) {
+            throw new BadRequestException(String.format("The new password of the Stack '%s' is missing.", stackId));
         }
         if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword())) {
             throw new BadRequestException(String.format(
