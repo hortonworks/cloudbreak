@@ -83,6 +83,7 @@ public class AmbariDecommissioner {
     private static final int MAX_ATTEMPTS_FOR_REGION_DECOM = 500;
     private static final String DATANODE = "DATANODE";
     private static final double SAFETY_PERCENTAGE = 1.2;
+    private static final int NO_REPLICATION = 0;
 
     @Inject
     private StackRepository stackRepository;
@@ -219,15 +220,17 @@ public class AmbariDecommissioner {
         List<HostMetadata> downScaleCandidates;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
-        int replication = getReplicationFactor(ambariClient, hostGroupName);
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
         Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
         List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(cluster, hostsInHostGroup, hostGroupName);
         int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
-        verifyNodeCount(replication, scalingAdjustment, filteredHostList, reservedInstances);
-        if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup.getName())) {
+        String blueprintName = cluster.getBlueprint().getBlueprintName();
+        if (doesHostGroupContainDataNode(ambariClient, blueprintName, hostGroupName)) {
+            int replication = getReplicationFactor(ambariClient, hostGroupName);
+            verifyNodeCount(replication, scalingAdjustment, filteredHostList, reservedInstances);
             downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication, scalingAdjustment, filteredHostList);
         } else {
+            verifyNodeCount(NO_REPLICATION, scalingAdjustment, filteredHostList, reservedInstances);
             downScaleCandidates = filteredHostList;
         }
         return downScaleCandidates;
