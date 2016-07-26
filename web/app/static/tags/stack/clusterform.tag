@@ -21,6 +21,7 @@
                         <a type="button" ng-class="{'btn-info': configureFileSystem, 'btn-default': !configureFileSystem}" ng-disabled="!cluster.name || !cluster.region || !cluster.networkId || !cluster.blueprintId || !ambariServerSelected()" class="btn ng-binding wizard-button" role="presentation" ng-click="showWizardActualElement('configureFileSystem')" ng-if="activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP'">{{msg.cluster_form_ambari_filesystem_tag}}</a>
                         <a type="button" ng-class="{'btn-info': configureFailureAction, 'btn-default': !configureFailureAction}" class="btn ng-binding wizard-button" role="presentation" ng-click="showWizardActualElement('configureFailureAction')" ng-disabled="!cluster.name || !cluster.region || !cluster.networkId || !cluster.blueprintId || !ambariServerSelected()" ng-if="activeCredential !== undefined && showAdvancedOptionForm">{{msg.cluster_form_ambari_failure_tag}}</a>
                         <a type="button" ng-class="{'btn-info': configureAmbariRepository, 'btn-default': !configureAmbariRepository}" class="btn ng-binding wizard-button" role="presentation" ng-click="showWizardActualElement('configureAmbariRepository')" ng-disabled="!cluster.name || !cluster.blueprintId || (activeCredential !== undefined && (!cluster.region || !cluster.networkId)) || !ambariServerSelected()" ng-if="showAdvancedOptionForm">{{msg.cluster_form_ambari_hdprepo_tag}}</a>
+                        <a type="button" ng-class="{'btn-info': configureAmbariDatabase, 'btn-default': !configureAmbariDatabase}" class="btn ng-binding wizard-button" role="presentation" ng-click="showWizardActualElement('configureAmbariDatabase')" ng-disabled="!cluster.name || !cluster.blueprintId || (activeCredential !== undefined && (!cluster.region || !cluster.networkId)) || !ambariServerSelected()" ng-if="showAdvancedOptionForm">{{msg.cluster_form_ambari_database_tag}}</a>
                         <a type="button" ng-class="{'btn-info': configureReview, 'btn-default': !configureReview}" class="btn ng-binding" role="presentation wizard-button" ng-click="showWizardActualElement('configureReview')" ng-if="!clusterCreationForm.$invalid && ambariServerSelected()">{{msg.cluster_form_ambari_launch_tag}}</a>
                     </div>
 
@@ -31,6 +32,8 @@
                         <div id="configure_security_group" class="container" ng-show="configureSecurity" ng-include src="'tags/stack/configuresecuritygroup.tag'">
                         </div>
                         <div id="ambari_repository_config" class="container" ng-show="showAdvancedOptionForm && configureAmbariRepository" ng-include src="'tags/stack/ambarirepositoryconfig.tag'">
+                        </div>
+                        <div id="ambari_database_config" class="container" ng-show="showAdvancedOptionForm && configureAmbariDatabase" ng-include src="'tags/stack/ambaridatabaseconfig.tag'">
                         </div>
                         <div id="configure_failure_action" class="container" ng-show="configureFailureAction" ng-include src="'tags/stack/configurefailureaction.tag'">
                         </div>

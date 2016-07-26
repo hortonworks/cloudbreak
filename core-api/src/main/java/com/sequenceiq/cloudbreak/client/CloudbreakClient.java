@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.TopologyEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.UserEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.UtilEndpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -76,6 +77,7 @@ public class CloudbreakClient {
     private ClusterEndpoint clusterEndpoint;
     private ConnectorEndpoint connectorEndpoint;
     private ConstraintTemplateEndpoint constraintTemplateEndpoint;
+    private UtilEndpoint utilEndpoint;
 
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
         this.client = RestClientUtil.get(configKey);
@@ -143,6 +145,7 @@ public class CloudbreakClient {
         this.connectorEndpoint = newResource(ConnectorEndpoint.class, headers);
         this.userEndpoint = newResource(UserEndpoint.class, headers);
         this.constraintTemplateEndpoint = newResource(ConstraintTemplateEndpoint.class, headers);
+        this.utilEndpoint = newResource(UtilEndpoint.class, headers);
         LOGGER.info("Endpoints have been renewed for CloudbreakClient");
     }
 
@@ -237,6 +240,11 @@ public class CloudbreakClient {
 
     public ConstraintTemplateEndpoint constraintTemplateEndpoint() {
         return constraintTemplateEndpoint;
+    }
+
+    public UtilEndpoint utilEndpoint() {
+        refresh();
+        return utilEndpoint;
     }
 
     public static class CloudbreakClientBuilder {

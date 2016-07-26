@@ -26,4 +26,9 @@ public interface SettingsEndpoint {
     @Path("sssd")
     @Produces(MediaType.APPLICATION_JSON)
     Map<String, Object> getSssdConfigSettings();
+
+    @GET
+    @Path("database")
+    @Produces(MediaType.APPLICATION_JSON)
+    Map<String, Object> getDatabaseConfigSettings();
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.SettingsEndpoint;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
@@ -18,6 +19,7 @@ public class SettingsController implements SettingsEndpoint {
         Map<String, Map<String, Object>> settings = new HashMap<>();
         settings.put("sssdConfig", bundleSssdConfigSettings());
         settings.put("recipe", bundleRecipeSettings());
+        settings.put("database", bundleDatabaseConfigSettings());
         return settings;
     }
 
@@ -41,5 +43,16 @@ public class SettingsController implements SettingsEndpoint {
         sssdConfig.put("schemaTypes", SssdSchemaType.values());
         sssdConfig.put("tlsReqcertTypes", SssdTlsReqcertType.values());
         return sssdConfig;
+    }
+
+    @Override
+    public Map<String, Object> getDatabaseConfigSettings() {
+        return bundleDatabaseConfigSettings();
+    }
+
+    private Map<String, Object> bundleDatabaseConfigSettings() {
+        Map<String, Object> dbConfig = new HashMap<>();
+        dbConfig.put("vendor", DatabaseVendor.availableVendors());
+        return dbConfig;
     }
 }

@@ -160,7 +160,7 @@ public class ClusterCommands implements BaseCommands {
             }
 
             if (shellContext.getAmbariDatabaseDetailsJson() != null) {
-                clusterRequest.setAmbariDatabaseDetailsJson(shellContext.getAmbariDatabaseDetailsJson());
+                clusterRequest.setAmbariDatabaseDetails(shellContext.getAmbariDatabaseDetailsJson());
             }
 
             AmbariStackDetailsJson ambariStackDetailsJson = new AmbariStackDetailsJson();

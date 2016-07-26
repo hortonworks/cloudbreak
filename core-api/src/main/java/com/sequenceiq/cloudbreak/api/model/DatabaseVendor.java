@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.Collection;
+import java.util.EnumSet;
+
 public enum DatabaseVendor {
     POSTGRES("postgres", "Postgres"),
     MYSQL("mysql", "MySQL"),
@@ -32,5 +35,9 @@ public enum DatabaseVendor {
             }
         }
         throw new UnsupportedOperationException("Not a DatabaseVendor value");
+    }
+
+    public static Collection<DatabaseVendor> availableVendors() {
+        return EnumSet.complementOf(EnumSet.of(DatabaseVendor.EMBEDDED));
     }
 }

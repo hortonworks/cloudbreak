@@ -52,6 +52,22 @@
         "DEMAND": "Demand",
         "HARD": "Hard"
     },
+    "database" : {
+      "POSTGRES" : "PostgreSQL",
+      "MYSQL" : "MySQL",
+      "MARIADB" : "Mariadb",
+      "MSSQL" : "SQL Server",
+      "ORACLE" : "Oracle Database",
+      "SQLANYWHERE" : "SQL Anywhere"
+    },
+    "databasePorts" : {
+      "POSTGRES" : "5432",
+      "MYSQL" : "3306",
+      "MARIADB" : "3306",
+      "MSSQL" : "1433",
+      "ORACLE" : "1521",
+      "SQLANYWHERE" : "2638"
+    },
     "recipes" : {
         "ONE_NODE": "One Node",
         "ALL_NODES": "All Nodes"

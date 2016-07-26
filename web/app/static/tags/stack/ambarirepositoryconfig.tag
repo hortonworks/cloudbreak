@@ -65,7 +65,7 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group" ng-hide="clusterCreationForm.$invalid">
-                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureReview')">{{msg.cluster_form_ambari_launch_tag}} <i class="fa fa-angle-double-right"></i></button>
+                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureAmbariDatabase')">{{msg.cluster_form_ambari_database_tag}} <i class="fa fa-angle-double-right"></i></button>
             </div>
         </div>
     </div>
