@@ -1164,5 +1164,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             });
             return result
         }
+
+        $scope.noProxyBeforeAmbari = function() {
+            return $rootScope.activeCluster.orchestrator.type === 'MARATHON'
+            || $rootScope.activeCluster.cloudbreakDetails === null
+            || !$rootScope.activeCluster.cloudbreakDetails
+        }
     }
 ]);

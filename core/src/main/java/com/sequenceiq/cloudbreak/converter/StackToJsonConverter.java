@@ -12,16 +12,19 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
 @Component
@@ -33,6 +36,9 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
 
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private ComponentConfigProvider componentConfigProvider;
 
     @Override
     public StackResponse convert(Stack source) {
@@ -84,6 +90,14 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         }
         stackJson.setCreated(source.getCreated());
         stackJson.setGatewayPort(source.getGatewayPort());
+        try {
+            CloudbreakDetails cloudbreakDetails = componentConfigProvider.getCloudbreakDetails(source.getId());
+            if (cloudbreakDetails != null) {
+                stackJson.setCloudbreakDetails(getConversionService().convert(cloudbreakDetails, CloudbreakDetailsJson.class));
+            }
+        } catch (Exception e) {
+            LOGGER.error("Cloudbreak details could not be added to Stack response.", e);
+        }
         return stackJson;
     }
 
