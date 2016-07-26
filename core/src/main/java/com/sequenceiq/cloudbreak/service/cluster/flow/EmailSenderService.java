@@ -37,7 +37,7 @@ import freemarker.template.Configuration;
 @Service
 public class EmailSenderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailSenderService.class);
-    private static final String CLUSTER_READY_SUBJECT = "Your cluster is ready";
+    private static final String CLUSTER_READY_SUBJECT = "Your cluster '%s' is ready";
 
     @Value("${cb.smtp.sender.from:}")
     private String msgFrom;
@@ -127,7 +127,7 @@ public class EmailSenderService {
     @Async
     public void sendProvisioningSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, successClusterMailTemplatePath, CLUSTER_READY_SUBJECT, getEmailModel(user.getGivenName(),
+        sendEmail(user, email, successClusterMailTemplatePath, String.format(CLUSTER_READY_SUBJECT, clusterName), getEmailModel(user.getGivenName(),
                 ambariServer, State.PROVISIONING_SUCCESS, clusterName));
     }
 
@@ -141,7 +141,7 @@ public class EmailSenderService {
     @Async
     public void sendStartSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, successClusterMailTemplatePath, CLUSTER_READY_SUBJECT, getEmailModel(user.getGivenName(),
+        sendEmail(user, email, successClusterMailTemplatePath, String.format(CLUSTER_READY_SUBJECT, clusterName), getEmailModel(user.getGivenName(),
                 ambariServer, State.START_SUCCESS, clusterName));
     }
 
@@ -168,14 +168,14 @@ public class EmailSenderService {
 
     public void sendUpscaleSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, successClusterMailTemplatePath, CLUSTER_READY_SUBJECT, getEmailModel(user.getGivenName(),
+        sendEmail(user, email, successClusterMailTemplatePath, String.format(CLUSTER_READY_SUBJECT, clusterName), getEmailModel(user.getGivenName(),
                 ambariServer, State.UPSCALE_SUCCESS, clusterName));
     }
 
     @Async
     public void sendDownScaleSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
-        sendEmail(user, email, successClusterMailTemplatePath, CLUSTER_READY_SUBJECT, getEmailModel(user.getGivenName(),
+        sendEmail(user, email, successClusterMailTemplatePath, String.format(CLUSTER_READY_SUBJECT, clusterName), getEmailModel(user.getGivenName(),
                 ambariServer, State.DOWN_SCALE_SUCCESS, clusterName));
     }
 
