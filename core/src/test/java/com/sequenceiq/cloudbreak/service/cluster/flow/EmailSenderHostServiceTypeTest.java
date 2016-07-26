@@ -113,7 +113,6 @@ public class EmailSenderHostServiceTypeTest {
 
         Assert.assertEquals(1, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
-        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString(cbUser.getGivenName()));
         Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("successfully terminated"));
     }
 
@@ -129,7 +128,6 @@ public class EmailSenderHostServiceTypeTest {
 
         Assert.assertEquals(1, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
-        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString(cbUser.getGivenName()));
         Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("Failed to terminate your cluster"));
     }
 
@@ -145,7 +143,6 @@ public class EmailSenderHostServiceTypeTest {
 
         Assert.assertEquals(1, messages.length);
         Assert.assertEquals(subject, messages[0].getSubject());
-        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString(cbUser.getGivenName()));
         Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("Something went terribly wrong"));
     }
     @Ignore
@@ -182,8 +179,7 @@ public class EmailSenderHostServiceTypeTest {
         Message[] messages = greenMail.getReceivedMessages();
 
         Assert.assertEquals(1, messages.length);
-        Assert.assertEquals(subject, messages[0].getSubject());
-        Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString(cbUser.getGivenName()));
+        Assert.assertEquals("Your cluster '" + NAME_OF_THE_CLUSTER + "' is ready", messages[0].getSubject());
         Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("Your cluster '" + NAME_OF_THE_CLUSTER + "' is ready"));
     }
 
