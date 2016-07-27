@@ -3,7 +3,7 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
-## [v1.4.0-rc.46]
+## [v1.4.0]
 
 ### Fixed
 
@@ -32,7 +32,7 @@ The Change Log summarizes the changes in Cloudbreak.
 - add admin user to `hadoop` and `hdfs` groups after Ambari install
 - use only Cloudbreak address to connect Cloudbreak
 
-## [v1.3.0-rc.2]
+## [v1.3.2]
 
 ### Fixed
 
