@@ -3,7 +3,7 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
-## [v1.5.0-dev.61]
+## [v1.5.0]
 
 ### Fixed
 
@@ -24,7 +24,7 @@ The Change Log summarizes the changes in Cloudbreak.
 - increase Ambari password length and fix error message
 - automatic blueprint update during startup
 
-## [v1.4.0-rc.46]
+## [v1.4.0]
 
 ### Fixed
 
@@ -53,7 +53,11 @@ The Change Log summarizes the changes in Cloudbreak.
 - add admin user to `hadoop` and `hdfs` groups after Ambari install
 - use only Cloudbreak address to connect Cloudbreak
 
+<<<<<<< HEAD
 ## [v1.3.0-rc.2]
+=======
+## [v1.3.2]
+>>>>>>> origin/rc-1.4
 
 ### Fixed
 
@@ -569,4 +573,7 @@ Added
 - Added --version
 - CircleCI build
 - Linux/Darwin binary releases on github
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/rc-1.4
