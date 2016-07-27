@@ -569,7 +569,3 @@ Added
 - Added --version
 - CircleCI build
 - Linux/Darwin binary releases on github
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/rc-1.4
