@@ -14,8 +14,7 @@ The Change Log summarizes the changes in Cloudbreak.
 ### Added
 
 - added HDP version field to RDS config
-- ability to configure remote MySQL database for Ambari
-- ability to configure remote Postgres database for Ambari
+- ability to configure remote database for Ambari
 - stacks/clusters are associated with Cloudbreak version
 
 ### Changed

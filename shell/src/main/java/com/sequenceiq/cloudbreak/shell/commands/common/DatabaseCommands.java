@@ -42,7 +42,9 @@ public class DatabaseCommands implements CommandMarker {
             String error = shellContext.cloudbreakClient().utilEndpoint().testAmbariDatabase(databaseDetails).getError();
             if (error == null) {
                 shellContext.setAmbariDatabaseDetailsJson(databaseDetails);
-                return String.format("%s://%s:%s@%s:%d/%s", databaseDetails.getVendor().value(), username, password, host, port, name);
+                return com.sequenceiq.cloudbreak.api.model.DatabaseVendor.outOfTheBoxVendors().contains(databaseDetails.getVendor())
+                        ? "This type of database supported out of the box, Cloudbreak would initialize it"
+                        : "This type of database not supported out of the box, Cloudbreak couldn't initialize it";
             }
             return error;
         } catch (Exception ex) {
