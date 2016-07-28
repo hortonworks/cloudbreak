@@ -23,8 +23,15 @@ dependencies {
     compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
 
     testCompile project(':cloud-reactor')
-    testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
+
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+    testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version:springBootVersion
+    testCompile (group: 'junit', name: 'junit', version: '4+') {
+      exclude group: 'org.hamcrest'
+    }
+    testCompile ('org.mockito:mockito-core:1+') {
+      exclude group: 'org.hamcrest'
+    }
+    testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
 }
 
