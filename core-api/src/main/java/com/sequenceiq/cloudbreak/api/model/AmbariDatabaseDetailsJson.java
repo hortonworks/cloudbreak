@@ -23,6 +23,7 @@ public class AmbariDatabaseDetailsJson {
     @ApiModelProperty(value = VENDOR, required = true)
     private DatabaseVendor vendor;
     @NotNull
+    @Pattern(regexp = "^[^']+$", message = "Invalid character in name: '")
     @ApiModelProperty(value = NAME, required = true)
     private String name;
     @NotNull
@@ -33,9 +34,11 @@ public class AmbariDatabaseDetailsJson {
     @ApiModelProperty(value = PORT, required = true)
     private Integer port;
     @NotNull
+    @Pattern(regexp = "^[^']+$", message = "Invalid character in user name: '")
     @ApiModelProperty(value = USER_NAME, required = true)
     private String userName;
     @NotNull
+    @Pattern(regexp = "^[^']+$", message = "Invalid character in password: '")
     @ApiModelProperty(value = PASSWORD, required = true)
     private String password;
 
