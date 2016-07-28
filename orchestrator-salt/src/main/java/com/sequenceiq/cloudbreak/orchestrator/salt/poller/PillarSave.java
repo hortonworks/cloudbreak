@@ -28,11 +28,11 @@ public class PillarSave implements OrchestratorBootstrap {
         this.pillar = new Pillar("/ambari/server.sls", singletonMap("ambari", singletonMap("server", gateway)));
     }
 
-    public PillarSave(SaltConnector sc, Set<Node> hosts) {
+    public PillarSave(SaltConnector sc, Set<Node> hosts, boolean useCustomDomain) {
         this.sc = sc;
         Map<String, Map<String, Object>> fqdn = hosts
                 .stream()
-                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp())));
+                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp(), useCustomDomain)));
         this.pillar = new Pillar("/nodes/hosts.sls", singletonMap("hosts", fqdn));
     }
 
@@ -55,10 +55,11 @@ public class PillarSave implements OrchestratorBootstrap {
         this.pillar = new Pillar(pillarProperties.getPath(), pillarProperties.getProperties());
     }
 
-    private Map<String, Object> discovery(String hostname, String publicAddress) {
+    private Map<String, Object> discovery(String hostname, String publicAddress, boolean useCustomDomain) {
         Map<String, Object> map = new HashMap<>();
         map.put("fqdn", hostname);
         map.put("hostname", hostname.split("\\.")[0]);
+        map.put("custom_domain", useCustomDomain);
         map.put("public_address", StringUtils.isEmpty(publicAddress) ? Boolean.FALSE : Boolean.TRUE);
         return map;
     }

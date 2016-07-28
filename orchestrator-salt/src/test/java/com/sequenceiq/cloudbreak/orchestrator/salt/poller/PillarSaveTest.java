@@ -42,7 +42,7 @@ public class PillarSaveTest {
         nodes.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com"));
         nodes.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com"));
         nodes.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com"));
-        PillarSave pillarSave = new PillarSave(saltConnector, nodes);
+        PillarSave pillarSave = new PillarSave(saltConnector, nodes, false);
         pillarSave.call();
         ArgumentCaptor<Pillar> pillarCaptor = ArgumentCaptor.forClass(Pillar.class);
         verify(saltConnector).pillar(pillarCaptor.capture());

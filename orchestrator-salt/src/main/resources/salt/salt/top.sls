@@ -17,6 +17,7 @@ base:
 
   'platform:AWS':
     - match: pillar
+    - discovery.init
     - dns.init
 
   'roles:kerberos_server':
