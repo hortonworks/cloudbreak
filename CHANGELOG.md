@@ -41,6 +41,7 @@ The Change Log summarizes the changes in Cloudbreak.
 - allow dynamically change Ambari version
 - added `canada` region to Azure
 - add basic auth to Zeppelin, Zeppelin is secured with the same password like Ambari
+- ability to configure a custom domain for the clusters with the CB_HOST_DISCOVERY_CUSTOM_DOMAIN env variable
 
 ### Changed
 
