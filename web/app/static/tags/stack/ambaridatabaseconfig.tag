@@ -32,7 +32,7 @@
     <div class="form-group" name="ambari_database4" ng-class="{ 'has-error': $parent.clusterCreationForm.ambari_db_name.$dirty && $parent.clusterCreationForm.ambari_db_name.$invalid }">
         <label class="col-sm-3 control-label" for="ambari_db_name">{{msg.cluster_form_ambari_db_name_label}}</label>
         <div class="col-sm-8">
-            <input type="string" name="ambari_db_name" class="form-control" ng-model="cluster.ambariDatabaseDetails.name" id="ambari_db_name" ng-required="cluster.ambariDatabaseDetails.vendor">
+            <input type="string" name="ambari_db_name" class="form-control" ng-model="cluster.ambariDatabaseDetails.name" id="ambari_db_name" ng-required="cluster.ambariDatabaseDetails.vendor" ng-pattern="/^[^']+$/">
             <div class="help-block" ng-show="$parent.clusterCreationForm.ambari_db_name.$dirty && $parent.clusterCreationForm.ambari_db_name.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_form_ambari_db_name_invalid}}
             </div>
         </div>
@@ -41,7 +41,7 @@
     <div class="form-group" name="ambari_database5" ng-class="{ 'has-error': $parent.clusterCreationForm.ambari_db_username.$dirty && $parent.clusterCreationForm.ambari_db_username.$invalid }">
         <label class="col-sm-3 control-label" for="ambari_db_username">{{msg.cluster_form_ambari_db_username_label}}</label>
         <div class="col-sm-8">
-            <input type="string" name="ambari_db_username" class="form-control" ng-model="cluster.ambariDatabaseDetails.userName" id="ambari_db_username" ng-required="cluster.ambariDatabaseDetails.vendor">
+            <input type="string" name="ambari_db_username" class="form-control" ng-model="cluster.ambariDatabaseDetails.userName" id="ambari_db_username" ng-required="cluster.ambariDatabaseDetails.vendor" ng-pattern="/^[^']+$/">
             <div class="help-block" ng-show="$parent.clusterCreationForm.ambari_db_username.$dirty && $parent.clusterCreationForm.ambari_db_username.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_form_ambari_db_username_invalid}}
             </div>
         </div>
@@ -50,7 +50,7 @@
     <div class="form-group" name="ambari_database6" ng-class="{ 'has-error': $parent.clusterCreationForm.ambari_db_password.$dirty && $parent.clusterCreationForm.ambari_db_password.$invalid }">
         <label class="col-sm-3 control-label" for="ambari_db_password">{{msg.cluster_form_ambari_db_password_label}}</label>
         <div class="col-sm-8">
-            <input type="string" name="ambari_db_password" class="form-control" ng-model="cluster.ambariDatabaseDetails.password" id="ambari_db_password" ng-required="cluster.ambariDatabaseDetails.vendor">
+            <input type="string" name="ambari_db_password" class="form-control" ng-model="cluster.ambariDatabaseDetails.password" id="ambari_db_password" ng-required="cluster.ambariDatabaseDetails.vendor" ng-pattern="/^[^']+$/">
             <div class="help-block" ng-show="$parent.clusterCreationForm.ambari_db_password.$dirty && $parent.clusterCreationForm.ambari_db_password.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_form_ambari_db_password_invalid}}
             </div>
         </div>

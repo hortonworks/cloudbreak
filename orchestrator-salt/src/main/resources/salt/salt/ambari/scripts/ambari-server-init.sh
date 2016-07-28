@@ -5,28 +5,28 @@ set -x
 : ${JAVA_HOME:="/usr/lib/jvm/java"}
 
 config_remote_jdbc() {
-    if [[ '{{ ambari_database.vendor }}' = "embedded" ]]; then
+    if [[ '{{ ambari_database.vendor }}' = 'embedded' ]]; then
         echo Configure local jdbc connection
         ambari-server setup --silent --java-home $JAVA_HOME
     else
         echo Configure remote jdbc connection
-        local specoptions=""
+        local specoptions=''
         if [[ -f /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql ]]; then
-          echo "Initialize {{ ambari_database.vendor }} database for Ambari."
-          if [[ '{{ ambari_database.vendor }}' = "postgres" ]]; then
-            PGPASSWORD='{{ ambari_database.password }}' psql "dbname={{ ambari_database.name }} options=--search_path=public" -h {{ ambari_database.host }} -p {{ ambari_database.port }} -U {{ ambari_database.userName }} -a -f /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
-            specoptions="--postgresschema public"
+          echo 'Initialize {{ ambari_database.vendor }} database for Ambari.'
+          if [[ '{{ ambari_database.vendor }}' = 'postgres' ]]; then
+            PGPASSWORD='{{ ambari_database.password }}' psql 'dbname={{ ambari_database.name }} options=--search_path=public' -h {{ ambari_database.host }} -p {{ ambari_database.port }} -U '{{ ambari_database.userName }}' -a -f /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
+            specoptions='--postgresschema public'
           fi
-          if [[ '{{ ambari_database.vendor }}' = "mysql" ]]; then
-            mysql -h{{ ambari_database.host }} -P{{ ambari_database.port }} -u{{ ambari_database.userName }} -p{{ ambari_database.password }} {{ ambari_database.name }} < /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
+          if [[ '{{ ambari_database.vendor }}' = 'mysql' ]]; then
+            mysql -h{{ ambari_database.host }} -P{{ ambari_database.port }} -u'{{ ambari_database.userName }}' -p'{{ ambari_database.password }}' '{{ ambari_database.name }}' < /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
           fi
         else
             echo File not found /var/lib/ambari-server/resources/Ambari-DDL-{{ ambari_database.fancyName }}-CREATE.sql
             exit 1
         fi
         ambari-server setup --silent --verbose --java-home $JAVA_HOME \
-            --database {{ ambari_database.vendor }} --databasehost {{ ambari_database.host }} --databaseport {{ ambari_database.port }} --databasename {{ ambari_database.name }} \
-            --databaseusername {{ ambari_database.userName }} --databasepassword {{ ambari_database.password }} $specoptions
+            --database {{ ambari_database.vendor }} --databasehost {{ ambari_database.host }} --databaseport {{ ambari_database.port }} --databasename '{{ ambari_database.name }}' \
+            --databaseusername '{{ ambari_database.userName }}' --databasepassword '{{ ambari_database.password }}' $specoptions
     fi
 }
 
