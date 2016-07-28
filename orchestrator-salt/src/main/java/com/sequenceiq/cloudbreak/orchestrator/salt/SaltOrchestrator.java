@@ -28,6 +28,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -71,6 +72,9 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Value("${cb.smartsense.configure:false}")
     private boolean configureSmartSense;
+
+    @Value("${cb.host.discovery.custom.domain:}")
+    private String customDomain;
 
     private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
     private ExitCriteria exitCriteria;
@@ -119,7 +123,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, SaltPillarConfig pillarConfig,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            PillarSave hostSave = new PillarSave(sc, allNodes);
+            PillarSave hostSave = new PillarSave(sc, allNodes, !StringUtils.isEmpty(customDomain));
             Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
