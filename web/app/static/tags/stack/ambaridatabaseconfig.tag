@@ -4,6 +4,9 @@
         <select class="form-control" id="ambari_db_vendor" name="ambari_db_vendor" ng-options="dbVendor as $root.displayNames.getPropertyName('database', dbVendor) for dbVendor in $root.settings.database.vendor" ng-model="cluster.ambariDatabaseDetails.vendor">
             <option/>
         </select>
+        <div class="help-block" ng-show="cluster.ambariDatabaseDetails.vendor == 'MSSQL' || cluster.ambariDatabaseDetails.vendor == 'ORACLE' || cluster.ambariDatabaseDetails.vendor == 'SQLANYWHERE'">
+            <i class="fa fa-warning"></i> {{msg.cluster_form_ambari_db_not_oob_warning}}
+        </div>
     </div>
 </div>
 
