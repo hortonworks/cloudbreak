@@ -12,6 +12,8 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 
+import jersey.repackaged.com.google.common.collect.ImmutableMap;
+
 public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     @Inject
     private TemplateAdditionHelper additionHelper;
@@ -25,9 +27,10 @@ public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "gcpName", "gcpInstanceType", "volumeType", "volumeCount", "volumeSize" })
+    @Parameters({ "gcpName", "gcpInstanceType", "volumeType", "volumeCount", "volumeSize", "preemptible" })
     public void testGcpTemplateCreation(@Optional("it-gcp-template") String gcpName, @Optional("n1-standard-2") String gcpInstanceType,
-            @Optional("pd-standard") String volumeType, @Optional("1") String volumeCount, @Optional("30") String volumeSize) throws Exception {
+            @Optional("pd-standard") String volumeType, @Optional("1") String volumeCount, @Optional("30") String volumeSize,
+            @Optional("false") Boolean preemptible) throws Exception {
         // GIVEN
         // WHEN
         // TODO: publicInAccount
@@ -40,9 +43,13 @@ public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
         templateRequest.setVolumeSize(Integer.valueOf(volumeSize));
         templateRequest.setVolumeType(volumeType);
         templateRequest.setCloudPlatform("GCP");
+        if (preemptible != null) {
+            templateRequest.setParameters(ImmutableMap.of("preemptible", preemptible));
+        }
         String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         additionHelper.handleTemplateAdditions(getItContext(), id, additions);
     }
+
 }

@@ -22,6 +22,7 @@ dependencies {
     compile group: 'com.google.apis',               name: 'google-api-services-dns',        version: 'v1beta1-rev9-1.19.0'
     compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
 
+    testCompile project(path: ':core-model', configuration: 'tests')
     testCompile project(':cloud-reactor')
     testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
     testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
