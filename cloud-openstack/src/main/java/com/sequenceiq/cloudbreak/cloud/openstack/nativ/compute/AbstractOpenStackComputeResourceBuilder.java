@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.AbstractOpenStackResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
@@ -38,11 +39,13 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
 
     @Inject
     private OpenStackResourceNameService resourceNameService;
+    @Inject
+    private OpenStackUtils utils;
 
     @Override
     public List<CloudResource> create(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
-        String resourceName = resourceNameService.resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
+        String resourceName = resourceNameService.resourceName(resourceType(), utils.getStackName(auth), group.getName(), privateId);
         return Arrays.asList(createNamedResource(resourceType(), resourceName));
     }
 
@@ -73,6 +76,14 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
             throw new OpenStackResourceException(String.format("No resource order found for class: %s", getClass()));
         }
         return order;
+    }
+
+    public OpenStackUtils getUtils() {
+        return utils;
+    }
+
+    public void setUtils(OpenStackUtils utils) {
+        this.utils = utils;
     }
 
     protected InstanceTemplate getInstanceTemplate(Group group, long privateId) {
