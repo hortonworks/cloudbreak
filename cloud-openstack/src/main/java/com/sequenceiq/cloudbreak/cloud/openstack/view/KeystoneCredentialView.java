@@ -16,7 +16,7 @@ public class KeystoneCredentialView {
     private String stackName;
 
     public KeystoneCredentialView(AuthenticatedContext authenticatedContext) {
-        this.stackName = authenticatedContext.getCloudContext().getName();
+        this.stackName = authenticatedContext.getCloudContext().getName() + "_" + authenticatedContext.getCloudContext().getId();
         this.cloudCredential = authenticatedContext.getCloudCredential();
     }
 
