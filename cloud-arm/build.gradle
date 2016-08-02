@@ -30,9 +30,14 @@ dependencies {
     compile group: 'org.codehaus.groovy',           name: 'groovy-all',                     version: '2.4.6'
 
     testCompile project(path: ':core-model', configuration: 'tests')
-    testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
-
+    testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version:springBootVersion
+    testCompile (group: 'junit', name: 'junit', version: '4+') {
+      exclude group: 'org.hamcrest'
+    }
+    testCompile ('org.mockito:mockito-core:1+') {
+      exclude group: 'org.hamcrest'
+    }
+    testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
 }
