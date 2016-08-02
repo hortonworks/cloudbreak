@@ -44,7 +44,7 @@ public class OpenStackMetadataCollector implements MetadataCollector {
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
         CloudResource resource = utils.getHeatResource(resources);
 
-        String stackName = authenticatedContext.getCloudContext().getName();
+        String stackName = utils.getStackName(authenticatedContext);
         String heatStackId = resource.getName();
 
         List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);

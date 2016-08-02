@@ -64,6 +64,10 @@ public class OpenStackUtils {
         return groupName.replaceAll("_", "");
     }
 
+    public String getStackName(AuthenticatedContext context) {
+        return context.getCloudContext().getName() + "_" + context.getCloudContext().getId();
+    }
+
     public CloudResourceStatus heatStatus(CloudResource resource, Stack heatStack) {
         String status = heatStack.getStatus();
         LOGGER.info("Heat stack status of: {}  is: {}", heatStack, status);

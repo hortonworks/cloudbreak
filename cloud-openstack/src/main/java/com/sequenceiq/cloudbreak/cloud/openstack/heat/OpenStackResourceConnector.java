@@ -48,7 +48,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
-        String stackName = authenticatedContext.getCloudContext().getName();
+        String stackName = utils.getStackName(authenticatedContext);
         boolean existingNetwork = isExistingNetwork(stack);
         boolean assignFloatingIp = assignFloatingIp(stack);
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
@@ -88,7 +88,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
             switch (resource.getType()) {
                 case HEAT_STACK:
                     String heatStackId = resource.getName();
-                    String stackName = authenticatedContext.getCloudContext().getName();
+                    String stackName = utils.getStackName(authenticatedContext);
                     LOGGER.info("Checking OpenStack Heat stack status of: {}", stackName);
                     Stack heatStack = client.heat().stacks().getDetails(stackName, heatStackId);
                     CloudResourceStatus heatResourceStatus = utils.heatStatus(resource, heatStack);
@@ -109,7 +109,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
             switch (resource.getType()) {
                 case HEAT_STACK:
                     String heatStackId = resource.getName();
-                    String stackName = authenticatedContext.getCloudContext().getName();
+                    String stackName = utils.getStackName(authenticatedContext);
                     LOGGER.info("Terminate stack: {}", stackName);
                     OSClient client = openStackClient.createOSClient(authenticatedContext);
                     client.heat().stacks().delete(stackName, heatStackId);
@@ -124,7 +124,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        String stackName = authenticatedContext.getCloudContext().getName();
+        String stackName = utils.getStackName(authenticatedContext);
         boolean existingNetwork = isExistingNetwork(stack);
         boolean assignFloatingIp = assignFloatingIp(stack);
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
@@ -138,7 +138,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack cloudStack, List<CloudResource> resources, List<CloudInstance> vms) {
         CloudStack stack = removeDeleteRequestedInstances(cloudStack);
-        String stackName = auth.getCloudContext().getName();
+        String stackName = utils.getStackName(auth);
         boolean existingNetwork = isExistingNetwork(stack);
         boolean assignFloatingIp = assignFloatingIp(stack);
         String existingSubnetCidr = getExistingSubnetCidr(auth, stack);
@@ -151,7 +151,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        String stackName = authenticatedContext.getCloudContext().getName();
+        String stackName = utils.getStackName(authenticatedContext);
         boolean existingNetwork = isExistingNetwork(stack);
         boolean assignFloatingIp = assignFloatingIp(stack);
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
@@ -165,7 +165,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
     private List<CloudResourceStatus> updateHeatStack(AuthenticatedContext authenticatedContext, List<CloudResource> resources, String heatTemplate,
             Map<String, String> parameters) {
         CloudResource resource = utils.getHeatResource(resources);
-        String stackName = authenticatedContext.getCloudContext().getName();
+        String stackName = utils.getStackName(authenticatedContext);
         String heatStackId = resource.getName();
 
         OSClient client = openStackClient.createOSClient(authenticatedContext);

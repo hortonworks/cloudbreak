@@ -97,7 +97,7 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
         if (osRouter != null && context.isBuild()) {
             State routerStatus = osRouter.getStatus();
             if (State.ERROR == routerStatus) {
-                throw new OpenStackResourceException("Router in failed state", resource.getType(), cloudContext.getName(), cloudContext.getId(),
+                throw new OpenStackResourceException("Router in failed state", resource.getType(), utils.getStackName(auth), cloudContext.getId(),
                         resource.getName());
             }
             return routerStatus == State.ACTIVE;

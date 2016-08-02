@@ -47,8 +47,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
         InstanceTemplate template = getInstanceTemplate(group, privateId);
         NovaInstanceView instanceView = new NovaInstanceView(template, group.getType());
         String groupName = group.getName();
-        final CloudContext cloudContext = auth.getCloudContext();
-        final String stackName = cloudContext.getName();
+        final String stackName = getUtils().getStackName(auth);
         for (int i = 0; i < instanceView.getVolumes().size(); i++) {
             final String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
             CloudResource resource = createNamedResource(resourceType(), groupName, resourceName);

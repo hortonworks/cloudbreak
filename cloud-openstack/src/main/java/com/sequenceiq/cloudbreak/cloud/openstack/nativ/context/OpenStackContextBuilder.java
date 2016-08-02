@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
 
@@ -31,13 +32,15 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
 
     @Inject
     private OpenStackClient openStackClient;
+    @Inject
+    private OpenStackUtils utils;
 
     @Override
     public OpenStackContext contextInit(CloudContext cloudContext, AuthenticatedContext auth, Network network, List<CloudResource> resources, boolean build) {
         OSClient osClient = openStackClient.createOSClient(auth);
         KeystoneCredentialView credentialView = new KeystoneCredentialView(auth);
 
-        OpenStackContext openStackContext = new OpenStackContext(cloudContext.getName(), cloudContext.getLocation(),
+        OpenStackContext openStackContext = new OpenStackContext(utils.getStackName(auth), cloudContext.getLocation(),
                 PARALLEL_RESOURCE_REQUEST, build);
 
         openStackContext.putParameter(OpenStackConstants.TENANT_ID, osClient.identity().tenants().getByName(credentialView.getTenantName()).getId());
