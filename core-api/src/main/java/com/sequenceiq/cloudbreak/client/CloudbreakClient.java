@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.ConstraintTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.EventEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
@@ -78,6 +79,7 @@ public class CloudbreakClient {
     private ConnectorEndpoint connectorEndpoint;
     private ConstraintTemplateEndpoint constraintTemplateEndpoint;
     private UtilEndpoint utilEndpoint;
+    private LdapConfigEndpoint ldapConfigEndpoint;
 
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
         this.client = RestClientUtil.get(configKey);
@@ -146,6 +148,7 @@ public class CloudbreakClient {
         this.userEndpoint = newResource(UserEndpoint.class, headers);
         this.constraintTemplateEndpoint = newResource(ConstraintTemplateEndpoint.class, headers);
         this.utilEndpoint = newResource(UtilEndpoint.class, headers);
+        this.ldapConfigEndpoint = newResource(LdapConfigEndpoint.class, headers);
         LOGGER.info("Endpoints have been renewed for CloudbreakClient");
     }
 
@@ -236,6 +239,11 @@ public class CloudbreakClient {
     public ConnectorEndpoint connectorEndpoint() {
         refresh();
         return connectorEndpoint;
+    }
+
+    public LdapConfigEndpoint ldapConfigEndpoint() {
+        refresh();
+        return ldapConfigEndpoint;
     }
 
     public ConstraintTemplateEndpoint constraintTemplateEndpoint() {

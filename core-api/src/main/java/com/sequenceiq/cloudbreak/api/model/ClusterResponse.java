@@ -52,6 +52,8 @@ public class ClusterResponse {
     private ConfigStrategy configStrategy;
     @ApiModelProperty(ClusterModelDescription.ENABLE_SHIPYARD)
     private Boolean enableShipyard;
+    @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG_ID)
+    private Long ldapConfigId;
 
     public Boolean getEnableShipyard() {
         return enableShipyard;
@@ -220,5 +222,13 @@ public class ClusterResponse {
 
     public void setConfigStrategy(ConfigStrategy configStrategy) {
         this.configStrategy = configStrategy;
+    }
+
+    public Long getLdapConfigId() {
+        return ldapConfigId;
+    }
+
+    public void setLdapConfigId(Long ldapConfigId) {
+        this.ldapConfigId = ldapConfigId;
     }
 }

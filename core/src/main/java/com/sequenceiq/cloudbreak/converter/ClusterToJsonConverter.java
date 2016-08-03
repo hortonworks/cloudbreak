@@ -69,6 +69,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (rdsConfig != null) {
             clusterResponse.setRdsConfigId(rdsConfig.getId());
         }
+        if (source.getLdapConfig() != null) {
+            clusterResponse.setLdapConfigId(source.getLdapConfig().getId());
+        }
+
         clusterResponse.setAmbariServerIp(source.getAmbariIp());
         clusterResponse.setUserName(source.getUserName());
         clusterResponse.setPassword(source.getPassword());

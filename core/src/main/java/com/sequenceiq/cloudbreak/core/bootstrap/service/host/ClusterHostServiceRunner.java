@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
 import static java.util.Collections.singletonMap;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -34,6 +36,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Component
@@ -55,6 +58,8 @@ public class ClusterHostServiceRunner {
     private InstanceMetaDataRepository instanceMetaDataRepository;
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+    @Inject
+    private BlueprintUtils blueprintUtils;
 
     public void runAmbariServices(Stack stack) throws CloudbreakException {
         try {
@@ -82,11 +87,15 @@ public class ClusterHostServiceRunner {
             }
             AmbariDatabase ambariDb = componentConfigProvider.getAmbariDatabase(stack.getId());
             servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
+            LdapConfig ldapConfig = cluster.getLdapConfig();
+            if (ldapConfig != null && blueprintUtils.containsComponent(cluster.getBlueprint(), "KNOX_GATEWAY")) {
+                servicePillar.put("ldap", new SaltPillarProperties("/ldap/init.sls", singletonMap("ldap", ldapConfig)));
+            }
             SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
             hostOrchestrator.runService(gatewayConfig, nodes, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException e) {
+        } catch (CloudbreakOrchestratorException | IOException e) {
             throw new CloudbreakException(e);
         }
     }

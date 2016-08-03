@@ -32,6 +32,10 @@ base:
     - match: grain
     - ambari.agent
 
+  'G@recipes:post and G@roles:knox_gateway':
+    - match: compound
+    - ldap.init
+
   'I@platform:AWS and G@roles:smartsense':
     - match: compound
     - smartsense.init

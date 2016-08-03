@@ -56,6 +56,7 @@ public class ShellContext {
     private Long activeNetworkId;
     private FileSystemType fileSystemType;
     private Map<String, Object> fileSystemParameters = new HashMap<>();
+    private Map<Long, String> ldapConfigs = new HashMap<>();
     private Boolean defaultFileSystem;
     private Long selectedMarathonStackId;
     private String selectedMarathonStackName;
@@ -448,6 +449,27 @@ public class ShellContext {
         return getLastPropertyValue(PropertyKey.RDSCONFIG_ID);
     }
 
+    public boolean isLdapConfigAccessible() {
+        return isPropertyAvailable(PropertyKey.LDAPCONFIG_ACCESSIBLE);
+    }
+
+    public void setLdapConfigAccessible() {
+        addProperty(PropertyKey.LDAPCONFIG_ACCESSIBLE, ACCESSIBLE);
+    }
+
+    public void addLdapConfig(String id) {
+        addProperty(PropertyKey.LDAPCONFIG_ID, id);
+        setSssdConfigAccessible();
+    }
+
+    public String getLdapConfigId() {
+        return getLastPropertyValue(PropertyKey.LDAPCONFIG_ID);
+    }
+
+    public Map<Long, String> getLdapConfigs() {
+        return ldapConfigs;
+    }
+
     public void putNetwork(Long id, String provider) {
         networksByProvider.put(id, provider);
     }
@@ -458,6 +480,10 @@ public class ShellContext {
 
     public void putRdsConfig(Long id, String name) {
         rdsConfigs.put(id, name);
+    }
+
+    public void putLdapConfig(Long id, String name) {
+        this.ldapConfigs.put(id, name);
     }
 
     public void putSecurityGroup(Long id, String name) {
@@ -608,6 +634,8 @@ public class ShellContext {
         SSSDCONFIG_ID,
         RDSCONFIG_ACCESSIBLE,
         RDSCONFIG_ID,
-        RDSCONFIG_NAME
+        RDSCONFIG_NAME,
+        LDAPCONFIG_ID,
+        LDAPCONFIG_ACCESSIBLE
     }
 }

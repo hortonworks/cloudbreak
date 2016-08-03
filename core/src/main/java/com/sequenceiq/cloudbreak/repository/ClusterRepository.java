@@ -27,4 +27,6 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     List<Cluster> findAllClustersForConstraintTemplate(@Param("id") Long id);
 
     Set<Cluster> findAllClustersByRDSConfig(@Param("id") Long rdsConfigId);
+
+    Set<Cluster> findAllClustersByLdapConfig(@Param("id") Long ldapConfigId);
 }

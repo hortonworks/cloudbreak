@@ -146,6 +146,10 @@ public class ClusterCommands implements BaseCommands {
                 }
                 clusterRequest.setRdsConfigId(Long.valueOf(shellContext.getRdsConfigId()));
             }
+            String ldapConfigId = shellContext.getLdapConfigId();
+            if (ldapConfigId != null) {
+                clusterRequest.setLdapConfigId(Long.valueOf(ldapConfigId));
+            }
             clusterRequest.setValidateBlueprint(false);
 
             if (ambariVersion != null || ambariRepoBaseURL != null || ambariRepoGpgKey != null) {

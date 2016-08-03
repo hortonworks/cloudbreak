@@ -55,6 +55,8 @@ public class ClusterRequest {
     private Boolean ldapRequired = false;
     @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
     private Long sssdConfigId;
+    @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG_ID)
+    private Long ldapConfigId;
     private Boolean validateBlueprint = true;
     @Valid
     private AmbariStackDetailsJson ambariStackDetails;
@@ -231,6 +233,14 @@ public class ClusterRequest {
 
     public void setFileSystem(FileSystemRequest fileSystem) {
         this.fileSystem = fileSystem;
+    }
+
+    public Long getLdapConfigId() {
+        return ldapConfigId;
+    }
+
+    public void setLdapConfigId(Long ldapConfigId) {
+        this.ldapConfigId = ldapConfigId;
     }
 
     public ConfigStrategy getConfigStrategy() {

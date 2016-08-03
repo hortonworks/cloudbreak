@@ -1,0 +1,14 @@
+{
+  "name" : "config-01",
+  "description" : "my first config",
+  "serverHost": "localhost",
+  "serverPort": 389,
+  "serverSSL": true,
+  "bindDn": "cn=admin,dc=example,dc=org",
+  "bindPassword": "admin",
+  "userSearchBase": "cn=users,dc=example,dc=org",
+  "userSearchFilter": "(&amp;(objectclass=person)(sAMAccountName={2}))",
+  "groupSearchBase": "cn=groups,dc=example,dc=org",
+  "groupSearchFilter": "(&amp;(objectclass=person)(sAMAccountName={2}))",
+  "principalRegex": "(.*)"
+}
