@@ -8,9 +8,21 @@ machine:
     - docker
 
 dependencies:
+  override:
+    - sudo service postgresql stop
   cache_directories:
     - "~/.gradle"
 
 test:
   override:
-    - ./gradlew clean build
+    - case $CIRCLE_NODE_INDEX in 0) make build ;; 1) cd integration-test && make ;; esac:
+        parallel: true
+        timeout: 1200
+
+  post:
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then mkdir -p $CIRCLE_TEST_REPORTS/junit/; find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;; fi:
+        parallel: true
+    - if [ $CIRCLE_NODE_INDEX == 1 ]; then mkdir -p $CIRCLE_TEST_REPORTS/mock/; cp integration-test/test-output/junitreports/* $CIRCLE_TEST_REPORTS/mock/; fi:
+        parallel: true
+    - if [ $CIRCLE_NODE_INDEX == 1 ]; then mkdir -p $CIRCLE_ARTIFACTS/mock/; cp integration-test/cloudbreak.log $CIRCLE_ARTIFACTS/mock/cloudbreak.log; fi:
+        parallel: true

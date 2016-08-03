@@ -56,7 +56,7 @@ stop-containers:
 	@echo "\n\033[1;96m--- Stop cbd containers"
 	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose stop;
 	@echo "\n\033[1;96m--- Save cloudbreak log to cloudbreak.log file"
-	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose logs --no-color cloudbreak >& ../cloudbreak.log;
+	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose logs --no-color cloudbreak &> ../cloudbreak.log;
 
 remove-test-containers:
 	@cd $(INTEGCB_LOCATION); ./cbd kill; ./cbd delete;
@@ -67,4 +67,4 @@ build-with-docker: download-cbd docker-build runtest
 
 docker-build:
 	@echo "\n\033[1;96m--- build cloudbreak in docker container\033[0m\n"
-	docker run -i --rm $(ADDITIONAL_DOCKER_BUILD_COMMAND) -v $(shell pwd)/../:/tmp/prj:rw java:openjdk-8 /tmp/prj/gradlew -b /tmp/prj/build.gradle clean build
+	docker run -i --rm $(ADDITIONAL_DOCKER_BUILD_COMMAND) -v $(shell pwd)/../:/tmp/prj:rw java:openjdk-8 /tmp/prj/gradlew -b /tmp/prj/build.gradle clean build -x test
