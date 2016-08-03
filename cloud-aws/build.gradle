@@ -22,8 +22,14 @@ dependencies {
   compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.10.50')      { exclude group: 'commons-logging' }
   compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
 
-  testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
-  testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version:springBootVersion
+  testCompile (group: 'junit', name: 'junit', version: '4+') {
+    exclude group: 'org.hamcrest'
+  }
+  testCompile ('org.mockito:mockito-core:1+') {
+    exclude group: 'org.hamcrest'
+  }
+  testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
 
 }

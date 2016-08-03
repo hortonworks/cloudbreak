@@ -14,7 +14,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -97,11 +96,6 @@ public class CloudFormationTemplateBuilder {
         } catch (ClassCastException e) {
             return instanceTemplate.getParameter("spotPrice", Integer.class).doubleValue();
         }
-    }
-
-    @VisibleForTesting
-    void setFreemarkerConfiguration(Configuration freemarkerConfiguration) {
-        this.freemarkerConfiguration = freemarkerConfiguration;
     }
 
     public static class ModelContext {
