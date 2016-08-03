@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.http.MethodNotSupportedException;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
@@ -134,8 +133,8 @@ public class SecurityGroupCommands implements BaseCommands {
     }
 
     @Override
-    public String select(Long secId, String secName) throws MethodNotSupportedException {
-        throw new MethodNotSupportedException("Select is not supported on securitygroups");
+    public String select(Long secId, String secName) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Select is not supported on securitygroups");
     }
 
     @CliCommand(value = "securitygroup select --id", help = "Delete the securitygroup by its id")
