@@ -181,9 +181,13 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "volumeType", help = "volumeType of the template") GcpVolumeType volumeType,
             @CliOption(key = "publicInAccount", help = "flags if the template is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the template") String description,
-            @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId
+            @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId,
+            @CliOption(key = "preemptible", help = "flags if the template is preemptible") Boolean preemptible
     ) {
         Map<String, Object> parameters = new HashMap<>();
+        if (preemptible != null) {
+            parameters.put("preemptible", preemptible);
+        }
         return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volumeType == null ? "pd-standard" : volumeType.getName(),
                 publicInAccount, description, parameters, platformId, PLATFORM);
     }

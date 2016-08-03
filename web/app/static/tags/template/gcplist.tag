@@ -52,5 +52,13 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+    <div class="form-group" ng-show="template.parameters.preemptible">
+        <label class="col-sm-3 control-label" for="preemptible">{{msg.preemptible_label}}</label>
+
+        <div class="col-sm-9">
+            <i id="preemptible" class="form-control-static fa fa-check-circle fa-5" style="color: #4cb84c;"></i>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
 
 </form>
