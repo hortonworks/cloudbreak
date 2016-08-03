@@ -1,0 +1,1 @@
+./gradlew -Penv=jenkins -b build.gradle clean build release uploadArchives -Prelease.scope=minor -Prelease.stage=dev --info --stacktrace
