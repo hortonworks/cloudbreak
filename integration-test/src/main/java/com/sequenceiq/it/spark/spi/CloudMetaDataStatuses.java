@@ -21,16 +21,36 @@ public class CloudMetaDataStatuses extends ITResponse {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudMetaDataStatuses.class);
     private String mockServerAddress;
     private int sshPort;
+    private String prefix;
+    private Integer from;
 
     public CloudMetaDataStatuses(String mockServerAddress, int sshPort) {
         this.mockServerAddress = mockServerAddress;
         this.sshPort = sshPort;
     }
 
+    public CloudMetaDataStatuses(String mockServerAddress, int sshPort, String prefix) {
+        this(mockServerAddress, sshPort);
+        this.prefix = prefix;
+    }
+
+    public CloudMetaDataStatuses(String mockServerAddress, int sshPort, int from) {
+        this(mockServerAddress, sshPort);
+        this.from = from;
+    }
+
+
     private List<CloudVmMetaDataStatus> createCloudVmMetaDataStatuses(List<CloudInstance> cloudInstances) {
         List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
         int numberOfServers = cloudInstances.size();
-        new ServerAddressGenerator(numberOfServers).iterateOver((address, number) -> {
+        ServerAddressGenerator serverAddressGenerator = new ServerAddressGenerator(numberOfServers);
+        if (prefix != null) {
+            serverAddressGenerator.setPrefix(prefix);
+        }
+        if (from != null) {
+            serverAddressGenerator.setFrom(from);
+        }
+        serverAddressGenerator.iterateOver((address, number) -> {
             CloudInstance cloudInstance = cloudInstances.get(number);
             CloudInstance cloudInstanceWithId = new CloudInstance("instance-" + address, cloudInstance.getTemplate());
             CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstanceWithId, InstanceStatus.STARTED);

@@ -58,6 +58,9 @@ public class SaltApiRunPostResponse extends ITResponse {
         if (request.body().contains("state.apply")) {
             return stateApply();
         }
+        if (request.body().contains("key.delete")) {
+            return "";
+        }
         LOGGER.error("no response for this SALT RUN request: " + request.body());
         throw new IllegalStateException("no response for this SALT RUN request: " + request.body());
     }

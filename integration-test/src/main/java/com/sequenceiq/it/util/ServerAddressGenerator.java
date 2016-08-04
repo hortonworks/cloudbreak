@@ -4,27 +4,48 @@ public class ServerAddressGenerator {
 
     public static final int ADDRESS_RANGE = 254;
     private int numberOfServers;
+    private String prefix;
+    private int from = 1;
 
     public ServerAddressGenerator(int numberOfServers) {
         this.numberOfServers = numberOfServers;
+        this.prefix = "192.168.";
     }
 
     public void iterateOver(ServerAddressGeneratorFunction serverAddressGeneratorFunction) {
-        for (int i = 0; i <= numberOfServers / ADDRESS_RANGE; i++) {
-            int subAddress = Integer.min(ADDRESS_RANGE, numberOfServers - i * ADDRESS_RANGE);
-            for (int j = 1; j <= subAddress; j++) {
-                serverAddressGeneratorFunction.doSomething("192.168." + i + "." + j);
+        int i = from / ADDRESS_RANGE;
+        int j = from % ADDRESS_RANGE;
+        int serverProduceCount = from + numberOfServers - 1;
+        for (; i <= serverProduceCount / ADDRESS_RANGE; i++) {
+            int subAddress = Integer.min(ADDRESS_RANGE, serverProduceCount - i * ADDRESS_RANGE);
+            for (; j <= subAddress; j++) {
+                serverAddressGeneratorFunction.doSomething(prefix + i + "." + j);
             }
+            j = 1;
         }
     }
 
     public void iterateOver(ServerAddressGeneratorWithNumberFunction serverAddressGeneratorWithNumberFunction) {
-        for (int i = 0; i <= numberOfServers / ADDRESS_RANGE; i++) {
-            int subAddress = Integer.min(ADDRESS_RANGE, numberOfServers - i * ADDRESS_RANGE);
-            for (int j = 1; j <= subAddress; j++) {
-                serverAddressGeneratorWithNumberFunction.doSomething("192.168." + i + "." + j, i * ADDRESS_RANGE + j - 1);
+        int i = from / ADDRESS_RANGE;
+        int j = from % ADDRESS_RANGE;
+        int k = 0;
+        int serverProduceCount = from + numberOfServers - 1;
+        for (; i <= serverProduceCount / ADDRESS_RANGE; i++) {
+            int subAddress = Integer.min(ADDRESS_RANGE, serverProduceCount - i * ADDRESS_RANGE);
+            for (; j <= subAddress; j++) {
+                serverAddressGeneratorWithNumberFunction.doSomething(prefix + i + "." + j, k);
+                k++;
             }
+            j = 1;
         }
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public void setFrom(int from) {
+        this.from = from;
     }
 
     @FunctionalInterface

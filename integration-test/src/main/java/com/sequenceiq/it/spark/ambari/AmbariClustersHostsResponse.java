@@ -1,7 +1,5 @@
 package com.sequenceiq.it.spark.ambari;
 
-import java.util.Collections;
-
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -25,14 +23,13 @@ public class AmbariClustersHostsResponse extends ITResponse {
         ArrayNode items = rootNode.putArray("items");
 
         for (int i = 1; i <= serverNumber; i++) {
-            Hosts hosts = new Hosts(Collections.singletonList("host" + i), "HEALTHY");
+            Hosts hosts = new Hosts("host" + i, "HEALTHY");
             ObjectNode item = items.addObject();
             item.set("Hosts", getObjectMapper().valueToTree(hosts));
 
             item.putArray("host_components")
                     .addObject()
-                    .putArray("HostRoles")
-                    .addObject()
+                    .putObject("HostRoles")
                     .put("component_name", "component-name")
                     .put("state", "SUCCESSFUL");
         }

@@ -110,7 +110,7 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
     private void addAmbariMappings(int numberOfServers) {
         get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
         post(AMBARI_API_ROOT + "/views/:view/versions/1.0.0/instances/*", new EmptyAmbariResponse());
-        get(AMBARI_API_ROOT + "/clusters", new AmbariClusterResponse(numberOfServers));
+        get(AMBARI_API_ROOT + "/clusters", new AmbariClusterResponse());
         post(AMBARI_API_ROOT + "/clusters/:cluster/requests", new AmbariClusterRequestsResponse());
         post(AMBARI_API_ROOT + "/clusters/:cluster", new EmptyAmbariResponse(), gson()::toJson);
         get(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", new AmbariServicesComponentsResponse(), gson()::toJson);

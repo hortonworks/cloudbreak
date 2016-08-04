@@ -12,9 +12,11 @@ public class AmbariBlueprintsResponse extends ITResponse {
     public Object handle(Request request, Response response) throws Exception {
         response.type("text/plain");
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
-        rootNode.putObject("host_groups")
-                .putObject("components")
-                .putArray("name");
+        rootNode.putArray("host_groups").addObject()
+                    .put("name", "host_group")
+                    .putArray("components")
+                        .addObject()
+                            .put("name", "");
         return rootNode.toString();
     }
 }

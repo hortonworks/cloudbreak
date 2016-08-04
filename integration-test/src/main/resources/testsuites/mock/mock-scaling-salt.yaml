@@ -1,4 +1,4 @@
-name: mock-clustercreate-salt
+name: Mock_salt_scaling
 parameters: {
   cloudProvider: MOCK,
   blueprintName: hdp-small-default
@@ -72,12 +72,27 @@ tests:
       clusterName: it-mock-cluster,
       checkAmbari: false,
       mockPort: 9443,
-      orchestrator: SALT,
-      emailNeeded: true
+      orchestrator: SALT
     }
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockStackCreationWithSaltSuccessTest
       - com.sequenceiq.it.cloudbreak.mock.MockClusterCreationWithSaltSuccessTest
+
+
+  - name: upscale
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: 3
+    classes:
+        - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
+
+
+  - name: downscale
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: -2
+    classes:
+        - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
 
   - name: stop ssh server
     parameters:
