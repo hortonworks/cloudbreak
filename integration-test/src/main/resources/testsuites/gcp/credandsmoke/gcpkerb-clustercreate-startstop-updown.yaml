@@ -1,0 +1,97 @@
+# GCP credential name must be specified
+name: Gcp_simple_kerberostest
+parameters: {
+  cloudProvider: GCP,
+  blueprintName: hdp-small-default
+}
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  # integratontest.gcpcredential params must be set in application.yml
+  - name: gcpkerb_credential_test
+    parameters:
+      credentialName: its-gcpkerb-credandsmoke-cred-ssud
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpCredentialCreationTest
+
+  - name: create gateway template
+    parameters:
+      gcpName: it-gcp-credandsmoke-gateway-ssud
+      gcpInstanceType: n1-standard-4
+      volumeType: pd-standard
+      volumeCount: 1
+      volumeSize: 30
+      templateAdditions: "cbgateway,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create master template
+    parameters:
+      gcpName: it-gcp-credandsmoke-master-ssud
+      gcpInstanceType: n1-highmem-8
+      volumeType: pd-standard
+      volumeCount: 2
+      volumeSize: 100
+      templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create slave template
+    parameters:
+      gcpName: it-gcp-credandsmoke-slave-ssud
+      gcpInstanceType: n1-highcpu-4
+      volumeType: pd-ssd
+      volumeCount: 3
+      volumeSize: 500
+      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create cluster
+    parameters: {
+      stackName: it-gcp-kerberos-stack,
+      region: europe-west1,
+      availabilityZone: europe-west1-b,
+      clusterName: it-gcp-kerberos-cluster,
+      enableSecurity: true,
+      kerberosMasterKey: masterkey,
+      kerberosAdmin: admin,
+      kerberosPassword: admin
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: stop cluster
+    parameters: {
+      newStatus: STOPPED
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: start cluster
+    parameters: {
+      newStatus: STARTED
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+
+  - name: upscale
+    parameters: {
+      instanceGroup: slave_1,
+      scalingAdjustment: 2
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
+
+  - name: downscale
+    parameters: {
+      instanceGroup: slave_1,
+      scalingAdjustment: -1
+    }
+    classes:
+      - com.sequenceiq.it.cloudbreak.ScalingTest
