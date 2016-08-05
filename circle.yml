@@ -10,12 +10,13 @@ machine:
 dependencies:
   override:
     - sudo service postgresql stop
+    - ./gradlew -Penv=jenkins -b build.gradle clean build --info --stacktrace -x test
   cache_directories:
     - "~/.gradle"
 
 test:
   override:
-    - case $CIRCLE_NODE_INDEX in 0) make build ;; 1) cd integration-test && make ;; esac:
+    - case $CIRCLE_NODE_INDEX in 0) ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace ;; 1) cd integration-test && make without-build ;; esac:
         parallel: true
         timeout: 1200
 

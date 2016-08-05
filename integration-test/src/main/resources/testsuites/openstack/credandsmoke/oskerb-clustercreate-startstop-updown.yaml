@@ -1,9 +1,7 @@
-# GCP credential name must be specified
-name: Gcp_simple_kerberostest
-parameters: {
-  cloudProvider: GCP,
+name: OpenStack_Kerberos_Test_cred
+parameters:
+  cloudProvider: OPENSTACK
   blueprintName: hdp-small-default
-}
 
 tests:
   - name: init
@@ -11,87 +9,85 @@ tests:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
 
-  # integratontest.gcpcredential params must be set in application.yml
-  - name: gcpkerb_credential_test
+  # integratontest.openstackcredential params must be set in application.yml
+  - name: openstack_credential_test
     parameters:
-      credentialName: its-gcpkerb-credandsmoke-cred-ssud
+      credentialName: its-oskerb-credandsmoke-cred-ssud
     classes:
-      - com.sequenceiq.it.cloudbreak.GcpCredentialCreationTest
+      - com.sequenceiq.it.cloudbreak.OpenStackCredentialCreationTest
+
+  - name: create openstack network
+    parameters:
+      networkName: it-oskerb-credandsmoke-network-ssud
+      subnetCIDR: 10.0.36.0/24
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
 
   - name: create gateway template
     parameters:
-      gcpName: it-gcp-credandsmoke-gateway-ssud
-      gcpInstanceType: n1-standard-4
-      volumeType: pd-standard
+      templateName: it-oskerb-credandsmoke-gateway-ssud
+      instanceType: m1.large
       volumeCount: 1
-      volumeSize: 30
+      volumeSize: 10
       templateAdditions: "cbgateway,1,GATEWAY"
     classes:
-      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
 
   - name: create master template
     parameters:
-      gcpName: it-gcp-credandsmoke-master-ssud
-      gcpInstanceType: n1-highmem-8
-      volumeType: pd-standard
+      templateName: it-oskerb-credandsmoke-master-ssud
+      instanceType: m1.large
       volumeCount: 2
-      volumeSize: 100
+      volumeSize: 10
       templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
     classes:
-      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
 
   - name: create slave template
     parameters:
-      gcpName: it-gcp-credandsmoke-slave-ssud
-      gcpInstanceType: n1-highcpu-4
-      volumeType: pd-ssd
+      templateName: it-oskerb-credandsmoke-slave-ssud
+      instanceType: m1.large
       volumeCount: 3
-      volumeSize: 500
+      volumeSize: 10
       templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
     classes:
-      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
 
   - name: create cluster
-    parameters: {
-      stackName: it-gcp-kerberos-stack,
-      region: europe-west1,
-      availabilityZone: europe-west1-b,
-      clusterName: it-gcp-kerberos-cluster,
+    parameters:
+      stackName: it-oskerb-cred-ssud
+      region: local
+      clusterName: it-oskerb-cred-ssud
       enableSecurity: true,
       kerberosMasterKey: masterkey,
       kerberosAdmin: admin,
       kerberosPassword: admin
-    }
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
 
   - name: stop cluster
-    parameters: {
+    parameters:
       newStatus: STOPPED
-    }
     classes:
       - com.sequenceiq.it.cloudbreak.StatusUpdateTest
 
   - name: start cluster
-    parameters: {
+    parameters:
       newStatus: STARTED
-    }
     classes:
       - com.sequenceiq.it.cloudbreak.StatusUpdateTest
 
   - name: upscale
-    parameters: {
-      instanceGroup: host_group_slave_1,
+    parameters:
+      instanceGroup: host_group_slave_1
       scalingAdjustment: 2
-    }
     classes:
       - com.sequenceiq.it.cloudbreak.ScalingTest
 
   - name: downscale
-    parameters: {
-      instanceGroup: host_group_slave_1,
+    parameters:
+      instanceGroup: host_group_slave_1
       scalingAdjustment: -1
-    }
     classes:
       - com.sequenceiq.it.cloudbreak.ScalingTest
