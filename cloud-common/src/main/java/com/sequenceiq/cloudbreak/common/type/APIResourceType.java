@@ -13,5 +13,6 @@ public enum APIResourceType {
     TOPOLOGY,
     SECURITY_GROUP,
     CLUSTER_TEMPLATE,
-    RDS_CONFIG
+    RDS_CONFIG,
+    LDAP_CONFIG
 }

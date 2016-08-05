@@ -1,0 +1,119 @@
+{%- from 'ldap/settings.sls' import ldap with context -%}
+<?xml version="1.0" encoding="UTF-8"?>
+<topology>
+    <gateway>
+        <provider>
+            <role>authentication</role>
+            <name>ShiroProvider</name>
+            <enabled>true</enabled>
+            <param>
+                <name>sessionTimeout</name>
+                <value>30</value>
+            </param>
+            <param>
+                <name>main.ldapRealm</name>
+                <value>org.apache.hadoop.gateway.shirorealm.KnoxLdapRealm</value>
+            </param>
+            <param>
+                <name>main.ldapRealm.userDnTemplate</name>
+                <!--<value>uid={0},ou=people,dc=hadoop,dc=apache,dc=org</value>-->
+                <value>{{ ldap.userSearchFilter }},{{ ldap.userSearchBase }}</value>
+            </param>
+            <param>
+                <name>main.ldapRealm.contextFactory.url</name>
+                {% if salt['pillar.get']('ldap:serverSSL') == 'true' -%}
+                <value>ldaps://{{ ldap.serverHost }}:{{ ldap.serverPort }}</value>
+                {% else %}
+                <value>ldap://{{ ldap.serverHost }}:{{ ldap.serverPort }}</value>
+                {%- endif %}
+            </param>
+            <param>
+                <name>main.ldapRealm.contextFactory.authenticationMechanism</name>
+                <value>simple</value>
+            </param>
+            <param>
+                <name>urls./**</name>
+                <value>authcBasic</value>
+            </param>
+        </provider>
+        <provider>
+            <role>identity-assertion</role>
+            <name>Default</name>
+            <enabled>true</enabled>
+        </provider>
+        <provider>
+            <role>authorization</role>
+            <name>AclsAuthz</name>
+            <enabled>true</enabled>
+        </provider>
+        <provider>
+            <role>hostmap</role>
+            <name>static</name>
+            <enabled>true</enabled>
+            <param>
+                <name>localhost</name>
+                <value>sandbox,sandbox.hortonworks.com</value>
+            </param>
+        </provider>
+    </gateway>
+    <service>
+        <role>NAMENODE</role>
+        <url>hdfs://{{ salt['grains.get']('fqdn') }}:8020</url>
+    </service>
+    <service>
+        <role>JOBTRACKER</role>
+        <url>rpc://{{ salt['grains.get']('fqdn') }}:8050</url>
+    </service>
+    <service>
+        <role>WEBHDFS</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:50070/webhdfs</url>
+    </service>
+    <service>
+        <role>WEBHCAT</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:50111/templeton</url>
+    </service>
+    <service>
+        <role>OOZIE</role>
+        <url>http://None:11000/oozie</url>
+    </service>
+    <service>
+        <role>WEBHBASE</role>
+        <url>http://None:8080</url>
+    </service>
+    <service>
+        <role>HIVE</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:10001/cliservice</url>
+    </service>
+    <service>
+        <role>RESOURCEMANAGER</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:8088/ws</url>
+    </service>
+    <service>
+        <role>AMBARI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
+    </service>
+    <service>
+        <role>HDFSUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:50070</url>
+    </service>
+    <service>
+        <role>YARNUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:8088</url>
+    </service>
+    <service>
+        <role>HBASEUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:16010</url>
+    </service>
+    <service>
+        <role>OOZIEUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:11000/oozie/</url>
+    </service>
+    <service>
+        <role>JOBHISTORYUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:19888</url>
+    </service>
+    <service>
+        <role>SPARKHISTORYUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:18080/</url>
+    </service>
+</topology>

@@ -168,6 +168,20 @@ public class OperationDescriptions {
         public static final String VALIDATE = "validate account preferences of all stacks";
     }
 
+    public static class LdapConfigOpDescription {
+        public static final String POST_PRIVATE = "create LDAP config as private resource";
+        public static final String POST_PUBLIC = "create LDAP config as public resource";
+        public static final String GET_PRIVATE = "retrieve private LDAP configs";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) LDAP configs";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private LDAP config by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) LDAP config by name";
+        public static final String GET_BY_ID = "retrieve LDAP config by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private LDAP config by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private LDAP config by name";
+        public static final String DELETE_BY_ID = "delete LDAP config by id";
+    }
+
+
     public static class UtilityOpDescription {
         public static final String TEST_CONNECTION = "tests a RDS connection";
         public static final String TEST_DATABASE = "tests a database connection parameters";

@@ -55,6 +55,10 @@ import com.sequenceiq.cloudbreak.api.model.Status;
                 query = "SELECT c FROM Cluster c "
                         + "WHERE c.sssdConfig.id= :id"),
         @NamedQuery(
+                name = "Cluster.findAllClustersByLdapConfig",
+                query = "SELECT c FROM Cluster c "
+                        + "WHERE c.ldapConfig.id= :id"),
+        @NamedQuery(
                 name = "Cluster.findOneWithLists",
                 query = "SELECT c FROM Cluster c "
                         + "LEFT JOIN FETCH c.hostGroups "
@@ -140,6 +144,9 @@ public class Cluster implements ProvisionEntity {
 
     @Enumerated(EnumType.STRING)
     private ConfigStrategy configStrategy;
+
+    @ManyToOne
+    private LdapConfig ldapConfig;
 
     public Stack getStack() {
         return stack;
@@ -431,5 +438,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setConfigStrategy(ConfigStrategy configStrategy) {
         this.configStrategy = configStrategy;
+    }
+
+    public LdapConfig getLdapConfig() {
+        return ldapConfig;
+    }
+
+    public void setLdapConfig(LdapConfig ldapConfig) {
+        this.ldapConfig = ldapConfig;
     }
 }

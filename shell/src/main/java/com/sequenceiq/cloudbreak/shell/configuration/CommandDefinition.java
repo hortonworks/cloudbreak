@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.shell.commands.common.DatabaseCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.HostGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.InstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RdsConfigCommands;
+import com.sequenceiq.cloudbreak.shell.commands.common.LdapConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RecipeCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.SecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.SssdConfigCommands;
@@ -85,6 +86,10 @@ public class CommandDefinition {
         return new RdsConfigCommands(shellContext);
     }
 
+    @Bean
+    LdapConfigCommands ldapConfigCommands() {
+        return new LdapConfigCommands(shellContext);
+    }
 
     @Bean
     BaseStackCommands stackCommands() {

@@ -13,3 +13,7 @@ base:
   'roles:ambari_server':
     - match: grain
     - ambari.database
+
+  'roles:knox_gateway':
+    - match: grain
+    - ldap.init

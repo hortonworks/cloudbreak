@@ -17,6 +17,7 @@ public class ControllerDescription {
     public static final String ACCOUNT_PREFERENCES_DESCRIPTION = "Operations on account preferences";
     public static final String USER_DESCRIPTION = "Operations on users";
     public static final String SECURITY_GROUPS_DESCRIPTION = "Operations on security group resources";
+    public static final String LDAP_CONFIG_DESCRIPTION = "Operations on LDAP server configurations";
     public static final String UTIL_DESCRIPTION = "Miscellaneous utility operations";
     public static final String RDSCONFIG_DESCRIPTION = "Operations on RDS configs";
 

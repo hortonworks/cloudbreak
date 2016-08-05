@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Plugin;
@@ -348,6 +349,7 @@ public class TestUtil {
         cluster.setEnableShipyard(true);
         RDSConfig rdsConfig = new RDSConfig();
         cluster.setRdsConfig(rdsConfig);
+        cluster.setLdapConfig(ldapConfig());
         cluster.setHostGroups(hostGroups(cluster));
         return cluster;
     }
@@ -424,6 +426,25 @@ public class TestUtil {
             configs.add(config);
         }
         return configs;
+    }
+
+    public static LdapConfig ldapConfig() {
+        LdapConfig config = new LdapConfig();
+        config.setId(1L);
+        config.setName(DUMMY_NAME);
+        config.setDescription(DUMMY_DESCRIPTION);
+        config.setPublicInAccount(true);
+        config.setPrincipalRegex("(.*)");
+        config.setUserSearchBase("cn=users,dc=example,dc=org");
+        config.setUserSearchFilter("");
+        config.setGroupSearchBase("cn=groups,dc=example,dc=org");
+        config.setGroupSearchFilter("");
+        config.setBindDn("cn=admin,dc=example,dc=org");
+        config.setBindPassword("admin");
+        config.setServerHost("localhost");
+        config.setServerPort(389);
+        config.setServerSSL(false);
+        return config;
     }
 
     public static Blueprint blueprint(String name) {

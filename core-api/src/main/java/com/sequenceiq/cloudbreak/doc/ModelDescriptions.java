@@ -105,6 +105,7 @@ public class ModelDescriptions {
         public static final String SSSDCONFIG_ID = "SSSD config id for the cluster";
         public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
         public static final String RDSCONFIG_ID = "RDS configuration id for the cluster";
+        public static final String LDAP_CONFIG_ID = "LDAP config id for the cluster";
     }
 
     public static class AmbariRepoDetailsDescription {
@@ -257,5 +258,20 @@ public class ModelDescriptions {
         public static final String CLUSTER_TIME_TO_LIVE = "lifecycle of the cluster in hours (0 for immortal clusters)";
         public static final String ACCOUNT_TIME_TO_LIVE = "lifecycle of the account and its clusters in hours (0 for immortal account)";
         public static final String PLATFORMS = "list of the cloudplatforms visible on the UI";
+    }
+
+    public static class LdapConfigModelDescription {
+        public static final String SERVER_HOST = "public host or IP address of LDAP server";
+        public static final String SERVER_PORT = "port of LDAP server (typically: 389 or 636 for LDAPS)";
+        public static final String IS_SERVER_SSL = "determines if LDAP or LDAP over SSL is to be used";
+        public static final String BIND_DN = "bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)";
+        public static final String BIND_PASSWORD = "password for the provided bind DN";
+        public static final String USER_SEARCH_BASE = "template for user search for authentication (e.g. dc=hadoop,dc=apache,dc=org)";
+        public static final String USER_SEARCH_FILTER = "filter for user search for authentication (e.g. (&amp;(objectclass=person)(sAMAccountName={2})) )";
+        public static final String GROUP_SEARCH_BASE = "template for group search for authorization (e.g. dc=hadoop,dc=apache,dc=org)";
+        public static final String GROUP_SEARCH_FILTER = "filter for group search for authorization";
+        public static final String PRINCIPAL_REGEX = "parses the principal for insertion into templates via regex.";
+
+
     }
 }
