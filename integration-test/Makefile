@@ -20,7 +20,7 @@ download-cbd:
 
 buildcb:
 	@echo "\n\033[1;96m--- build cloudbreak\033[0m\n"
-	../gradlew -p ../ clean build
+	../gradlew -p ../ clean build -x test
 
 create-image:
 	@echo "\n\033[1;96m--- Test will run on \033[92;5m"$(TEST_ENV)"\033[0m\n"
@@ -61,7 +61,7 @@ stop-containers:
 remove-test-containers:
 	@cd $(INTEGCB_LOCATION); ./cbd kill; ./cbd delete;
 
-without-build: create-image create-cloudbreak-context docker-compose check-results
+without-build: download-cbd runtest
 
 build-with-docker: download-cbd docker-build runtest
 
