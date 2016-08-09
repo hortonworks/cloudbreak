@@ -12,25 +12,34 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Optional;
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
+import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 
 @Component
 public class ClusterToJsonConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterResponse> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterToJsonConverter.class);
 
     private static final int SECONDS_PER_MINUTE = 60;
     private static final int MILLIS_PER_SECOND = 1000;
@@ -39,6 +48,12 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     private BlueprintValidator blueprintValidator;
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
+    @Inject
+    private TlsSecurityService tlsSecurityService;
+    @Inject
+    private AmbariClientProvider ambariClientProvider;
+    @Inject
+    private AmbariViewProvider ambariViewProvider;
 
     @Override
     public ClusterResponse convert(Cluster source) {
@@ -72,7 +87,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getLdapConfig() != null) {
             clusterResponse.setLdapConfigId(source.getLdapConfig().getId());
         }
-
+        source = provideViewDefinitions(source);
+        if (source.getAttributes() != null) {
+            clusterResponse.setAttributes(source.getAttributes().getMap());
+        }
         clusterResponse.setAmbariServerIp(source.getAmbariIp());
         clusterResponse.setUserName(source.getUserName());
         clusterResponse.setPassword(source.getPassword());
@@ -83,6 +101,20 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setEnableShipyard(source.getEnableShipyard());
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
         return clusterResponse;
+    }
+
+    private Cluster provideViewDefinitions(Cluster source) {
+        if (source.getAttributes().getValue() == null) {
+            try {
+                HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(source.getStack().getId(), source.getAmbariIp());
+                AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, source.getStack().getGatewayPort(),
+                        source.getUserName(), source.getPassword());
+                return ambariViewProvider.provideViewInformation(ambariClient, source);
+            } catch (CloudbreakSecuritySetupException e) {
+                LOGGER.error("Unable to setup ambari client tls configs: ", e);
+            }
+        }
+        return source;
     }
 
     private Set<HostGroupJson> convertHostGroupsToJson(Set<HostGroup> hostGroups) {

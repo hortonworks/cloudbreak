@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -351,6 +352,12 @@ public class TestUtil {
         cluster.setRdsConfig(rdsConfig);
         cluster.setLdapConfig(ldapConfig());
         cluster.setHostGroups(hostGroups(cluster));
+        Map<String, String> map = new HashMap<>();
+        try {
+            cluster.setAttributes(new Json(map));
+        } catch (JsonProcessingException e) {
+            cluster.setAttributes(null);
+        }
         return cluster;
     }
 
