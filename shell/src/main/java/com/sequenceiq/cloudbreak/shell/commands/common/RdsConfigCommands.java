@@ -38,7 +38,9 @@ public class RdsConfigCommands implements BaseCommands {
             @CliOption(key = "connectionPassword", mandatory = true, help = "Password to use for the connection") String connectionPassword,
             @CliOption(key = "hdpVersion", mandatory = true, help = "Compatible HDP version for the RDS configuration") String hdpVersion,
             @CliOption(key = "publicInAccount", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
-                    help = "flags if the config is public in the account") Boolean publicInAccount) {
+                    help = "flags if the config is public in the account") Boolean publicInAccount,
+            @CliOption(key = "validated", mandatory = false, unspecifiedDefaultValue = "true", specifiedDefaultValue = "true",
+                    help = "the RDS config parameters will be validated") Boolean validated) {
         try {
             RDSConfigJson rdsConfig = new RDSConfigJson();
             rdsConfig.setName(name);
@@ -47,6 +49,7 @@ public class RdsConfigCommands implements BaseCommands {
             rdsConfig.setConnectionUserName(connectionUsername);
             rdsConfig.setConnectionPassword(connectionPassword);
             rdsConfig.setHdpVersion(hdpVersion);
+            rdsConfig.setValidated(validated);
             IdJson id;
             if (publicInAccount) {
                 id = shellContext.cloudbreakClient().rdsConfigEndpoint().postPublic(rdsConfig);

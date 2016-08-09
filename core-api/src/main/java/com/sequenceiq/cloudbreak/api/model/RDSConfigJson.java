@@ -30,6 +30,8 @@ public class RDSConfigJson {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.HDPVERSION, required = true)
     private String hdpVersion;
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.VALIDATED)
+    private boolean validated = true;
 
     public String getName() {
         return name;
@@ -77,5 +79,13 @@ public class RDSConfigJson {
 
     public void setHdpVersion(String hdpVersion) {
         this.hdpVersion = hdpVersion;
+    }
+
+    public boolean isValidated() {
+        return validated;
+    }
+
+    public void setValidated(boolean validated) {
+        this.validated = validated;
     }
 }

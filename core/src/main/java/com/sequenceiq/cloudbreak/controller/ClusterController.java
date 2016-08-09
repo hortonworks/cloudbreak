@@ -108,7 +108,7 @@ public class ClusterController implements ClusterEndpoint {
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), request.getFileSystem());
         validateRdsConfigParams(request);
         if (request.getRdsConfigJson() != null) {
-            rdsConnectionValidator.validateRdsConnection(request.getRdsConfigJson());
+            validateRdsConnection(request);
             RDSConfig rdsConfig = rdsConfigService.create(user, conversionService.convert(request.getRdsConfigJson(), RDSConfig.class));
             request.setRdsConfigId(rdsConfig.getId());
         }
@@ -122,6 +122,12 @@ public class ClusterController implements ClusterEndpoint {
         components = addAmbariRepoConfig(components, request, stack);
         clusterService.create(user, stackId, cluster, components);
         return Response.status(Response.Status.ACCEPTED).build();
+    }
+
+    private void validateRdsConnection(ClusterRequest request) {
+        if (request.getRdsConfigJson().isValidated()) {
+            rdsConnectionValidator.validateRdsConnection(request.getRdsConfigJson());
+        }
     }
 
     @Override
