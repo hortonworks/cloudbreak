@@ -1,4 +1,5 @@
 <div id="active-cluster-panel" class="col-sm-11 col-md-11 col-lg-11">
+    <input type="hidden" id="cloudbreak-details-{{activeCluster.id}}" name="cloudbreak-details-{{activeCluster.name}}" value="{{activeCluster.cloudbreakDetails.version}}">
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a href="" id="cluster-details-back-btn" class="btn btn-info btn-fa-2x" role="button" ng-click="deselectActiveCluster()"><i class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
