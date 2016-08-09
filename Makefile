@@ -73,7 +73,7 @@ deps:
 	go get -u github.com/jteeuwen/go-bindata/...
 	go get -u github.com/progrium/gh-release/...
 	go get github.com/progrium/basht
-	go get github.com/github/hub
+#	go get github.com/github/hub
 	go get || true
 
 tests:
