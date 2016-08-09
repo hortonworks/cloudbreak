@@ -51,6 +51,8 @@ public class ClusterResponse {
     private ConfigStrategy configStrategy;
     @ApiModelProperty(ClusterModelDescription.ENABLE_SHIPYARD)
     private Boolean enableShipyard;
+    @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
+    private Map<String, Object> attributes;
 
     public Boolean getEnableShipyard() {
         return enableShipyard;
@@ -219,5 +221,13 @@ public class ClusterResponse {
 
     public void setConfigStrategy(ConfigStrategy configStrategy) {
         this.configStrategy = configStrategy;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
     }
 }

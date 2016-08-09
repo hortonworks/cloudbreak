@@ -9,6 +9,7 @@ import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -21,10 +22,13 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -40,6 +44,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 
 public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Cluster> {
 
@@ -68,6 +73,8 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     private InstanceMetaData instanceMetaData;
     @Mock
     private Iterator<JsonNode> mockComponentIterator;
+    @Mock
+    private AmbariViewProvider ambariViewProvider;
 
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
@@ -151,6 +158,13 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     }
 
     private void mockAll() throws IOException {
+        when(ambariViewProvider.provideViewInformation(any(AmbariClient.class), any(Cluster.class))).thenAnswer(new Answer<Cluster>() {
+            @Override
+            public Cluster answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (Cluster) args[1];
+            }
+        });
         given(blueprintValidator.getHostGroupNode(any(Blueprint.class))).willReturn(jsonNode);
         given(jsonNode.iterator()).willReturn(mockIterator);
         given(mockIterator.hasNext()).willReturn(true).willReturn(false);

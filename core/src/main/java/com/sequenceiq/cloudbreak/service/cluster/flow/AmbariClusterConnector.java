@@ -159,6 +159,8 @@ public class AmbariClusterConnector {
     private RDSConfigProvider rdsConfigProvider;
     @Inject
     private ImageService imageService;
+    @Inject
+    private AmbariViewProvider ambariViewProvider;
 
     public void waitForAmbariServer(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getDefaultAmbariClient(stack);
@@ -217,10 +219,11 @@ public class AmbariClusterConnector {
 
             recipeEngine.executePostInstall(stack);
 
-//            executeSmokeTest(stack, ambariClient);
+            // executeSmokeTest(stack, ambariClient);
             //TODO https://hortonworks.jira.com/browse/BUG-51920
             startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
             triggerSmartSenseCapture(ambariClient, blueprintText);
+            cluster = ambariViewProvider.provideViewInformation(ambariClient, cluster);
             cluster = handleClusterCreationSuccess(stack, cluster);
             return cluster;
         } catch (CancellationException cancellationException) {
