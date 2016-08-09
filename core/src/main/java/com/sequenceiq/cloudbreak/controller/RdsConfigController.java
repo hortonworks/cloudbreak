@@ -112,7 +112,9 @@ public class RdsConfigController implements RdsConfigEndpoint {
     }
 
     private IdJson createRdsConfig(CbUser user, RDSConfigJson rdsConfigJson, boolean publicInAccount) {
-        rdsConnectionValidator.validateRdsConnection(rdsConfigJson);
+        if (rdsConfigJson.isValidated()) {
+            rdsConnectionValidator.validateRdsConnection(rdsConfigJson);
+        }
         RDSConfig rdsConfig = conversionService.convert(rdsConfigJson, RDSConfig.class);
         rdsConfig.setPublicInAccount(publicInAccount);
         try {
