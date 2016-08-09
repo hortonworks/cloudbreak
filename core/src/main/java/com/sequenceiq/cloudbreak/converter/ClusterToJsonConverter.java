@@ -108,7 +108,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     }
 
     private Cluster provideViewDefinitions(Cluster source) {
-        if (source.getAttributes().getValue() == null) {
+        if (source.getAttributes().getValue() == null || ambariViewProvider.isViewDefinitionNotProvided(source)) {
             try {
                 HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(source.getStack().getId(), source.getAmbariIp());
                 AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, source.getStack().getGatewayPort(),

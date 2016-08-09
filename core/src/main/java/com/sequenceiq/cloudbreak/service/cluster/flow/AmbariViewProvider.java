@@ -26,18 +26,19 @@ public class AmbariViewProvider {
         try {
             LOGGER.info("Provide view definitions.");
             Map<String, String> viewDefinitions = (Map<String, String>) ambariClient.getViewDefinitions();
-            if (cluster.getAttributes().getMap() != null && !cluster.getAttributes().getMap().isEmpty()) {
-                cluster.getAttributes().getMap().put(VIEW_DEFINITIONS, viewDefinitions);
-            } else {
-                Map<String, Object> obj = new HashMap<>();
-                obj.put(VIEW_DEFINITIONS, viewDefinitions);
-                cluster.setAttributes(new Json(obj));
-            }
+
+            Map<String, Object> obj = new HashMap<>();
+            obj.put(VIEW_DEFINITIONS, viewDefinitions);
+            cluster.setAttributes(new Json(obj));
             return clusterRepository.save(cluster);
         } catch (Exception e) {
             LOGGER.error("Provide view definitions is failed.", e);
         }
         return cluster;
+    }
+
+    public boolean isViewDefinitionNotProvided(Cluster cluster) {
+        return ((Map<String, Object>) cluster.getAttributes().getMap().get(VIEW_DEFINITIONS)).entrySet().isEmpty();
     }
 
 }
