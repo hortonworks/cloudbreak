@@ -19,6 +19,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -36,6 +37,8 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "Cluster", uniqueConstraints = {
@@ -142,6 +145,10 @@ public class Cluster implements ProvisionEntity {
 
     @Enumerated(EnumType.STRING)
     private ConfigStrategy configStrategy;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json attributes;
 
     public Stack getStack() {
         return stack;
@@ -425,6 +432,14 @@ public class Cluster implements ProvisionEntity {
                 || STOP_IN_PROGRESS.equals(status)
                 || START_IN_PROGRESS.equals(status)
                 || DELETE_IN_PROGRESS.equals(status);
+    }
+
+    public Json getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Json attributes) {
+        this.attributes = attributes;
     }
 
     public String getEmailTo() {

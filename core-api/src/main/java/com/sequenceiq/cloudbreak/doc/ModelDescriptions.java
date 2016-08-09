@@ -99,6 +99,7 @@ public class ModelDescriptions {
         public static final String LDAP_REQUIRED = "flag for default LDAP support";
         public static final String SSSDCONFIG_ID = "SSSD config id for the cluster";
         public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
+        public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_ID = "RDS configuration id for the cluster";
     }
 
