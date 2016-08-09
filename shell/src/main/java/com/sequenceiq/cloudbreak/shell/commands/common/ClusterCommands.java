@@ -73,6 +73,9 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "databaseType", mandatory = false, help = "Type of the external database (MYSQL, POSTGRES)") RDSDatabase databaseType,
             @CliOption(key = "connectionUserName", mandatory = false, help = "Username to use for the jdbc connection") String connectionUserName,
             @CliOption(key = "connectionPassword", mandatory = false, help = "Password to use for the jdbc connection") String connectionPassword,
+            @CliOption(key = "hdpVersion", mandatory = false, help = "Compatible HDP version for the jdbc configuration") String hdpVersion,
+            @CliOption(key = "validated", mandatory = false, unspecifiedDefaultValue = "true", specifiedDefaultValue = "true",
+                    help = "the jdbc config parameters will be validated") Boolean validated,
             @CliOption(key = "enableSecurity", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false",
                     help = "Kerberos security status") Boolean enableSecurity,
             @CliOption(key = "kerberosMasterKey", mandatory = false, specifiedDefaultValue = "key", help = "Kerberos mater key") String kerberosMasterKey,
@@ -140,7 +143,7 @@ public class ClusterCommands implements BaseCommands {
                 clusterRequest.setSssdConfigId(Long.valueOf(shellContext.getSssdConfigId()));
             }
             if (shellContext.getRdsConfigId() != null) {
-                if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null) {
+                if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null || hdpVersion != null) {
                     return "--connectionURL, --databaseType, --connectionUserName, --connectionPassword switches "
                             + "cannot be used if an RDS config is already selected with 'rdsconfig select'";
                 }
@@ -175,16 +178,18 @@ public class ClusterCommands implements BaseCommands {
             }
             clusterRequest.setAmbariStackDetails(ambariStackDetailsJson);
 
-            if (connectionURL != null && connectionUserName != null && connectionPassword != null && databaseType != null) {
+            if (connectionURL != null && connectionUserName != null && connectionPassword != null && databaseType != null && hdpVersion != null) {
                 RDSConfigJson rdsConfigJson = new RDSConfigJson();
                 rdsConfigJson.setName(clusterRequest.getName());
                 rdsConfigJson.setConnectionURL(connectionURL);
                 rdsConfigJson.setDatabaseType(databaseType);
                 rdsConfigJson.setConnectionUserName(connectionUserName);
                 rdsConfigJson.setConnectionPassword(connectionPassword);
+                rdsConfigJson.setHdpVersion(hdpVersion);
+                rdsConfigJson.setValidated(validated);
                 clusterRequest.setRdsConfigJson(rdsConfigJson);
-            } else if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null) {
-                return "connectionURL, databaseType, connectionUserName and connectionPassword must be all set.";
+            } else if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null || hdpVersion != null) {
+                return "connectionURL, databaseType, connectionUserName, connectionPassword and hdpVersion must be all set.";
             }
 
             String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
