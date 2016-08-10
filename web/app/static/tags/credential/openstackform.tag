@@ -1,8 +1,8 @@
 <div class="form-group" ng-class="{ 'has-error': openstackCredentialForm.openstack_keystone_version.$dirty && openstackCredentialForm.openstack_keystone_version.$invalid }">
     <label class="col-sm-3 control-label" for="openstack_keystone_version">{{msg.credential_openstack_form_keystoneVersion_label}}</label>
 
-    <div class="col-sm-9">
-        <select name="keystoneVersion" id="keystoneVersion" ng-model="credentialOpenstack.parameters.keystoneVersion" ng-dropdown required ng-init="credentialOpenstack.parameters.keystoneVersion='cb-keystone-v2'">
+    <div class="col-sm-2">
+        <select class="form-control" name="keystoneVersion" id="keystoneVersion" ng-model="credentialOpenstack.parameters.keystoneVersion" ng-dropdown required ng-init="credentialOpenstack.parameters.keystoneVersion='cb-keystone-v2'">
             <option ng-option value="cb-keystone-v2" ng-selected="true">v2</option>
             <option ng-option value="cb-keystone-v3">v3</option>
         </select>
@@ -17,8 +17,8 @@
 <div class="form-group" ng-if="credentialOpenstack.parameters.keystoneVersion == 'cb-keystone-v3'" ng-class="{ 'has-error': openstackCredentialForm.openstack_keystone_scope.$dirty && openstackCredentialForm.openstack_keystone_scope.$invalid }">
     <label class="col-sm-3 control-label" for="openstack_keystone_scope">{{msg.credential_openstack_form_keystoneAuthScope_label}}</label>
 
-    <div class="col-sm-9">
-        <select name="keystoneAuthScope" id="keystoneAuthScope" ng-model="credentialOpenstack.parameters.keystoneAuthScope" ng-dropdown required ng-init="credentialOpenstack.parameters.keystoneAuthScope='cb-keystone-v3-default-scope'">
+    <div class="col-sm-2">
+        <select class="form-control" name="keystoneAuthScope" id="keystoneAuthScope" ng-model="credentialOpenstack.parameters.keystoneAuthScope" ng-dropdown required ng-init="credentialOpenstack.parameters.keystoneAuthScope='cb-keystone-v3-default-scope'">
             <option ng-option value="cb-keystone-v3-default-scope" ng-selected="true">Default</option>
             <option ng-option value="cb-keystone-v3-domain-scope">Domain</option>
             <option ng-option value="cb-keystone-v3-project-scope">Project</option>
@@ -165,8 +165,8 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="facing">{{msg.credential_openstack_form_facing_label}}</label>
 
-    <div class="col-sm-9">
-        <select name="facing" id="facing" ng-model="credentialOpenstack.parameters.facing" ng-dropdown required ng-init="credentialOpenstack.parameters.facing='public'">
+    <div class="col-sm-2">
+        <select  class="form-control" name="facing" id="facing" ng-model="credentialOpenstack.parameters.facing" ng-dropdown required ng-init="credentialOpenstack.parameters.facing='public'">
             <option ng-option value="public" ng-selected="true">public</option>
             <option ng-option value="admin">admin</option>
             <option ng-option value="internal">internal</option>
