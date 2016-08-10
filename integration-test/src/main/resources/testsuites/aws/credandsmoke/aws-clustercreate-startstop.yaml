@@ -23,7 +23,7 @@ tests:
       awsVolumeType: standard
       awsVolumeCount: 1
       awsVolumeSize: 30
-      templateAdditions: "cbgateway,1,GATEWAY"
+      templateAdditions: "host_group_master_1,1,GATEWAY"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
@@ -34,7 +34,7 @@ tests:
       awsVolumeType: gp2
       awsVolumeCount: 2
       awsVolumeSize: 100
-      templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
+      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 

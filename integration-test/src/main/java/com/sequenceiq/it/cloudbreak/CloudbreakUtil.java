@@ -71,7 +71,7 @@ public class CloudbreakUtil {
         if (checkAmbari) {
             AmbariClient ambariClient = new AmbariClient(ambariIp, port, ambariUser, ambariPassowrd);
             Assert.assertEquals(ambariClient.healthCheck(), "RUNNING", "The Ambari server is not running!");
-            Assert.assertEquals(ambariClient.getClusterHosts().size(), getNodeCount(stackResponse) - 1,
+            Assert.assertEquals(ambariClient.getClusterHosts().size(), getNodeCount(stackResponse),
                     "The number of cluster nodes in the stack differs from the number of nodes registered in ambari");
         }
     }
@@ -150,7 +150,9 @@ public class CloudbreakUtil {
         List<InstanceGroupJson> instanceGroups = stackResponse.getInstanceGroups();
         int nodeCount = 0;
         for (InstanceGroupJson instanceGroup : instanceGroups) {
-            nodeCount += instanceGroup.getNodeCount();
+            if (!instanceGroup.getGroup().equals("cbgateway")) {
+                nodeCount += instanceGroup.getNodeCount();
+            }
         }
         return nodeCount;
     }

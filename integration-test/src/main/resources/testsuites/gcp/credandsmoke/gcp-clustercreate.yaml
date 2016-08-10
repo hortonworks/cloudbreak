@@ -23,7 +23,7 @@ tests:
       volumeType: pd-standard
       volumeCount: 1
       volumeSize: 30
-      templateAdditions: "cbgateway,1,GATEWAY"
+      templateAdditions: "host_group_master_1,1,GATEWAY"
     classes:
       - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 
@@ -34,7 +34,7 @@ tests:
       volumeType: pd-standard
       volumeCount: 2
       volumeSize: 100
-      templateAdditions: "host_group_master_1,1;host_group_master_2,1;host_group_master_3,1"
+      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
     classes:
       - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 
