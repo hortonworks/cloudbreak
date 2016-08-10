@@ -77,8 +77,6 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         for (HostGroup hostgroup : hostGroups) {
             HostGroupJson hostGroupJson = new HostGroupJson();
             hostGroupJson.setName(hostgroup.getName());
-
-
             ConstraintJson constraintJson = new ConstraintJson();
             constraintJson.setInstanceGroupName(hostgroup.getInstanceGroupName());
             constraintJson.setHostCount(hostgroup.getHostCount());

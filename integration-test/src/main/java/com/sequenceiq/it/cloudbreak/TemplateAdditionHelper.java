@@ -43,7 +43,7 @@ public class TemplateAdditionHelper {
         for (TemplateAddition addition : additions) {
             String groupName = addition.getGroupName();
             instanceGroups.add(new InstanceGroup(templateId, addition.getGroupName(), addition.getNodeCount(), addition.getType()));
-            if ("CORE".equals(addition.getType())) {
+            if ("CORE".equals(addition.getType()) || ("GATEWAY".equals(addition.getType()) && !"cbgateway".equals(groupName))) {
                 hostGroups.add(new HostGroup(groupName, groupName, addition.getNodeCount()));
             }
         }
