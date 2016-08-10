@@ -91,24 +91,10 @@
         </#list>
     },
   	"variables" : {
-      "userImageName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userImageStorageContainerName'),'/',parameters('userImageVhdName'))]",
-      "osDiskVhdName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'osDisk')]",
-      <#if existingVPC>
-      "vnetID": "[resourceId(parameters('resourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('existingVNETName'))]",
-      "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('existingSubnetName'))]",
-      <#else>
-      "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkNamePrefix'))]",
-      "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
-      </#if>
       "staticIpRef": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('gatewaystaticipname'))]",
-      "ilbBackendAddressPoolName": "${stackname}bapn",
       <#list igs as group>
       "${group?replace('_', '')}secGroupName": "${group?replace('_', '')}${stackname}sg",
       </#list>
-      "lbID": "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]",
-      "sshIPConfig": "[concat(variables('lbID'),'/frontendIPConfigurations/', parameters('sshIPConfigName'))]",
-      "ilbBackendAddressPoolID": "[concat(variables('lbID'),'/backendAddressPools/', variables('ilbBackendAddressPoolName'))]",
-      "sshKeyPath" : "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]"
   	},
     "resources": [
            <#if !existingVPC>
@@ -198,7 +184,7 @@
                        "name": "[parameters('loadBalancerName')]",
                        "location": "[parameters('region')]",
                        "dependsOn": [
-                         "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
+                         "[concat('${publicIpAddressId}', '${instance.instanceId}')]"
                        ],
                        "properties": {
                          "frontendIPConfigurations": [
@@ -213,7 +199,7 @@
                          ],
                          "backendAddressPools": [
                            {
-                             "name": "[variables('ilbBackendAddressPoolName')]"
+                             "name": "${stackname}bapn"
                            }
                          ],
                          "inboundNatRules": [
@@ -222,7 +208,7 @@
                              "name": "endpoint${port_index}inr",
                              "properties": {
                                "frontendIPConfiguration": {
-                                 "id": "[variables('sshIPConfig')]"
+                                 "id": "[concat(resourceId('${lbID}'), '${ipConfigurationsAddress}')]"
                                },
                                "protocol": "${port.protocol}",
                                "frontendPort": "${port.port}",
@@ -254,13 +240,13 @@
                    "location": "[parameters('region')]",
                    "dependsOn": [
                        <#if instanceGroup == "CORE">
-                       "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
+                       "[concat('${publicIpAddressId}', '${instance.instanceId}')]"
                        </#if>
                        <#if instanceGroup == "GATEWAY">
-                       "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
+                       "${loadBalancerAddress}"
                        </#if>
                        <#if !existingVPC>
-                       ,"[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkNamePrefix'))]"
+                       ,"${virtualNetworkAddress}"
                        </#if>
                        ,"[concat('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
                    ],
@@ -280,18 +266,18 @@
                                    },
                                    </#if>
                                    "subnet": {
-                                       "id": "[variables('subnet1Ref')]"
+                                       "id": "[concat(resourceId('${vnetID}'), '${subnet1Address}')]"
                                    }
                                    <#if instanceGroup == "GATEWAY">
                                    ,"loadBalancerBackendAddressPools": [
                                        {
-                                           "id": "[variables('ilbBackendAddressPoolID')]"
+                                           "id": "[concat(resourceId('${lbID}'), ${ilbBackendAddress})]"
                                        }
                                    ],
                                    "loadBalancerInboundNatRules": [
                                    <#list securities[instance.groupName] as port>
                                        {
-                                           "id": "[concat(variables('lbID'),'/inboundNatRules/', 'endpoint${port_index}inr')]"
+                                           "id": "[concat(resourceId('${lbID}'), '/inboundNatRules/', 'endpoint${port_index}inr')]"
                                        }<#if (port_index + 1) != securities[instance.groupName]?size>,</#if>
                                    </#list>
                                    ]
@@ -308,7 +294,7 @@
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
                    "dependsOn": [
-                       "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instance.instanceId}')]"
+                       "[concat('${networkInterfaceAddress}', '${instance.instanceId}')]"
                    ],
                    "properties": {
                        "hardwareProfile": {
@@ -326,7 +312,7 @@
                                    "publicKeys": [
                                     <#if disablePasswordAuthentication == true>
                                        {
-                                           "path": "[variables('sshKeyPath')]",
+                                           "path": "${sshKeyPath}",
                                            "keyData": "[parameters('sshKeyData')]"
                                        }
                                     </#if>
@@ -342,13 +328,13 @@
                        },
                        "storageProfile": {
                            "osDisk" : {
-                               "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instance.instanceId}')]",
+                               "name" : "[concat('${osDiskName}', '${instance.instanceId}')]",
                                "osType" : "linux",
                                "image" : {
-                                   "uri" : "[variables('userImageName')]"
+                                   "uri" : "${userImageName}"
                                },
                                "vhd" : {
-                                   "uri" : "[concat(variables('osDiskVhdName'), '${instance.instanceId}','.vhd')]"
+                                   "uri" : "[concat('${osDiskVhdName}', '${instance.instanceId}','.vhd')]"
                                },
                                "createOption": "FromImage"
                            },
@@ -359,7 +345,7 @@
                                    "diskSizeGB": ${volume.size},
                                    "lun":  ${volume_index},
                                    "vhd": {
-                                       "Uri": "[concat('${instance.attachedDiskStorageUrl}',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk','${instance.instanceId}', '${volume_index}', '.vhd')]"
+                                       "Uri": "[concat('${instance.attachedDiskStorageUrl}','${dataDiskAddress}','${instance.instanceId}', '${volume_index}', '.vhd')]"
                                    },
                                    "caching": "None",
                                    "createOption": "Empty"

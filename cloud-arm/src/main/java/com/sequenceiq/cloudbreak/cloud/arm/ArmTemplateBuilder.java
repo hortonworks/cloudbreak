@@ -77,6 +77,28 @@ public class ArmTemplateBuilder {
             model.put("resourceGroupName", armUtils.getCustomResourceGroupName(network));
             model.put("existingVNETName", armUtils.getCustomNetworkId(network));
             model.put("existingSubnetName", armUtils.getCustomSubnetId(network));
+            model.put("userImageName", String.format("https://%s.blob.core.windows.net/%s/%s", rootDiskStorage, ArmStorage.IMAGES, imageName));
+            model.put("osDiskVhdName", String.format("https://%s.blob.core.windows.net/%s/%sosDisk",
+                    rootDiskStorage, armStorage.getDiskContainerName(cloudContext), stackName));
+            model.put("sshKeyPath", String.format("/home/%s/.ssh/authorized_keys", armCredentialView.getLoginUserName()));
+            model.put("ipConfigurationsAddress", String.format("'/frontendIPConfigurations/%sipcn", stackName));
+            model.put("ilbBackendAddress", String.format("/backendAddressPools/%sbapn", stackName));
+            model.put("loadBalancerAddress", String.format("Microsoft.Network/loadBalancers/%slb", stackName));
+            model.put("virtualNetworkAddress", String.format("Microsoft.Network/virtualNetworks/%s", stackName));
+            model.put("publicIpAddressId", String.format("Microsoft.Network/publicIPAddresses/%s", stackName));
+            model.put("networkInterfaceAddress", String.format("Microsoft.Network/networkInterfaces/%s", stackName));
+            model.put("osDiskName", String.format("%s-osDisk", stackName));
+            model.put("dataDiskAddress", String.format("%s/%sdatadisk", armStorage.getDiskContainerName(cloudContext), stackName));
+
+            if (armUtils.isExistingNetwork(network)) {
+                model.put("vnetID", String.format("%sMicrosoft.Network/virtualNetworks%s",
+                        armUtils.getCustomResourceGroupName(network), armUtils.getCustomNetworkId(network)));
+                model.put("subnet1Address", String.format("/subnets/%s", armUtils.getCustomSubnetId(network)));
+            } else {
+                model.put("vnetID", String.format("Microsoft.Network/virtualNetworks%s", stackName));
+                model.put("subnet1Address", String.format("/subnets/%ssubnet", stackName, stackName));
+            }
+            model.put("lbID", String.format("Microsoft.Network/loadBalancers%slb", stackName));
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8"), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
