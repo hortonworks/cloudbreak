@@ -574,9 +574,13 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         id: $rootScope.activeCluster.blueprintId.toString()
                     }, true)[0];
                     if (typeof($rootScope.activeCluster.credentialId) !== "undefined" && $rootScope.activeCluster.credentialId) {
-                        $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, { id: $rootScope.activeCluster.credentialId}, true)[0];
-                        if (typeof($rootScope.activeClusterCredential) !== "undefined") {
-                            $rootScope.activeCluster.cloudPlatform = $rootScope.activeClusterCredential.cloudPlatform
+                        if ($rootScope.activeCluster.cloudPlatform) {
+                            $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {
+                                id: $rootScope.activeCluster.credentialId
+                            }, true)[0];
+                            if (typeof($rootScope.activeClusterCredential) !== "undefined") {
+                                $rootScope.activeCluster.cloudPlatform = $rootScope.activeClusterCredential.cloudPlatform
+                            }
                         }
                     } else {
                         $rootScope.activeCluster.cloudPlatform = $rootScope.activeCluster.orchestrator.type
