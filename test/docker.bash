@@ -9,6 +9,11 @@ T_dockerClientVersionRC() {
     [[ "$result" -eq 160 ]]
 }
 
+T_dockerClientVersionExperimental() {
+    result=$(docker-getversion "Docker version 1.12.0, build 8eab29e, experimental")
+    [[ "$result" -eq 1120 ]]
+}
+
 T_dockerServerVersion() {
     result=$(docker-getversion "Server version: 1.5.0-rc2")
     [[ "$result" -eq 150 ]]

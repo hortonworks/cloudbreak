@@ -86,7 +86,7 @@ docker-getversion() {
 
     local versionstr="$*"
     debug versionstr=$versionstr
-    local fullver=$(echo "${versionstr%,*}" |sed "s/.*version[ :]*//")
+    local fullver=$(echo "${versionstr%%,*}" |sed "s/.*version[ :]*//")
     debug fullver=$fullver
     # remove -rc2 and similar
     local numver=$(echo ${fullver%-*} | sed "s/\.//g")
