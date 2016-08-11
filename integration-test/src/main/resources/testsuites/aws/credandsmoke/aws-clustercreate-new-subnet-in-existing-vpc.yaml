@@ -21,8 +21,9 @@ tests:
       networkName: existing-vpc-network
       description: description
       regionName: eu-west-1
+      existingSubnet: false
     classes:
-      - com.sequenceiq.it.cloudbreak.AwsCreateExistingVpcNetworkTest
+      - com.sequenceiq.it.cloudbreak.AwsCreateVpcNetworkTest
 
   - name: create gateway template
     parameters:

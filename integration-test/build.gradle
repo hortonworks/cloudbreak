@@ -28,30 +28,32 @@ dependencies {
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
     exclude group: 'org.slf4j';
   }
-  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',             version: '1.10.50') {
+  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.10.50') {
     exclude group: 'commons-logging'
   }
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter',      version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test', version: springBootVersion
-  compile group:  'org.springframework',          name: 'spring-web',               version: springFrameworkVersion
-  compile group:  'org.springframework',          name: 'spring-context-support',   version: springFrameworkVersion
-  compile group:  'org.apache.velocity',          name: 'velocity',                 version: '1.7'
-  compile group:  'com.jcraft',                   name: 'jsch',                     version: jschVersion
-  compile group:  'org.testng',                   name: 'testng',                   version: '6.9.10'
-  compile group:  'javax.el',                     name: 'javax.el-api',             version: '3.0.0'
-  compile group:  'org.apache.commons',           name: 'commons-lang3',            version: '3.4'
-  compile(group:  'org.apache.sshd',              name: 'sshd-core',                version: '1.2.0') {
+  compile group:  'com.microsoft.azure',          name: 'azure',                          version: '1.0.0-beta2'
+  compile group:  'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev102-1.21.0'
+  compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
+  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
+  compile group:  'org.springframework',          name: 'spring-web',                     version: springFrameworkVersion
+  compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
+  compile group:  'org.apache.velocity',          name: 'velocity',                       version: '1.7'
+  compile group:  'com.jcraft',                   name: 'jsch',                           version: jschVersion
+  compile group:  'org.testng',                   name: 'testng',                         version: '6.9.10'
+  compile group:  'javax.el',                     name: 'javax.el-api',                   version: '3.0.0'
+  compile group:  'org.apache.commons',           name: 'commons-lang3',                  version: '3.4'
+  compile(group:  'org.apache.sshd',              name: 'sshd-core',                      version: '1.2.0') {
     exclude group: 'ch.qos.logback'
   }
-  compile group: 'com.github.docker-java',        name: 'docker-java',              version: '2.1.2'
-  compile group: 'com.sequenceiq',                name: 'consul-api',               version: '1.10'
-  compile group: 'com.sparkjava',                 name: 'spark-core',               version: '2.5'
+  compile group: 'com.github.docker-java',        name: 'docker-java',                    version: '2.1.2'
+  compile group: 'com.sequenceiq',                name: 'consul-api',                     version: '1.10'
+  compile group: 'com.sparkjava',                 name: 'spark-core',                     version: '2.5'
 
   compile ("org.uncommons:reportng:1.1.4") {
     exclude group: "velocity"
   }
-  runtime group: 'com.google.inject',             name: 'guice',                    version: '3.0'
-  runtime group: 'org.hibernate',                 name: 'hibernate-validator',      version: hibernateValidatorVersion
+  runtime group: 'com.google.inject',             name: 'guice',                          version: '3.0'
+  runtime group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
 }
 
 task buildInfo(type: BuildInfoTask) {
