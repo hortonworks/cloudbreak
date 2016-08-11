@@ -201,16 +201,17 @@ public class AwsSetup implements Setup {
     private void validateExistingSubnet(AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
         if (awsNetworkView.isExistingSubnet()) {
             DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
-            describeSubnetsRequest.withSubnetIds(awsNetworkView.getExistingSubnet());
+            describeSubnetsRequest.withSubnetIds(awsNetworkView.getSubnetList());
             DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(describeSubnetsRequest);
-            if (describeSubnetsResult.getSubnets().size() < 1) {
+            if (describeSubnetsResult.getSubnets().size() < awsNetworkView.getSubnetList().size()) {
                 throw new CloudConnectorException(String.format(SUBNET_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingSubnet()));
             } else {
-                Subnet subnet = describeSubnetsResult.getSubnets().get(0);
-                String vpcId = subnet.getVpcId();
-                if (vpcId != null && !vpcId.equals(awsNetworkView.getExistingVPC())) {
-                    throw new CloudConnectorException(String.format(SUBNETVPC_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingSubnet(),
-                            awsNetworkView.getExistingVPC()));
+                for (Subnet subnet : describeSubnetsResult.getSubnets()) {
+                    String vpcId = subnet.getVpcId();
+                    if (vpcId != null && !vpcId.equals(awsNetworkView.getExistingVPC())) {
+                        throw new CloudConnectorException(String.format(SUBNETVPC_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingSubnet(),
+                                awsNetworkView.getExistingVPC()));
+                    }
                 }
             }
         }

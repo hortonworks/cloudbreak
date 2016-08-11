@@ -226,7 +226,7 @@
                         <label class="col-sm-3 control-label" for="aws_networkSubnetId">{{msg.network_aws_form_subnet_id_label_optional}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="aws_networkSubnetId" ng-model="network.parameters.subnetId" id="aws_networkSubnetId" placeholder="{{msg.network_aws_form_subnet_id_placeholder}}" ng-pattern="/^subnet-[a-zA-Z0-9]{8}$/" required>
+                            <input type="text" class="form-control" name="aws_networkSubnetId" ng-model="network.parameters.subnetId" id="aws_networkSubnetId" placeholder="{{msg.network_aws_form_subnet_id_placeholder}}" ng-pattern="/^subnet-[a-zA-Z0-9]{8}(,subnet-[a-zA-Z0-9]{8})*$/" required>
                             <div class="help-block" ng-show="awsNetworkForm_3.aws_networkSubnetId.$dirty && awsNetworkForm_3.aws_networkSubnetId.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_subnetid_invalid}}
                             </div>
