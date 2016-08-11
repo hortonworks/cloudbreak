@@ -211,7 +211,7 @@ traefik:
     command: --debug --web \
         --defaultEntryPoints=http,https \
         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' \
-        --entryPoints='Name:https Address::443 TLS:/certs/client-ca.pem,/certs/client-ca-key.pem' \
+        --entryPoints='Name:https Address::443 TLS:$CBD_TRAEFIK_TLS' \
         --docker
 haveged:
     labels:

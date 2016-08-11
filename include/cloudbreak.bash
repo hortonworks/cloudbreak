@@ -125,6 +125,8 @@ cloudbreak-conf-db() {
 cloudbreak-conf-cert() {
     declare desc="Declares cloudbreak cert config"
     env-import CBD_CERT_ROOT_PATH "${PWD}/certs"
+
+    env-import CBD_TRAEFIK_TLS "/certs/client-ca.pem,/certs/client-ca-key.pem"
 }
 
 cloudbreak-delete-dbs() {
