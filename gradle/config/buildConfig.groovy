@@ -1,13 +1,15 @@
 environments {
   jenkins {
-    sonar_host_url = "http://$System.env.SONAR_PORT_9000_TCP_ADDR:9000"
-    sonar_jdbc_url = "jdbc:mysql://$System.env.SONAR_DB_PORT_3306_TCP_ADDR:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
+    sonar_host_url = "http://$System.env.SONAR_HOST:9000"
     metadata = "https://s3-eu-west-1.amazonaws.com/maven.sequenceiq.com/releases/com/sequenceiq/cloudbreak/maven-metadata.xml"
+    sonar_host_user = "$System.env.SONAR_USER"
+    sonar_host_password = "$System.env.SONAR_PASSWORD"
   }
 
   local {
     sonar_host_url = "http://localhost:9000"
-    sonar_jdbc_url = "jdbc:mysql://localhost:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
     metadata = "https://s3-eu-west-1.amazonaws.com/maven.sequenceiq.com/releases/com/sequenceiq/cloudbreak/maven-metadata.xml"
+    sonar_host_user = "$System.env.SONAR_USER"
+    sonar_host_password = "$System.env.SONAR_PASSWORD"
   }
 }
