@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils.processTemplateIntoString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.io.IOException;
@@ -14,6 +13,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -56,10 +56,11 @@ public class CloudFormationTemplateBuilder {
         model.put("instanceGroups", awsGroupViews);
         model.put("existingVPC", context.existingVPC);
         model.put("existingIGW", context.existingIGW);
-        model.put("existingSubnet", isNoneEmpty(context.existingSubnetCidr));
+        model.put("existingSubnet", !isNullOrEmptyList(context.existingSubnetCidr));
         model.put("enableInstanceProfile", context.enableInstanceProfile || context.s3RoleAvailable);
         model.put("existingRole", context.s3RoleAvailable);
-        model.put("cbSubnet", isBlank(context.existingSubnetCidr) ? context.stack.getNetwork().getSubnet().getCidr() : context.existingSubnetCidr);
+        model.put("cbSubnet", (isNullOrEmptyList(context.existingSubnetCidr)) ? Lists.newArrayList(context.stack.getNetwork().getSubnet().getCidr())
+                : context.existingSubnetCidr);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
@@ -75,6 +76,10 @@ public class CloudFormationTemplateBuilder {
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process CloudFormation freemarker template", e);
         }
+    }
+
+    private boolean isNullOrEmptyList(List<?> list) {
+        return list == null || list.isEmpty();
     }
 
     public boolean areDedicatedInstancesRequested(CloudStack cloudStack) {
@@ -104,7 +109,7 @@ public class CloudFormationTemplateBuilder {
         private String snapshotId;
         private boolean existingVPC;
         private boolean existingIGW;
-        private String existingSubnetCidr;
+        private List<String> existingSubnetCidr;
         private boolean mapPublicIpOnLaunch;
         private String templatePath;
         private boolean enableInstanceProfile;
@@ -135,7 +140,7 @@ public class CloudFormationTemplateBuilder {
             return this;
         }
 
-        public ModelContext withExistingSubnetCidr(String cidr) {
+        public ModelContext withExistingSubnetCidr(List<String> cidr) {
             this.existingSubnetCidr = cidr;
             return this;
         }

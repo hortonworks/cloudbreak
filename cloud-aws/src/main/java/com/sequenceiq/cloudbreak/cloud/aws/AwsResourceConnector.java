@@ -64,6 +64,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -136,7 +137,7 @@ public class AwsResourceConnector implements ResourceConnector {
         boolean existingIGW = awsNetworkView.isExistingIGW();
         boolean s3RoleAvailable = awsInstanceProfileView.isS3RoleAvailable();
         boolean enableInstanceProfile = awsInstanceProfileView.isEnableInstanceProfileStrategy();
-        String existingSubnetCidr = existingSubnet ? getExistingSubnetCidr(ac, stack) : null;
+        List<String> existingSubnetCidr = existingSubnet ? getExistingSubnetCidr(ac, stack) : null;
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
         AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
@@ -144,7 +145,7 @@ public class AwsResourceConnector implements ResourceConnector {
         boolean mapPublicIpOnLaunch = true;
         if (existingVPC && existingSubnet) {
             DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
-            describeSubnetsRequest.setSubnetIds(Collections.singletonList(awsNetworkView.getExistingSubnet()));
+            describeSubnetsRequest.setSubnetIds(awsNetworkView.getSubnetList());
             DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(describeSubnetsRequest);
             if (!describeSubnetsResult.getSubnets().isEmpty()) {
                 mapPublicIpOnLaunch = describeSubnetsResult.getSubnets().get(0).isMapPublicIpOnLaunch();
@@ -286,16 +287,20 @@ public class AwsResourceConnector implements ResourceConnector {
         return parameters;
     }
 
-    private String getExistingSubnetCidr(AuthenticatedContext ac, CloudStack stack) {
+    private List<String> getExistingSubnetCidr(AuthenticatedContext ac, CloudStack stack) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
-        DescribeSubnetsRequest subnetsRequest = new DescribeSubnetsRequest().withSubnetIds(awsNetworkView.getExistingSubnet());
+        DescribeSubnetsRequest subnetsRequest = new DescribeSubnetsRequest().withSubnetIds(awsNetworkView.getSubnetList());
         List<Subnet> subnets = ec2Client.describeSubnets(subnetsRequest).getSubnets();
         if (subnets.isEmpty()) {
             throw new CloudConnectorException("The specified subnet does not exist (maybe it's in a different region).");
         }
-        return subnets.get(0).getCidrBlock();
+        List<String> cidrs = Lists.newArrayList();
+        for (Subnet subnet : subnets) {
+            cidrs.add(subnet.getCidrBlock());
+        }
+        return cidrs;
     }
 
     private String getRootDeviceName(AuthenticatedContext ac, CloudStack cloudStack) {

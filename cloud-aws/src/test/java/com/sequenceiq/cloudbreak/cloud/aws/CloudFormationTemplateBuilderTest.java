@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,9 +13,11 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.hamcrest.Matchers.containsString;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -34,8 +36,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-
-import static org.hamcrest.core.IsNot.not;
 
 import freemarker.template.Configuration;
 
@@ -112,7 +112,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -141,7 +141,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -175,7 +175,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -209,7 +209,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -243,7 +243,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -277,7 +277,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -311,7 +311,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -345,7 +345,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -379,7 +379,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -413,7 +413,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -447,7 +447,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -481,7 +481,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -515,7 +515,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -549,7 +549,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -583,7 +583,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -617,7 +617,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
@@ -651,7 +651,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withSnapshotId(snapshotId)
                 .withExistingVpc(existingVPC)
                 .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
+                .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
