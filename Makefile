@@ -34,11 +34,11 @@ endif
 
 	echo VERSION=$(VERSION)
 
-build: bindata
+build: bindata ## Creates linux an osx binaries in "build/$OS"
 	mkdir -p build/Linux  && GOOS=linux  go build -ldflags $(FLAGS) -o build/Linux/$(BINARYNAME)
 	mkdir -p build/Darwin && GOOS=darwin go build -ldflags $(FLAGS) -o build/Darwin/$(BINARYNAME)
 
-create-snapshot-tgz:
+create-snapshot-tgz: ## Creates snapshot tgz from binaries into snapshot dir
 	rm -rf snapshots
 	mkdir -p snapshots
 
@@ -59,17 +59,17 @@ upload-snapshot: create-snapshot-tgz
 dev: bindata
 	go build -ldflags $(FLAGS) -o /usr/local/bin/$(BINARYNAME)
 
-dev-debug:
+dev-debug: ## Installs dev version into /usr/local/bin. bash scripts are linked, so changes are effective without new build
 	go-bindata -debug=true include .deps/bin
 	go build -ldflags $(FLAGS) -o /usr/local/bin/$(BINARYNAME)
 
 bindata:
 	go-bindata include .deps/bin
 
-install: build
+install: build ## Installs OS specific binary into: /usr/local/bin
 	install build/$(shell uname -s)/$(BINARYNAME) /usr/local/bin
 
-deps:
+deps: ## Installs required cli tools (only needed for new envs)
 	go get -u github.com/jteeuwen/go-bindata/...
 	go get -u github.com/progrium/gh-release/...
 	go get github.com/progrium/basht
@@ -150,4 +150,12 @@ circleci:
 clean:
 	rm -rf build release
 
-.PHONY: build release generate-aws-json
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: build release generate-aws-json help
+
+.DEFAULT_GOAL := help
+
+
+
