@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -104,7 +105,8 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     }
 
     private Cluster provideViewDefinitions(Cluster source) {
-        if (source.getAttributes().getValue() == null || ambariViewProvider.isViewDefinitionNotProvided(source)) {
+        if ((source.getAttributes().getValue() == null || ambariViewProvider.isViewDefinitionNotProvided(source))
+                && !Strings.isNullOrEmpty(source.getAmbariIp())) {
             try {
                 HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(source.getStack().getId(), source.getAmbariIp());
                 AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, source.getStack().getGatewayPort(),
