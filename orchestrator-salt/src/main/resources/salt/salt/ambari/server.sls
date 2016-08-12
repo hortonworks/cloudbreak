@@ -11,15 +11,16 @@ haveged:
     - enable: True
 
 ambari-server:
-  pkg.latest:
+  pkg.installed:
     - require:
       - sls: ambari.repo
+    - version: {{ ambari.version }}
 
 {% endif %}
 
 {% if ambari.ambari_database.vendor == 'mysql' %}
 install-mariadb:
-  pkg.latest:
+  pkg.installed:
     - pkgs:
       - mariadb
 {% endif %}
