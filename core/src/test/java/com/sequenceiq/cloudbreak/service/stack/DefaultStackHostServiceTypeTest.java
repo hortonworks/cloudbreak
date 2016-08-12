@@ -183,6 +183,15 @@ public class DefaultStackHostServiceTypeTest {
         underTest.updateStatus(1L, StatusRequest.STOPPED);
     }
 
+    @Test(expected = BadRequestException.class)
+    public void updateStatusTestStopWhenClusterAndStackAvailableAndSpotInstancesThenBadRequestExceptionDropping() {
+        Stack stack = TestUtil.setSpotInstances(TestUtil.stack(AVAILABLE, TestUtil.awsCredential()));
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
+        given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
+        given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        underTest.updateStatus(1L, StatusRequest.STOPPED);
+    }
+
     private Stack stack(Status stackStatus, Status clusterStatus) {
         Credential gcpCredential = new Credential();
         Stack stack = new Stack();

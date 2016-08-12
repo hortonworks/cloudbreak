@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
@@ -621,17 +622,23 @@ public class Stack implements ProvisionEntity {
                 || DELETE_IN_PROGRESS.equals(status);
     }
 
-    public boolean infrastructureIsEphemeral() {
-        boolean ephemeral = false;
+    public StopRestrictionReason isInfrastructureStoppable() {
+        StopRestrictionReason reason = StopRestrictionReason.NONE;
         if ("AWS".equals(cloudPlatform())) {
             for (InstanceGroup instanceGroup : instanceGroups) {
                 if ("ephemeral".equals(instanceGroup.getTemplate().getVolumeType())) {
-                    ephemeral = true;
+                    reason = StopRestrictionReason.EPHEMERAL_VOLUMES;
                     break;
+                } else {
+                    Json attributes = instanceGroup.getTemplate().getAttributes();
+                    if ((attributes != null) && (attributes.getMap().containsKey("spotPrice"))) {
+                        reason = StopRestrictionReason.SPOT_INSTANCES;
+                        break;
+                    }
                 }
             }
         }
-        return ephemeral;
+        return reason;
     }
 
     public Long getCreated() {
