@@ -6,7 +6,7 @@
     - template: jinja
 
 install_kerberos:
-  pkg.latest:
+  pkg.installed:
     - pkgs:
       - krb5-server
       - krb5-libs
