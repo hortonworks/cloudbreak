@@ -7,9 +7,10 @@ include:
   - ambari.repo
 
 ambari-agent:
-  pkg.latest:
+  pkg.installed:
     - require:
       - sls: ambari.repo
+    - version: {{ ambari.version }}
 
 {% else %}
 

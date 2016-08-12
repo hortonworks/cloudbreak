@@ -11,9 +11,10 @@ haveged:
     - enable: True
 
 ambari-server:
-  pkg.latest:
+  pkg.installed:
     - require:
       - sls: ambari.repo
+    - version: {{ ambari.version }}
 
 {% endif %}
 
