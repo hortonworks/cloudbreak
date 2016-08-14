@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
@@ -366,13 +367,14 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void stop(Stack stack, Cluster cluster) {
+        StopRestrictionReason reason = stack.isInfrastructureStoppable();
         if (cluster.isStopped()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_STOP_IGNORED.code());
             LOGGER.info(statusDesc);
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
-        } else if (stack.infrastructureIsEphemeral()) {
+        } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
-                    String.format("Cannot stop a cluster '%s' if the volumeType is Ephemeral.", cluster.getId()));
+                    String.format("Cannot stop a cluster '%s'. Reason: %s", cluster.getId(), reason.getReason()));
         } else if (!cluster.isClusterReadyForStop() && !cluster.isStopFailed()) {
             throw new BadRequestException(
                     String.format("Cannot update the status of cluster '%s' to STOPPED, because it isn't in AVAILABLE state.", cluster.getId()));

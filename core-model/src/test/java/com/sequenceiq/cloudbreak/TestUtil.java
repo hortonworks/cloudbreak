@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -577,5 +578,16 @@ public class TestUtil {
         resource.setResourceName("testResource");
         resource.setResourceType(ResourceType.GCP_INSTANCE);
         return resource;
+    }
+
+    public static Stack setSpotInstances(Stack stack) {
+        if (stack.cloudPlatform().equals(AWS)) {
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                (instanceGroup.getTemplate()).setAttributes(new JsonToString().convertToEntityAttribute(
+                        "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false,\"spotPrice\":0.04}"));
+            }
+        }
+        return stack;
+
     }
 }

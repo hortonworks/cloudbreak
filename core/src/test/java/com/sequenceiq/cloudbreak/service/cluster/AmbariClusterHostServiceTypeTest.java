@@ -128,6 +128,21 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test(expected = BadRequestException.class)
+    public void testStopWhenAwsHasSpotInstances() {
+        cluster = TestUtil.cluster(TestUtil.blueprint(), TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential()), 1L);
+        cluster.getStack().setCloudPlatform("AWS");
+        stack = TestUtil.setSpotInstances(cluster.getStack());
+        cluster.setStatus(Status.AVAILABLE);
+        cluster.setStack(stack);
+        stack.setCluster(cluster);
+
+        when(stackService.get(anyLong())).thenReturn(stack);
+        when(stackService.getById(anyLong())).thenReturn(stack);
+
+        underTest.updateStatus(1L, StatusRequest.STOPPED);
+    }
+
+    @Test(expected = BadRequestException.class)
     public void testRetrieveClusterJsonWhenClusterJsonIsNull() throws HttpResponseException {
         // GIVEN
         doReturn(ambariClient).when(ambariClientProvider).getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class));

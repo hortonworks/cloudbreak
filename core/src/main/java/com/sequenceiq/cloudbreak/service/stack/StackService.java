@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
+import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -378,13 +379,14 @@ public class StackService {
             String message = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_REQUESTED.code());
             eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), message);
         } else {
+            StopRestrictionReason reason = stack.isInfrastructureStoppable();
             if (stack.isStopped()) {
                 String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
                 LOGGER.info(statusDesc);
                 eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
-            } else if (stack.infrastructureIsEphemeral()) {
+            } else if (reason != StopRestrictionReason.NONE) {
                 throw new BadRequestException(
-                        String.format("Cannot stop a stack '%s' if the volumeType is Ephemeral.", stack.getId()));
+                        String.format("Cannot stop a stack '%s'. Reason: %s", stack.getId(), reason.getReason()));
             } else if (!stack.isAvailable() && !stack.isStopFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
