@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
@@ -155,6 +156,8 @@ public class AmbariClusterConnector {
     private ZeppelinConfigProvider zeppelinConfigProvider;
     @Inject
     private RDSConfigProvider rdsConfigProvider;
+    @Inject
+    private AutoRecoveryConfigProvider autoRecoveryConfigProvider;
     @Inject
     private ImageService imageService;
     @Inject
@@ -254,6 +257,7 @@ public class AmbariClusterConnector {
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, rdsConfigProvider.getConfigs(rdsConfig), true);
             blueprintText = blueprintProcessor.removeComponentFromBlueprint("MYSQL_SERVER", blueprintText);
         }
+        blueprintText = autoRecoveryConfigProvider.addToBlueprint(blueprintText);
         return blueprintText;
     }
 

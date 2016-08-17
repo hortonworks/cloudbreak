@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class JacksonBlueprintProcessor implements BlueprintProcessor {
 
     private static final String CONFIGURATIONS_NODE = "configurations";
+    private static final String SETTINGS_NODE = "settings";
     private static final String HOST_GROUPS_NODE = "host_groups";
     private static final String BLUEPRINTS = "Blueprints";
     private static final String STACK_VERSION = "stack_version";
@@ -44,6 +45,31 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
                     } else {
                         ((ObjectNode) configFileNode).put(configurationEntry.getKey(), configurationEntry.getValue());
                     }
+                }
+            }
+            return JsonUtil.writeValueAsString(root);
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to add config entries to original blueprint.", e);
+        }
+    }
+
+    @Override
+    public String addSettingsEntries(String originalBlueprint, List<BlueprintConfigurationEntry> configurationEntries, boolean override) {
+        try {
+            ObjectNode root = (ObjectNode) JsonUtil.readTree(originalBlueprint);
+            JsonNode configurationsNode = root.path(SETTINGS_NODE);
+            if (configurationsNode.isMissingNode()) {
+                configurationsNode = root.putArray(SETTINGS_NODE);
+            }
+            ArrayNode configurationsArrayNode = (ArrayNode) configurationsNode;
+            for (BlueprintConfigurationEntry configurationEntry : configurationEntries) {
+                JsonNode configFileNode = configurationsArrayNode.findPath(configurationEntry.getConfigFile());
+                if (override || configFileNode.findPath(configurationEntry.getKey()).isMissingNode()) {
+                    if (configFileNode.isMissingNode()) {
+                        ObjectNode arrayElementNode = configurationsArrayNode.addObject();
+                        configFileNode = arrayElementNode.putObject(configurationEntry.getConfigFile());
+                    }
+                    ((ObjectNode) configFileNode).put(configurationEntry.getKey(), configurationEntry.getValue());
                 }
             }
             return JsonUtil.writeValueAsString(root);
