@@ -43,8 +43,8 @@
       "Description" : "Id of the Subnet within the existing VPC where to deploy the cluster",
       "Type" : "String",
       "MinLength": "15",
-      "MaxLength": "15",
-      "AllowedPattern" : "subnet-[a-z0-9]{8}"
+      "MaxLength": "255",
+      "AllowedPattern" : "subnet-[a-z0-9]{8}(?:,subnet-[a-z0-9]{8})*"
     },
     </#if>
 
@@ -120,8 +120,8 @@
   <#if !existingVPC>
   "Mappings" : {
     "SubnetConfig" : {
-      "VPC"     : { "CIDR" : "${cbSubnet}" },
-      "Public"  : { "CIDR" : "${cbSubnet}" }
+      "VPC"     : { "CIDR" : "${cbSubnet?first}" },
+      "Public"  : { "CIDR" : "${cbSubnet?first}" }
     }
   },
   </#if>
@@ -379,9 +379,11 @@
                 { "IpProtocol" : "${r.protocol}", "FromPort" : "${p}", "ToPort" : "${p}", "CidrIp" : "${r.cidr}"} ,
             </#list>
 		  </#list>
-		  { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "${cbSubnet}"} ,
-          { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${cbSubnet}"} ,
-          { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${cbSubnet}"}
+          <#list cbSubnet as s>
+                { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "${s}"} ,
+                { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${s}"} ,
+                { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${s}"}<#if (s_index + 1) != cbSubnet?size> ,</#if>
+          </#list>
         ]
       }
     }

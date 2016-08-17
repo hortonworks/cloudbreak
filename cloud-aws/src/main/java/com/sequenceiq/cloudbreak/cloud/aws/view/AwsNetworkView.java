@@ -2,6 +2,10 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
+import java.util.Arrays;
+import java.util.List;
+
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 public class AwsNetworkView {
@@ -30,6 +34,14 @@ public class AwsNetworkView {
 
     public String getExistingSubnet() {
         return network.getStringParameter(SUBNET);
+    }
+
+    public boolean isSubnetList() {
+        return getExistingSubnet().contains(",");
+    }
+
+    public List<String> getSubnetList() {
+        return isSubnetList() ? Arrays.asList(getExistingSubnet().split(",")) : Lists.newArrayList(getExistingSubnet());
     }
 
     public String getExistingIGW() {
