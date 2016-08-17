@@ -8,6 +8,8 @@ public interface BlueprintProcessor {
 
     String addConfigEntries(String originalBlueprint, List<BlueprintConfigurationEntry> properties, boolean override);
 
+    String addSettingsEntries(String originalBlueprint, List<BlueprintConfigurationEntry> properties, boolean override);
+
     Set<String> getComponentsInHostGroup(String blueprintText, String hostGroup);
 
     boolean componentExistsInBlueprint(String component, String blueprintText);
