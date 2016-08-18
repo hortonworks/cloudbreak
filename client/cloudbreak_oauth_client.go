@@ -11,6 +11,11 @@ import (
 	"crypto/tls"
 	"net"
 	"time"
+	"fmt"
+	"net/url"
+"errors"
+	"regexp"
+"strings"
 )
 
 // This is nearly identical with http.DefaultTransport
@@ -34,10 +39,31 @@ func NewOAuth2HTTPClient(formats strfmt.Registry) *Cloudbreak {
 		formats = strfmt.Default
 	}
 	transport := httptransport.New("192.168.99.100", "/cb/api/v1", []string{"https"})
-
-	token := GetToken("https://192.168.99.100/identity/oauth/authorize", "admin@example.com", "cloudbreak", "cloudbreak_shell")
+	token := getOAuth2Token("https://192.168.99.100/identity/oauth/authorize", "admin@example.com", "cloudbreak", "cloudbreak_shell")
 	transport.DefaultAuthentication = httptransport.BearerToken(token)
 
 	transport.Transport = TransportConfig
 	return New(transport, formats)
+}
+
+func getOAuth2Token(identityUrl string, username string, password string, clientId string) string {
+	form := url.Values{"credentials": {fmt.Sprintf(`{"username":"%s","password":"%s"}`, username, password)}}
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s?response_type=token&client_id=%s", identityUrl, clientId), strings.NewReader(form.Encode()))
+	req.Header.Add("Accept", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{
+		Transport: TransportConfig,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return errors.New("Don't redirect!")
+		},
+	}
+
+	resp, _ := client.Do(req)
+	location := resp.Header.Get("Location")
+	regexp := regexp.MustCompile("access_token=(.*)&expires_in")
+	tokenBytes := regexp.Find([]byte(location))
+	tokenString := string(tokenBytes)
+	token := tokenString[13 : len(tokenString)-11]
+	return token
 }
