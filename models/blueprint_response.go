@@ -6,7 +6,7 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-swagger/go-swagger/strfmt"
+	"github.com/go-swagger/go-swagger/strfmt"
 	"github.com/go-swagger/go-swagger/swag"
 
 	"github.com/go-swagger/go-swagger/errors"
@@ -18,12 +18,6 @@ import (
 swagger:model BlueprintResponse
 */
 type BlueprintResponse struct {
-
-	/* ambari blueprint JSON, set this or the url field
-
-	Required: true
-	*/
-	AmbariBlueprint string `json:"ambariBlueprint"`
 
 	/* gathered from blueprintName field from the blueprint JSON
 	 */
@@ -65,11 +59,6 @@ type BlueprintResponse struct {
 func (m *BlueprintResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAmbariBlueprint(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateDescription(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -88,15 +77,6 @@ func (m *BlueprintResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *BlueprintResponse) validateAmbariBlueprint(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("ambariBlueprint", "body", string(m.AmbariBlueprint)); err != nil {
-		return err
-	}
-
 	return nil
 }
 

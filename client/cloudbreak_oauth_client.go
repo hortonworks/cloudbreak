@@ -7,7 +7,6 @@ import (
 	httptransport "github.com/go-swagger/go-swagger/httpkit/client"
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
-
 )
 
 // Default cloudbreak HTTP client.
@@ -21,5 +20,3 @@ func NewOAuth2HTTPClient(formats strfmt.Registry) *Cloudbreak {
 	transport := httptransport.New("localhost:9091", "/cb/api/v1", []string{"http"})
 	return New(transport, formats)
 }
-
-

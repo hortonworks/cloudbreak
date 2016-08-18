@@ -231,7 +231,7 @@ func (a *Client) GetPublics(params *GetPublicsParams, authInfo *client.AuthInfoW
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &GetPublicsReader{formats: a.formats},
-		AuthInfo:	    *authInfo,
+		AuthInfo:           *authInfo,
 	})
 	if err != nil {
 		return nil, err
