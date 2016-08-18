@@ -34,6 +34,19 @@ endif
 
 	echo VERSION=$(VERSION)
 
+update-container-versions:
+	sed -i "0,/DOCKER_TAG_PERISCOPE/ s/DOCKER_TAG_PERISCOPE .*/DOCKER_TAG_PERISCOPE $(CB_VERSION)/" include/cloudbreak.bash
+	sed -i "0,/DOCKER_TAG_CLOUDBREAK/  s/DOCKER_TAG_CLOUDBREAK .*/DOCKER_TAG_CLOUDBREAK $(CB_VERSION)/" include/cloudbreak.bash
+	sed -i "0,/DOCKER_TAG_ULUWATU/ s/DOCKER_TAG_ULUWATU .*/DOCKER_TAG_ULUWATU $(CB_VERSION)/" include/cloudbreak.bash
+	sed -i "0,/DOCKER_TAG_SULTANS/ s/DOCKER_TAG_SULTANS .*/DOCKER_TAG_SULTANS $(CB_VERSION)/" include/cloudbreak.bash
+	sed -i "0,/DOCKER_TAG_CLOUDBREAK_SHELL/ s/DOCKER_TAG_CLOUDBREAK_SHELL .*/DOCKER_TAG_CLOUDBREAK_SHELL $(CB_VERSION)/" include/cloudbreak.bash
+
+push-container-versions: update-container-versions
+	git add include/cloudbreak.bash
+	git commit -m "Updated container versions to $(CB_VERSION)"
+	git tag $(CB_VERSION)
+	git push origin HEAD:$(GIT_BRANCH) --tags
+
 build: bindata ## Creates linux an osx binaries in "build/$OS"
 	mkdir -p build/Linux  && GOOS=linux  go build -ldflags $(FLAGS) -o build/Linux/$(BINARYNAME)
 	mkdir -p build/Darwin && GOOS=darwin go build -ldflags $(FLAGS) -o build/Darwin/$(BINARYNAME)
