@@ -13,6 +13,18 @@ import (
 	"time"
 )
 
+// This is nearly identical with http.DefaultTransport
+var TransportConfig = &http.Transport{
+	Proxy: http.ProxyFromEnvironment,
+	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	Dial: (&net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}).Dial,
+	TLSHandshakeTimeout: 10 * time.Second,
+	ExpectContinueTimeout: 1 * time.Second,
+}
+
 // Default cloudbreak HTTP client.
 var DefaultOAuth2 = NewOAuth2HTTPClient(nil)
 
@@ -23,21 +35,9 @@ func NewOAuth2HTTPClient(formats strfmt.Registry) *Cloudbreak {
 	}
 	transport := httptransport.New("192.168.99.100", "/cb/api/v1", []string{"https"})
 
-	token := GetToken("http://192.168.99.100:8089/oauth/authorize", "admin@example.com", "cloudbreak", "cloudbreak_shell")
+	token := GetToken("https://192.168.99.100/identity/oauth/authorize", "admin@example.com", "cloudbreak", "cloudbreak_shell")
 	transport.DefaultAuthentication = httptransport.BearerToken(token)
 
-	// This is nearly identical with http.DefaultTransport
-	tr := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		Dial: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).Dial,
-		TLSHandshakeTimeout: 10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-	}
-
-	transport.Transport = tr
+	transport.Transport = TransportConfig
 	return New(transport, formats)
 }

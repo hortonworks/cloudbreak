@@ -16,6 +16,7 @@ func GetToken(identityUrl string, username string, password string, clientId str
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	client := &http.Client{
+		Transport: TransportConfig,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return errors.New("Don't redirect!")
 		},
