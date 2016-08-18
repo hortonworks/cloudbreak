@@ -13,9 +13,9 @@ import (
 	"time"
 	"fmt"
 	"net/url"
-"errors"
+	"errors"
 	"regexp"
-"strings"
+	"strings"
 )
 
 // This is nearly identical with http.DefaultTransport
@@ -30,20 +30,14 @@ var TransportConfig = &http.Transport{
 	ExpectContinueTimeout: 1 * time.Second,
 }
 
-// Default cloudbreak HTTP client.
-var DefaultOAuth2 = NewOAuth2HTTPClient(nil)
-
 // NewHTTPClient creates a new cloudbreak HTTP client.
-func NewOAuth2HTTPClient(formats strfmt.Registry) *Cloudbreak {
-	if formats == nil {
-		formats = strfmt.Default
-	}
-	transport := httptransport.New("192.168.99.100", "/cb/api/v1", []string{"https"})
-	token := getOAuth2Token("https://192.168.99.100/identity/oauth/authorize", "admin@example.com", "cloudbreak", "cloudbreak_shell")
+func NewOAuth2HTTPClient(address string, username string, password string) *Cloudbreak {
+	transport := httptransport.New(address, "/cb/api/v1", []string{"https"})
+	token := getOAuth2Token("https://" + address + "/identity/oauth/authorize", username, password, "cloudbreak_shell")
 	transport.DefaultAuthentication = httptransport.BearerToken(token)
 
 	transport.Transport = TransportConfig
-	return New(transport, formats)
+	return New(transport, strfmt.Default)
 }
 
 func getOAuth2Token(identityUrl string, username string, password string, clientId string) string {
@@ -64,6 +58,6 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 	regexp := regexp.MustCompile("access_token=(.*)&expires_in")
 	tokenBytes := regexp.Find([]byte(location))
 	tokenString := string(tokenBytes)
-	token := tokenString[13 : len(tokenString)-11]
+	token := tokenString[13 : len(tokenString) - 11]
 	return token
 }

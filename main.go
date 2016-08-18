@@ -12,7 +12,7 @@ import (
 func main() {
 
 	// create the API client
-	client := apiclient.DefaultOAuth2
+	client := apiclient.NewOAuth2HTTPClient("192.168.99.100", "admin@example.com", "cloudbreak")
 
 	// make the request to get all items
 	resp, err := client.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
