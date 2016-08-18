@@ -4,19 +4,17 @@ import (
 	"log"
 	"fmt"
 
-	"github.com/sequenceiq/hdc-cli/client/greeting"
+	"github.com/sequenceiq/hdc-cli/client/blueprints"
 
 	apiclient "github.com/sequenceiq/hdc-cli/client"
 )
 
 func main() {
 
-	name := "TestName"
-	gr := greeting.GreetingParams{Name: &name}
 	// make the request to get all items
-	resp, err := apiclient.Default.Greeting.Greeting(&gr)
+	resp, err := apiclient.DefaultOAuth2.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%#v\n", *resp.Payload.Content)
+	fmt.Printf("%#v\n", resp.Payload)
 }
