@@ -18,5 +18,8 @@ func NewOAuth2HTTPClient(formats strfmt.Registry) *Cloudbreak {
 		formats = strfmt.Default
 	}
 	transport := httptransport.New("localhost:9091", "/cb/api/v1", []string{"http"})
+	token := GetToken("http://192.168.99.100:8089/oauth/authorize", "admin@example.com", "cloudbreak", "cloudbreak_shell")
+	bearerTokenAuth := httptransport.BearerToken(token)
+	transport.DefaultAuthentication = bearerTokenAuth
 	return New(transport, formats)
 }
