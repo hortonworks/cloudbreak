@@ -7,6 +7,10 @@ import (
 	httptransport "github.com/go-swagger/go-swagger/httpkit/client"
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
+	"net/http"
+	"crypto/tls"
+	"net"
+	"time"
 )
 
 // Default cloudbreak HTTP client.
@@ -17,9 +21,23 @@ func NewOAuth2HTTPClient(formats strfmt.Registry) *Cloudbreak {
 	if formats == nil {
 		formats = strfmt.Default
 	}
-	transport := httptransport.New("localhost:9091", "/cb/api/v1", []string{"http"})
+	transport := httptransport.New("192.168.99.100", "/cb/api/v1", []string{"https"})
+
 	token := GetToken("http://192.168.99.100:8089/oauth/authorize", "admin@example.com", "cloudbreak", "cloudbreak_shell")
-	bearerTokenAuth := httptransport.BearerToken(token)
-	transport.DefaultAuthentication = bearerTokenAuth
+	transport.DefaultAuthentication = httptransport.BearerToken(token)
+
+	// This is nearly identical with http.DefaultTransport
+	tr := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		Dial: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
+		TLSHandshakeTimeout: 10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+
+	transport.Transport = tr
 	return New(transport, formats)
 }
