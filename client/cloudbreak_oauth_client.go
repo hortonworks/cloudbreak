@@ -6,34 +6,34 @@ package client
 import (
 	httptransport "github.com/go-swagger/go-swagger/httpkit/client"
 
-	strfmt "github.com/go-swagger/go-swagger/strfmt"
-	"net/http"
 	"crypto/tls"
-	"net"
-	"time"
-	"fmt"
-	"net/url"
 	"errors"
+	"fmt"
+	strfmt "github.com/go-swagger/go-swagger/strfmt"
+	"net"
+	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // This is nearly identical with http.DefaultTransport
 var TransportConfig = &http.Transport{
-	Proxy: http.ProxyFromEnvironment,
+	Proxy:           http.ProxyFromEnvironment,
 	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	Dial: (&net.Dialer{
 		Timeout:   30 * time.Second,
 		KeepAlive: 30 * time.Second,
 	}).Dial,
-	TLSHandshakeTimeout: 10 * time.Second,
+	TLSHandshakeTimeout:   10 * time.Second,
 	ExpectContinueTimeout: 1 * time.Second,
 }
 
 // NewHTTPClient creates a new cloudbreak HTTP client.
 func NewOAuth2HTTPClient(address string, username string, password string) *Cloudbreak {
 	transport := httptransport.New(address, "/cb/api/v1", []string{"https"})
-	token := getOAuth2Token("https://" + address + "/identity/oauth/authorize", username, password, "cloudbreak_shell")
+	token := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
 	transport.DefaultAuthentication = httptransport.BearerToken(token)
 
 	transport.Transport = TransportConfig
@@ -58,6 +58,6 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 	regexp := regexp.MustCompile("access_token=(.*)&expires_in")
 	tokenBytes := regexp.Find([]byte(location))
 	tokenString := string(tokenBytes)
-	token := tokenString[13 : len(tokenString) - 11]
+	token := tokenString[13 : len(tokenString)-11]
 	return token
 }

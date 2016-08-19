@@ -1,26 +1,35 @@
 package main
 
 import (
-	"fmt"
-	"log"
-
-	"github.com/sequenceiq/hdc-cli/client/blueprints"
-
-	apiclient "github.com/sequenceiq/hdc-cli/client"
+	hdc "github.com/sequenceiq/hdc-cli/cli"
+	"github.com/urfave/cli"
+	"os"
 )
 
 func main() {
 
-	// create the API client
-	client := apiclient.NewOAuth2HTTPClient("192.168.99.100", "admin@example.com", "cloudbreak")
+	app := cli.NewApp()
+	app.Name = "hdc-cli"
+	app.Usage = ""
+	app.Version = "0.0.1"
+	app.Author = "Hortonworks"
 
-	// make the request to get all items
-	resp, err := client.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
-	if err != nil {
-		log.Fatal(err)
+	app.Commands = []cli.Command{
+		{
+			Name:    "configure",
+			Aliases: []string{"conf"},
+			Usage:   "configure the server address and credentials used to communicate with this server",
+			Flags:   []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Action:  hdc.Configure,
+		},
+		{
+			Name:    "blueprints",
+			Aliases: []string{"bp"},
+			Usage:   "list the available blueprints",
+			Flags:   []cli.Flag{hdc.FlCBServer},
+			Action:  hdc.ListBlueprints,
+		},
 	}
 
-	for _, v := range resp.Payload {
-		fmt.Printf("%s\n", v.Name)
-	}
+	app.Run(os.Args)
 }
