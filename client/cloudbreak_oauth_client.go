@@ -15,6 +15,9 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"github.com/ernesto-jimenez/httplogger"
+	"log"
+	"os"
 	"time"
 )
 
@@ -30,13 +33,15 @@ var TransportConfig = &http.Transport{
 	ExpectContinueTimeout: 1 * time.Second,
 }
 
+var LoggedTransportConfig = httplogger.NewLoggedTransport(TransportConfig, newLogger())
+
 // NewHTTPClient creates a new cloudbreak HTTP client.
 func NewOAuth2HTTPClient(address string, username string, password string) *Cloudbreak {
 	transport := httptransport.New(address, "/cb/api/v1", []string{"https"})
 	token := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
 	transport.DefaultAuthentication = httptransport.BearerToken(token)
 
-	transport.Transport = TransportConfig
+	transport.Transport = LoggedTransportConfig
 	return New(transport, strfmt.Default)
 }
 
@@ -47,7 +52,7 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	client := &http.Client{
-		Transport: TransportConfig,
+		Transport: LoggedTransportConfig,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return errors.New("Don't redirect!")
 		},
@@ -60,4 +65,37 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 	tokenString := string(tokenBytes)
 	token := tokenString[13 : len(tokenString)-11]
 	return token
+}
+
+type httpLogger struct {
+	log *log.Logger
+}
+
+func newLogger() *httpLogger {
+	return &httpLogger{
+		log: log.New(os.Stderr, "", log.LstdFlags),
+	}
+}
+
+func (l *httpLogger) LogRequest(req *http.Request) {
+	l.log.Printf(
+		"Request %s %s",
+		req.Method,
+		req.URL.String(),
+	)
+}
+
+func (l *httpLogger) LogResponse(req *http.Request, res *http.Response, err error, duration time.Duration) {
+	duration /= time.Millisecond
+	if err != nil {
+		l.log.Println(err)
+	} else {
+		l.log.Printf(
+			"Response method:%s status:%d duration:%dms req_url:%s",
+			req.Method,
+			res.StatusCode,
+			duration,
+			req.URL.String(),
+		)
+	}
 }
