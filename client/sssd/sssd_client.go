@@ -39,7 +39,7 @@ func (a *Client) DeleteSssdAccountName(params *DeleteSssdAccountNameParams) erro
 		PathPattern:        "/sssd/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteSssdAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteSssdID(params *DeleteSssdIDParams) error {
 		PathPattern:        "/sssd/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteSssdIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteSssdUserName(params *DeleteSssdUserNameParams) error {
 		PathPattern:        "/sssd/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteSssdUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetSssdAccount(params *GetSssdAccountParams) (*GetSssdAccountOK
 		PathPattern:        "/sssd/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetSssdAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetSssdAccountName(params *GetSssdAccountNameParams) (*GetSssdA
 		PathPattern:        "/sssd/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetSssdAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetSssdID(params *GetSssdIDParams) (*GetSssdIDOK, error) {
 		PathPattern:        "/sssd/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetSssdIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetSssdUser(params *GetSssdUserParams) (*GetSssdUserOK, error) 
 		PathPattern:        "/sssd/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetSssdUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetSssdUserName(params *GetSssdUserNameParams) (*GetSssdUserNam
 		PathPattern:        "/sssd/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetSssdUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostSssdAccount(params *PostSssdAccountParams) (*PostSssdAccoun
 		PathPattern:        "/sssd/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostSssdAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostSssdUser(params *PostSssdUserParams) (*PostSssdUserOK, erro
 		PathPattern:        "/sssd/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostSssdUserReader{formats: a.formats},
 	})

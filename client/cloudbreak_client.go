@@ -37,7 +37,7 @@ func NewHTTPClient(formats strfmt.Registry) *Cloudbreak {
 	if formats == nil {
 		formats = strfmt.Default
 	}
-	transport := httptransport.New("localhost:9091", "/cb/api/v1", []string{"http"})
+	transport := httptransport.New("localhost", "/", []string{"https", "http"})
 	return New(transport, formats)
 }
 

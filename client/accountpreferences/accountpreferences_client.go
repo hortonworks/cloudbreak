@@ -39,7 +39,7 @@ func (a *Client) Get(params *GetParams) (*GetOK, error) {
 		PathPattern:        "/accountpreferences",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) Post(params *PostParams) error {
 		PathPattern:        "/accountpreferences",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) Put(params *PutParams) error {
 		PathPattern:        "/accountpreferences",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PutReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) Validate(params *ValidateParams) error {
 		PathPattern:        "/accountpreferences/validate",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &ValidateReader{formats: a.formats},
 	})
