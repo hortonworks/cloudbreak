@@ -3,6 +3,10 @@
 	"GoVersion": "go1.6.3",
 	"Deps": [
 		{
+			"ImportPath": "github.com/ernesto-jimenez/httplogger",
+			"Rev": "86cc44f6150a7e9dca8586e425a9c73e71f8ae7d"
+		},
+		{
 			"ImportPath": "github.com/go-swagger/go-swagger/client",
 			"Comment": "0.5.0",
 			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
@@ -41,6 +45,11 @@
 			"ImportPath": "github.com/go-swagger/go-swagger/vendor/gopkg.in/yaml.v2",
 			"Comment": "0.5.0",
 			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
+		},
+		{
+			"ImportPath": "github.com/urfave/cli",
+			"Comment": "v1.18.0-47-g168c954",
+			"Rev": "168c95418e66e019fe17b8f4f5c45aa62ff80e23"
 		}
 	]
 }
