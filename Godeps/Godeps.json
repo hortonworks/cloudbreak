@@ -1,7 +1,13 @@
 {
 	"ImportPath": "github.com/sequenceiq/hdc-cli",
 	"GoVersion": "go1.7",
+	"GodepVersion": "v74",
 	"Deps": [
+		{
+			"ImportPath": "github.com/asaskevich/govalidator",
+			"Comment": "v4-12-g593d645",
+			"Rev": "593d64559f7600f29581a3ee42177f5dbded27a9"
+		},
 		{
 			"ImportPath": "github.com/ernesto-jimenez/httplogger",
 			"Rev": "86cc44f6150a7e9dca8586e425a9c73e71f8ae7d"
@@ -22,6 +28,16 @@
 			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
 		},
 		{
+			"ImportPath": "github.com/go-swagger/go-swagger/httpkit/client",
+			"Comment": "0.5.0",
+			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
+		},
+		{
+			"ImportPath": "github.com/go-swagger/go-swagger/httpkit/validate",
+			"Comment": "0.5.0",
+			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
+		},
+		{
 			"ImportPath": "github.com/go-swagger/go-swagger/strfmt",
 			"Comment": "0.5.0",
 			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
@@ -32,24 +48,21 @@
 			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
 		},
 		{
-			"ImportPath": "github.com/go-swagger/go-swagger/vendor/github.com/asaskevich/govalidator",
-			"Comment": "0.5.0",
-			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
-		},
-		{
-			"ImportPath": "github.com/go-swagger/go-swagger/vendor/golang.org/x/net/context",
-			"Comment": "0.5.0",
-			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
-		},
-		{
-			"ImportPath": "github.com/go-swagger/go-swagger/vendor/gopkg.in/yaml.v2",
-			"Comment": "0.5.0",
-			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
-		},
-		{
 			"ImportPath": "github.com/urfave/cli",
 			"Comment": "v1.18.0-47-g168c954",
 			"Rev": "168c95418e66e019fe17b8f4f5c45aa62ff80e23"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "07b51741c1d6423d4a6abab1c49940ec09cb1aaf"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context/ctxhttp",
+			"Rev": "07b51741c1d6423d4a6abab1c49940ec09cb1aaf"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "e4d366fc3c7938e2958e662b4258c7a89e1f0e3e"
 		}
 	]
 }
