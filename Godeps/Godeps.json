@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/sequenceiq/hdc-cli",
-	"GoVersion": "go1.6.3",
+	"GoVersion": "go1.7",
 	"Deps": [
 		{
 			"ImportPath": "github.com/ernesto-jimenez/httplogger",
