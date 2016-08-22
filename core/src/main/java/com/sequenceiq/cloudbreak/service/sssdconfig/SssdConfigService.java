@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 @Transactional
 public class SssdConfigService {
 
+    private static final String LOCKER = new String();
+
     @Value("${cb.sssd.name}")
     private String sssdName;
     @Value("${cb.sssd.type}")
@@ -47,7 +49,7 @@ public class SssdConfigService {
     public SssdConfig getDefaultSssdConfig(CbUser user) {
         SssdConfig config = sssdConfigRepository.findByNameInAccount(sssdName, user.getAccount());
         if (config == null) {
-            synchronized (sssdName) {
+            synchronized (LOCKER) {
                 config = sssdConfigRepository.findByNameInAccount(sssdName, user.getAccount());
                 if (config == null) {
                     config = new SssdConfig();
