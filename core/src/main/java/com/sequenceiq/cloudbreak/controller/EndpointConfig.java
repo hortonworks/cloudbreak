@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.io.IOException;
+
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
@@ -30,25 +33,41 @@ import com.sequenceiq.cloudbreak.controller.mapper.TerminationFailedExceptionMap
 import com.sequenceiq.cloudbreak.controller.mapper.TypeMismatchExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.UnsupportedOperationFailedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+
+import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.jaxrs.config.SwaggerConfigLocator;
+import io.swagger.jaxrs.config.SwaggerContextService;
+import io.swagger.jaxrs.listing.ApiListingResource;
 
 @ApplicationPath(CoreApi.API_ROOT_CONTEXT)
 //TODO find a working solution for storing response codes globally
-//@ApiResponses(value = {
-//        @ApiResponse(code = HttpStatus.SC_OK, message = "Resource retrieved successfully"),
-//        @ApiResponse(code = HttpStatus.SC_CREATED, message = "Resource created successfully"),
-//        @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Resource request validation error"),
-//        @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = "Unauthorized. Cannot access resource"),
-//        @ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden. Cannot access resource"),
-//        @ApiResponse(code = HttpStatus.SC_NOT_ACCEPTABLE, message = "Media type is not acceptable"),
-//        @ApiResponse(code = HttpStatus.SC_CONFLICT, message = "Resource updated successfully"),
-//        @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Internal server error")
-//})
 @Component
 public class EndpointConfig extends ResourceConfig {
 
-    public EndpointConfig() {
+    @Value("${info.app.version:}")
+    private String cbVersion;
+
+    public EndpointConfig() throws IOException {
         registerEndpoints();
         registerExceptionMappers();
+        registerSwagger();
+    }
+
+    private void registerSwagger() throws IOException {
+        BeanConfig swaggerConfig = new BeanConfig();
+        swaggerConfig.setTitle("Cloudbreak API");
+        swaggerConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/cloudbreak-introduction"));
+        swaggerConfig.setVersion(cbVersion);
+        swaggerConfig.setSchemes(new String[]{"http, https"});
+        swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
+        swaggerConfig.setLicense("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
+        swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api");
+        swaggerConfig.setScan(true);
+        swaggerConfig.setPrettyPrint(true);
+        SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, swaggerConfig);
+
+        packages(getClass().getPackage().getName(), ApiListingResource.class.getPackage().getName());
     }
 
     private void registerExceptionMappers() {

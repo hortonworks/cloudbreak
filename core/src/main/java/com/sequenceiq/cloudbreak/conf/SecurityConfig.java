@@ -167,6 +167,7 @@ public class SecurityConfig {
                     .antMatchers(API_ROOT_CONTEXT + "/util/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/rdsconfigs/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
+                    .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/connectors/**").permitAll()
 
                     .antMatchers(API_ROOT_CONTEXT + "/**").denyAll();

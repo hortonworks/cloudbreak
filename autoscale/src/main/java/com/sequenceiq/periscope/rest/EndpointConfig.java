@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.rest;
 
+import java.io.IOException;
+
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
@@ -27,25 +29,36 @@ import com.sequenceiq.periscope.rest.mapper.SpringBadRequestExceptionMapper;
 import com.sequenceiq.periscope.rest.mapper.TypeMismatchExceptionMapper;
 import com.sequenceiq.periscope.rest.mapper.UnsupportedOperationFailedExceptionMapper;
 import com.sequenceiq.periscope.rest.mapper.WebApplicaitonExceptionMapper;
+import com.sequenceiq.periscope.utils.FileReaderUtils;
+
+import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.jaxrs.config.SwaggerConfigLocator;
+import io.swagger.jaxrs.config.SwaggerContextService;
+import io.swagger.jaxrs.listing.ApiListingResource;
 
 @ApplicationPath(AutoscaleApi.API_ROOT_CONTEXT)
 //TODO find a working solution for storing response codes globally
-//@ApiResponses(value = {
-//        @ApiResponse(code = HttpStatus.SC_OK, message = "Resource retrieved successfully"),
-//        @ApiResponse(code = HttpStatus.SC_CREATED, message = "Resource created successfully"),
-//        @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = "Resource request validation error"),
-//        @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = "Unauthorized. Cannot access resource"),
-//        @ApiResponse(code = HttpStatus.SC_FORBIDDEN, message = "Forbidden. Cannot access resource"),
-//        @ApiResponse(code = HttpStatus.SC_NOT_ACCEPTABLE, message = "Media type is not acceptable"),
-//        @ApiResponse(code = HttpStatus.SC_CONFLICT, message = "Resource updated successfully"),
-//        @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = "Internal server error")
-//})
 @Component
 public class EndpointConfig  extends ResourceConfig {
 
-    public EndpointConfig() {
+    public EndpointConfig() throws IOException {
         registerEndpoints();
         registerExceptionMappers();
+        registerSwagger();
+    }
+
+    private void registerSwagger() throws IOException {
+        BeanConfig beanConfig = new BeanConfig();
+        beanConfig.setTitle("Auto-scaling API");
+        beanConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/auto-scaling-introduction"));
+        beanConfig.setVersion("1.4.0");
+        beanConfig.setSchemes(new String[]{"http"});
+        beanConfig.setBasePath(AutoscaleApi.API_ROOT_CONTEXT);
+        beanConfig.setResourcePackage("com.sequenceiq.periscope.api");
+        beanConfig.setScan(true);
+        SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, beanConfig);
+
+        packages(getClass().getPackage().getName(), ApiListingResource.class.getPackage().getName());
     }
 
     private void registerExceptionMappers() {
