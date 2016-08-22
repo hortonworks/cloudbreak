@@ -23,14 +23,14 @@ cloudbreak-conf-tags() {
     declare desc="Defines docker image tags"
 
     env-import DOCKER_TAG_ALPINE 3.1
-    env-import DOCKER_TAG_HAVEGED 1.1
+    env-import DOCKER_TAG_HAVEGED 1.1.0
     env-import DOCKER_TAG_TRAEFIK v1.0.0
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTGRES 9.4.1
     env-import DOCKER_TAG_POSTFIX latest
     env-import DOCKER_TAG_UAA 2.7.1
-    env-import DOCKER_TAG_UAADB v2.7.1
+    env-import DOCKER_TAG_UAADB 2.7.1
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
     env-import DOCKER_TAG_CBDB 1.2.0
