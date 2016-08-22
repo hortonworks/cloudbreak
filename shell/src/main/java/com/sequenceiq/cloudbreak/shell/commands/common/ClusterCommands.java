@@ -255,13 +255,13 @@ public class ClusterCommands implements BaseCommands {
     }
 
     @Override
-    public boolean deleteAvailable() {
-        return false;
-    }
-
-    @Override
     public String delete(Long id, String name) throws Exception {
         throw new MethodNotSupportedException("Cluster delete command not available");
+    }
+
+    @CliAvailabilityIndicator(value = {"cluster delete"})
+    public boolean deleteAvailable() {
+        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable());
     }
 
     @CliCommand(value = "cluster delete", help = "Delete the cluster by stack id")
@@ -315,7 +315,7 @@ public class ClusterCommands implements BaseCommands {
         throw new MethodNotSupportedException("Cluster list command not available");
     }
 
-    @CliAvailabilityIndicator(value = {"cluster show --id", "cluster show --name"})
+    @CliAvailabilityIndicator(value = {"cluster show", "cluster show --id", "cluster show --name"})
     @Override
     public boolean showAvailable() {
         return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable());
@@ -349,7 +349,7 @@ public class ClusterCommands implements BaseCommands {
         return show(null, name);
     }
 
-    @CliAvailabilityIndicator(value = {"cluster node"})
+    @CliAvailabilityIndicator(value = {"cluster node --ADD", "cluster node --REMOVE"})
     public boolean nodeAvailable() {
         return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable());
     }
