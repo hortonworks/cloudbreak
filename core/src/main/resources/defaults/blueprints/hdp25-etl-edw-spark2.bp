@@ -70,15 +70,9 @@
       "name": "worker",
       "configurations": [],
       "components": [
-        {
-          "name": "DATANODE"
-        },
-        {
-          "name": "METRICS_MONITOR"
-        },
-        {
-          "name": "NODEMANAGER"
-        }
+        { "name": "DATANODE" },
+        { "name": "METRICS_MONITOR" },
+        { "name": "NODEMANAGER" }
       ],
       "cardinality": "1+"
     }
