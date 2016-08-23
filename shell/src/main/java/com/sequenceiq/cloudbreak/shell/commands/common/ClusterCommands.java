@@ -376,7 +376,7 @@ public class ClusterCommands implements BaseCommands {
             String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
             cloudbreakShellUtil.checkResponse("upscaleCluster",
                     shellContext.cloudbreakClient().clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson));
-            return shellContext.getStackId();
+            return "Cluster upscale started with stack id: " + shellContext.getStackId();
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -400,7 +400,7 @@ public class ClusterCommands implements BaseCommands {
             String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
             cloudbreakShellUtil.checkResponse("downscaleCluster",
                     shellContext.cloudbreakClient().clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson));
-            return shellContext.getStackId();
+            return "Cluster downscale started with stack id: " + shellContext.getStackId();
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
