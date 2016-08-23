@@ -78,7 +78,7 @@ public class OpenStackSetup implements Setup {
     }
 
     private void verifyImage(OSClient osClient, String name) {
-        List<? extends Image> images = osClient.images().list();
+        List<? extends Image> images = osClient.images().listAll();
         for (Image image : images) {
             if (name.equalsIgnoreCase(image.getName())) {
                 return;
