@@ -18,10 +18,10 @@ endif
 
 # if on release branch dont use git revision
 ifeq ($(GIT_BRANCH), release)
-  FLAGS="-X main.Version $(VERSION)"
+  FLAGS="-X main.Version=$(VERSION)"
   VERSION=$(VERSION_FILE)
 else
-	FLAGS="-X main.Version $(VERSION) -X main.GitRevision $(GIT_REV)"
+	FLAGS="-X main.Version=$(VERSION) -X main.GitRevision=$(GIT_REV)"
 endif
 
 echo_version:
