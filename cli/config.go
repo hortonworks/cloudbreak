@@ -29,12 +29,14 @@ func (c Config) Yaml() string {
 
 func Configure(c *cli.Context) error {
 	if c.NumFlags() != 3 || len(c.String(FlCBUsername.Name)) == 0 || len(c.String(FlCBPassword.Name)) == 0 || len(c.String(FlCBServer.Name)) == 0 {
-		return cli.NewExitError(fmt.Sprintf("You need to specify all the parameters. See '%s configure --help'.", c.App.Name), 1)
+		log.Error(fmt.Sprintf("You need to specify all the parameters. See '%s configure --help'.", c.App.Name))
+		return newExitError()
 	}
 
 	err := WriteConfigToFile(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 	if err != nil {
-		return cli.NewExitError(fmt.Sprintf("[WriteConfigToFile] %s", err.Error()), 1)
+		log.Error(fmt.Sprintf("[WriteConfigToFile] %s", err.Error()))
+		return newExitError()
 	}
 	return nil
 }

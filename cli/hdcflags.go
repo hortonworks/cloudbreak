@@ -23,4 +23,8 @@ var (
 		Usage:  "password",
 		EnvVar: "CB_PASSWORD",
 	}
+	FlCBInputJson = cli.StringFlag{
+		Name:  "cli-input-json",
+		Usage: "user provided file with json content",
+	}
 )
