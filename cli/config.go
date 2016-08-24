@@ -52,8 +52,8 @@ func WriteConfigToFile(server string, username string, password string) error {
 	currentUser := GetCurrentUser()
 	log.Infof("[WriteConfigToFile] current user: %s", currentUser.Username)
 
-	hdcDir := currentUser.HomeDir + "/" + hdc_dir
-	configFile := hdcDir + "/" + config_file
+	hdcDir := currentUser.HomeDir + "/" + Hdc_dir
+	configFile := hdcDir + "/" + Config_file
 
 	if _, err := os.Stat(hdcDir); os.IsNotExist(err) {
 		log.Infof("[WriteCredentialsToFile] create dir: %s", hdcDir)
@@ -93,8 +93,8 @@ func ReadConfig() (*Config, error) {
 	currentUser := GetCurrentUser()
 	log.Infof("[ReadConfig] current user: %s", currentUser.Username)
 
-	hdcDir := currentUser.HomeDir + "/" + hdc_dir
-	configFile := hdcDir + "/" + config_file
+	hdcDir := currentUser.HomeDir + "/" + Hdc_dir
+	configFile := hdcDir + "/" + Config_file
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		return nil, err

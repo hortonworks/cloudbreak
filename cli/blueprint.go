@@ -2,20 +2,19 @@ package cli
 
 import (
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	apiclient "github.com/sequenceiq/hdc-cli/client"
 	"github.com/sequenceiq/hdc-cli/client/blueprints"
 	"github.com/urfave/cli"
-	"log"
 )
 
 func ListBlueprints(c *cli.Context) error {
-	// create the API client
 	client := apiclient.NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	// make the request to get all items
 	resp, err := client.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	for _, v := range resp.Payload {

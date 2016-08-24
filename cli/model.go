@@ -1,6 +1,6 @@
 package cli
 
 const (
-	hdc_dir     = ".hdc"
-	config_file = "config"
+	Hdc_dir     = ".hdc"
+	Config_file = "config"
 )

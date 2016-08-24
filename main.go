@@ -58,19 +58,26 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
-			Name:    "configure",
-			Aliases: []string{"conf"},
-			Usage:   "configure the server address and credentials used to communicate with this server",
-			Flags:   []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
-			Action:  hdc.Configure,
+			Name: "configure",
+			Description: fmt.Sprintf("it will save the provided server address and credential "+
+				"to %s/%s/%s", hdc.GetCurrentUser().HomeDir, hdc.Hdc_dir, hdc.Config_file),
+			Usage:  "configure the server address and credentials used to communicate with this server",
+			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Action: hdc.Configure,
 		},
 		{
-			Name:    "blueprints",
-			Aliases: []string{"bp"},
-			Usage:   "list the available blueprints",
-			Flags:   []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
-			Before:  ConfigRead,
-			Action:  hdc.ListBlueprints,
+			Name:   "list-blueprints",
+			Usage:  "list the available blueprints",
+			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Before: ConfigRead,
+			Action: hdc.ListBlueprints,
+		},
+		{
+			Name:   "list-clusters",
+			Usage:  "list the available clusters",
+			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Before: ConfigRead,
+			Action: hdc.ListClusters,
 		},
 	}
 
