@@ -79,6 +79,19 @@ func main() {
 			Before: ConfigRead,
 			Action: hdc.ListClusters,
 		},
+		{
+			Name:  "create-cluster",
+			Usage: "creates a new cluster",
+			Flags: []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Subcommands: []cli.Command{
+				{
+					Name:   "generate-cli-skeleton",
+					Action: hdc.GenerateCreateClusterSkeleton,
+				},
+			},
+			Before: ConfigRead,
+			Action: hdc.CreateCluster,
+		},
 	}
 
 	app.Run(os.Args)

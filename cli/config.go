@@ -18,7 +18,7 @@ type Config struct {
 }
 
 func (c Config) Json() string {
-	j, _ := json.Marshal(c)
+	j, _ := json.MarshalIndent(c, "", "  ")
 	return string(j)
 }
 
