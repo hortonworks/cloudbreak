@@ -3,6 +3,11 @@ package cli
 import "github.com/urfave/cli"
 
 var (
+	FlDebug = cli.BoolFlag{
+		Name:   "debug",
+		Usage:  "debug mode",
+		EnvVar: "CB_DEBUG",
+	}
 	FlCBServer = cli.StringFlag{
 		Name:   "server",
 		Usage:  "server address",

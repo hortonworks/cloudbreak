@@ -9,13 +9,12 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/ernesto-jimenez/httplogger"
 	"github.com/go-swagger/go-swagger/strfmt"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -68,17 +67,14 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 }
 
 type httpLogger struct {
-	log *log.Logger
 }
 
 func newLogger() *httpLogger {
-	return &httpLogger{
-		log: log.New(os.Stderr, "", log.LstdFlags),
-	}
+	return &httpLogger{}
 }
 
 func (l *httpLogger) LogRequest(req *http.Request) {
-	l.log.Printf(
+	log.Debugf(
 		"Request %s %s",
 		req.Method,
 		req.URL.String(),
@@ -88,9 +84,9 @@ func (l *httpLogger) LogRequest(req *http.Request) {
 func (l *httpLogger) LogResponse(req *http.Request, res *http.Response, err error, duration time.Duration) {
 	duration /= time.Millisecond
 	if err != nil {
-		l.log.Println(err)
+		log.Error(err)
 	} else {
-		l.log.Printf(
+		log.Debugf(
 			"Response method:%s status:%d duration:%dms req_url:%s",
 			req.Method,
 			res.StatusCode,

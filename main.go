@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	hdc "github.com/sequenceiq/hdc-cli/cli"
 	"github.com/urfave/cli"
-	"log"
 	"os"
 )
 
@@ -16,12 +16,12 @@ func ConfigRead(c *cli.Context) error {
 	if len(server) == 0 || len(username) == 0 || len(password) == 0 {
 		config, err := hdc.ReadConfig()
 		if err != nil {
-			log.Print(fmt.Sprintf("[ConfigRead] %s", err.Error()))
-			log.Println(fmt.Sprintf("[ConfigRead] configuration is not set, see: %s configure --help", c.App.Name))
+			log.Error(fmt.Sprintf("[ConfigRead] %s", err.Error()))
+			log.Error(fmt.Sprintf("[ConfigRead] configuration is not set, see: %s configure --help", c.App.Name))
 			return cli.NewExitError("", 1)
 		}
 
-		log.Printf("[ConfigRead] Config read from file, setting as global variable:\n%s", config.Yaml())
+		log.Infof("[ConfigRead] Config read from file, setting as global variable:\n%s", config.Yaml())
 		if len(server) == 0 {
 			c.Set(hdc.FlCBServer.Name, config.Server)
 		}
@@ -43,6 +43,19 @@ func main() {
 	app.Version = "0.0.1"
 	app.Author = "Hortonworks"
 
+	app.Flags = []cli.Flag{
+		hdc.FlDebug,
+	}
+
+	app.Before = func(c *cli.Context) error {
+		log.SetOutput(os.Stderr)
+		log.SetLevel(log.ErrorLevel)
+		if c.Bool(hdc.FlDebug.Name) {
+			log.SetLevel(log.DebugLevel)
+		}
+		return nil
+	}
+
 	app.Commands = []cli.Command{
 		{
 			Name:    "configure",
@@ -55,8 +68,8 @@ func main() {
 			Name:    "blueprints",
 			Aliases: []string{"bp"},
 			Usage:   "list the available blueprints",
-            Flags:   []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
-            Before:  ConfigRead,
+			Flags:   []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Before:  ConfigRead,
 			Action:  hdc.ListBlueprints,
 		},
 	}
