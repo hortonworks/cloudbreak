@@ -366,6 +366,11 @@ cloudbreak:
         - "ENDPOINTS_ENV_ENABLED=false"
         - "CB_ADDRESS_RESOLVING_TIMEOUT"
         - "CB_IDENTITY_SERVICEID=identity.service.consul"
+        - CB_DB_PORT_5432_TCP_ADDR
+        - CB_DB_PORT_5432_TCP_PORT
+        - CB_DB_ENV_USER
+        - CB_DB_ENV_PASS
+        - CB_DB_ENV_DB
         - "CB_DB_SERVICEID=cbdb.service.consul"
         - "CB_MAIL_SMTP_AUTH=$CLOUDBREAK_SMTP_AUTH"
         - "CB_MAIL_SMTP_STARTTLS_ENABLE=$CLOUDBREAK_SMTP_STARTTLS_ENABLE"
