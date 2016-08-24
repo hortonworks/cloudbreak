@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerClusterAvailabilityCheckerTask;
@@ -104,15 +105,18 @@ public class ClusterBootstrapper {
 
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
+        String stackOrchestratorType = stack.getOrchestrator().getType();
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stackOrchestratorType);
 
         if (orchestratorType.hostOrchestrator()) {
             bootstrapOnHost(stack);
+        } else if (OrchestratorConstants.MARATHON.equals(stackOrchestratorType)) {
+            LOGGER.info("Skipping bootstrap of the macines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
         } else if (orchestratorType.containerOrchestrator()) {
             bootstrapContainers(stack);
         } else {
-            LOGGER.error("Orchestrator not found: {}", stack.getOrchestrator().getType());
-            throw new CloudbreakException("HostOrchestrator not found: " + stack.getOrchestrator().getType());
+            LOGGER.error("Orchestrator not found: {}", stackOrchestratorType);
+            throw new CloudbreakException("HostOrchestrator not found: " + stackOrchestratorType);
         }
     }
 

@@ -134,10 +134,14 @@ public class StackToCloudStackConverter {
 
     private Network buildNetwork(Stack stack) {
         com.sequenceiq.cloudbreak.domain.Network stackNetwork = stack.getNetwork();
-        Subnet subnet = new Subnet(stackNetwork.getSubnetCIDR());
-        Json attributes = stackNetwork.getAttributes();
-        Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
-        return new Network(subnet, params);
+        Network result = null;
+        if (stackNetwork != null) {
+            Subnet subnet = new Subnet(stackNetwork.getSubnetCIDR());
+            Json attributes = stackNetwork.getAttributes();
+            Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+            result = new Network(subnet, params);
+        }
+        return result;
     }
 
     private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -107,5 +108,12 @@ public class ComponentConfigProvider {
         return components;
     }
 
-
+    public void deleteComponentsForStack(Long stackId) {
+        Set<Component> componentsByStackId = componentRepository.findComponentByStackId(stackId);
+        if (!componentsByStackId.isEmpty()) {
+            LOGGER.debug("Components({}) are going to be deleted for stack: {}", componentsByStackId.size(), stackId);
+            componentRepository.delete(componentsByStackId);
+            LOGGER.debug("Components({}) have been deleted for stack : {}", componentsByStackId.size(), stackId);
+        }
+    }
 }
