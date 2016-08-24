@@ -10,7 +10,7 @@ import (
 
 func ListBlueprints(c *cli.Context) error {
 	// create the API client
-	client := apiclient.NewOAuth2HTTPClient(c.String(FlCBServer.Name), "admin@example.com", "cloudbreak")
+	client := apiclient.NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	// make the request to get all items
 	resp, err := client.Blueprints.GetPublics(&blueprints.GetPublicsParams{})

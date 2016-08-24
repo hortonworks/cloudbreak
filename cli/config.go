@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
@@ -31,20 +32,25 @@ func Configure(c *cli.Context) error {
 		return cli.NewExitError(fmt.Sprintf("You need to specify all the parameters. See '%s configure --help'.", c.App.Name), 1)
 	}
 
-	err := WriteCredentialsToFile(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	err := WriteConfigToFile(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 	if err != nil {
-		log.Print(fmt.Sprintf("[WriteCredentialsToFile] %s", err.Error()))
-		os.Exit(1)
+		return cli.NewExitError(fmt.Sprintf("[WriteConfigToFile] %s", err.Error()), 1)
 	}
 	return nil
 }
 
-func WriteCredentialsToFile(server string, username string, password string) error {
+func GetCurrentUser() *user.User {
 	currentUser, err := user.Current()
 	if err != nil {
-		return err
+		log.Printf("[GetCurrentUser] %s", err.Error())
+		os.Exit(1)
 	}
-	log.Printf("[WriteCredentialsToFile] current user: %s", currentUser.Username)
+	return currentUser
+}
+
+func WriteConfigToFile(server string, username string, password string) error {
+	currentUser := GetCurrentUser()
+	log.Printf("[WriteConfigToFile] current user: %s", currentUser.Username)
 
 	hdcDir := currentUser.HomeDir + "/" + hdc_dir
 	configFile := hdcDir + "/" + config_file
@@ -56,7 +62,7 @@ func WriteCredentialsToFile(server string, username string, password string) err
 			return err
 		}
 	} else {
-		log.Printf("[WriteCredentialsToFile] dir already exists: %s", hdcDir)
+		log.Printf("[WriteConfigToFile] dir already exists: %s", hdcDir)
 	}
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
@@ -65,15 +71,15 @@ func WriteCredentialsToFile(server string, username string, password string) err
 			return err
 		}
 	} else {
-		log.Printf("[WriteCredentialsToFile] file already exists: %s", configFile)
+		log.Printf("[WriteConfigToFile] file already exists: %s", configFile)
 	}
 
-	f, err := os.OpenFile(configFile, os.O_WRONLY, 0600)
+	f, err := os.OpenFile(configFile, os.O_WRONLY, 0744)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[WriteCredentialsToFile] writing credentials to file: %s", configFile)
+	log.Printf("[WriteConfigToFile] writing credentials to file: %s", configFile)
 	confJson := Config{Server: server, Username: username, Password: password}.Yaml()
 	if _, err = f.WriteString(confJson); err != nil {
 		return err
@@ -81,4 +87,29 @@ func WriteCredentialsToFile(server string, username string, password string) err
 	f.Close()
 
 	return nil
+}
+
+func ReadConfig() (*Config, error) {
+	currentUser := GetCurrentUser()
+	log.Printf("[ReadConfig] current user: %s", currentUser.Username)
+
+	hdcDir := currentUser.HomeDir + "/" + hdc_dir
+	configFile := hdcDir + "/" + config_file
+
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		return nil, err
+	}
+	log.Printf("[ReadConfig] found config file: %s", configFile)
+
+	content, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		return nil, err
+	}
+	var config Config
+	err = yaml.Unmarshal(content, &config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }
