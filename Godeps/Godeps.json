@@ -4,6 +4,11 @@
 	"GodepVersion": "v74",
 	"Deps": [
 		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.6.0-5-gf92b795",
+			"Rev": "f92b7950b372b1db80bd3527e4d40e42555fe6c2"
+		},
+		{
 			"ImportPath": "github.com/asaskevich/govalidator",
 			"Comment": "v4-12-g593d645",
 			"Rev": "593d64559f7600f29581a3ee42177f5dbded27a9"
