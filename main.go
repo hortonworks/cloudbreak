@@ -40,7 +40,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "hdc-cli"
 	app.Usage = ""
-	app.Version = "0.0.1"
+	app.Version = hdc.Version + "-" + hdc.BuildTime
 	app.Author = "Hortonworks"
 
 	app.Flags = []cli.Flag{
