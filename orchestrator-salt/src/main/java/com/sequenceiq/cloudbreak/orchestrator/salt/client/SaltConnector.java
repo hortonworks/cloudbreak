@@ -31,10 +31,10 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 
 public class SaltConnector implements Closeable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SaltConnector.class);
+    public static final String SALT_USER = "saltuser";
+    public static final String SALT_PASSWORD = "saltpass";
 
-    private static final String SALT_USER = "saltuser";
-    private static final String SALT_PASSWORD = "saltpass";
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaltConnector.class);
 
     private final Client restClient;
     private final WebTarget saltTarget;
