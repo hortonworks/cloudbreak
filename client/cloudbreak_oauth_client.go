@@ -9,15 +9,15 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/ernesto-jimenez/httplogger"
 	"github.com/go-swagger/go-swagger/strfmt"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
-	"github.com/ernesto-jimenez/httplogger"
-	"log"
-	"os"
 	"time"
 )
 
