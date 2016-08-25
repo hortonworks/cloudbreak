@@ -17,16 +17,12 @@ swagger:model OrchestratorResponse
 type OrchestratorResponse struct {
 
 	/* endpoint for the container orchestration api
-
-	Required: true
-	*/
-	APIEndpoint string `json:"apiEndpoint"`
+	 */
+	APIEndpoint *string `json:"apiEndpoint,omitempty"`
 
 	/* orchestrator specific parameters, like authentication details
-
-	Required: true
-	*/
-	Parameters map[string]interface{} `json:"parameters"`
+	 */
+	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
 	/* type of the orchestrator (Swarm or Marathon)
 
@@ -39,16 +35,6 @@ type OrchestratorResponse struct {
 func (m *OrchestratorResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAPIEndpoint(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateParameters(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateType(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -57,24 +43,6 @@ func (m *OrchestratorResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *OrchestratorResponse) validateAPIEndpoint(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("apiEndpoint", "body", string(m.APIEndpoint)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *OrchestratorResponse) validateParameters(formats strfmt.Registry) error {
-
-	if err := validate.Required("parameters", "body", m.Parameters); err != nil {
-		return err
-	}
-
 	return nil
 }
 
