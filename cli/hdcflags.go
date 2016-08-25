@@ -6,7 +6,7 @@ var (
 	FlDebug = cli.BoolFlag{
 		Name:   "debug",
 		Usage:  "debug mode",
-		EnvVar: "CB_DEBUG",
+		EnvVar: "DEBUG",
 	}
 	FlCBServer = cli.StringFlag{
 		Name:   "server",

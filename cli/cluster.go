@@ -90,13 +90,16 @@ func CreateCluster(c *cli.Context) error {
 	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(3)
 
 	credentialId := make(chan int64, 1)
 	go client.CreateCredential(skeleton, credentialId, &wg)
 
 	templateIds := make(chan int64, 2)
 	go client.CreateTemplate(skeleton, templateIds, &wg)
+
+	secGroupId := make(chan int64, 1)
+	go client.CreateSecurityGroup(skeleton, secGroupId, &wg)
 
 	wg.Wait()
 
