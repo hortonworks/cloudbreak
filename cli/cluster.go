@@ -5,6 +5,7 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/sequenceiq/hdc-cli/client/stacks"
+	"github.com/sequenceiq/hdc-cli/models"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -98,8 +99,8 @@ func CreateCluster(c *cli.Context) error {
 	templateIds := make(chan int64, 2)
 	go client.CreateTemplate(skeleton, templateIds, &wg)
 
+	var secGroupId = make(chan int64, 1)
 	if skeleton.WebAccess {
-		secGroupId := make(chan int64, 1)
 		go client.CreateSecurityGroup(skeleton, secGroupId, &wg)
 	} else {
 		wg.Done()
@@ -109,6 +110,66 @@ func CreateCluster(c *cli.Context) error {
 	go client.CreateNetwork(skeleton, networkId, &wg)
 
 	wg.Wait()
+
+	// create stack
+
+	func() {
+		failurePolicy := models.FailurePolicy{AdjustmentType: "BEST_EFFORT"}
+		failureAction := "DO_NOTHING"
+		masterType := "GATEWAY"
+		workerType := "CORE"
+		ambariVersion := "2.4"
+		secGroupId := <-secGroupId
+		platform := "AWS"
+
+		instanceGroups := []*models.InstanceGroup{
+			{
+				Group:           "master",
+				TemplateID:      <-templateIds,
+				NodeCount:       1,
+				Type:            &masterType,
+				SecurityGroupID: secGroupId,
+			},
+			{
+				Group:           "worker",
+				TemplateID:      <-templateIds,
+				NodeCount:       skeleton.InstanceCount - 1,
+				Type:            &workerType,
+				SecurityGroupID: secGroupId,
+			},
+		}
+
+		var stackParameters = make(map[string]string)
+		stackParameters["instanceProfileStrategy"] = "CREATE"
+
+		orchestrator := models.OrchestratorRequest{Type: "SALT"}
+
+		stackReq := models.StackRequest{
+			Name:            skeleton.ClusterName,
+			CredentialID:    <-credentialId,
+			Region:          "eu-central-1",
+			FailurePolicy:   &failurePolicy,
+			OnFailureAction: &failureAction,
+			InstanceGroups:  instanceGroups,
+			Parameters:      stackParameters,
+			CloudPlatform:   platform,
+			PlatformVariant: &platform,
+			NetworkID:       <-networkId,
+			AmbariVersion:   &ambariVersion,
+			HdpVersion:      &skeleton.HDPVersion,
+			Orchestrator:    &orchestrator,
+		}
+
+		log.Infof("[CreateStack] sending stack create request with name: %s", skeleton.ClusterName)
+		resp, err := client.Cloudbreak.Stacks.PostStacksUser(&stacks.PostStacksUserParams{&stackReq})
+
+		if err != nil {
+			log.Errorf("[CreateStack] %s", err.Error())
+			newExitError()
+		}
+
+		log.Infof("[CreateStack] stack created, id: %d", resp.Payload.ID)
+	}()
 
 	return nil
 }
