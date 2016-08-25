@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	"github.com/sequenceiq/hdc-cli/client/cluster"
 	"github.com/sequenceiq/hdc-cli/client/stacks"
 	"github.com/sequenceiq/hdc-cli/models"
 	"github.com/urfave/cli"
@@ -113,7 +114,7 @@ func CreateCluster(c *cli.Context) error {
 
 	// create stack
 
-	func() {
+	stackId := func() int64 {
 		failurePolicy := models.FailurePolicy{AdjustmentType: "BEST_EFFORT"}
 		failureAction := "DO_NOTHING"
 		masterType := "GATEWAY"
@@ -169,6 +170,52 @@ func CreateCluster(c *cli.Context) error {
 		}
 
 		log.Infof("[CreateStack] stack created, id: %d", resp.Payload.ID)
+		return resp.Payload.ID
+	}()
+
+	// create cluster
+
+	func() {
+		master := "master"
+		worker := "worker"
+
+		masterConstraint := models.Constraint{
+			InstanceGroupName: &master,
+			HostCount:         int32(1),
+		}
+
+		workerConstraint := models.Constraint{
+			InstanceGroupName: &worker,
+			HostCount:         int32(skeleton.InstanceCount - 1),
+		}
+
+		hostGroups := []*models.HostGroup{
+			{
+				Name:       master,
+				Constraint: &masterConstraint,
+			},
+			{
+				Name:       worker,
+				Constraint: &workerConstraint,
+			},
+		}
+
+		clusterReq := models.ClusterRequest{
+			Name:        skeleton.ClusterName,
+			BlueprintID: GetBlueprintId(skeleton.ClusterType, client),
+			HostGroups:  hostGroups,
+			UserName:    skeleton.ClusterAndAmbariUser,
+			Password:    skeleton.ClusterAndAmbariPassword,
+		}
+
+		err := client.Cloudbreak.Cluster.PostStacksIDCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
+
+		if err != nil {
+			log.Errorf("[CreateCluster] %s", err.Error())
+			newExitError()
+		}
+
+		log.Infof("[CreateCluster] cluster created")
 	}()
 
 	return nil
