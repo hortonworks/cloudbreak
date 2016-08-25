@@ -21,9 +21,9 @@ type ClusterSkeleton struct {
 	InstanceCount            int32  `json:"InstanceCount" yaml:"InstanceCount"`
 	SSHKeyName               string `json:"SSHKeyName" yaml:"SSHKeyName"`
 	RemoteAccess             string `json:"RemoteAccess" yaml:"RemoteAccess"`
+	WebAccess                bool   `json:"WebAccess" yaml:"WebAccess"`
 	ClusterAndAmbariUser     string `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
 	ClusterAndAmbariPassword string `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
-	WebAccess                string `json:"WebAccess" yaml:"WebAccess"`
 
 	//InstanceRole             string `json:"InstanceRole" yaml:"InstanceRole"`
 	//HiveMetastoreUrl         string `json:"HiveMetastoreUrl" yaml:"HiveMetastoreUrl"`
@@ -90,7 +90,7 @@ func CreateCluster(c *cli.Context) error {
 	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	var wg sync.WaitGroup
-	wg.Add(3)
+	wg.Add(4)
 
 	credentialId := make(chan int64, 1)
 	go client.CreateCredential(skeleton, credentialId, &wg)
@@ -98,8 +98,15 @@ func CreateCluster(c *cli.Context) error {
 	templateIds := make(chan int64, 2)
 	go client.CreateTemplate(skeleton, templateIds, &wg)
 
-	secGroupId := make(chan int64, 1)
-	go client.CreateSecurityGroup(skeleton, secGroupId, &wg)
+	if skeleton.WebAccess {
+		secGroupId := make(chan int64, 1)
+		go client.CreateSecurityGroup(skeleton, secGroupId, &wg)
+	} else {
+		wg.Done()
+	}
+
+	networkId := make(chan int64, 1)
+	go client.CreateNetwork(skeleton, networkId, &wg)
 
 	wg.Wait()
 

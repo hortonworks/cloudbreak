@@ -16,7 +16,7 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 	modifiable := false
 	secRules := []*models.SecurityRule{
 		{
-			Subnet:     "0.0.0.0/0",
+			Subnet:     skeleton.RemoteAccess,
 			Protocol:   "tcp",
 			Ports:      "9443,22,443,8080,18080,18081,9995",
 			Modifiable: &modifiable,
@@ -31,13 +31,13 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 	log.Infof("[CreateSecurityGroup] sending security group create request with name: %s", secGroupName)
 	resp, err := c.Cloudbreak.Securitygroups.PostSecuritygroupsAccount(&securitygroups.PostSecuritygroupsAccountParams{&secGroup})
 
-    if err != nil {
-        log.Errorf("[CreateSecurityGroup] %s", err.Error())
-        newExitError()
-    }
+	if err != nil {
+		log.Errorf("[CreateSecurityGroup] %s", err.Error())
+		newExitError()
+	}
 
-    log.Infof("[CreateSecurityGroup] security group created, id: %d", resp.Payload.ID)
-    channel <- resp.Payload.ID
+	log.Infof("[CreateSecurityGroup] security group created, id: %d", resp.Payload.ID)
+	channel <- resp.Payload.ID
 
 	wg.Done()
 }
