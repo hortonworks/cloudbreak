@@ -62,7 +62,7 @@ public class ClusterRequest {
     private AmbariStackDetailsJson ambariStackDetails;
     @Valid
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
-    @ApiModelProperty(value = ClusterModelDescription.RDSCONFIG_ID, required = true)
+    @ApiModelProperty(value = ClusterModelDescription.RDSCONFIG_ID)
     private Long rdsConfigId;
     @Valid
     private AmbariDatabaseDetailsJson ambariDatabaseDetails;
