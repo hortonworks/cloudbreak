@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
@@ -64,6 +65,8 @@ public class ClusterTerminationService {
     private ContainerOrchestratorResolver containerOrchestratorResolver;
     @Inject
     private TlsSecurityService tlsSecurityService;
+    @Inject
+    private ComponentConfigProvider componentConfigProvider;
 
     public void deleteClusterContainers(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
@@ -96,17 +99,19 @@ public class ClusterTerminationService {
 
     public void finalizeClusterTermination(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
+        Long stackId = cluster.getStack().getId();
         String terminatedName = cluster.getName() + DELIMITER + new Date().getTime();
         cluster.setName(terminatedName);
         FileSystem fs = cluster.getFileSystem();
         if (fs != null) {
-            deleteFileSystemResources(cluster.getStack().getId(), fs);
+            deleteFileSystemResources(stackId, fs);
         }
         cluster.setBlueprint(null);
         cluster.setStack(null);
         cluster.setSssdConfig(null);
         cluster.setStatus(DELETE_COMPLETED);
         deleteClusterHostGroupsWithItsMetadata(cluster);
+        componentConfigProvider.deleteComponentsForStack(stackId);
     }
 
     private void deleteClusterHostGroupsWithItsMetadata(Cluster cluster) {

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -52,25 +53,29 @@ public class HostMetadataSetup {
     public void setupHostMetadata(Long stackId) throws CloudbreakSecuritySetupException {
         LOGGER.info("Setting up host metadata for the cluster.");
         Stack stack = stackService.getById(stackId);
-        Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIpWrapper());
-        updateWithHostData(clientConfig, stack, Collections.emptySet());
-        instanceMetaDataRepository.save(allInstanceMetaData);
+        if (!OrchestratorConstants.MARATHON.equals(stack.getOrchestrator().getType())) {
+            Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIpWrapper());
+            updateWithHostData(clientConfig, stack, Collections.emptySet());
+            instanceMetaDataRepository.save(allInstanceMetaData);
+        }
     }
 
     public void setupNewHostMetadata(Long stackId, Set<String> newAddresses) throws CloudbreakSecuritySetupException {
         LOGGER.info("Extending host metadata.");
         Stack stack = stackService.getById(stackId);
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIpWrapper());
-        Set<InstanceMetaData> newInstanceMetadata = stack.getRunningInstanceMetaData().stream()
-                .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
-                .collect(Collectors.toSet());
-        updateWithHostData(clientConfig, stack, newInstanceMetadata);
-        instanceMetaDataRepository.save(newInstanceMetadata);
+        if (!OrchestratorConstants.MARATHON.equals(stack.getOrchestrator().getType())) {
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, gatewayInstance.getPublicIpWrapper());
+            Set<InstanceMetaData> newInstanceMetadata = stack.getRunningInstanceMetaData().stream()
+                    .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
+                    .collect(Collectors.toSet());
+            updateWithHostData(clientConfig, stack, newInstanceMetadata);
+            instanceMetaDataRepository.save(newInstanceMetadata);
+        }
     }
 
     private void updateWithHostData(HttpClientConfig clientConfig, Stack stack, Set<InstanceMetaData> newInstanceMetadata)

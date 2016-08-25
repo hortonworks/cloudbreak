@@ -22,7 +22,11 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
         @NamedQuery(
                 name = "Component.findComponentByStackIdComponentTypeName",
                 query = "SELECT cv FROM Component cv "
-                        + "WHERE cv.stack.id = :stackId AND cv.componentType = :componentType AND cv.name = :name")
+                        + "WHERE cv.stack.id = :stackId AND cv.componentType = :componentType AND cv.name = :name"),
+        @NamedQuery(
+                name = "Component.findComponentByStackId",
+                query = "SELECT cv FROM Component cv WHERE cv.stack.id = :stackId"
+        )
 })
 public class Component {
 
