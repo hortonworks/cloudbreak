@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.task;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -23,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "aSGroupStatusCheckerTask";
 
+    private static final int MAX_INSTANCE_ID_SIZE = 100;
     private static final int INSTANCE_RUNNING = 16;
     private static final Logger LOGGER = LoggerFactory.getLogger(ASGroupStatusCheckerTask.class);
 
@@ -52,12 +56,26 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
             LOGGER.debug("Instances in AS group: {}, needed: {}", instanceIds.size(), requiredInstances);
             return false;
         }
-        DescribeInstanceStatusResult describeResult = amazonEC2Client.describeInstanceStatus(new DescribeInstanceStatusRequest().withInstanceIds(instanceIds));
-        if (describeResult.getInstanceStatuses().size() < requiredInstances) {
-            LOGGER.debug("Instances up: {}, needed: {}", describeResult.getInstanceStatuses().size(), requiredInstances);
+        List<DescribeInstanceStatusResult> describeInstanceStatusResultList = new ArrayList<>();
+
+        List<List<String>> partitionedInstanceIdsList = Lists.partition(instanceIds, MAX_INSTANCE_ID_SIZE);
+
+        for (List<String> partitionedInstanceIds : partitionedInstanceIdsList) {
+            DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest().withInstanceIds(partitionedInstanceIds);
+            DescribeInstanceStatusResult describeResult = amazonEC2Client.describeInstanceStatus(describeInstanceStatusRequest);
+            describeInstanceStatusResultList.add(describeResult);
+        }
+
+        List<InstanceStatus> instanceStatusList = describeInstanceStatusResultList.stream()
+                .flatMap(describeInstanceStatusResult -> describeInstanceStatusResult.getInstanceStatuses().stream())
+                .collect(Collectors.toList());
+
+        if (instanceStatusList.size() < requiredInstances) {
+            LOGGER.debug("Instances up: {}, needed: {}", instanceStatusList.size(), requiredInstances);
             return false;
         }
-        for (InstanceStatus status : describeResult.getInstanceStatuses()) {
+
+        for (InstanceStatus status : instanceStatusList) {
             if (INSTANCE_RUNNING != status.getInstanceState().getCode()) {
                 LOGGER.debug("Instances are up but not all of them are in running state.");
                 return false;
