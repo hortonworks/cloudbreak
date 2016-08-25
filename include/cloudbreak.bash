@@ -116,7 +116,7 @@ cloudbreak-conf-db() {
     fi
 
     env-import CB_DB_ENV_USER "postgres"
-    env-import CB_DB_ENV_DB "cloudbreak"
+    env-import CB_DB_ENV_DB ""
     env-import CB_DB_ENV_PASS ""
     env-import CB_HBM2DDL_STRATEGY "validate"
     env-import PERISCOPE_DB_HBM2DDL_STRATEGY "validate"
