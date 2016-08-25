@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAuth;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public class SaltBootstrap implements OrchestratorBootstrap {
@@ -82,6 +84,13 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         SaltAction saltAction = new SaltAction(SaltActionType.RUN);
 
         if (targets.stream().map(Node::getPrivateIp).collect(Collectors.toList()).contains(getGatewayPrivateIp())) {
+            SaltAuth auth = new SaltAuth();
+            auth.setPassword(SaltConnector.SALT_PASSWORD);
+            SaltMaster master = new SaltMaster();
+            master.setAddress(getGatewayPrivateIp());
+            master.setAuth(auth);
+            saltAction.setMaster(master);
+            //set due to compatibility reason
             saltAction.setServer(getGatewayPrivateIp());
             Node saltMaster = targets.stream().filter(n -> n.getPrivateIp().equals(getGatewayPrivateIp())).findFirst().get();
             saltAction.addMinion(createMinion(saltMaster));
