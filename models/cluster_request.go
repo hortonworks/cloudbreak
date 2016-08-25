@@ -122,10 +122,8 @@ type ClusterRequest struct {
 	Password string `json:"password"`
 
 	/* RDS configuration id for the cluster
-
-	Required: true
-	*/
-	RdsConfigID int64 `json:"rdsConfigId"`
+	 */
+	RdsConfigID *int64 `json:"rdsConfigId,omitempty"`
 
 	/* rds config json
 	 */
@@ -194,11 +192,6 @@ func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validatePassword(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateRdsConfigID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -378,15 +371,6 @@ func (m *ClusterRequest) validatePassword(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("password", "body", string(m.Password), 100); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ClusterRequest) validateRdsConfigID(formats strfmt.Registry) error {
-
-	if err := validate.Required("rdsConfigId", "body", int64(m.RdsConfigID)); err != nil {
 		return err
 	}
 
