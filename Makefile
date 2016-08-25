@@ -15,6 +15,9 @@ build-darwin:
 build-linux:
 	GOOS=linux go build -a -installsuffix cgo ${LDFLAGS} -o build/Linux/${BINARY} main.go
 
+generate-swagger:
+	swagger generate client -f http://localhost:9091/cb/api/v1/swagger.json
+
 release: build
 	rm -rf release
 	glu release
