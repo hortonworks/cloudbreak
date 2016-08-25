@@ -38,7 +38,7 @@ func ConfigRead(c *cli.Context) error {
 func main() {
 
 	app := cli.NewApp()
-	app.Name = "hdc-cli"
+	app.Name = "hdc"
 	app.Usage = ""
 	app.Version = hdc.Version + "-" + hdc.BuildTime
 	app.Author = "Hortonworks"
