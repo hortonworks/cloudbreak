@@ -7,12 +7,16 @@ LDFLAGS=-ldflags "-X github.com/sequenceiq/hdc-cli/cli.Version=${VERSION} -X git
 deps:
 	go get github.com/gliderlabs/glu
 
-build:
-	GOOS=linux go build -a -installsuffix cgo ${LDFLAGS} -o build/Linux/${BINARY} main.go
+build: build-darwin build-linux
+
+build-darwin:
 	GOOS=darwin go build -a -installsuffix cgo ${LDFLAGS} -o build/Darwin/${BINARY} main.go
+
+build-linux:
+	GOOS=linux go build -a -installsuffix cgo ${LDFLAGS} -o build/Linux/${BINARY} main.go
 
 release: build
 	rm -rf release
 	glu release
 
-.PHONY: build
+.PHONY: build build-darwin build-linux
