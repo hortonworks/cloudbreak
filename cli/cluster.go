@@ -108,11 +108,7 @@ func CreateCluster(c *cli.Context) error {
 	go client.CreateTemplate(skeleton, templateIds, &wg)
 
 	var secGroupId = make(chan int64, 1)
-	if skeleton.WebAccess {
-		go client.CreateSecurityGroup(skeleton, secGroupId, &wg)
-	} else {
-		wg.Done()
-	}
+	go client.CreateSecurityGroup(skeleton, secGroupId, &wg)
 
 	networkId := make(chan int64, 1)
 	go client.CreateNetwork(skeleton, networkId, &wg)

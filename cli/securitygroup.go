@@ -5,6 +5,7 @@ import (
 	"github.com/sequenceiq/hdc-cli/client/securitygroups"
 	"github.com/sequenceiq/hdc-cli/models"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -13,12 +14,17 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 
 	secGroupName := "secg" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
+	defaultPorts := []string{"22", "443"}
+	if skeleton.WebAccess {
+		defaultPorts = append(defaultPorts, "9443", "8080", "18080", "18081", "9995")
+	}
+
 	modifiable := false
 	secRules := []*models.SecurityRule{
 		{
 			Subnet:     skeleton.RemoteAccess,
 			Protocol:   "tcp",
-			Ports:      "9443,22,443,8080,18080,18081,9995",
+			Ports:      strings.Join(defaultPorts, ","),
 			Modifiable: &modifiable,
 		},
 	}
