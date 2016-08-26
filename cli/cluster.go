@@ -15,22 +15,29 @@ import (
 )
 
 type ClusterSkeleton struct {
-	ClusterName              string `json:"ClusterName" yaml:"ClusterName"`
-	HDPVersion               string `json:"HDPVersion" yaml:"HDPVersion"`
-	ClusterType              string `json:"ClusterType" yaml:"ClusterType"`
-	MasterInstanceType       string `json:"MasterInstanceType" yaml:"MasterInstanceType"`
-	WorkerInstanceType       string `json:"WorkerInstanceType" yaml:"WorkerInstanceType"`
-	InstanceCount            int32  `json:"InstanceCount" yaml:"InstanceCount"`
-	SSHKeyName               string `json:"SSHKeyName" yaml:"SSHKeyName"`
-	RemoteAccess             string `json:"RemoteAccess" yaml:"RemoteAccess"`
-	WebAccess                bool   `json:"WebAccess" yaml:"WebAccess"`
-	ClusterAndAmbariUser     string `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
-	ClusterAndAmbariPassword string `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
+	ClusterName              string         `json:"ClusterName" yaml:"ClusterName"`
+	HDPVersion               string         `json:"HDPVersion" yaml:"HDPVersion"`
+	ClusterType              string         `json:"ClusterType" yaml:"ClusterType"`
+	Master                   InstanceConfig `json:"Master" yaml:"Master"`
+	Worker                   InstanceConfig `json:"Worker" yaml:"Worker"`
+	InstanceCount            int32          `json:"InstanceCount" yaml:"InstanceCount"`
+	SSHKeyName               string         `json:"SSHKeyName" yaml:"SSHKeyName"`
+	RemoteAccess             string         `json:"RemoteAccess" yaml:"RemoteAccess"`
+	WebAccess                bool           `json:"WebAccess" yaml:"WebAccess"`
+	ClusterAndAmbariUser     string         `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
+	ClusterAndAmbariPassword string         `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
 
 	//InstanceRole             string `json:"InstanceRole" yaml:"InstanceRole"`
 	//HiveMetastoreUrl         string `json:"HiveMetastoreUrl" yaml:"HiveMetastoreUrl"`
 	//HiveMetastoreUser        string `json:"HiveMetastoreUser" yaml:"HiveMetastoreUser"`
 	//HiveMetastorePassword    string `json:"HiveMetastorePassword" yaml:"HiveMetastorePassword"`
+}
+
+type InstanceConfig struct {
+	InstanceType string `json:"InstanceType" yaml:"InstanceType"`
+	VolumeType   string `json:"VolumeType" yaml:"VolumeType"`
+	VolumeSize   int32  `json:"VolumeSize" yaml:"VolumeSize"`
+	VolumeCount  int32  `json:"VolumeCount" yaml:"VolumeCount"`
 }
 
 func (c ClusterSkeleton) Json() string {
@@ -148,7 +155,7 @@ func CreateCluster(c *cli.Context) error {
 		stackReq := models.StackRequest{
 			Name:            skeleton.ClusterName,
 			CredentialID:    <-credentialId,
-			Region:          "eu-central-1",
+			Region:          "eu-west-1",
 			FailurePolicy:   &failurePolicy,
 			OnFailureAction: &failureAction,
 			InstanceGroups:  instanceGroups,
@@ -208,20 +215,37 @@ func CreateCluster(c *cli.Context) error {
 			Password:    skeleton.ClusterAndAmbariPassword,
 		}
 
-		err := client.Cloudbreak.Cluster.PostStacksIDCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
+		resp, err := client.Cloudbreak.Cluster.PostStacksIDCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
 
 		if err != nil {
 			log.Errorf("[CreateCluster] %s", err.Error())
 			newExitReturnError()
 		}
 
-		log.Infof("[CreateCluster] cluster created")
+		log.Infof("[CreateCluster] cluster created, id: %d", resp.Payload.ID)
 	}()
 
 	return nil
 }
 
 func GenerateCreateClusterSkeleton(c *cli.Context) error {
-	fmt.Println(ClusterSkeleton{}.JsonPretty())
+	skeleton := ClusterSkeleton{
+		ClusterType:   "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",
+		HDPVersion:    "2.5",
+		InstanceCount: 3,
+		Master: InstanceConfig{
+			InstanceType: "m4.xlarge",
+			VolumeType:   "gp2",
+			VolumeCount:  1,
+			VolumeSize:   32,
+		},
+		Worker: InstanceConfig{
+			InstanceType: "m3.xlarge",
+			VolumeType:   "ephemeral",
+			VolumeCount:  2,
+			VolumeSize:   40,
+		},
+	}
+	fmt.Println(skeleton.JsonPretty())
 	return nil
 }

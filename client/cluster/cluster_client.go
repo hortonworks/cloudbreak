@@ -135,13 +135,13 @@ PostStacksIDCluster creates cluster for stack
 
 Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
 */
-func (a *Client) PostStacksIDCluster(params *PostStacksIDClusterParams) error {
+func (a *Client) PostStacksIDCluster(params *PostStacksIDClusterParams) (*PostStacksIDClusterOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewPostStacksIDClusterParams()
 	}
 
-	_, err := a.transport.Submit(&client.Operation{
+	result, err := a.transport.Submit(&client.Operation{
 		ID:                 "PostStacksIDCluster",
 		Method:             "POST",
 		PathPattern:        "/stacks/{id}/cluster",
@@ -152,9 +152,9 @@ func (a *Client) PostStacksIDCluster(params *PostStacksIDClusterParams) error {
 		Reader:             &PostStacksIDClusterReader{formats: a.formats},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*PostStacksIDClusterOK), nil
 }
 
 /*

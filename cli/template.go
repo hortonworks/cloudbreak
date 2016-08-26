@@ -14,26 +14,23 @@ func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64
 	masterTemplateName := "mtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	workerTemplateName := "wtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	volumeType := "gp2"
-	volumeSize := int32(100)
-
 	masterTemplateReqBody := models.TemplateRequest{
 		Name:          masterTemplateName,
 		CloudPlatform: "AWS",
-		InstanceType:  skeleton.MasterInstanceType,
-		VolumeType:    &volumeType,
-		VolumeSize:    &volumeSize,
-		VolumeCount:   1,
+		InstanceType:  skeleton.Master.InstanceType,
+		VolumeType:    &skeleton.Master.VolumeType,
+		VolumeSize:    &skeleton.Master.VolumeSize,
+		VolumeCount:   skeleton.Master.VolumeCount,
 		Parameters:    make(map[string]interface{}),
 	}
 
 	workerTemplateReqBody := models.TemplateRequest{
 		Name:          workerTemplateName,
 		CloudPlatform: "AWS",
-		InstanceType:  skeleton.WorkerInstanceType,
-		VolumeType:    &volumeType,
-		VolumeSize:    &volumeSize,
-		VolumeCount:   1,
+		InstanceType:  skeleton.Worker.InstanceType,
+		VolumeType:    &skeleton.Worker.VolumeType,
+		VolumeSize:    &skeleton.Worker.VolumeSize,
+		VolumeCount:   skeleton.Worker.VolumeCount,
 		Parameters:    make(map[string]interface{}),
 	}
 
