@@ -8,11 +8,10 @@ After=network.target network.service consul.service
 [Service]
 Type=forking
 PIDFile=/var/run/ambari-agent/ambari-agent.pid
-Restart=no
+Restart=always
 TimeoutSec=5min
 IgnoreSIGPIPE=no
 KillMode=process
 GuessMainPID=no
-RemainAfterExit=yes
 ExecStart=/usr/sbin/ambari-agent start
 ExecStop=/usr/sbin/ambari-agent stop

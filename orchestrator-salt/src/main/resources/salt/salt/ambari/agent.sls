@@ -84,15 +84,9 @@ start-ambari-agent:
 
 {% else %}
 
-/etc/init/ambari-agent.conf:
-  file.managed:
-    - source: salt://ambari/upstart/ambari-agent.conf
-
 start-ambari-agent:
   service.running:
-    - enable: True
     - name: ambari-agent
-    - watch:
-       - file: /etc/init/ambari-agent.conf
+    - enable: True
 
 {% endif %}

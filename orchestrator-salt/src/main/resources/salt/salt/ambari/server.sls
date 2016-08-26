@@ -64,8 +64,9 @@ start-ambari-server:
 
 {% else %}
 
-/etc/init/ambari-server.conf:
-  file.managed:
+update-ambari-server-conf:
+  file.append:
+    - name: /etc/init/ambari-server.conf
     - source: salt://ambari/upstart/ambari-server.conf
 
 start-ambari-server:
@@ -73,6 +74,6 @@ start-ambari-server:
     - enable: True
     - name: ambari-server
     - watch:
-       - file: /etc/init/ambari-server.conf
+      - file: /etc/init/ambari-server.conf
 
 {% endif %}
