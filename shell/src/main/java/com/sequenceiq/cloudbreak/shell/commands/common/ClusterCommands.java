@@ -201,7 +201,7 @@ public class ClusterCommands implements BaseCommands {
             }
 
             String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
-            cloudbreakShellUtil.checkResponse("createCluster", shellContext.cloudbreakClient().clusterEndpoint().post(Long.valueOf(stackId), clusterRequest));
+            shellContext.cloudbreakClient().clusterEndpoint().post(Long.valueOf(stackId), clusterRequest);
             shellContext.setHint(Hints.NONE);
             shellContext.resetFileSystemConfiguration();
             shellContext.resetAmbariDatabaseDetailsJson();

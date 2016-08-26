@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
@@ -96,11 +97,11 @@ public class ClusterController implements ClusterEndpoint {
     private ComponentConfigProvider componentConfigProvider;
 
     @Override
-    public Response post(Long stackId, ClusterRequest request) throws Exception {
+    public IdJson post(Long stackId, ClusterRequest request) throws Exception {
         CbUser user = authenticatedUserService.getCbUser();
         if (request.getEnableSecurity()
                 && (request.getKerberosMasterKey() == null || request.getKerberosAdmin() == null || request.getKerberosPassword() == null)) {
-            return Response.status(Response.Status.ACCEPTED).build();
+            throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
         }
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getById(stackId);
@@ -125,7 +126,7 @@ public class ClusterController implements ClusterEndpoint {
         components = addHDPRepoConfig(components, request, stack);
         components = addAmbariDatabaseConfig(components, request, stack);
         clusterService.create(user, stackId, cluster, components);
-        return Response.status(Response.Status.ACCEPTED).build();
+        return new IdJson(cluster.getId());
     }
 
     private void validateRdsConnection(ClusterRequest request) {
