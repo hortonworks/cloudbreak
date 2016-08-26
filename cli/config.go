@@ -67,26 +67,12 @@ func WriteConfigToFile(server string, username string, password string) error {
 		log.Infof("[WriteConfigToFile] dir already exists: %s", hdcDir)
 	}
 
-	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		log.Infof("[WriteCredentialsToFile] create file: %s", configFile)
-		if _, err := os.Create(configFile); err != nil {
-			return err
-		}
-	} else {
-		log.Infof("[WriteConfigToFile] file already exists: %s", configFile)
-	}
-
-	f, err := os.OpenFile(configFile, os.O_WRONLY, 0744)
+	log.Infof("[WriteConfigToFile] writing credentials to file: %s", configFile)
+	confJson := Config{Server: server, Username: username, Password: password}.Yaml()
+	err := ioutil.WriteFile(configFile, []byte(confJson), 0744)
 	if err != nil {
 		return err
 	}
-
-	log.Infof("[WriteConfigToFile] writing credentials to file: %s", configFile)
-	confJson := Config{Server: server, Username: username, Password: password}.Yaml()
-	if _, err = f.WriteString(confJson); err != nil {
-		return err
-	}
-	f.Close()
 
 	return nil
 }
