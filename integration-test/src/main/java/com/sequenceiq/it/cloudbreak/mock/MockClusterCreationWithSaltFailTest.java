@@ -98,8 +98,10 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
         addAmbariMappings(numberOfServers);
 
         ClusterEndpoint clusterEndpoint = getCloudbreakClient().clusterEndpoint();
-        CloudbreakUtil.checkResponse("ClusterCreation", clusterEndpoint.post(Long.valueOf(stackId), clusterRequest));
+        Long clusterId = clusterEndpoint.post(Long.valueOf(stackId), clusterRequest).getId();
+
         // THEN
+        Assert.assertNotNull(clusterId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         String failMessage = "Source file salt://ambari/scripts/ambari-server-initttt.sh not found | "
                 + "Service ambari-server is already enabled, and is dead | "

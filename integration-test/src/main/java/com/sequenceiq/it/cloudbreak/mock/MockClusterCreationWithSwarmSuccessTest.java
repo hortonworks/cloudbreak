@@ -95,11 +95,12 @@ public class MockClusterCreationWithSwarmSuccessTest extends AbstractMockIntegra
         addAmbariMappings(numberOfServers);
 
         ClusterEndpoint clusterEndpoint = getCloudbreakClient().clusterEndpoint();
-        CloudbreakUtil.checkResponse("ClusterCreation", clusterEndpoint.post(Long.valueOf(stackId), clusterRequest));
+        Long clusterId = clusterEndpoint.post(Long.valueOf(stackId), clusterRequest).getId();
         // THEN
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
 
+        Assert.assertNotNull(clusterId);
         verify(AMBARI_API_ROOT + "/views/FILES/versions/1.0.0/instances/files", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
         verify(AMBARI_API_ROOT + "/views/PIG/versions/1.0.0/instances/pig", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
         verify(AMBARI_API_ROOT + "/views/HIVE/versions/1.0.0/instances/hive", "POST").exactTimes(1).bodyContains("ambari_cluster").verify();
