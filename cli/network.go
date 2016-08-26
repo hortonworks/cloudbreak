@@ -23,7 +23,7 @@ func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64,
 
 	if err != nil {
 		log.Errorf("[CreateNetwork] %s", err.Error())
-		newExitError()
+		newExitReturnError()
 	}
 
 	log.Infof("[CreateNetwork] network created, id: %d", resp.Payload.ID)

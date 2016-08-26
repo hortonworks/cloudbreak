@@ -1,6 +1,13 @@
 package cli
 
-import "github.com/urfave/cli"
+import (
+	"github.com/urfave/cli"
+	"os"
+)
+
+func newExitReturnError() {
+	os.Exit(1)
+}
 
 func newExitError() error {
 	return newExitErrorCode(1)

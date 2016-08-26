@@ -29,7 +29,7 @@ func (c *Cloudbreak) CreateCredential(skeleton ClusterSkeleton, channel chan int
 
 	if err != nil {
 		log.Errorf("[CreateCredential] %s", err.Error())
-		newExitError()
+		newExitReturnError()
 	}
 
 	log.Infof("[CreateCredential] credential created, id: %d", resp.Payload.ID)

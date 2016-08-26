@@ -166,7 +166,7 @@ func CreateCluster(c *cli.Context) error {
 
 		if err != nil {
 			log.Errorf("[CreateStack] %s", err.Error())
-			newExitError()
+			newExitReturnError()
 		}
 
 		log.Infof("[CreateStack] stack created, id: %d", resp.Payload.ID)
@@ -212,7 +212,7 @@ func CreateCluster(c *cli.Context) error {
 
 		if err != nil {
 			log.Errorf("[CreateCluster] %s", err.Error())
-			newExitError()
+			newExitReturnError()
 		}
 
 		log.Infof("[CreateCluster] cluster created")

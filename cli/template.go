@@ -42,7 +42,7 @@ func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64
 
 	if err != nil {
 		log.Errorf("[CreateTemplate] %s", err.Error())
-		newExitError()
+		newExitReturnError()
 	}
 
 	log.Infof("[CreateTemplate] master template created, id: %d", resp.Payload.ID)
@@ -53,7 +53,7 @@ func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64
 
 	if err != nil {
 		log.Errorf("[CreateTemplate] %s", err.Error())
-		newExitError()
+		newExitReturnError()
 	}
 
 	log.Infof("[CreateTemplate] worker template created, id: %d", resp.Payload.ID)

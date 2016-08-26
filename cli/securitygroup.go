@@ -33,7 +33,7 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 
 	if err != nil {
 		log.Errorf("[CreateSecurityGroup] %s", err.Error())
-		newExitError()
+		newExitReturnError()
 	}
 
 	log.Infof("[CreateSecurityGroup] security group created, id: %d", resp.Payload.ID)
