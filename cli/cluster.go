@@ -14,7 +14,11 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/sequenceiq/hdc-cli/client/blueprints"
 )
+
+var ClusterSkeletonListHeader []string = []string{"ClusterName", "Status", "HDPVersion", "ClusterType"}
 
 type ClusterSkeleton struct {
 	ClusterName              string         `json:"ClusterName" yaml:"ClusterName"`
@@ -29,6 +33,8 @@ type ClusterSkeleton struct {
 	ClusterAndAmbariUser     string         `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
 	ClusterAndAmbariPassword string         `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
 
+	Status                   string         `json:"Status,omitempty" yaml:"Status,omitempty"`
+
 	//InstanceRole             string `json:"InstanceRole" yaml:"InstanceRole"`
 	//HiveMetastoreUrl         string `json:"HiveMetastoreUrl" yaml:"HiveMetastoreUrl"`
 	//HiveMetastoreUser        string `json:"HiveMetastoreUser" yaml:"HiveMetastoreUser"`
@@ -42,32 +48,53 @@ type InstanceConfig struct {
 	VolumeCount  int32  `json:"VolumeCount" yaml:"VolumeCount"`
 }
 
-func (c ClusterSkeleton) Json() string {
+func (c *ClusterSkeleton) Json() string {
 	j, _ := json.Marshal(c)
 	return string(j)
 }
 
-func (c ClusterSkeleton) JsonPretty() string {
+func (c *ClusterSkeleton) JsonPretty() string {
 	j, _ := json.MarshalIndent(c, "", "  ")
 	return string(j)
 }
 
-func (c ClusterSkeleton) Yaml() string {
+func (c *ClusterSkeleton) Yaml() string {
 	j, _ := yaml.Marshal(c)
 	return string(j)
+}
+
+func (c *ClusterSkeleton) fill(stackResponse *models.StackResponse, blueprintResponse *models.BlueprintResponse) error {
+	c.ClusterName = stackResponse.Name
+	c.Status = *stackResponse.Status
+	if stackResponse.Image.HdpVersion != nil {
+		c.HDPVersion = *stackResponse.Image.HdpVersion
+	}
+	c.ClusterType = *blueprintResponse.BlueprintName
+
+	return nil
+}
+
+func (c *ClusterSkeleton) DataAsStringArray() []string {
+	return []string{c.ClusterName, c.Status, c.HDPVersion, c.ClusterType}
 }
 
 func ListClusters(c *cli.Context) error {
 	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
-	resp, err := client.Cloudbreak.Stacks.GetStacksUser(&stacks.GetStacksUserParams{})
+	respStack, err := client.Cloudbreak.Stacks.GetStacksUser(&stacks.GetStacksUserParams{})
 	if err != nil {
 		log.Error(err)
+		return err
 	}
 
-	for _, v := range resp.Payload {
-		fmt.Printf("%s\n", v.Name)
+	var tableRows []TableRow
+	for _, v := range respStack.Payload {
+		clusterSkeleton := &ClusterSkeleton{}
+		respBlueprint, _ := client.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *v.Cluster.BlueprintID})
+		clusterSkeleton.fill(v, respBlueprint.Payload)
+		tableRows = append(tableRows, clusterSkeleton)
 	}
+	WriteTable(ClusterSkeletonListHeader, tableRows)
 	return nil
 }
 

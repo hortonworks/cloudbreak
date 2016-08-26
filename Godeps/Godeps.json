@@ -53,6 +53,15 @@
 			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
 		},
 		{
+			"ImportPath": "github.com/mattn/go-runewidth",
+			"Comment": "v0.0.1",
+			"Rev": "d6bea18f789704b5f83375793155289da36a3c7f"
+		},
+		{
+			"ImportPath": "github.com/olekukonko/tablewriter",
+			"Rev": "daf2955e742cf123959884fdff4685aa79b63135"
+		},
+		{
 			"ImportPath": "github.com/urfave/cli",
 			"Comment": "v1.18.0-47-g168c954",
 			"Rev": "168c95418e66e019fe17b8f4f5c45aa62ff80e23"
