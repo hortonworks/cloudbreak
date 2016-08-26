@@ -1,0 +1,63 @@
+name: Openstack Spark Blueprint Test
+parameters:
+  cloudProvider: OPENSTACK
+  blueprintName: hdp-spark-cluster
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  # integratontest.openstackcredential params must be set in application.yml
+  - name: openstack_credential_test
+    parameters:
+      credentialName: its-osspark-credandsmoke-cred
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackCredentialCreationTest
+
+  - name: create openstack network
+    parameters:
+      networkName: it-openstack-credandsmoke-network
+      subnetCIDR: 10.0.36.0/24
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
+
+  - name: create gateway template
+    parameters:
+      templateName: it-osspark-credandsmoke-gateway
+      instanceType: m1.large
+      volumeCount: 1
+      volumeSize: 10
+      templateAdditions: "host_group_master_1,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
+
+  - name: create master template
+    parameters:
+      templateName: it-osspark-credandsmoke-master
+      instanceType: m1.large
+      volumeCount: 2
+      volumeSize: 10
+      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
+
+  - name: create slave template
+    parameters:
+      templateName: it-osspark-credandsmoke-slave
+      instanceType: m1.large
+      volumeCount: 3
+      volumeSize: 10
+      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-osspark-cred
+      region: local
+      clusterName: it-osspark-cred
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
