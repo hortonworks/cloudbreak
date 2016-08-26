@@ -9,18 +9,24 @@ import (
 	"time"
 )
 
-func (c *Cloudbreak) CreateCredential(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
+func (c *Cloudbreak) CopyDefaultCredential(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
+	defaultCred := c.GetCredential("aws-access")
+	channel <- c.CreateCredential(defaultCred, skeleton.SSHKeyName)
+	wg.Done()
+}
+
+func (c *Cloudbreak) CreateCredential(defaultCredential models.CredentialResponse, existingKey string) int64 {
 	var credentialMap = make(map[string]interface{})
 	credentialMap["selector"] = "role-based"
-	credentialMap["roleArn"] = ""
-	credentialMap["existingKeyPairName"] = skeleton.SSHKeyName
+	credentialMap["roleArn"] = defaultCredential.Parameters["roleArn"]
+	credentialMap["existingKeyPairName"] = existingKey
 
 	credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	credReq := models.CredentialRequest{
 		Name:          credentialName,
 		CloudPlatform: "AWS",
-		PublicKey:     "",
+		PublicKey:     defaultCredential.PublicKey,
 		Parameters:    credentialMap,
 	}
 
@@ -33,6 +39,31 @@ func (c *Cloudbreak) CreateCredential(skeleton ClusterSkeleton, channel chan int
 	}
 
 	log.Infof("[CreateCredential] credential created, id: %d", resp.Payload.ID)
-	channel <- resp.Payload.ID
-	wg.Done()
+	return resp.Payload.ID
+}
+
+func (c *Cloudbreak) GetCredential(name string) models.CredentialResponse {
+	log.Infof("[GetCredential] sending get request to find credential with name: %s", name)
+	resp, err := c.Cloudbreak.Credentials.GetCredentialsUser(&credentials.GetCredentialsUserParams{})
+
+	if err != nil {
+		log.Errorf("[GetCredential] %s", err.Error())
+		newExitReturnError()
+	}
+
+	var awsAccess models.CredentialResponse
+	for _, credential := range resp.Payload {
+		if credential.Name == name {
+			awsAccess = *credential
+			break
+		}
+	}
+
+	if awsAccess.ID == nil {
+		log.Errorf("[GetCredential] failed to find the following credential: %s", name)
+		newExitReturnError()
+	}
+
+	log.Infof("[GetCredential] found credential, name: %s id: %d", awsAccess.Name, awsAccess.ID)
+	return awsAccess
 }

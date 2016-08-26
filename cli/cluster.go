@@ -102,7 +102,7 @@ func CreateCluster(c *cli.Context) error {
 	wg.Add(4)
 
 	credentialId := make(chan int64, 1)
-	go client.CreateCredential(skeleton, credentialId, &wg)
+	go client.CopyDefaultCredential(skeleton, credentialId, &wg)
 
 	templateIds := make(chan int64, 2)
 	go client.CreateTemplate(skeleton, templateIds, &wg)
