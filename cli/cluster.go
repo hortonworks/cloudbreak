@@ -69,6 +69,26 @@ func ListClusters(c *cli.Context) error {
 	return nil
 }
 
+func TerminateCluster(c *cli.Context) error {
+	clusterName := c.String(FlCBClusterName.Name)
+
+	if len(clusterName) == 0 {
+		log.Error(fmt.Sprintf("[TerminateCluster] You need to specify the %s parameter", FlCBClusterName.Name))
+		return newExitError()
+	}
+
+	log.Infof("[TerminateCluster] sending request to terminate cluster: %s")
+	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	err := client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName})
+
+	if err != nil {
+		log.Error(fmt.Sprintf("[TerminateCluster] Failed to terminate the cluster: %s, error: %s", clusterName, err.Error()))
+		return newExitError()
+	}
+
+	return nil
+}
+
 func CreateCluster(c *cli.Context) error {
 	path := c.String(FlCBInputJson.Name)
 	if len(path) == 0 {

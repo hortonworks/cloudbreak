@@ -9,6 +9,8 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/ernesto-jimenez/httplogger"
+	swaggerclient "github.com/go-swagger/go-swagger/client"
+	"github.com/go-swagger/go-swagger/httpkit"
 	httptransport "github.com/go-swagger/go-swagger/httpkit/client"
 	"github.com/go-swagger/go-swagger/strfmt"
 	apiclient "github.com/sequenceiq/hdc-cli/client"
@@ -40,12 +42,12 @@ var LoggedTransportConfig = httplogger.NewLoggedTransport(TransportConfig, newLo
 
 // NewHTTPClient creates a new cloudbreak HTTP client.
 func NewOAuth2HTTPClient(address string, username string, password string) *Cloudbreak {
-	transport := httptransport.New(address, "/cb/api/v1", []string{"https"})
+	cbTransport := &cbTransport{httptransport.New(address, "/cb/api/v1", []string{"https"})}
 	token := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
-	transport.DefaultAuthentication = httptransport.BearerToken(token)
+	cbTransport.Runtime.DefaultAuthentication = httptransport.BearerToken(token)
 
-	transport.Transport = LoggedTransportConfig
-	return &Cloudbreak{Cloudbreak: apiclient.New(transport, strfmt.Default)}
+	cbTransport.Runtime.Transport = LoggedTransportConfig
+	return &Cloudbreak{Cloudbreak: apiclient.New(cbTransport, strfmt.Default)}
 }
 
 func getOAuth2Token(identityUrl string, username string, password string, clientId string) string {
@@ -68,6 +70,35 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 	tokenString := string(tokenBytes)
 	token := tokenString[13 : len(tokenString)-11]
 	return token
+}
+
+type cbTransport struct {
+	Runtime *httptransport.Runtime
+}
+
+func (t *cbTransport) Submit(operation *swaggerclient.Operation) (interface{}, error) {
+	operation.Reader = &noContentSafeResponseReader{OriginalReader: operation.Reader}
+	response, err := t.Runtime.Submit(operation)
+	return response, err
+}
+
+type noContentSafeResponseReader struct {
+	OriginalReader swaggerclient.ResponseReader
+}
+
+func (r *noContentSafeResponseReader) ReadResponse(response swaggerclient.Response, consumer httpkit.Consumer) (interface{}, error) {
+	resp, err := r.OriginalReader.ReadResponse(response, consumer)
+	if err != nil {
+		switch response.Code() {
+		case 200:
+		case 202:
+		case 204:
+			return nil, nil
+		default:
+			return nil, err
+		}
+	}
+	return resp, nil
 }
 
 type httpLogger struct {

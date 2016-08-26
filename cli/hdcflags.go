@@ -27,4 +27,8 @@ var (
 		Name:  "cli-input-json",
 		Usage: "user provided file with json content",
 	}
+	FlCBClusterName = cli.StringFlag{
+		Name:  "cluster-name",
+		Usage: "name of a cluster",
+	}
 )
