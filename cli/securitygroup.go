@@ -14,9 +14,9 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 
 	secGroupName := "secg" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	defaultPorts := []string{"22", "443"}
+	defaultPorts := []string{"22", "443", "9443"}
 	if skeleton.WebAccess {
-		defaultPorts = append(defaultPorts, "9443", "8080", "18080", "18081", "9995")
+		defaultPorts = append(defaultPorts, "8080", "18080", "18081", "9995")
 	}
 
 	modifiable := false
