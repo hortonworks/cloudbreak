@@ -13,7 +13,6 @@ TimeoutSec=5min
 IgnoreSIGPIPE=no
 KillMode=process
 GuessMainPID=no
-RemainAfterExit=yes
 Environment='AMBARI_JVM_ARGS=-XX:MaxPermSize=512m'
 ExecStartPre=/opt/ambari-server/ambari-server-init.sh
 ExecStart=/usr/sbin/ambari-server start
