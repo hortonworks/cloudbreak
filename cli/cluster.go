@@ -226,7 +226,6 @@ func CreateCluster(c *cli.Context) error {
 		stackReq := models.StackRequest{
 			Name:            skeleton.ClusterName,
 			CredentialID:    <-credentialId,
-			Region:          "eu-west-1",
 			FailurePolicy:   &failurePolicy,
 			OnFailureAction: &failureAction,
 			InstanceGroups:  instanceGroups,
