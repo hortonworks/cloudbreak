@@ -95,7 +95,7 @@ func main() {
 		{
 			Name:   "terminate-cluster",
 			Usage:  "terminates a cluster",
-			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBWait, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
 			Before: ConfigRead,
 			Action: hdc.TerminateCluster,
 		},
