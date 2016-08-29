@@ -69,7 +69,7 @@ func (c *ClusterSkeleton) fill(stackResponse *models.StackResponse, blueprintRes
 	if stackResponse.Image.HdpVersion != nil {
 		c.HDPVersion = *stackResponse.Image.HdpVersion
 	}
-	c.ClusterType = *blueprintResponse.BlueprintName
+	c.ClusterType = blueprintResponse.Name
 
 	return nil
 }
@@ -78,20 +78,45 @@ func (c *ClusterSkeleton) DataAsStringArray() []string {
 	return []string{c.ClusterName, c.Status, c.HDPVersion, c.ClusterType}
 }
 
+func DescribeCluster(c *cli.Context) error {
+	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	clusterName := c.String(FlCBClusterName.Name)
+	if len(clusterName) == 0 {
+		log.Error(fmt.Sprintf("[DescribeCluster] You need to specify the %s parameter", FlCBClusterName.Name))
+		return newExitError()
+	}
+
+	respStack, err := client.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	stack := respStack.Payload
+
+	clusterSkeleton := &ClusterSkeleton{}
+	respBlueprint, _ := client.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
+	clusterSkeleton.fill(stack, respBlueprint.Payload)
+
+	fmt.Println(clusterSkeleton.JsonPretty())
+
+	return nil
+}
+
 func ListClusters(c *cli.Context) error {
 	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
-	respStack, err := client.Cloudbreak.Stacks.GetStacksUser(&stacks.GetStacksUserParams{})
+	respStacks, err := client.Cloudbreak.Stacks.GetStacksUser(&stacks.GetStacksUserParams{})
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
 	var tableRows []TableRow
-	for _, v := range respStack.Payload {
+	for _, stack := range respStacks.Payload {
 		clusterSkeleton := &ClusterSkeleton{}
-		respBlueprint, _ := client.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *v.Cluster.BlueprintID})
-		clusterSkeleton.fill(v, respBlueprint.Payload)
+		respBlueprint, _ := client.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
+		clusterSkeleton.fill(stack, respBlueprint.Payload)
 		tableRows = append(tableRows, clusterSkeleton)
 	}
 	WriteTable(ClusterSkeletonListHeader, tableRows)

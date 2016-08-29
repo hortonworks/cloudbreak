@@ -66,20 +66,6 @@ func main() {
 			Action: hdc.Configure,
 		},
 		{
-			Name:   "list-blueprints",
-			Usage:  "list the available blueprints",
-			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
-			Before: ConfigRead,
-			Action: hdc.ListBlueprints,
-		},
-		{
-			Name:   "list-clusters",
-			Usage:  "list the available clusters",
-			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
-			Before: ConfigRead,
-			Action: hdc.ListClusters,
-		},
-		{
 			Name:   "create-cluster",
 			Usage:  "creates a new cluster",
 			Flags:  []cli.Flag{hdc.FlCBInputJson, hdc.FlCBWait, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
@@ -91,6 +77,27 @@ func main() {
 					Action: hdc.GenerateCreateClusterSkeleton,
 				},
 			},
+		},
+		{
+			Name:   "list-cluster-types",
+			Usage:  "list the available blueprints",
+			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Before: ConfigRead,
+			Action: hdc.ListBlueprints,
+		},
+		{
+			Name:   "describe-cluster",
+			Usage:  "list the available clusters",
+			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Before: ConfigRead,
+			Action: hdc.DescribeCluster,
+		},
+		{
+			Name:   "list-clusters",
+			Usage:  "list the available clusters",
+			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Before: ConfigRead,
+			Action: hdc.ListClusters,
 		},
 		{
 			Name:   "terminate-cluster",
