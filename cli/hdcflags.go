@@ -31,4 +31,8 @@ var (
 		Name:  "cluster-name",
 		Usage: "name of a cluster",
 	}
+	FlCBWait = cli.StringFlag{
+		Name:  "wait",
+		Usage: "wait for the operation to finish",
+	}
 )

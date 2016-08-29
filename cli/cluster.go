@@ -11,7 +11,9 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+	"strings"
 	"sync"
+	"time"
 )
 
 type ClusterSkeleton struct {
@@ -241,6 +243,7 @@ func CreateCluster(c *cli.Context) error {
 		log.Infof("[CreateCluster] cluster created, id: %d", resp.Payload.ID)
 	}()
 
+	client.waitForClusterToFinish(stackId, c)
 	return nil
 }
 
@@ -264,4 +267,37 @@ func GenerateCreateClusterSkeleton(c *cli.Context) error {
 	}
 	fmt.Println(skeleton.JsonPretty())
 	return nil
+}
+
+func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context) {
+	if context.Bool(FlCBWait.Name) {
+		defer timeTrack(time.Now(), "cluster_install")
+
+		log.Infof("[WaitForClusterToFinish] wait for cluster to finish")
+		for {
+			resp, err := c.Cloudbreak.Stacks.GetStacksID(&stacks.GetStacksIDParams{ID: stackId})
+
+			if err != nil {
+				log.Infof("[WaitForClusterToFinish] %s", err.Error())
+				newExitReturnError()
+			}
+
+			desiredStatus := "AVAILABLE"
+			stackStatus := *resp.Payload.Status
+			clusterStatus := *resp.Payload.Cluster.Status
+
+			log.Infof("[WaitForClusterToFinish] stack status: %s, cluster status: %s", stackStatus, clusterStatus)
+			if stackStatus == desiredStatus && clusterStatus == desiredStatus {
+				log.Infof("[WaitForClusterToFinish] cluster successfully installed")
+				break
+			}
+			if strings.Contains(stackStatus, "FAILED") || strings.Contains(clusterStatus, "FAILED") {
+				log.Infof("[WaitForClusterToFinish] cluster installation failed")
+				newExitReturnError()
+			}
+
+			log.Infof("[WaitForClusterToFinish] cluster is in progress, wait for 20 seconds")
+			time.Sleep(20 * time.Second)
+		}
+	}
 }

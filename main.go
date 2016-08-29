@@ -82,7 +82,7 @@ func main() {
 		{
 			Name:   "create-cluster",
 			Usage:  "creates a new cluster",
-			Flags:  []cli.Flag{hdc.FlCBInputJson, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Flags:  []cli.Flag{hdc.FlCBInputJson, hdc.FlCBWait, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
 			Before: ConfigRead,
 			Action: hdc.CreateCluster,
 			Subcommands: []cli.Command{
