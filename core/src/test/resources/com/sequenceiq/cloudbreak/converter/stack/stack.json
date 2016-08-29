@@ -1,7 +1,7 @@
 {
   "cloudPlatform": "AWS",
   "name": "mystack",
-  "region": "EU-WEST-1",
+  "region": "eu-west-1",
   "credentialId": 51,
   "image": "aws-image",
   "onFailureAction": "ROLLBACK",
