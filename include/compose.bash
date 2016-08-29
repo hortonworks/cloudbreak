@@ -391,6 +391,7 @@ cloudbreak:
         - "HWX_CLOUD_ADDRESS=$PUBLIC_IP"
         - AWS_INSTANCE_ID
         - AWS_ACCOUNT_ID
+        - CB_PLATFORM_DETAULT_REGIONS
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
