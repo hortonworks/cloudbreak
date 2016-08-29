@@ -10,11 +10,13 @@ import (
 	"time"
 )
 
+var SECURITY_GROUP_DEFAULT_PORTS = []string{"22", "443", "9443"}
+
 func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
 
 	secGroupName := "secg" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	defaultPorts := []string{"22", "443", "9443"}
+	defaultPorts := SECURITY_GROUP_DEFAULT_PORTS
 	if skeleton.WebAccess {
 		defaultPorts = append(defaultPorts, "8080", "18080", "18081", "9995")
 	}

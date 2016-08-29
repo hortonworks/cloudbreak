@@ -16,9 +16,11 @@ import (
 	"time"
 
 	"github.com/sequenceiq/hdc-cli/client/blueprints"
+	"github.com/sequenceiq/hdc-cli/client/templates"
+	"github.com/sequenceiq/hdc-cli/client/credentials"
 )
 
-var ClusterSkeletonListHeader []string = []string{"ClusterName", "Status", "HDPVersion", "ClusterType"}
+var ClusterSkeletonListHeader []string = []string{"Cluster Name", "Status", "Status Reason", "HDP Version", "Cluster Type"}
 
 type ClusterSkeleton struct {
 	ClusterName              string         `json:"ClusterName" yaml:"ClusterName"`
@@ -34,6 +36,7 @@ type ClusterSkeleton struct {
 	ClusterAndAmbariPassword string         `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
 
 	Status                   string         `json:"Status,omitempty" yaml:"Status,omitempty"`
+	StatusReason             string         `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
 
 	//InstanceRole             string `json:"InstanceRole" yaml:"InstanceRole"`
 	//HiveMetastoreUrl         string `json:"HiveMetastoreUrl" yaml:"HiveMetastoreUrl"`
@@ -42,10 +45,20 @@ type ClusterSkeleton struct {
 }
 
 type InstanceConfig struct {
-	InstanceType string `json:"InstanceType" yaml:"InstanceType"`
-	VolumeType   string `json:"VolumeType" yaml:"VolumeType"`
-	VolumeSize   int32  `json:"VolumeSize" yaml:"VolumeSize"`
-	VolumeCount  int32  `json:"VolumeCount" yaml:"VolumeCount"`
+	InstanceType  string `json:"InstanceType" yaml:"InstanceType"`
+	VolumeType    string `json:"VolumeType" yaml:"VolumeType"`
+	VolumeSize    int32  `json:"VolumeSize" yaml:"VolumeSize"`
+	VolumeCount   int32  `json:"VolumeCount" yaml:"VolumeCount"`
+	instanceCount int32
+}
+
+func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroup, template *models.TemplateResponse) error {
+	c.instanceCount = instanceGroup.NodeCount
+	c.InstanceType = template.InstanceType
+	c.VolumeType = *template.VolumeType
+	c.VolumeSize = *template.VolumeSize
+	c.VolumeCount = template.VolumeCount
+	return nil
 }
 
 func (c *ClusterSkeleton) Json() string {
@@ -63,19 +76,61 @@ func (c *ClusterSkeleton) Yaml() string {
 	return string(j)
 }
 
-func (c *ClusterSkeleton) fill(stackResponse *models.StackResponse, blueprintResponse *models.BlueprintResponse) error {
-	c.ClusterName = stackResponse.Name
-	c.Status = *stackResponse.Status
-	if stackResponse.Image.HdpVersion != nil {
-		c.HDPVersion = *stackResponse.Image.HdpVersion
+func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.CredentialResponse, blueprint *models.BlueprintResponse, templateMap map[string]*models.TemplateResponse) error {
+	c.ClusterName = stack.Name
+	c.Status = *stack.Status
+	if (c.Status == "AVAILABLE") {
+		c.Status = *stack.Cluster.Status
+		c.StatusReason = *stack.Cluster.StatusReason
+	} else {
+		c.StatusReason = *stack.StatusReason
 	}
-	c.ClusterType = blueprintResponse.Name
+	if stack.Image.HdpVersion != nil {
+		c.HDPVersion = *stack.Image.HdpVersion
+	}
+	c.ClusterType = blueprint.Name
+
+	for _, v := range stack.InstanceGroups {
+		if (v.Group == "master") {
+			c.Master.fill(v, templateMap[v.Group])
+		}
+		if (v.Group == "worker") {
+			c.Worker.fill(v, templateMap[v.Group])
+		}
+	}
+
+	if str, ok := credential.Parameters["existingKeyPairName"].(string); ok {
+		c.SSHKeyName = str
+	}
+
+	c.InstanceCount = c.Master.instanceCount + c.Worker.instanceCount
+	c.ClusterAndAmbariUser = stack.Cluster.UserName
+	c.ClusterAndAmbariPassword = stack.Cluster.Password
 
 	return nil
 }
 
 func (c *ClusterSkeleton) DataAsStringArray() []string {
-	return []string{c.ClusterName, c.Status, c.HDPVersion, c.ClusterType}
+	return []string{c.ClusterName, c.Status, c.StatusReason, c.HDPVersion, c.ClusterType}
+}
+
+func FetchCluster(client *Cloudbreak, stack *models.StackResponse) (*ClusterSkeleton, error) {
+
+	respCredential, _ := client.Cloudbreak.Credentials.GetCredentialsID(&credentials.GetCredentialsIDParams{ID: stack.CredentialID})
+
+	respBlueprint, _ := client.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
+
+	var templateMap map[string]*models.TemplateResponse = make(map[string]*models.TemplateResponse)
+	for _, v := range stack.InstanceGroups {
+		respTemplate, err := client.Cloudbreak.Templates.GetTemplatesID(&templates.GetTemplatesIDParams{ID: v.TemplateID})
+		if (err == nil) {
+			templateMap[v.Group] = respTemplate.Payload
+		}
+	}
+
+	clusterSkeleton := &ClusterSkeleton{}
+	clusterSkeleton.fill(stack, respCredential.Payload, respBlueprint.Payload, templateMap)
+	return clusterSkeleton, nil
 }
 
 func DescribeCluster(c *cli.Context) error {
@@ -91,13 +146,7 @@ func DescribeCluster(c *cli.Context) error {
 		log.Error(err)
 		return err
 	}
-
-	stack := respStack.Payload
-
-	clusterSkeleton := &ClusterSkeleton{}
-	respBlueprint, _ := client.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
-	clusterSkeleton.fill(stack, respBlueprint.Payload)
-
+	clusterSkeleton, _ := FetchCluster(client, respStack.Payload)
 	fmt.Println(clusterSkeleton.JsonPretty())
 
 	return nil
@@ -114,9 +163,7 @@ func ListClusters(c *cli.Context) error {
 
 	var tableRows []TableRow
 	for _, stack := range respStacks.Payload {
-		clusterSkeleton := &ClusterSkeleton{}
-		respBlueprint, _ := client.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
-		clusterSkeleton.fill(stack, respBlueprint.Payload)
+		clusterSkeleton, _ := FetchCluster(client, stack)
 		tableRows = append(tableRows, clusterSkeleton)
 	}
 	WriteTable(ClusterSkeletonListHeader, tableRows)
