@@ -213,7 +213,7 @@ public class EmailSenderService {
         Map<String, Object> telemetryMailMap = new LinkedHashMap<>();
         if (configureSmartSense && !StringUtils.isEmpty(smartSenseId)) {
             telemetryMailMap.put("Date", dateFormat.format(new Date()));
-            if (Strings.isNullOrEmpty(accountId)) {
+            if (!Strings.isNullOrEmpty(accountId)) {
                 telemetryMailMap.put("Account ID", accountId);
             }
             telemetryMailMap.put("Smartsense ID", smartSenseId);
@@ -223,10 +223,10 @@ public class EmailSenderService {
             telemetryMailMap.put("Instance type(s)", getInstanceTypes(stack));
             telemetryMailMap.put("Running time", getRunningTime(cluster));
             telemetryMailMap.put("Status", status.normalizedStatusName());
-            if (Strings.isNullOrEmpty(templateVersion)) {
+            if (!Strings.isNullOrEmpty(templateVersion)) {
                 telemetryMailMap.put("Version", templateVersion);
             }
-            if (Strings.isNullOrEmpty(awsInstanceId)) {
+            if (!Strings.isNullOrEmpty(awsInstanceId)) {
                 telemetryMailMap.put("Controller Instance ID", awsInstanceId);
             }
             telemetryMailMap.put("Master Instance ID", getMasterInstanceId(stack));
