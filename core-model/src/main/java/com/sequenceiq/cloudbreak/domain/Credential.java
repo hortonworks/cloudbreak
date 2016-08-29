@@ -33,13 +33,12 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
         @NamedQuery(
                 name = "Credential.findPublicInAccountForUser",
                 query = "SELECT c FROM Credential c "
-                        + "WHERE (c.account= :account AND c.publicInAccount= true) "
-                        + "OR c.owner= :user"
+                        + "WHERE ((c.account= :account AND c.publicInAccount= true) OR c.owner= :user)"
                         + " AND c.archived IS FALSE"),
         @NamedQuery(
                 name = "Credential.findOneByName",
                 query = "SELECT b FROM Credential b "
-                        + "WHERE b.name= :name and b.account= :account"
+                        + "WHERE b.name= :name AND b.account= :account"
                         + " AND b.archived IS FALSE"),
         @NamedQuery(
                 name = "Credential.findAllInAccount",
@@ -49,12 +48,12 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
         @NamedQuery(
                 name = "Credential.findByIdInAccount",
                 query = "SELECT c FROM Credential c "
-                        + "WHERE c.id= :id and c.account= :account"
+                        + "WHERE c.id= :id AND c.account= :account"
                         + " AND c.archived IS FALSE"),
         @NamedQuery(
                 name = "Credential.findByNameInAccount",
                 query = "SELECT c FROM Credential c "
-                        + "WHERE c.name= :name and ((c.publicInAccount=true and c.account= :account) or c.owner= :owner)"
+                        + "WHERE c.name= :name AND ((c.publicInAccount=true and c.account= :account) OR c.owner= :owner)"
                         + " AND c.archived IS FALSE"),
         @NamedQuery(
                 name = "Credential.findByNameInUser",
