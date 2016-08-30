@@ -10,18 +10,30 @@ The Change Log summarizes the changes in Cloudbreak.
 - ClusterBootstrapperTest randomly fails
 - slider does not work with ssl on python 2.7.9+
 - fix Ambari address on UI for clusters that provisioned by an older version of Cloudbreak
+- credential visibility on cluster details view
+- "Keystone Version" dropdown layouts
 
 ### Added
 
 - added HDP version field to RDS config
 - ability to configure remote database for Ambari
 - stacks/clusters are associated with Cloudbreak version
+- new resource to configure LDAP service for Knox
+- support of Google's spot instances
+- support for c4 instance types in AWS
+- enable auto recovery for HDP services on failure via blueprint
+- ability to specify multiple subnets for the same VPC on AWS
+- ability to configure default regions
 
 ### Changed
 
 - reinstate recipes on Uluwatu UI
 - increase Ambari password length and fix error message
 - automatic blueprint update during startup
+- on OpenStack stack name contains stack ID
+- disable upgrade of saltstack
+- remove unecessary `require` flags from API documentation
+- improve security of salt communication
 
 ## [v1.4.0]
 
