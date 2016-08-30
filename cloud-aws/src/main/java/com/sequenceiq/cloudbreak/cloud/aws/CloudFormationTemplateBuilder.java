@@ -59,7 +59,7 @@ public class CloudFormationTemplateBuilder {
         model.put("existingSubnet", !isNullOrEmptyList(context.existingSubnetCidr));
         model.put("enableInstanceProfile", context.enableInstanceProfile || context.s3RoleAvailable);
         model.put("existingRole", context.s3RoleAvailable);
-        model.put("cbSubnet", (isNullOrEmptyList(context.existingSubnetCidr)) ? Lists.newArrayList(context.stack.getNetwork().getSubnet().getCidr())
+        model.put("cbSubnet", (isNullOrEmptyList(context.existingSubnetCidr)) ? Lists.newArrayList(context.defaultSubnet)
                 : context.existingSubnetCidr);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
@@ -114,6 +114,7 @@ public class CloudFormationTemplateBuilder {
         private String templatePath;
         private boolean enableInstanceProfile;
         private boolean s3RoleAvailable;
+        private String defaultSubnet;
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;
@@ -162,6 +163,11 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withTemplatePath(String templatePath) {
             this.templatePath = templatePath;
+            return this;
+        }
+
+        public ModelContext withDefaultSubnet(String subnet) {
+            this.defaultSubnet = subnet;
             return this;
         }
     }
