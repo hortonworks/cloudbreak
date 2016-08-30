@@ -11,8 +11,6 @@ import io.swagger.annotations.ApiModelProperty;
 public class ImageJson implements JsonEntity {
     @ApiModelProperty(ImageModelDescription.IMAGE_NAME)
     private String imageName;
-    @ApiModelProperty(ImageModelDescription.HDPVERSION)
-    private String hdpVersion;
 
     public String getImageName() {
         return imageName;
@@ -22,11 +20,4 @@ public class ImageJson implements JsonEntity {
         this.imageName = imageName;
     }
 
-    public String getHdpVersion() {
-        return hdpVersion;
-    }
-
-    public void setHdpVersion(String hdpVersion) {
-        this.hdpVersion = hdpVersion;
-    }
 }

@@ -47,6 +47,10 @@ public abstract class StackBase implements JsonEntity {
     private Long networkId;
     @ApiModelProperty(value = StackModelDescription.RELOCATE_DOCKER)
     private Boolean relocateDocker;
+    @ApiModelProperty(value = StackModelDescription.AMBARI_VERSION)
+    private String ambariVersion;
+    @ApiModelProperty(value = StackModelDescription.HDP_VERSION)
+    private String hdpVersion;
 
     @ApiModelProperty(StackModelDescription.PARAMETERS)
     private Map<String, String> parameters = new HashMap<>();
@@ -148,4 +152,21 @@ public abstract class StackBase implements JsonEntity {
     public void setRelocateDocker(Boolean relocateDocker) {
         this.relocateDocker = relocateDocker;
     }
+
+    public String getAmbariVersion() {
+        return ambariVersion;
+    }
+
+    public void setAmbariVersion(String ambariVersion) {
+        this.ambariVersion = ambariVersion;
+    }
+
+    public String getHdpVersion() {
+        return hdpVersion;
+    }
+
+    public void setHdpVersion(String hdpVersion) {
+        this.hdpVersion = hdpVersion;
+    }
+
 }
