@@ -50,8 +50,7 @@ compose-pull-parallel() {
     cloudbreak-conf-tags
 
     [ -f docker-compose.yml ] || deployer-generate
-
-    sed -n "s/.*image://p" docker-compose.yml | cat - <<< "sequenceiq/cb-shell:${DOCKER_TAG_CLOUDBREAK_SHELL}" |sort -u|xargs -n1 -P 20 docker pull
+    (sed -n "s/.*image://p" docker-compose.yml ; echo "sequenceiq/cb-shell:${DOCKER_TAG_CLOUDBREAK_SHELL}") |sort -u|xargs -n1 -P 20 docker pull
 }
 
 create-logfile() {
