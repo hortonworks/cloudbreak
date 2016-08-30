@@ -20,6 +20,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"io/ioutil"
 )
 
 type Cloudbreak struct {
@@ -95,7 +96,8 @@ func (r *noContentSafeResponseReader) ReadResponse(response swaggerclient.Respon
 		case 204:
 			return nil, nil
 		default:
-			return nil, err
+			body, _ := ioutil.ReadAll(response.Body())
+			return nil, swaggerclient.NewAPIError("", string(body), response.Code())
 		}
 	}
 	return resp, nil
