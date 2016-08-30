@@ -76,7 +76,7 @@ func (c *ClusterSkeleton) Yaml() string {
 	return string(j)
 }
 
-func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.CredentialResponse, blueprint *models.BlueprintResponse, templateMap map[string]*models.TemplateResponse) error {
+func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.CredentialResponse, blueprint *models.BlueprintResponse, templateMap map[string]*models.TemplateResponse, securityMap map[string][]*models.SecurityRule) error {
 	c.ClusterName = stack.Name
 	c.Status = *stack.Status
 	if c.Status == "AVAILABLE" {
@@ -98,9 +98,23 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 			c.Worker.fill(v, templateMap[v.Group])
 		}
 	}
-
 	if str, ok := credential.Parameters["existingKeyPairName"].(string); ok {
 		c.SSHKeyName = str
+	}
+
+	keys := make([]string, 0, len(securityMap))
+	for k := range securityMap {
+		keys = append(keys, k)
+	}
+	c.RemoteAccess = strings.Join(keys, ",")
+
+	for _, v := range securityMap {
+		for _, sr := range v {
+			log.Debugf("SecurityRule: %s", sr.Ports)
+			if(strings.Join(SECURITY_GROUP_DEFAULT_PORTS, ",") != sr.Ports){
+				c.WebAccess = true
+			}
+		}
 	}
 
 	c.InstanceCount = c.Master.instanceCount + c.Worker.instanceCount
@@ -127,9 +141,9 @@ func FetchCluster(client *Cloudbreak, stack *models.StackResponse) (*ClusterSkel
 			templateMap[v.Group] = respTemplate.Payload
 		}
 	}
-
+	securityMap, _ := client.GetSecurityDetails(client, stack)
 	clusterSkeleton := &ClusterSkeleton{}
-	clusterSkeleton.fill(stack, respCredential.Payload, respBlueprint.Payload, templateMap)
+	clusterSkeleton.fill(stack, respCredential.Payload, respBlueprint.Payload, templateMap, securityMap)
 	return clusterSkeleton, nil
 }
 
