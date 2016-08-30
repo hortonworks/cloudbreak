@@ -6,7 +6,6 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -73,7 +72,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Collections.singletonList("platformVariant"));
+        assertAllFieldsNotNull(result, Arrays.asList("platformVariant", "ambariVersion", "hdpVersion"));
     }
 
     @Test
@@ -90,7 +89,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("credentialId", "cloudPlatform", "platformVariant"));
+        assertAllFieldsNotNull(result, Arrays.asList("credentialId", "cloudPlatform", "platformVariant", "ambariVersion", "hdpVersion"));
     }
 
     @Test
@@ -108,7 +107,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("cluster", "platformVariant"));
+        assertAllFieldsNotNull(result, Arrays.asList("cluster", "platformVariant", "ambariVersion", "hdpVersion"));
     }
 
     @Test
@@ -125,7 +124,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("failurePolicy", "platformVariant"));
+        assertAllFieldsNotNull(result, Arrays.asList("failurePolicy", "platformVariant", "ambariVersion", "hdpVersion"));
     }
 
     @Test
@@ -143,7 +142,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("networkId", "platformVariant"));
+        assertAllFieldsNotNull(result, Arrays.asList("networkId", "platformVariant", "ambariVersion", "hdpVersion"));
     }
 
     @Override
