@@ -16,8 +16,8 @@ import (
 	"time"
 
 	"github.com/sequenceiq/hdc-cli/client/blueprints"
-	"github.com/sequenceiq/hdc-cli/client/templates"
 	"github.com/sequenceiq/hdc-cli/client/credentials"
+	"github.com/sequenceiq/hdc-cli/client/templates"
 )
 
 var ClusterSkeletonListHeader []string = []string{"Cluster Name", "Status", "Status Reason", "HDP Version", "Cluster Type"}
@@ -35,8 +35,8 @@ type ClusterSkeleton struct {
 	ClusterAndAmbariUser     string         `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
 	ClusterAndAmbariPassword string         `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
 
-	Status                   string         `json:"Status,omitempty" yaml:"Status,omitempty"`
-	StatusReason             string         `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
+	Status       string `json:"Status,omitempty" yaml:"Status,omitempty"`
+	StatusReason string `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
 
 	//InstanceRole             string `json:"InstanceRole" yaml:"InstanceRole"`
 	//HiveMetastoreUrl         string `json:"HiveMetastoreUrl" yaml:"HiveMetastoreUrl"`
@@ -79,7 +79,7 @@ func (c *ClusterSkeleton) Yaml() string {
 func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.CredentialResponse, blueprint *models.BlueprintResponse, templateMap map[string]*models.TemplateResponse) error {
 	c.ClusterName = stack.Name
 	c.Status = *stack.Status
-	if (c.Status == "AVAILABLE") {
+	if c.Status == "AVAILABLE" {
 		c.Status = *stack.Cluster.Status
 		c.StatusReason = *stack.Cluster.StatusReason
 	} else {
@@ -91,10 +91,10 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	c.ClusterType = blueprint.Name
 
 	for _, v := range stack.InstanceGroups {
-		if (v.Group == "master") {
+		if v.Group == "master" {
 			c.Master.fill(v, templateMap[v.Group])
 		}
-		if (v.Group == "worker") {
+		if v.Group == "worker" {
 			c.Worker.fill(v, templateMap[v.Group])
 		}
 	}
@@ -123,7 +123,7 @@ func FetchCluster(client *Cloudbreak, stack *models.StackResponse) (*ClusterSkel
 	var templateMap map[string]*models.TemplateResponse = make(map[string]*models.TemplateResponse)
 	for _, v := range stack.InstanceGroups {
 		respTemplate, err := client.Cloudbreak.Templates.GetTemplatesID(&templates.GetTemplatesIDParams{ID: v.TemplateID})
-		if (err == nil) {
+		if err == nil {
 			templateMap[v.Group] = respTemplate.Payload
 		}
 	}
@@ -144,7 +144,7 @@ func DescribeCluster(c *cli.Context) error {
 	respStack, err := client.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
 	if err != nil {
 		log.Error(err)
-		return err
+		return newExitError()
 	}
 	clusterSkeleton, _ := FetchCluster(client, respStack.Payload)
 	fmt.Println(clusterSkeleton.JsonPretty())
@@ -233,7 +233,7 @@ func CreateCluster(c *cli.Context) error {
 	go client.CreateSecurityGroup(skeleton, secGroupId, &wg)
 
 	networkId := make(chan int64, 1)
-	go client.CreateNetwork(skeleton, networkId, &wg)
+	go client.CopyDefaultNetwork(skeleton, networkId, &wg)
 
 	wg.Wait()
 

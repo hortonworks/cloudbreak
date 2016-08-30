@@ -14,13 +14,13 @@ import (
 	httptransport "github.com/go-swagger/go-swagger/httpkit/client"
 	"github.com/go-swagger/go-swagger/strfmt"
 	apiclient "github.com/sequenceiq/hdc-cli/client"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
 	"time"
-	"io/ioutil"
 )
 
 type Cloudbreak struct {
