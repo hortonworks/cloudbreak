@@ -23,6 +23,10 @@ type StackResponse struct {
 	 */
 	Account *string `json:"account,omitempty"`
 
+	/* specific version of ambari
+	 */
+	AmbariVersion *string `json:"ambariVersion,omitempty"`
+
 	/* availability zone of the stack
 	 */
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
@@ -59,6 +63,10 @@ type StackResponse struct {
 	/* port of the gateway secured proxy
 	 */
 	GatewayPort *int32 `json:"gatewayPort,omitempty"`
+
+	/* specific version of HDP
+	 */
+	HdpVersion *string `json:"hdpVersion,omitempty"`
 
 	/* id of the stack
 	 */

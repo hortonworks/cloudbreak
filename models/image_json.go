@@ -11,10 +11,6 @@ swagger:model ImageJson
 */
 type ImageJSON struct {
 
-	/* hdp version of image
-	 */
-	HdpVersion *string `json:"hdpVersion,omitempty"`
-
 	/* name of the image
 	 */
 	ImageName *string `json:"imageName,omitempty"`
