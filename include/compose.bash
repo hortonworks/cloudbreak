@@ -37,18 +37,21 @@ compose-ps() {
 
 compose-pull() {
     declare desc="Pulls service images"
+    cloudbreak-conf-tags
 
     [ -f docker-compose.yml ] || deployer-generate
 
     dockerCompose pull
+    docker pull "sequenceiq/cb-shell:${DOCKER_TAG_CLOUDBREAK_SHELL}"
 }
 
 compose-pull-parallel() {
     declare desc="Pulls service images parallel"
+    cloudbreak-conf-tags
 
     [ -f docker-compose.yml ] || deployer-generate
 
-    sed -n "s/.*image://p" docker-compose.yml |sort -u|xargs -n1 -P 20 docker pull
+    sed -n "s/.*image://p" docker-compose.yml | cat - <<< "sequenceiq/cb-shell:${DOCKER_TAG_CLOUDBREAK_SHELL}" |sort -u|xargs -n1 -P 20 docker pull
 }
 
 create-logfile() {
