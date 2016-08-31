@@ -33,7 +33,7 @@ public class NetworkJson implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, required = true)
     @NotNull
     private boolean publicInAccount;
-    @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.SUBNET_CIDR, required = true)
+    @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.SUBNET_CIDR)
     @ValidSubnet
     private String subnetCIDR;
     @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.PARAMETERS, required = true)
