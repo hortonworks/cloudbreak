@@ -364,7 +364,7 @@ func CreateCluster(c *cli.Context) error {
 
 func GenerateCreateClusterSkeleton(c *cli.Context) error {
 	skeleton := ClusterSkeleton{
-		ClusterType:   "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",
+		ClusterType:   "EDW-ETL: Apache Spark 2.0-preview",
 		HDPVersion:    "2.5",
 		InstanceCount: 3,
 		Master: InstanceConfig{
