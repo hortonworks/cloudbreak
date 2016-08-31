@@ -99,8 +99,8 @@ public class AwsResourceConnector implements ResourceConnector {
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
     private static final List<String> CAPABILITY_IAM = singletonList("CAPABILITY_IAM");
-    private static final int MAX_NUM_OF_SUBNETS = 255;
     private static final int INCREMENT_HOST_NUM = 256;
+    private static final int CIDR_PREFIX = 24;
 
     private static final List<String> SUSPENDED_PROCESSES = asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
             "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
@@ -160,10 +160,8 @@ public class AwsResourceConnector implements ResourceConnector {
             }
         }
 
-        String subnet = stack.getNetwork().getSubnet().getCidr();
-        if (existingVPC && !existingSubnet && subnet == null) {
-            subnet = findNonOverLappingCIDR(ac, stack);
-        }
+        String cidr = stack.getNetwork().getSubnet().getCidr();
+        String subnet = existingVPC && !existingSubnet && cidr == null ? findNonOverLappingCIDR(ac, stack) : cidr;
 
         CloudFormationTemplateBuilder.ModelContext modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(ac)
@@ -179,7 +177,25 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withDefaultSubnet(subnet);
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
-        CreateStackRequest createStackRequest = new CreateStackRequest()
+        client.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
+        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stackId);
+        PollTask<Boolean> task = awsPollTaskFactory.newAwsCloudformationStatusCheckerTask(ac, client,
+                CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, cFStackName, true);
+        try {
+            Boolean statePollerResult = task.call();
+            if (!task.completed(statePollerResult)) {
+                syncPollingScheduler.schedule(task);
+            }
+        } catch (Exception e) {
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
+
+        List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, client, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
+        return check(ac, cloudResources);
+    }
+
+    private CreateStackRequest createCreateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String subnet, String cfTemplate) {
+        return new CreateStackRequest()
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cfTemplate)
@@ -195,19 +211,10 @@ public class AwsResourceConnector implements ResourceConnector {
                                 subnet
                         )
                 );
-        client.createStack(createStackRequest);
-        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stackId);
-        PollTask<Boolean> task = awsPollTaskFactory.newAwsCloudformationStatusCheckerTask(ac, client,
-                CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, cFStackName, true);
-        try {
-            Boolean statePollerResult = task.call();
-            if (!task.completed(statePollerResult)) {
-                syncPollingScheduler.schedule(task);
-            }
-        } catch (Exception e) {
-            throw new CloudConnectorException(e.getMessage(), e);
-        }
+    }
 
+    private List<CloudResource> getCloudResources(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationClient client,
+            AmazonEC2Client amazonEC2Client, AmazonAutoScalingClient amazonASClient, boolean mapPublicIpOnLaunch) {
         List<CloudResource> cloudResources = new ArrayList<>();
         if (mapPublicIpOnLaunch) {
             String eipAllocationId = getElasticIpAllocationId(cFStackName, client);
@@ -219,7 +226,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 ac.getCloudContext().getLocation().getRegion().value());
         scheduleStatusChecks(stack, ac, cloudFormationClient);
         suspendAutoScaling(ac, stack);
-        return check(ac, cloudResources);
+        return cloudResources;
     }
 
     private String getElasticIpAllocationId(String cFStackName, AmazonCloudFormationClient client) {
@@ -605,10 +612,6 @@ public class AwsResourceConnector implements ResourceConnector {
         DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVPC());
         Vpc vpc = ec2Client.describeVpcs(vpcRequest).getVpcs().get(0);
         String vpcCidr = vpc.getCidrBlock();
-        // TODO should be less than /24
-        if (!vpcCidr.endsWith("/16")) {
-            throw new CloudConnectorException("The selected VPCs subnet mask has to be 255.255.0.0");
-        }
         LOGGER.info("Subnet cidr is empty, find a non-overlapping subnet for VPC cidr: {}", vpcCidr);
 
         DescribeSubnetsRequest request = new DescribeSubnetsRequest().withFilters(new Filter("vpc-id", singletonList(awsNetworkView.getExistingVPC())));
@@ -621,10 +624,19 @@ public class AwsResourceConnector implements ResourceConnector {
 
     private String calculateSubnet(Vpc vpc, List<String> subnetCidrs) {
         SubnetUtils.SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
+
+        String[] cidrParts = vpcInfo.getCidrSignature().split("/");
+        int netmask = Integer.valueOf(cidrParts[cidrParts.length - 1]);
+        int netmaskBits = CIDR_PREFIX - netmask;
+        if (netmaskBits <= 0) {
+            throw new CloudConnectorException("The selected VPC has to be in a bigger CIDR range than /24");
+        }
+
+        int numberOfSubnets = Double.valueOf(Math.pow(2, netmaskBits)).intValue();
         String lowProbe = incrementIp(vpcInfo.getLowAddress());
         String highProbe = new SubnetUtils(toSubnetCidr(lowProbe)).getInfo().getHighAddress();
         boolean foundProbe = false;
-        for (int i = 0; i < MAX_NUM_OF_SUBNETS; i++) {
+        for (int i = 0; i < numberOfSubnets - 1; i++) {
             boolean overlapping = false;
             for (String subnetCidr : subnetCidrs) {
                 SubnetUtils.SubnetInfo subnetInfo = new SubnetUtils(subnetCidr).getInfo();
@@ -646,7 +658,7 @@ public class AwsResourceConnector implements ResourceConnector {
             LOGGER.info("The following subnet cidr found: {} for VPC: {}", subnet, vpc.getVpcId());
             return subnet;
         } else {
-            throw new CloudConnectorException("Cannot find non-overlapping CIDR range with subnet mask 255.255.0.0");
+            throw new CloudConnectorException("Cannot find non-overlapping CIDR range");
         }
     }
 
