@@ -49,7 +49,7 @@ public class HdpInfoSearchService {
             return null;
         }
         List<AmbariCatalog> ambariCatalog;
-        if (cbVersion != null && !"unspecified".equals(cbVersion) && !StringUtils.isEmpty(cbVersion)) {
+        if (!StringUtils.isEmpty(cbVersion) && !"unspecified".equals(cbVersion) && !cbVersion.contains("dev")) {
             ambariCatalog = imageCatalog.getAmbariVersions().stream()
                     .filter(p -> p.getAmbariInfo().getCbVersions().contains(cbVersion)).collect(Collectors.toList());
         } else {
