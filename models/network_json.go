@@ -59,10 +59,8 @@ type NetworkJSON struct {
 	PublicInAccount bool `json:"publicInAccount"`
 
 	/* the subnet definition of the network in CIDR format
-
-	Required: true
-	*/
-	SubnetCIDR string `json:"subnetCIDR"`
+	 */
+	SubnetCIDR *string `json:"subnetCIDR,omitempty"`
 
 	/* id of the topology the resource belongs to
 	 */
@@ -94,11 +92,6 @@ func (m *NetworkJSON) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validatePublicInAccount(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateSubnetCIDR(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -168,15 +161,6 @@ func (m *NetworkJSON) validateParameters(formats strfmt.Registry) error {
 func (m *NetworkJSON) validatePublicInAccount(formats strfmt.Registry) error {
 
 	if err := validate.Required("publicInAccount", "body", bool(m.PublicInAccount)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *NetworkJSON) validateSubnetCIDR(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("subnetCIDR", "body", string(m.SubnetCIDR)); err != nil {
 		return err
 	}
 

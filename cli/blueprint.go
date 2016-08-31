@@ -14,7 +14,7 @@ func ListBlueprints(c *cli.Context) error {
 	respBlueprints, err := client.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
 	if err != nil {
 		log.Error(err)
-		return err
+		newExitReturnError()
 	}
 
 	var tableRows []TableRow
@@ -32,8 +32,8 @@ func GetBlueprintId(name string, client *Cloudbreak) int64 {
 	resp, err := client.Cloudbreak.Blueprints.GetPrivate(&blueprints.GetPrivateParams{Name: name})
 
 	if err != nil {
-		log.Errorf("[CreateCredential] %s", err.Error())
-		newExitError()
+		log.Errorf("[GetBlueprintId] %s", err.Error())
+		newExitReturnError()
 	}
 
 	id, _ := strconv.Atoi(*resp.Payload.ID)

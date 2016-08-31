@@ -24,7 +24,6 @@ func (c *Cloudbreak) CreateNetwork(defaultNetwork models.NetworkJSON) int64 {
 
 	network := models.NetworkJSON{
 		Name:          networkName,
-		SubnetCIDR:    defaultNetwork.SubnetCIDR,
 		CloudPlatform: "AWS",
 		Parameters:    vpcParams,
 	}
