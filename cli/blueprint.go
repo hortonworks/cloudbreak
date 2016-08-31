@@ -27,9 +27,9 @@ func ListBlueprints(c *cli.Context) error {
 	return nil
 }
 
-func GetBlueprintId(name string, client *Cloudbreak) int64 {
+func (c *Cloudbreak) GetBlueprintId(name string) int64 {
 	log.Infof("[GetBlueprintId] get blueprint id by name: %s", name)
-	resp, err := client.Cloudbreak.Blueprints.GetPrivate(&blueprints.GetPrivateParams{Name: name})
+	resp, err := c.Cloudbreak.Blueprints.GetPrivate(&blueprints.GetPrivateParams{Name: name})
 
 	if err != nil {
 		log.Errorf("[GetBlueprintId] %s", err.Error())

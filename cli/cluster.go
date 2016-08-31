@@ -35,8 +35,8 @@ type ClusterSkeleton struct {
 	ClusterAndAmbariUser     string         `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
 	ClusterAndAmbariPassword string         `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
 
-	Status                   string `json:"Status,omitempty" yaml:"Status,omitempty"`
-	StatusReason             string `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
+	Status       string `json:"Status,omitempty" yaml:"Status,omitempty"`
+	StatusReason string `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
 
 	//InstanceRole             string `json:"InstanceRole" yaml:"InstanceRole"`
 	//HiveMetastoreUrl         string `json:"HiveMetastoreUrl" yaml:"HiveMetastoreUrl"`
@@ -85,7 +85,7 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	} else {
 		c.StatusReason = *stack.StatusReason
 	}
-	if (stack.HdpVersion != nil) {
+	if stack.HdpVersion != nil {
 		c.HDPVersion = *stack.HdpVersion
 	}
 	c.ClusterType = blueprint.Name
@@ -111,7 +111,7 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	for _, v := range securityMap {
 		for _, sr := range v {
 			log.Debugf("SecurityRule: %s", sr.Ports)
-			if (strings.Join(SECURITY_GROUP_DEFAULT_PORTS, ",") != sr.Ports) {
+			if strings.Join(SECURITY_GROUP_DEFAULT_PORTS, ",") != sr.Ports {
 				c.WebAccess = true
 			}
 		}
@@ -234,6 +234,8 @@ func CreateCluster(c *cli.Context) error {
 
 	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
+	blueprintId := client.GetBlueprintId(skeleton.ClusterType)
+
 	var wg sync.WaitGroup
 	wg.Add(4)
 
@@ -340,7 +342,7 @@ func CreateCluster(c *cli.Context) error {
 
 		clusterReq := models.ClusterRequest{
 			Name:        skeleton.ClusterName,
-			BlueprintID: GetBlueprintId(skeleton.ClusterType, client),
+			BlueprintID: blueprintId,
 			HostGroups:  hostGroups,
 			UserName:    skeleton.ClusterAndAmbariUser,
 			Password:    skeleton.ClusterAndAmbariPassword,
