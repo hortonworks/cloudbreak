@@ -49,7 +49,7 @@ func NewOAuth2HTTPClient(address string, username string, password string) (*Clo
 		address = strings.TrimPrefix(address, v)
 	}
 
-	token, err := getOAuth2Token("https://" + address + "/identity/oauth/authorize", username, password, "cloudbreak_shell")
+	token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
 	if err != nil {
 		return nil, err
 	}
@@ -80,12 +80,12 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 
 	resp, err := client.Do(req)
 
-	if ( resp == nil && err == nil ) {
+	if resp == nil && err == nil {
 		return "", errors.New(fmt.Sprintf("Unkown error while connnecting to %s as user: %s", identityUrl, username))
 	}
 
-	if ( resp == nil || resp.StatusCode >= 400) {
-		if (err != nil ) {
+	if resp == nil || resp.StatusCode >= 400 {
+		if err != nil {
 			return "", err
 		}
 		return "", errors.New(fmt.Sprintf("Error while connnecting to %s as user: %s, please check your username and password. (%s)", identityUrl, username, resp.Status))
@@ -95,7 +95,7 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 	regexp := regexp.MustCompile("access_token=(.*)&expires_in")
 	tokenBytes := regexp.Find([]byte(location))
 	tokenString := string(tokenBytes)
-	token := tokenString[13 : len(tokenString) - 11]
+	token := tokenString[13 : len(tokenString)-11]
 	return token, nil
 }
 
