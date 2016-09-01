@@ -28,4 +28,4 @@ release: build
 linux-test:
 	docker run --rm -it -v ${PWD}/build/Linux/hdc:/usr/sbin/hdc --name hdc alpine sh
 
-.PHONY: build build-darwin build-linux
+.PHONY: build
