@@ -1,6 +1,6 @@
 BINARY=hdc
 
-VERSION=1.5.0-rc.9
+VERSION=1.6.0-dev.1
 BUILD_TIME=$(shell date +%FT%T)
 LDFLAGS=-ldflags "-X github.com/sequenceiq/hdc-cli/cli.Version=${VERSION} -X github.com/sequenceiq/hdc-cli/cli.BuildTime=${BUILD_TIME}"
 
