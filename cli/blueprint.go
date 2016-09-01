@@ -5,6 +5,7 @@ import (
 	"github.com/sequenceiq/hdc-cli/client/blueprints"
 	"github.com/urfave/cli"
 	"strconv"
+	"strings"
 )
 
 func ListBlueprints(c *cli.Context) error {
@@ -25,8 +26,11 @@ func ListBlueprints(c *cli.Context) error {
 
 	var tableRows []TableRow
 	for _, blueprint := range respBlueprints.Payload {
-		row := &GenericRow{Data: []string{blueprint.Name}}
-		tableRows = append(tableRows, row)
+		// this is a workaround, needs to be hidden, by not storing them as public
+		if !strings.HasPrefix(blueprint.Name, "b") {
+			row := &GenericRow{Data: []string{blueprint.Name}}
+			tableRows = append(tableRows, row)
+		}
 	}
 	WriteTable([]string{"ClusterType"}, tableRows)
 
