@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	"github.com/docker/notary/Godeps/_workspace/src/github.com/jfrazelle/go/canonical/json"
 	"github.com/ernesto-jimenez/httplogger"
 	swaggerclient "github.com/go-swagger/go-swagger/client"
 	"github.com/go-swagger/go-swagger/httpkit"
@@ -113,6 +114,10 @@ type noContentSafeResponseReader struct {
 	OriginalReader swaggerclient.ResponseReader
 }
 
+type ErrorMessage struct {
+	Message string `json:"message"`
+}
+
 func (r *noContentSafeResponseReader) ReadResponse(response swaggerclient.Response, consumer httpkit.Consumer) (interface{}, error) {
 	resp, err := r.OriginalReader.ReadResponse(response, consumer)
 	if err != nil {
@@ -123,7 +128,11 @@ func (r *noContentSafeResponseReader) ReadResponse(response swaggerclient.Respon
 			return nil, nil
 		default:
 			body, _ := ioutil.ReadAll(response.Body())
-			return nil, swaggerclient.NewAPIError("", string(body), response.Code())
+			var message ErrorMessage
+			if err := json.Unmarshal(body, &message); err != nil {
+				return nil, swaggerclient.NewAPIError("", string(body), response.Code())
+			}
+			return nil, swaggerclient.NewAPIError("", message.Message, response.Code())
 		}
 	}
 	return resp, nil
