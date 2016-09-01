@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/users", description = ControllerDescription.USER_DESCRIPTION, position = 9)
+@Api(value = "/users", description = ControllerDescription.USER_DESCRIPTION)
 public interface UserEndpoint {
 
     @PUT

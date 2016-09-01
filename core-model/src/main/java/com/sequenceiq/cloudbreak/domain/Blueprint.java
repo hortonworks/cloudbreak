@@ -75,7 +75,7 @@ public class Blueprint implements ProvisionEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(length = 1000000, columnDefinition = "TEXT")
+    @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
     private String blueprintText;
 
     private String blueprintName;
@@ -84,11 +84,16 @@ public class Blueprint implements ProvisionEntity {
 
     private int hostGroupCount;
 
+    @Column(nullable = false)
     private String owner;
+
+    @Column(nullable = false)
     private String account;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 

@@ -13,11 +13,13 @@ public class RDSConfigResponse extends RDSConfigJson {
     @ApiModelProperty(value = ModelDescriptions.ID)
     private String id;
 
+    @ApiModelProperty(value = ModelDescriptions.CREATED)
     private Long creationDate;
 
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
 
+    @ApiModelProperty(value = ModelDescriptions.RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;
 
     public String getId() {

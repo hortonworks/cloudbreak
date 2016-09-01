@@ -37,8 +37,8 @@ public class BlueprintCommands implements BaseCommands {
 
     @CliCommand(value = "blueprint create", help = "Add a new blueprint with either --url or --file")
     public String create(
-            @CliOption(key = "description", mandatory = true, help = "Description of the blueprint to download from") String description,
             @CliOption(key = "name", mandatory = true, help = "Name of the blueprint to download from") String name,
+            @CliOption(key = "description", help = "Description of the blueprint to download from") String description,
             @CliOption(key = "url", help = "URL of the blueprint to download from") String url,
             @CliOption(key = "file", help = "File which contains the blueprint") File file,
             @CliOption(key = "publicInAccount", help = "flags if the blueprint is public in the account") Boolean publicInAccount) {

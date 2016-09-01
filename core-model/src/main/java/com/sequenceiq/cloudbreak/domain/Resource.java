@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -34,8 +35,10 @@ public class Resource implements ProvisionEntity {
     private Long id;
     private String instanceGroup;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceType resourceType;
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CommonStatus resourceStatus;
 

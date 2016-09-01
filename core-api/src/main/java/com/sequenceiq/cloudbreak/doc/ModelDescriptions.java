@@ -12,6 +12,8 @@ public class ModelDescriptions {
     public static final String TOPOLOGY_ID = "id of the topology the resource belongs to";
     public static final String REQUESTS = "request object";
     public static final String RESPONSE = "response object";
+    public static final String CREATED = "creation time of the resource in long";
+    public static final String AMBARI_SERVER = "ambari server address";
 
     private ModelDescriptions() {
     }
@@ -70,14 +72,17 @@ public class ModelDescriptions {
         public static final String CREDENTIAL_ID = "credential resource id for the stack";
         public static final String USERNAME = "ambari username";
         public static final String PASSWORD = "ambari password";
+        public static final String ENABLE_SECURITY = "enable Kerberos security";
+        public static final String KERBEROS_MASTER_KEY = "kerberos master key";
+        public static final String KERBEROS_ADMIN = "kerberos admin user";
+        public static final String KERBEROS_PASSWORD = "kerberos admin password";
         public static final String PARAMETERS = "additional cloud specific parameters for stack";
-        public static final String SECURITY_GROUP_ID = "security group resource id for the stack";
         public static final String FAILURE_ACTION = "action on failure";
         public static final String FAILURE_POLICY = "failure policy in case of failures";
         public static final String STACK_STATUS = "status of the stack";
         public static final String STATUS_REASON = "status message of the stack";
+        public static final String STATUS_REQUEST = "status of the scale request";
         public static final String AMBARI_IP = "public ambari ip of the stack";
-        public static final String BLUEPRINT_ID = "id of the referenced blueprint";
         public static final String NETWORK_ID = "network resource id for the stack";
         public static final String CERTIFICATE = "certificate used by the gateway";
         public static final String CLUSTER_STATUS = "status of the cluster";
@@ -90,6 +95,9 @@ public class ModelDescriptions {
         public static final String HDP_VERSION = "specific version of HDP";
         public static final String IMAGE_CATALOG = "custom image catalog URL";
         public static final String CLOUDBREAK_DETAILS = "details of the Cloudbreak that provisioned the stack";
+        public static final String FILE_SYSTEM = "external file system configuration";
+        public static final String INSTANCE_GROUPS = "collection of instance groupst";
+        public static final String INSTANCE_GROUP_ADJUSTMENT = "instnce group adjustment";
     }
 
     public static class ClusterModelDescription {
@@ -98,6 +106,7 @@ public class ModelDescriptions {
         public static final String CLUSTER_NAME = "name of the cluster";
         public static final String CLUSTER_ID = "id of the cluster";
         public static final String BLUEPRINT_ID = "blueprint id for the cluster";
+        public static final String VALIDATE_BLUEPRINT = "validate blueprint";
         public static final String HOURS = "duration - how long the cluster is running in hours";
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";
         public static final String EMAIL_TO = "send email to the requested address";
@@ -111,6 +120,38 @@ public class ModelDescriptions {
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_ID = "RDS configuration id for the cluster";
         public static final String LDAP_CONFIG_ID = "LDAP config id for the cluster";
+        public static final String HOSTGROUP_ADJUSTMENT = "host group adjustment";
+        public static final String ADJUSTMENT_TYPE = "type of  adjustment";
+        public static final String STATUS_REQUEST = "request status";
+        public static final String USERNAME_PASSWORD = "user details";
+        public static final String HOSTGROUPS = "collection of hostgroups";
+        public static final String AMBARI_STACK_DETAILS = "details of the Ambari stack";
+        public static final String AMBARI_REPO_DETAILS = "details of the Ambari package repository";
+        public static final String AMBARI_DATABASE_DETAILS = "details of the external Ambari database";
+        public static final String AMBARI_DATABASE_ERROR = "result of Ambari database test";
+        public static final String RDS_CONFIG = "details of the external database for Hadoop components";
+        public static final String RDS_CONNECTION_RESULT = "result of RDS connection test";
+    }
+
+    public static class ClusterTemplateModelDescription {
+        public static final String NAME = "name of the cluster template";
+        public static final String TEMPLATE = "stringified template JSON";
+        public static final String TYPE = "type of the cluster template";
+    }
+
+    public static class ConnectorModelDescription {
+        public static final String PLATFORM_VARIANTS = "platform variants";
+        public static final String DEFAULT_VARIANTS = "default variants";
+        public static final String DISK_TYPES = "disk types";
+        public static final String DEFAULT_DISKS = "default disks";
+        public static final String DISK_MAPPINGS = "disk mappings";
+        public static final String ORCHESTRATORS = "orchestrators";
+        public static final String DEFAULT_ORCHESTRATORS = "default orchestrators";
+        public static final String VIRTUAL_MACHNES = "virtual machines";
+        public static final String DEFAULT_VIRTUAL_MACHINES = "default virtual machines";
+        public static final String REGIONS = "regions";
+        public static final String AVAILABILITY_ZONES = "availability zones";
+        public static final String DEFAULT_REGIOS = "default regions";
     }
 
     public static class AmbariRepoDetailsDescription {
@@ -183,6 +224,7 @@ public class ModelDescriptions {
         public static final String TEMPLATE_ID = "referenced template id";
         public static final String STATUS = "status of the instance";
         public static final String SECURITY_GROUP_ID = "security group resource id for the instance group";
+        public static final String METADATA = "metadata of instances";
     }
 
     public static class InstanceGroupAdjustmentModelDescription {
@@ -196,6 +238,8 @@ public class ModelDescriptions {
         public static final String CONSTRAINT = "instance group or resource constraint for a hostgroup";
         public static final String INSTANCE_GROUP = "name of an instance group where the hostgroup will be deployed";
         public static final String CONSTRAINT_NAME = "name of a constraint template that defines the resource constraints for the hostgroup";
+        public static final String HOST_COUNT = "number of hosts in the hostgroup";
+        public static final String METADATA = "metadata of hosts";
     }
 
     public static class UserNamePasswordModelDescription {
@@ -217,7 +261,6 @@ public class ModelDescriptions {
         public static final String PRIVATE_IP = "private ip of the insctance";
         public static final String PUBLIC_IP = "public ip of the instance";
         public static final String INSTANCE_ID = "id of the instance";
-        public static final String AMBARI_SERVER = "ambari server address";
         public static final String DISCOVERY_FQDN = "the fully qualified domain name of the node in the service discovery cluster";
     }
 
@@ -279,7 +322,17 @@ public class ModelDescriptions {
         public static final String GROUP_SEARCH_BASE = "template for group search for authorization (e.g. dc=hadoop,dc=apache,dc=org)";
         public static final String GROUP_SEARCH_FILTER = "filter for group search for authorization";
         public static final String PRINCIPAL_REGEX = "parses the principal for insertion into templates via regex.";
+    }
 
+    public static class RDSConfigModelDescription {
+        public static final String CLUSTER_NAMES = "list of clusters which use config";
+    }
 
+    public static class TopologyModelDescription {
+        public static final String NODES = "topology mapping";
+    }
+
+    public static class SubscriptionModelDescription {
+        public static final String ENDPOINT = "url of the endpoint";
     }
 }

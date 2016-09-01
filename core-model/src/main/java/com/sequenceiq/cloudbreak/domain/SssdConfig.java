@@ -50,15 +50,19 @@ public class SssdConfig implements ProvisionEntity {
     @SequenceGenerator(name = "sssdconfig_generator", sequenceName = "sssdconfig_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
     @Column(length = 1000, columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
     private String account;
 
+    @Column(nullable = false)
     private String owner;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
     @Enumerated(EnumType.STRING)
@@ -74,7 +78,7 @@ public class SssdConfig implements ProvisionEntity {
     private String baseSearch;
 
     @Enumerated(EnumType.STRING)
-    private SssdTlsReqcertType tlsReqcert = SssdTlsReqcertType.HARD;
+    private SssdTlsReqcertType tlsReqcert;
 
     private String adServer;
 

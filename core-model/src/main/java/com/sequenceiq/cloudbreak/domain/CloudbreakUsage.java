@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,28 +17,39 @@ public class CloudbreakUsage implements ProvisionEntity {
     @SequenceGenerator(name = "cloudbreakusage_generator", sequenceName = "cloudbreakusage_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
     private String owner;
 
+    @Column(nullable = false)
     private String account;
 
+    @Column(nullable = false)
     private Long stackId;
 
+    @Column(nullable = false)
     private String stackName;
 
+    @Column(nullable = false)
     private String provider;
 
+    @Column(nullable = false)
     private String region;
 
     private String availabilityZone;
 
+    @Column(nullable = false)
     private Date day;
 
+    @Column(nullable = false)
     private Long instanceHours;
 
+    @Column(nullable = false)
     private Double costs;
 
+    @Column(nullable = false)
     private String instanceType;
 
+    @Column(nullable = false)
     private String instanceGroup;
 
     private Long blueprintId;

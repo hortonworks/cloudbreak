@@ -51,22 +51,31 @@ public class LdapConfig implements ProvisionEntity {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
     private String account;
 
+    @Column(nullable = false)
     private String owner;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
+    @Column(nullable = false)
     private String serverHost;
 
+    @Column(nullable = false)
     private Integer serverPort;
 
+    @Column(nullable = false)
     private Boolean serverSSL;
 
+    @Column(nullable = false)
     private String bindDn;
 
+    @Column(nullable = false)
     private String bindPassword;
 
+    @Column(nullable = false)
     private String userSearchBase;
 
     private String userSearchFilter;

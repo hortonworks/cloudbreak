@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/clusters")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/clusters", description = CLUSTERS_DESCRIPTION, position = 5)
+@Api(value = "/clusters", description = CLUSTERS_DESCRIPTION)
 public interface ClusterEndpoint {
 
     @POST

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
@@ -13,10 +15,12 @@ public class HostMetadataJson {
     @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(value = ModelDescriptions.NAME)
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.HOST_GROUP_NAME)
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.HOST_GROUP_NAME, required = true)
     private String groupName;
 
     @ApiModelProperty(value = ModelDescriptions.HostMetadataModelDescription.STATE)

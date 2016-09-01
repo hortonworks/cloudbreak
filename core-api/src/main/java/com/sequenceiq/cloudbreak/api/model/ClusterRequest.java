@@ -21,21 +21,28 @@ public class ClusterRequest {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
+
     @NotNull
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_ID, required = true)
     private Long blueprintId;
+
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
+
     @Valid
-    @NotNull
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupJson> hostGroups;
+
     @ApiModelProperty(ClusterModelDescription.EMAIL_NEEDED)
     private Boolean emailNeeded = Boolean.FALSE;
+
     @ApiModelProperty(ClusterModelDescription.EMAIL_TO)
     private String emailTo;
+
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.ENABLE_SECURITY)
     private Boolean enableSecurity = Boolean.FALSE;
+
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -46,33 +53,57 @@ public class ClusterRequest {
     @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
     private String password;
+
     @Size(max = 50, min = 3, message = "The length of the Kerberos password has to be in range of 3 to 50")
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KERBEROS_MASTER_KEY)
     private String kerberosMasterKey;
+
     @Size(max = 15, min = 5, message = "The length of the Kerberos admin has to be in range of 5 to 15")
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KERBEROS_ADMIN)
     private String kerberosAdmin;
+
     @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KERBEROS_PASSWORD)
     private String kerberosPassword;
+
     @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)
-    private Boolean ldapRequired = false;
+    private Boolean ldapRequired = Boolean.FALSE;
+
     @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
     private Long sssdConfigId;
+
     @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
-    private Boolean validateBlueprint = true;
+
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.VALIDATE_BLUEPRINT)
+    private Boolean validateBlueprint = Boolean.TRUE;
+
     @Valid
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_STACK_DETAILS)
     private AmbariStackDetailsJson ambariStackDetails;
+
     @Valid
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_REPO_DETAILS)
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
+
     @ApiModelProperty(value = ClusterModelDescription.RDSCONFIG_ID)
     private Long rdsConfigId;
+
     @Valid
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_DATABASE_DETAILS)
     private AmbariDatabaseDetailsJson ambariDatabaseDetails;
+
     @Valid
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.RDS_CONFIG)
     private RDSConfigJson rdsConfigJson;
+
     @Valid
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.FILE_SYSTEM)
     private FileSystemRequest fileSystem;
+
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
+
     @ApiModelProperty(value = ClusterModelDescription.ENABLE_SHIPYARD)
     private Boolean enableShipyard = Boolean.FALSE;
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)

@@ -94,6 +94,19 @@ public class OperationDescriptions {
         public static final String GET_CLUSTER_PROPERTIES = "get cluster properties with blueprint outputs";
     }
 
+    public static class ClusterTemplateOpDescription {
+        public static final String POST_PRIVATE = "create cluster template as private resource";
+        public static final String POST_PUBLIC = "create cluster template as public resource";
+        public static final String GET_PRIVATE = "retrieve private cluster templates";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) cluster template";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private cluster template by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) cluster template by name";
+        public static final String GET_BY_ID = "retrieve cluster template by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private cluster template by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private cluster template by name";
+        public static final String DELETE_BY_ID = "delete cluster template by id";
+    }
+
     public static class RecipeOpDescription {
         public static final String POST_PRIVATE = "create recipe as private resource";
         public static final String POST_PUBLIC = "create recipe as public resource";
@@ -198,5 +211,31 @@ public class OperationDescriptions {
         public static final String DELETE_PRIVATE_BY_NAME = "delete private RDS configuration by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private RDS configuration by name";
         public static final String DELETE_BY_ID = "delete RDS configuration by id";
+    }
+
+    public static class ConnectorOpDescription {
+        public static final String GET_PLATFORMS = "retrive available platforms";
+        public static final String GET_PLATFORM_VARIANTS = "retrive available platform variants";
+        public static final String GET_PLATFORM_VARIANT_BY_TYPE = "retrive a platform variant by type";
+        public static final String GET_DISK_TYPES = "retrive available disk types";
+        public static final String GET_DISK_TYPE_BY_TYPE = "retrive disks by type";
+        public static final String GET_ORCHESTRATOR_TYPES = "retrive available orchestrator types";
+        public static final String GET_ORCHESTRATORS_BY_TYPES = "retrive orchestrators by type";
+        public static final String GET_VM_TYPES = "retrive available vm types";
+        public static final String GET_VM_TYPE_BY_TYPE = "retrive vm types by type";
+        public static final String GET_REGIONS = "retrive available regions";
+        public static final String GET_REGION_R_BY_TYPE = "retrive regions by type";
+        public static final String GET_REGION_AV_BY_TYPE = "retrive availability zones by type";
+    }
+
+    public static class SettingsOpDescription {
+        public static final String GET_ALL_SETTINGS = "retrive all available settings";
+        public static final String GET_RECIPE_SETTINGS = "retrive available recipe settings";
+        public static final String GET_SSSD_SETTINGS = "retrive available SSSD configuration settings";
+        public static final String GET_DATABASE_SETTINGS = "retrive available Ambari database settings";
+    }
+
+    public static class SubscriptionOpDescription {
+        public static final String SUBSCRIBE = "retrive subscribe identifier";
     }
 }
