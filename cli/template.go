@@ -2,8 +2,8 @@ package cli
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/sequenceiq/hdc-cli/client/templates"
-	"github.com/sequenceiq/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client/templates"
+	"github.com/hortonworks/hdc-cli/models"
 	"strconv"
 	"sync"
 	"time"

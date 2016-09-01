@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/sequenceiq/hdc-cli/client/cluster"
-	"github.com/sequenceiq/hdc-cli/client/stacks"
-	"github.com/sequenceiq/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client/cluster"
+	"github.com/hortonworks/hdc-cli/client/stacks"
+	"github.com/hortonworks/hdc-cli/models"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -17,9 +17,9 @@ import (
 
 	"github.com/go-swagger/go-swagger/errors"
 	"github.com/go-swagger/go-swagger/httpkit/validate"
-	"github.com/sequenceiq/hdc-cli/client/blueprints"
-	"github.com/sequenceiq/hdc-cli/client/credentials"
-	"github.com/sequenceiq/hdc-cli/client/templates"
+	"github.com/hortonworks/hdc-cli/client/blueprints"
+	"github.com/hortonworks/hdc-cli/client/credentials"
+	"github.com/hortonworks/hdc-cli/client/templates"
 )
 
 var ClusterSkeletonListHeader []string = []string{"Cluster Name", "Status", "HDP Version", "Cluster Type"}

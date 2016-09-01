@@ -12,7 +12,7 @@ import (
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
 
-	"github.com/sequenceiq/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/models"
 )
 
 // GetRdsconfigsAccountReader is a Reader for the GetRdsconfigsAccount structure.

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	hdc "github.com/sequenceiq/hdc-cli/cli"
+	hdc "github.com/hortonworks/hdc-cli/cli"
 	"github.com/urfave/cli"
 	"os"
 )

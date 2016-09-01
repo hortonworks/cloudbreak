@@ -1,11 +1,11 @@
 FROM alpine
 
-COPY . /go/src/github.com/sequenceiq/hdc-cli
-WORKDIR /go/src/github.com/sequenceiq/hdc-cli
+COPY . /go/src/github.com/hortonworks/hdc-cli
+WORKDIR /go/src/github.com/hortonworks/hdc-cli
 
 RUN apk update \
     && apk add -t build-deps go git \
-    && cd /go/src/github.com/sequenceiq/hdc-cli \
+    && cd /go/src/github.com/hortonworks/hdc-cli \
     && export GOPATH=/go \
     && export PATH=$PATH:/$GOPATH/bin \
     && go get github.com/tools/godep \
