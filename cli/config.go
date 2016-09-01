@@ -47,7 +47,6 @@ func GetHomeDirectory() string {
 		log.Infof("[GetHomeDirectory] failed to determine the user's home directory")
 		newExitReturnError()
 	}
-	log.Debugf("[GetHomeDirectory] current user's home directory: %s", homeDir)
 	return homeDir
 }
 
