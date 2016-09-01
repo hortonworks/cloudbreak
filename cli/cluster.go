@@ -20,7 +20,7 @@ import (
 	"github.com/sequenceiq/hdc-cli/client/templates"
 )
 
-var ClusterSkeletonListHeader []string = []string{"Cluster Name", "Status", "Status Reason", "HDP Version", "Cluster Type"}
+var ClusterSkeletonListHeader []string = []string{"Cluster Name", "Status", "HDP Version", "Cluster Type"}
 
 type ClusterSkeleton struct {
 	ClusterName              string         `json:"ClusterName" yaml:"ClusterName"`
@@ -125,7 +125,7 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 }
 
 func (c *ClusterSkeleton) DataAsStringArray() []string {
-	return []string{c.ClusterName, c.Status, c.StatusReason, c.HDPVersion, c.ClusterType}
+	return []string{c.ClusterName, c.Status, c.HDPVersion, c.ClusterType}
 }
 
 func FetchCluster(client *Cloudbreak, stack *models.StackResponse) (*ClusterSkeleton, error) {
