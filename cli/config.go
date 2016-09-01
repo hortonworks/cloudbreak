@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	"os/user"
 )
 
 type Config struct {
@@ -41,20 +41,18 @@ func Configure(c *cli.Context) error {
 	return nil
 }
 
-func GetCurrentUser() *user.User {
-	currentUser, err := user.Current()
-	if err != nil {
-		log.Fatalf("[GetCurrentUser] %s", err.Error())
-		os.Exit(1)
+func GetHomeDirectory() string {
+	homeDir, err := homedir.Dir()
+	if err != nil || len(homeDir) == 0 {
+		log.Infof("[GetHomeDirectory] failed to determine the user's home directory")
+		newExitReturnError()
 	}
-	return currentUser
+	log.Infof("[GetHomeDirectory] current user's home directory: %s", homeDir)
+	return homeDir
 }
 
 func WriteConfigToFile(server string, username string, password string) error {
-	currentUser := GetCurrentUser()
-	log.Infof("[WriteConfigToFile] current user: %s", currentUser.Username)
-
-	hdcDir := currentUser.HomeDir + "/" + Hdc_dir
+	hdcDir := GetHomeDirectory() + "/" + Hdc_dir
 	configFile := hdcDir + "/" + Config_file
 
 	if _, err := os.Stat(hdcDir); os.IsNotExist(err) {
@@ -78,10 +76,7 @@ func WriteConfigToFile(server string, username string, password string) error {
 }
 
 func ReadConfig() (*Config, error) {
-	currentUser := GetCurrentUser()
-	log.Infof("[ReadConfig] current user: %s", currentUser.Username)
-
-	hdcDir := currentUser.HomeDir + "/" + Hdc_dir
+	hdcDir := GetHomeDirectory() + "/" + Hdc_dir
 	configFile := hdcDir + "/" + Config_file
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {

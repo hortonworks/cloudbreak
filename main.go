@@ -60,7 +60,7 @@ func main() {
 		{
 			Name: "configure",
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
-				"to %s/%s/%s", hdc.GetCurrentUser().HomeDir, hdc.Hdc_dir, hdc.Config_file),
+				"to %s/%s/%s", hdc.GetHomeDirectory(), hdc.Hdc_dir, hdc.Config_file),
 			Usage:  "configure the server address and credentials used to communicate with this server",
 			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
 			Action: hdc.Configure,
