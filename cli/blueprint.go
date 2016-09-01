@@ -2,7 +2,7 @@ package cli
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/sequenceiq/hdc-cli/client/blueprints"
+	"github.com/hortonworks/hdc-cli/client/blueprints"
 	"github.com/urfave/cli"
 	"strconv"
 	"strings"

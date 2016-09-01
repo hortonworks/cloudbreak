@@ -9,7 +9,7 @@ import (
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
 
-	"github.com/sequenceiq/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/models"
 )
 
 // NewGetStackForAmbariParams creates a new GetStackForAmbariParams object
