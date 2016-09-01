@@ -17,10 +17,12 @@ public class FlowLog {
     @SequenceGenerator(name = "flowlog_generator", sequenceName = "flowlog_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
     private Long stackId;
 
     private Long created = new Date().getTime();
 
+    @Column(nullable = false)
     private String flowId;
 
     private String nextEvent;
@@ -34,7 +36,8 @@ public class FlowLog {
 
     private String currentState;
 
-    private Boolean finalized = false;
+    @Column(nullable = false)
+    private Boolean finalized = Boolean.FALSE;
 
     public FlowLog() {
 

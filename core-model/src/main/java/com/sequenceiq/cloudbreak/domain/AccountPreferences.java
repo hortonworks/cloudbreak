@@ -31,7 +31,9 @@ public class AccountPreferences {
     private Long maxNumberOfNodesPerCluster;
     private Long maxNumberOfClustersPerUser;
     private String allowedInstanceTypes;
+    @Column(nullable = false)
     private Long clusterTimeToLive;
+    @Column(nullable = false)
     private Long userTimeToLive;
     @Column(columnDefinition = "TEXT")
     private String platforms;

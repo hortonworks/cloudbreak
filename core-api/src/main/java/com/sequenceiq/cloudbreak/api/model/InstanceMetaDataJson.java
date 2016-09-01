@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceMetaDataModelDescription;
 
@@ -17,7 +18,7 @@ public class InstanceMetaDataJson implements JsonEntity {
     private Integer sshPort;
     @ApiModelProperty(InstanceMetaDataModelDescription.INSTANCE_ID)
     private String instanceId;
-    @ApiModelProperty(InstanceMetaDataModelDescription.AMBARI_SERVER)
+    @ApiModelProperty(ModelDescriptions.AMBARI_SERVER)
     private Boolean ambariServer;
     @ApiModelProperty(InstanceMetaDataModelDescription.DISCOVERY_FQDN)
     private String discoveryFQDN;

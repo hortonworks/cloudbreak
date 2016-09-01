@@ -29,7 +29,7 @@ public class CloudbreakEventsJson implements JsonEntity {
     private String region;
     @ApiModelProperty(StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
-    @ApiModelProperty(StackModelDescription.BLUEPRINT_ID)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private long blueprintId;
     @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_NAME)
     private String blueprintName;

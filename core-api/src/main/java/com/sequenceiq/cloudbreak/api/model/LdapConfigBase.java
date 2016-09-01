@@ -32,13 +32,15 @@ public class LdapConfigBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.SERVER_PORT, required = true)
     private Integer serverPort;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.IS_SERVER_SSL, required = true)
-    private Boolean serverSSL;
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.IS_SERVER_SSL)
+    private Boolean serverSSL = Boolean.FALSE;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_DN)
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_DN, required = true)
     private String bindDn;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_PASSWORD)
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_PASSWORD, required = true)
     private String bindPassword;
 
     @NotNull

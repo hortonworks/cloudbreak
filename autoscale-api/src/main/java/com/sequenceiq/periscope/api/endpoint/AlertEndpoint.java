@@ -29,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/clusters/{clusterId}/alerts")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/alerts", description = ALERT_DESCRIPTION, position = 1)
+@Api(value = "/alerts", description = ALERT_DESCRIPTION)
 public interface AlertEndpoint {
 
     @POST

@@ -130,17 +130,14 @@ public class RecipeCommandsTest {
 
     @Test
     public void testStoreRecipePreScriptExistsAndPublic() throws Exception {
-
-        underTest.createRecipe("name", null, new File(getClass().getResource("/store-recipe-test").getFile()), null, null,
-                true);
+        underTest.createRecipe("name", null, new File(getClass().getResource("/store-recipe-test").getFile()), null, null, true);
         verify(recipeEndpoint, times(1)).postPublic(any(RecipeRequest.class));
         verify(recipeEndpoint, times(0)).postPrivate(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipePostScriptExistsAndPrivate() throws Exception {
-        underTest.createRecipe("name", null, null, new File(getClass().getResource("/store-recipe-test").getFile()), null,
-                false);
+        underTest.createRecipe("name", null, null, new File(getClass().getResource("/store-recipe-test").getFile()), null, false);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
         verify(recipeEndpoint, times(1)).postPrivate(any(RecipeRequest.class));
     }

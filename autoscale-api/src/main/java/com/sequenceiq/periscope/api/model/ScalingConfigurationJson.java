@@ -6,7 +6,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.ScalingConfigurationJsonPrope
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("ScalingConfigurationJson")
+@ApiModel("ScalingConfiguration")
 public class ScalingConfigurationJson implements Json {
 
     @ApiModelProperty(ScalingConfigurationJsonProperties.MINSIZE)

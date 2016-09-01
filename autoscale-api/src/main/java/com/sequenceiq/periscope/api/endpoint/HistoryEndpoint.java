@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/clusters/{clusterId}/history")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/history", description = HISTORY_DESCRIPTION, position = 3)
+@Api(value = "/history", description = HISTORY_DESCRIPTION)
 public interface HistoryEndpoint {
 
     @GET

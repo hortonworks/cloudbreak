@@ -34,7 +34,7 @@ public class LdapConfigCommands implements BaseCommands {
             @CliOption(key = "description", help = "Description of the config") String description,
             @CliOption(key = "serverHost", mandatory = true, help = "Public host or IP address of LDAP server") String serverHost,
             @CliOption(key = "serverPort", mandatory = true, help = "Port of LDAP server (typically: 389 or 636 for LDAPS)") Integer serverPort,
-            @CliOption(key = "serverSSL", mandatory = true, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
+            @CliOption(key = "serverSSL", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "Determines if LDAP or LDAP over SSL is to be used") Boolean serverSSL,
             @CliOption(key = "bindDn", mandatory = true,
                     help = "Bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)") String bindDn,

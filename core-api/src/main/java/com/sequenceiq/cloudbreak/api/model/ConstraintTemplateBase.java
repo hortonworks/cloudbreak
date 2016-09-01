@@ -24,19 +24,19 @@ public abstract class ConstraintTemplateBase implements JsonEntity {
     private String description;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.CPU, readOnly = true)
+    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.CPU, required = true)
     private Double cpu;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.MEMORY, readOnly = true)
+    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.MEMORY, required = true)
     private Double memory;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.DISK, readOnly = true)
+    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.DISK, required = true)
     private Double disk;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.ORCHESTRATOR_TYPE, readOnly = true)
+    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.ORCHESTRATOR_TYPE, required = true)
     private String orchestratorType;
 
     public String getName() {

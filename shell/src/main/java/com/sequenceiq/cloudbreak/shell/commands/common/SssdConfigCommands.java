@@ -97,7 +97,7 @@ public class SssdConfigCommands implements BaseCommands {
             @CliOption(key = "url", mandatory = true, help = "comma-separated list of URIs of the LDAP servers") String url,
             @CliOption(key = "schema", mandatory = true, help = "Schema of the database") SssdSchemaType schema,
             @CliOption(key = "baseSearch", mandatory = true, help = "Search base of the database") String baseSearch,
-            @CliOption(key = "tlsReqcert", mandatory = true, unspecifiedDefaultValue = "hard", specifiedDefaultValue = "hard",
+            @CliOption(key = "tlsReqcert", unspecifiedDefaultValue = "hard", specifiedDefaultValue = "hard",
                     help = "TLS behavior of connection") SssdTlsReqcertType tlsReqcert,
             @CliOption(key = "adServer", help = "comma-separated list of IP addresses or hostnames of the AD servers") String adServer,
             @CliOption(key = "kerberosServer", help = "comma-separated list of IP addresses or hostnames of the Kerberos servers") String kerberosServer,

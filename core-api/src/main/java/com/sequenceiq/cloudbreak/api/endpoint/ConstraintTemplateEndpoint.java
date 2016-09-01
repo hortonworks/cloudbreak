@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/constraints")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/constraints", description = ControllerDescription.CONSTRAINT_TEMPLATE_DESCRIPTION, position = 2)
+@Api(value = "/constraints", description = ControllerDescription.CONSTRAINT_TEMPLATE_DESCRIPTION)
 public interface ConstraintTemplateEndpoint {
 
     @POST
