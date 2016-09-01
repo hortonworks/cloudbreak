@@ -50,12 +50,12 @@ OPTIONS:
 ### Configure
 Although there is an option to provide some global flags to every command to which Cloudbreak to connect to, it is recommended to save the configuration. 
 ```
-hdc configure --server ec2-52-29-224-64...compute.amazonaws.com --username your@email --password your-password
+hdc configure --server https://ec2-52-29-224-64...compute.amazonaws.com --username your@email --password your-password
 ```
 This will save the configuration into the user's home directory. To see its content: `cat ~/.hdc/config`. If this config file is present you don't need to specify the connection flags anymore,
 otherwise you need to specify these flags to every command.
 ```
-hdc list-clusters --server ec2-52-29-224-64...compute.amazonaws.com --username your@email --password your-password
+hdc list-clusters --server https://ec2-52-29-224-64...compute.amazonaws.com --username your@email --password your-password
 ```
 
 ### Create cluster
