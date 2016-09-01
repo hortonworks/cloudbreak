@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/credentials")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/credentials", description = ControllerDescription.CREDENTIAL_DESCRIPTION, position = 1)
+@Api(value = "/credentials", description = ControllerDescription.CREDENTIAL_DESCRIPTION)
 public interface CredentialEndpoint {
 
     @POST

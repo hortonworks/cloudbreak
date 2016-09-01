@@ -114,11 +114,11 @@ public class AccountPreferencesValidator {
         }
     }
 
-    private boolean needToValidateField(long field) {
-        return !EXTREMAL_VALUE.equals(field);
+    private boolean needToValidateField(Long field) {
+        return field != null && !EXTREMAL_VALUE.equals(field);
     }
 
     private boolean needToValidateField(List<String> field) {
-        return !field.isEmpty();
+        return field != null && !field.isEmpty();
     }
 }

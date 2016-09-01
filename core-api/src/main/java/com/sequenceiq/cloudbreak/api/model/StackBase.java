@@ -28,12 +28,14 @@ public abstract class StackBase implements JsonEntity {
     private String name;
     @ApiModelProperty(value = StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
-    @ApiModelProperty(value = StackModelDescription.REGION)
+    @NotNull
+    @ApiModelProperty(value = StackModelDescription.REGION, required = true)
     private String region;
-    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
+    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM)
     private String cloudPlatform;
     @ApiModelProperty(StackModelDescription.PLATFORM_VARIANT)
     private String platformVariant;
+    @NotNull
     @ApiModelProperty(value = StackModelDescription.CREDENTIAL_ID, required = true)
     private Long credentialId;
     @ApiModelProperty(StackModelDescription.FAILURE_ACTION)
@@ -41,15 +43,16 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.FAILURE_POLICY)
     private FailurePolicyJson failurePolicy;
     @Valid
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
+    @NotNull
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
     private Long networkId;
-    @ApiModelProperty(value = StackModelDescription.RELOCATE_DOCKER)
+    @ApiModelProperty(StackModelDescription.RELOCATE_DOCKER)
     private Boolean relocateDocker;
-    @ApiModelProperty(value = StackModelDescription.AMBARI_VERSION)
+    @ApiModelProperty(StackModelDescription.AMBARI_VERSION)
     private String ambariVersion;
-    @ApiModelProperty(value = StackModelDescription.HDP_VERSION)
+    @ApiModelProperty(StackModelDescription.HDP_VERSION)
     private String hdpVersion;
 
     @ApiModelProperty(StackModelDescription.PARAMETERS)

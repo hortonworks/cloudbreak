@@ -31,9 +31,10 @@ public class Notes {
             + "They are built based on a Blueprint (running the components and services specified) and on "
             + "a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual"
             + " way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.";
+    public static final String CLUSTER_TEMPLATE_NOTES = "Cluster templates are stored cluster configurations, which configurations are reusable any time";
     public static final String RECIPE_NOTES = "Recipes are basically script extensions to a cluster that run on a set of nodes"
             + " before or after the Ambari cluster installation.";
-    public static final String SSSDCONFIG_NOTES = "SSSD configs are defining external user database configuration for Hadoop containers.";
+    public static final String SSSDCONFIG_NOTES = "SSSD configs are defining external user database configuration for provisioned clusters.";
     public static final String USAGE_NOTES = "Cloudbreak gives you an up to date overview of cluster usage based "
             + "on different filtering criteria (start/end date, users, providers, region, etc)";
     public static final String EVENT_NOTES = "Events are used to track stack creation initiated by cloudbreak users. "
@@ -52,6 +53,10 @@ public class Notes {
 
     public static final String LDAP_CONFIG_NOTES = "LDAP server integration enables the user to provide"
             + " a central place to store usernames and passwords for the users of his/her clusters.";
+    public static final String CONNECTOR_NOTES = "Each cloud provider has it's own specific resources like instance types and disk types."
+            + " These endpoints are collecting them.";
+    public static final String SETTINGS_NOTES = "Collecting Cloudbreak specific resource settings.";
+    public static final String SUBSCRIPTION_NOTES = "Accepting client subscriptions to notification events.";
 
     private Notes() {
     }

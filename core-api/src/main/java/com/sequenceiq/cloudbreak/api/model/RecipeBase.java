@@ -33,7 +33,7 @@ abstract class RecipeBase implements JsonEntity {
     private Integer timeout;
 
     @ValidPlugin
-    @ApiModelProperty(value = RecipeModelDescription.PLUGINS, required = true)
+    @ApiModelProperty(value = RecipeModelDescription.PLUGINS)
     private Set<String> plugins;
 
     @JsonProperty("properties")

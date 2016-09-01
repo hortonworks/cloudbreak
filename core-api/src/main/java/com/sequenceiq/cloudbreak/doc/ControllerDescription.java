@@ -9,6 +9,7 @@ public class ControllerDescription {
     public static final String TOPOLOGY_DESCRIPTION = "Operations on topologies";
     public static final String STACK_DESCRIPTION = "Operations on stacks";
     public static final String CLUSTER_DESCRIPTION = "Operations on clusters";
+    public static final String CLUSTER_TEMPLATE_DESCRIPTION = "Operations on clusters templates";
     public static final String RECIPE_DESCRIPTION = "Operations on recipes";
     public static final String SSSDCONFIG_DESCRIPTION = "Operations on SSSD configs";
     public static final String USAGES_DESCRIPTION = "Operations on usages";
@@ -20,6 +21,9 @@ public class ControllerDescription {
     public static final String LDAP_CONFIG_DESCRIPTION = "Operations on LDAP server configurations";
     public static final String UTIL_DESCRIPTION = "Miscellaneous utility operations";
     public static final String RDSCONFIG_DESCRIPTION = "Operations on RDS configs";
+    public static final String CONNECTOR_DESCRIPTION = "Returns cloud provider specific resource types";
+    public static final String SETTINGS_DESCRIPTION = "Returns Cloudbreak specific resource settings";
+    public static final String SUBSCRIPTION_DESCRIPTION = "Client subscription for event notifications";
 
     private ControllerDescription() {
     }

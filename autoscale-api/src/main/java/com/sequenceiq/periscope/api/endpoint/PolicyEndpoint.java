@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/clusters/{clusterId}/policies")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/policies", description = POLICIES_DESCRIPTION, position = 4)
+@Api(value = "/policies", description = POLICIES_DESCRIPTION)
 public interface PolicyEndpoint {
 
     @POST

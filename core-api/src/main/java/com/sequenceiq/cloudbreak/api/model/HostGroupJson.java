@@ -29,6 +29,7 @@ public class HostGroupJson {
     @ApiModelProperty(value = HostGroupModelDescription.RECIPE_IDS)
     private Set<Long> recipeIds;
 
+    @ApiModelProperty(value = HostGroupModelDescription.METADATA)
     private Set<HostMetadataJson> metadata = new HashSet<>();
 
     public String getName() {
