@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATHON;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.util.Calendar;
@@ -25,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
-import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -64,7 +64,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
     }
 
     private String getRegion(StackRequest source) {
-        if (isEmpty(source.getRegion())) {
+        if (isEmpty(source.getRegion()) && !MARATHON.equals(source.getOrchestrator().getType())) {
             Map<Platform, Region> regions = Maps.newHashMap();
             if (isNoneEmpty(defaultRegions)) {
                 for (String entry : defaultRegions.split(",")) {
@@ -113,7 +113,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
                 throw new BadRequestException("Only 1 Ambari server can be specified");
             }
         }
-        boolean orchestratorIsMarathon = OrchestratorConstants.MARATHON.equals(source.getOrchestrator().getType());
+        boolean orchestratorIsMarathon = MARATHON.equals(source.getOrchestrator().getType());
         if (!gatewaySpecified && !orchestratorIsMarathon) {
             throw new BadRequestException("Ambari server must be specified");
         }
