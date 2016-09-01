@@ -32,10 +32,10 @@ GLOBAL OPTIONS:
 Each command provides a help flag with a description and the accepted flags and subcommands, e.g: `hdc configure -h`.
 ```
 NAME:
-   hdc-cli configure - configure the server address and credentials used to communicate with this server
+   hdc configure - configure the server address and credentials used to communicate with this server
 
 USAGE:
-   hdc-cli configure [command options] [arguments...]
+   hdc configure [command options] [arguments...]
 
 DESCRIPTION:
    it will save the provided server address and credential to /Users/khorvath/.hdc/config
@@ -108,7 +108,7 @@ hdc terminate-cluster --cluster-name my-cluster
 ### Describe cluster
 If you want to clone a cluster the `describe-cluster` command can be useful.
 ```
-hdc-cli describe-cluster --cluster-name my-cluster
+hdc describe-cluster --cluster-name my-cluster
 
 {
   "ClusterName": "my-cluster",
