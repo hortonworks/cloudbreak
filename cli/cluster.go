@@ -121,12 +121,16 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 		c.Status = *stack.Cluster.Status
 		c.StatusReason = *stack.Cluster.StatusReason
 	} else {
-		c.StatusReason = *stack.StatusReason
+		if stack.StatusReason != nil {
+			c.StatusReason = *stack.StatusReason
+		}
 	}
 	if stack.HdpVersion != nil {
 		c.HDPVersion = *stack.HdpVersion
 	}
-	c.ClusterType = blueprint.Name
+	if blueprint != nil {
+		c.ClusterType = blueprint.Name
+	}
 
 	for _, v := range stack.InstanceGroups {
 		if v.Group == "master" {
@@ -170,7 +174,11 @@ func FetchCluster(client *Cloudbreak, stack *models.StackResponse) (*ClusterSkel
 
 	respCredential, _ := client.Cloudbreak.Credentials.GetCredentialsID(&credentials.GetCredentialsIDParams{ID: stack.CredentialID})
 
-	respBlueprint, _ := client.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
+	var blueprint *models.BlueprintResponse = nil
+	if stack.Cluster != nil && stack.Cluster.BlueprintID != nil {
+		respBlueprint, _ := client.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
+		blueprint = respBlueprint.Payload
+	}
 
 	var templateMap map[string]*models.TemplateResponse = make(map[string]*models.TemplateResponse)
 	for _, v := range stack.InstanceGroups {
@@ -181,7 +189,7 @@ func FetchCluster(client *Cloudbreak, stack *models.StackResponse) (*ClusterSkel
 	}
 	securityMap, _ := client.GetSecurityDetails(client, stack)
 	clusterSkeleton := &ClusterSkeleton{}
-	clusterSkeleton.fill(stack, respCredential.Payload, respBlueprint.Payload, templateMap, securityMap)
+	clusterSkeleton.fill(stack, respCredential.Payload, blueprint, templateMap, securityMap)
 	return clusterSkeleton, nil
 }
 
