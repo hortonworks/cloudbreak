@@ -8,7 +8,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.HistoryJsonProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("HistoryJson")
+@ApiModel("History")
 public class HistoryJson implements Json {
 
     @ApiModelProperty(HistoryJsonProperties.ID)

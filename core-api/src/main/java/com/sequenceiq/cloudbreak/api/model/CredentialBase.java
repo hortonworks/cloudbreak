@@ -20,9 +20,10 @@ public class CredentialBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
+    @NotNull
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
-    @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PARAMETERS, required = true)
+    @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)

@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
-import com.sequenceiq.cloudbreak.shell.completion.PluginExecutionType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class RecipeCommands implements BaseCommands {
@@ -101,7 +100,6 @@ public class RecipeCommands implements BaseCommands {
     public String storeRecipe(
             @CliOption(key = "name", mandatory = true, help = "Unique name of the recepie") String name,
             @CliOption(key = "description", help = "Description of the recepie") String description,
-            @CliOption(key = "executionType", mandatory = true, help = "Type of recepie execution") PluginExecutionType executionType,
             @CliOption(key = "preInstallScriptFile", help = "Path of the pre install script file") File preInstallScriptFile,
             @CliOption(key = "postInstallScriptFile", help = "Path of the post install script file") File postInstallScriptFile,
             @CliOption(key = "timeout", help = "Timeout of the script execution") Integer timeout,

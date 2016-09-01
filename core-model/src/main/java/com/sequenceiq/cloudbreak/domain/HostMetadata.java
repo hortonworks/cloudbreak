@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -38,11 +39,13 @@ public class HostMetadata {
     @SequenceGenerator(name = "hostmetadata_generator", sequenceName = "hostmetadata_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
     private String hostName;
 
     @ManyToOne
     private HostGroup hostGroup;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private HostMetadataState hostMetadataState = HostMetadataState.HEALTHY;
 

@@ -13,7 +13,7 @@ public class FailurePolicyJson implements JsonEntity {
     private Long id;
     @ApiModelProperty(FailurePolicyModelDescription.THRESHOLD)
     private Long threshold;
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.ADJUSTMENT_TYPE, required = true)
     private AdjustmentType adjustmentType;
 
     public Long getThreshold() {

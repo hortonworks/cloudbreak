@@ -36,7 +36,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/stacks")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/stacks", description = ControllerDescription.STACK_DESCRIPTION, position = 3)
+@Api(value = "/stacks", description = ControllerDescription.STACK_DESCRIPTION)
 public interface StackEndpoint {
 
     @POST
@@ -136,8 +136,8 @@ public interface StackEndpoint {
     Response put(@PathParam(value = "id")Long id, @Valid UpdateStackJson updateRequest);
 
     @GET
+    @Path(value = "{id}/certificate")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
-    @Path(value = "{id}/certificate")
     CertificateResponse getCertificate(@PathParam(value = "id") Long stackId);
 }

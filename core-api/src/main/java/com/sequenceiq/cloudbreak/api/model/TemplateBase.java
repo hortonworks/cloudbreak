@@ -24,8 +24,7 @@ public abstract class TemplateBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.PARAMETERS, required = true)
+    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
@@ -33,18 +32,18 @@ public abstract class TemplateBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_COUNT, required = true)
     private Integer volumeCount;
-    @ApiModelProperty(ModelDescriptions.TemplateModelDescription.VOLUME_SIZE)
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_SIZE, required = true)
     private Integer volumeSize;
     @ApiModelProperty(ModelDescriptions.TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.INSTANCE_TYPE, required = true)
     private String instanceType;
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, readOnly = true)
+    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
 
-    @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
+    @ApiModelProperty(ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;
 
     public String getDescription() {

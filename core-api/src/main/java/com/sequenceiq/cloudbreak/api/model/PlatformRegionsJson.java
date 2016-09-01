@@ -5,12 +5,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformRegionsJson implements JsonEntity {
 
+    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.REGIONS)
     private Map<String, Collection<String>> regions;
+    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.AVAILABILITY_ZONES)
     private Map<String, Map<String, Collection<String>>> availabilityZones;
+    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DEFAULT_REGIOS)
     private Map<String, String> defaultRegions;
 
     public PlatformRegionsJson() {

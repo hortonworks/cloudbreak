@@ -13,7 +13,7 @@ public class ConstraintTemplateResponse extends ConstraintTemplateBase {
     private Long id;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, readOnly = true)
+    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
 
     public Long getId() {

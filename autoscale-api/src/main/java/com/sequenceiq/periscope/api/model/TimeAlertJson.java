@@ -5,7 +5,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.TimeAlertJsonProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("MetricAlertJson")
+@ApiModel("MetricSchedule")
 public class TimeAlertJson extends AbstractAlertJson {
 
     @ApiModelProperty(TimeAlertJsonProperties.TIMEZONE)

@@ -20,10 +20,13 @@ public class FileSystem {
     @SequenceGenerator(name = "filesystem_generator", sequenceName = "filesystem_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String type;
 
+    @Column(nullable = false)
     private boolean defaultFs;
 
     @ElementCollection(fetch = FetchType.EAGER)

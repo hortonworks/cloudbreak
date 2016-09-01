@@ -38,6 +38,7 @@ public class Component {
     @Enumerated(EnumType.STRING)
     private ComponentType componentType;
 
+    @Column(nullable = false)
     private String name;
 
     @Convert(converter = JsonToString.class)

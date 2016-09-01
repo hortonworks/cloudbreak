@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -40,8 +41,11 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     private Template template;
     @OneToOne
     private SecurityGroup securityGroup;
+    @Column(nullable = false)
     private Integer nodeCount;
+    @Column(nullable = false)
     private String groupName;
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InstanceGroupType instanceGroupType = InstanceGroupType.CORE;
     @ManyToOne

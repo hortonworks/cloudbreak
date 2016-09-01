@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -79,21 +80,31 @@ public class RDSConfig {
     @SequenceGenerator(name = "rdsconfig_generator", sequenceName = "rdsconfig_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String connectionURL;
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private RDSDatabase databaseType;
+    @Column(nullable = false)
     private String connectionUserName;
+    @Column(nullable = false)
     private String connectionPassword;
     private Long creationDate;
+    @Column(nullable = false)
     private String hdpVersion;
 
+    @Column(nullable = false)
     private String owner;
+    @Column(nullable = false)
     private String account;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 

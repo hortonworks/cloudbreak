@@ -14,19 +14,16 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("AccountPreferences")
 public class AccountPreferencesJson implements JsonEntity {
 
-    @NotNull
     @Min(value = 0, message = "The maximum number of clusters has to be greater than '-1'")
     @Digits(fraction = 0, integer = 10, message = "The maximum number of clusters has to be a number")
     @ApiModelProperty(AccountPreferencesModelDescription.MAX_NO_CLUSTERS)
     private Long maxNumberOfClusters;
 
-    @NotNull
     @Min(value = 0, message = "The maximum number of vms per cluster has to be greater than '-1'")
     @Digits(fraction = 0, integer = 10, message = "The maximum number of vms per cluster has to be a number")
     @ApiModelProperty(AccountPreferencesModelDescription.MAX_NO_NODES_PER_CLUSTER)
     private Long maxNumberOfNodesPerCluster;
 
-    @NotNull
     @Min(value = 0, message = "The maximum number of clusters per user has to be greater than '-1'")
     @Digits(fraction = 0, integer = 10, message = "The maximum number of clusters per user has to be a number")
     @ApiModelProperty(AccountPreferencesModelDescription.MAX_NO_CLUSTERS_PER_USER)
@@ -37,12 +34,12 @@ public class AccountPreferencesJson implements JsonEntity {
 
     @NotNull
     @Min(value = 0, message = "The cluster time to live has to be greater than '-1'")
-    @ApiModelProperty(AccountPreferencesModelDescription.CLUSTER_TIME_TO_LIVE)
+    @ApiModelProperty(value = AccountPreferencesModelDescription.CLUSTER_TIME_TO_LIVE, required = true)
     private Long clusterTimeToLive;
 
     @NotNull
     @Min(value = 0, message = "The account time to live has to be greater than '-1'")
-    @ApiModelProperty(AccountPreferencesModelDescription.ACCOUNT_TIME_TO_LIVE)
+    @ApiModelProperty(value = AccountPreferencesModelDescription.ACCOUNT_TIME_TO_LIVE, required = true)
     private Long userTimeToLive;
 
     @ApiModelProperty(AccountPreferencesModelDescription.PLATFORMS)
