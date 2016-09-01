@@ -15,6 +15,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-swagger/go-swagger/errors"
+	"github.com/go-swagger/go-swagger/httpkit/validate"
 	"github.com/sequenceiq/hdc-cli/client/blueprints"
 	"github.com/sequenceiq/hdc-cli/client/credentials"
 	"github.com/sequenceiq/hdc-cli/client/templates"
@@ -42,6 +44,42 @@ type ClusterSkeleton struct {
 	//HiveMetastoreUrl         string `json:"HiveMetastoreUrl" yaml:"HiveMetastoreUrl"`
 	//HiveMetastoreUser        string `json:"HiveMetastoreUser" yaml:"HiveMetastoreUser"`
 	//HiveMetastorePassword    string `json:"HiveMetastorePassword" yaml:"HiveMetastorePassword"`
+}
+
+func (s *ClusterSkeleton) Validate() error {
+	var res []error
+	if err := validate.RequiredString("ClusterName", "body", string(s.ClusterName)); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("HDPVersion", "body", string(s.HDPVersion)); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("ClusterType", "body", string(s.ClusterType)); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredNumber("InstanceCount", "body", float64(s.InstanceCount)); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("SSHKeyName", "body", string(s.SSHKeyName)); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("RemoteAccess", "body", string(s.RemoteAccess)); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.Required("WebAccess", "body", s.WebAccess); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("ClusterAndAmbariUser", "body", string(s.ClusterAndAmbariUser)); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("ClusterAndAmbariPassword", "body", string(s.ClusterAndAmbariPassword)); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
 }
 
 type InstanceConfig struct {
@@ -221,32 +259,43 @@ func TerminateCluster(c *cli.Context) error {
 	return nil
 }
 
-func CreateCluster(c *cli.Context) error {
+func AssembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 	path := c.String(FlCBInputJson.Name)
 	if len(path) == 0 {
-		log.Errorf("[CreateCluster] missing parameter: %s", FlCBInputJson.Name)
-		return newExitError()
+		log.Errorf("[AssembleClusterSkeleton] missing parameter: %s", FlCBInputJson.Name)
+		newExitReturnError()
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		log.Errorf("[CreateCluster] %s", err.Error())
-		return newExitError()
+		log.Errorf("[AssembleClusterSkeleton] %s", err.Error())
+		newExitReturnError()
 	}
 
-	log.Infof("[CreateCluster] read cluster create json from file: %s", path)
+	log.Infof("[AssembleClusterSkeleton] read cluster create json from file: %s", path)
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Errorf("[CreateCluster] %s", err.Error())
-		return newExitError()
+		log.Errorf("[AssembleClusterSkeleton] %s", err.Error())
+		newExitReturnError()
 	}
 
 	var skeleton ClusterSkeleton
 	err = json.Unmarshal(content, &skeleton)
 	if err != nil {
-		log.Errorf("[CreateCluster] %s", err.Error())
-		return newExitError()
+		log.Errorf("[AssembleClusterSkeleton] %s", err.Error())
+		newExitReturnError()
 	}
-	log.Infof("[CreateCluster] assemble cluster based on skeleton: %s", skeleton.Json())
+
+	log.Infof("[AssembleClusterSkeleton] assemble cluster based on skeleton: %s", skeleton.Json())
+	return skeleton
+}
+
+func CreateCluster(c *cli.Context) error {
+	skeleton := AssembleClusterSkeleton(c)
+
+	if err := skeleton.Validate(); err != nil {
+		log.Errorf("[CreateCluster] %s", err)
+		newExitReturnError()
+	}
 
 	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
@@ -381,6 +430,11 @@ func CreateCluster(c *cli.Context) error {
 
 	oAuth2Client.waitForClusterToFinish(stackId, c)
 	return nil
+}
+
+func ValidateCreateClusterSkeleton(c *cli.Context) error {
+	skeleton := AssembleClusterSkeleton(c)
+	return skeleton.Validate()
 }
 
 func GenerateCreateClusterSkeleton(c *cli.Context) error {

@@ -76,6 +76,11 @@ func main() {
 					Name:   "generate-cli-skeleton",
 					Action: hdc.GenerateCreateClusterSkeleton,
 				},
+				{
+					Name:   "validate-cli-skeleton",
+					Flags:  []cli.Flag{hdc.FlCBInputJson},
+					Action: hdc.ValidateCreateClusterSkeleton,
+				},
 			},
 		},
 		{
