@@ -23,6 +23,8 @@ import (
 	"time"
 )
 
+var PREFIX_TRIM []string = []string{"http://", "https://"}
+
 type Cloudbreak struct {
 	Cloudbreak *apiclient.Cloudbreak
 }
@@ -42,18 +44,30 @@ var TransportConfig = &http.Transport{
 var LoggedTransportConfig = httplogger.NewLoggedTransport(TransportConfig, newLogger())
 
 // NewHTTPClient creates a new cloudbreak HTTP client.
-func NewOAuth2HTTPClient(address string, username string, password string) *Cloudbreak {
+func NewOAuth2HTTPClient(address string, username string, password string) (*Cloudbreak, error) {
+	for _, v := range PREFIX_TRIM {
+		address = strings.TrimPrefix(address, v)
+	}
+
+	token, err := getOAuth2Token("https://" + address + "/identity/oauth/authorize", username, password, "cloudbreak_shell")
+	if err != nil {
+		return nil, err
+	}
+
 	cbTransport := &cbTransport{httptransport.New(address, "/cb/api/v1", []string{"https"})}
-	token := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
 	cbTransport.Runtime.DefaultAuthentication = httptransport.BearerToken(token)
 
 	cbTransport.Runtime.Transport = LoggedTransportConfig
-	return &Cloudbreak{Cloudbreak: apiclient.New(cbTransport, strfmt.Default)}
+	return &Cloudbreak{Cloudbreak: apiclient.New(cbTransport, strfmt.Default)}, nil
 }
 
-func getOAuth2Token(identityUrl string, username string, password string, clientId string) string {
+func getOAuth2Token(identityUrl string, username string, password string, clientId string) (string, error) {
+
 	form := url.Values{"credentials": {fmt.Sprintf(`{"username":"%s","password":"%s"}`, username, password)}}
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s?response_type=token&client_id=%s", identityUrl, clientId), strings.NewReader(form.Encode()))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s?response_type=token&client_id=%s", identityUrl, clientId), strings.NewReader(form.Encode()))
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Accept", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
@@ -64,13 +78,25 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 		},
 	}
 
-	resp, _ := client.Do(req)
+	resp, err := client.Do(req)
+
+	if ( resp == nil && err == nil ) {
+		return "", errors.New(fmt.Sprintf("Unkown error while connnecting to %s as user: %s", identityUrl, username))
+	}
+
+	if ( resp == nil || resp.StatusCode >= 400) {
+		if (err != nil ) {
+			return "", err
+		}
+		return "", errors.New(fmt.Sprintf("Error while connnecting to %s as user: %s, please check your username and password. (%s)", identityUrl, username, resp.Status))
+	}
+
 	location := resp.Header.Get("Location")
 	regexp := regexp.MustCompile("access_token=(.*)&expires_in")
 	tokenBytes := regexp.Find([]byte(location))
 	tokenString := string(tokenBytes)
-	token := tokenString[13 : len(tokenString)-11]
-	return token
+	token := tokenString[13 : len(tokenString) - 11]
+	return token, nil
 }
 
 type cbTransport struct {

@@ -148,28 +148,38 @@ func FetchCluster(client *Cloudbreak, stack *models.StackResponse) (*ClusterSkel
 }
 
 func DescribeCluster(c *cli.Context) error {
-	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	if err != nil {
+		log.Error(err)
+		newExitReturnError()
+	}
+
 	clusterName := c.String(FlCBClusterName.Name)
 	if len(clusterName) == 0 {
 		log.Error(fmt.Sprintf("[DescribeCluster] You need to specify the %s parameter", FlCBClusterName.Name))
 		return newExitError()
 	}
 
-	respStack, err := client.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
+	respStack, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
 	if err != nil {
 		log.Error(err)
 		return newExitError()
 	}
-	clusterSkeleton, _ := FetchCluster(client, respStack.Payload)
+	clusterSkeleton, _ := FetchCluster(oAuth2Client, respStack.Payload)
 	fmt.Println(clusterSkeleton.JsonPretty())
 
 	return nil
 }
 
 func ListClusters(c *cli.Context) error {
-	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
-	respStacks, err := client.Cloudbreak.Stacks.GetStacksUser(&stacks.GetStacksUserParams{})
+	if err != nil {
+		log.Error(err)
+		newExitReturnError()
+	}
+
+	respStacks, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUser(&stacks.GetStacksUserParams{})
 	if err != nil {
 		log.Error(err)
 		return err
@@ -177,7 +187,7 @@ func ListClusters(c *cli.Context) error {
 
 	var tableRows []TableRow
 	for _, stack := range respStacks.Payload {
-		clusterSkeleton, _ := FetchCluster(client, stack)
+		clusterSkeleton, _ := FetchCluster(oAuth2Client, stack)
 		tableRows = append(tableRows, clusterSkeleton)
 	}
 	WriteTable(ClusterSkeletonListHeader, tableRows)
@@ -193,15 +203,21 @@ func TerminateCluster(c *cli.Context) error {
 	}
 
 	log.Infof("[TerminateCluster] sending request to terminate cluster: %s")
-	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
-	err := client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName})
+	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+
+	if err != nil {
+		log.Error(err)
+		newExitReturnError()
+	}
+
+	err = oAuth2Client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName})
 
 	if err != nil {
 		log.Error(fmt.Sprintf("[TerminateCluster] Failed to terminate the cluster: %s, error: %s", clusterName, err.Error()))
 		return newExitError()
 	}
 
-	client.waitForClusterToTerminate(clusterName, c)
+	oAuth2Client.waitForClusterToTerminate(clusterName, c)
 	return nil
 }
 
@@ -232,24 +248,29 @@ func CreateCluster(c *cli.Context) error {
 	}
 	log.Infof("[CreateCluster] assemble cluster based on skeleton: %s", skeleton.Json())
 
-	client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
-	blueprintId := client.GetBlueprintId(skeleton.ClusterType)
+	if err != nil {
+		log.Error(err)
+		newExitReturnError()
+	}
+
+	blueprintId := oAuth2Client.GetBlueprintId(skeleton.ClusterType)
 
 	var wg sync.WaitGroup
 	wg.Add(4)
 
 	credentialId := make(chan int64, 1)
-	go client.CopyDefaultCredential(skeleton, credentialId, &wg)
+	go oAuth2Client.CopyDefaultCredential(skeleton, credentialId, &wg)
 
 	templateIds := make(chan int64, 2)
-	go client.CreateTemplate(skeleton, templateIds, &wg)
+	go oAuth2Client.CreateTemplate(skeleton, templateIds, &wg)
 
 	var secGroupId = make(chan int64, 1)
-	go client.CreateSecurityGroup(skeleton, secGroupId, &wg)
+	go oAuth2Client.CreateSecurityGroup(skeleton, secGroupId, &wg)
 
 	networkId := make(chan int64, 1)
-	go client.CopyDefaultNetwork(skeleton, networkId, &wg)
+	go oAuth2Client.CopyDefaultNetwork(skeleton, networkId, &wg)
 
 	wg.Wait()
 
@@ -302,7 +323,7 @@ func CreateCluster(c *cli.Context) error {
 		}
 
 		log.Infof("[CreateStack] sending stack create request with name: %s", skeleton.ClusterName)
-		resp, err := client.Cloudbreak.Stacks.PostStacksUser(&stacks.PostStacksUserParams{&stackReq})
+		resp, err := oAuth2Client.Cloudbreak.Stacks.PostStacksUser(&stacks.PostStacksUserParams{&stackReq})
 
 		if err != nil {
 			log.Errorf("[CreateStack] %s", err.Error())
@@ -348,7 +369,7 @@ func CreateCluster(c *cli.Context) error {
 			Password:    skeleton.ClusterAndAmbariPassword,
 		}
 
-		resp, err := client.Cloudbreak.Cluster.PostStacksIDCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
+		resp, err := oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
 
 		if err != nil {
 			log.Errorf("[CreateCluster] %s", err.Error())
@@ -358,7 +379,7 @@ func CreateCluster(c *cli.Context) error {
 		log.Infof("[CreateCluster] cluster created, id: %d", resp.Payload.ID)
 	}()
 
-	client.waitForClusterToFinish(stackId, c)
+	oAuth2Client.waitForClusterToFinish(stackId, c)
 	return nil
 }
 
