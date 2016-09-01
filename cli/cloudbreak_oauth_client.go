@@ -5,10 +5,10 @@ package cli
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/docker/notary/Godeps/_workspace/src/github.com/jfrazelle/go/canonical/json"
 	"github.com/ernesto-jimenez/httplogger"
 	swaggerclient "github.com/go-swagger/go-swagger/client"
 	"github.com/go-swagger/go-swagger/httpkit"
