@@ -90,10 +90,8 @@ type StackRequest struct {
 	PlatformVariant *string `json:"platformVariant,omitempty"`
 
 	/* region of the stack
-
-	Required: true
-	*/
-	Region string `json:"region"`
+	 */
+	Region *string `json:"region,omitempty"`
 
 	/* relocate the docker service in startup time
 	 */
@@ -135,11 +133,6 @@ func (m *StackRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateParameters(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateRegion(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -256,15 +249,6 @@ func (m *StackRequest) validateParameters(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Required("parameters", "body", m.Parameters); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *StackRequest) validateRegion(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("region", "body", string(m.Region)); err != nil {
 		return err
 	}
 
