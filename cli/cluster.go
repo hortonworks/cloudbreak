@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/cluster"
@@ -15,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-swagger/go-swagger/errors"
+	swagerrors "github.com/go-swagger/go-swagger/errors"
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 	"github.com/hortonworks/hdc-cli/client/blueprints"
 	"github.com/hortonworks/hdc-cli/client/credentials"
@@ -60,7 +61,7 @@ func (s *ClusterSkeleton) Validate() error {
 	if err := validate.RequiredNumber("InstanceCount", "body", float64(s.InstanceCount)); err != nil {
 		res = append(res, err)
 	} else if s.InstanceCount < 2 {
-		res = append(res, errors.New(1, "The instance count has to be greater than 1"))
+		res = append(res, swagerrors.New(1, "The instance count has to be greater than 1"))
 	}
 	if err := validate.RequiredString("SSHKeyName", "body", string(s.SSHKeyName)); err != nil {
 		res = append(res, err)
@@ -79,7 +80,7 @@ func (s *ClusterSkeleton) Validate() error {
 	}
 
 	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
+		return swagerrors.CompositeValidationError(res...)
 	}
 	return nil
 }
@@ -95,8 +96,8 @@ type InstanceConfig struct {
 func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroup, template *models.TemplateResponse) error {
 	c.instanceCount = instanceGroup.NodeCount
 	c.InstanceType = template.InstanceType
-	c.VolumeType = *template.VolumeType
-	c.VolumeSize = *template.VolumeSize
+	c.VolumeType = SafeStringConvert(template.VolumeType)
+	c.VolumeSize = SafeInt32Convert(template.VolumeSize)
 	c.VolumeCount = template.VolumeCount
 	return nil
 }
@@ -117,31 +118,40 @@ func (c *ClusterSkeleton) Yaml() string {
 }
 
 func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.CredentialResponse, blueprint *models.BlueprintResponse, templateMap map[string]*models.TemplateResponse, securityMap map[string][]*models.SecurityRule) error {
+	if stack == nil {
+		return errors.New("Stack definition is not returned from Cloudbreak")
+	}
 	c.ClusterName = stack.Name
-	c.Status = *stack.Status
-	if c.Status == "AVAILABLE" {
-		c.Status = *stack.Cluster.Status
-		c.StatusReason = *stack.Cluster.StatusReason
-	} else {
-		if stack.StatusReason != nil {
-			c.StatusReason = *stack.StatusReason
+	c.Status = SafeStringConvert(stack.Status)
+
+	if stack.Cluster != nil {
+		if c.Status == "AVAILABLE" {
+			c.Status = SafeStringConvert(stack.Cluster.Status)
+			c.StatusReason = SafeStringConvert(stack.Cluster.StatusReason)
+		} else {
+			c.StatusReason = SafeStringConvert(stack.StatusReason)
 		}
+		c.ClusterAndAmbariUser = stack.Cluster.UserName
+		c.ClusterAndAmbariPassword = stack.Cluster.Password
+
 	}
-	if stack.HdpVersion != nil {
-		c.HDPVersion = *stack.HdpVersion
-	}
+
+	c.HDPVersion = SafeStringConvert(stack.HdpVersion)
 	if blueprint != nil {
 		c.ClusterType = blueprint.Name
 	}
 
-	for _, v := range stack.InstanceGroups {
-		if v.Group == "master" {
-			c.Master.fill(v, templateMap[v.Group])
-		}
-		if v.Group == "worker" {
-			c.Worker.fill(v, templateMap[v.Group])
+	if stack.InstanceGroups != nil {
+		for _, v := range stack.InstanceGroups {
+			if v.Group == "master" {
+				c.Master.fill(v, templateMap[v.Group])
+			}
+			if v.Group == "worker" {
+				c.Worker.fill(v, templateMap[v.Group])
+			}
 		}
 	}
+
 	if str, ok := credential.Parameters["existingKeyPairName"].(string); ok {
 		c.SSHKeyName = str
 	}
@@ -162,8 +172,6 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	}
 
 	c.InstanceCount = c.Master.instanceCount + c.Worker.instanceCount
-	c.ClusterAndAmbariUser = stack.Cluster.UserName
-	c.ClusterAndAmbariPassword = stack.Cluster.Password
 
 	return nil
 }
