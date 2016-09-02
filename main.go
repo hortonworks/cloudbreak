@@ -21,7 +21,8 @@ func ConfigRead(c *cli.Context) error {
 			return cli.NewExitError("", 1)
 		}
 
-		log.Infof("[ConfigRead] Config read from file, setting as global variable:\n%s", config.Yaml())
+		PrintConfig(*config)
+
 		if len(server) == 0 {
 			c.Set(hdc.FlCBServer.Name, config.Server)
 		}
@@ -33,6 +34,11 @@ func ConfigRead(c *cli.Context) error {
 		}
 	}
 	return nil
+}
+
+func PrintConfig(cfg hdc.Config) {
+	cfg.Password = "*"
+	log.Infof("[ConfigRead] Config read from file, setting as global variable:\n%s", cfg.Yaml())
 }
 
 func main() {

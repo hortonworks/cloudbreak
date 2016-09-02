@@ -115,7 +115,22 @@ type noContentSafeResponseReader struct {
 }
 
 type ErrorMessage struct {
-	Message string `json:"message"`
+	Message         string            `json:"message"`
+	ValidationError map[string]string `json:"validationErrors"`
+}
+
+func (e *ErrorMessage) String() string {
+	var result string = ""
+	if len(e.Message) > 0 {
+		result = e.Message
+	} else if len(e.ValidationError) > 0 {
+		var validationErrors []string
+		for _, v := range e.ValidationError {
+			validationErrors = append(validationErrors, v)
+		}
+		result = strings.Join(validationErrors, ",")
+	}
+	return result
 }
 
 func (r *noContentSafeResponseReader) ReadResponse(response swaggerclient.Response, consumer httpkit.Consumer) (interface{}, error) {
@@ -128,11 +143,12 @@ func (r *noContentSafeResponseReader) ReadResponse(response swaggerclient.Respon
 			return nil, nil
 		default:
 			body, _ := ioutil.ReadAll(response.Body())
-			var message ErrorMessage
-			if err := json.Unmarshal(body, &message); err != nil {
+			var errorMessage ErrorMessage
+			err := json.Unmarshal(body, &errorMessage)
+			if err != nil || (len(errorMessage.Message) == 0 && len(errorMessage.ValidationError) == 0) {
 				return nil, swaggerclient.NewAPIError("", string(body), response.Code())
 			}
-			return nil, swaggerclient.NewAPIError("", message.Message, response.Code())
+			return nil, swaggerclient.NewAPIError("", errorMessage.String(), response.Code())
 		}
 	}
 	return resp, nil
