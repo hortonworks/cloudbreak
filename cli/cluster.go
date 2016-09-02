@@ -244,14 +244,20 @@ func ListClusters(c *cli.Context) error {
 		log.Error(err)
 		return err
 	}
-	//var wg sync.WaitGroup
-	//var tableRows []TableRow
-
+	var wg sync.WaitGroup
 	tableRows := make([]TableRow, len(respStacks.Payload))
 	for i, stack := range respStacks.Payload {
-		clusterSkeleton, _ := oAuth2Client.FetchCluster(stack)
-		tableRows[i] = clusterSkeleton
+		wg.Add(1)
+		go func(i int, stack *models.StackResponse) {
+
+			defer wg.Done()
+			clusterSkeleton, _ := oAuth2Client.FetchCluster(stack)
+			tableRows[i] = clusterSkeleton
+
+		}(i, stack)
 	}
+	wg.Wait()
+
 	WriteTable(ClusterSkeletonListHeader, tableRows)
 	return nil
 }
