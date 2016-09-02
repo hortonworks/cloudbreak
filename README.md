@@ -10,10 +10,15 @@ USAGE:
    hdc [global options] command [command options] [arguments...]
 
 VERSION:
-   0.1.0-2016-09-01T11:30:37
+   1.5.0-rc.9-2016-09-02T14:08:05
 
 AUTHOR(S):
    Hortonworks
+
+LICENSE:
+   Apache License
+   Version 2.0, January 2004
+   http://www.apache.org/licenses/
 
 COMMANDS:
      configure           configure the server address and credentials used to communicate with this server

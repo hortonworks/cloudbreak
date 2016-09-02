@@ -47,7 +47,10 @@ func main() {
 	app.Name = "hdc"
 	app.Usage = ""
 	app.Version = hdc.Version + "-" + hdc.BuildTime
-	app.Author = "Hortonworks"
+	app.Author = "Hortonworks\n\nLICENSE:" + `
+	 Apache License
+	 Version 2.0, January 2004
+	 http://www.apache.org/licenses/`
 
 	app.Flags = []cli.Flag{
 		hdc.FlDebug,
