@@ -42,6 +42,15 @@ func (c *Cloudbreak) CreateCredential(defaultCredential models.CredentialRespons
 	return resp.Payload.ID
 }
 
+func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models.CredentialResponse, error) {
+	respCredential, error := c.Cloudbreak.Credentials.GetCredentialsID(&credentials.GetCredentialsIDParams{ID: credentialID})
+	var credential *models.CredentialResponse
+	if respCredential != nil {
+		credential = respCredential.Payload
+	}
+	return credential, error
+}
+
 func (c *Cloudbreak) GetCredential(name string) models.CredentialResponse {
 	log.Infof("[GetCredential] sending get request to find credential with name: %s", name)
 	resp, err := c.Cloudbreak.Credentials.GetCredentialsUser(&credentials.GetCredentialsUserParams{})

@@ -15,10 +15,8 @@ func ListBlueprints(c *cli.Context) error {
 		log.Error(err)
 		newExitReturnError()
 	}
-	client := oAuth2Client.Cloudbreak
-
 	// make the request to get all items
-	respBlueprints, err := client.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
+	respBlueprints, err := oAuth2Client.Cloudbreak.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
 	if err != nil {
 		log.Error(err)
 		newExitReturnError()

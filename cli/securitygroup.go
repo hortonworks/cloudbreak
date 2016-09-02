@@ -50,10 +50,10 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 	wg.Done()
 }
 
-func (c *Cloudbreak) GetSecurityDetails(client *Cloudbreak, stack *models.StackResponse) (securityMap map[string][]*models.SecurityRule, err error) {
+func (c *Cloudbreak) GetSecurityDetails(stack *models.StackResponse) (securityMap map[string][]*models.SecurityRule, err error) {
 	securityMap = make(map[string][]*models.SecurityRule)
 	for _, v := range stack.InstanceGroups {
-		if respSecurityGroup, err := client.Cloudbreak.Securitygroups.GetSecuritygroupsID(&securitygroups.GetSecuritygroupsIDParams{ID: v.SecurityGroupID}); err == nil {
+		if respSecurityGroup, err := c.Cloudbreak.Securitygroups.GetSecuritygroupsID(&securitygroups.GetSecuritygroupsIDParams{ID: v.SecurityGroupID}); err == nil {
 			securityGroup := respSecurityGroup.Payload
 			for _, sr := range securityGroup.SecurityRules {
 				securityMap[sr.Subnet] = append(securityMap[sr.Subnet], sr)

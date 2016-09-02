@@ -19,7 +19,6 @@ import (
 	swagerrors "github.com/go-swagger/go-swagger/errors"
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 	"github.com/hortonworks/hdc-cli/client/blueprints"
-	"github.com/hortonworks/hdc-cli/client/credentials"
 	"github.com/hortonworks/hdc-cli/client/templates"
 )
 
@@ -184,26 +183,26 @@ func (c *ClusterSkeleton) DataAsStringArray() []string {
 	return []string{c.ClusterName, c.Status, c.HDPVersion, c.ClusterType}
 }
 
-func FetchCluster(client *Cloudbreak, stack *models.StackResponse) (*ClusterSkeleton, error) {
+func (c *Cloudbreak) FetchCluster(stack *models.StackResponse) (*ClusterSkeleton, error) {
 
-	respCredential, _ := client.Cloudbreak.Credentials.GetCredentialsID(&credentials.GetCredentialsIDParams{ID: stack.CredentialID})
+	credential, _ := c.GetCredentialById(stack.CredentialID)
 
 	var blueprint *models.BlueprintResponse = nil
 	if stack.Cluster != nil && stack.Cluster.BlueprintID != nil {
-		respBlueprint, _ := client.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
+		respBlueprint, _ := c.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
 		blueprint = respBlueprint.Payload
 	}
 
 	var templateMap map[string]*models.TemplateResponse = make(map[string]*models.TemplateResponse)
 	for _, v := range stack.InstanceGroups {
-		respTemplate, err := client.Cloudbreak.Templates.GetTemplatesID(&templates.GetTemplatesIDParams{ID: v.TemplateID})
+		respTemplate, err := c.Cloudbreak.Templates.GetTemplatesID(&templates.GetTemplatesIDParams{ID: v.TemplateID})
 		if err == nil {
 			templateMap[v.Group] = respTemplate.Payload
 		}
 	}
-	securityMap, _ := client.GetSecurityDetails(client, stack)
+	securityMap, _ := c.GetSecurityDetails(stack)
 	clusterSkeleton := &ClusterSkeleton{}
-	clusterSkeleton.fill(stack, respCredential.Payload, blueprint, templateMap, securityMap)
+	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap)
 	return clusterSkeleton, nil
 }
 
@@ -225,7 +224,7 @@ func DescribeCluster(c *cli.Context) error {
 		log.Error(err)
 		return newExitError()
 	}
-	clusterSkeleton, _ := FetchCluster(oAuth2Client, respStack.Payload)
+	clusterSkeleton, _ := oAuth2Client.FetchCluster(respStack.Payload)
 	clusterSkeleton.ClusterAndAmbariPassword = ""
 	fmt.Println(clusterSkeleton.JsonPretty())
 
@@ -245,11 +244,13 @@ func ListClusters(c *cli.Context) error {
 		log.Error(err)
 		return err
 	}
+	//var wg sync.WaitGroup
+	//var tableRows []TableRow
 
-	var tableRows []TableRow
-	for _, stack := range respStacks.Payload {
-		clusterSkeleton, _ := FetchCluster(oAuth2Client, stack)
-		tableRows = append(tableRows, clusterSkeleton)
+	tableRows := make([]TableRow, len(respStacks.Payload))
+	for i, stack := range respStacks.Payload {
+		clusterSkeleton, _ := oAuth2Client.FetchCluster(stack)
+		tableRows[i] = clusterSkeleton
 	}
 	WriteTable(ClusterSkeletonListHeader, tableRows)
 	return nil
