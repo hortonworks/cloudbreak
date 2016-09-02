@@ -303,7 +303,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         }
                     });
                 }
-                tmpNodeCount += hg.nodeCount;
+                tmpNodeCount += hg.constraint.hostCount;
             });
 
             if (blueprint.hostGroupCount > tmpNodeCount) {
