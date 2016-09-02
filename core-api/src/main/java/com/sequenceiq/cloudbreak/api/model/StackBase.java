@@ -28,7 +28,7 @@ public abstract class StackBase implements JsonEntity {
     private String name;
     @ApiModelProperty(value = StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
-    @ApiModelProperty(value = StackModelDescription.REGION, required = true)
+    @ApiModelProperty(value = StackModelDescription.REGION)
     private String region;
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
