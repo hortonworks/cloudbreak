@@ -137,6 +137,10 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	}
 
 	c.HDPVersion = SafeStringConvert(stack.HdpVersion)
+	if len(c.HDPVersion) > 3 {
+		c.HDPVersion = c.HDPVersion[0:3]
+	}
+
 	if blueprint != nil {
 		c.ClusterType = blueprint.Name
 	}
