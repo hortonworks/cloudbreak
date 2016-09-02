@@ -144,13 +144,15 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 		c.ClusterType = blueprint.Name
 	}
 
-	if stack.InstanceGroups != nil {
-		for _, v := range stack.InstanceGroups {
-			if v.Group == "master" {
-				c.Master.fill(v, templateMap[v.Group])
-			}
-			if v.Group == "worker" {
-				c.Worker.fill(v, templateMap[v.Group])
+	if securityMap != nil {
+		if stack.InstanceGroups != nil {
+			for _, v := range stack.InstanceGroups {
+				if v.Group == "master" {
+					c.Master.fill(v, templateMap[v.Group])
+				}
+				if v.Group == "worker" {
+					c.Worker.fill(v, templateMap[v.Group])
+				}
 			}
 		}
 	}
@@ -183,7 +185,7 @@ func (c *ClusterSkeleton) DataAsStringArray() []string {
 	return []string{c.ClusterName, c.Status, c.HDPVersion, c.ClusterType}
 }
 
-func (c *Cloudbreak) FetchCluster(stack *models.StackResponse) (*ClusterSkeleton, error) {
+func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, minimal bool) (*ClusterSkeleton, error) {
 
 	credential, _ := c.GetCredentialById(stack.CredentialID)
 
@@ -193,16 +195,21 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse) (*ClusterSkeleton
 		blueprint = respBlueprint.Payload
 	}
 
-	var templateMap map[string]*models.TemplateResponse = make(map[string]*models.TemplateResponse)
-	for _, v := range stack.InstanceGroups {
-		respTemplate, err := c.Cloudbreak.Templates.GetTemplatesID(&templates.GetTemplatesIDParams{ID: v.TemplateID})
-		if err == nil {
-			templateMap[v.Group] = respTemplate.Payload
+	var templateMap map[string]*models.TemplateResponse = nil
+	var securityMap map[string][]*models.SecurityRule = nil
+	if !minimal {
+		templateMap = make(map[string]*models.TemplateResponse)
+		for _, v := range stack.InstanceGroups {
+			respTemplate, err := c.Cloudbreak.Templates.GetTemplatesID(&templates.GetTemplatesIDParams{ID: v.TemplateID})
+			if err == nil {
+				templateMap[v.Group] = respTemplate.Payload
+			}
 		}
+		securityMap, _ = c.GetSecurityDetails(stack)
 	}
-	securityMap, _ := c.GetSecurityDetails(stack)
 	clusterSkeleton := &ClusterSkeleton{}
 	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap)
+
 	return clusterSkeleton, nil
 }
 
@@ -224,7 +231,7 @@ func DescribeCluster(c *cli.Context) error {
 		log.Error(err)
 		return newExitError()
 	}
-	clusterSkeleton, _ := oAuth2Client.FetchCluster(respStack.Payload)
+	clusterSkeleton, _ := oAuth2Client.FetchCluster(respStack.Payload, false)
 	clusterSkeleton.ClusterAndAmbariPassword = ""
 	fmt.Println(clusterSkeleton.JsonPretty())
 
@@ -251,7 +258,7 @@ func ListClusters(c *cli.Context) error {
 		go func(i int, stack *models.StackResponse) {
 
 			defer wg.Done()
-			clusterSkeleton, _ := oAuth2Client.FetchCluster(stack)
+			clusterSkeleton, _ := oAuth2Client.FetchCluster(stack, true)
 			tableRows[i] = clusterSkeleton
 
 		}(i, stack)
