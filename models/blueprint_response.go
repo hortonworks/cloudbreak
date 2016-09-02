@@ -19,6 +19,13 @@ swagger:model BlueprintResponse
 */
 type BlueprintResponse struct {
 
+	// TODO WARNING: do not replace it with string, otherwise it cannot be deserialized
+	/* ambari blueprint JSON, set this or the url field
+
+	Required: true
+	*/
+	AmbariBlueprint AmbariBlueprint `json:"ambariBlueprint"`
+
 	/* gathered from blueprintName field from the blueprint JSON
 	 */
 	BlueprintName *string `json:"blueprintName,omitempty"`
@@ -53,6 +60,32 @@ type BlueprintResponse struct {
 	/* status of the blueprint
 	 */
 	Status *string `json:"status,omitempty"`
+}
+
+type AmbariBlueprint struct {
+	Blueprint Blueprint `json:"Blueprints"`
+}
+
+type Blueprint struct {
+	Name           *string        `json:"blueprint_name"`
+	StackName      string         `json:"stack_name"`
+	StackVersion   string         `json:"stack_version"`
+	Configurations Configurations `json:"configurations"`
+	HostGroups     HostGroups     `json:"host_groups"`
+}
+
+type Configurations struct {
+	Configurations map[string]interface{} `json:"configurations"`
+}
+
+type HostGroups struct {
+	Name           string         `json:"name"`
+	Configurations Configurations `json:"configurations"`
+	Components     []Components   `json:"components"`
+}
+
+type Components struct {
+	Name string `json:"name"`
 }
 
 // Validate validates this blueprint response

@@ -28,11 +28,11 @@ func ListBlueprints(c *cli.Context) error {
 	for _, blueprint := range respBlueprints.Payload {
 		// this is a workaround, needs to be hidden, by not storing them as public
 		if !strings.HasPrefix(blueprint.Name, "b") {
-			row := &GenericRow{Data: []string{blueprint.Name}}
+			row := &GenericRow{Data: []string{blueprint.Name, blueprint.AmbariBlueprint.Blueprint.StackVersion}}
 			tableRows = append(tableRows, row)
 		}
 	}
-	WriteTable([]string{"ClusterType"}, tableRows)
+	WriteTable([]string{"Cluster Type", "HDP Version"}, tableRows)
 
 	return nil
 }
