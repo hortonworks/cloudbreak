@@ -56,7 +56,7 @@ func WriteConfigToFile(server string, username string, password string) error {
 
 	if _, err := os.Stat(hdcDir); os.IsNotExist(err) {
 		log.Infof("[WriteCredentialsToFile] create dir: %s", hdcDir)
-		err = os.MkdirAll(hdcDir, 0744)
+		err = os.MkdirAll(hdcDir, 0700)
 		if err != nil {
 			return err
 		}
@@ -66,7 +66,7 @@ func WriteConfigToFile(server string, username string, password string) error {
 
 	log.Infof("[WriteConfigToFile] writing credentials to file: %s", configFile)
 	confJson := Config{Server: server, Username: username, Password: password}.Yaml()
-	err := ioutil.WriteFile(configFile, []byte(confJson), 0744)
+	err := ioutil.WriteFile(configFile, []byte(confJson), 0600)
 	if err != nil {
 		return err
 	}

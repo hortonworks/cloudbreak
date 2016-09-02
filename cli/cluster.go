@@ -222,6 +222,7 @@ func DescribeCluster(c *cli.Context) error {
 		return newExitError()
 	}
 	clusterSkeleton, _ := FetchCluster(oAuth2Client, respStack.Payload)
+	clusterSkeleton.ClusterAndAmbariPassword = ""
 	fmt.Println(clusterSkeleton.JsonPretty())
 
 	return nil
