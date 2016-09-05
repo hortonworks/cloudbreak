@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var BlueprinttHeader []string = []string{"Cluster Type", "HDP Version"}
+var BlueprintHeader []string = []string{"Cluster Type", "HDP Version"}
 
 type Blueprint struct {
 	ClusterType string `json:"ClusterType" yaml:"ClusterType"`
@@ -42,7 +42,7 @@ func ListBlueprints(c *cli.Context) error {
 		}
 	}
 	output := Output{Format: c.String(FlCBOutput.Name)}
-	output.WriteList(BlueprinttHeader, tableRows)
+	output.WriteList(BlueprintHeader, tableRows)
 
 	return nil
 }

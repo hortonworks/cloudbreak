@@ -20,7 +20,10 @@ import (
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 	"github.com/hortonworks/hdc-cli/client/blueprints"
 	"github.com/hortonworks/hdc-cli/client/templates"
+	"strconv"
 )
+
+var ClusterSkeletonHeader []string = []string{"Cluster Name", "HDP Version", "Cluster Type", "Master", "Worker", "SSH Key Name", "Remote Access", "WebAccess", "User", "Status", "Status Reason"}
 
 type ClusterSkeleton struct {
 	ClusterName              string         `json:"ClusterName" yaml:"ClusterName"`
@@ -88,6 +91,11 @@ type InstanceConfig struct {
 	VolumeSize    int32  `json:"VolumeSize" yaml:"VolumeSize"`
 	VolumeCount   int32  `json:"VolumeCount" yaml:"VolumeCount"`
 	instanceCount int32
+}
+
+func (c *InstanceConfig) Yaml() string {
+	j, _ := yaml.Marshal(c)
+	return string(j)
 }
 
 func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroup, template *models.TemplateResponse) error {
@@ -180,10 +188,10 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 }
 
 func (c *ClusterSkeleton) DataAsStringArray() []string {
-	return []string{c.ClusterName, c.Status, c.HDPVersion, c.ClusterType}
+	return []string{c.ClusterName, c.HDPVersion, c.ClusterType, c.Master.Yaml(), c.Worker.Yaml(), c.SSHKeyName, c.RemoteAccess, strconv.FormatBool(c.WebAccess), c.ClusterAndAmbariUser, c.Status, c.StatusReason}
 }
 
-func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, minimal bool) (*ClusterSkeleton, error) {
+func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeleton, error) {
 
 	credential, _ := c.GetCredentialById(stack.CredentialID)
 
@@ -195,7 +203,8 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, minimal bool) (*C
 
 	var templateMap map[string]*models.TemplateResponse = nil
 	var securityMap map[string][]*models.SecurityRule = nil
-	if !minimal {
+	// some operations does not require all info
+	if !reduced {
 		templateMap = make(map[string]*models.TemplateResponse)
 		for _, v := range stack.InstanceGroups {
 			respTemplate, err := c.Cloudbreak.Templates.GetTemplatesID(&templates.GetTemplatesIDParams{ID: v.TemplateID})
@@ -232,7 +241,9 @@ func DescribeCluster(c *cli.Context) error {
 	}
 	clusterSkeleton, _ := oAuth2Client.FetchCluster(respStack.Payload, false)
 	clusterSkeleton.ClusterAndAmbariPassword = ""
-	fmt.Println(clusterSkeleton.JsonPretty())
+
+	output := Output{Format: c.String(FlCBOutput.Name)}
+	output.Write(ClusterSkeletonHeader, clusterSkeleton)
 
 	return nil
 }

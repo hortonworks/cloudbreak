@@ -102,7 +102,7 @@ func main() {
 		{
 			Name:   "describe-cluster",
 			Usage:  "list the available clusters",
-			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
 			Before: ConfigRead,
 			Action: hdc.DescribeCluster,
 			Subcommands: []cli.Command{
