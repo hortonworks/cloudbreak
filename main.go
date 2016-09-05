@@ -59,6 +59,8 @@ func main() {
 	app.Before = func(c *cli.Context) error {
 		log.SetOutput(os.Stderr)
 		log.SetLevel(log.ErrorLevel)
+		formatter := &hdc.CBFormatter{}
+		log.SetFormatter(formatter)
 		if c.Bool(hdc.FlDebug.Name) {
 			log.SetLevel(log.DebugLevel)
 		}
