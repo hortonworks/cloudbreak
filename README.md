@@ -1,5 +1,12 @@
 # Hortonworks Data Cloud - Command Line Interface
 
+## Install
+
+You can install directly the GitHUb binary release:
+```
+curl -LsS https://github.com/hortonworks/hdc-cli/releases/download/v1.5.0-rc.9/hdc-cli_1.5.0-rc.9_$(uname)_x86_64.tgz | sudo tar -zx -C /usr/local/bin
+```
+
 ## Usage
 To see the available commands `hdc -h`.
 ```
