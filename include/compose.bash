@@ -439,6 +439,7 @@ sultans:
         - SL_HWX_CLOUD_DEFAULT_REGION=$ULU_HWX_CLOUD_DEFAULT_REGION
         - SL_ADDRESS_RESOLVING_TIMEOUT
         - SL_UAA_SERVICEID=identity.service.consul
+        - SL_DISPLAY_TERMS_AND_SERVICES=$HWX_DISPLAY_TERMS_AND_CONDITIONS
     labels:
       - traefik.port=3000
       - traefik.frontend.rule=PathPrefixStrip:/sl
