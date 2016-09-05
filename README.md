@@ -24,7 +24,7 @@ COMMANDS:
      configure           configure the server address and credentials used to communicate with this server
      create-cluster      creates a new cluster
      list-cluster-types  list the available blueprints
-     describe-cluster    list the available clusters
+     describe-cluster    get a detailed description of a cluster
      list-clusters       list the available clusters
      terminate-cluster   terminates a cluster
      help, h             Shows a list of commands or help for one command
