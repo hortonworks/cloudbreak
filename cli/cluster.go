@@ -31,7 +31,6 @@ type ClusterSkeleton struct {
 	ClusterType              string         `json:"ClusterType" yaml:"ClusterType"`
 	Master                   InstanceConfig `json:"Master" yaml:"Master"`
 	Worker                   InstanceConfig `json:"Worker" yaml:"Worker"`
-	InstanceCount            int32          `json:"InstanceCount" yaml:"InstanceCount"`
 	SSHKeyName               string         `json:"SSHKeyName" yaml:"SSHKeyName"`
 	RemoteAccess             string         `json:"RemoteAccess" yaml:"RemoteAccess"`
 	WebAccess                bool           `json:"WebAccess" yaml:"WebAccess"`
@@ -58,10 +57,10 @@ func (s *ClusterSkeleton) Validate() error {
 	if err := validate.RequiredString("ClusterType", "body", string(s.ClusterType)); err != nil {
 		res = append(res, err)
 	}
-	if err := validate.RequiredNumber("InstanceCount", "body", float64(s.InstanceCount)); err != nil {
+	if err := validate.RequiredNumber("InstanceCount", "worker", float64(s.Worker.InstanceCount)); err != nil {
 		res = append(res, err)
-	} else if s.InstanceCount < 2 {
-		res = append(res, swagerrors.New(1, "The instance count has to be greater than 1"))
+	} else if s.Worker.InstanceCount < 1 {
+		res = append(res, swagerrors.New(1, "The instance count has to be greater than 0"))
 	}
 	if err := validate.RequiredString("SSHKeyName", "body", string(s.SSHKeyName)); err != nil {
 		res = append(res, err)
@@ -90,7 +89,7 @@ type InstanceConfig struct {
 	VolumeType    string `json:"VolumeType" yaml:"VolumeType"`
 	VolumeSize    int32  `json:"VolumeSize" yaml:"VolumeSize"`
 	VolumeCount   int32  `json:"VolumeCount" yaml:"VolumeCount"`
-	instanceCount int32
+	InstanceCount int32  `json:"InstanceCount,omitempty" yaml:"InstanceCount"`
 }
 
 func (c *InstanceConfig) Yaml() string {
@@ -99,7 +98,7 @@ func (c *InstanceConfig) Yaml() string {
 }
 
 func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroup, template *models.TemplateResponse) error {
-	c.instanceCount = instanceGroup.NodeCount
+	c.InstanceCount = instanceGroup.NodeCount
 	c.InstanceType = template.InstanceType
 	c.VolumeType = SafeStringConvert(template.VolumeType)
 	c.VolumeSize = SafeInt32Convert(template.VolumeSize)
@@ -181,8 +180,6 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 			}
 		}
 	}
-
-	c.InstanceCount = c.Master.instanceCount + c.Worker.instanceCount
 
 	return nil
 }
@@ -401,7 +398,7 @@ func CreateCluster(c *cli.Context) error {
 			{
 				Group:           "worker",
 				TemplateID:      <-templateIds,
-				NodeCount:       skeleton.InstanceCount - 1,
+				NodeCount:       skeleton.Worker.InstanceCount,
 				Type:            &workerType,
 				SecurityGroupID: secGroupId,
 			},
@@ -452,7 +449,7 @@ func CreateCluster(c *cli.Context) error {
 
 		workerConstraint := models.Constraint{
 			InstanceGroupName: &worker,
-			HostCount:         int32(skeleton.InstanceCount - 1),
+			HostCount:         int32(skeleton.Worker.InstanceCount),
 		}
 
 		hostGroups := []*models.HostGroup{
@@ -495,9 +492,8 @@ func ValidateCreateClusterSkeleton(c *cli.Context) error {
 
 func GenerateCreateClusterSkeleton(c *cli.Context) error {
 	skeleton := ClusterSkeleton{
-		ClusterType:   "EDW-ETL: Apache Spark 2.0-preview",
-		HDPVersion:    "2.5",
-		InstanceCount: 3,
+		ClusterType: "EDW-ETL: Apache Spark 2.0-preview",
+		HDPVersion:  "2.5",
 		Master: InstanceConfig{
 			InstanceType: "m4.xlarge",
 			VolumeType:   "gp2",
@@ -505,11 +501,13 @@ func GenerateCreateClusterSkeleton(c *cli.Context) error {
 			VolumeSize:   32,
 		},
 		Worker: InstanceConfig{
-			InstanceType: "m3.xlarge",
-			VolumeType:   "ephemeral",
-			VolumeCount:  2,
-			VolumeSize:   40,
+			InstanceType:  "m3.xlarge",
+			VolumeType:    "ephemeral",
+			VolumeCount:   2,
+			VolumeSize:    40,
+			InstanceCount: 2,
 		},
+		WebAccess: true,
 	}
 	fmt.Println(skeleton.JsonPretty())
 	return nil
