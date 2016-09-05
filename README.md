@@ -88,10 +88,10 @@ To create a cluster fill the empty values or change the existing ones, e.g:
     "InstanceType": "m3.xlarge",
     "VolumeType": "ephemeral",
     "VolumeSize": 40,
-    "VolumeCount": 2
+    "VolumeCount": 2,
+    "InstanceCount": 2
   },
-  "InstanceCount": 3,
-  "SSHKeyName": "my-existing-keypari-name",
+  "SSHKeyName": "my-existing-keypair-name",
   "RemoteAccess": "0.0.0.0/0",
   "WebAccess": true,
   "ClusterAndAmbariUser": "admin",
@@ -129,14 +129,14 @@ hdc describe-cluster --cluster-name my-cluster
     "InstanceType": "m3.xlarge",
     "VolumeType": "ephemeral",
     "VolumeSize": 40,
-    "VolumeCount": 2
+    "VolumeCount": 2,
+    "InstanceCount": 2
   },
-  "InstanceCount": 3,
-  "SSHKeyName": "my-existing-keypari-name",
+  "SSHKeyName": "my-existing-keypair-name",
   "RemoteAccess": "0.0.0.0/0",
   "WebAccess": true,
   "ClusterAndAmbariUser": "admin",
-  "ClusterAndAmbariPassword": "admin",
+  "ClusterAndAmbariPassword": "",
   "Status": "CREATE_IN_PROGRESS",
   "StatusReason": "Creating infrastructure"
 }
