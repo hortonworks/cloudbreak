@@ -13,14 +13,14 @@ type Output struct {
 }
 
 func (o *Output) WriteList(header []string, tableRows []Row) {
-	if o.Format == "json" {
-		j, _ := json.MarshalIndent(tableRows, "", "  ")
-		fmt.Println(string(j))
+	if o.Format == "table" {
+		WriteTable(header, tableRows)
 	} else if o.Format == "yaml" {
 		y, _ := yaml.Marshal(tableRows)
 		fmt.Println(string(y))
 	} else {
-		WriteTable(header, tableRows)
+		j, _ := json.MarshalIndent(tableRows, "", "  ")
+		fmt.Println(string(j))
 	}
 }
 

@@ -36,9 +36,9 @@ var (
 		Usage: "wait for the operation to finish",
 	}
 	FlCBOutput = cli.StringFlag{
-		Name:  "output",
-		Usage: "supported formats: json, yaml, table",
-		Value: "json",
+		Name:   "output",
+		Usage:  "supported formats: json, yaml, table",
+		Value:  "json",
 		EnvVar: "CB_OUT_FORMAT",
 	}
 )
