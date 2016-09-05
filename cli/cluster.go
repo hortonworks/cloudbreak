@@ -252,7 +252,7 @@ func ListClusters(c *cli.Context) error {
 		return err
 	}
 	var wg sync.WaitGroup
-	tableRows := make([]TableRow, len(respStacks.Payload))
+	tableRows := make([]Row, len(respStacks.Payload))
 	for i, stack := range respStacks.Payload {
 		wg.Add(1)
 		go func(i int, stack *models.StackResponse) {

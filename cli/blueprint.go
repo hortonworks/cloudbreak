@@ -8,6 +8,17 @@ import (
 	"strings"
 )
 
+var BlueprinttHeader []string = []string{"Cluster Type", "HDP Version"}
+
+type Blueprint struct {
+	ClusterType string `json:"ClusterType" yaml:"ClusterType"`
+	HDPVersion  string `json:"HDPVersion" yaml:"HDPVersion"`
+}
+
+func (b *Blueprint) DataAsStringArray() []string {
+	return []string{b.ClusterType, b.HDPVersion}
+}
+
 func ListBlueprints(c *cli.Context) error {
 	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
@@ -22,15 +33,16 @@ func ListBlueprints(c *cli.Context) error {
 		newExitReturnError()
 	}
 
-	var tableRows []TableRow
+	var tableRows []Row
 	for _, blueprint := range respBlueprints.Payload {
 		// this is a workaround, needs to be hidden, by not storing them as public
 		if !strings.HasPrefix(blueprint.Name, "b") {
-			row := &GenericRow{Data: []string{blueprint.Name, blueprint.AmbariBlueprint.Blueprint.StackVersion}}
+			row := &Blueprint{ClusterType: blueprint.Name, HDPVersion: blueprint.AmbariBlueprint.Blueprint.StackVersion}
 			tableRows = append(tableRows, row)
 		}
 	}
-	WriteTable([]string{"Cluster Type", "HDP Version"}, tableRows)
+	output := Output{Format: c.String(FlCBOutput.Name)}
+	output.WriteList(BlueprinttHeader, tableRows)
 
 	return nil
 }

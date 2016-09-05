@@ -95,7 +95,7 @@ func main() {
 		{
 			Name:   "list-cluster-types",
 			Usage:  "list the available blueprints",
-			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
 			Before: ConfigRead,
 			Action: hdc.ListBlueprints,
 		},
