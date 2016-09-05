@@ -271,10 +271,13 @@ func ListClusterNodes(c *cli.Context) error {
 		for _, metadata := range metadataArray {
 			data := *metadata
 			if data.DiscoveryFQDN == nil {
-				log.Errorf("[ListClusterNodes] The instances are not configured yet")
-				newExitReturnError()
+				continue
 			}
-			row := &GenericRow{Data: []string{*data.InstanceID, *data.DiscoveryFQDN, *data.PublicIP, *data.PrivateIP, *data.InstanceGroup}}
+			nodeType := *data.InstanceGroup
+			if nodeType == "master" {
+				nodeType = "master - ambari server"
+			}
+			row := &GenericRow{Data: []string{*data.InstanceID, *data.DiscoveryFQDN, *data.PublicIP, *data.PrivateIP, nodeType}}
 			tableRows = append(tableRows, row)
 		}
 	}
