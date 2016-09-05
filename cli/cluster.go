@@ -293,7 +293,7 @@ func TerminateCluster(c *cli.Context) error {
 	err := oAuth2Client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName})
 
 	if err != nil {
-		log.Error(fmt.Sprintf("[TerminateCluster] Failed to terminate the cluster: %s, error: %s", clusterName, err.Error()))
+		log.Errorf("[TerminateCluster] %s", err.Error())
 		newExitReturnError()
 	}
 

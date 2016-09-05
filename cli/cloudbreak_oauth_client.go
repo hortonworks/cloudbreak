@@ -147,9 +147,9 @@ func (r *noContentSafeResponseReader) ReadResponse(response swaggerclient.Respon
 			var errorMessage ErrorMessage
 			err := json.Unmarshal(body, &errorMessage)
 			if err != nil || (len(errorMessage.Message) == 0 && len(errorMessage.ValidationError) == 0) {
-				return nil, swaggerclient.NewAPIError("", string(body), response.Code())
+				return nil, &RESTError{string(body), response.Code()}
 			}
-			return nil, swaggerclient.NewAPIError("", errorMessage.String(), response.Code())
+			return nil, &RESTError{errorMessage.String(), response.Code()}
 		}
 	}
 	return resp, nil
