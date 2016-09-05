@@ -218,11 +218,7 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 }
 
 func DescribeCluster(c *cli.Context) error {
-	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
-	if err != nil {
-		log.Error(err)
-		newExitReturnError()
-	}
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	clusterName := c.String(FlCBClusterName.Name)
 	if len(clusterName) == 0 {
@@ -246,11 +242,7 @@ func DescribeCluster(c *cli.Context) error {
 }
 
 func ListClusterNodes(c *cli.Context) error {
-	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
-	if err != nil {
-		log.Errorf("[ListClusterNodes] %s", err)
-		newExitReturnError()
-	}
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	clusterName := c.String(FlCBClusterName.Name)
 	if len(clusterName) == 0 {
@@ -296,14 +288,9 @@ func TerminateCluster(c *cli.Context) error {
 	}
 
 	log.Infof("[TerminateCluster] sending request to terminate cluster: %s")
-	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
-	if err != nil {
-		log.Error(err)
-		newExitReturnError()
-	}
-
-	err = oAuth2Client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName})
+	err := oAuth2Client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName})
 
 	if err != nil {
 		log.Error(fmt.Sprintf("[TerminateCluster] Failed to terminate the cluster: %s, error: %s", clusterName, err.Error()))
@@ -353,12 +340,7 @@ func CreateCluster(c *cli.Context) error {
 		newExitReturnError()
 	}
 
-	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
-
-	if err != nil {
-		log.Error(err)
-		newExitReturnError()
-	}
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	blueprintId := oAuth2Client.GetBlueprintId(skeleton.ClusterType)
 

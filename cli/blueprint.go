@@ -20,12 +20,8 @@ func (b *Blueprint) DataAsStringArray() []string {
 }
 
 func ListBlueprints(c *cli.Context) error {
-	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
-	if err != nil {
-		log.Error(err)
-		newExitReturnError()
-	}
 	// make the request to get all items
 	respBlueprints, err := oAuth2Client.Cloudbreak.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
 	if err != nil {

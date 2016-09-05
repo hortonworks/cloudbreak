@@ -23,12 +23,7 @@ func (c *ClusterListElement) DataAsStringArray() []string {
 }
 
 func ListClusters(c *cli.Context) error {
-	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
-
-	if err != nil {
-		log.Error(err)
-		newExitReturnError()
-	}
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	respStacks, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUser(&stacks.GetStacksUserParams{})
 	if err != nil {
