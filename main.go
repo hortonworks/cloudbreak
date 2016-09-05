@@ -105,6 +105,15 @@ func main() {
 			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
 			Before: ConfigRead,
 			Action: hdc.DescribeCluster,
+			Subcommands: []cli.Command{
+				{
+					Name:   "instances",
+					Usage:  "list the available nodes in the cluster",
+					Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+					Before: ConfigRead,
+					Action: hdc.ListClusterNodes,
+				},
+			},
 		},
 		{
 			Name:   "list-clusters",

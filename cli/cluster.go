@@ -220,14 +220,15 @@ func DescribeCluster(c *cli.Context) error {
 
 	clusterName := c.String(FlCBClusterName.Name)
 	if len(clusterName) == 0 {
-		log.Error(fmt.Sprintf("[DescribeCluster] You need to specify the %s parameter", FlCBClusterName.Name))
-		return newExitError()
+		log.Error("[DescribeCluster] There are missing parameters.\n")
+		cli.ShowSubcommandHelp(c)
+		newExitReturnError()
 	}
 
 	respStack, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
 	if err != nil {
 		log.Error(err)
-		return newExitError()
+		newExitReturnError()
 	}
 	clusterSkeleton, _ := oAuth2Client.FetchCluster(respStack.Payload, false)
 	clusterSkeleton.ClusterAndAmbariPassword = ""
@@ -236,12 +237,51 @@ func DescribeCluster(c *cli.Context) error {
 	return nil
 }
 
+func ListClusterNodes(c *cli.Context) error {
+	oAuth2Client, err := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	if err != nil {
+		log.Errorf("[ListClusterNodes] %s", err)
+		newExitReturnError()
+	}
+
+	clusterName := c.String(FlCBClusterName.Name)
+	if len(clusterName) == 0 {
+		log.Error("[ListClusterNodes] There are missing parameters.\n")
+		cli.ShowSubcommandHelp(c)
+		newExitReturnError()
+	}
+
+	respStack, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
+	if err != nil {
+		log.Errorf("[ListClusterNodes] %s", err)
+		newExitReturnError()
+	}
+
+	var tableRows []Row
+	for _, instanceGroup := range respStack.Payload.InstanceGroups {
+		metadataArray := instanceGroup.Metadata
+		for _, metadata := range metadataArray {
+			data := *metadata
+			if data.DiscoveryFQDN == nil {
+				log.Errorf("[ListClusterNodes] The instances are not configured yet")
+				newExitReturnError()
+			}
+			row := &GenericRow{Data: []string{*data.InstanceID, *data.DiscoveryFQDN, *data.PublicIP, *data.PrivateIP, *data.InstanceGroup}}
+			tableRows = append(tableRows, row)
+		}
+	}
+
+	WriteTable([]string{"Instance ID", "Hostname", "Public IP", "Private IP", "Type"}, tableRows)
+	return nil
+}
+
 func TerminateCluster(c *cli.Context) error {
 	clusterName := c.String(FlCBClusterName.Name)
 
 	if len(clusterName) == 0 {
-		log.Error(fmt.Sprintf("[TerminateCluster] You need to specify the %s parameter", FlCBClusterName.Name))
-		return newExitError()
+		log.Error("[TerminateCluster] There are missing parameters.\n")
+		cli.ShowSubcommandHelp(c)
+		newExitReturnError()
 	}
 
 	log.Infof("[TerminateCluster] sending request to terminate cluster: %s")
@@ -256,7 +296,7 @@ func TerminateCluster(c *cli.Context) error {
 
 	if err != nil {
 		log.Error(fmt.Sprintf("[TerminateCluster] Failed to terminate the cluster: %s, error: %s", clusterName, err.Error()))
-		return newExitError()
+		newExitReturnError()
 	}
 
 	oAuth2Client.waitForClusterToTerminate(clusterName, c)
@@ -266,7 +306,8 @@ func TerminateCluster(c *cli.Context) error {
 func AssembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 	path := c.String(FlCBInputJson.Name)
 	if len(path) == 0 {
-		log.Errorf("[AssembleClusterSkeleton] missing parameter: %s", FlCBInputJson.Name)
+		log.Error("[AssembleClusterSkeleton] There are missing parameters.\n")
+		cli.ShowSubcommandHelp(c)
 		newExitReturnError()
 	}
 
