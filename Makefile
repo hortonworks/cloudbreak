@@ -6,6 +6,7 @@ LDFLAGS=-ldflags "-X github.com/hortonworks/hdc-cli/cli.Version=${VERSION} -X gi
 
 deps:
 	go get github.com/gliderlabs/glu
+	go get github.com/tools/godep
 
 format:
 	gofmt -w .
@@ -25,7 +26,7 @@ release: build
 	rm -rf release
 	glu release
 
-linux-test:
+linux-test: build-linux
 	docker run --rm -it -v ${PWD}/build/Linux/hdc:/usr/sbin/hdc --name hdc alpine sh
 
 .PHONY: build
