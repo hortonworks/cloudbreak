@@ -12,9 +12,16 @@ func ConfigRead(c *cli.Context) error {
 	server := c.String(hdc.FlCBServer.Name)
 	username := c.String(hdc.FlCBUsername.Name)
 	password := c.String(hdc.FlCBPassword.Name)
+	output := c.String(hdc.FlCBOutput.Name)
+
+	config, err := hdc.ReadConfig()
+	if err == nil {
+		if len(output) == 0 {
+			c.Set(hdc.FlCBOutput.Name, config.Output)
+		}
+	}
 
 	if len(server) == 0 || len(username) == 0 || len(password) == 0 {
-		config, err := hdc.ReadConfig()
 		if err != nil {
 			log.Error(fmt.Sprintf("[ConfigRead] %s", err.Error()))
 			log.Error(fmt.Sprintf("[ConfigRead] configuration is not set, see: %s configure --help", c.App.Name))
@@ -26,10 +33,10 @@ func ConfigRead(c *cli.Context) error {
 		if len(server) == 0 {
 			c.Set(hdc.FlCBServer.Name, config.Server)
 		}
-		if len(c.String(username)) == 0 {
+		if len(username) == 0 {
 			c.Set(hdc.FlCBUsername.Name, config.Username)
 		}
-		if len(c.String(password)) == 0 {
+		if len(password) == 0 {
 			c.Set(hdc.FlCBPassword.Name, config.Password)
 		}
 	}
@@ -73,7 +80,7 @@ func main() {
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
 				"to %s/%s/%s", hdc.GetHomeDirectory(), hdc.Hdc_dir, hdc.Config_file),
 			Usage:  "configure the server address and credentials used to communicate with this server",
-			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
 			Action: hdc.Configure,
 		},
 		{

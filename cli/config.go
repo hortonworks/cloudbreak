@@ -20,6 +20,7 @@ type Config struct {
 	Username string `json:"username" yaml:"username"`
 	Password string `json:"password" yaml:"password"`
 	Server   string `json:"server" yaml:"server"`
+	Output   string `json:"output,omitempty" yaml:"output,omitempty"`
 }
 
 func (c Config) Json() string {
@@ -33,13 +34,13 @@ func (c Config) Yaml() string {
 }
 
 func Configure(c *cli.Context) error {
-	if c.NumFlags() != 3 || len(c.String(FlCBUsername.Name)) == 0 || len(c.String(FlCBPassword.Name)) == 0 || len(c.String(FlCBServer.Name)) == 0 {
+	if c.NumFlags() < 3 || len(c.String(FlCBUsername.Name)) == 0 || len(c.String(FlCBPassword.Name)) == 0 || len(c.String(FlCBServer.Name)) == 0 {
 		log.Error("[Configure] you need to specify all the parameters.\n")
 		cli.ShowSubcommandHelp(c)
 		newExitReturnError()
 	}
 
-	err := WriteConfigToFile(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	err := WriteConfigToFile(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name), c.String(FlCBOutput.Name))
 	if err != nil {
 		log.Error(fmt.Sprintf("[WriteConfigToFile] %s", err.Error()))
 		newExitReturnError()
@@ -56,7 +57,7 @@ func GetHomeDirectory() string {
 	return homeDir
 }
 
-func WriteConfigToFile(server string, username string, password string) error {
+func WriteConfigToFile(server string, username string, password string, output string) error {
 	hdcDir := GetHomeDirectory() + "/" + Hdc_dir
 	configFile := hdcDir + "/" + Config_file
 
@@ -71,7 +72,7 @@ func WriteConfigToFile(server string, username string, password string) error {
 	}
 
 	log.Infof("[WriteConfigToFile] writing credentials to file: %s", configFile)
-	confJson := Config{Server: server, Username: username, Password: password}.Yaml()
+	confJson := Config{Server: server, Username: username, Password: password, Output: output}.Yaml()
 	err := ioutil.WriteFile(configFile, []byte(confJson), 0600)
 	if err != nil {
 		return err

@@ -37,8 +37,7 @@ var (
 	}
 	FlCBOutput = cli.StringFlag{
 		Name:   "output",
-		Usage:  "supported formats: json, yaml, table",
-		Value:  "json",
+		Usage:  "supported formats: json, yaml, table (default: \"json\")",
 		EnvVar: "CB_OUT_FORMAT",
 	}
 )

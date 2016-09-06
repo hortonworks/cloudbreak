@@ -29,4 +29,4 @@ release: build
 linux-test: build-linux
 	docker run --rm -it -v ${PWD}/build/Linux/hdc:/usr/sbin/hdc --name hdc alpine sh
 
-.PHONY: build
+.DEFAULT_GOAL := build
