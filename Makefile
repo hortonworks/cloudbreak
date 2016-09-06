@@ -11,13 +11,16 @@ deps:
 format:
 	gofmt -w .
 
-build: format build-darwin build-linux
+build: format build-darwin build-linux build-windows
 
 build-darwin:
 	GOOS=darwin go build -a -installsuffix cgo ${LDFLAGS} -o build/Darwin/${BINARY} main.go
 
 build-linux:
 	GOOS=linux go build -a -installsuffix cgo ${LDFLAGS} -o build/Linux/${BINARY} main.go
+
+build-windows:
+	GOOS=windows go build -a -installsuffix cgo ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
 generate-swagger:
 	swagger generate client -f http://localhost:9091/cb/api/v1/swagger.json
