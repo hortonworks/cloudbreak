@@ -11,6 +11,11 @@ import (
 	"os"
 )
 
+const (
+	Hdc_dir     = ".hdc"
+	Config_file = "config"
+)
+
 type Config struct {
 	Username string `json:"username" yaml:"username"`
 	Password string `json:"password" yaml:"password"`

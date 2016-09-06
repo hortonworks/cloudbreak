@@ -79,6 +79,10 @@ Direct the output to a file to save the skeleton locally.
 ```
 hdc create-cluster generate-cli-skeleton > create_cluster.json
 ```
+To get a detailed explanation of the parameters use the `help` command.
+```
+hdc create-cluster generate-cli-skeleton --help
+```
 To create a cluster fill the empty values or change the existing ones, e.g:
 ```
 {

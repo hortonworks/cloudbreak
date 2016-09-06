@@ -36,11 +36,11 @@ type ClusterSkeleton struct {
 	WebAccess                bool           `json:"WebAccess" yaml:"WebAccess"`
 	ClusterAndAmbariUser     string         `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
 	ClusterAndAmbariPassword string         `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
+	InstanceRole             string         `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
 
 	Status       string `json:"Status,omitempty" yaml:"Status,omitempty"`
 	StatusReason string `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
 
-	//InstanceRole             string `json:"InstanceRole" yaml:"InstanceRole"`
 	//HiveMetastoreUrl         string `json:"HiveMetastoreUrl" yaml:"HiveMetastoreUrl"`
 	//HiveMetastoreUser        string `json:"HiveMetastoreUser" yaml:"HiveMetastoreUser"`
 	//HiveMetastorePassword    string `json:"HiveMetastorePassword" yaml:"HiveMetastorePassword"`
@@ -127,6 +127,15 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	}
 	c.ClusterName = stack.Name
 	c.Status = SafeStringConvert(stack.Status)
+
+	parameters := stack.Parameters
+	if len(parameters) > 0 && len(parameters["instanceProfileStrategy"]) > 0 {
+		if parameters["instanceProfileStrategy"] == "USE_EXISTING" {
+			c.InstanceRole = parameters["s3Role"]
+		} else {
+			c.InstanceRole = parameters["instanceProfileStrategy"]
+		}
+	}
 
 	if stack.Cluster != nil {
 		if c.Status == "AVAILABLE" {
@@ -353,7 +362,15 @@ func CreateCluster(c *cli.Context) error {
 		}
 
 		var stackParameters = make(map[string]string)
-		stackParameters["instanceProfileStrategy"] = "CREATE"
+		s3Role := skeleton.InstanceRole
+		if len(s3Role) > 0 {
+			if s3Role == "CREATE" {
+				stackParameters["instanceProfileStrategy"] = "CREATE"
+			} else {
+				stackParameters["instanceProfileStrategy"] = "USE_EXISTING"
+				stackParameters["s3Role"] = s3Role
+			}
+		}
 
 		orchestrator := models.OrchestratorRequest{Type: "SALT"}
 
@@ -455,7 +472,8 @@ func GenerateCreateClusterSkeleton(c *cli.Context) error {
 			VolumeSize:    40,
 			InstanceCount: 2,
 		},
-		WebAccess: true,
+		WebAccess:    true,
+		InstanceRole: "CREATE",
 	}
 	fmt.Println(skeleton.JsonPretty())
 	return nil

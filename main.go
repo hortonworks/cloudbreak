@@ -84,8 +84,9 @@ func main() {
 			Action: hdc.CreateCluster,
 			Subcommands: []cli.Command{
 				{
-					Name:   "generate-cli-skeleton",
-					Action: hdc.GenerateCreateClusterSkeleton,
+					Name:      "generate-cli-skeleton",
+					Action:    hdc.GenerateCreateClusterSkeleton,
+					ArgsUsage: hdc.AWSCreateClusterSkeletonHelp,
 				},
 				{
 					Name:   "validate-cli-skeleton",
