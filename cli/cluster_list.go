@@ -9,7 +9,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-var ClusterListHeader []string = []string{"Cluster Name", "Status", "HDP Version", "Cluster Type"}
+var ClusterListHeader = []string{"Cluster Name", "Status", "HDP Version", "Cluster Type"}
+var ClusterNodeHeader = []string{"Instance ID", "Hostname", "Public IP", "Private IP", "Type"}
 
 type ClusterListElement struct {
 	ClusterName string `json:"ClusterName" yaml:"ClusterName"`
@@ -20,6 +21,18 @@ type ClusterListElement struct {
 
 func (c *ClusterListElement) DataAsStringArray() []string {
 	return []string{c.ClusterName, c.Status, c.HDPVersion, c.ClusterType}
+}
+
+type ClusterNode struct {
+	InstanceId string `json:"IndtanceId" yaml:"IndtanceId"`
+	Hostname   string `json:"Hostname" yaml:"Hostname"`
+	PublicIP   string `json:"PublicIP,omitempty" yaml:"PublicIP,omitempty"`
+	PrivateIP  string `json:"PrivateIP" yaml:"PrivateIP"`
+	Type       string
+}
+
+func (c *ClusterNode) DataAsStringArray() []string {
+	return []string{c.InstanceId, c.Hostname, c.PublicIP, c.PrivateIP, c.Type}
 }
 
 func ListClusters(c *cli.Context) error {
@@ -44,8 +57,6 @@ func ListClusters(c *cli.Context) error {
 	}
 	wg.Wait()
 
-	output := Output{Format: c.String(FlCBOutput.Name)}
-
 	tableRows := make([]Row, len(respStacks.Payload))
 
 	for i, v := range clusters {
@@ -57,6 +68,7 @@ func ListClusters(c *cli.Context) error {
 		}
 		tableRows[i] = clusterListElement
 	}
+	output := Output{Format: c.String(FlCBOutput.Name)}
 	output.WriteList(ClusterListHeader, tableRows)
 
 	return nil
@@ -90,11 +102,18 @@ func ListClusterNodes(c *cli.Context) error {
 			if nodeType == "master" {
 				nodeType = "master - ambari server"
 			}
-			row := &GenericRow{Data: []string{*data.InstanceID, *data.DiscoveryFQDN, *data.PublicIP, *data.PrivateIP, nodeType}}
+			row := &ClusterNode{
+				InstanceId: SafeStringConvert(data.InstanceID),
+				Hostname:   SafeStringConvert(data.DiscoveryFQDN),
+				PublicIP:   SafeStringConvert(data.PublicIP),
+				PrivateIP:  SafeStringConvert(data.PrivateIP),
+				Type:       nodeType,
+			}
 			tableRows = append(tableRows, row)
 		}
 	}
 
-	WriteTable([]string{"Instance ID", "Hostname", "Public IP", "Private IP", "Type"}, tableRows)
+	output := Output{Format: c.String(FlCBOutput.Name)}
+	output.WriteList(ClusterNodeHeader, tableRows)
 	return nil
 }

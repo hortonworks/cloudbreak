@@ -14,7 +14,7 @@ type Output struct {
 
 func (o *Output) Write(header []string, row Row) {
 	if o.Format == "table" {
-		WriteTable(header, []Row{row})
+		writeTable(header, []Row{row})
 	} else if o.Format == "yaml" {
 		y, _ := yaml.Marshal(row)
 		fmt.Println(string(y))
@@ -26,7 +26,7 @@ func (o *Output) Write(header []string, row Row) {
 
 func (o *Output) WriteList(header []string, tableRows []Row) {
 	if o.Format == "table" {
-		WriteTable(header, tableRows)
+		writeTable(header, tableRows)
 	} else if o.Format == "yaml" {
 		y, _ := yaml.Marshal(tableRows)
 		fmt.Println(string(y))
@@ -36,19 +36,11 @@ func (o *Output) WriteList(header []string, tableRows []Row) {
 	}
 }
 
-type GenericRow struct {
-	Data []string
-}
-
-func (r *GenericRow) DataAsStringArray() []string {
-	return r.Data
-}
-
 type Row interface {
 	DataAsStringArray() []string
 }
 
-func WriteTable(header []string, tableRows []Row) {
+func writeTable(header []string, tableRows []Row) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(header)
 	table.SetAutoWrapText(false)
