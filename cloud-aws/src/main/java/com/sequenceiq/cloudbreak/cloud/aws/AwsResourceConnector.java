@@ -201,16 +201,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withTemplateBody(cfTemplate)
                 .withTags(awsTagPreparationService.prepareTags(ac))
                 .withCapabilities(CAPABILITY_IAM)
-                .withParameters(
-                        getStackParameters(
-                                ac,
-                                stack.getImage().getUserData(InstanceGroupType.CORE),
-                                stack.getImage().getUserData(InstanceGroupType.GATEWAY),
-                                stack,
-                                cFStackName,
-                                subnet
-                        )
-                );
+                .withParameters(getStackParameters(ac, stack, cFStackName, subnet));
     }
 
     private List<CloudResource> getCloudResources(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationClient client,
@@ -271,8 +262,7 @@ public class AwsResourceConnector implements ResourceConnector {
         }
     }
 
-    private List<Parameter> getStackParameters(AuthenticatedContext ac, String coreGroupUserData,
-            String gateWayUserData, CloudStack stack, String stackName, String newSubnetCidr) {
+    private List<Parameter> getStackParameters(AuthenticatedContext ac, CloudStack stack, String stackName, String newSubnetCidr) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack.getParameters());
         String keyPairName = awsClient.getKeyPairName(ac);
@@ -281,8 +271,8 @@ public class AwsResourceConnector implements ResourceConnector {
         }
 
         List<Parameter> parameters = new ArrayList<>(asList(
-                new Parameter().withParameterKey("CBUserData").withParameterValue(coreGroupUserData),
-                new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(gateWayUserData),
+                new Parameter().withParameterKey("CBUserData").withParameterValue(stack.getImage().getUserData(InstanceGroupType.CORE)),
+                new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(stack.getImage().getUserData(InstanceGroupType.GATEWAY)),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(ac.getCloudContext().getOwner()),
                 new Parameter().withParameterKey("KeyName").withParameterValue(keyPairName),
