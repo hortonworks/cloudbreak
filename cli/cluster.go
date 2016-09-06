@@ -198,28 +198,54 @@ func (c *ClusterSkeleton) DataAsStringArray() []string {
 }
 
 func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeleton, error) {
+	var wg sync.WaitGroup
 
-	credential, _ := c.GetCredentialById(stack.CredentialID)
+	wg.Add(1)
+	var credential *models.CredentialResponse
+	go func() {
+		defer wg.Done()
+		cred, _ := c.GetCredentialById(stack.CredentialID)
+		credential = cred
+	}()
 
+	wg.Add(1)
 	var blueprint *models.BlueprintResponse = nil
-	if stack.Cluster != nil && stack.Cluster.BlueprintID != nil {
-		respBlueprint, _ := c.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
-		blueprint = respBlueprint.Payload
-	}
+	go func() {
+		defer wg.Done()
+		if stack.Cluster != nil && stack.Cluster.BlueprintID != nil {
+			respBlueprint, _ := c.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
+			blueprint = respBlueprint.Payload
+		}
+	}()
 
 	var templateMap map[string]*models.TemplateResponse = nil
 	var securityMap map[string][]*models.SecurityRule = nil
 	// some operations does not require all info
 	if !reduced {
 		templateMap = make(map[string]*models.TemplateResponse)
-		for _, v := range stack.InstanceGroups {
-			respTemplate, err := c.Cloudbreak.Templates.GetTemplatesID(&templates.GetTemplatesIDParams{ID: v.TemplateID})
-			if err == nil {
-				templateMap[v.Group] = respTemplate.Payload
-			}
+		for i, v := range stack.InstanceGroups {
+			wg.Add(1)
+			go func(i int, instanceGroup *models.InstanceGroup) {
+				defer wg.Done()
+				respTemplate, err := c.Cloudbreak.Templates.GetTemplatesID(&templates.GetTemplatesIDParams{ID: instanceGroup.TemplateID})
+				if err == nil {
+					templateMap[instanceGroup.Group] = respTemplate.Payload
+				} else {
+					log.Warnf("[FetchCluster] failed to get the instance group info of %s", instanceGroup.Group)
+				}
+			}(i, v)
 		}
-		securityMap, _ = c.GetSecurityDetails(stack)
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			securityMap, _ = c.GetSecurityDetails(stack)
+		}()
 	}
+
+	// synchronize here
+	wg.Wait()
+
 	clusterSkeleton := &ClusterSkeleton{}
 	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap)
 
