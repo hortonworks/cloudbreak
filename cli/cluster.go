@@ -155,7 +155,7 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	}
 
 	if blueprint != nil {
-		c.ClusterType = blueprint.Name
+		c.ClusterType = getBlueprintName(blueprint)
 	}
 
 	if securityMap != nil {
