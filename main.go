@@ -96,13 +96,6 @@ func main() {
 			},
 		},
 		{
-			Name:   "list-cluster-types",
-			Usage:  "list the available blueprints",
-			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
-			Before: ConfigRead,
-			Action: hdc.ListBlueprints,
-		},
-		{
 			Name:   "describe-cluster",
 			Usage:  "get a detailed description of a cluster",
 			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
@@ -119,8 +112,15 @@ func main() {
 			},
 		},
 		{
+			Name:   "list-cluster-types",
+			Usage:  "list available cluster types and HDP versions",
+			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
+			Before: ConfigRead,
+			Action: hdc.ListBlueprints,
+		},
+		{
 			Name:   "list-clusters",
-			Usage:  "list the available clusters",
+			Usage:  "list available clusters",
 			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
 			Before: ConfigRead,
 			Action: hdc.ListClusters,
