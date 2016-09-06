@@ -13,6 +13,7 @@ import (
 var SECURITY_GROUP_DEFAULT_PORTS = []string{"22", "443", "9443"}
 
 func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
+	defer timeTrack(time.Now(), "create security group")
 
 	secGroupName := "secg" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
@@ -51,6 +52,7 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 }
 
 func (c *Cloudbreak) GetSecurityDetails(stack *models.StackResponse) (securityMap map[string][]*models.SecurityRule, err error) {
+	defer timeTrack(time.Now(), "get security group by id")
 	securityMap = make(map[string][]*models.SecurityRule)
 	for _, v := range stack.InstanceGroups {
 		if respSecurityGroup, err := c.Cloudbreak.Securitygroups.GetSecuritygroupsID(&securitygroups.GetSecuritygroupsIDParams{ID: v.SecurityGroupID}); err == nil {

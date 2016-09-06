@@ -7,6 +7,7 @@ import (
 
 	"github.com/hortonworks/hdc-cli/models"
 	"github.com/urfave/cli"
+	"time"
 )
 
 var ClusterListHeader = []string{"Cluster Name", "Status", "HDP Version", "Cluster Type"}
@@ -36,6 +37,7 @@ func (c *ClusterNode) DataAsStringArray() []string {
 }
 
 func ListClusters(c *cli.Context) error {
+	defer timeTrack(time.Now(), "list clusters")
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	respStacks, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUser(&stacks.GetStacksUserParams{})
@@ -75,6 +77,7 @@ func ListClusters(c *cli.Context) error {
 }
 
 func ListClusterNodes(c *cli.Context) error {
+	defer timeTrack(time.Now(), "list cluster nodes")
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	clusterName := c.String(FlCBClusterName.Name)

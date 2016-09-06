@@ -16,6 +16,7 @@ func (c *Cloudbreak) CopyDefaultCredential(skeleton ClusterSkeleton, channel cha
 }
 
 func (c *Cloudbreak) CreateCredential(defaultCredential models.CredentialResponse, existingKey string) int64 {
+	defer timeTrack(time.Now(), "create credential")
 	var credentialMap = make(map[string]interface{})
 	credentialMap["selector"] = "role-based"
 	credentialMap["roleArn"] = defaultCredential.Parameters["roleArn"]
@@ -43,6 +44,7 @@ func (c *Cloudbreak) CreateCredential(defaultCredential models.CredentialRespons
 }
 
 func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models.CredentialResponse, error) {
+	defer timeTrack(time.Now(), "get credential by id")
 	respCredential, err := c.Cloudbreak.Credentials.GetCredentialsID(&credentials.GetCredentialsIDParams{ID: credentialID})
 	var credential *models.CredentialResponse
 	if respCredential != nil {
@@ -52,6 +54,7 @@ func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models.CredentialRe
 }
 
 func (c *Cloudbreak) GetCredential(name string) models.CredentialResponse {
+	defer timeTrack(time.Now(), "get credential by name")
 	log.Infof("[GetCredential] sending get request to find credential with name: %s", name)
 	resp, err := c.Cloudbreak.Credentials.GetCredentialsUser(&credentials.GetCredentialsUserParams{})
 

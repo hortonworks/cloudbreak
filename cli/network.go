@@ -16,6 +16,7 @@ func (c *Cloudbreak) CopyDefaultNetwork(skeleton ClusterSkeleton, channel chan i
 }
 
 func (c *Cloudbreak) CreateNetwork(defaultNetwork models.NetworkJSON) int64 {
+	defer timeTrack(time.Now(), "create network")
 	networkName := "net" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	var vpcParams = make(map[string]interface{})

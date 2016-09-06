@@ -198,6 +198,7 @@ func (c *ClusterSkeleton) DataAsStringArray() []string {
 }
 
 func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeleton, error) {
+	defer timeTrack(time.Now(), "fetch cluster")
 	var wg sync.WaitGroup
 
 	wg.Add(1)
@@ -253,6 +254,7 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 }
 
 func DescribeCluster(c *cli.Context) error {
+	defer timeTrack(time.Now(), "describe cluster")
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	clusterName := c.String(FlCBClusterName.Name)

@@ -10,6 +10,7 @@ import (
 )
 
 func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
+	defer timeTrack(time.Now(), "create template")
 
 	masterTemplateName := "mtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	workerTemplateName := "wtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
