@@ -170,6 +170,16 @@ or provide it as an environment variable `export DEBUG=1` or inline
 DEBUG=1 hdc list-clusters
 ```
 
+## Proxy settings
+To use the hdc cli behind a proxy you must use the following environment variable:
+```
+ export HTTP_PROXY=10.0.0.133:3128
+```
+or with basic auth:
+```
+export HTTP_PROXY=http://user:pass@10.0.0.133:3128/
+```
+
 ## Dependency management
 
 This project uses [Godep](https://github.com/tools/godep) for dependency management. You can install it and download the configured dependency versions with:
