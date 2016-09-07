@@ -21,8 +21,10 @@ import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcAttributeRequest;
+import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.VpcAttributeName;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
@@ -61,6 +63,10 @@ public class AwsSetup implements Setup {
     private static final String SUBNET_DOES_NOT_EXIST_MSG = "The given subnet '%s' does not exist or belongs to a different region.";
     private static final String SUBNETVPC_DOES_NOT_EXIST_MSG = "The given subnet '%s' does not belong to the given VPC '%s'.";
     private static final String IGWVPC_DOES_NOT_EXIST_MSG = "The given internet gateway '%s' does not belong to the given VPC '%s'.";
+    private static final String IMAGE_OPT_IN_REQUIRED_MSG = "Unable to create cluster because AWS Marketplace subscription to the Hortonworks Data Cloud"
+            + " HDP Services is required. In order to create a cluster, you need to accept terms and subscribe to the AWS Marketplace product.";
+    private static final String LINK_TO_MARKETPLACE_MSG = "To do so please visit ";
+    private static final String MARKETPLACE_HTTP_LINK = "http://aws.amazon.com/marketplace";
     private static final int FINISHED_PROGRESS_VALUE = 100;
     private static final int UNAUTHORIZED = 403;
 
@@ -95,8 +101,10 @@ public class AwsSetup implements Setup {
                 }
             }
         }
+
         AwsCredentialView awsCredentialView = new AwsCredentialView(ac.getCloudCredential());
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack.getParameters());
+        validateImageOptIn(awsCredentialView, region, stack.getImage().getImageName());
         if (awsClient.roleBasedCredential(awsCredentialView) && awsInstanceProfileView.isCreateInstanceProfile()) {
             validateInstanceProfileCreation(awsCredentialView);
         }
@@ -115,6 +123,30 @@ public class AwsSetup implements Setup {
         }
         validateExistingKeyPair(ac, credentialView, region);
         LOGGER.debug("setup has been executed");
+    }
+
+    private void validateImageOptIn(AwsCredentialView credentialView, String region, String imageName) {
+        try {
+            AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, region);
+            RunInstancesRequest request = new RunInstancesRequest()
+                    .withMinCount(1)
+                    .withMaxCount(1)
+                    .withImageId(imageName)
+                    .withInstanceType(InstanceType.M4Large);
+            amazonEC2Client.dryRun(request);
+            LOGGER.info("Dry run succeeded, AMI '{}' is safe to launch.", imageName);
+        } catch (AmazonServiceException e) {
+            String errorMessage = e.getErrorMessage();
+            if (e.getErrorCode().equals("OptInRequired")) {
+                int marketplaceLinkIndex = errorMessage.indexOf(MARKETPLACE_HTTP_LINK);
+                if (marketplaceLinkIndex != -1) {
+                    errorMessage = IMAGE_OPT_IN_REQUIRED_MSG + " " + LINK_TO_MARKETPLACE_MSG + errorMessage.substring(marketplaceLinkIndex);
+                } else {
+                    errorMessage = IMAGE_OPT_IN_REQUIRED_MSG;
+                }
+            }
+            throw new CloudConnectorException(errorMessage, e);
+        }
     }
 
     private void validateInstanceProfileCreation(AwsCredentialView awsCredentialView) {
