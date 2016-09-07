@@ -40,25 +40,52 @@ public class CloudbreakEvent implements ProvisionEntity {
     @SequenceGenerator(name = "cloudbreakevent_generator", sequenceName = "cloudbreakevent_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
     private String eventType;
+
+    @Column(nullable = false)
     private Date eventTimestamp;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String eventMessage;
+
+    @Column(nullable = false)
     private String owner;
+
+    @Column(nullable = false)
     private String account;
+
+    @Column(nullable = false)
     private String cloud;
+
+    @Column(nullable = false)
     private String region;
+
     private String availabilityZone;
+
     private String blueprintName;
+
     private long blueprintId;
+
+    @Column(nullable = false)
     private Long stackId;
+
+    @Column(nullable = false)
     private String stackName;
+
     private Long clusterId;
+
     private String clusterName;
+
     private String instanceGroup;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status stackStatus;
+
+    @Column(nullable = false)
     private Integer nodeCount;
+
     @Enumerated(EnumType.STRING)
     private Status clusterStatus;
 

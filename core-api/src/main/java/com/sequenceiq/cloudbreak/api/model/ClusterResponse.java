@@ -33,9 +33,9 @@ public class ClusterResponse {
     private String statusReason;
     @ApiModelProperty(ModelDescriptions.StackModelDescription.AMBARI_IP)
     private String ambariServerIp;
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME, required = true)
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME)
     private String userName;
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD)
     private String password;
     private boolean secure;
     @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)

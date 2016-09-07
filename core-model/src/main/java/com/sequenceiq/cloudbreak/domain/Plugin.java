@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,6 +19,7 @@ public class Plugin {
     @ManyToOne
     private Recipe recipe;
 
+    @Column(nullable = false)
     private String content;
 
     public Plugin() {

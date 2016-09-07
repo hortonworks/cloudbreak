@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/clusters/{clusterId}/configurations")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/configurations", description = CONFIGURATION_DESCRIPTION, position = 2)
+@Api(value = "/configurations", description = CONFIGURATION_DESCRIPTION)
 public interface ConfigurationEndpoint {
 
     @POST

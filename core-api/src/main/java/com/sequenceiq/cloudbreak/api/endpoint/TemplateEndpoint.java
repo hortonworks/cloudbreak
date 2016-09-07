@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/templates")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/templates", description = ControllerDescription.TEMPLATE_DESCRIPTION, position = 2)
+@Api(value = "/templates", description = ControllerDescription.TEMPLATE_DESCRIPTION)
 public interface TemplateEndpoint {
 
     @POST

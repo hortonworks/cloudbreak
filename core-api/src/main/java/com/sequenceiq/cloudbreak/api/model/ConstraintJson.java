@@ -13,13 +13,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConstraintJson {
 
-    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.INSTANCE_GROUP)
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.INSTANCE_GROUP, required = true)
     private String instanceGroupName;
 
     @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.CONSTRAINT_NAME)
     private String constraintTemplateName;
 
     @NotNull
+    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.HOST_COUNT, required = true)
     private Integer hostCount;
 
     public String getInstanceGroupName() {

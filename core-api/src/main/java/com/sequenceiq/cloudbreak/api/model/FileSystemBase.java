@@ -20,10 +20,10 @@ public abstract class FileSystemBase {
     @ApiModelProperty(value = ModelDescriptions.FileSystem.TYPE, required = true)
     private FileSystemType type;
 
-    @ApiModelProperty(value = ModelDescriptions.FileSystem.DEFAULT, required = true)
-    private boolean defaultFs;
+    @ApiModelProperty(value = ModelDescriptions.FileSystem.DEFAULT)
+    private boolean defaultFs = true;
 
-    @ApiModelProperty(value = ModelDescriptions.FileSystem.PROPERTIES, required = true)
+    @ApiModelProperty(value = ModelDescriptions.FileSystem.PROPERTIES)
     private Map<String, String> properties;
 
     public String getName() {

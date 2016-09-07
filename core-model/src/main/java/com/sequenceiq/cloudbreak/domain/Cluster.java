@@ -97,11 +97,16 @@ public class Cluster implements ProvisionEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String owner;
+
+    @Column(nullable = false)
     private String account;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
 
@@ -116,9 +121,13 @@ public class Cluster implements ProvisionEntity {
 
     private String ambariIp;
 
+    @Column(nullable = false)
     private String userName;
+
+    @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
     private Boolean secure;
     private String kerberosMasterKey;
     private String kerberosAdmin;
@@ -130,6 +139,7 @@ public class Cluster implements ProvisionEntity {
     @ManyToOne
     private SssdConfig sssdConfig;
 
+    @Column(nullable = false)
     private Boolean emailNeeded;
     private String emailTo;
 
@@ -145,6 +155,7 @@ public class Cluster implements ProvisionEntity {
     @ManyToOne
     private FileSystem fileSystem;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ConfigStrategy configStrategy;
 

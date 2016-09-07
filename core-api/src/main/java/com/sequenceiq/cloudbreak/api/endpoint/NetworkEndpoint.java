@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/networks")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/networks", description = ControllerDescription.NETWORK_DESCRIPTION, position = 8)
+@Api(value = "/networks", description = ControllerDescription.NETWORK_DESCRIPTION)
 public interface NetworkEndpoint {
 
     @GET

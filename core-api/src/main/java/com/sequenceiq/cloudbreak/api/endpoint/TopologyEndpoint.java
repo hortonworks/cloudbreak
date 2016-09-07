@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/topologies")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/topologies", description = ControllerDescription.TOPOLOGY_DESCRIPTION, position = 9)
+@Api(value = "/topologies", description = ControllerDescription.TOPOLOGY_DESCRIPTION)
 public interface TopologyEndpoint {
 
     @GET

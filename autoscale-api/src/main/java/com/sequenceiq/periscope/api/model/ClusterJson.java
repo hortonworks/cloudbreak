@@ -5,7 +5,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("ClusterJson")
+@ApiModel("ClusterSummary")
 public class ClusterJson implements Json {
 
     @ApiModelProperty(ClusterJsonProperties.ID)
