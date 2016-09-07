@@ -171,8 +171,10 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 		}
 	}
 
-	if str, ok := credential.Parameters["existingKeyPairName"].(string); ok {
-		c.SSHKeyName = str
+	if credential != nil {
+		if str, ok := credential.Parameters["existingKeyPairName"].(string); ok {
+			c.SSHKeyName = str
+		}
 	}
 
 	keys := make([]string, 0, len(securityMap))
@@ -202,14 +204,6 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 	var wg sync.WaitGroup
 
 	wg.Add(1)
-	var credential *models.CredentialResponse
-	go func() {
-		defer wg.Done()
-		cred, _ := c.GetCredentialById(stack.CredentialID)
-		credential = cred
-	}()
-
-	wg.Add(1)
 	var blueprint *models.BlueprintResponse = nil
 	go func() {
 		defer wg.Done()
@@ -221,6 +215,7 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 
 	var templateMap map[string]*models.TemplateResponse = nil
 	var securityMap map[string][]*models.SecurityRule = nil
+	var credential *models.CredentialResponse = nil
 	// some operations does not require all info
 	if !reduced {
 		templateMap = make(map[string]*models.TemplateResponse)
@@ -241,6 +236,13 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 		go func() {
 			defer wg.Done()
 			securityMap, _ = c.GetSecurityDetails(stack)
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			cred, _ := c.GetCredentialById(stack.CredentialID)
+			credential = cred
 		}()
 	}
 
@@ -287,7 +289,7 @@ func TerminateCluster(c *cli.Context) error {
 		newExitReturnError()
 	}
 
-	log.Infof("[TerminateCluster] sending request to terminate cluster: %s")
+	log.Infof("[TerminateCluster] sending request to terminate cluster: %s", clusterName)
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	err := oAuth2Client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName})
