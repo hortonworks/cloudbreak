@@ -41,7 +41,7 @@ public class Topology {
     private String account;
     @Column(nullable = false)
     private String owner;
-
+    @Column(nullable = false)
     private boolean deleted;
 
     @ElementCollection(fetch = FetchType.EAGER)

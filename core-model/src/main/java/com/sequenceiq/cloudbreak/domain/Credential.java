@@ -75,14 +75,18 @@ public class Credential {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
     private String owner;
+
+    @Column(nullable = false)
     private String account;
 
     private String loginUserName;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String publicKey;
 
     @Column(columnDefinition = "boolean default false")

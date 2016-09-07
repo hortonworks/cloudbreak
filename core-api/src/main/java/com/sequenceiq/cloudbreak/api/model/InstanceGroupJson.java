@@ -26,6 +26,7 @@ public class InstanceGroupJson implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = InstanceGroupModelDescription.TEMPLATE_ID, required = true)
     private Long templateId;
+    @NotNull
     @ApiModelProperty(value = InstanceGroupModelDescription.SECURITY_GROUP_ID, required = true)
     private Long securityGroupId;
     @Min(value = 1, message = "The node count has to be greater than 0")
@@ -38,6 +39,7 @@ public class InstanceGroupJson implements JsonEntity {
     private String group;
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_TYPE)
     private InstanceGroupType type = InstanceGroupType.CORE;
+    @ApiModelProperty(InstanceGroupModelDescription.METADATA)
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
 
     public InstanceGroupJson() {

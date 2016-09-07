@@ -36,7 +36,7 @@ public class SecurityGroupCommands implements BaseCommands {
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the security group") String name,
             @CliOption(key = "description", help = "Description of the security group") String description,
-            @CliOption(key = "rules", mandatory = true,
+            @CliOption(key = "rules",
                     help = "Security rules in the following format: ';' separated list of <cidr>:<protocol>:<comma separated port list>") SecurityRules rules,
             @CliOption(key = "publicInAccount", help = "Marks the securitygroup as visible for all members of the account",
                     specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) {

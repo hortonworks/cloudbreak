@@ -5,7 +5,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.AmbariJsonProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("AmbariJson")
+@ApiModel("AmbariConnectionDetails")
 public class AmbariJson implements Json {
 
     @ApiModelProperty(AmbariJsonProperties.HOST)

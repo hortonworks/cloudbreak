@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("Id")
 public class IdJson implements JsonEntity {
 
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(value = ModelDescriptions.ID, required = true)
     private Long id;
 
     public IdJson() {

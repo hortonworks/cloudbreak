@@ -74,9 +74,13 @@ public class ClusterTemplate implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private ClusterTemplateType type;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
+    @Column(nullable = false)
     private String owner;
+
+    @Column(nullable = false)
     private String account;
 
     public Long getId() {

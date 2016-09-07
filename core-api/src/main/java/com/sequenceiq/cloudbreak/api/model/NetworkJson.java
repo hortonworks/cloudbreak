@@ -21,26 +21,25 @@ import io.swagger.annotations.ApiModelProperty;
 public class NetworkJson implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     @Size(max = 100, min = 1, message = "The length of the network's name has to be in range of 1 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The network's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
+    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
     @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
     @Size(max = 1000)
     private String description;
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT, required = true)
-    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
     @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.SUBNET_CIDR)
     @ValidSubnet
     private String subnetCIDR;
-    @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.PARAMETERS, required = true)
-    private Map<String, Object> parameters = new HashMap<>();
-    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     @NotNull
+    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
+    @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.PARAMETERS)
+    private Map<String, Object> parameters = new HashMap<>();
 
     @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;

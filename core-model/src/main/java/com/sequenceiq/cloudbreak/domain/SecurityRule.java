@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -28,6 +29,7 @@ public class SecurityRule implements ProvisionEntity {
     private String cidr;
     private String ports;
     private String protocol;
+    @Column(nullable = false)
     private boolean modifiable;
 
     public SecurityRule() { }
