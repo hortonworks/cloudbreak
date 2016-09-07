@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
 )
 
 const (
+	green  = 32
 	red    = 31
 	yellow = 33
 	blue   = 34
@@ -52,17 +54,45 @@ func printColored(b *bytes.Buffer, entry *log.Entry, keys []string) {
 		levelColor = yellow
 	case log.ErrorLevel, log.FatalLevel, log.PanicLevel:
 		levelColor = red
+	case log.InfoLevel:
+		levelColor = green
 	default:
 		levelColor = blue
 	}
 
-	levelText := strings.ToUpper(entry.Level.String()) + ":"
+	levelText := strings.ToUpper(levelToString(entry)) + ":"
 
-	fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m %-44s ", levelColor, levelText, entry.Message)
-	for _, k := range keys {
-		v := entry.Data[k]
-		fmt.Fprintf(b, " \x1b[%dm%s\x1b[0m=%v", levelColor, k, v)
+	if runtime.GOOS == "windows" {
+		fmt.Fprintf(b, "%-6s %-44s ", levelText, entry.Message)
+		for _, k := range keys {
+			v := entry.Data[k]
+			fmt.Fprintf(b, "%s=%v", k, v)
+		}
+	} else {
+		fmt.Fprintf(b, "\x1b[%dm%-6s\x1b[0m %-44s ", levelColor, levelText, entry.Message)
+		for _, k := range keys {
+			v := entry.Data[k]
+			fmt.Fprintf(b, " \x1b[%dm%s\x1b[0m=%v", levelColor, k, v)
+		}
 	}
+}
+
+func levelToString(entry *log.Entry) string {
+	switch entry.Level {
+	case log.DebugLevel:
+		return "debug"
+	case log.InfoLevel:
+		return "info"
+	case log.WarnLevel:
+		return "warn"
+	case log.ErrorLevel:
+		return "error"
+	case log.FatalLevel:
+		return "fatal"
+	case log.PanicLevel:
+		return "panic"
+	}
+	return "error"
 }
 
 func (f *CBFormatter) appendKeyValue(b *bytes.Buffer, key, value interface{}) {

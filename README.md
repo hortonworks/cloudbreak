@@ -7,10 +7,10 @@ You can install directly the GitHub binary release:
 curl -LsS https://github.com/hortonworks/hdc-cli/releases/download/v1.5.0-rc.9/hdc-cli_1.5.0-rc.9_$(uname)_x86_64.tgz | sudo tar -zx -C /usr/local/bin
 ```
 ### Windows
-The windows binary is in experimental phase, but you can download it from the GitHub release page. It has some terminal coloring issues:
+The windows binary is in experimental phase, but you can download it from the GitHub release page.
 ```
 ﻿C:\Users\IEUser\Desktop>hdc.exe terminate-cluster --cluster-name my-cluster
-[31mERROR:[0m [TerminateCluster] (status 404): Stack 'my-cluster' not found
+﻿ERROR: [TerminateCluster] (status 404): Stack 'my-cluster' not found
 ```
 
 ## Usage
