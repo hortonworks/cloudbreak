@@ -19,10 +19,14 @@ var AWSCreateClusterSkeletonHelp = `
     "InstanceCount": 1                                    // Instance count of workerk instance group, accepted value: >1
   },
   "SSHKeyName": "my-existing-keypair-name",               // Name of an existing EC2 KeyPair to enable SSH access to the cluster node instances.
-  "RemoteAccess": "0.0.0.0/0",                            // Allow connections from this address range. Must be a valid CIDR IP (for example: 0.0.0.0/0 will allow access from all).
+  "RemoteAccess": "0.0.0.0/0",                            // Allow connections from this address range. Must be a valid CIDR IP (for example: 0.0.0.0/0 will allow access from all)
   "WebAccess": true,                                      // Open access to web UI (Ambari, Spark, Zeppelin)
   "ClusterAndAmbariUser": "admin",                        // User name for Ambari and all services
   "ClusterAndAmbariPassword": "admin",                    // Password for Ambari and all services
-  "InstanceRole": "CREATE"                                // Instance role to access S3, accepted values: "", null, CREATE, existing AWS instance role name
+  "InstanceRole": "CREATE",                               // (Optional) Instance role to access S3, accepted values: "", null, CREATE, existing AWS instance role name
+  "Network": {                                            // (Optional) Use existing VPC and subnet
+    "VpcId": "vpc-12345678",                              // Identifier of an existing VPC where the cluster will be provisioned
+    "SubnetId": "subnet-12345678"                         // Identifier of an existing subnet where the cluster will be provisioned
+  }
 }
 `

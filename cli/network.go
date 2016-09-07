@@ -9,19 +9,22 @@ import (
 	"time"
 )
 
-func (c *Cloudbreak) CopyDefaultNetwork(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
-	defaultNetwork := c.GetNetwork("aws-network")
-	channel <- c.CreateNetwork(defaultNetwork)
-	wg.Done()
-}
-
-func (c *Cloudbreak) CreateNetwork(defaultNetwork models.NetworkJSON) int64 {
+func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
 	defer timeTrack(time.Now(), "create network")
+	defer wg.Done()
+
 	networkName := "net" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
+	vpc := skeleton.Network
 	var vpcParams = make(map[string]interface{})
-	vpcParams["vpcId"] = defaultNetwork.Parameters["vpcId"]
-	vpcParams["internetGatewayId"] = defaultNetwork.Parameters["internetGatewayId"]
+	if vpc != nil && len(vpc.VpcId) > 0 && len(vpc.SubnetId) > 0 {
+		vpcParams["vpcId"] = vpc.VpcId
+		vpcParams["subnetId"] = vpc.SubnetId
+	} else {
+		defaultNetwork := c.GetNetwork("aws-network")
+		vpcParams["vpcId"] = defaultNetwork.Parameters["vpcId"]
+		vpcParams["internetGatewayId"] = defaultNetwork.Parameters["internetGatewayId"]
+	}
 
 	network := models.NetworkJSON{
 		Name:          networkName,
@@ -38,7 +41,7 @@ func (c *Cloudbreak) CreateNetwork(defaultNetwork models.NetworkJSON) int64 {
 	}
 
 	log.Infof("[CreateNetwork] network created, id: %d", resp.Payload.ID)
-	return resp.Payload.ID
+	channel <- resp.Payload.ID
 }
 
 func (c *Cloudbreak) GetNetwork(name string) models.NetworkJSON {
@@ -51,6 +54,20 @@ func (c *Cloudbreak) GetNetwork(name string) models.NetworkJSON {
 	}
 
 	defaultNetwork := *resp.Payload
-	log.Infof("[GetNetwork] found network, name: %s id: %d", defaultNetwork.Name, defaultNetwork.ID)
+	log.Infof("[GetNetwork] found network, name: %s", defaultNetwork.Name)
 	return defaultNetwork
+}
+
+func (c *Cloudbreak) GetNetworkById(id int64) *models.NetworkJSON {
+	log.Infof("[GetNetwork] sending get request to find network with id: %d", id)
+	resp, err := c.Cloudbreak.Networks.GetNetworksID(&networks.GetNetworksIDParams{ID: id})
+
+	if err != nil {
+		log.Errorf("[GetNetwork] %s", err.Error())
+		newExitReturnError()
+	}
+
+	network := resp.Payload
+	log.Infof("[GetNetwork] found network, name: %s", network.Name)
+	return network
 }

@@ -16,8 +16,6 @@ import (
 	"sync"
 	"time"
 
-	swagerrors "github.com/go-swagger/go-swagger/errors"
-	"github.com/go-swagger/go-swagger/httpkit/validate"
 	"github.com/hortonworks/hdc-cli/client/blueprints"
 	"github.com/hortonworks/hdc-cli/client/templates"
 	"strconv"
@@ -37,6 +35,7 @@ type ClusterSkeleton struct {
 	ClusterAndAmbariUser     string         `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
 	ClusterAndAmbariPassword string         `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
 	InstanceRole             string         `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
+	Network                  *Network       `json:"Network,omitempty" yaml:"Network,omitempty"`
 
 	Status       string `json:"Status,omitempty" yaml:"Status,omitempty"`
 	StatusReason string `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
@@ -46,42 +45,9 @@ type ClusterSkeleton struct {
 	//HiveMetastorePassword    string `json:"HiveMetastorePassword" yaml:"HiveMetastorePassword"`
 }
 
-func (s *ClusterSkeleton) Validate() error {
-	var res []error
-	if err := validate.RequiredString("ClusterName", "body", string(s.ClusterName)); err != nil {
-		res = append(res, err)
-	}
-	if err := validate.RequiredString("HDPVersion", "body", string(s.HDPVersion)); err != nil {
-		res = append(res, err)
-	}
-	if err := validate.RequiredString("ClusterType", "body", string(s.ClusterType)); err != nil {
-		res = append(res, err)
-	}
-	if err := validate.RequiredNumber("InstanceCount", "worker", float64(s.Worker.InstanceCount)); err != nil {
-		res = append(res, err)
-	} else if s.Worker.InstanceCount < 1 {
-		res = append(res, swagerrors.New(1, "The instance count has to be greater than 0"))
-	}
-	if err := validate.RequiredString("SSHKeyName", "body", string(s.SSHKeyName)); err != nil {
-		res = append(res, err)
-	}
-	if err := validate.RequiredString("RemoteAccess", "body", string(s.RemoteAccess)); err != nil {
-		res = append(res, err)
-	}
-	if err := validate.Required("WebAccess", "body", s.WebAccess); err != nil {
-		res = append(res, err)
-	}
-	if err := validate.RequiredString("ClusterAndAmbariUser", "body", string(s.ClusterAndAmbariUser)); err != nil {
-		res = append(res, err)
-	}
-	if err := validate.RequiredString("ClusterAndAmbariPassword", "body", string(s.ClusterAndAmbariPassword)); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return swagerrors.CompositeValidationError(res...)
-	}
-	return nil
+type Network struct {
+	VpcId    string `json:"VpcId" yaml:"VpcId"`
+	SubnetId string `json:"SubnetId" yaml:"SubnetId"`
 }
 
 type InstanceConfig struct {
@@ -89,7 +55,7 @@ type InstanceConfig struct {
 	VolumeType    string `json:"VolumeType" yaml:"VolumeType"`
 	VolumeSize    int32  `json:"VolumeSize" yaml:"VolumeSize"`
 	VolumeCount   int32  `json:"VolumeCount" yaml:"VolumeCount"`
-	InstanceCount int32  `json:"InstanceCount,omitempty" yaml:"InstanceCount"`
+	InstanceCount int32  `json:"InstanceCount,omitempty" yaml:"InstanceCount,omitempty"`
 }
 
 func (c *InstanceConfig) Yaml() string {
@@ -121,7 +87,9 @@ func (c *ClusterSkeleton) Yaml() string {
 	return string(j)
 }
 
-func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.CredentialResponse, blueprint *models.BlueprintResponse, templateMap map[string]*models.TemplateResponse, securityMap map[string][]*models.SecurityRule) error {
+func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.CredentialResponse, blueprint *models.BlueprintResponse,
+	templateMap map[string]*models.TemplateResponse, securityMap map[string][]*models.SecurityRule, network *models.NetworkJSON) error {
+
 	if stack == nil {
 		return errors.New("Stack definition is not returned from Cloudbreak")
 	}
@@ -156,6 +124,11 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 
 	if blueprint != nil {
 		c.ClusterType = getBlueprintName(blueprint)
+	}
+
+	if network != nil && network.Parameters["internetGatewayId"] == nil {
+		net := Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
+		c.Network = &net
 	}
 
 	if securityMap != nil {
@@ -216,6 +189,7 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 	var templateMap map[string]*models.TemplateResponse = nil
 	var securityMap map[string][]*models.SecurityRule = nil
 	var credential *models.CredentialResponse = nil
+	var network *models.NetworkJSON = nil
 	// some operations does not require all info
 	if !reduced {
 		templateMap = make(map[string]*models.TemplateResponse)
@@ -244,13 +218,19 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 			cred, _ := c.GetCredentialById(stack.CredentialID)
 			credential = cred
 		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			network = c.GetNetworkById(stack.NetworkID)
+		}()
 	}
 
 	// synchronize here
 	wg.Wait()
 
 	clusterSkeleton := &ClusterSkeleton{}
-	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap)
+	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network)
 
 	return clusterSkeleton, nil
 }
@@ -359,7 +339,7 @@ func CreateCluster(c *cli.Context) error {
 	go oAuth2Client.CreateSecurityGroup(skeleton, secGroupId, &wg)
 
 	networkId := make(chan int64, 1)
-	go oAuth2Client.CopyDefaultNetwork(skeleton, networkId, &wg)
+	go oAuth2Client.CreateNetwork(skeleton, networkId, &wg)
 
 	wg.Wait()
 
@@ -504,6 +484,7 @@ func GenerateCreateClusterSkeleton(c *cli.Context) error {
 		},
 		WebAccess:    true,
 		InstanceRole: "CREATE",
+		Network:      &Network{},
 	}
 	fmt.Println(skeleton.JsonPretty())
 	return nil
