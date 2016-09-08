@@ -36,13 +36,10 @@ type ClusterSkeleton struct {
 	ClusterAndAmbariPassword string         `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
 	InstanceRole             string         `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
 	Network                  *Network       `json:"Network,omitempty" yaml:"Network,omitempty"`
+	HiveMetastore            *HiveMetastore `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
 
 	Status       string `json:"Status,omitempty" yaml:"Status,omitempty"`
 	StatusReason string `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
-
-	//HiveMetastoreUrl         string `json:"HiveMetastoreUrl" yaml:"HiveMetastoreUrl"`
-	//HiveMetastoreUser        string `json:"HiveMetastoreUser" yaml:"HiveMetastoreUser"`
-	//HiveMetastorePassword    string `json:"HiveMetastorePassword" yaml:"HiveMetastorePassword"`
 }
 
 type Network struct {
@@ -58,18 +55,14 @@ type InstanceConfig struct {
 	InstanceCount int32  `json:"InstanceCount,omitempty" yaml:"InstanceCount,omitempty"`
 }
 
-func (c *InstanceConfig) Yaml() string {
-	j, _ := yaml.Marshal(c)
-	return string(j)
-}
+type HiveMetastore struct {
+	Name         string `json:"Name" yaml:"Name"`
+	Username     string `json:"Username" yaml:"Username"`
+	Password     string `json:"Password" yaml:"Password"`
+	URL          string `json:"URL" yaml:"URL"`
+	DatabaseType string `json:"DatabaseType" yaml:"DatabaseType"`
 
-func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroup, template *models.TemplateResponse) error {
-	c.InstanceCount = instanceGroup.NodeCount
-	c.InstanceType = template.InstanceType
-	c.VolumeType = SafeStringConvert(template.VolumeType)
-	c.VolumeSize = SafeInt32Convert(template.VolumeSize)
-	c.VolumeCount = template.VolumeCount
-	return nil
+	HDPVersion string `json:"HDPVersion,omitempty" yaml:"HDPVersion,omitempty"`
 }
 
 func (c *ClusterSkeleton) Json() string {
@@ -87,8 +80,38 @@ func (c *ClusterSkeleton) Yaml() string {
 	return string(j)
 }
 
+func (c *InstanceConfig) Yaml() string {
+	j, _ := yaml.Marshal(c)
+	return string(j)
+}
+
+func (c *Network) Yaml() string {
+	j, _ := yaml.Marshal(c)
+	return string(j)
+}
+
+func (c *HiveMetastore) Yaml() string {
+	j, _ := yaml.Marshal(c)
+	return string(j)
+}
+
+func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroup, template *models.TemplateResponse) error {
+	c.InstanceCount = instanceGroup.NodeCount
+	c.InstanceType = template.InstanceType
+	c.VolumeType = SafeStringConvert(template.VolumeType)
+	c.VolumeSize = SafeInt32Convert(template.VolumeSize)
+	c.VolumeCount = template.VolumeCount
+	return nil
+}
+
+func (c *ClusterSkeleton) DataAsStringArray() []string {
+	return []string{c.ClusterName, c.HDPVersion, c.ClusterType, c.Master.Yaml(), c.Worker.Yaml(),
+		c.SSHKeyName, c.RemoteAccess, strconv.FormatBool(c.WebAccess), c.ClusterAndAmbariUser, c.Status, c.StatusReason}
+}
+
 func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.CredentialResponse, blueprint *models.BlueprintResponse,
-	templateMap map[string]*models.TemplateResponse, securityMap map[string][]*models.SecurityRule, network *models.NetworkJSON) error {
+	templateMap map[string]*models.TemplateResponse, securityMap map[string][]*models.SecurityRule,
+	network *models.NetworkJSON, rdsConfig *models.RDSConfigResponse) error {
 
 	if stack == nil {
 		return errors.New("Stack definition is not returned from Cloudbreak")
@@ -131,6 +154,13 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 		c.Network = &net
 	}
 
+	if rdsConfig != nil {
+		rdsConfig := HiveMetastore{
+			Name: rdsConfig.Name,
+		}
+		c.HiveMetastore = &rdsConfig
+	}
+
 	if securityMap != nil {
 		if stack.InstanceGroups != nil {
 			for _, v := range stack.InstanceGroups {
@@ -168,10 +198,6 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	return nil
 }
 
-func (c *ClusterSkeleton) DataAsStringArray() []string {
-	return []string{c.ClusterName, c.HDPVersion, c.ClusterType, c.Master.Yaml(), c.Worker.Yaml(), c.SSHKeyName, c.RemoteAccess, strconv.FormatBool(c.WebAccess), c.ClusterAndAmbariUser, c.Status, c.StatusReason}
-}
-
 func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeleton, error) {
 	defer timeTrack(time.Now(), "fetch cluster")
 	var wg sync.WaitGroup
@@ -190,6 +216,7 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 	var securityMap map[string][]*models.SecurityRule = nil
 	var credential *models.CredentialResponse = nil
 	var network *models.NetworkJSON = nil
+	var rdsConfig *models.RDSConfigResponse = nil
 	// some operations does not require all info
 	if !reduced {
 		templateMap = make(map[string]*models.TemplateResponse)
@@ -224,13 +251,21 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 			defer wg.Done()
 			network = c.GetNetworkById(stack.NetworkID)
 		}()
+
+		if stack.Cluster != nil && stack.Cluster.RdsConfigID != nil {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				rdsConfig = c.GetRDSConfigById(*stack.Cluster.RdsConfigID)
+			}()
+		}
 	}
 
 	// synchronize here
 	wg.Wait()
 
 	clusterSkeleton := &ClusterSkeleton{}
-	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network)
+	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, rdsConfig)
 
 	return clusterSkeleton, nil
 }
@@ -438,12 +473,43 @@ func CreateCluster(c *cli.Context) error {
 			},
 		}
 
+		var rdsConfig *models.RDSConfig = nil
+		var rdsId *int64 = nil
+		ms := skeleton.HiveMetastore
+		if skeleton.HiveMetastore != nil {
+			if len(skeleton.HiveMetastore.URL) > 0 {
+				var connUrl string
+				if ms.DatabaseType == POSTGRES {
+					connUrl = "jdbc:postgresql://" + ms.URL
+				} else {
+					connUrl = "jdbc:mysql://" + ms.URL
+				}
+				rdsConfig = &models.RDSConfig{
+					Name:               ms.Name,
+					ConnectionUserName: ms.Username,
+					ConnectionPassword: ms.Password,
+					ConnectionURL:      connUrl,
+					DatabaseType:       ms.DatabaseType,
+					HdpVersion:         skeleton.HDPVersion,
+				}
+			} else if len(ms.Name) > 0 {
+				id, err := strconv.ParseInt(*oAuth2Client.GetRDSConfigByName(ms.Name).ID, 10, 64)
+				if err != nil {
+					log.Errorf("[CreateCluster] %s", err)
+					newExitReturnError()
+				}
+				rdsId = &id
+			}
+		}
+
 		clusterReq := models.ClusterRequest{
-			Name:        skeleton.ClusterName,
-			BlueprintID: blueprintId,
-			HostGroups:  hostGroups,
-			UserName:    skeleton.ClusterAndAmbariUser,
-			Password:    skeleton.ClusterAndAmbariPassword,
+			Name:          skeleton.ClusterName,
+			BlueprintID:   blueprintId,
+			HostGroups:    hostGroups,
+			UserName:      skeleton.ClusterAndAmbariUser,
+			Password:      skeleton.ClusterAndAmbariPassword,
+			RdsConfigJSON: rdsConfig,
+			RdsConfigID:   rdsId,
 		}
 
 		resp, err := oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
@@ -482,9 +548,10 @@ func GenerateCreateClusterSkeleton(c *cli.Context) error {
 			VolumeSize:    40,
 			InstanceCount: 2,
 		},
-		WebAccess:    true,
-		InstanceRole: "CREATE",
-		Network:      &Network{},
+		WebAccess:     true,
+		InstanceRole:  "CREATE",
+		Network:       &Network{},
+		HiveMetastore: &HiveMetastore{},
 	}
 	fmt.Println(skeleton.JsonPretty())
 	return nil

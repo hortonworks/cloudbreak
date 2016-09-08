@@ -27,6 +27,13 @@ var AWSCreateClusterSkeletonHelp = `
   "Network": {                                            // (Optional) Use existing VPC and subnet
     "VpcId": "vpc-12345678",                              // Identifier of an existing VPC where the cluster will be provisioned
     "SubnetId": "subnet-12345678"                         // Identifier of an existing subnet where the cluster will be provisioned
+  },
+  "HiveMetastore": {                                      // (Optional) You can specify an existing Hive metastore or register a new one
+   "Name": "my-hive-metastore",                           // Name of the Hive metastore, if it's an existing one only provide the name, otherwise one will be created with this name
+   "Username": "hive-metastore-username",                 // Username of the Hive metastore
+   "Password": "hive-metastore-password",                 // Password of the Hive metastore
+   "URL": "hive.eu-west-1.rds.amazonaws.com:5432/hive",   // Connection URL of the Hive metastore
+   "DatabaseType": "POSTGRES"                             // Database type of the Hive metastore, accepted values: POSTGRES, MYSQL
   }
 }
 `
