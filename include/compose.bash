@@ -42,7 +42,7 @@ compose-pull() {
     [ -f docker-compose.yml ] || deployer-generate
 
     dockerCompose pull
-    docker pull "sequenceiq/cb-shell:${DOCKER_TAG_CLOUDBREAK_SHELL}"
+    docker pull "${DOCKER_IMAGE_CLOUDBREAK_SHELL}:${DOCKER_TAG_CLOUDBREAK_SHELL}"
 }
 
 compose-pull-parallel() {
@@ -50,7 +50,7 @@ compose-pull-parallel() {
     cloudbreak-conf-tags
 
     [ -f docker-compose.yml ] || deployer-generate
-    (sed -n "s/.*image://p" docker-compose.yml ; echo "sequenceiq/cb-shell:${DOCKER_TAG_CLOUDBREAK_SHELL}") |sort -u|xargs -n1 -P 20 docker pull
+    (sed -n "s/.*image://p" docker-compose.yml ; echo "${DOCKER_IMAGE_CLOUDBREAK_SHELL}:${DOCKER_TAG_CLOUDBREAK_SHELL}") |sort -u|xargs -n1 -P 20 docker pull
 }
 
 create-logfile() {
@@ -408,7 +408,7 @@ cloudbreak:
     dns: $PRIVATE_IP
     links:
         - consul
-    image: sequenceiq/cloudbreak:$DOCKER_TAG_CLOUDBREAK
+    image: $DOCKER_IMAGE_CLOUDBREAK:$DOCKER_TAG_CLOUDBREAK
     command: bash
 
 sultans:
@@ -542,7 +542,7 @@ periscope:
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
         - /dev/urandom:/dev/random
-    image: sequenceiq/periscope:$DOCKER_TAG_PERISCOPE
+    image: $DOCKER_IMAGE_CLOUDBREAK_PERISCOPE:$DOCKER_TAG_PERISCOPE
 
 EOF
 }

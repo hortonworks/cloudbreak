@@ -41,8 +41,11 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_SULTANS 1.6.0-dev.29
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.6.0-dev.29
 
+    env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/cloudbreak-web
     env-import DOCKER_IMAGE_CLOUDBREAK_AUTH hortonworks/cloudbreak-auth
+    env-import DOCKER_IMAGE_CLOUDBREAK_PERISCOPE hortonworks/cloudbreak-autoscale
+    env-import DOCKER_IMAGE_CLOUDBREAK_SHELL hortonworks/cloudbreak-shell
 
     env-import CB_DOCKER_CONTAINER_AMBARI ""
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
@@ -253,7 +256,7 @@ util-cloudbreak-shell-remote(){
         -e SEQUENCEIQ_PASSWORD=\'$UAA_DEFAULT_USER_PW\' \
         -w /data \
         -v $PWD:/data \
-        sequenceiq/cb-shell:$DOCKER_TAG_CLOUDBREAK_SHELL --cert.validation=false
+        $DOCKER_IMAGE_CLOUDBREAK_SHELL:$DOCKER_TAG_CLOUDBREAK_SHELL --cert.validation=false
 
 }
 
@@ -276,7 +279,7 @@ _cloudbreak-shell() {
         -e SEQUENCEIQ_PASSWORD=$UAA_DEFAULT_USER_PW \
         -w /data \
         -v $PWD:/data \
-        sequenceiq/cb-shell:$DOCKER_TAG_CLOUDBREAK_SHELL
+        $DOCKER_IMAGE_CLOUDBREAK_SHELL:$DOCKER_TAG_CLOUDBREAK_SHELL
 
     docker-kill-all-sidekicks
 }

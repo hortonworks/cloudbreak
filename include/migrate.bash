@@ -79,11 +79,11 @@ migrate-one-db() {
     case $service_name in
         cbdb)
             local scripts_location=${CB_SCHEMA_SCRIPTS_LOCATION}
-            local docker_image_name=sequenceiq/cloudbreak:${DOCKER_TAG_CLOUDBREAK}
+            local docker_image_name=${DOCKER_IMAGE_CLOUDBREAK}:${DOCKER_TAG_CLOUDBREAK}
             ;;
         pcdb)
             local scripts_location=${PERISCOPE_SCHEMA_SCRIPTS_LOCATION}
-            local docker_image_name=sequenceiq/periscope:${DOCKER_TAG_PERISCOPE}
+            local docker_image_name=${DOCKER_IMAGE_CLOUDBREAK_PERISCOPE}:${DOCKER_TAG_PERISCOPE}
             ;;
         uaadb)
             local scripts_location=${UAA_SCHEMA_SCRIPTS_LOCATION}

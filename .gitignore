@@ -2,8 +2,9 @@ build
 release
 cbd
 bindata.go
+debug
 Profile*
-
+.vscode
 *.iml
 .idea
 .deps
