@@ -35,9 +35,9 @@ public class StackUsageGenerator {
     public List<CloudbreakUsage> generate(List<CloudbreakEvent> stackEvents) {
         List<CloudbreakUsage> stackUsages = new LinkedList<>();
         CloudbreakEvent actEvent = null;
-        try {
-            CloudbreakEvent start = null;
-            for (CloudbreakEvent cbEvent : stackEvents) {
+        CloudbreakEvent start = null;
+        for (CloudbreakEvent cbEvent : stackEvents) {
+            try {
                 actEvent = cbEvent;
                 if (isStartEvent(cbEvent) && start == null) {
                     start = cbEvent;
@@ -45,13 +45,19 @@ public class StackUsageGenerator {
                     addAllGeneratedUsages(stackUsages, start, cbEvent.getEventTimestamp());
                     start = null;
                 }
+            } catch (ParseException e) {
+                LOGGER.error("Usage generation failed for stack(id:{})! Error when processing event(id:{})! Ex: {}", actEvent.getStackId(), actEvent.getId(), e);
+                throw new IllegalStateException(e);
             }
+        }
 
+        try {
             generateRunningStackUsage(stackUsages, start);
-        } catch (Exception e) {
-            LOGGER.error("Usage generation failed for stack(id:{})! Error when processing event(id:{})! Ex: {}", actEvent.getStackId(), actEvent.getId(), e);
+        } catch (ParseException e) {
+            LOGGER.error("Unable to parse usage at all! Ex: {}", e);
             throw new IllegalStateException(e);
         }
+
         return stackUsages;
     }
 

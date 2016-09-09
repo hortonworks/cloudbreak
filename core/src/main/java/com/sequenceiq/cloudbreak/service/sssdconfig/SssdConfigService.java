@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 @Transactional
 public class SssdConfigService {
 
-    private static final String LOCKER = new String();
+    private static final Object LOCKER = new Object();
 
     @Value("${cb.sssd.name}")
     private String sssdName;
