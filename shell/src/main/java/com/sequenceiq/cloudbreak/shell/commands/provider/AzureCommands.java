@@ -78,7 +78,6 @@ public class AzureCommands implements CommandMarker {
         return baseCredentialCommands.createCredentialAvailable(PLATFORM);
     }
 
-
     @CliCommand(value = "credential create --AZURE", help = "Create a new Azure credential")
     public String createCredential(
             @CliOption(key = "name", mandatory = true, help = "Name of the credential") String name,

@@ -135,7 +135,6 @@ public final class TableRenderer {
         return null;
     }
 
-
     private static Table createTable(String... headers) {
         Table table = new Table();
         if (headers != null) {

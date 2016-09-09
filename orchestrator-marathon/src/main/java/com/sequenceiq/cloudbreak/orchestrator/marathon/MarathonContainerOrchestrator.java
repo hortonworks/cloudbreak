@@ -55,7 +55,6 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final String SPACE = " ";
     private static final Integer STATUS_NOT_FOUND = 404;
 
-
     @Override
     public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
         Marathon client = MarathonClient.getInstance(cred.getApiEndpoint());

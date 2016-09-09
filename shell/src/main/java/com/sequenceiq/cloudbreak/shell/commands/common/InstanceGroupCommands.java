@@ -35,7 +35,6 @@ public class InstanceGroupCommands implements CommandMarker {
         return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable()) && !shellContext.isMarathonMode();
     }
 
-
     @CliAvailabilityIndicator(value = "instancegroup show")
     public boolean showAvailable() {
         return !shellContext.isMarathonMode();

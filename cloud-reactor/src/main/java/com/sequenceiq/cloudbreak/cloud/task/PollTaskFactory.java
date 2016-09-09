@@ -42,8 +42,6 @@ public class PollTaskFactory {
         return createPollTask(PollInstanceConsoleOutputTask.NAME, instanceConnector, authenticatedContext, instance);
     }
 
-
-
     @SuppressWarnings("unchecked")
     private <T> T createPollTask(String name, Object... args) {
         return (T) applicationContext.getBean(name, args);

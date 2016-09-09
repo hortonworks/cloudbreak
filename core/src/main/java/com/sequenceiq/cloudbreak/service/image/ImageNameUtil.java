@@ -59,8 +59,6 @@ public class ImageNameUtil {
         return image;
     }
 
-
-
     private String getImage(String key) {
         return environment.getProperty(key);
     }

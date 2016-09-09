@@ -140,7 +140,6 @@ public class BaseStackCommandsTest {
         underTest.show(null, "test1");
     }
 
-
     private StackResponse stackResponse() {
         StackResponse stackResponse = new StackResponse();
         stackResponse.setName("test1");

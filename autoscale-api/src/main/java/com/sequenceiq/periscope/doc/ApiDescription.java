@@ -32,7 +32,6 @@ public class ApiDescription {
                 + "please go to Ambari UI and select the Alerts tab and the metric. The values can be changed in the Threshold section. ";
     }
 
-
     public static class ConfigurationOpDescription {
         public static final String CONFIGURATION_POST = "create configuration";
         public static final String CONFIGURATION_GET = "retrieve configuration";

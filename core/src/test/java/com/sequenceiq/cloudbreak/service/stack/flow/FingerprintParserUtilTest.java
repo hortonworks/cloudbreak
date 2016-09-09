@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class FingerprintParserUtilTest {
 
-
     @Test
     @SuppressWarnings("unchecked")
     public void parseFingerprintGCP() throws IOException {

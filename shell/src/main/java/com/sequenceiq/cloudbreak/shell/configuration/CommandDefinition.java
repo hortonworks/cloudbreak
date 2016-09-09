@@ -116,7 +116,6 @@ public class CommandDefinition {
         return new ClusterCommands(shellContext, cloudbreakShellUtil);
     }
 
-
     @Bean
     public AwsCommands awsCredentialCommands() {
         return new AwsCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(),

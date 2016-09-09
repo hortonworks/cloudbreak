@@ -44,6 +44,7 @@ public class OrchestratorTestUtil {
         class SimpleExitCriteriaModel extends ExitCriteriaModel {
 
         }
+
         return new SimpleExitCriteriaModel();
     }
 
@@ -73,6 +74,7 @@ public class OrchestratorTestUtil {
                 return containerBootstrap.call();
             }
         }
+
         return new TestContainerBootstrapRunner(orchestratorBootstrap, exitCriteria, exitCriteriaModel, mdcReplica);
     }
 
@@ -84,6 +86,7 @@ public class OrchestratorTestUtil {
                 return containerBootstrap().call();
             }
         }
+
         return new TestOrchestratorBootstrap();
     }
 
@@ -96,6 +99,7 @@ public class OrchestratorTestUtil {
                 return executorService.submit(callable);
             }
         }
+
         return new TestParallelOrchestratorComponentRunner();
     }
 
@@ -112,12 +116,14 @@ public class OrchestratorTestUtil {
                 return "exit.";
             }
         }
+
         return new TestExitCriteria();
     }
 
     public static Node node(Long id) {
         Set<String> strings = new HashSet<>();
         strings.add("df" + id);
+
         return new Node("10.0.0." + id, "11.0.0." + id, id.toString(), strings);
     }
 }

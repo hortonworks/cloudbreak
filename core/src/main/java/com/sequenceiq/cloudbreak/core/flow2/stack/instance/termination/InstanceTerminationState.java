@@ -20,7 +20,6 @@ enum InstanceTerminationState implements FlowState {
         this.action = action;
     }
 
-
     @Override
     public Class<? extends AbstractAction> action() {
         return action;

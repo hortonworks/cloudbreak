@@ -9,6 +9,11 @@
         <!-- Format -->
         <module name="EmptyForIteratorPad" />
         <module name="EmptyForInitializerPad" />
+        <module name="EmptyLineSeparator">
+            <property name="allowMultipleEmptyLines" value="false" />
+            <!--<property name="tokens" value="PACKAGE_DEF, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, VARIABLE_DEF" />-->
+            <property name="tokens" value="PACKAGE_DEF, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, INSTANCE_INIT, METHOD_DEF, CTOR_DEF" />
+        </module>
         <module name="MethodParamPad" />
         <module name="NoWhitespaceAfter">
             <property name="tokens" value="BNOT,DEC,DOT,INC,LNOT,UNARY_MINUS,UNARY_PLUS" />

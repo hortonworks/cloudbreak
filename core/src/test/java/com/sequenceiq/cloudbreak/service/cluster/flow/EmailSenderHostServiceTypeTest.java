@@ -145,6 +145,7 @@ public class EmailSenderHostServiceTypeTest {
         Assert.assertEquals(subject, messages[0].getSubject());
         Assert.assertThat(String.valueOf(messages[0].getContent()), Matchers.containsString("Something went terribly wrong"));
     }
+
     @Ignore
     @Test
     public void testSendProvisioningSuccessEmailSMTPS() throws IOException, MessagingException {

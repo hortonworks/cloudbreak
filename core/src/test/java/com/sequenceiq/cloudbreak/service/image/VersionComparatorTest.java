@@ -17,7 +17,6 @@ public class VersionComparatorTest {
         underTest = new VersionComparator();
     }
 
-
     @Test
     public void testEquals() throws IOException {
         Assert.assertEquals(0, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-770")));
@@ -30,7 +29,6 @@ public class VersionComparatorTest {
         Assert.assertEquals(1, underTest.compare(new VersionString("2.5.0.0-1000"), new VersionString("2.4.0.0-1000")));
         Assert.assertEquals(1, underTest.compare(new VersionString("2.15.0.0-1000"), new VersionString("2.5.0.0-1000")));
     }
-
 
     @Test
     public void testGreaterNonEqualLength() throws IOException {

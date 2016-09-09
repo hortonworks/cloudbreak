@@ -33,7 +33,6 @@ public class ClusterTemplateService {
     @Inject
     private ClusterRepository clusterRepository;
 
-
     public Set<ClusterTemplate> retrievePrivateClusterTemplates(CbUser user) {
         return clusterTemplateRepository.findForUser(user.getUserId());
     }

@@ -62,7 +62,6 @@ public class RdsConfigCommands implements BaseCommands {
         }
     }
 
-
     @Override
     @CliAvailabilityIndicator(value = { "rdsconfig select --id", "rdsconfig select --name" })
     public boolean selectAvailable() {
@@ -95,7 +94,6 @@ public class RdsConfigCommands implements BaseCommands {
     public String selectById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
         return select(id, null);
     }
-
 
     @CliCommand(value = "rdsconfig select --name", help = "Selects the RDS config by its name")
     @Override

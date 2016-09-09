@@ -31,7 +31,6 @@ public class CertificateTrustManager {
 
     }
 
-
     public static SSLContext sslContext() {
         // Create a trust manager that does not validate certificate chains
         TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {

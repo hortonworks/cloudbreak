@@ -59,7 +59,6 @@ public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterT
         assertAllFieldsNotNull(result);
     }
 
-
     @Override
     public HostGroup createSource() {
         return TestUtil.hostGroup();

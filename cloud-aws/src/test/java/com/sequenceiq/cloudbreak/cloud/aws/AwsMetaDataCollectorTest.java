@@ -96,7 +96,6 @@ public class AwsMetaDataCollectorTest {
         Mockito.reset(amazonEC2Client);
     }
 
-
     @Test
     public void collectMigratedExistingOneGroup() {
         List<CloudInstance> vms = new ArrayList<>();
@@ -183,7 +182,6 @@ public class AwsMetaDataCollectorTest {
         Assert.assertEquals("publicIp", statuses.get(0).getMetaData().getPublicIp());
     }
 
-
     @Test
     public void collectNewOneGroup() {
         List<CloudInstance> vms = new ArrayList<>();
@@ -224,7 +222,6 @@ public class AwsMetaDataCollectorTest {
         Assert.assertEquals("privateIp", statuses.get(0).getMetaData().getPrivateIp());
         Assert.assertEquals("publicIp", statuses.get(0).getMetaData().getPublicIp());
     }
-
 
     @Test
     public void collectNewAndExistingOneGroup() {
@@ -326,7 +323,6 @@ public class AwsMetaDataCollectorTest {
         Assert.assertEquals("publicIp2", statuses.get(0).getMetaData().getPublicIp());
     }
 
-
     private Reservation getReservation(Instance... instance) {
         List<Instance> instances = Arrays.asList(instance);
         Reservation r = new Reservation();
@@ -340,6 +336,4 @@ public class AwsMetaDataCollectorTest {
         CloudCredential cc = new CloudCredential(1L, null, null, null);
         return new AuthenticatedContext(cloudContext, cc);
     }
-
-
 }

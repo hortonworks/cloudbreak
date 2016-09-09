@@ -134,7 +134,6 @@ public class MockStackCreationWithSwarmSuccessTest extends AbstractMockIntegrati
         get(CONSUL_API_ROOT + "/agent/members", "application/json", new ConsulMemberResponse(numberOfServers), gson()::toJson);
     }
 
-
     private int getNumberOfServers(List<InstanceGroup> instanceGroups) {
         int numberOfServers = 0;
         for (InstanceGroup instanceGroup : instanceGroups) {

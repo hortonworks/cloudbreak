@@ -34,7 +34,6 @@ public class Container {
     @ManyToOne
     private Cluster cluster;
 
-
     public Long getId() {
         return id;
     }

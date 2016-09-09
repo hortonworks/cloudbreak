@@ -84,7 +84,6 @@ public class StackUpscaleService {
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
 
-
     public void startAddInstances(Stack stack, Integer scalingAdjustment) {
         String statusReason = format("Adding %s new instance(s) to the infrastructure.", scalingAdjustment);
         stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, statusReason);

@@ -27,7 +27,6 @@ public class Notification {
     public Notification() {
     }
 
-
     public String getEventType() {
         return eventType;
     }

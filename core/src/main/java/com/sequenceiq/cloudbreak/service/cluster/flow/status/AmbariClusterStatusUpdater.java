@@ -57,7 +57,6 @@ public class AmbariClusterStatusUpdater {
         }
     }
 
-
     public void updateClusterStatus(Stack stack, Cluster cluster) throws CloudbreakSecuritySetupException {
         if (isStackOrClusterStatusInvalid(stack, cluster)) {
             String msg = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_COULD_NOT_SYNC.code(), Arrays.asList(stack.getStatus(),

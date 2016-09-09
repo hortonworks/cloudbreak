@@ -23,7 +23,6 @@ public class AmbariDatabaseDetailsJsonToAmbariDatabaseConverter extends Abstract
     @Value("${cb.ambari.database.password}")
     private String password;
 
-
     @Override
     public AmbariDatabase convert(AmbariDatabaseDetailsJson source) {
         AmbariDatabase ambariDatabase;

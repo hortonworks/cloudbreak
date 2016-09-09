@@ -84,7 +84,6 @@ public class StackDecorator implements Decorator<Stack> {
         }
     }
 
-
     private void validate(Stack stack) {
         if (stack.getGatewayInstanceGroup() == null) {
             throw new BadRequestException("Gateway instance group not configured");

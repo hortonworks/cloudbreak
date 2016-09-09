@@ -40,8 +40,6 @@ public class PlatformVariantsToJsonConverterTest extends AbstractEntityConverter
         assertAllFieldsNotNull(result);
     }
 
-
-
     @Override
     public PlatformVariants createSource() {
         Map<Platform, Collection<Variant>> platformToVariants = Maps.newHashMap();

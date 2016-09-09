@@ -126,7 +126,6 @@ public class DefaultStackHostServiceTypeTest {
         verify(flowManager, times(1)).triggerStackStop(anyObject());
     }
 
-
     @Test(expected = BadRequestException.class)
     public void updateStatusTestStopWhenClusterAndStackAvailableThenBadRequestExceptionDropping() {
         Stack stack = stack(AVAILABLE, AVAILABLE);

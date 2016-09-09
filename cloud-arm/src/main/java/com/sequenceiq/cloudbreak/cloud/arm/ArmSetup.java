@@ -158,7 +158,6 @@ public class ArmSetup implements Setup {
         }
     }
 
-
     private boolean resourceGroupExist(AzureRMClient client, String groupName) {
         try {
             List<Map<String, Object>> resourceGroups = client.getResourceGroups();

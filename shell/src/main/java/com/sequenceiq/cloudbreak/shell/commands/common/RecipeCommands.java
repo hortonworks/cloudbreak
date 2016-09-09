@@ -33,7 +33,6 @@ public class RecipeCommands implements BaseCommands {
         this.shellContext = shellContext;
     }
 
-
     @CliAvailabilityIndicator(value = "recipe list")
     @Override
     public boolean listAvailable() {

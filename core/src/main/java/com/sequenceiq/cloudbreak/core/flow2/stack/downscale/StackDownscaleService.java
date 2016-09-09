@@ -31,7 +31,6 @@ public class StackDownscaleService {
     @Inject
     private StackScalingService stackScalingService;
 
-
     public void startStackDownscale(StackScalingFlowContext context, Integer adjustment) {
         LOGGER.debug("Downscaling of stack ", context.getStack().getId());
         MDCBuilder.buildMdcContext(context.getStack());

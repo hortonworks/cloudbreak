@@ -78,7 +78,6 @@ public class OpenStackResourceConnector implements ResourceConnector {
         return resources;
     }
 
-
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         List<CloudResourceStatus> result = new ArrayList<>();

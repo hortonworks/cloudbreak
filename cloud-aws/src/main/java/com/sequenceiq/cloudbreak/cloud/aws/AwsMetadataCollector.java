@@ -147,7 +147,6 @@ public class AwsMetadataCollector implements MetadataCollector {
         return null;
     }
 
-
     private void addTag(AmazonEC2Client amazonEC2Client, CloudInstance cloudInstance, Instance instance) {
         String tagName = awsClient.getCbName(cloudInstance.getTemplate().getGroupName(), cloudInstance.getTemplate().getPrivateId());
         Tag t = new Tag();
@@ -159,7 +158,6 @@ public class AwsMetadataCollector implements MetadataCollector {
         amazonEC2Client.createTags(ctr);
     }
 
-
     private ListMultimap<String, CloudInstance> groupByInstanceGroup(List<CloudInstance> vms) {
         ListMultimap<String, CloudInstance> groupByInstanceGroup = ArrayListMultimap.create();
         for (CloudInstance vm : vms) {
@@ -168,7 +166,6 @@ public class AwsMetadataCollector implements MetadataCollector {
         }
         return groupByInstanceGroup;
     }
-
 
     private Map<String, CloudInstance> mapByInstanceId(List<CloudInstance> vms) {
         Map<String, CloudInstance> groupByInstanceId = Maps.newHashMap();
@@ -180,7 +177,6 @@ public class AwsMetadataCollector implements MetadataCollector {
         }
         return groupByInstanceId;
     }
-
 
     private Queue<CloudInstance> untrackedInstances(List<CloudInstance> vms) {
         Queue<CloudInstance> cloudInstances = Lists.newLinkedList();

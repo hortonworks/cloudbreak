@@ -10,6 +10,7 @@ import org.apache.commons.codec.binary.Base64;
 public class PluginValidator implements ConstraintValidator<ValidPlugin, Set<String>> {
 
     private static final String URL_PATTERN = "^(consul|base64)://.*";
+
     private static final String SCRIPT_PATTERN = "^(recipe-pre-install|recipe-post-install):.*";
 
     @Override

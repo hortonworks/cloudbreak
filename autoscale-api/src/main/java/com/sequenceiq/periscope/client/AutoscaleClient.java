@@ -181,7 +181,6 @@ public class AutoscaleClient {
             return this;
         }
 
-
         public AutoscaleClient build() {
             ConfigKey configKey = new ConfigKey(secure, debug);
             if (secret != null) {

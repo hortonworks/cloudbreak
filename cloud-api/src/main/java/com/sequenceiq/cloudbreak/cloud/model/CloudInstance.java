@@ -24,7 +24,6 @@ public class CloudInstance extends DynamicModel {
         return instanceId;
     }
 
-
     public InstanceTemplate getTemplate() {
         return template;
     }

@@ -184,7 +184,6 @@ public class RemoteUserDetailsService implements UserDetailsService {
                 && blueprints.isEmpty() && networks.isEmpty());
     }
 
-
     private String getAuthorizationHeader(String clientId, String clientSecret) {
         String creds = String.format("%s:%s", clientId, clientSecret);
         try {

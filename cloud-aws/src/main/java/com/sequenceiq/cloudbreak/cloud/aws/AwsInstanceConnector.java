@@ -96,7 +96,6 @@ public class AwsInstanceConnector implements InstanceConnector {
         return statuses;
     }
 
-
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();

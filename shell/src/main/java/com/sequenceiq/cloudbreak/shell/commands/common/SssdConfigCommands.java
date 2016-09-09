@@ -183,7 +183,6 @@ public class SssdConfigCommands implements BaseCommands {
         }
     }
 
-
     @CliCommand(value = "sssdconfig show --id", help = "Show the config by its id")
     @Override
     public String showById(@CliOption(key = "", mandatory = true) Long id) throws Exception {

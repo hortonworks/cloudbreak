@@ -72,7 +72,6 @@ public class SaltConnector implements Closeable {
         return responses;
     }
 
-
     public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
         Form form = new Form();
         form = addAuth(form)

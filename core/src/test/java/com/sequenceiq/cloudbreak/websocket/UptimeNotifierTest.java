@@ -42,7 +42,6 @@ public class UptimeNotifierTest {
     @Mock
     private NotificationSender notificationSender;
 
-
     @Test
     public void notificationSendingWhenEverythingWorkFine() {
         doNothing().when(notificationSender).send(any(Notification.class));

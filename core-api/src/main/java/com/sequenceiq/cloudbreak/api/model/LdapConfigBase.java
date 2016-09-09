@@ -57,7 +57,6 @@ public class LdapConfigBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.PRINCIPAL_REGEX)
     private String principalRegex;
 
-
     public String getName() {
         return name;
     }

@@ -18,7 +18,6 @@ public class AmbariRepoDetailsJsonToAmbariRepoConverter extends AbstractConversi
     @Value("${cb.ambari.repo.gpgkey}")
     private String gpgKeyUrl;
 
-
     @Override
     public AmbariRepo convert(AmbariRepoDetailsJson source) {
         AmbariRepo ambariRepo;

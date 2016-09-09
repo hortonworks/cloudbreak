@@ -1,4 +1,5 @@
 package com.sequenceiq.cloudbreak.common.type;
+
 public enum ResourceType {
     // AWS
     CLOUDFORMATION_STACK,
