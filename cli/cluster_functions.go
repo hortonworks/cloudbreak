@@ -112,7 +112,7 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	}
 
 	if blueprint != nil {
-		c.ClusterType = getBlueprintName(blueprint)
+		c.ClusterType = getFancyBlueprintName(blueprint)
 	}
 
 	if network != nil && network.Parameters["internetGatewayId"] == nil {

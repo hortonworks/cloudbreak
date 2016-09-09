@@ -19,8 +19,9 @@ func init() {
 	BlueprintMap["hdp-edw-analytics"] = "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
 	BlueprintMap["hdp-data-science"] = "Data Science: Apache Spark 1.6, Zeppelin"
 	BlueprintMap["hdp-etl-edw-tp"] = "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0"
-	BlueprintMap["hdp25-etl-edw-spark2"] = "EDW-ETL: Apache Spark 2.0-preview"
-	BlueprintMap["hdp-etl-edw-spark2"] = "EDW-ETL: Apache Spark 2.0-preview"
+	BlueprintMap["hdp-etl-edw-spark2"] = "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0"
+
+	BlueprintMap["EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0"] = "EDW-ETL: Apache Spark 2.0-preview"
 }
 
 type Blueprint struct {
@@ -46,7 +47,7 @@ func ListBlueprints(c *cli.Context) error {
 	for _, blueprint := range respBlueprints.Payload {
 		// this is a workaround, needs to be hidden, by not storing them as public
 		if !strings.HasPrefix(blueprint.Name, "b") {
-			row := &Blueprint{ClusterType: getBlueprintName(blueprint), HDPVersion: blueprint.AmbariBlueprint.Blueprint.StackVersion}
+			row := &Blueprint{ClusterType: getFancyBlueprintName(blueprint), HDPVersion: blueprint.AmbariBlueprint.Blueprint.StackVersion}
 			tableRows = append(tableRows, row)
 		}
 	}
@@ -71,7 +72,7 @@ func (c *Cloudbreak) GetBlueprintId(name string) int64 {
 	return id64
 }
 
-func getBlueprintName(blueprint *models.BlueprintResponse) string {
+func getFancyBlueprintName(blueprint *models.BlueprintResponse) string {
 	var name string
 	ambariBpName := *blueprint.AmbariBlueprint.Blueprint.Name
 	if len(ambariBpName) > 0 {
@@ -83,6 +84,14 @@ func getBlueprintName(blueprint *models.BlueprintResponse) string {
 		}
 	} else {
 		name = blueprint.Name
+	}
+	return name
+}
+
+func getRealBlueprintName(name string) string {
+	realName := BlueprintMap[name]
+	if len(realName) > 0 {
+		return realName
 	}
 	return name
 }

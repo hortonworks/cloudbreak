@@ -153,7 +153,7 @@ func CreateCluster(c *cli.Context) error {
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
-	blueprintId := oAuth2Client.GetBlueprintId(skeleton.ClusterType)
+	blueprintId := oAuth2Client.GetBlueprintId(getRealBlueprintName(skeleton.ClusterType))
 
 	var wg sync.WaitGroup
 	wg.Add(4)
