@@ -76,20 +76,20 @@
            "defaultValue": "${subnet1Prefix}"
         },
         </#if>
-        "sshIPConfigName": {
-            "type": "string",
-            "defaultValue": "${stackname}ipcn"
-        },
         <#list groups?keys as instanceGroup>
         <#list groups[instanceGroup] as instance>
         <#if instanceGroup == "GATEWAY">
         "gatewaystaticipname": {
             "type": "string",
             "defaultValue": "${stackname}${instance.instanceId}"
-        }
+        },
         </#if>
         </#list>
         </#list>
+        "sshIPConfigName": {
+            "type": "string",
+            "defaultValue": "${stackname}ipcn"
+        }
     },
   	"variables" : {
       "userImageName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userImageStorageContainerName'),'/',parameters('userImageVhdName'))]",
@@ -176,7 +176,7 @@
                        }
                    }<#if (port_index + 1) != securities[group]?size>,</#if>
                    </#list>
-                   ],
+                   ]
 
                }
              },

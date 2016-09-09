@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,15 +17,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.mockito.Mockito.when;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.IsNot.not;
+import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
@@ -44,8 +45,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-
-import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import freemarker.template.Configuration;
 
@@ -77,6 +76,7 @@ public class ArmTemplateBuilderTest {
     private CloudStack cloudStack;
     private ArmStorageView armStorageView;
     private ArmStackView armStackView;
+    private Gson gson = new Gson();
 
     @Before
     public void setUp() throws Exception {
@@ -125,6 +125,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Dynamic\""));
     }
 
@@ -144,6 +145,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Static\""));
     }
 
@@ -163,6 +165,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Static\""));
     }
 
@@ -182,6 +185,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Dynamic\""));
     }
 
@@ -202,6 +206,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Static\""));
         assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Dynamic\""));
     }
@@ -223,6 +228,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, not(containsString("resourceGroupName")));
     }
 
@@ -243,6 +249,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, not(containsString("existingVNETName")));
     }
 
@@ -263,6 +270,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, not(containsString("existingSubnetName")));
     }
 
@@ -283,6 +291,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, containsString("virtualNetworkNamePrefix"));
     }
 
@@ -303,6 +312,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, containsString("subnet1Prefix"));
     }
 
@@ -323,6 +333,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '0')]"));
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '1')]"));
     }
@@ -344,6 +355,7 @@ public class ArmTemplateBuilderTest {
         when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
+        gson.fromJson(templateString, Map.class);
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '0')]"));
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '1')]"));
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '2')]"));
