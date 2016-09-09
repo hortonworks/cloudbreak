@@ -72,6 +72,9 @@
       "name": "worker",
       "configurations": [],
       "components": [
+        { "name": "HIVE_CLIENT" },
+        { "name": "TEZ_CLIENT" },
+        { "name": "SPARK_CLIENT" },
         { "name": "DATANODE" },
         { "name": "METRICS_MONITOR" },
         { "name": "NODEMANAGER" }
