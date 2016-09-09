@@ -28,11 +28,13 @@ create-image:
 	@echo "\n\033[1;96m--- Copy ../core/build/libs/cloudbreak.jar to test-image directory\033[0m\n"
 	@cp ../core/build/libs/cloudbreak.jar test-image
 	@echo "\n\033[1;96m--- Build dev cloudbreak test image\033[0m\n"
-	@docker build -t sequenceiq/cloudbreak:dev test-image
+	@docker build -t hortonworks/cloudbreak:dev test-image
 
 create-cloudbreak-context:
 	@echo "\n\033[1;96m--- Create cloudbreak context\033[0m\n"
 	@cp $(INTEGCB_LOCATION)/Profile_template $(INTEGCB_LOCATION)/Profile
+	@cp docker-compose_template.yml docker-compose.yml
+	@sed -i.bak "s/dns:/dns: $(shell docker run --label cbreak.sidekick=true alpine sh -c 'ip ro | grep default | cut -d" " -f 3')/g" docker-compose.yml
 	@./fill_public_ip.sh
 	@cd $(INTEGCB_LOCATION); ./cbd delete;
 	@cd $(INTEGCB_LOCATION); ./cbd regenerate;
