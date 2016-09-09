@@ -125,8 +125,9 @@ public class TlsSecurityService {
             File file = new File(path);
             if (!file.exists()) {
                 if (content != null) {
-                    FileOutputStream output = new FileOutputStream(file);
-                    IOUtils.write(Base64.decodeBase64(content), output);
+                    try (FileOutputStream output = new FileOutputStream(file)) {
+                        IOUtils.write(Base64.decodeBase64(content), output);
+                    }
                 }
             }
         } catch (IOException | SecurityException se) {
