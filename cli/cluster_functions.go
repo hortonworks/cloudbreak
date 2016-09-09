@@ -130,10 +130,10 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	if securityMap != nil {
 		if stack.InstanceGroups != nil {
 			for _, v := range stack.InstanceGroups {
-				if v.Group == "master" {
+				if v.Group == MASTER {
 					c.Master.fill(v, templateMap[v.Group])
 				}
-				if v.Group == "worker" {
+				if v.Group == WORKER {
 					c.Worker.fill(v, templateMap[v.Group])
 				}
 			}

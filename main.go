@@ -133,6 +133,13 @@ func main() {
 			Action: hdc.ListClusters,
 		},
 		{
+			Name:   "resize-cluster",
+			Usage:  "change the number of worker nodes of an existing cluster",
+			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBScalingAdjustment, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
+			Before: ConfigRead,
+			Action: hdc.ResizeCluster,
+		},
+		{
 			Name:   "terminate-cluster",
 			Usage:  "terminates a cluster",
 			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBWait, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},

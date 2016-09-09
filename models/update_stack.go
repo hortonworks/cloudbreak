@@ -22,11 +22,12 @@ type UpdateStack struct {
 	 */
 	InstanceGroupAdjustment *InstanceGroupAdjustment `json:"instanceGroupAdjustment,omitempty"`
 
+	// TODO must be a pointer !
 	/* status
 
 	Required: true
 	*/
-	Status string `json:"status"`
+	Status *string `json:"status"`
 }
 
 // Validate validates this update stack
@@ -64,11 +65,11 @@ func (m *UpdateStack) validateStatusEnum(path, location string, value string) er
 
 func (m *UpdateStack) validateStatus(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("status", "body", string(m.Status)); err != nil {
+	if err := validate.RequiredString("status", "body", string(*m.Status)); err != nil {
 		return err
 	}
 
-	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
+	if err := m.validateStatusEnum("status", "body", *m.Status); err != nil {
 		return err
 	}
 

@@ -1,5 +1,12 @@
 package cli
 
+const (
+	MASTER   = "master"
+	WORKER   = "worker"
+	MYSQL    = "MYSQL"
+	POSTGRES = "POSTGRES"
+)
+
 var ClusterSkeletonHeader []string = []string{"Cluster Name", "HDP Version", "Cluster Type", "Master", "Worker",
 	"SSH Key Name", "Remote Access", "WebAccess", "User", "Status", "Status Reason"}
 

@@ -40,4 +40,8 @@ var (
 		Usage:  "supported formats: json, yaml, table (default: \"json\")",
 		EnvVar: "CB_OUT_FORMAT",
 	}
+	FlCBScalingAdjustment = cli.StringFlag{
+		Name:  "scaling-adjustment",
+		Usage: "change the number of worker nodes, positive number for add more nodes, e.g: 1, negative for take down nodes, e.g: -1",
+	}
 )

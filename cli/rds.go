@@ -7,11 +7,6 @@ import (
 	"time"
 )
 
-const (
-	MYSQL    = "MYSQL"
-	POSTGRES = "POSTGRES"
-)
-
 func (c *Cloudbreak) GetRDSConfigByName(name string) models.RDSConfigResponse {
 	defer timeTrack(time.Now(), "get rds config by name")
 	log.Infof("[GetRDSConfigByName] get rds config by name: %s", name)

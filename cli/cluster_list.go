@@ -102,7 +102,7 @@ func ListClusterNodes(c *cli.Context) error {
 				continue
 			}
 			nodeType := *data.InstanceGroup
-			if nodeType == "master" {
+			if nodeType == MASTER {
 				nodeType = "master - ambari server"
 			}
 			row := &ClusterNode{

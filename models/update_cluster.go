@@ -39,11 +39,12 @@ type UpdateCluster struct {
 	*/
 	Hostgroups []*HostGroup `json:"hostgroups,omitempty"`
 
+	// TODO must be a pointer !
 	/* status
 
 	Required: true
 	*/
-	Status string `json:"status"`
+	Status *string `json:"status"`
 
 	/* user name password json
 
@@ -142,11 +143,11 @@ func (m *UpdateCluster) validateStatusEnum(path, location string, value string) 
 
 func (m *UpdateCluster) validateStatus(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("status", "body", string(m.Status)); err != nil {
+	if err := validate.RequiredString("status", "body", string(*m.Status)); err != nil {
 		return err
 	}
 
-	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
+	if err := m.validateStatusEnum("status", "body", *m.Status); err != nil {
 		return err
 	}
 

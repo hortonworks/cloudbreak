@@ -15,6 +15,17 @@ import (
 	"strconv"
 )
 
+func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
+	defer timeTrack(time.Now(), "get cluster by name")
+
+	stack, err := c.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: name})
+	if err != nil {
+		log.Errorf("[GetClusterByName] %s", err)
+		newExitReturnError()
+	}
+	return stack.Payload
+}
+
 func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeleton, error) {
 	defer timeTrack(time.Now(), "fetch cluster")
 	var wg sync.WaitGroup
@@ -98,12 +109,8 @@ func DescribeCluster(c *cli.Context) error {
 		newExitReturnError()
 	}
 
-	respStack, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
-	if err != nil {
-		log.Error(err)
-		newExitReturnError()
-	}
-	clusterSkeleton, _ := oAuth2Client.FetchCluster(respStack.Payload, false)
+	stack := oAuth2Client.GetClusterByName(clusterName)
+	clusterSkeleton, _ := oAuth2Client.FetchCluster(stack, false)
 	clusterSkeleton.ClusterAndAmbariPassword = ""
 
 	output := Output{Format: c.String(FlCBOutput.Name)}
@@ -178,14 +185,14 @@ func CreateCluster(c *cli.Context) error {
 
 		instanceGroups := []*models.InstanceGroup{
 			{
-				Group:           "master",
+				Group:           MASTER,
 				TemplateID:      <-templateIds,
 				NodeCount:       1,
 				Type:            &masterType,
 				SecurityGroupID: secGroupId,
 			},
 			{
-				Group:           "worker",
+				Group:           WORKER,
 				TemplateID:      <-templateIds,
 				NodeCount:       skeleton.Worker.InstanceCount,
 				Type:            &workerType,
@@ -236,8 +243,8 @@ func CreateCluster(c *cli.Context) error {
 	// create cluster
 
 	func() {
-		master := "master"
-		worker := "worker"
+		master := MASTER
+		worker := WORKER
 
 		masterConstraint := models.Constraint{
 			InstanceGroupName: &master,
@@ -316,6 +323,58 @@ func CreateCluster(c *cli.Context) error {
 func ValidateCreateClusterSkeleton(c *cli.Context) error {
 	skeleton := assembleClusterSkeleton(c)
 	return skeleton.Validate()
+}
+
+func ResizeCluster(c *cli.Context) error {
+	defer timeTrack(time.Now(), "resize cluster")
+
+	clusterName := c.String(FlCBClusterName.Name)
+	if len(clusterName) == 0 {
+		log.Error("[ResizeCluster] There are missing parameters.\n")
+		cli.ShowSubcommandHelp(c)
+		newExitReturnError()
+	}
+
+	adjustment := int32(c.Int(FlCBScalingAdjustment.Name))
+	if adjustment == 0 {
+		log.Errorf("[ResizeCluster] The %s cannot be 0.\n", FlCBScalingAdjustment.Name)
+		cli.ShowSubcommandHelp(c)
+		newExitReturnError()
+	}
+
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	stack := oAuth2Client.GetClusterByName(clusterName)
+
+	if adjustment > 0 {
+		withClusterScale := true
+		update := &models.UpdateStack{
+			InstanceGroupAdjustment: &models.InstanceGroupAdjustment{
+				InstanceGroup:     WORKER,
+				ScalingAdjustment: adjustment,
+				WithClusterEvent:  &withClusterScale,
+			},
+			Status: nil,
+		}
+		if err := oAuth2Client.Cloudbreak.Stacks.PutStacksID(&stacks.PutStacksIDParams{ID: *stack.ID, Body: update}); err != nil {
+			log.Errorf("[ResizeCluster] %s", err)
+			newExitReturnError()
+		}
+	} else {
+		withStackScale := true
+		update := &models.UpdateCluster{
+			HostGroupAdjustment: &models.HostGroupAdjustment{
+				ScalingAdjustment: adjustment,
+				HostGroup:         WORKER,
+				WithStackUpdate:   &withStackScale,
+			},
+		}
+		if err := oAuth2Client.Cloudbreak.Cluster.PutStacksIDCluster(&cluster.PutStacksIDClusterParams{ID: *stack.ID, Body: update}); err != nil {
+			log.Errorf("[ResizeCluster] %s", err)
+			newExitReturnError()
+		}
+	}
+
+	return nil
 }
 
 func GenerateCreateClusterSkeleton(c *cli.Context) error {
