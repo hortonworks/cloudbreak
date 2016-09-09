@@ -50,7 +50,6 @@ public final class GcpStackUtil {
     private static final String NETWORK_ID = "networkId";
     private static final String SUBNET_ID = "subnetId";
 
-
     private GcpStackUtil() {
     }
 

@@ -7,7 +7,6 @@ public class ContainerName {
     private String namePrefix;
     private String name;
 
-
     public ContainerName(String name, String namePrefix) {
         this.namePrefix = namePrefix;
         this.name = name;

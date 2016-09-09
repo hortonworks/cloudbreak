@@ -39,7 +39,6 @@ public class CloudMetaDataStatuses extends ITResponse {
         this.from = from;
     }
 
-
     private List<CloudVmMetaDataStatus> createCloudVmMetaDataStatuses(List<CloudInstance> cloudInstances) {
         List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
         int numberOfServers = cloudInstances.size();

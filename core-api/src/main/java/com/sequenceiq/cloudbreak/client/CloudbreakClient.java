@@ -52,7 +52,6 @@ public class CloudbreakClient {
     private final IdentityClient identityClient;
     private final String cloudbreakAddress;
 
-
     private String user;
     private String password;
 
@@ -296,7 +295,6 @@ public class CloudbreakClient {
             this.secure = secure;
             return this;
         }
-
 
         public CloudbreakClient build() {
             ConfigKey configKey = new ConfigKey(secure, debug);

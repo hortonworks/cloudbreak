@@ -181,7 +181,6 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete LDAP config by id";
     }
 
-
     public static class UtilityOpDescription {
         public static final String TEST_CONNECTION = "tests a RDS connection";
         public static final String TEST_DATABASE = "tests a database connection parameters";

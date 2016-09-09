@@ -23,11 +23,9 @@ public class BootstrapManTest {
 
     private static final int PARALLELISM = 1;
 
-
     private static final int CONSUL_SERVER_SIZE = 1;
 
     private static final int LOOP_SIZE = 10;
-
 
     private Set<Node> nodes = new HashSet<>();
 
@@ -98,7 +96,6 @@ public class BootstrapManTest {
     private static class NoExitModel extends ExitCriteriaModel {
 
     }
-
 
     private static class SingleContainerRunner implements ParallelOrchestratorComponentRunner {
 

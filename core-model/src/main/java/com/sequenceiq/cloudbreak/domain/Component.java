@@ -47,7 +47,6 @@ public class Component {
     @ManyToOne
     private Stack stack;
 
-
     public Component() {
 
     }

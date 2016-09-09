@@ -109,6 +109,5 @@ public abstract class AbstractOpenStackResourceBuilder implements CloudPlatformA
         return OpenStackConstants.OpenStackVariant.NATIVE.variant();
     }
 
-
     protected abstract boolean checkStatus(OpenStackContext context, AuthenticatedContext auth, CloudResource resource);
 }

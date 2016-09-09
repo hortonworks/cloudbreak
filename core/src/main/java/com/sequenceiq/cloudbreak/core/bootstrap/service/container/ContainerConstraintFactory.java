@@ -78,7 +78,6 @@ public class ContainerConstraintFactory {
                 .build();
     }
 
-
     public ContainerConstraint getAmbariServerDbConstraint(String gatewayHostname, String clusterName) {
         ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
                 .withName(createContainerInstanceName(AMBARI_DB.getName(), clusterName))

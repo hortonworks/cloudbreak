@@ -174,7 +174,6 @@ public class MarathonCommands implements CommandMarker {
         }
     }
 
-
     @CliCommand(value = "marathon constraint create", help = "Create a new marathon constraint")
     public String createMarathonTemplate(
             @CliOption(key = "name", mandatory = true, help = "Name of the marathon constraint") String name,

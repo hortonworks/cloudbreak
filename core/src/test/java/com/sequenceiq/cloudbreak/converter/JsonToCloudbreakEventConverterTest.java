@@ -24,7 +24,6 @@ public class JsonToCloudbreakEventConverterTest extends AbstractJsonConverterTes
         assertAllFieldsNotNull(result);
     }
 
-
     @Override
     public Class<CloudbreakEventsJson> getRequestClass() {
         return CloudbreakEventsJson.class;

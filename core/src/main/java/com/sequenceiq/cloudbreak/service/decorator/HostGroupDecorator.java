@@ -66,7 +66,6 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
     @Inject
     private ClusterService clusterService;
 
-
     @Override
     public HostGroup decorate(HostGroup subject, Object... data) {
         if (null == data || data.length != DecorationData.values().length) {

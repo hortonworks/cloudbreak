@@ -44,7 +44,6 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackInstanceBuilder.class);
 
-
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource) throws Exception {
@@ -137,7 +136,6 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
         }
         return new CloudVmInstanceStatus(instance, InstanceStatus.FAILED, actionResponse.getFault());
     }
-
 
     @Override
     public ResourceType resourceType() {

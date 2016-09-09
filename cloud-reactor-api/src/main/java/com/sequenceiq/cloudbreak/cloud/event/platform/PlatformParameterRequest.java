@@ -6,7 +6,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class PlatformParameterRequest extends CloudPlatformRequest<PlatformParameterResult> {
 
-
     public PlatformParameterRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
         super(cloudContext, cloudCredential);
     }

@@ -13,7 +13,6 @@ public final class ClusterUtils {
     private ClusterUtils() {
     }
 
-
     public static int getTotalNodes(AmbariClient ambariClient) {
         return ambariClient.getClusterHosts().size();
     }

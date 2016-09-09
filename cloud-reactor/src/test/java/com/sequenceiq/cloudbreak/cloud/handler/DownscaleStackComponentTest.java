@@ -20,6 +20,7 @@ public class DownscaleStackComponentTest extends AbstractComponentTest<Downscale
         assertEquals(1, result.getDownscaledResources().size());
         assertNull(result.getErrorDetails());
     }
+
     @Override
     protected String getTopicName() {
         return "DOWNSCALESTACKREQUEST";

@@ -46,7 +46,6 @@ public class GcpResourceNameServiceTest {
         Assert.assertEquals("The resource name suffix is not the expected one!", "internal", resourceName.split("-")[1]);
     }
 
-
     @Test
     public void shouldGenerateFirewallInResourceNameWhenStackNameProvided() throws Exception {
         // GIVEN

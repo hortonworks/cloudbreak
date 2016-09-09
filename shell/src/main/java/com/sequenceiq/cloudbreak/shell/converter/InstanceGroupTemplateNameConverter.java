@@ -17,7 +17,6 @@ public class InstanceGroupTemplateNameConverter extends AbstractConverter<Instan
     public InstanceGroupTemplateNameConverter() {
     }
 
-
     @Override
     public boolean supports(Class<?> type, String s) {
         return InstanceGroupTemplateName.class.isAssignableFrom(type);

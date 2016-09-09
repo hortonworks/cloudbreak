@@ -34,7 +34,6 @@ public class BlueprintService {
     @Inject
     private ClusterRepository clusterRepository;
 
-
     public Set<Blueprint> retrievePrivateBlueprints(CbUser user) {
         return blueprintRepository.findForUser(user.getUserId());
     }

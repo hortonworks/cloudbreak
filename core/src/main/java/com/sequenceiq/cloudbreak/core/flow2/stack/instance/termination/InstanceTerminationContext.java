@@ -22,7 +22,6 @@ public class InstanceTerminationContext extends CommonContext {
     private final CloudInstance cloudInstance;
     private final InstanceMetaData instanceMetaData;
 
-
     public InstanceTerminationContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
             CloudStack cloudStack, List<CloudResource> cloudResources, CloudInstance cloudInstance, InstanceMetaData instanceMetaData) {
         super(flowId);

@@ -30,8 +30,6 @@ public class LdapConfigCommands implements BaseCommands {
 
     @CliCommand(value = "ldapconfig create", help = "Adds a new Ldap configuration")
     public String create(
-
-
             @CliOption(key = "name", mandatory = true, help = "Name of the config") String name,
             @CliOption(key = "description", help = "Description of the config") String description,
             @CliOption(key = "serverHost", mandatory = true, help = "Public host or IP address of LDAP server") String serverHost,
@@ -78,7 +76,6 @@ public class LdapConfigCommands implements BaseCommands {
         }
     }
 
-
     @Override
     @CliAvailabilityIndicator(value = { "ldapconfig select --id", "ldapconfig select --name" })
     public boolean selectAvailable() {
@@ -111,7 +108,6 @@ public class LdapConfigCommands implements BaseCommands {
     public String selectById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
         return select(id, null);
     }
-
 
     @CliCommand(value = "ldapconfig select --name", help = "Selects the Ldap config by its name")
     @Override

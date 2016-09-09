@@ -153,7 +153,6 @@ public class GcpInstanceResourceBuilderTest {
         assertFalse(instanceArg.getValue().getScheduling().getPreemptible());
     }
 
-
     @Test
     public void preemptibleParameterNotSetTest() throws Exception {
         // GIVEN

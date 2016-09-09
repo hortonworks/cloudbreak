@@ -9,7 +9,6 @@ public class CoreInstanceMetaData {
     private String instanceGroupName;
     private String hypervisor;
 
-
     public CoreInstanceMetaData(String instanceId, Long privateId, String privateIp, String publicIp, String instanceGroupName, String hypervisor) {
         this.instanceId = instanceId;
         this.privateId = privateId;

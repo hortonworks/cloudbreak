@@ -68,7 +68,6 @@ public class BlueprintLoaderServiceTest {
     @Mock
     private BlueprintUtils blueprintUtils;
 
-
     @Before
     public void setUp() throws IOException {
         when(conversionService.convert(any(BlueprintRequest.class), any(Class.class))).thenAnswer(new Answer<Blueprint>() {

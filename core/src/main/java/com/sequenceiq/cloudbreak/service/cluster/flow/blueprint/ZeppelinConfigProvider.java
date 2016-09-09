@@ -42,7 +42,6 @@ public class ZeppelinConfigProvider {
         return blueprintText;
     }
 
-
     private List<BlueprintConfigurationEntry> getConfigs(Stack stack) {
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         try {

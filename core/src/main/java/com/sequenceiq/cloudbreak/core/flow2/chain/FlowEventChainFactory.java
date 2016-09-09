@@ -7,5 +7,6 @@ import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 
 public interface FlowEventChainFactory<P extends Payload> {
     String initEvent();
+
     Queue<Selectable> createFlowTriggerEventQueue(P event);
 }

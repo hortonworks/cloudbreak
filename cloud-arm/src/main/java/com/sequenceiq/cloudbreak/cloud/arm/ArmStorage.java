@@ -145,7 +145,6 @@ public class ArmStorage {
         return armUtils.getResourceGroupName(cloudContext);
     }
 
-
     private boolean storageAccountExist(AzureRMClient client, String storageName) {
         try {
             List<Map<String, Object>> storageAccounts = client.getStorageAccounts();

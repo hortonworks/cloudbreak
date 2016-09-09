@@ -48,7 +48,6 @@ public class ArmUtils {
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
 
-
     public CloudResource getTemplateResource(List<CloudResource> resourceList) {
         for (CloudResource resource : resourceList) {
             if (resource.getType() == ResourceType.ARM_TEMPLATE) {
@@ -109,11 +108,9 @@ public class ArmUtils {
         return armResourceStatus;
     }
 
-
     public String getResourceGroupName(CloudContext cloudContext) {
         return getStackName(cloudContext);
     }
-
 
     public boolean isExistingNetwork(Network network) {
         return isNoneEmpty(getCustomNetworkId(network)) && isNoneEmpty(getCustomResourceGroupName(network)) && isNoneEmpty(getCustomSubnetId(network));

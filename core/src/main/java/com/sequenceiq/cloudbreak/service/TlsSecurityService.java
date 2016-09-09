@@ -229,7 +229,6 @@ public class TlsSecurityService {
         return readSecurityFile(stackId, "ca.pem");
     }
 
-
     public String readPrivateSshKey(Long stackId) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
         if (!checkSecurityFileExist(stackId, getPrivateSshKeyFileName(stackId))) {

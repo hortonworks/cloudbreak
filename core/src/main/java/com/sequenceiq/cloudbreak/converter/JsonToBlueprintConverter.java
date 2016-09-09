@@ -60,7 +60,6 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         return blueprint;
     }
 
-
     public Blueprint convert(String name, String blueprintText, boolean publicInAccount) {
         Blueprint blueprint = new Blueprint();
         blueprint.setName(name);
@@ -77,8 +76,6 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
 
         return blueprint;
     }
-
-
 
     private String readUrl(String url) throws IOException {
         if (!url.startsWith("http://") && !url.startsWith("https://")) {

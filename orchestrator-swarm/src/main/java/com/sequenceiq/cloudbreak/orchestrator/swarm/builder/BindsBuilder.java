@@ -42,7 +42,6 @@ public class BindsBuilder {
         return this;
     }
 
-
     public BindsBuilder add(Collection<String> paths) {
         for (String path : paths) {
             add(path);

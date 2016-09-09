@@ -18,7 +18,6 @@ public class ResourcePersisted {
         this.exception = exception;
     }
 
-
     public String getStatusReason() {
         return statusReason;
     }

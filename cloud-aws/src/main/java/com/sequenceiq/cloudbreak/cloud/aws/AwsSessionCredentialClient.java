@@ -48,7 +48,6 @@ public class AwsSessionCredentialClient {
                 result.getCredentials().getSessionToken());
     }
 
-
     private AWSSecurityTokenServiceClient awsSecurityTokenServiceClient() {
         if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable() || !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable()) {
             InstanceProfileCredentialsProvider instanceProfileCredentialsProvider = new InstanceProfileCredentialsProvider();

@@ -53,7 +53,6 @@ public class DockerClientUtilTest {
     @Mock
     private InspectContainerResponse.ContainerState containerState;
 
-
     @Before
     public void before() {
         reset(client);
@@ -115,7 +114,6 @@ public class DockerClientUtilTest {
         verify(client, times(1)).inspectContainerCmd(anyString());
         verify(client, times(1)).removeContainerCmd(anyString());
     }
-
 
     @Test
     public void startContainerWhenEverythingWorksFine() throws Exception {

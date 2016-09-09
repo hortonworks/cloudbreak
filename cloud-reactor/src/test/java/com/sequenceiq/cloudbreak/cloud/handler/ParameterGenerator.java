@@ -95,7 +95,6 @@ public class ParameterGenerator {
         return Lists.newArrayList();
     }
 
-
     public LaunchStackRequest createLaunchStackRequest() {
         return new LaunchStackRequest(createCloudContext(), createCloudCredential(), createCloudStack(), AdjustmentType.BEST_EFFORT, 0L);
     }

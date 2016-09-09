@@ -29,7 +29,6 @@ public class LdapConfigService {
     @Inject
     private ClusterRepository clusterRepository;
 
-
     @Transactional(Transactional.TxType.NEVER)
     public LdapConfig create(CbUser user, LdapConfig ldapConfig) {
         ldapConfig.setOwner(user.getUserId());

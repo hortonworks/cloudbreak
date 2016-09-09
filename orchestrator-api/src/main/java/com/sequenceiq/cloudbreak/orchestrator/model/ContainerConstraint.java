@@ -26,7 +26,6 @@ public class ContainerConstraint {
     private Double mem;
     private Double disk;
 
-
     private ContainerConstraint(ContainerConstraint.Builder builder) {
         this.cmd = builder.cmd;
         this.cpu = builder.cpus;

@@ -65,7 +65,6 @@ public abstract class AbstractContainerBootstrapTest {
     @Mock
     private InspectContainerResponse.ContainerState containerState;
 
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -134,7 +133,6 @@ public abstract class AbstractContainerBootstrapTest {
     public DockerClient getMockedDockerClient() {
         return mockedDockerClient;
     }
-
 
     public abstract OrchestratorBootstrap getTestInstance();
 }

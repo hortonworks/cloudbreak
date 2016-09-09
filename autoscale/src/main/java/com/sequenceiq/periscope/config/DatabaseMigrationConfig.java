@@ -70,7 +70,6 @@ public class DatabaseMigrationConfig {
         return upOperation;
     }
 
-
     @Bean
     public FileMigrationLoader upMigrationLoader() {
         String schemaLoc = schemaLocation;

@@ -242,7 +242,6 @@ public class ConverterConfiguration {
         return new RdsConfigNameConverter();
     }
 
-
     @Bean
     Converter getSssdSchemaTypeConverter() {
         return new SssdSchemaTypeConverter();

@@ -28,7 +28,6 @@ public class UptimeNotifier {
     @Inject
     private NotificationSender notificationSender;
 
-
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
         List<Cluster> clusters = (List<Cluster>) clusterRepository.findAll();
