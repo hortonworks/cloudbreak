@@ -14,8 +14,17 @@
 			"Rev": "593d64559f7600f29581a3ee42177f5dbded27a9"
 		},
 		{
+			"ImportPath": "github.com/briandowns/spinner",
+			"Rev": "a00ac22c746220ee70a0891a0ec4aa6c56c6bb6a"
+		},
+		{
 			"ImportPath": "github.com/ernesto-jimenez/httplogger",
 			"Rev": "86cc44f6150a7e9dca8586e425a9c73e71f8ae7d"
+		},
+		{
+			"ImportPath": "github.com/fatih/color",
+			"Comment": "v0.2.0",
+			"Rev": "87d4004f2ab62d0d255e0a38f1680aa534549fe3"
 		},
 		{
 			"ImportPath": "github.com/go-swagger/go-swagger/client",
@@ -53,6 +62,15 @@
 			"Rev": "ff42df2bf231f6a12383b36332f8364254ea86d6"
 		},
 		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Comment": "v0.0.6",
+			"Rev": "ed8eb9e318d7a84ce5915b495b7d35e0cfe7b5a8"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Rev": "56b76bdf51f7708750eac80fa38b952bb9f32639"
+		},
+		{
 			"ImportPath": "github.com/mattn/go-runewidth",
 			"Comment": "v0.0.1",
 			"Rev": "d6bea18f789704b5f83375793155289da36a3c7f"
@@ -77,6 +95,10 @@
 		{
 			"ImportPath": "golang.org/x/net/context/ctxhttp",
 			"Rev": "07b51741c1d6423d4a6abab1c49940ec09cb1aaf"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "f64b50fbea64174967a8882830d621a18ee1548e"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
