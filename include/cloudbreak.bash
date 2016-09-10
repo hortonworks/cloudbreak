@@ -187,6 +187,7 @@ cloudbreak-conf-defaults() {
     env-import CB_UI_MAX_WAIT 400
     env-import CB_HOST_DISCOVERY_CUSTOM_DOMAIN ""
     env-import CB_SMARTSENSE_CONFIGURE "false"
+    env-import TRAEFIK_MAX_IDLE_CONNECTION 100
 }
 
 cloudbreak-conf-cloud-provider() {

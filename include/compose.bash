@@ -214,6 +214,7 @@ traefik:
         --defaultEntryPoints=http,https \
         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' \
         --entryPoints='Name:https Address::443 TLS:$CBD_TRAEFIK_TLS' \
+        --maxidleconnsperhost=$TRAEFIK_MAX_IDLE_CONNECTION \
         --docker
 haveged:
     labels:
