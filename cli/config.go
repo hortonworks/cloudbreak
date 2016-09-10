@@ -2,7 +2,6 @@ package cli
 
 import (
 	"encoding/json"
-	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
@@ -35,15 +34,12 @@ func (c Config) Yaml() string {
 
 func Configure(c *cli.Context) error {
 	if c.NumFlags() < 3 || len(c.String(FlCBUsername.Name)) == 0 || len(c.String(FlCBPassword.Name)) == 0 || len(c.String(FlCBServer.Name)) == 0 {
-		log.Error("[Configure] you need to specify all the parameters.\n")
-		cli.ShowSubcommandHelp(c)
-		newExitReturnError()
+		logMissingParameterAndExit(c, Configure, "you need to specify all the parameters\n")
 	}
 
 	err := WriteConfigToFile(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name), c.String(FlCBOutput.Name))
 	if err != nil {
-		log.Error(fmt.Sprintf("[WriteConfigToFile] %s", err.Error()))
-		newExitReturnError()
+		logErrorAndExit(Configure, err.Error())
 	}
 	return nil
 }
@@ -51,8 +47,7 @@ func Configure(c *cli.Context) error {
 func GetHomeDirectory() string {
 	homeDir, err := homedir.Dir()
 	if err != nil || len(homeDir) == 0 {
-		log.Infof("[GetHomeDirectory] failed to determine the user's home directory")
-		newExitReturnError()
+		logErrorAndExit(GetHomeDirectory, "failed to determine the home directory")
 	}
 	return homeDir
 }

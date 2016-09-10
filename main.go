@@ -25,7 +25,7 @@ func ConfigRead(c *cli.Context) error {
 		if err != nil {
 			log.Error(fmt.Sprintf("[ConfigRead] %s", err.Error()))
 			log.Error(fmt.Sprintf("[ConfigRead] configuration is not set, see: %s configure --help", c.App.Name))
-			return cli.NewExitError("", 1)
+			os.Exit(1)
 		}
 
 		PrintConfig(*config)
@@ -46,6 +46,11 @@ func ConfigRead(c *cli.Context) error {
 func PrintConfig(cfg hdc.Config) {
 	cfg.Password = "*"
 	log.Infof("[ConfigRead] Config read from file, setting as global variable:\n%s", cfg.Yaml())
+}
+
+func StopSpinner(c *cli.Context) error {
+	hdc.StopSpinner()
+	return nil
 }
 
 func main() {
@@ -70,6 +75,7 @@ func main() {
 		log.SetFormatter(formatter)
 		if c.Bool(hdc.FlDebug.Name) {
 			log.SetLevel(log.DebugLevel)
+			hdc.Spinner = nil
 		}
 		return nil
 	}
@@ -88,6 +94,7 @@ func main() {
 			Usage:  "creates a new cluster",
 			Flags:  []cli.Flag{hdc.FlCBInputJson, hdc.FlCBWait, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
 			Before: ConfigRead,
+			After:  StopSpinner,
 			Action: hdc.CreateCluster,
 			Subcommands: []cli.Command{
 				{
@@ -137,6 +144,7 @@ func main() {
 			Usage:  "change the number of worker nodes of an existing cluster",
 			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBScalingAdjustment, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
 			Before: ConfigRead,
+			After:  StopSpinner,
 			Action: hdc.ResizeCluster,
 		},
 		{
@@ -144,6 +152,7 @@ func main() {
 			Usage:  "terminates a cluster",
 			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBWait, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
 			Before: ConfigRead,
+			After:  StopSpinner,
 			Action: hdc.TerminateCluster,
 		},
 	}

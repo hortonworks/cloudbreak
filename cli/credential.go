@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/credentials"
 	"github.com/hortonworks/hdc-cli/models"
@@ -35,8 +36,7 @@ func (c *Cloudbreak) CreateCredential(defaultCredential models.CredentialRespons
 	resp, err := c.Cloudbreak.Credentials.PostCredentialsAccount(&credentials.PostCredentialsAccountParams{&credReq})
 
 	if err != nil {
-		log.Errorf("[CreateCredential] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.CreateCredential, err.Error())
 	}
 
 	log.Infof("[CreateCredential] credential created, id: %d", resp.Payload.ID)
@@ -59,8 +59,7 @@ func (c *Cloudbreak) GetCredential(name string) models.CredentialResponse {
 	resp, err := c.Cloudbreak.Credentials.GetCredentialsUser(&credentials.GetCredentialsUserParams{})
 
 	if err != nil {
-		log.Errorf("[GetCredential] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.GetCredential, err.Error())
 	}
 
 	var awsAccess models.CredentialResponse
@@ -72,8 +71,7 @@ func (c *Cloudbreak) GetCredential(name string) models.CredentialResponse {
 	}
 
 	if awsAccess.ID == nil {
-		log.Errorf("[GetCredential] failed to find the following credential: %s", name)
-		newExitReturnError()
+		logErrorAndExit(c.GetCredential, fmt.Sprintf("failed to find the following credential: %s", name))
 	}
 
 	log.Infof("[GetCredential] found credential, name: %s id: %d", awsAccess.Name, awsAccess.ID)

@@ -14,8 +14,7 @@ func (c *Cloudbreak) GetRDSConfigByName(name string) models.RDSConfigResponse {
 	resp, err := c.Cloudbreak.Rdsconfigs.GetRdsconfigsAccountName(&rdsconfigs.GetRdsconfigsAccountNameParams{Name: name})
 
 	if err != nil {
-		log.Errorf("[GetRDSConfigByName] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.GetRDSConfigByName, err.Error())
 	}
 
 	rdsConfig := *resp.Payload
@@ -30,8 +29,7 @@ func (c *Cloudbreak) GetRDSConfigById(id int64) *models.RDSConfigResponse {
 	resp, err := c.Cloudbreak.Rdsconfigs.GetRdsconfigsID(&rdsconfigs.GetRdsconfigsIDParams{ID: id})
 
 	if err != nil {
-		log.Errorf("[GetRDSConfigById] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.GetRDSConfigById, err.Error())
 	}
 
 	rdsConfig := resp.Payload

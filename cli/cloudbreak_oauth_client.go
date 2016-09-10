@@ -46,14 +46,15 @@ var LoggedTransportConfig = httplogger.NewLoggedTransport(TransportConfig, newLo
 
 // NewHTTPClient creates a new cloudbreak HTTP client.
 func NewOAuth2HTTPClient(address string, username string, password string) *Cloudbreak {
+	go StartSpinner()
+
 	for _, v := range PREFIX_TRIM {
 		address = strings.TrimPrefix(address, v)
 	}
 
 	token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
 	if err != nil {
-		log.Error(err.Error())
-		newExitReturnError()
+		logErrorAndExit(NewOAuth2HTTPClient, err.Error())
 	}
 
 	cbTransport := &cbTransport{httptransport.New(address, "/cb/api/v1", []string{"https"})}

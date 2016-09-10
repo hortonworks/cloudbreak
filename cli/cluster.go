@@ -20,8 +20,7 @@ func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
 
 	stack, err := c.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: name})
 	if err != nil {
-		log.Errorf("[GetClusterByName] %s", err)
-		newExitReturnError()
+		logErrorAndExit(c.GetClusterByName, err.Error())
 	}
 	return stack.Payload
 }
@@ -100,14 +99,13 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 
 func DescribeCluster(c *cli.Context) error {
 	defer timeTrack(time.Now(), "describe cluster")
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	clusterName := c.String(FlCBClusterName.Name)
 	if len(clusterName) == 0 {
-		log.Error("[DescribeCluster] There are missing parameters.\n")
-		cli.ShowSubcommandHelp(c)
-		newExitReturnError()
+		logMissingParameterAndExit(c, DescribeCluster)
 	}
+
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	stack := oAuth2Client.GetClusterByName(clusterName)
 	clusterSkeleton, _ := oAuth2Client.FetchCluster(stack, false)
@@ -123,9 +121,7 @@ func TerminateCluster(c *cli.Context) error {
 	clusterName := c.String(FlCBClusterName.Name)
 
 	if len(clusterName) == 0 {
-		log.Error("[TerminateCluster] There are missing parameters.\n")
-		cli.ShowSubcommandHelp(c)
-		newExitReturnError()
+		logMissingParameterAndExit(c, TerminateCluster)
 	}
 
 	log.Infof("[TerminateCluster] sending request to terminate cluster: %s", clusterName)
@@ -134,8 +130,7 @@ func TerminateCluster(c *cli.Context) error {
 	err := oAuth2Client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName})
 
 	if err != nil {
-		log.Errorf("[TerminateCluster] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(TerminateCluster, err.Error())
 	}
 
 	oAuth2Client.waitForClusterToTerminate(clusterName, c)
@@ -147,8 +142,7 @@ func CreateCluster(c *cli.Context) error {
 	skeleton := assembleClusterSkeleton(c)
 
 	if err := skeleton.Validate(); err != nil {
-		log.Errorf("[CreateCluster] %s", err)
-		newExitReturnError()
+		logErrorAndExit(CreateCluster, err.Error())
 	}
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
@@ -232,8 +226,7 @@ func CreateCluster(c *cli.Context) error {
 		resp, err := oAuth2Client.Cloudbreak.Stacks.PostStacksUser(&stacks.PostStacksUserParams{&stackReq})
 
 		if err != nil {
-			log.Errorf("[CreateStack] %s", err.Error())
-			newExitReturnError()
+			logErrorAndExit(CreateCluster, err.Error())
 		}
 
 		log.Infof("[CreateStack] stack created, id: %d", resp.Payload.ID)
@@ -289,8 +282,7 @@ func CreateCluster(c *cli.Context) error {
 			} else if len(ms.Name) > 0 {
 				id, err := strconv.ParseInt(*oAuth2Client.GetRDSConfigByName(ms.Name).ID, 10, 64)
 				if err != nil {
-					log.Errorf("[CreateCluster] %s", err)
-					newExitReturnError()
+					logErrorAndExit(CreateCluster, err.Error())
 				}
 				rdsId = &id
 			}
@@ -309,8 +301,7 @@ func CreateCluster(c *cli.Context) error {
 		resp, err := oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
 
 		if err != nil {
-			log.Errorf("[CreateCluster] %s", err.Error())
-			newExitReturnError()
+			logErrorAndExit(CreateCluster, err.Error())
 		}
 
 		log.Infof("[CreateCluster] cluster created, id: %d", resp.Payload.ID)
@@ -330,16 +321,12 @@ func ResizeCluster(c *cli.Context) error {
 
 	clusterName := c.String(FlCBClusterName.Name)
 	if len(clusterName) == 0 {
-		log.Error("[ResizeCluster] There are missing parameters.\n")
-		cli.ShowSubcommandHelp(c)
-		newExitReturnError()
+		logMissingParameterAndExit(c, ResizeCluster)
 	}
 
 	adjustment := int32(c.Int(FlCBScalingAdjustment.Name))
 	if adjustment == 0 {
-		log.Errorf("[ResizeCluster] The %s cannot be 0.\n", FlCBScalingAdjustment.Name)
-		cli.ShowSubcommandHelp(c)
-		newExitReturnError()
+		logMissingParameterAndExit(c, ResizeCluster, fmt.Sprintf("the %s cannot be 0\n", FlCBScalingAdjustment.Name))
 	}
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
@@ -356,8 +343,7 @@ func ResizeCluster(c *cli.Context) error {
 			Status: nil,
 		}
 		if err := oAuth2Client.Cloudbreak.Stacks.PutStacksID(&stacks.PutStacksIDParams{ID: *stack.ID, Body: update}); err != nil {
-			log.Errorf("[ResizeCluster] %s", err)
-			newExitReturnError()
+			logErrorAndExit(ResizeCluster, err.Error())
 		}
 	} else {
 		withStackScale := true
@@ -369,8 +355,7 @@ func ResizeCluster(c *cli.Context) error {
 			},
 		}
 		if err := oAuth2Client.Cloudbreak.Cluster.PutStacksIDCluster(&cluster.PutStacksIDClusterParams{ID: *stack.ID, Body: update}); err != nil {
-			log.Errorf("[ResizeCluster] %s", err)
-			newExitReturnError()
+			logErrorAndExit(ResizeCluster, err.Error())
 		}
 	}
 

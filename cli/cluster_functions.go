@@ -47,28 +47,23 @@ func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroup, template *mod
 func assembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 	path := c.String(FlCBInputJson.Name)
 	if len(path) == 0 {
-		log.Error("[AssembleClusterSkeleton] There are missing parameters.\n")
-		cli.ShowSubcommandHelp(c)
-		newExitReturnError()
+		logMissingParameterAndExit(c, assembleClusterSkeleton)
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		log.Errorf("[AssembleClusterSkeleton] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(assembleClusterSkeleton, err.Error())
 	}
 
 	log.Infof("[AssembleClusterSkeleton] read cluster create json from file: %s", path)
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Errorf("[AssembleClusterSkeleton] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(assembleClusterSkeleton, err.Error())
 	}
 
 	var skeleton ClusterSkeleton
 	err = json.Unmarshal(content, &skeleton)
 	if err != nil {
-		log.Errorf("[AssembleClusterSkeleton] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(assembleClusterSkeleton, err.Error())
 	}
 
 	log.Infof("[AssembleClusterSkeleton] assemble cluster based on skeleton: %s", skeleton.Json())
@@ -173,8 +168,7 @@ func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context)
 			resp, err := c.Cloudbreak.Stacks.GetStacksID(&stacks.GetStacksIDParams{ID: stackId})
 
 			if err != nil {
-				log.Infof("[WaitForClusterToFinish] %s", err.Error())
-				newExitReturnError()
+				logErrorAndExit(c.waitForClusterToFinish, err.Error())
 			}
 
 			desiredStatus := "AVAILABLE"
@@ -187,8 +181,7 @@ func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context)
 				break
 			}
 			if strings.Contains(stackStatus, "FAILED") || strings.Contains(clusterStatus, "FAILED") {
-				log.Infof("[WaitForClusterToFinish] cluster installation failed")
-				newExitReturnError()
+				logErrorAndExit(c.waitForClusterToFinish, "cluster installation failed")
 			}
 
 			log.Infof("[WaitForClusterToFinish] cluster is in progress, wait for 20 seconds")
@@ -212,16 +205,14 @@ func (c *Cloudbreak) waitForClusterToTerminate(clusterName string, context *cli.
 					log.Infof("[waitForClusterToTerminate] cluster is terminated")
 					break
 				}
-				log.Errorf("[waitForClusterToTerminate] %s", errorMessage)
-				newExitReturnError()
+				logErrorAndExit(c.waitForClusterToTerminate, errorMessage)
 			}
 
 			stackStatus := *resp.Payload.Status
 			log.Infof("[waitForClusterToTerminate] stack status: %s", stackStatus)
 
 			if strings.Contains(stackStatus, "FAILED") {
-				log.Infof("[waitForClusterToTerminate] cluster termination failed")
-				newExitReturnError()
+				logErrorAndExit(c.waitForClusterToTerminate, "cluster termination failed")
 			}
 			if strings.Contains(stackStatus, "DELETE_COMPLETED") {
 				log.Infof("[waitForClusterToTerminate] cluster is terminated")

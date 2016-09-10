@@ -39,8 +39,7 @@ func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64
 	resp, err := c.Cloudbreak.Templates.PostTemplatesAccount(&templates.PostTemplatesAccountParams{&masterTemplateReqBody})
 
 	if err != nil {
-		log.Errorf("[CreateTemplate] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.CreateTemplate, err.Error())
 	}
 
 	log.Infof("[CreateTemplate] master template created, id: %d", resp.Payload.ID)
@@ -50,8 +49,7 @@ func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64
 	resp, err = c.Cloudbreak.Templates.PostTemplatesAccount(&templates.PostTemplatesAccountParams{&workerTemplateReqBody})
 
 	if err != nil {
-		log.Errorf("[CreateTemplate] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.CreateTemplate, err.Error())
 	}
 
 	log.Infof("[CreateTemplate] worker template created, id: %d", resp.Payload.ID)

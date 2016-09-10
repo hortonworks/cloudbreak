@@ -39,8 +39,7 @@ func ListBlueprints(c *cli.Context) error {
 	// make the request to get all items
 	respBlueprints, err := oAuth2Client.Cloudbreak.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
 	if err != nil {
-		log.Error(err)
-		newExitReturnError()
+		logErrorAndExit(ListBlueprints, err.Error())
 	}
 
 	var tableRows []Row
@@ -62,8 +61,7 @@ func (c *Cloudbreak) GetBlueprintId(name string) int64 {
 	resp, err := c.Cloudbreak.Blueprints.GetPrivate(&blueprints.GetPrivateParams{Name: name})
 
 	if err != nil {
-		log.Errorf("[GetBlueprintId] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.GetBlueprintId, err.Error())
 	}
 
 	id, _ := strconv.Atoi(*resp.Payload.ID)

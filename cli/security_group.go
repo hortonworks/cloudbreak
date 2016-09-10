@@ -41,8 +41,7 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 	resp, err := c.Cloudbreak.Securitygroups.PostSecuritygroupsAccount(&securitygroups.PostSecuritygroupsAccountParams{&secGroup})
 
 	if err != nil {
-		log.Errorf("[CreateSecurityGroup] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.CreateSecurityGroup, err.Error())
 	}
 
 	log.Infof("[CreateSecurityGroup] security group created, id: %d", resp.Payload.ID)

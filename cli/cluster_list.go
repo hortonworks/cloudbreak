@@ -78,19 +78,17 @@ func ListClusters(c *cli.Context) error {
 
 func ListClusterNodes(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list cluster nodes")
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	clusterName := c.String(FlCBClusterName.Name)
 	if len(clusterName) == 0 {
-		log.Error("[ListClusterNodes] There are missing parameters.\n")
-		cli.ShowSubcommandHelp(c)
-		newExitReturnError()
+		logMissingParameterAndExit(c, ListClusterNodes)
 	}
+
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
 
 	respStack, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
 	if err != nil {
-		log.Errorf("[ListClusterNodes] %s", err)
-		newExitReturnError()
+		logErrorAndExit(ListClusterNodes, err.Error())
 	}
 
 	var tableRows []Row

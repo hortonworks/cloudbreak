@@ -36,8 +36,7 @@ func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64,
 	resp, err := c.Cloudbreak.Networks.PostNetworksAccount(&networks.PostNetworksAccountParams{&network})
 
 	if err != nil {
-		log.Errorf("[CreateNetwork] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.CreateNetwork, err.Error())
 	}
 
 	log.Infof("[CreateNetwork] network created, id: %d", resp.Payload.ID)
@@ -49,8 +48,7 @@ func (c *Cloudbreak) GetNetwork(name string) models.NetworkJSON {
 	resp, err := c.Cloudbreak.Networks.GetNetworksAccountName(&networks.GetNetworksAccountNameParams{Name: name})
 
 	if err != nil {
-		log.Errorf("[GetNetwork] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.GetNetwork, err.Error())
 	}
 
 	defaultNetwork := *resp.Payload
@@ -63,8 +61,7 @@ func (c *Cloudbreak) GetNetworkById(id int64) *models.NetworkJSON {
 	resp, err := c.Cloudbreak.Networks.GetNetworksID(&networks.GetNetworksIDParams{ID: id})
 
 	if err != nil {
-		log.Errorf("[GetNetwork] %s", err.Error())
-		newExitReturnError()
+		logErrorAndExit(c.GetNetwork, err.Error())
 	}
 
 	network := resp.Payload
