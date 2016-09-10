@@ -3,13 +3,14 @@ BINARY=hdc
 VERSION=1.6.0-dev.1
 BUILD_TIME=$(shell date +%FT%T)
 LDFLAGS=-ldflags "-X github.com/hortonworks/hdc-cli/cli.Version=${VERSION} -X github.com/hortonworks/hdc-cli/cli.BuildTime=${BUILD_TIME}"
+GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 deps:
 	go get github.com/gliderlabs/glu
 	go get github.com/tools/godep
 
 format:
-	gofmt -w .
+	@gofmt -w ${GOFILES_NOVENDOR}
 
 build: format build-darwin build-linux build-windows
 
