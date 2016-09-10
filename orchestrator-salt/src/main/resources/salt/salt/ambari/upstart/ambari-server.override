@@ -1,4 +1,6 @@
 
+start on runlevel [2345]
+
 pre-start script
   /opt/ambari-server/ambari-server-init.sh
 end script
