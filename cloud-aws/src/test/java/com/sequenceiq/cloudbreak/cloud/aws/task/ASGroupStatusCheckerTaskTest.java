@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.task;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -17,6 +18,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
@@ -73,6 +76,11 @@ public class ASGroupStatusCheckerTaskTest {
         for (int i = 0; i < requiredInstances; i++) {
             instancIds.add(Integer.toString(i));
         }
+
+        AmazonAutoScalingClient autoScalingClient = mock(AmazonAutoScalingClient.class);
+        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(autoScalingClient);
+        when(autoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(new DescribeScalingActivitiesResult());
+
         when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq(asGroupName))).thenReturn(instancIds);
 
         ASGroupStatusCheckerTask asGroupStatusCheckerTask = new ASGroupStatusCheckerTask(authenticatedContext, asGroupName, requiredInstances, awsClient,
@@ -125,6 +133,11 @@ public class ASGroupStatusCheckerTaskTest {
         for (int i = 0; i < requiredInstances; i++) {
             instancIds.add(Integer.toString(i));
         }
+
+        AmazonAutoScalingClient autoScalingClient = mock(AmazonAutoScalingClient.class);
+        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(autoScalingClient);
+        when(autoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(new DescribeScalingActivitiesResult());
+
         when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq(asGroupName))).thenReturn(instancIds);
 
         ASGroupStatusCheckerTask asGroupStatusCheckerTask = new ASGroupStatusCheckerTask(authenticatedContext, asGroupName, requiredInstances, awsClient,
