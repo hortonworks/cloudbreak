@@ -149,7 +149,7 @@ init-profile() {
             else
                 warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
                 echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
-            fi    
+            fi
             _exit 2
         fi
     fi
