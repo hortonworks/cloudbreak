@@ -45,8 +45,8 @@ public class OrchestratorRecipeExecutor {
         Map<String, List<RecipeModel>> recipeMap = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
                 .collect(Collectors.toMap(HostGroup::getName, h -> convert(h.getRecipes())));
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
-                gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
+        GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(),
+                gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSaltPassword());
         try {
             hostOrchestrator.uploadRecipes(gatewayConfig, recipeMap, collectNodes(stack),
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
@@ -58,8 +58,8 @@ public class OrchestratorRecipeExecutor {
     public void preInstall(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
-                gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
+        GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(),
+                gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSaltPassword());
         try {
             hostOrchestrator.preInstallRecipes(gatewayConfig, collectNodes(stack),
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
@@ -71,8 +71,8 @@ public class OrchestratorRecipeExecutor {
     public void postInstall(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(),
-                gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
+        GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(),
+                gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSaltPassword());
         try {
             hostOrchestrator.postInstallRecipes(gatewayConfig, collectNodes(stack),
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));

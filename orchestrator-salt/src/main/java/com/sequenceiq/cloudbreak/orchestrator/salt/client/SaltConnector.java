@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Client;
@@ -31,19 +32,21 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 
 public class SaltConnector implements Closeable {
 
-    public static final String SALT_USER = "saltuser";
-    public static final String SALT_PASSWORD = "saltpass";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltConnector.class);
+
+    private static final String SALT_USER = "saltuser";
+    private static final String SALT_PASSWORD = "saltpass";
 
     private final Client restClient;
     private final WebTarget saltTarget;
+    private final String password;
 
     public SaltConnector(GatewayConfig gatewayConfig, boolean debug) {
         try {
             this.restClient = RestClientUtil.createClient(
                     gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(), debug, SaltConnector.class);
             this.saltTarget = RestClientUtil.createTarget(restClient, gatewayConfig.getGatewayUrl());
+            this.password = Optional.ofNullable(gatewayConfig.getSaltPassword()).orElse(SALT_PASSWORD);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
         }
@@ -128,7 +131,7 @@ public class SaltConnector implements Closeable {
 
     private Form addAuth(Form form) {
         form.param("username", SALT_USER)
-                .param("password", SALT_PASSWORD)
+                .param("password", password)
                 .param("eauth", "pam");
         return form;
     }
@@ -138,5 +141,9 @@ public class SaltConnector implements Closeable {
         if (restClient != null) {
             restClient.close();
         }
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

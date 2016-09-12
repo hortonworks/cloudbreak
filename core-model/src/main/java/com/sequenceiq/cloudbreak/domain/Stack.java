@@ -452,6 +452,14 @@ public class Stack implements ProvisionEntity {
         this.relocateDocker = relocateDocker;
     }
 
+    public String getSaltPassword() {
+        return saltPassword;
+    }
+
+    public void setSaltPassword(String saltPassword) {
+        this.saltPassword = saltPassword;
+    }
+
     public List<Resource> getResourcesByType(ResourceType resourceType) {
         List<Resource> resourceList = new ArrayList<>();
         for (Resource resource : resources) {

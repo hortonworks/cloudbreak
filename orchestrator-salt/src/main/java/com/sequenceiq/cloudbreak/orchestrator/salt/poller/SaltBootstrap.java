@@ -85,7 +85,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
         if (targets.stream().map(Node::getPrivateIp).collect(Collectors.toList()).contains(getGatewayPrivateIp())) {
             SaltAuth auth = new SaltAuth();
-            auth.setPassword(SaltConnector.SALT_PASSWORD);
+            auth.setPassword(sc.getPassword());
             SaltMaster master = new SaltMaster();
             master.setAddress(getGatewayPrivateIp());
             master.setAuth(auth);

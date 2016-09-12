@@ -383,7 +383,7 @@ public class AmbariDecommissioner {
                 InstanceGroup gateway = stack.getGatewayInstanceGroup();
                 InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
                 GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
-                        stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN());
+                        stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSaltPassword());
                 hostOrchestrator.tearDown(gatewayConfig, hostList);
                 deleteHosts(stack, hostList, components);
             }
