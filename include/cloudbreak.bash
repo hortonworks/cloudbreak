@@ -35,11 +35,11 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
     env-import DOCKER_TAG_CBDB 1.2.0
     env-import DOCKER_TAG_PCDB 1.2.0
-    env-import DOCKER_TAG_PERISCOPE 1.6.0-dev.44
-    env-import DOCKER_TAG_CLOUDBREAK 1.6.0-dev.44
-    env-import DOCKER_TAG_ULUWATU 1.6.0-dev.44
-    env-import DOCKER_TAG_SULTANS 1.6.0-dev.44
-    env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.6.0-dev.44
+    env-import DOCKER_TAG_PERISCOPE 1.6.0-dev.45
+    env-import DOCKER_TAG_CLOUDBREAK 1.6.0-dev.45
+    env-import DOCKER_TAG_ULUWATU 1.6.0-dev.45
+    env-import DOCKER_TAG_SULTANS 1.6.0-dev.45
+    env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.6.0-dev.45
 
     env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/cloudbreak-web
