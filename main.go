@@ -57,12 +57,9 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "hdc"
-	app.Usage = ""
+	app.Usage = "Hortonworks Data Cloud command line tool"
 	app.Version = hdc.Version + "-" + hdc.BuildTime
-	app.Author = "Hortonworks\n\nLICENSE:" + `
-	 Apache License
-	 Version 2.0, January 2004
-	 http://www.apache.org/licenses/`
+	app.Author = "Hortonworks"
 
 	app.Flags = []cli.Flag{
 		hdc.FlDebug,
