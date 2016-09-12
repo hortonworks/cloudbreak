@@ -1,24 +1,11 @@
 base:
   '*':
-    - kernel.init
-    - users.init
-
-  'platform:OPENSTACK':
-    - match: pillar
-    - discovery.init
-
-  'platform:GCP':
-    - match: pillar
-    - discovery.init
-
-  'platform:AZURE_RM':
-    - match: pillar
-    - discovery.init
+    - discovery
+    - users
 
   'platform:AWS':
     - match: pillar
-    - discovery.init
-    - dns.init
+    - dns
 
   'roles:kerberos_server':
     - match: grain
@@ -34,18 +21,18 @@ base:
 
   'G@recipes:post and G@roles:knox_gateway':
     - match: compound
-    - ldap.init
+    - ldap
 
   'I@platform:AWS and G@roles:smartsense':
     - match: compound
-    - smartsense.init
+    - smartsense
 
   'recipes:pre':
     - match: grain
-    - pre-recipes.init
+    - pre-recipes
 
   'recipes:post':
     - match: grain
-    - post-recipes.init
+    - post-recipes
     - users.add-to-group
 

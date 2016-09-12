@@ -84,9 +84,22 @@ start-ambari-agent:
 
 {% else %}
 
+# Upstart case
+
+# Avoid concurrency between SysV and Upstart
+disable-ambari-agent-sysv:
+  cmd.run:
+    - name: chkconfig ambari-agent off
+    - onlyif: chkconfig --list ambari-agent | grep on
+
+
+/etc/init/ambari-agent.override:
+  file.managed:
+    - source: salt://ambari/upstart/ambari-agent.override
+
 start-ambari-agent:
   service.running:
-    - name: ambari-agent
     - enable: True
+    - name: ambari-agent
 
 {% endif %}
