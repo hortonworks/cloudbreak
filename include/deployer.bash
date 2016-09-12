@@ -249,6 +249,11 @@ doctor() {
 
 network-doctor() {
     
+    if [[ "$SKIP_NETWORK_DOCTOR" ]] || [[ "$CB_HTTP_PROXY" ]] || [[ "$CB_HTTPS_PROXY" ]] || [[ "$http_proxy" ]] || [[ "$https_proxy" ]]; then
+        info "network checks are skippen in case you are using porxy"
+        return
+    fi
+
     echo-n "ping 8.8.8.8 on host: "
     if ping -c 1 -W 1 8.8.8.8 &> /dev/null; then
         info "OK"
