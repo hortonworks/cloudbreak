@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.legacyNetwork;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.newNetworkAndSubnet;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.newSubnetInExistingNetwork;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
+import com.sequenceiq.cloudbreak.cloud.template.ResourceNotNeededException;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
@@ -29,6 +31,9 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
 
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
+        if (noFirewallRules(network)) {
+            throw new ResourceNotNeededException("Firewall rules won't be created.");
+        }
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }

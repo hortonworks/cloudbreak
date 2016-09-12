@@ -202,15 +202,20 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         List<CloudResource> subnet = filterResourcesByType(resources, ResourceType.GCP_SUBNET);
         String networkName = subnet.isEmpty() ? filterResourcesByType(resources, ResourceType.GCP_NETWORK).get(0).getName() : subnet.get(0).getName();
         networkInterface.setName(networkName);
-        AccessConfig accessConfig = new AccessConfig();
-        accessConfig.setName(networkName);
-        accessConfig.setType("ONE_TO_ONE_NAT");
-        if (InstanceGroupType.GATEWAY == group.getType()) {
-            Compute.Addresses.Get getReservedIp = compute.addresses().get(projectId, region.value(),
-                    filterResourcesByType(resources, ResourceType.GCP_RESERVED_IP).get(0).getName());
-            accessConfig.setNatIP(getReservedIp.execute().getAddress());
+
+        List<CloudResource> reservedIp = filterResourcesByType(resources, ResourceType.GCP_RESERVED_IP);
+        if (reservedIp != null && !reservedIp.isEmpty()) {
+            AccessConfig accessConfig = new AccessConfig();
+            accessConfig.setName(networkName);
+            accessConfig.setType("ONE_TO_ONE_NAT");
+            if (InstanceGroupType.GATEWAY == group.getType()) {
+                Compute.Addresses.Get getReservedIp = compute.addresses().get(projectId, region.value(),
+                        filterResourcesByType(resources, ResourceType.GCP_RESERVED_IP).get(0).getName());
+                accessConfig.setNatIP(getReservedIp.execute().getAddress());
+            }
+            networkInterface.setAccessConfigs(Collections.singletonList(accessConfig));
         }
-        networkInterface.setAccessConfigs(Collections.singletonList(accessConfig));
+
         if (subnet.isEmpty()) {
             networkInterface.setNetwork(
                     String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));

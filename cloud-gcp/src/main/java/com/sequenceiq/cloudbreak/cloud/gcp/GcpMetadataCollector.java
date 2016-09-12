@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.AccessConfig;
 import com.google.api.services.compute.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -64,10 +65,14 @@ public class GcpMetadataCollector implements MetadataCollector {
                 Compute compute = GcpStackUtil.buildCompute(credential);
                 Instance executeInstance = getInstance(cloudContext, credential, compute, cloudResource.getName());
 
+                String privateIp = executeInstance.getNetworkInterfaces().get(0).getNetworkIP();
+                String publicIp = privateIp;
+                List<AccessConfig> acl = executeInstance.getNetworkInterfaces().get(0).getAccessConfigs();
+                if (acl != null && acl.get(0) != null) {
+                    publicIp = executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP();
+                }
 
-                CloudInstanceMetaData metaData = new CloudInstanceMetaData(
-                        executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
-                        executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP());
+                CloudInstanceMetaData metaData = new CloudInstanceMetaData(privateIp, publicIp);
 
                 CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
                 cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, metaData);
