@@ -5,9 +5,12 @@ import (
 	"reflect"
 )
 
+var REQUIRED RequiredFlag = RequiredFlag{true}
+var OPTIONAL RequiredFlag = RequiredFlag{false}
+
 var (
 	FlDebug = BoolFlag{
-		RequiredFlag: RequiredFlag{false},
+		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
 			Name:   "debug",
 			Usage:  "debug mode",
@@ -15,7 +18,7 @@ var (
 		},
 	}
 	FlCBServer = StringFlag{
-		RequiredFlag: RequiredFlag{false},
+		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "server",
 			Usage:  "server address",
@@ -23,7 +26,7 @@ var (
 		},
 	}
 	FlCBServerRequired = StringFlag{
-		RequiredFlag: RequiredFlag{true},
+		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:   "server",
 			Usage:  "server address",
@@ -31,7 +34,7 @@ var (
 		},
 	}
 	FlCBUsername = StringFlag{
-		RequiredFlag: RequiredFlag{false},
+		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "username",
 			Usage:  "user name (e-mail address)",
@@ -39,7 +42,7 @@ var (
 		},
 	}
 	FlCBUsernameRequired = StringFlag{
-		RequiredFlag: RequiredFlag{true},
+		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:   "username",
 			Usage:  "user name (e-mail address)",
@@ -47,7 +50,7 @@ var (
 		},
 	}
 	FlCBPassword = StringFlag{
-		RequiredFlag: RequiredFlag{false},
+		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "password",
 			Usage:  "password",
@@ -55,7 +58,7 @@ var (
 		},
 	}
 	FlCBPasswordRequired = StringFlag{
-		RequiredFlag: RequiredFlag{true},
+		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:   "password",
 			Usage:  "password",
@@ -63,28 +66,28 @@ var (
 		},
 	}
 	FlCBInputJson = StringFlag{
-		RequiredFlag: RequiredFlag{true},
+		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "cli-input-json",
 			Usage: "user provided file with json content",
 		},
 	}
 	FlCBClusterName = StringFlag{
-		RequiredFlag: RequiredFlag{true},
+		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "cluster-name",
 			Usage: "name of a cluster",
 		},
 	}
 	FlCBWait = StringFlag{
-		RequiredFlag: RequiredFlag{false},
+		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "wait",
 			Usage: "wait for the operation to finish",
 		},
 	}
 	FlCBOutput = StringFlag{
-		RequiredFlag: RequiredFlag{false},
+		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "output",
 			Usage:  "supported formats: json, yaml, table (default: \"json\")",
@@ -92,10 +95,16 @@ var (
 		},
 	}
 	FlCBScalingAdjustment = StringFlag{
-		RequiredFlag: RequiredFlag{true},
+		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "scaling-adjustment",
 			Usage: "change the number of worker nodes, positive number for add more nodes, e.g: 1, negative for take down nodes, e.g: -1",
+		},
+	}
+	FlCBCredentialName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "credential-name",
 		},
 	}
 )

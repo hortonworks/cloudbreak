@@ -159,5 +159,18 @@ func main() {
 		},
 	}
 
+	// hidden commands
+	app.Commands = append(app.Commands, []cli.Command{
+		{
+			Name:   "create-credential",
+			Usage:  "create a new credential",
+			Flags:  []cli.Flag{hdc.FlCBCredentialName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
+			Before: ConfigRead,
+			Hidden: true,
+			After:  StopSpinner,
+			Action: hdc.CreateCredential,
+		},
+	}...)
+
 	app.Run(os.Args)
 }

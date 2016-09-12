@@ -5,10 +5,16 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/credentials"
 	"github.com/hortonworks/hdc-cli/models"
+	"github.com/urfave/cli"
 	"strconv"
 	"sync"
 	"time"
 )
+
+func CreateCredential(c *cli.Context) error {
+	logErrorAndExit(CreateCredential, "Not implemented yet..")
+	return nil
+}
 
 func (c *Cloudbreak) CopyDefaultCredential(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
 	defaultCred := c.GetCredential("aws-access")
