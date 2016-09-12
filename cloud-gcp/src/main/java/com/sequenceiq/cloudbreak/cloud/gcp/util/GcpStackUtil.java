@@ -49,6 +49,8 @@ public final class GcpStackUtil {
     private static final String PROJECT_ID = "projectId";
     private static final String NETWORK_ID = "networkId";
     private static final String SUBNET_ID = "subnetId";
+    private static final String NO_PUBLIC_IP = "noPublicIp";
+    private static final String NO_FIREWALL_RULES = "noFirewallRules";
 
     private GcpStackUtil() {
     }
@@ -215,6 +217,22 @@ public final class GcpStackUtil {
 
     public static String getSubnetId(Network network) {
         return network.getStringParameter(SUBNET_ID);
+    }
+
+    public static Boolean noPublicIp(Network network) {
+        Boolean noPublicIp = network.getParameter(NO_PUBLIC_IP, Boolean.class);
+        if (noPublicIp == null) {
+            return Boolean.FALSE;
+        }
+        return noPublicIp;
+    }
+
+    public static Boolean noFirewallRules(Network network) {
+        Boolean noFirewallRules = network.getParameter(NO_FIREWALL_RULES, Boolean.class);
+        if (noFirewallRules == null) {
+            return Boolean.FALSE;
+        }
+        return noFirewallRules;
     }
 
     public static String getClusterTag(CloudContext cloudContext) {

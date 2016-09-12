@@ -205,6 +205,20 @@
                         <!-- .col-sm-9 -->
                     </div>
                     <div class="form-group">
+                        <label class="col-sm-3 control-label" for="no_public_ip">{{msg.network_dont_create_publicip}}</label>
+                        <div class="col-sm-9">
+                            <input type="checkbox" name="no_public_ip" id="no_public_ip" ng-model="network.parameters.noPublicIp">
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="no_firewall_rules">{{msg.network_dont_create_firewall_rules}}</label>
+                        <div class="col-sm-9">
+                            <input type="checkbox" name="no_firewall_rules" id="no_firewall_rules" ng-model="network.parameters.noFirewallRules">
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-3 control-label" for="gcp_network_public">{{msg.public_in_account_label}}</label>
                         <div class="col-sm-9">
                             <input type="checkbox" name="gcp_network_public" id="gcp_network_public" ng-model="network.publicInAccount">

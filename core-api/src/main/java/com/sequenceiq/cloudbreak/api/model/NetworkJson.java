@@ -41,7 +41,6 @@ public class NetworkJson implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     @NotNull
     private String cloudPlatform;
-
     @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;
 

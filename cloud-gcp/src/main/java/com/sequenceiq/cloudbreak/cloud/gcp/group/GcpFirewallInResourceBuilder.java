@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.group;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
 import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_FIREWALL_IN;
 import static java.util.Arrays.asList;
 
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
+import com.sequenceiq.cloudbreak.cloud.template.ResourceNotNeededException;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
@@ -36,6 +38,9 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
 
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Group group, Network network) {
+        if (noFirewallRules(network)) {
+            throw new ResourceNotNeededException("Firewall rules won't be created.");
+        }
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }

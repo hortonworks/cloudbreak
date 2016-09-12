@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noPublicIp;
+
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -12,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
+import com.sequenceiq.cloudbreak.cloud.template.ResourceNotNeededException;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
@@ -21,6 +24,9 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
+        if (noPublicIp(network)) {
+            throw new ResourceNotNeededException("Public IPs won't be created.");
+        }
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }
