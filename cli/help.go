@@ -1,5 +1,15 @@
 package cli
 
+import (
+	"fmt"
+	"github.com/urfave/cli"
+	"io"
+	"os"
+	"strings"
+	"text/tabwriter"
+	"text/template"
+)
+
 var AWSCreateClusterSkeletonHelp = `
 {
   "ClusterName": "my-cluster",                            // Name of the cluster
@@ -37,3 +47,61 @@ var AWSCreateClusterSkeletonHelp = `
   }
 }
 `
+
+var CommandHelpTemplate = `NAME:
+   {{.HelpName}} - {{.Usage}}
+
+USAGE:
+   {{.HelpName}}{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{if .Category}}
+
+CATEGORY:
+   {{.Category}}{{end}}{{if .Description}}
+
+DESCRIPTION:
+   {{.Description}}{{end}}{{if .VisibleFlags}}{{if requiredFlags .Flags}}
+
+REQUIRED OPTIONS:{{range requiredFlags .Flags}}
+   {{.}}{{end}}{{end}}{{if optionalFlags .Flags}}
+
+OPTIONS:
+   {{range optionalFlags .Flags}}{{.}}
+   {{end}}{{end}}{{end}}
+`
+
+var SubCommandHelpTemplate = `NAME:
+   {{.HelpName}} - {{.Usage}}
+
+USAGE:
+   {{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}
+
+COMMANDS:{{range .VisibleCategories}}{{if .Name}}
+   {{.Name}}:{{end}}{{range .VisibleCommands}}
+     {{join .Names ", "}}{{"\t"}}{{.Usage}}{{end}}
+{{end}}{{if .VisibleFlags}}{{if requiredFlags .Flags}}
+REQUIRED OPTIONS:{{range requiredFlags .Flags}}
+   {{.}}{{end}}{{end}}{{if optionalFlags .Flags}}
+
+OPTIONS:
+   {{range optionalFlags .Flags}}{{.}}
+   {{end}}{{end}}{{end}}
+`
+
+func PrintHelp(out io.Writer, templ string, data interface{}) {
+	funcMap := template.FuncMap{
+		"join":          strings.Join,
+		"requiredFlags": RequiredFlags,
+		"optionalFlags": OptionalFlags,
+	}
+	w := tabwriter.NewWriter(out, 1, 8, 2, ' ', 0)
+	t := template.Must(template.New("help").Funcs(funcMap).Parse(templ))
+	err := t.Execute(w, data)
+	if err != nil {
+		// If the writer is closed, t.Execute will fail, and there's nothing
+		// we can do to recover.
+		if os.Getenv("CLI_TEMPLATE_ERROR_DEBUG") != "" {
+			fmt.Fprintf(cli.ErrWriter, "CLI TEMPLATE ERROR: %#v\n", err)
+		}
+		return
+	}
+	w.Flush()
+}

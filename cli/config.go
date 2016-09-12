@@ -34,7 +34,7 @@ func (c Config) Yaml() string {
 
 func Configure(c *cli.Context) error {
 	if c.NumFlags() < 3 || len(c.String(FlCBUsername.Name)) == 0 || len(c.String(FlCBPassword.Name)) == 0 || len(c.String(FlCBServer.Name)) == 0 {
-		logMissingParameterAndExit(c, Configure, "you need to specify all the parameters\n")
+		logMissingParameterAndExit(c, Configure)
 	}
 
 	err := WriteConfigToFile(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name), c.String(FlCBOutput.Name))

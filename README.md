@@ -17,7 +17,7 @@ The windows binary is in experimental phase, but you can download it from the Gi
 To see the available commands `hdc -h`.
 ```
 NAME:
-   hdc -
+   hdc - Hortonworks Data Cloud command line tool
 
 USAGE:
    hdc [global options] command [command options] [arguments...]
@@ -28,17 +28,13 @@ VERSION:
 AUTHOR(S):
    Hortonworks
 
-LICENSE:
-   Apache License
-   Version 2.0, January 2004
-   http://www.apache.org/licenses/
-
 COMMANDS:
      configure           configure the server address and credentials used to communicate with this server
      create-cluster      creates a new cluster
-     list-cluster-types  list the available blueprints
      describe-cluster    get a detailed description of a cluster
-     list-clusters       list the available clusters
+     list-cluster-types  list available cluster types and HDP versions
+     list-clusters       list available clusters
+     resize-cluster      change the number of worker nodes of an existing cluster
      terminate-cluster   terminates a cluster
      help, h             Shows a list of commands or help for one command
 
@@ -56,13 +52,15 @@ USAGE:
    hdc configure [command options] [arguments...]
 
 DESCRIPTION:
-   it will save the provided server address and credential to /Users/khorvath/.hdc/config
+   it will save the provided server address and credential to /root/.hdc/config
 
-OPTIONS:
+REQUIRED OPTIONS:
    --server value    server address [$CB_SERVER_ADDRESS]
    --username value  user name (e-mail address) [$CB_USER_NAME]
    --password value  password [$CB_PASSWORD]
 
+OPTIONS:
+   --output value  supported formats: json, yaml, table (default: "json") [$CB_OUT_FORMAT]
 ```
 
 ### Configure

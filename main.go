@@ -77,13 +77,17 @@ func main() {
 		return nil
 	}
 
+	cli.HelpPrinter = hdc.PrintHelp
+	cli.CommandHelpTemplate = hdc.CommandHelpTemplate
+	cli.SubcommandHelpTemplate = hdc.SubCommandHelpTemplate
+
 	app.Commands = []cli.Command{
 		{
 			Name: "configure",
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
 				"to %s/%s/%s", hdc.GetHomeDirectory(), hdc.Hdc_dir, hdc.Config_file),
 			Usage:  "configure the server address and credentials used to communicate with this server",
-			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
+			Flags:  []cli.Flag{hdc.FlCBServerRequired, hdc.FlCBUsernameRequired, hdc.FlCBPasswordRequired, hdc.FlCBOutput},
 			Action: hdc.Configure,
 		},
 		{
@@ -103,6 +107,7 @@ func main() {
 					Name:   "validate-cli-skeleton",
 					Flags:  []cli.Flag{hdc.FlCBInputJson},
 					Action: hdc.ValidateCreateClusterSkeleton,
+					Usage:  "validate the input json",
 				},
 			},
 		},
