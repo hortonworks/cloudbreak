@@ -318,7 +318,10 @@ identity:
         - https_proxy=$CB_HTTPS_PROXY
         - SERVICE_NAME=identity
         # - SERVICE_CHECK_HTTP=/login
-        - IDENTITY_DB_URL=uaadb.service.consul:5434
+        - IDENTITY_DB_URL
+        - IDENTITY_DB_NAME
+        - IDENTITY_DB_USER
+        - IDENTITY_DB_PASS
     dns: $PRIVATE_IP
     volumes:
       - ./uaa.yml:/uaa/uaa.yml

@@ -123,6 +123,11 @@ cloudbreak-conf-db() {
     env-import CB_DB_ENV_PASS ""
     env-import CB_HBM2DDL_STRATEGY "validate"
     env-import PERISCOPE_DB_HBM2DDL_STRATEGY "validate"
+
+    env-import IDENTITY_DB_URL "uaadb.service.consul:5434"
+    env-import IDENTITY_DB_NAME "postgres"
+    env-import IDENTITY_DB_USER "postgres"
+    env-import IDENTITY_DB_PASS ""
 }
 
 cloudbreak-conf-cert() {
@@ -370,7 +375,7 @@ spring_profiles: postgresql
 
 database:
   driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://\${IDENTITY_DB_URL}/postgres
+  url: jdbc:postgresql://\${IDENTITY_DB_URL}/\${IDENTITY_DB_NAME:postgres}
   username: \${IDENTITY_DB_USER:postgres}
   password: \${IDENTITY_DB_PASS:}
 
