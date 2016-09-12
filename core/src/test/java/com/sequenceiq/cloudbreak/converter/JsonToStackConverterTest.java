@@ -21,6 +21,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -82,6 +83,9 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
 
         // WHEN
         StackRequest stackRequest = getRequest("stack/stack.json");
+        OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
+        orchestratorRequest.setType("SALT");
+        stackRequest.setOrchestrator(orchestratorRequest);
         stackRequest.setRegion(null);
         underTest.convert(stackRequest);
     }
@@ -102,6 +106,9 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
 
         // WHEN
         StackRequest stackRequest = getRequest("stack/stack.json");
+        OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
+        orchestratorRequest.setType("SALT");
+        stackRequest.setOrchestrator(orchestratorRequest);
         stackRequest.setRegion(null);
         Stack stack = underTest.convert(stackRequest);
 
