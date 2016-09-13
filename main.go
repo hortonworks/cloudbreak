@@ -162,6 +162,13 @@ func main() {
 	// hidden commands
 	app.Commands = append(app.Commands, []cli.Command{
 		{
+			Name:   "hidden",
+			Usage:  "shows the hidden commands",
+			Before: ConfigRead,
+			Hidden: true,
+			Action: hdc.ShowHiddenCommands,
+		},
+		{
 			Name:  "create-credential",
 			Usage: "create a new credential",
 			Flags: []cli.Flag{hdc.FlCredentialName, hdc.FlRoleARN, hdc.FlSSHKeyURL, hdc.FlSSHKeyPair,

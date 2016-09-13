@@ -86,11 +86,51 @@ OPTIONS:
    {{end}}{{end}}{{end}}
 `
 
+var HiddenAppHelpTemplate = `NAME:
+   {{.Name}} - {{.Usage}}
+
+USAGE:
+   {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}
+   {{if .Version}}{{if not .HideVersion}}
+VERSION:
+   {{.Version}}
+   {{end}}{{end}}{{if len .Authors}}
+AUTHOR(S):
+   {{range .Authors}}{{.}}{{end}}
+   {{end}}
+COMMANDS:{{range hiddenCommands .}}
+     {{join .Names ", "}}{{"\t"}}{{.Usage}}{{end}}
+{{if .VisibleFlags}}
+GLOBAL OPTIONS:
+   {{range .VisibleFlags}}{{.}}
+   {{end}}{{end}}{{if .Copyright}}
+COPYRIGHT:
+   {{.Copyright}}
+   {{end}}
+`
+
+func HiddenCommands(app cli.App) []cli.Command {
+	var commands []cli.Command
+	for _, command := range app.Commands {
+		if command.Hidden {
+			commands = append(commands, command)
+		}
+	}
+	return commands
+}
+
+func ShowHiddenCommands(c *cli.Context) error {
+	cli.AppHelpTemplate = HiddenAppHelpTemplate
+	cli.ShowAppHelp(c)
+	return nil
+}
+
 func PrintHelp(out io.Writer, templ string, data interface{}) {
 	funcMap := template.FuncMap{
-		"join":          strings.Join,
-		"requiredFlags": RequiredFlags,
-		"optionalFlags": OptionalFlags,
+		"join":           strings.Join,
+		"requiredFlags":  RequiredFlags,
+		"optionalFlags":  OptionalFlags,
+		"hiddenCommands": HiddenCommands,
 	}
 	w := tabwriter.NewWriter(out, 1, 8, 2, ' ', 0)
 	t := template.Must(template.New("help").Funcs(funcMap).Parse(templ))
