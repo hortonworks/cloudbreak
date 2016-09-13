@@ -145,7 +145,9 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "subnetId", mandatory = true, help = "Id of a custom subnet") String subnetId,
             @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the network") String description,
-            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId,
+            @CliOption(key = "noPublicIp", help = "If true, no public IP is created for the instances") Boolean noPublicIp,
+            @CliOption(key = "noFirewallRules", help = "If true, no new firewall rules will be created for the network") Boolean noFirewallRules
     ) {
         Map<String, Object> parameters = new HashMap<>();
         if (networkId != null) {
@@ -153,6 +155,12 @@ public class GcpCommands implements CommandMarker {
         }
         if (subnetId != null) {
             parameters.put("subnetId", subnetId);
+        }
+        if (noPublicIp != null) {
+            parameters.put("noPublicIp", noPublicIp);
+        }
+        if (noFirewallRules != null) {
+            parameters.put("noFirewallRules", noFirewallRules);
         }
         return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
     }
