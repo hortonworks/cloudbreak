@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector;
 
+import java.util.List;
+
 public final class VolumeUtils {
 
     public static final String VOLUME_PREFIX = "/hadoopfs/fs";
@@ -14,6 +16,17 @@ public final class VolumeUtils {
         for (int i = 1; i <= volumeCount; i++) {
             localDirs.append(getVolumeDir(i, directory));
             if (i != volumeCount) {
+                localDirs.append(",");
+            }
+        }
+        return localDirs.toString();
+    }
+
+    public static String buildVolumePathString(List<String> volumes, String directory) {
+        StringBuilder localDirs = new StringBuilder("");
+        for (int i = 0; i <= volumes.size() - 1; i++) {
+            localDirs.append(volumes.get(i)).append("/").append(directory);
+            if (i != volumes.size() - 1) {
                 localDirs.append(",");
             }
         }

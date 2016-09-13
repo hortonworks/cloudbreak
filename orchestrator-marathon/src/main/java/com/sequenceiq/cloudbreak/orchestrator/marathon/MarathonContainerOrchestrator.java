@@ -42,6 +42,7 @@ import mesosphere.marathon.client.model.v2.Container;
 import mesosphere.marathon.client.model.v2.Docker;
 import mesosphere.marathon.client.model.v2.GetAppResponse;
 import mesosphere.marathon.client.model.v2.Task;
+import mesosphere.marathon.client.model.v2.Volume;
 import mesosphere.marathon.client.utils.MarathonException;
 
 @Component
@@ -78,7 +79,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             Marathon client = MarathonClient.getInstance(cred.getApiEndpoint());
             App app;
             if (appName == null) {
-                app = createMarathonApp(config, constraint, image, name);
+                app = createMarathonApp(constraint, image, name);
                 app = postAppToMarathon(config, client, app);
             } else {
                 app = getMarathonApp(client, constraint.getAppName());
@@ -199,7 +200,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
         return 0;
     }
 
-    private App createMarathonApp(ContainerConfig config, ContainerConstraint constraint, String image, String name) {
+    private App createMarathonApp(ContainerConstraint constraint, String image, String name) {
         App app = new App();
         app.setId(name);
         app.setCpus(constraint.getCpu() != null ? constraint.getCpu() : MIN_CPU);
@@ -218,9 +219,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
             app.setCmd(sb.toString());
         }
 
-        for (Integer port : constraint.getPorts()) {
-            app.addPort(port);
-        }
+        constraint.getPorts().forEach(app::addPort);
 
         Docker docker = new Docker();
         docker.setPrivileged(true);
@@ -230,6 +229,17 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
         Container container = new Container();
         container.setType(DOCKER_CONTAINER_TYPE);
         container.setDocker(docker);
+
+        List<Volume> volumes = new ArrayList<>();
+        for (Map.Entry<String, String> volumeBind : constraint.getVolumeBinds().entrySet()) {
+            Volume sharedVolume = new Volume();
+            sharedVolume.setHostPath(volumeBind.getKey());
+            sharedVolume.setContainerPath(volumeBind.getValue());
+            sharedVolume.setMode("RW");
+            volumes.add(sharedVolume);
+        }
+        container.setVolumes(volumes);
+
         app.setContainer(container);
         return app;
     }
