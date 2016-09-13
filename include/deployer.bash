@@ -342,6 +342,15 @@ deployer-login() {
     echo "  $UAA_DEFAULT_USER_EMAIL" | blue
     info "password:"
     echo "  $UAA_DEFAULT_USER_PW" | blue
+
+    info "creating config file for hdc cli: $HOME/.hdc/config"
+    mkdir -p $HOME/.hdc
+    cat > $HOME/.hdc/config <<EOF
+username: $UAA_DEFAULT_USER_EMAIL
+password: $UAA_DEFAULT_USER_PW
+server: $ULU_HOST_ADDRESS
+EOF
+
 }
 
 start-cmd() {
