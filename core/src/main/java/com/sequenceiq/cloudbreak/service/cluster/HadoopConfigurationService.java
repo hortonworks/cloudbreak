@@ -13,12 +13,14 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -29,6 +31,9 @@ public class HadoopConfigurationService {
     private HostGroupRepository hostGroupRepository;
     private Map<String, ServiceConfig> serviceConfigs = new HashMap<>();
     private Map<String, Map<String, String>> bpConfigs = new HashMap<>();
+
+    @Value("#{'${cb.byos.dfs.data.dir}'.split('\\,')}")
+    private List<String> byosDfsDataDirs;
 
     @PostConstruct
     public void init() throws IOException {
@@ -69,14 +74,20 @@ public class HadoopConfigurationService {
     }
 
     public Map<String, Map<String, String>> getGlobalConfiguration(Cluster cluster) throws IOException {
+        Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
         Map<String, Map<String, String>> config = new HashMap<>();
         JsonNode blueprintNode = JsonUtil.readTree(cluster.getBlueprint().getBlueprintText());
-        JsonNode hostGroups = blueprintNode.path("host_groups");
-        for (JsonNode hostGroup : hostGroups) {
-            JsonNode components = hostGroup.path("components");
+        JsonNode hostGroupsBp = blueprintNode.path("host_groups");
+        for (JsonNode hostGroupNode : hostGroupsBp) {
+            HostGroup hostGroup = findHostGroupForNode(hostGroups, hostGroupNode);
+            JsonNode components = hostGroupNode.path("components");
             for (JsonNode component : components) {
                 String name = component.path("name").asText();
-                config.putAll(getProperties(name, true, null));
+                Integer volumeCount = -1;
+                if (hostGroup.getConstraint().getInstanceGroup() != null) {
+                    volumeCount = null;
+                }
+                config.putAll(getProperties(name, true, volumeCount));
             }
         }
         for (Map.Entry<String, Map<String, String>> entry : bpConfigs.entrySet()) {
@@ -91,13 +102,25 @@ public class HadoopConfigurationService {
         return config;
     }
 
+    private HostGroup findHostGroupForNode(Set<HostGroup> hostGroups, JsonNode hostGroupNode) {
+        for (HostGroup hostGroup : hostGroups) {
+            if (hostGroup.getName().equals(hostGroupNode.path("name").asText())) {
+                return hostGroup;
+            }
+        }
+        throw new CloudbreakServiceException("Couldn't find a saved hostgroup for the hostgroup in the blueprint.");
+    }
+
     public Map<String, Map<String, Map<String, String>>> getHostGroupConfiguration(Cluster cluster) {
         Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
         Map<String, Map<String, Map<String, String>>> hadoopConfig = new HashMap<>();
         for (HostGroup hostGroup : hostGroups) {
+            Map<String, Map<String, String>> componentConfig = new HashMap<>();
+            Integer volumeCount = -1;
             if (hostGroup.getConstraint().getInstanceGroup() != null) {
-                int volumeCount = hostGroup.getConstraint().getInstanceGroup().getTemplate().getVolumeCount();
-                Map<String, Map<String, String>> componentConfig = new HashMap<>();
+                volumeCount = hostGroup.getConstraint().getInstanceGroup().getTemplate().getVolumeCount();
+            }
+            if (configUpdateNeeded(hostGroup)) {
                 for (String serviceName : serviceConfigs.keySet()) {
                     componentConfig.putAll(getProperties(serviceName, false, volumeCount));
                 }
@@ -105,6 +128,10 @@ public class HadoopConfigurationService {
             }
         }
         return hadoopConfig;
+    }
+
+    private boolean configUpdateNeeded(HostGroup hostGroup) {
+        return hostGroup.getConstraint().getInstanceGroup() != null || (byosDfsDataDirs != null && !byosDfsDataDirs.isEmpty());
     }
 
     private List<ConfigProperty> toList(JsonNode nodes) {
@@ -125,13 +152,29 @@ public class HadoopConfigurationService {
                 Map<String, String> properties = new HashMap<>();
                 for (ConfigProperty property : config.get(siteConfig)) {
                     String directory = serviceName.toLowerCase() + (property.getDirectory().isEmpty() ? "" : "/" + property.getDirectory());
-                    String value = global ? property.getPrefix() + getLogVolume(directory) : buildVolumePathString(volumeCount, directory);
-                    properties.put(property.getName(), value);
+                    String value = getValue(global, volumeCount, property, directory);
+                    if (value != null) {
+                        properties.put(property.getName(), value);
+                    }
                 }
                 result.put(siteConfig, properties);
             }
         }
         return result;
+    }
+
+    private String getValue(boolean global, Integer volumeCount, ConfigProperty property, String directory) {
+        String value = null;
+        if (volumeCount == null || volumeCount != -1) {
+            value = global ? property.getPrefix() + getLogVolume(directory) : buildVolumePathString(volumeCount, directory);
+        } else if (byosDataDirIsSet()) {
+            value = global ? property.getPrefix() + byosDfsDataDirs.get(0) + "/" + directory : buildVolumePathString(byosDfsDataDirs, directory);
+        }
+        return value;
+    }
+
+    private boolean byosDataDirIsSet() {
+        return byosDfsDataDirs != null && !byosDfsDataDirs.isEmpty() && !"".equals(byosDfsDataDirs.get(0));
     }
 
     private String getServiceName(String componentName) {
