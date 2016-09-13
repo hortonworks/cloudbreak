@@ -9,14 +9,15 @@ public class GatewayConfig {
     private final String serverCert;
     private final String clientCert;
     private final String clientKey;
-    private Integer gatewayPort;
+    private final Integer gatewayPort;
+    private final String saltPassword;
 
     public GatewayConfig(String publicAddress, String privateAddress, Integer gatewayPort, String certificateDir) {
-        this(publicAddress, privateAddress, null, gatewayPort, certificateDir, null, null, null);
+        this(publicAddress, privateAddress, null, gatewayPort, certificateDir, null, null, null, null);
     }
 
     public GatewayConfig(String publicAddress, String privateAddress, String hostname,
-            Integer gatewayPort, String certificateDir, String serverCert, String clientCert, String clientKey) {
+            Integer gatewayPort, String certificateDir, String serverCert, String clientCert, String clientKey, String saltPassword) {
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
         this.hostname = hostname;
@@ -25,6 +26,7 @@ public class GatewayConfig {
         this.serverCert = serverCert;
         this.clientCert = clientCert;
         this.clientKey = clientKey;
+        this.saltPassword = saltPassword;
     }
 
     public String getPublicAddress() {
@@ -63,6 +65,10 @@ public class GatewayConfig {
         return clientKey;
     }
 
+    public String getSaltPassword() {
+        return saltPassword;
+    }
+
     @Override
     public String toString() {
         return "GatewayConfig{"
@@ -72,6 +78,7 @@ public class GatewayConfig {
                 + ", serverCert='" + serverCert + '\''
                 + ", clientCert='" + clientCert + '\''
                 + ", clientKey='" + clientKey + '\''
+                + ", saltPassword='" + saltPassword + '\''
                 + '}';
     }
 }

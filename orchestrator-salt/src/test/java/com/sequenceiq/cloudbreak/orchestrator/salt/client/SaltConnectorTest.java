@@ -33,7 +33,8 @@ public class SaltConnectorTest {
                 "/Users/rdoktorics/prj/certs/stack-" + id,
                 "/Users/rdoktorics/prj/certs/stack-" + id + "/ca.pem",
                 "/Users/rdoktorics/prj/certs/stack-" + id + "/cert.pem",
-                "/Users/rdoktorics/prj/certs/stack-" + id + "/key.pem");
+                "/Users/rdoktorics/prj/certs/stack-" + id + "/key.pem",
+                "saltPasswd");
         client = new SaltConnector(gatewayConfig, true);
     }
 
