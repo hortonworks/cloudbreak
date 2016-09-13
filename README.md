@@ -4,7 +4,7 @@
 ### OSX, Linux
 You can install directly the GitHub binary release:
 ```
-curl -LsS https://github.com/hortonworks/hdc-cli/releases/download/v1.5.0/hdc-cli_1.5.0_$(uname)_x86_64.tgz | sudo tar -zx -C /usr/local/bin
+curl -LsS https://github.com/hortonworks/hdc-cli/releases/download/v1.6.0/hdc-cli_1.6.0-rc.1_$(uname)_x86_64.tgz | sudo tar -zx -C /usr/local/bin
 ```
 ### Windows
 The windows binary is in experimental phase, but you can download it from the GitHub release page.
@@ -23,7 +23,7 @@ USAGE:
    hdc [global options] command [command options] [arguments...]
 
 VERSION:
-   1.5.0-rc.9-2016-09-02T14:08:05
+   1.6.0-rc.1-2016-09-13T09:21:52
 
 AUTHOR(S):
    Hortonworks
