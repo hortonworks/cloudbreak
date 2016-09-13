@@ -108,6 +108,9 @@ cb:
   gcp:
     hostkey.verify: false
 
+  byos:
+    dfs.data.dir: /hadoop/hdfs/data
+
   nginx:
     port: 9443
 
