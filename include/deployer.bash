@@ -394,6 +394,14 @@ start-requested-services() {
 
     create-logfile
     compose-up $services
+    hdc-cli-downloadable
+}
+
+hdc-cli-downloadable() {
+  if [ -e /var/lib/cloudbreak/hdc-cli ];then
+    find /var/lib/cloudbreak/hdc-cli -name \*.tgz \
+      | xargs --no-run-if-empty -t -n 1 -I@ docker cp @ cbreak_uluwatu_1:/hortonworks-cloud-web/app/static/
+  fi
 }
 
 wait-for-cloudbreak() {
