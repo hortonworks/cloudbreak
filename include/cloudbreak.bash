@@ -205,6 +205,8 @@ cloudbreak-conf-cloud-provider() {
 
     env-import CB_AWS_HOSTKEY_VERIFY "false"
     env-import CB_GCP_HOSTKEY_VERIFY "false"
+    
+    env-import CB_BYOS_DFS_DATA_DIR "/hadoop/hdfs/data"
 }
 
 cloudbreak-conf-rest-client() {
