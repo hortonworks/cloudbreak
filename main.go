@@ -9,15 +9,15 @@ import (
 )
 
 func ConfigRead(c *cli.Context) error {
-	server := c.String(hdc.FlCBServer.Name)
-	username := c.String(hdc.FlCBUsername.Name)
-	password := c.String(hdc.FlCBPassword.Name)
-	output := c.String(hdc.FlCBOutput.Name)
+	server := c.String(hdc.FlServer.Name)
+	username := c.String(hdc.FlUsername.Name)
+	password := c.String(hdc.FlPassword.Name)
+	output := c.String(hdc.FlOutput.Name)
 
 	config, err := hdc.ReadConfig()
 	if err == nil {
 		if len(output) == 0 {
-			c.Set(hdc.FlCBOutput.Name, config.Output)
+			c.Set(hdc.FlOutput.Name, config.Output)
 		}
 	}
 
@@ -31,13 +31,13 @@ func ConfigRead(c *cli.Context) error {
 		PrintConfig(*config)
 
 		if len(server) == 0 {
-			c.Set(hdc.FlCBServer.Name, config.Server)
+			c.Set(hdc.FlServer.Name, config.Server)
 		}
 		if len(username) == 0 {
-			c.Set(hdc.FlCBUsername.Name, config.Username)
+			c.Set(hdc.FlUsername.Name, config.Username)
 		}
 		if len(password) == 0 {
-			c.Set(hdc.FlCBPassword.Name, config.Password)
+			c.Set(hdc.FlPassword.Name, config.Password)
 		}
 	}
 	return nil
@@ -87,13 +87,13 @@ func main() {
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
 				"to %s/%s/%s", hdc.GetHomeDirectory(), hdc.Hdc_dir, hdc.Config_file),
 			Usage:  "configure the server address and credentials used to communicate with this server",
-			Flags:  []cli.Flag{hdc.FlCBServerRequired, hdc.FlCBUsernameRequired, hdc.FlCBPasswordRequired, hdc.FlCBOutput},
+			Flags:  []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPasswordRequired, hdc.FlOutput},
 			Action: hdc.Configure,
 		},
 		{
 			Name:   "create-cluster",
 			Usage:  "creates a new cluster",
-			Flags:  []cli.Flag{hdc.FlCBInputJson, hdc.FlCBWait, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Flags:  []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			After:  StopSpinner,
 			Action: hdc.CreateCluster,
@@ -105,7 +105,7 @@ func main() {
 				},
 				{
 					Name:   "validate-cli-skeleton",
-					Flags:  []cli.Flag{hdc.FlCBInputJson},
+					Flags:  []cli.Flag{hdc.FlInputJson},
 					Action: hdc.ValidateCreateClusterSkeleton,
 					Usage:  "validate the input json",
 				},
@@ -114,14 +114,14 @@ func main() {
 		{
 			Name:   "describe-cluster",
 			Usage:  "get a detailed description of a cluster",
-			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Action: hdc.DescribeCluster,
 			Subcommands: []cli.Command{
 				{
 					Name:   "instances",
 					Usage:  "list the available instances in the cluster",
-					Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
+					Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 					Before: ConfigRead,
 					Action: hdc.ListClusterNodes,
 				},
@@ -130,21 +130,21 @@ func main() {
 		{
 			Name:   "list-cluster-types",
 			Usage:  "list available cluster types and HDP versions",
-			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Action: hdc.ListBlueprints,
 		},
 		{
 			Name:   "list-clusters",
 			Usage:  "list available clusters",
-			Flags:  []cli.Flag{hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Action: hdc.ListClusters,
 		},
 		{
 			Name:   "resize-cluster",
 			Usage:  "change the number of worker nodes of an existing cluster",
-			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBScalingAdjustment, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlScalingAdjustment, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			After:  StopSpinner,
 			Action: hdc.ResizeCluster,
@@ -152,7 +152,7 @@ func main() {
 		{
 			Name:   "terminate-cluster",
 			Usage:  "terminates a cluster",
-			Flags:  []cli.Flag{hdc.FlCBClusterName, hdc.FlCBWait, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword},
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			After:  StopSpinner,
 			Action: hdc.TerminateCluster,
@@ -162,9 +162,10 @@ func main() {
 	// hidden commands
 	app.Commands = append(app.Commands, []cli.Command{
 		{
-			Name:   "create-credential",
-			Usage:  "create a new credential",
-			Flags:  []cli.Flag{hdc.FlCBCredentialName, hdc.FlCBServer, hdc.FlCBUsername, hdc.FlCBPassword, hdc.FlCBOutput},
+			Name:  "create-credential",
+			Usage: "create a new credential",
+			Flags: []cli.Flag{hdc.FlCredentialName, hdc.FlRoleARN, hdc.FlSSHKeyURL, hdc.FlSSHKeyPair,
+				hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Hidden: true,
 			After:  StopSpinner,

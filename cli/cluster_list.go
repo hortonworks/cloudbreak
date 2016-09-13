@@ -38,7 +38,7 @@ func (c *ClusterNode) DataAsStringArray() []string {
 
 func ListClusters(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list clusters")
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	respStacks, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUser(&stacks.GetStacksUserParams{})
 	if err != nil {
@@ -70,7 +70,7 @@ func ListClusters(c *cli.Context) error {
 		}
 		tableRows[i] = clusterListElement
 	}
-	output := Output{Format: c.String(FlCBOutput.Name)}
+	output := Output{Format: c.String(FlOutput.Name)}
 	output.WriteList(ClusterListHeader, tableRows)
 
 	return nil
@@ -79,12 +79,12 @@ func ListClusters(c *cli.Context) error {
 func ListClusterNodes(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list cluster nodes")
 
-	clusterName := c.String(FlCBClusterName.Name)
+	clusterName := c.String(FlClusterName.Name)
 	if len(clusterName) == 0 {
 		logMissingParameterAndExit(c, ListClusterNodes)
 	}
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	respStack, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
 	if err != nil {
@@ -114,7 +114,7 @@ func ListClusterNodes(c *cli.Context) error {
 		}
 	}
 
-	output := Output{Format: c.String(FlCBOutput.Name)}
+	output := Output{Format: c.String(FlOutput.Name)}
 	output.WriteList(ClusterNodeHeader, tableRows)
 	return nil
 }

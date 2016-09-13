@@ -17,7 +17,7 @@ var (
 			EnvVar: "DEBUG",
 		},
 	}
-	FlCBServer = StringFlag{
+	FlServer = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "server",
@@ -25,7 +25,7 @@ var (
 			EnvVar: "CB_SERVER_ADDRESS",
 		},
 	}
-	FlCBServerRequired = StringFlag{
+	FlServerRequired = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:   "server",
@@ -33,7 +33,7 @@ var (
 			EnvVar: "CB_SERVER_ADDRESS",
 		},
 	}
-	FlCBUsername = StringFlag{
+	FlUsername = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "username",
@@ -41,7 +41,7 @@ var (
 			EnvVar: "CB_USER_NAME",
 		},
 	}
-	FlCBUsernameRequired = StringFlag{
+	FlUsernameRequired = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:   "username",
@@ -49,7 +49,7 @@ var (
 			EnvVar: "CB_USER_NAME",
 		},
 	}
-	FlCBPassword = StringFlag{
+	FlPassword = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "password",
@@ -57,7 +57,7 @@ var (
 			EnvVar: "CB_PASSWORD",
 		},
 	}
-	FlCBPasswordRequired = StringFlag{
+	FlPasswordRequired = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:   "password",
@@ -65,28 +65,28 @@ var (
 			EnvVar: "CB_PASSWORD",
 		},
 	}
-	FlCBInputJson = StringFlag{
+	FlInputJson = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "cli-input-json",
 			Usage: "user provided file with json content",
 		},
 	}
-	FlCBClusterName = StringFlag{
+	FlClusterName = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "cluster-name",
 			Usage: "name of a cluster",
 		},
 	}
-	FlCBWait = StringFlag{
+	FlWait = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "wait",
 			Usage: "wait for the operation to finish",
 		},
 	}
-	FlCBOutput = StringFlag{
+	FlOutput = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:   "output",
@@ -94,17 +94,35 @@ var (
 			EnvVar: "CB_OUT_FORMAT",
 		},
 	}
-	FlCBScalingAdjustment = StringFlag{
+	FlScalingAdjustment = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "scaling-adjustment",
 			Usage: "change the number of worker nodes, positive number for add more nodes, e.g: 1, negative for take down nodes, e.g: -1",
 		},
 	}
-	FlCBCredentialName = StringFlag{
+	FlCredentialName = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name: "credential-name",
+		},
+	}
+	FlRoleARN = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "role-arn",
+		},
+	}
+	FlSSHKeyURL = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "ssh-key-url",
+		},
+	}
+	FlSSHKeyPair = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "existing-ssh-key-pair",
 		},
 	}
 )
@@ -126,7 +144,7 @@ type BoolFlag struct {
 func RequiredFlags(flags []cli.Flag) []cli.Flag {
 	required := []cli.Flag{}
 	for _, flag := range flags {
-		if isRequired(flag) {
+		if isRequiredVisible(flag) {
 			required = append(required, flag)
 		}
 	}
@@ -136,20 +154,35 @@ func RequiredFlags(flags []cli.Flag) []cli.Flag {
 func OptionalFlags(flags []cli.Flag) []cli.Flag {
 	required := []cli.Flag{}
 	for _, flag := range flags {
-		if !isRequired(flag) {
+		if !isRequiredVisible(flag) {
 			required = append(required, flag)
 		}
 	}
 	return required
 }
 
-func isRequired(flag cli.Flag) bool {
+func checkRequiredFlags(c *cli.Context, caller interface{}) {
+	for _, f := range c.Command.Flags {
+		if isRequired(f) && len(c.String(f.GetName())) == 0 {
+			logMissingParameterAndExit(c, caller)
+		}
+	}
+}
+
+func isRequiredVisible(flag cli.Flag) bool {
 	if flag.GetName() == "help, h" {
 		return false
 	}
 	hidden := flagValue(flag).FieldByName("Hidden").Bool()
 	required := flagValue(flag).FieldByName("Required").Bool()
 	return !hidden && required
+}
+
+func isRequired(flag cli.Flag) bool {
+	if flag.GetName() == "help, h" {
+		return false
+	}
+	return flagValue(flag).FieldByName("Required").Bool()
 }
 
 func flagValue(flag cli.Flag) reflect.Value {

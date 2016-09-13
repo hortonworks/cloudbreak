@@ -6,39 +6,62 @@ import (
 	"github.com/hortonworks/hdc-cli/client/credentials"
 	"github.com/hortonworks/hdc-cli/models"
 	"github.com/urfave/cli"
+	"io/ioutil"
+	"net/http"
 	"strconv"
 	"sync"
 	"time"
 )
 
 func CreateCredential(c *cli.Context) error {
-	logErrorAndExit(CreateCredential, "Not implemented yet..")
+	checkRequiredFlags(c, CreateCredential)
+
+	go StartSpinner()
+
+	sshKeyURL := c.String(FlSSHKeyURL.Name)
+	log.Infof("[CreateCredential] sending GET request for SSH key to %s", sshKeyURL)
+	client := &http.Client{Transport: TransportConfig}
+	resp, err := client.Get(sshKeyURL)
+	if err != nil {
+		logErrorAndExit(CreateCredential, err.Error())
+	}
+	sshKey, _ := ioutil.ReadAll(resp.Body)
+	log.Infof("[CreateCredential] SSH key recieved: %s", sshKey)
+
+	var credentialMap = make(map[string]interface{})
+	credentialMap["roleArn"] = c.String(FlRoleARN.Name)
+	defaultCredential := models.CredentialResponse{
+		Parameters: credentialMap,
+		PublicKey:  string(sshKey),
+	}
+
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client.CreateCredential(c.String(FlCredentialName.Name), defaultCredential, c.String(FlSSHKeyPair.Name))
 	return nil
 }
 
 func (c *Cloudbreak) CopyDefaultCredential(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
 	defaultCred := c.GetCredential("aws-access")
-	channel <- c.CreateCredential(defaultCred, skeleton.SSHKeyName)
+	credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	channel <- c.CreateCredential(credentialName, defaultCred, skeleton.SSHKeyName)
 	wg.Done()
 }
 
-func (c *Cloudbreak) CreateCredential(defaultCredential models.CredentialResponse, existingKey string) int64 {
+func (c *Cloudbreak) CreateCredential(name string, defaultCredential models.CredentialResponse, existingKey string) int64 {
 	defer timeTrack(time.Now(), "create credential")
 	var credentialMap = make(map[string]interface{})
 	credentialMap["selector"] = "role-based"
 	credentialMap["roleArn"] = defaultCredential.Parameters["roleArn"]
 	credentialMap["existingKeyPairName"] = existingKey
 
-	credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
-
 	credReq := models.CredentialRequest{
-		Name:          credentialName,
+		Name:          name,
 		CloudPlatform: "AWS",
 		PublicKey:     defaultCredential.PublicKey,
 		Parameters:    credentialMap,
 	}
 
-	log.Infof("[CreateCredential] sending credential create request with name: %s", credentialName)
+	log.Infof("[CreateCredential] sending credential create request with name: %s", name)
 	resp, err := c.Cloudbreak.Credentials.PostCredentialsAccount(&credentials.PostCredentialsAccountParams{&credReq})
 
 	if err != nil {

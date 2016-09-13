@@ -33,11 +33,9 @@ func (c Config) Yaml() string {
 }
 
 func Configure(c *cli.Context) error {
-	if c.NumFlags() < 3 || len(c.String(FlCBUsername.Name)) == 0 || len(c.String(FlCBPassword.Name)) == 0 || len(c.String(FlCBServer.Name)) == 0 {
-		logMissingParameterAndExit(c, Configure)
-	}
+	checkRequiredFlags(c, Configure)
 
-	err := WriteConfigToFile(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name), c.String(FlCBOutput.Name))
+	err := WriteConfigToFile(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlOutput.Name))
 	if err != nil {
 		logErrorAndExit(Configure, err.Error())
 	}

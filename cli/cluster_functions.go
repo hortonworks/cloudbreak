@@ -45,7 +45,7 @@ func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroup, template *mod
 }
 
 func assembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
-	path := c.String(FlCBInputJson.Name)
+	path := c.String(FlInputJson.Name)
 	if len(path) == 0 {
 		logMissingParameterAndExit(c, assembleClusterSkeleton)
 	}
@@ -160,7 +160,7 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 }
 
 func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context) {
-	if context.Bool(FlCBWait.Name) {
+	if context.Bool(FlWait.Name) {
 		defer timeTrack(time.Now(), "cluster installation")
 
 		log.Infof("[WaitForClusterToFinish] wait for cluster to finish")
@@ -191,7 +191,7 @@ func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context)
 }
 
 func (c *Cloudbreak) waitForClusterToTerminate(clusterName string, context *cli.Context) {
-	if context.Bool(FlCBWait.Name) {
+	if context.Bool(FlWait.Name) {
 		defer timeTrack(time.Now(), "cluster termination")
 
 		log.Infof("[waitForClusterToTerminate] wait for cluster to terminate")

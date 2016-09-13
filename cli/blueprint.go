@@ -34,7 +34,7 @@ func (b *Blueprint) DataAsStringArray() []string {
 }
 
 func ListBlueprints(c *cli.Context) error {
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	// make the request to get all items
 	respBlueprints, err := oAuth2Client.Cloudbreak.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
@@ -50,7 +50,7 @@ func ListBlueprints(c *cli.Context) error {
 			tableRows = append(tableRows, row)
 		}
 	}
-	output := Output{Format: c.String(FlCBOutput.Name)}
+	output := Output{Format: c.String(FlOutput.Name)}
 	output.WriteList(BlueprintHeader, tableRows)
 
 	return nil

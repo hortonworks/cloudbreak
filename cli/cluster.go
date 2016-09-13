@@ -100,32 +100,32 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 func DescribeCluster(c *cli.Context) error {
 	defer timeTrack(time.Now(), "describe cluster")
 
-	clusterName := c.String(FlCBClusterName.Name)
+	clusterName := c.String(FlClusterName.Name)
 	if len(clusterName) == 0 {
 		logMissingParameterAndExit(c, DescribeCluster)
 	}
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	stack := oAuth2Client.GetClusterByName(clusterName)
 	clusterSkeleton, _ := oAuth2Client.FetchCluster(stack, false)
 	clusterSkeleton.ClusterAndAmbariPassword = ""
 
-	output := Output{Format: c.String(FlCBOutput.Name)}
+	output := Output{Format: c.String(FlOutput.Name)}
 	output.Write(ClusterSkeletonHeader, clusterSkeleton)
 
 	return nil
 }
 
 func TerminateCluster(c *cli.Context) error {
-	clusterName := c.String(FlCBClusterName.Name)
+	clusterName := c.String(FlClusterName.Name)
 
 	if len(clusterName) == 0 {
 		logMissingParameterAndExit(c, TerminateCluster)
 	}
 
 	log.Infof("[TerminateCluster] sending request to terminate cluster: %s", clusterName)
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	err := oAuth2Client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName})
 
@@ -145,7 +145,7 @@ func CreateCluster(c *cli.Context) error {
 		logErrorAndExit(CreateCluster, err.Error())
 	}
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	blueprintId := oAuth2Client.GetBlueprintId(getRealBlueprintName(skeleton.ClusterType))
 
@@ -319,17 +319,17 @@ func ValidateCreateClusterSkeleton(c *cli.Context) error {
 func ResizeCluster(c *cli.Context) error {
 	defer timeTrack(time.Now(), "resize cluster")
 
-	clusterName := c.String(FlCBClusterName.Name)
+	clusterName := c.String(FlClusterName.Name)
 	if len(clusterName) == 0 {
 		logMissingParameterAndExit(c, ResizeCluster)
 	}
 
-	adjustment := int32(c.Int(FlCBScalingAdjustment.Name))
+	adjustment := int32(c.Int(FlScalingAdjustment.Name))
 	if adjustment == 0 {
-		logMissingParameterAndExit(c, ResizeCluster, fmt.Sprintf("the %s cannot be 0\n", FlCBScalingAdjustment.Name))
+		logMissingParameterAndExit(c, ResizeCluster, fmt.Sprintf("the %s cannot be 0\n", FlScalingAdjustment.Name))
 	}
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlCBServer.Name), c.String(FlCBUsername.Name), c.String(FlCBPassword.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	stack := oAuth2Client.GetClusterByName(clusterName)
 
 	if adjustment > 0 {
