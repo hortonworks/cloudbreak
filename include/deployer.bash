@@ -398,10 +398,14 @@ start-requested-services() {
 }
 
 hdc-cli-downloadable() {
+  cloudbreak-config
   if [ -e /var/lib/cloudbreak/hdc-cli ];then
     find /var/lib/cloudbreak/hdc-cli -name \*.tgz \
       | xargs --no-run-if-empty -t -n 1 -I@ docker cp @ cbreak_uluwatu_1:/hortonworks-cloud-web/app/static/
   fi
+
+  info "You can download the cli from:"
+  find /var/lib/cloudbreak/hdc-cli/ -name \*.tgz -printf "curl -kL $ULU_HOST_ADDRESS/%P | tar -xzv\n" | blue
 }
 
 wait-for-cloudbreak() {
