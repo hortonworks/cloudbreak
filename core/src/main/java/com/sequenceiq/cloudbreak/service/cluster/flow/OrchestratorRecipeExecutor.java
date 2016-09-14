@@ -46,7 +46,8 @@ public class OrchestratorRecipeExecutor {
                 .collect(Collectors.toMap(HostGroup::getName, h -> convert(h.getRecipes())));
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(),
-                gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSaltPassword());
+                gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
+                stack.getSecurityConfig().getSaltPassword(), stack.getSecurityConfig().getSaltBootPassword());
         try {
             hostOrchestrator.uploadRecipes(gatewayConfig, recipeMap, collectNodes(stack),
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
@@ -59,7 +60,8 @@ public class OrchestratorRecipeExecutor {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(),
-                gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSaltPassword());
+                gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
+                stack.getSecurityConfig().getSaltPassword(), stack.getSecurityConfig().getSaltBootPassword());
         try {
             hostOrchestrator.preInstallRecipes(gatewayConfig, collectNodes(stack),
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
@@ -72,7 +74,8 @@ public class OrchestratorRecipeExecutor {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(),
-                gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSaltPassword());
+                gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSecurityConfig().getSaltPassword(),
+                stack.getSecurityConfig().getSaltBootPassword());
         try {
             hostOrchestrator.postInstallRecipes(gatewayConfig, collectNodes(stack),
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));

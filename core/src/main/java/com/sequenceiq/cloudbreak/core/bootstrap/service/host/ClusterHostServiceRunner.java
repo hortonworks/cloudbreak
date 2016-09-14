@@ -68,7 +68,8 @@ public class ClusterHostServiceRunner {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(),
-                    gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSaltPassword());
+                    gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
+                    stack.getSecurityConfig().getSaltPassword(), stack.getSecurityConfig().getSaltBootPassword());
             Cluster cluster = stack.getCluster();
             Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
             if (cluster.isSecure()) {
@@ -111,7 +112,8 @@ public class ClusterHostServiceRunner {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(),
-                    gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSaltPassword());
+                    gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
+                    stack.getSecurityConfig().getSaltPassword(), stack.getSecurityConfig().getSaltBootPassword());
             hostOrchestrator.runService(gatewayConfig, allNodes, new SaltPillarConfig(), clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());

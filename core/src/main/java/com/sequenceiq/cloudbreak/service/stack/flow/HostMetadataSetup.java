@@ -90,7 +90,8 @@ public class HostMetadataSetup {
                 metadataToUpdate = newInstanceMetadata;
             }
             List<String> privateIps = metadataToUpdate.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
-            WebTarget target = RestClientUtil.createTarget(restClient, String.format("https://%s:%s", clientConfig.getApiAddress(), clientConfig.getApiPort()));
+            WebTarget target = RestClientUtil.createSaltBootstrapTarget(restClient, stack.getSecurityConfig().getSaltBootPassword(),
+                    clientConfig.getApiAddress(), clientConfig.getApiPort());
             GenericResponses responses = target.path(HOSTNAME_ENDPOINT).request()
                     .post(Entity.json(singletonMap("clients", privateIps))).readEntity(GenericResponses.class);
             Map<String, String> members = responses.getResponses().stream().collect(Collectors.toMap(GenericResponse::getAddress, GenericResponse::getStatus));

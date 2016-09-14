@@ -15,6 +15,7 @@
     <suppress checks="RedundantModifier" files="CoreApi.java"/>
     <suppress checks="RegexpMultilineCheck" files="ShellConfiguration.java"/>
     <suppress checks="IllegalTypeCheck" files="AbstractFlowConfiguration.java|AbstractFlowConfigurationTest.java"/>
+    <suppress checks="ParameterNumber" files="UserDataBuilder.java"/>
 
 
     <!-- suppressing checks in application runner classes -->

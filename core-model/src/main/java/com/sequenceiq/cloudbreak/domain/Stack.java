@@ -41,8 +41,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.hibernate.annotations.Type;
-
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
@@ -257,8 +255,6 @@ public class Stack implements ProvisionEntity {
     private Orchestrator orchestrator;
     private Long created;
     private Boolean relocateDocker;
-    @Type(type = "encrypted_string")
-    private String saltPassword;
 
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
@@ -450,14 +446,6 @@ public class Stack implements ProvisionEntity {
 
     public void setRelocateDocker(Boolean relocateDocker) {
         this.relocateDocker = relocateDocker;
-    }
-
-    public String getSaltPassword() {
-        return saltPassword;
-    }
-
-    public void setSaltPassword(String saltPassword) {
-        this.saltPassword = saltPassword;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {
