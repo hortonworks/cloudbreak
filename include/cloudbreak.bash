@@ -49,6 +49,7 @@ cloudbreak-conf-tags() {
 
     env-import CB_DOCKER_CONTAINER_AMBARI ""
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
+    env-import CERTS_BUCKET ""
 }
 
 docker-ip() {

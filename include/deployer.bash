@@ -461,10 +461,13 @@ main() {
     cmd-export aws-generate-role
     cmd-export aws-delete-role
     cmd-export aws-list-roles
+    cmd-export aws-certs-upload-s3
+    cmd-export aws-certs-restore-s3
 
     cmd-export-ns azure "Azure namespace"
     cmd-export azure-deploy-dash
     cmd-export azure-configure-arm
+
     
     if [[ "$PROFILE_LOADED" ]] ; then
         cmd-export cbd-update update

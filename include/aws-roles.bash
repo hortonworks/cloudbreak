@@ -6,6 +6,47 @@ aws-init() {
     AWS=.deps/bin/aws
 }
 
+aws-certs-upload-s3() {
+    declare desc="uploads certs dir backup tgz into s3 bucket"
+
+    local bucket=${1:-$CERTS_BUCKET}
+    : ${bucket:? required}
+    local regio=$($AWS s3api get-bucket-location --bucket $bucket --query LocationConstraint --out text)
+    
+    docker run --rm -it \
+      --volumes-from cbreak_cloudbreak_1 \
+      -e S3_BUCKET_NAME=$bucket \
+      -e AWS_DEFAULT_REGION=$regio \
+      -e BACKUP_NAME=certs \
+      -e PATHS_TO_BACKUP=/certs \
+      --entrypoint bash \
+      tutum/dockup -c 'unset AWS_SECRET_ACCESS_KEY; unset AWS_ACCESS_KEY_ID; ./backup.sh'
+}
+
+aws-certs-restore-s3() {
+    declare desc="restores certs dir backup tgz from s3 bucket"
+
+    local bucket=${1:-$CERTS_BUCKET}
+    : ${bucket:? required}
+    local regio=$($AWS s3api get-bucket-location --bucket $bucket --query LocationConstraint --out text)
+
+    mkdir -p certs
+    docker rm certs-volume 2>/dev/null || true
+    docker create -v $PWD/certs:/certs --name certs-volume alpine sh
+
+    docker run --rm -it \
+      --volumes-from certs-volume \
+      -e S3_BUCKET_NAME=$bucket \
+      -e AWS_DEFAULT_REGION=$regio \
+      -e BACKUP_NAME=certs \
+      -e PATHS_TO_BACKUP=/certs \
+      --entrypoint bash \
+      tutum/dockup -c 'unset AWS_SECRET_ACCESS_KEY; unset AWS_ACCESS_KEY_ID; ./restore.sh'
+
+    docker rm certs-volume
+}
+
+
 aws-show-policy() {
     declare policyArn=$1
 
