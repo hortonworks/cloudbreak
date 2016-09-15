@@ -11,13 +11,14 @@ public class GatewayConfig {
     private final String clientKey;
     private final Integer gatewayPort;
     private final String saltPassword;
+    private final String saltBootPassword;
 
     public GatewayConfig(String publicAddress, String privateAddress, Integer gatewayPort, String certificateDir) {
-        this(publicAddress, privateAddress, null, gatewayPort, certificateDir, null, null, null, null);
+        this(publicAddress, privateAddress, null, gatewayPort, certificateDir, null, null, null, null, null);
     }
 
     public GatewayConfig(String publicAddress, String privateAddress, String hostname,
-            Integer gatewayPort, String certificateDir, String serverCert, String clientCert, String clientKey, String saltPassword) {
+            Integer gatewayPort, String certificateDir, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword) {
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
         this.hostname = hostname;
@@ -27,6 +28,7 @@ public class GatewayConfig {
         this.clientCert = clientCert;
         this.clientKey = clientKey;
         this.saltPassword = saltPassword;
+        this.saltBootPassword = saltBootPassword;
     }
 
     public String getPublicAddress() {
@@ -67,6 +69,10 @@ public class GatewayConfig {
 
     public String getSaltPassword() {
         return saltPassword;
+    }
+
+    public String getSaltBootPassword() {
+        return saltBootPassword;
     }
 
     @Override

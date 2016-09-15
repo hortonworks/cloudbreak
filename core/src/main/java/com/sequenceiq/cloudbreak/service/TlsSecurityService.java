@@ -56,16 +56,16 @@ public class TlsSecurityService {
     @Inject
     private SecurityConfigRepository securityConfigRepository;
 
-    public void storeSSHKeys(Stack stack) throws CloudbreakSecuritySetupException {
+    public SecurityConfig storeSSHKeys(Stack stack) throws CloudbreakSecuritySetupException {
         try {
             generateTempSshKeypair(stack.getId());
             SecurityConfig securityConfig = new SecurityConfig();
             securityConfig.setClientKey(BaseEncoding.base64().encode(readClientKey(stack.getId()).getBytes()));
             securityConfig.setClientCert(BaseEncoding.base64().encode(readClientCert(stack.getId()).getBytes()));
-            securityConfig.setTemporarySshPrivateKey(BaseEncoding.base64().encode(readPrivateSshKey(stack.getId()).getBytes()));
-            securityConfig.setTemporarySshPublicKey(BaseEncoding.base64().encode(readPublicSshKey(stack.getId()).getBytes()));
-            securityConfig.setStack(stack);
-            securityConfigRepository.save(securityConfig);
+            securityConfig.setCloudbreakSshPrivateKey(BaseEncoding.base64().encode(readPrivateSshKey(stack.getId()).getBytes()));
+            securityConfig.setCloudbreakSshPublicKey(BaseEncoding.base64().encode(readPublicSshKey(stack.getId()).getBytes()));
+
+            return securityConfig;
         } catch (IOException | JSchException e) {
             throw new CloudbreakSecuritySetupException("Failed to generate temporary SSH key pair.", e);
         }
@@ -189,11 +189,11 @@ public class TlsSecurityService {
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, String publicIp, Integer gatewayPort,
-            String privateIp, String hostname, String saltPassword) throws CloudbreakSecuritySetupException {
+            String privateIp, String hostname, String saltPassword, String saltBootPassword) throws CloudbreakSecuritySetupException {
         prepareCertDir(stackId);
         HttpClientConfig conf = buildTLSClientConfig(stackId, publicIp);
-        return new GatewayConfig(publicIp, privateIp, hostname, gatewayPort,
-                prepareCertDir(stackId), conf.getServerCert(), conf.getClientCert(), conf.getClientKey(), saltPassword);
+        return new GatewayConfig(publicIp, privateIp, hostname, gatewayPort, prepareCertDir(stackId), conf.getServerCert(), conf.getClientCert(),
+                conf.getClientKey(), saltPassword, saltBootPassword);
     }
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
@@ -233,7 +233,7 @@ public class TlsSecurityService {
     public String readPrivateSshKey(Long stackId) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
         if (!checkSecurityFileExist(stackId, getPrivateSshKeyFileName(stackId))) {
-            writeSecurityFile(stackId, stack.getSecurityConfig().getTemporarySshPrivateKey(), getPrivateSshKeyFileName(stackId));
+            writeSecurityFile(stackId, stack.getSecurityConfig().getCloudbreakSshPrivateKey(), getPrivateSshKeyFileName(stackId));
         }
         return readSecurityFile(stackId, getPrivateSshKeyFileName(stackId));
     }
@@ -241,7 +241,7 @@ public class TlsSecurityService {
     public String readPublicSshKey(Long stackId) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
         if (!checkSecurityFileExist(stackId, getPublicSshKeyFileName(stackId))) {
-            writeSecurityFile(stackId, stack.getSecurityConfig().getTemporarySshPublicKey(), getPublicSshKeyFileName(stackId));
+            writeSecurityFile(stackId, stack.getSecurityConfig().getCloudbreakSshPublicKey(), getPublicSshKeyFileName(stackId));
         }
         return readSecurityFile(stackId, getPublicSshKeyFileName(stackId));
     }
@@ -253,5 +253,4 @@ public class TlsSecurityService {
         }
         return Base64.decodeBase64(cert);
     }
-
 }

@@ -32,11 +32,11 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, String pubKey, String tmpSshKey, String sshUser, PlatformParameters parameters,
-            Boolean relocate) {
+    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, String pubKey, String cbSshKey, String sshUser, PlatformParameters parameters,
+            Boolean relocate, String saltBootPassword) {
         Map<InstanceGroupType, String> result = new HashMap<>();
         for (InstanceGroupType type : InstanceGroupType.values()) {
-            String userData = build(type, cloudPlatform, pubKey, tmpSshKey, sshUser, parameters, relocate);
+            String userData = build(type, cloudPlatform, pubKey, cbSshKey, sshUser, parameters, relocate, saltBootPassword);
             result.put(type, userData);
             LOGGER.debug("User data for {}, content; {}", type, userData);
         }
@@ -44,18 +44,19 @@ public class UserDataBuilder {
         return result;
     }
 
-    private String build(InstanceGroupType type, Platform cloudPlatform, String publicSssKey, String tmpSshKey, String sshUser, PlatformParameters params,
-            Boolean relocate) {
+    private String build(InstanceGroupType type, Platform cloudPlatform, String publicSssKey, String cbSshKey, String sshUser, PlatformParameters params,
+            Boolean relocate, String saltBootPassword) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
         model.put("platformDiskStartLabel", params.scriptParams().getStartLabel());
         model.put("gateway", type == InstanceGroupType.GATEWAY);
-        model.put("tmpSshKey", tmpSshKey);
+        model.put("tmpSshKey", cbSshKey);
         model.put("sshUser", sshUser);
         model.put("publicSshKey", publicSssKey);
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("relocateDocker", relocate);
+        model.put("saltBootPassword", saltBootPassword);
         return build(model);
     }
 

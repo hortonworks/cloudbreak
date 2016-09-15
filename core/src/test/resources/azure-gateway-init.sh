@@ -18,3 +18,11 @@ export SSH_USER=cloudbreak
 date >> /tmp/time.txt
 
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
+
+mkdir -p /etc/systemd/system/salt-bootstrap.service.d
+cat > /etc/systemd/system/salt-bootstrap.service.d/envs.conf << EOF
+[Service]
+Environment="SALTBOOT_USERNAME=cbadmin"
+Environment="SALTBOOT_PASSWORD=pass"
+EOF
+systemctl daemon-reload

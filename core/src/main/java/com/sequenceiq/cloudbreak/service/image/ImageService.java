@@ -62,11 +62,11 @@ public class ImageService {
             Platform platform = platform(stack.cloudPlatform());
             String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
             String imageName = imageNameUtil.determineImageName(platformString, stack.getRegion(), ambariVersion, hdpVersion);
-            String tmpSshKey = tlsSecurityService.readPublicSshKey(stack.getId());
+            String cbSshKey = tlsSecurityService.readPublicSshKey(stack.getId());
             String sshUser = stack.getCredential().getLoginUserName();
             String publicSssKey = stack.getCredential().getPublicKey();
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, tmpSshKey, sshUser, params,
-                    stack.getRelocateDocker() == null ? false : stack.getRelocateDocker());
+            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, cbSshKey, sshUser, params,
+                    stack.getRelocateDocker() == null ? false : stack.getRelocateDocker(), stack.getSecurityConfig().getSaltBootPassword());
             HDPInfo hdpInfo = hdpInfoSearchService.searchHDPInfo(ambariVersion, hdpVersion, imageCatalog);
             if (hdpInfo != null) {
                 String specificImage = imageNameUtil.determineImageName(hdpInfo, platformString, stack.getRegion());
