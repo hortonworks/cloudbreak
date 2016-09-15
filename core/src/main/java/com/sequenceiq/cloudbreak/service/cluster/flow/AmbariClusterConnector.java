@@ -409,6 +409,7 @@ public class AmbariClusterConnector {
     }
 
     private void stopAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
+        LOGGER.info("Stop all Hadoop services");
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STOPPING.code()));
         int requestId = ambariClient.stopAllServices();
@@ -422,6 +423,7 @@ public class AmbariClusterConnector {
                 throw new CloudbreakException("Timeout while stopping Ambari services.");
             }
         } else {
+            LOGGER.warn("Failed to stop Hadoop services.");
             throw new CloudbreakException("Failed to stop Hadoop services.");
         }
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
@@ -429,6 +431,7 @@ public class AmbariClusterConnector {
     }
 
     private void startAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
+        LOGGER.info("Start all Hadoop services");
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STARTING.code()));
         int requestId = ambariClient.startAllServices();
@@ -442,6 +445,7 @@ public class AmbariClusterConnector {
                 throw new CloudbreakException("Timeout while starting Ambari services.");
             }
         } else {
+            LOGGER.warn("Failed to start Hadoop services.");
             throw new CloudbreakException("Failed to start Hadoop services.");
         }
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
