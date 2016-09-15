@@ -13,7 +13,7 @@ aws-certs-upload-s3() {
     : ${bucket:? required}
     local regio=$($AWS s3api get-bucket-location --bucket $bucket --query LocationConstraint --out text)
     
-    docker run --rm -it \
+    docker run --rm \
       --volumes-from cbreak_cloudbreak_1 \
       -e S3_BUCKET_NAME=$bucket \
       -e AWS_DEFAULT_REGION=$regio \
@@ -34,7 +34,7 @@ aws-certs-restore-s3() {
     docker rm certs-volume 2>/dev/null || true
     docker create -v $PWD/certs:/certs --name certs-volume alpine sh
 
-    docker run --rm -it \
+    docker run --rm \
       --volumes-from certs-volume \
       -e S3_BUCKET_NAME=$bucket \
       -e AWS_DEFAULT_REGION=$regio \
