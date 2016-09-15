@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
+import java.util.Map;
+
 public class Pillar {
 
     private String path;
 
-    private Object json;
+    private Map<?, ?> json;
 
-    public Pillar(String path, Object json) {
+    public Pillar(String path, Map<?, ?> json) {
         this.path = path;
         this.json = json;
     }
@@ -23,7 +25,7 @@ public class Pillar {
         return json;
     }
 
-    public void setJson(Object json) {
+    public void setJson(Map<?, ?> json) {
         this.json = json;
     }
 }

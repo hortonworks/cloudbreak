@@ -42,9 +42,9 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 
 @Component
 public class ClusterBootstrapper {
@@ -95,7 +95,7 @@ public class ClusterBootstrapper {
     private HostOrchestratorResolver hostOrchestratorResolver;
 
     @Inject
-    private TlsSecurityService tlsSecurityService;
+    private GatewayConfigService gatewayConfigService;
 
     @Inject
     private ContainerConfigService containerConfigService;
@@ -122,8 +122,6 @@ public class ClusterBootstrapper {
 
     @SuppressWarnings("unchecked")
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper());
@@ -131,9 +129,9 @@ public class ClusterBootstrapper {
             nodes.add(node);
         }
         try {
-            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
-                    stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                    stack.getSecurityConfig().getSaltPassword(), stack.getSecurityConfig().getSaltBootPassword());
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     hostBootstrapApiCheckerTask,
@@ -162,17 +160,14 @@ public class ClusterBootstrapper {
     }
 
     public void bootstrapContainers(Stack stack) throws CloudbreakException {
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
         }
         try {
-            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
-                    stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                    stack.getSecurityConfig().getSaltPassword(), stack.getSecurityConfig().getSaltBootPassword());
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance);
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(SWARM);
             PollingResult bootstrapApiPolling = containerBootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     containerBootstrapApiCheckerTask,
@@ -227,8 +222,6 @@ public class ClusterBootstrapper {
 
     public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
 
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
@@ -237,9 +230,9 @@ public class ClusterBootstrapper {
             }
         }
         try {
-            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
-                    stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                    stack.getSecurityConfig().getSaltPassword(), stack.getSecurityConfig().getSaltBootPassword());
+            InstanceGroup gateway = stack.getGatewayInstanceGroup();
+            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance);
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             if (orchestratorType.hostOrchestrator()) {
                 bootstrapNewNodesOnHost(stack, gatewayInstance, nodes, gatewayConfig);

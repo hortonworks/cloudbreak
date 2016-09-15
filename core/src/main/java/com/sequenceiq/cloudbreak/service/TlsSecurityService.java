@@ -21,6 +21,8 @@ import com.google.common.io.BaseEncoding;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -28,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
@@ -56,14 +57,14 @@ public class TlsSecurityService {
     @Inject
     private SecurityConfigRepository securityConfigRepository;
 
-    public SecurityConfig storeSSHKeys(Stack stack) throws CloudbreakSecuritySetupException {
+    public SecurityConfig storeSSHKeys(Long stackId) throws CloudbreakSecuritySetupException {
         try {
-            generateTempSshKeypair(stack.getId());
+            generateTempSshKeypair(stackId);
             SecurityConfig securityConfig = new SecurityConfig();
-            securityConfig.setClientKey(BaseEncoding.base64().encode(readClientKey(stack.getId()).getBytes()));
-            securityConfig.setClientCert(BaseEncoding.base64().encode(readClientCert(stack.getId()).getBytes()));
-            securityConfig.setCloudbreakSshPrivateKey(BaseEncoding.base64().encode(readPrivateSshKey(stack.getId()).getBytes()));
-            securityConfig.setCloudbreakSshPublicKey(BaseEncoding.base64().encode(readPublicSshKey(stack.getId()).getBytes()));
+            securityConfig.setClientKey(BaseEncoding.base64().encode(readClientKey(stackId).getBytes()));
+            securityConfig.setClientCert(BaseEncoding.base64().encode(readClientCert(stackId).getBytes()));
+            securityConfig.setCloudbreakSshPrivateKey(BaseEncoding.base64().encode(readPrivateSshKey(stackId).getBytes()));
+            securityConfig.setCloudbreakSshPublicKey(BaseEncoding.base64().encode(readPublicSshKey(stackId).getBytes()));
 
             return securityConfig;
         } catch (IOException | JSchException e) {
@@ -189,11 +190,11 @@ public class TlsSecurityService {
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, String publicIp, Integer gatewayPort,
-            String privateIp, String hostname, String saltPassword, String saltBootPassword) throws CloudbreakSecuritySetupException {
+            String privateIp, String hostname, SaltClientConfig saltClientConfig) throws CloudbreakSecuritySetupException {
         prepareCertDir(stackId);
         HttpClientConfig conf = buildTLSClientConfig(stackId, publicIp);
         return new GatewayConfig(publicIp, privateIp, hostname, gatewayPort, prepareCertDir(stackId), conf.getServerCert(), conf.getClientCert(),
-                conf.getClientKey(), saltPassword, saltBootPassword);
+                conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKey());
     }
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
@@ -121,7 +122,7 @@ public class ClusterContainerRunnerTest {
         when(containerService.findContainersInCluster(anyLong())).thenReturn(containers);
         when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString(), anyString(), anyString()))
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString(), any()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<>());
         when(containerService.save(anyList())).thenReturn(new ArrayList<>());
@@ -141,7 +142,7 @@ public class ClusterContainerRunnerTest {
         hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString(), anyString(), anyString()))
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString(), any()))
                 .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
         when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
         when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());

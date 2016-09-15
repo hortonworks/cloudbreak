@@ -22,14 +22,14 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class AmbariClusterResetService {
 
     @Inject
-    private TlsSecurityService tlsSecurityService;
+    private GatewayConfigService gatewayConfigService;
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
@@ -42,12 +42,10 @@ public class AmbariClusterResetService {
 
     public void resetCluster(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        InstanceGroup gatewayInstanceGroup = stack.getGatewayInstanceGroup();
         try {
+            InstanceGroup gatewayInstanceGroup = stack.getGatewayInstanceGroup();
             InstanceMetaData gatewayInstance = gatewayInstanceGroup.getInstanceMetaData().iterator().next();
-            GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
-                    stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                    stack.getSecurityConfig().getSaltPassword(), stack.getSecurityConfig().getSaltBootPassword());
+            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance);
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             if (orchestratorType.hostOrchestrator()) {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
