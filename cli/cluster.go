@@ -364,7 +364,7 @@ func ResizeCluster(c *cli.Context) error {
 
 func GenerateCreateClusterSkeleton(c *cli.Context) error {
 	skeleton := ClusterSkeleton{
-		ClusterType: "EDW-ETL: Apache Spark 2.0-preview",
+		ClusterType: "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",
 		HDPVersion:  "2.5",
 		Master: InstanceConfig{
 			InstanceType: "m4.xlarge",
