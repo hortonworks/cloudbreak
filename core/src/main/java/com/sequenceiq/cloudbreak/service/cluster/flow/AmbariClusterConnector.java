@@ -90,7 +90,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
-import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 

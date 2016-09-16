@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 @Component
 public class ClusterServiceRunner {

@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
-import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 @Component
 public class ClusterToJsonConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterResponse> {

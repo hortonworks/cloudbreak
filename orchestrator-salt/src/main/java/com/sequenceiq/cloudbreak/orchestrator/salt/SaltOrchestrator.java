@@ -245,8 +245,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig) {
-        SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug);
-        try {
+        try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
             if (saltConnector.health().getStatusCode() == HttpStatus.OK.value()) {
                 return true;
             }
@@ -264,6 +263,15 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public int getMaxBootstrapNodes() {
         return MAX_NODES;
+    }
+
+    @Override
+    public Map<String, String> getMembers(GatewayConfig gatewayConfig, List<String> privateIps) throws CloudbreakOrchestratorException {
+        try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
+            return saltConnector.members(privateIps);
+        } catch (IOException e) {
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
     }
 
     private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,

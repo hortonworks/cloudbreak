@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariConfigurationService;
-import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 @Service
 public class HostFilterService {

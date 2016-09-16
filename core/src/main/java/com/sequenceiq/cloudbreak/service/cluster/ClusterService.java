@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 public interface ClusterService {
 

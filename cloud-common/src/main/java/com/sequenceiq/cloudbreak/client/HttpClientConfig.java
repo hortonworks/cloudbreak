@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.flow;
+package com.sequenceiq.cloudbreak.client;
 
 public class HttpClientConfig {
     private static final String DEFAULT_PRIVATE_KEY_NAME = "/key.pem";

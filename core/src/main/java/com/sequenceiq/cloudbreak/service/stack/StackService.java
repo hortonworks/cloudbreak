@@ -285,7 +285,7 @@ public class StackService {
                 instanceGroupRepository.save(savedStack.getInstanceGroups());
                 tlsSecurityService.copyClientKeys(stack.getId());
 
-                SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys(stack);
+                SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys(stack.getId());
                 securityConfig.setSaltPassword(PasswordUtil.generatePassword());
                 securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
                 securityConfig.setStack(stack);

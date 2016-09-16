@@ -1,9 +1,15 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.client;
 
+import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltEndpoint.BOOT_HOSTNAME_ENDPOINT;
+import static java.util.Collections.singletonMap;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -15,14 +21,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.http.HttpStatus;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.Boundary;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StreamUtils;
 
+import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.client.SignUtil;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
@@ -33,21 +43,32 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 public class SaltConnector implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltConnector.class);
+    private static final Gson GSON = new Gson();
 
     private static final String SALT_USER = "saltuser";
     private static final String SALT_PASSWORD = "saltpass";
 
+    private static final String SALT_BOOT_USER = "cbadmin";
+    private static final String SALT_BOOT_PASSWORD = "cbadmin";
+
+    private static final String SIGN_HEADER = "signature";
+
+    private static final List<Integer> ACCEPTED_STATUSES = Arrays.asList(HttpStatus.SC_OK, HttpStatus.SC_CREATED, HttpStatus.SC_ACCEPTED);
+
     private final Client restClient;
     private final WebTarget saltTarget;
     private final String saltPassword;
+    private final String signatureKey;
 
     public SaltConnector(GatewayConfig gatewayConfig, boolean debug) {
         try {
             this.restClient = RestClientUtil.createClient(
                     gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(), debug, SaltConnector.class);
-            this.saltTarget = RestClientUtil.createSaltBootstrapTarget(restClient, gatewayConfig.getSaltBootPassword(),
-                    gatewayConfig.getPublicAddress(), gatewayConfig.getGatewayPort());
+            String saltBootPasswd = Optional.ofNullable(gatewayConfig.getSaltBootPassword()).orElse(SALT_BOOT_PASSWORD);
+            HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(SALT_BOOT_USER, saltBootPasswd);
+            this.saltTarget = restClient.target(gatewayConfig.getGatewayUrl()).register(feature);
             this.saltPassword = Optional.ofNullable(gatewayConfig.getSaltPassword()).orElse(SALT_PASSWORD);
+            this.signatureKey = gatewayConfig.getSignatureKey();
         } catch (Exception e) {
             throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
         }
@@ -63,6 +84,7 @@ public class SaltConnector implements Closeable {
     public GenericResponse pillar(Pillar pillar) {
         GenericResponse response = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE
                 .getContextPath()).request()
+                .header(SIGN_HEADER, SignUtil.generateSignature(signatureKey, GSON.toJson(pillar).getBytes()))
                 .post(Entity.json(pillar)).readEntity(GenericResponse.class);
         LOGGER.info("Pillar response: {}", response);
         return response;
@@ -71,6 +93,7 @@ public class SaltConnector implements Closeable {
     public GenericResponses action(SaltAction saltAction) {
         GenericResponses responses = saltTarget.path(SaltEndpoint.BOOT_ACTION_DISTRIBUTE
                 .getContextPath()).request()
+                .header(SIGN_HEADER, SignUtil.generateSignature(signatureKey, GSON.toJson(saltAction).getBytes()))
                 .post(Entity.json(saltAction)).readEntity(GenericResponses.class);
         LOGGER.info("SaltAction response: {}", responses);
         return responses;
@@ -96,6 +119,7 @@ public class SaltConnector implements Closeable {
         }
         T response = saltTarget.path(SaltEndpoint.SALT_RUN
                 .getContextPath()).request()
+                .header(SIGN_HEADER, SignUtil.generateSignature(signatureKey, GSON.toJson(form).getBytes()))
                 .post(Entity.form(form)).readEntity(clazz);
         LOGGER.info("Salt run response: {}", response);
         return response;
@@ -123,11 +147,22 @@ public class SaltConnector implements Closeable {
                 .bodyPart(streamDataBodyPart);
         MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
         contentType = Boundary.addBoundary(contentType);
+        String signature = SignUtil.generateSignature(signatureKey, StreamUtils.copyToByteArray(inputStream));
+        inputStream.reset();
         Response response = saltTarget.path(SaltEndpoint.BOOT_FILE_UPLOAD.getContextPath()).request()
+                .header(SIGN_HEADER, signature)
                 .post(Entity.entity(multiPart, contentType));
-        if (response.getStatus() != HttpStatus.SC_OK) {
+        if (!ACCEPTED_STATUSES.contains(response.getStatus())) {
             throw new IOException("can't upload file, status code: " + response.getStatus());
         }
+    }
+
+    public Map<String, String> members(List<String> privateIps) {
+        Map<String, List<String>> clients = singletonMap("clients", privateIps);
+        GenericResponses responses = saltTarget.path(BOOT_HOSTNAME_ENDPOINT.getContextPath()).request()
+                .header(SIGN_HEADER, SignUtil.generateSignature(signatureKey, GSON.toJson(clients).getBytes()))
+                .post(Entity.json(clients)).readEntity(GenericResponses.class);
+        return responses.getResponses().stream().collect(Collectors.toMap(GenericResponse::getAddress, GenericResponse::getStatus));
     }
 
     private Form addAuth(Form form) {
