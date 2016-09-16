@@ -13,7 +13,7 @@ import (
 var AWSCreateClusterSkeletonHelp = `
 {
   "ClusterName": "my-cluster",                                             // Name of the cluster
-  "HDPVersion": "2.5",                                    	           // HDP version
+  "HDPVersion": "2.5",                                    	               // HDP version
   "ClusterType": "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",     // Cluster type
   "Master": {                                                              // Master instance group
     "InstanceType": "m4.xlarge",                                           // Instance type of master instance group
