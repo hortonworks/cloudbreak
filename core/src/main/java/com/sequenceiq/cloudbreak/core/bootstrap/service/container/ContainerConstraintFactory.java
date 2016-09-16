@@ -58,6 +58,9 @@ public class ContainerConstraintFactory {
     @Value("#{'${cb.docker.env.ldap}'.split('\\|')}")
     private List<String> ldapEnvs;
 
+    @Value("#{'${cb.byos.dfs.data.dir}'.split(',')}")
+    private List<String> byosDfsDataDirs;
+
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
@@ -83,8 +86,7 @@ public class ContainerConstraintFactory {
                 .withName(createContainerInstanceName(AMBARI_DB.getName(), clusterName))
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
-                .addVolumeBindings(ImmutableMap.of("/data/ambari-server/pgsql/data", "/var/lib/postgresql/data",
-                        HOST_VOLUME_PATH + "/consul-watch", HOST_VOLUME_PATH + "/consul-watch"))
+                .addVolumeBindings(ImmutableMap.of("/var/lib/ambari-server/pgsql/data", "/var/lib/postgresql/data"))
                 .addEnv(ImmutableMap.of("POSTGRES_PASSWORD", "bigdata", "POSTGRES_USER", "ambari"));
         if (gatewayHostname != null) {
             builder.addHosts(ImmutableList.of(gatewayHostname));
@@ -99,7 +101,7 @@ public class ContainerConstraintFactory {
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
                 .tcpPortBinding(new TcpPortBinding(AMBARI_PORT, "0.0.0.0", AMBARI_PORT))
-                .addVolumeBindings(ImmutableMap.of(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
+                .addVolumeBindings(ImmutableMap.of("/var/log/ambari-server-container", CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
                 .addEnv(ImmutableMap.of("SERVICE_NAME", "ambari-8080"));
         if (!StringUtils.isEmpty(gatewayHostname)) {
             builder.addHosts(ImmutableList.of(gatewayHostname));
@@ -158,7 +160,7 @@ public class ContainerConstraintFactory {
                 .withName(createContainerInstanceName(KERBEROS.getName(), cluster.getName()))
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
-                .addVolumeBindings(ImmutableMap.of(HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
+                .addVolumeBindings(ImmutableMap.of("/var/log/kerberos-container", CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
                 .addHosts(ImmutableList.of(gatewayHostname))
                 .addEnv(env)
                 .build();
@@ -188,7 +190,7 @@ public class ContainerConstraintFactory {
     }
 
     public ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String ambariAgentApp, String cloudPlatform,
-                                                        HostGroup hostGroup, Integer adjustment, List<String> hostBlackList) {
+            HostGroup hostGroup, Integer adjustment, List<String> hostBlackList) {
         Constraint hgConstraint = hostGroup.getConstraint();
         ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
                 .withNamePrefix(createContainerInstanceName(hostGroup, AMBARI_AGENT.getName()))
@@ -197,9 +199,9 @@ public class ContainerConstraintFactory {
         if (hgConstraint.getInstanceGroup() != null) {
             InstanceGroup instanceGroup = hgConstraint.getInstanceGroup();
             Map<String, String> dataVolumeBinds = new HashMap<>();
+            dataVolumeBinds.put("/var/log/ambari-agent-container", CONTAINER_VOLUME_PATH);
             dataVolumeBinds.put(HADOOP_MOUNT_DIR, HADOOP_MOUNT_DIR);
             dataVolumeBinds.putAll(ImmutableMap.of("/data/jars", "/data/jars", HOST_VOLUME_PATH, CONTAINER_VOLUME_PATH));
-
             builder.addVolumeBindings(dataVolumeBinds);
             if (adjustment != null) {
                 List<String> candidates = collectUpscaleCandidates(hostGroup.getCluster().getId(), hostGroup.getName(), adjustment);
@@ -221,6 +223,16 @@ public class ContainerConstraintFactory {
                 builder.instances(hgConstraint.getHostCount());
             }
             builder.withDiskSize(hgConstraint.getConstraintTemplate().getDisk());
+            Map<String, String> dataVolumeBinds = new HashMap<>();
+            dataVolumeBinds.put("/var/log/ambari-agent-container", CONTAINER_VOLUME_PATH);
+            if (byosDfsDataDirs != null && !byosDfsDataDirs.isEmpty()) {
+                for (String dataDir : byosDfsDataDirs) {
+                    if (!"".equals(dataDir)) {
+                        dataVolumeBinds.put(dataDir, dataDir);
+                    }
+                }
+            }
+            builder.addVolumeBindings(dataVolumeBinds);
             builder.cmd(new String[]{String.format(
                     "/usr/sbin/init systemd.setenv=AMBARI_SERVER_ADDR=%s systemd.setenv=USE_CONSUL_DNS=false", ambariServerHost)});
         }
