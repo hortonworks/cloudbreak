@@ -2,8 +2,10 @@ package cli
 
 import (
 	"fmt"
-	"github.com/briandowns/spinner"
+	"os"
 	"time"
+
+	"github.com/briandowns/spinner"
 )
 
 var Spinner *spinner.Spinner
@@ -11,6 +13,7 @@ var Spinner *spinner.Spinner
 func init() {
 	spinner.CharSets[37] = []string{"H", "o", "r", "t", "o", "n", "w", "o", "r", "k", "s"}
 	Spinner = spinner.New(spinner.CharSets[9], 200*time.Millisecond)
+	Spinner.Writer = os.Stderr
 }
 
 func StartSpinner() {
