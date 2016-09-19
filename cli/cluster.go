@@ -147,7 +147,7 @@ func CreateCluster(c *cli.Context) error {
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	blueprintId := oAuth2Client.GetBlueprintId(getRealBlueprintName(skeleton.ClusterType))
+	blueprintId := oAuth2Client.GetBlueprintId(skeleton.ClusterType)
 
 	var wg sync.WaitGroup
 	wg.Add(4)
@@ -288,14 +288,22 @@ func CreateCluster(c *cli.Context) error {
 			}
 		}
 
+		var inputs []*models.BlueprintInputJSON
+		for key, value := range skeleton.ClusterInputs {
+			newKey := key
+			newValue := value
+			inputs = append(inputs, &models.BlueprintInputJSON{Name: &newKey, PropertyValue: &newValue})
+		}
+
 		clusterReq := models.ClusterRequest{
-			Name:          skeleton.ClusterName,
-			BlueprintID:   blueprintId,
-			HostGroups:    hostGroups,
-			UserName:      skeleton.ClusterAndAmbariUser,
-			Password:      skeleton.ClusterAndAmbariPassword,
-			RdsConfigJSON: rdsConfig,
-			RdsConfigID:   rdsId,
+			Name:            skeleton.ClusterName,
+			BlueprintID:     blueprintId,
+			HostGroups:      hostGroups,
+			UserName:        skeleton.ClusterAndAmbariUser,
+			Password:        skeleton.ClusterAndAmbariPassword,
+			RdsConfigJSON:   rdsConfig,
+			RdsConfigID:     rdsId,
+			BlueprintInputs: inputs,
 		}
 
 		resp, err := oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
@@ -363,7 +371,65 @@ func ResizeCluster(c *cli.Context) error {
 }
 
 func GenerateCreateClusterSkeleton(c *cli.Context) error {
-	skeleton := ClusterSkeleton{
+	Println(getBaseSkeleton().JsonPretty())
+	return nil
+}
+
+func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
+	defer timeTrack(time.Now(), "generate shared cluster skeleton")
+	checkRequiredFlags(c, GenerateCreateSharedClusterSkeleton)
+
+	skeleton := getBaseSkeleton()
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	clusterType := c.String(FlClusterType.Name)
+	ambariBp := oAuth2Client.GetBlueprintByName(clusterType)
+
+	skeleton.ClusterType = clusterType
+	skeleton.HDPVersion = ambariBp.Blueprint.StackVersion
+	var inputs = make(map[string]string)
+	for _, input := range ambariBp.Inputs {
+		inputs[*input.Name] = ""
+	}
+	skeleton.ClusterInputs = inputs
+	log.Infof("[GenerateCreateSharedClusterSkeleton] inputs for cluster type: %+v", inputs)
+
+	clusterName := c.String(FlClusterNameOptional.Name)
+	if len(clusterName) > 0 {
+		stack := oAuth2Client.GetClusterByName(clusterName)
+		if *stack.Status != "AVAILABLE" && *stack.Cluster.Status != "AVAILABLE" {
+			logErrorAndExit(GenerateCreateSharedClusterSkeleton, "the cluster is not 'AVAILABLE' yet, please try again later")
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			configs := oAuth2Client.GetClusterConfig(*stack.ID, ambariBp.Inputs)
+			for _, input := range configs {
+				inputs[*input.Name] = *input.PropertyValue
+			}
+		}()
+
+		if stack.Cluster != nil && stack.Cluster.RdsConfigID != nil {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				rdsConfig := oAuth2Client.GetRDSConfigById(*stack.Cluster.RdsConfigID)
+				skeleton.HiveMetastore.Name = rdsConfig.Name
+			}()
+		}
+
+		wg.Wait()
+	}
+
+	Println(skeleton.JsonPretty())
+	return nil
+}
+
+func getBaseSkeleton() *ClusterSkeleton {
+	return &ClusterSkeleton{
 		ClusterType: "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",
 		HDPVersion:  "2.5",
 		Master: InstanceConfig{
@@ -384,6 +450,4 @@ func GenerateCreateClusterSkeleton(c *cli.Context) error {
 		Network:       &Network{},
 		HiveMetastore: &HiveMetastore{},
 	}
-	fmt.Println(skeleton.JsonPretty())
-	return nil
 }

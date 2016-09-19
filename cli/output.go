@@ -12,6 +12,11 @@ type Output struct {
 	Format string
 }
 
+func Println(a ...interface{}) (n int, err error) {
+	StopSpinner()
+	return fmt.Println(a...)
+}
+
 func (o *Output) Write(header []string, row Row) {
 	StopSpinner()
 	if o.Format == "table" {

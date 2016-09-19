@@ -70,9 +70,19 @@ type RDSConfigResponse struct {
 	*/
 	Name string `json:"name"`
 
+	/* custom properties for rds connection
+
+	Unique: true
+	*/
+	Properties []*RdsConfigPropertyJSON `json:"properties,omitempty"`
+
 	/* resource is visible in account
 	 */
 	PublicInAccount *bool `json:"publicInAccount,omitempty"`
+
+	/* Type of rds (HIVE or RANGER)
+	 */
+	Type *string `json:"type,omitempty"`
 
 	/* If true, then the RDS configuration will be validated
 	 */
@@ -114,6 +124,16 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateProperties(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -215,6 +235,61 @@ func (m *RDSConfigResponse) validateHdpVersion(formats strfmt.Registry) error {
 func (m *RDSConfigResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *RDSConfigResponse) validateProperties(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Properties) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("properties", "body", m.Properties); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Properties); i++ {
+
+		if m.Properties[i] != nil {
+
+			if err := m.Properties[i].Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+var rDSConfigResponseTypeTypePropEnum []interface{}
+
+func (m *RDSConfigResponse) validateTypeEnum(path, location string, value string) error {
+	if rDSConfigResponseTypeTypePropEnum == nil {
+		var res []string
+		if err := json.Unmarshal([]byte(`["HIVE","RANGER"]`), &res); err != nil {
+			return err
+		}
+		for _, v := range res {
+			rDSConfigResponseTypeTypePropEnum = append(rDSConfigResponseTypeTypePropEnum, v)
+		}
+	}
+	if err := validate.Enum(path, location, value, rDSConfigResponseTypeTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *RDSConfigResponse) validateType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Type) { // not required
+		return nil
+	}
+
+	if err := m.validateTypeEnum("type", "body", *m.Type); err != nil {
 		return err
 	}
 

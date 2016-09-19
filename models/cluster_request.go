@@ -37,6 +37,12 @@ type ClusterRequest struct {
 	*/
 	BlueprintID int64 `json:"blueprintId"`
 
+	/* blueprint inputs in the cluster
+
+	Unique: true
+	*/
+	BlueprintInputs []*BlueprintInputJSON `json:"blueprintInputs,omitempty"`
+
 	/* config recommendation strategy
 	 */
 	ConfigStrategy *string `json:"configStrategy,omitempty"`
@@ -156,6 +162,11 @@ func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateBlueprintInputs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateConfigStrategy(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -211,6 +222,30 @@ func (m *ClusterRequest) validateBlueprintID(formats strfmt.Registry) error {
 
 	if err := validate.Required("blueprintId", "body", int64(m.BlueprintID)); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ClusterRequest) validateBlueprintInputs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.BlueprintInputs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("blueprintInputs", "body", m.BlueprintInputs); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.BlueprintInputs); i++ {
+
+		if m.BlueprintInputs[i] != nil {
+
+			if err := m.BlueprintInputs[i].Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

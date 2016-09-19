@@ -102,6 +102,15 @@ func main() {
 					Name:      "generate-cli-skeleton",
 					Action:    hdc.GenerateCreateClusterSkeleton,
 					ArgsUsage: hdc.AWSCreateClusterSkeletonHelp,
+					Usage:     "generate the cluster creation template",
+				},
+				{
+					Name:        "generate-cli-shared-skeleton",
+					Action:      hdc.GenerateCreateSharedClusterSkeleton,
+					Description: hdc.SharedDescription,
+					Before:      ConfigRead,
+					Flags:       []cli.Flag{hdc.FlClusterType, hdc.FlClusterNameOptional, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+					Usage:       "generate the cluster creation template for a specified shared cluster",
 				},
 				{
 					Name:   "validate-cli-skeleton",

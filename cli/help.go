@@ -45,8 +45,11 @@ var AWSCreateClusterSkeletonHelp = `
    "URL": "hive.eu-west-1.rds.amazonaws.com:5432/hive",                    // Connection URL of the Hive metastore
    "DatabaseType": "POSTGRES"                                              // Database type of the Hive metastore, accepted values: POSTGRES, MYSQL
   }
-}
-`
+}`
+
+var SharedDescription = `You can either start a new shared cluster or connect to an existing one. To start a new cluster provide only the input
+	 fields based on the cluster type. If you have an existing cluster you can provide it's name when generating the skeleton with
+	 the --` + FlClusterNameOptional.Name + ` option.`
 
 var CommandHelpTemplate = `NAME:
    {{.HelpName}} - {{.Usage}}

@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/credentials"
 	"github.com/hortonworks/hdc-cli/models"
@@ -85,24 +84,13 @@ func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models.CredentialRe
 func (c *Cloudbreak) GetCredential(name string) models.CredentialResponse {
 	defer timeTrack(time.Now(), "get credential by name")
 	log.Infof("[GetCredential] sending get request to find credential with name: %s", name)
-	resp, err := c.Cloudbreak.Credentials.GetCredentialsUser(&credentials.GetCredentialsUserParams{})
+	resp, err := c.Cloudbreak.Credentials.GetCredentialsUserName(&credentials.GetCredentialsUserNameParams{Name: name})
 
 	if err != nil {
 		logErrorAndExit(c.GetCredential, err.Error())
 	}
 
-	var awsAccess models.CredentialResponse
-	for _, credential := range resp.Payload {
-		if credential.Name == name {
-			awsAccess = *credential
-			break
-		}
-	}
-
-	if awsAccess.ID == nil {
-		logErrorAndExit(c.GetCredential, fmt.Sprintf("failed to find the following credential: %s", name))
-	}
-
+	awsAccess := *resp.Payload
 	log.Infof("[GetCredential] found credential, name: %s id: %d", awsAccess.Name, awsAccess.ID)
 	return awsAccess
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var BlueprintHeader []string = []string{"Cluster Type", "HDP Version"}
@@ -57,17 +58,24 @@ func ListBlueprints(c *cli.Context) error {
 }
 
 func (c *Cloudbreak) GetBlueprintId(name string) int64 {
-	log.Infof("[GetBlueprintId] get blueprint id by name: %s", name)
-	resp, err := c.Cloudbreak.Blueprints.GetPrivate(&blueprints.GetPrivateParams{Name: name})
+	bpResponse := c.GetBlueprintByName(name)
+	id, _ := strconv.Atoi(*bpResponse.ID)
+	return int64(id)
+}
 
+func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
+	defer timeTrack(time.Now(), "get blueprint by name")
+	log.Infof("[GetBlueprintByName] get blueprint by name: %s", name)
+
+	resp, err := c.Cloudbreak.Blueprints.GetPrivate(&blueprints.GetPrivateParams{Name: getRealBlueprintName(name)})
 	if err != nil {
-		logErrorAndExit(c.GetBlueprintId, err.Error())
+		logErrorAndExit(c.GetBlueprintByName, err.Error())
 	}
 
 	id, _ := strconv.Atoi(*resp.Payload.ID)
 	id64 := int64(id)
-	log.Infof("[GetBlueprintId] '%s' blueprint id: %d", name, id64)
-	return id64
+	log.Infof("[GetBlueprintByName] '%s' blueprint id: %d", name, id64)
+	return resp.Payload
 }
 
 func getFancyBlueprintName(blueprint *models.BlueprintResponse) string {

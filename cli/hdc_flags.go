@@ -79,6 +79,13 @@ var (
 			Usage: "name of a cluster",
 		},
 	}
+	FlClusterNameOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "cluster-name",
+			Usage: "name of a cluster",
+		},
+	}
 	FlWait = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
@@ -123,6 +130,13 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name: "existing-ssh-key-pair",
+		},
+	}
+	FlClusterType = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "cluster-type",
+			Usage: "type of the cluster",
 		},
 	}
 )

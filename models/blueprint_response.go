@@ -24,7 +24,7 @@ type BlueprintResponse struct {
 
 	Required: true
 	*/
-	AmbariBlueprint AmbariBlueprint `json:"ambariBlueprint"`
+	AmbariBlueprint `json:"ambariBlueprint"`
 
 	/* gathered from blueprintName field from the blueprint JSON
 	 */
@@ -45,6 +45,12 @@ type BlueprintResponse struct {
 	 */
 	ID *string `json:"id,omitempty"`
 
+	/* input parameters of the blueprint
+
+	Unique: true
+	*/
+	Inputs []*BlueprintParameterJSON `json:"inputs,omitempty"`
+
 	/* name of the resource
 
 	Required: true
@@ -62,29 +68,28 @@ type BlueprintResponse struct {
 	Status *string `json:"status,omitempty"`
 }
 
+type Configurations map[string]map[string]interface{}
+
 type AmbariBlueprint struct {
-	Blueprint Blueprint `json:"Blueprints"`
+	Blueprint      Blueprint            `json:"Blueprints"`
+	Configurations []Configurations     `json:"configurations"`
+	HostGroups     []BlueprintHostGroup `json:"host_groups"`
 }
 
 type Blueprint struct {
-	Name           *string        `json:"blueprint_name"`
-	StackName      string         `json:"stack_name"`
-	StackVersion   string         `json:"stack_version"`
-	Configurations Configurations `json:"configurations"`
-	HostGroups     HostGroups     `json:"host_groups"`
+	Name         *string `json:"blueprint_name"`
+	StackName    string  `json:"stack_name"`
+	StackVersion string  `json:"stack_version"`
 }
 
-type Configurations struct {
-	Configurations map[string]interface{} `json:"configurations"`
+type BlueprintHostGroup struct {
+	Name           string           `json:"name"`
+	Configurations []Configurations `json:"configurations"`
+	Components     []Component      `json:"components"`
+	Cardinality    string           `json:"cardinality"`
 }
 
-type HostGroups struct {
-	Name           string         `json:"name"`
-	Configurations Configurations `json:"configurations"`
-	Components     []Components   `json:"components"`
-}
-
-type Components struct {
+type Component struct {
 	Name string `json:"name"`
 }
 
@@ -93,6 +98,11 @@ func (m *BlueprintResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateInputs(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -125,6 +135,30 @@ func (m *BlueprintResponse) validateDescription(formats strfmt.Registry) error {
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *BlueprintResponse) validateInputs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Inputs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("inputs", "body", m.Inputs); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Inputs); i++ {
+
+		if m.Inputs[i] != nil {
+
+			if err := m.Inputs[i].Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

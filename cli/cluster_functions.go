@@ -98,7 +98,13 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 		}
 		c.ClusterAndAmbariUser = stack.Cluster.UserName
 		c.ClusterAndAmbariPassword = stack.Cluster.Password
-
+		if len(stack.Cluster.BlueprintInputs) > 0 {
+			var inputs = make(map[string]string)
+			for _, input := range stack.Cluster.BlueprintInputs {
+				inputs[*input.Name] = *input.PropertyValue
+			}
+			c.ClusterInputs = inputs
+		}
 	}
 
 	c.HDPVersion = SafeStringConvert(stack.HdpVersion)

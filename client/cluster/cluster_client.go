@@ -184,6 +184,33 @@ func (a *Client) PutStacksIDCluster(params *PutStacksIDClusterParams) error {
 	return nil
 }
 
+/*
+GetConfigs gets cluster properties with blueprint outputs
+
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+*/
+func (a *Client) GetConfigs(params *GetConfigsParams) (*GetConfigsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetConfigsParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getConfigs",
+		Method:             "POST",
+		PathPattern:        "/stacks/{id}/cluster/config",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetConfigsReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetConfigsOK), nil
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport client.Transport) {
 	a.transport = transport
