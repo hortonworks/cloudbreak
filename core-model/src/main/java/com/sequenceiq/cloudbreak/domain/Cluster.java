@@ -155,6 +155,10 @@ public class Cluster implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json attributes;
 
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json blueprintInputs;
+
     public Stack getStack() {
         return stack;
     }
@@ -461,5 +465,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setLdapConfig(LdapConfig ldapConfig) {
         this.ldapConfig = ldapConfig;
+    }
+
+    public Json getBlueprintInputs() {
+        return blueprintInputs;
+    }
+
+    public void setBlueprintInputs(Json blueprintInputs) {
+        this.blueprintInputs = blueprintInputs;
     }
 }

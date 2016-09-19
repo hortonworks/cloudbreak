@@ -10,6 +10,8 @@ public class ModelDescriptions {
     public static final String OWNER = "id of the resource owner that is provided by OAuth provider";
     public static final String ACCOUNT = "account id of the resource owner that is provided by OAuth provider";
     public static final String TOPOLOGY_ID = "id of the topology the resource belongs to";
+    public static final String REQUESTS = "request object";
+    public static final String RESPONSE = "response object";
 
     private ModelDescriptions() {
     }
@@ -20,6 +22,7 @@ public class ModelDescriptions {
         public static final String AMBARI_BLUEPRINT = "ambari blueprint JSON, set this or the url field";
         public static final String HOST_GROUP_COUNT = "number of host groups";
         public static final String STATUS = "status of the blueprint";
+        public static final String INPUTS = "input parameters of the blueprint";
     }
 
     public static class CredentialModelDescription {
@@ -103,6 +106,7 @@ public class ModelDescriptions {
         public static final String LDAP_REQUIRED = "flag for default LDAP support";
         public static final String SSSDCONFIG_ID = "SSSD config id for the cluster";
         public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
+        public static final String BLUEPRINT_INPUTS = "blueprint inputs in the cluster";
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_ID = "RDS configuration id for the cluster";
         public static final String LDAP_CONFIG_ID = "LDAP config id for the cluster";
@@ -142,6 +146,8 @@ public class ModelDescriptions {
         public static final String NAME = "Name of the RDS configuration resource";
         public static final String HDPVERSION = "HDP version for the RDS configuration";
         public static final String VALIDATED = "If true, then the RDS configuration will be validated";
+        public static final String RDSTYPE = "Type of rds (HIVE or RANGER)";
+        public static final String RDS_PROPERTIES = "custom properties for rds connection";
     }
 
     public static class FileSystem {

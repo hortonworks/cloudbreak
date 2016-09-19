@@ -1,9 +1,15 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -89,6 +95,10 @@ public class Blueprint implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "blueprint_parameter_inputs")
+    private Set<BlueprintParameter> inputs = new HashSet<>();
+
     public Blueprint() {
 
     }
@@ -171,5 +181,13 @@ public class Blueprint implements ProvisionEntity {
 
     public void setStatus(ResourceStatus status) {
         this.status = status;
+    }
+
+    public Set<BlueprintParameter> getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(Set<BlueprintParameter> inputs) {
+        this.inputs = inputs;
     }
 }
