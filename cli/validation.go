@@ -82,7 +82,7 @@ func (h *HiveMetastore) Validate() []error {
 		}
 		if err := validate.RequiredString("DatabaseType", "hivemetastore", h.DatabaseType); err != nil {
 			res = append(res, err)
-		} else if h.DatabaseType != POSTGRES || h.DatabaseType != MYSQL {
+		} else if h.DatabaseType != POSTGRES && h.DatabaseType != MYSQL {
 			res = append(res, errors.New("Invalid database type. Accepted values are: POSTGRES and MYSQL."))
 		}
 		if err := validate.RequiredString("Password", "hivemetastore", h.Password); err != nil {
