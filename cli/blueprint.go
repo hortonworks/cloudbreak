@@ -78,7 +78,7 @@ func getFancyBlueprintName(blueprint *models.BlueprintResponse) string {
 		if len(fancyName) > 0 {
 			name = fancyName
 		} else {
-			name = ambariBpName
+			name = blueprint.Name
 		}
 	} else {
 		name = blueprint.Name
