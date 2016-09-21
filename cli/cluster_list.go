@@ -25,7 +25,7 @@ func (c *ClusterListElement) DataAsStringArray() []string {
 }
 
 type ClusterNode struct {
-	InstanceId string `json:"IndtanceId" yaml:"IndtanceId"`
+	InstanceId string `json:"InstanceId" yaml:"InstanceId"`
 	Hostname   string `json:"Hostname" yaml:"Hostname"`
 	PublicIP   string `json:"PublicIP,omitempty" yaml:"PublicIP,omitempty"`
 	PrivateIP  string `json:"PrivateIP" yaml:"PrivateIP"`
