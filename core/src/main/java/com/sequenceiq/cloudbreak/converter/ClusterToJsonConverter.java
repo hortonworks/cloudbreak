@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SHIPYARD;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,8 +21,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
@@ -31,12 +34,12 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 @Component
 public class ClusterToJsonConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterResponse> {
@@ -99,6 +102,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source.getHostGroups(), source.getBlueprint(), source.getAmbariIp(),
                 source.getEnableShipyard()));
+        clusterResponse.setBlueprintInputs(convertBlueprintInputs(source.getBlueprintInputs()));
         clusterResponse.setEnableShipyard(source.getEnableShipyard());
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
         return clusterResponse;
@@ -117,6 +121,25 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             }
         }
         return source;
+    }
+
+    private Set<BlueprintInputJson> convertBlueprintInputs(Json inputs) {
+        Set<BlueprintInputJson> blueprintInputJsons = new HashSet<>();
+        try {
+            if (inputs != null && inputs.getValue() != null) {
+                Map<String, String> is = inputs.get(Map.class);
+                for (Map.Entry<String, String> stringStringEntry : is.entrySet()) {
+                    BlueprintInputJson blueprintInputJson = new BlueprintInputJson();
+                    blueprintInputJson.setName(stringStringEntry.getKey());
+                    blueprintInputJson.setPropertyValue(stringStringEntry.getValue());
+                    blueprintInputJsons.add(blueprintInputJson);
+                }
+            }
+        } catch (IOException ex) {
+            LOGGER.error("Could not convert blueprintinputs json to Set.");
+        }
+        return blueprintInputJsons;
+
     }
 
     private Set<HostGroupJson> convertHostGroupsToJson(Set<HostGroup> hostGroups) {

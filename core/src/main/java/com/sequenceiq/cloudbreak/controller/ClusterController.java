@@ -22,6 +22,8 @@ import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
+import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
@@ -201,6 +203,13 @@ public class ClusterController implements ClusterEndpoint {
         }
         LOGGER.error("Invalid cluster update request received. Stack id: {}", stackId);
         throw new BadRequestException("Invalid update cluster request!");
+    }
+
+    @Override
+    public ConfigsResponse getConfigs(Long stackId, ConfigsRequest requests) throws Exception {
+        CbUser user = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(user);
+        return clusterService.retrieveOutputs(stackId, requests.getRequests());
     }
 
     private List<Component> addAmbariRepoConfig(List<Component> components, ClusterRequest request, Stack stack) throws JsonProcessingException {

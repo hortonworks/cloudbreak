@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -74,6 +75,8 @@ public class ClusterRequest {
     private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
     @ApiModelProperty(value = ClusterModelDescription.ENABLE_SHIPYARD)
     private Boolean enableShipyard = Boolean.FALSE;
+    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
+    private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
 
     public String getDescription() {
         return description;
@@ -265,5 +268,13 @@ public class ClusterRequest {
 
     public void setEmailTo(String emailTo) {
         this.emailTo = emailTo;
+    }
+
+    public Set<BlueprintInputJson> getBlueprintInputs() {
+        return blueprintInputs;
+    }
+
+    public void setBlueprintInputs(Set<BlueprintInputJson> blueprintInputs) {
+        this.blueprintInputs = blueprintInputs;
     }
 }

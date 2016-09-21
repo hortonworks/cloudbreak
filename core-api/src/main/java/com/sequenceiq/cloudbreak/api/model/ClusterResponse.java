@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,6 +57,8 @@ public class ClusterResponse {
     private Long ldapConfigId;
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
     private Map<String, Object> attributes;
+    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
+    private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
 
     public Boolean getEnableShipyard() {
         return enableShipyard;
@@ -240,5 +243,13 @@ public class ClusterResponse {
 
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
+    }
+
+    public Set<BlueprintInputJson> getBlueprintInputs() {
+        return blueprintInputs;
+    }
+
+    public void setBlueprintInputs(Set<BlueprintInputJson> blueprintInputs) {
+        this.blueprintInputs = blueprintInputs;
     }
 }

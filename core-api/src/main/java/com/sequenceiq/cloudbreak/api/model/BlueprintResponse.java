@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -20,6 +23,8 @@ public class BlueprintResponse extends BlueprintBase {
     private boolean publicInAccount;
     @ApiModelProperty(value = BlueprintModelDescription.STATUS)
     private ResourceStatus status;
+    @ApiModelProperty(value = BlueprintModelDescription.INPUTS)
+    private Set<BlueprintParameterJson> inputs = new HashSet<>();
 
     public String getBlueprintName() {
         return blueprintName;
@@ -61,4 +66,13 @@ public class BlueprintResponse extends BlueprintBase {
     public void setStatus(ResourceStatus status) {
         this.status = status;
     }
+
+    public Set<BlueprintParameterJson> getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(Set<BlueprintParameterJson> inputs) {
+        this.inputs = inputs;
+    }
+
 }

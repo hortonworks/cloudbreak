@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.common.type.RdsType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -32,6 +36,10 @@ public class RDSConfigJson {
     private String hdpVersion;
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.VALIDATED)
     private boolean validated = true;
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.RDSTYPE)
+    private RdsType type = RdsType.HIVE;
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.RDS_PROPERTIES)
+    private Set<RdsConfigPropertyJson> properties = new HashSet<>();
 
     public String getName() {
         return name;
@@ -87,5 +95,21 @@ public class RDSConfigJson {
 
     public void setValidated(boolean validated) {
         this.validated = validated;
+    }
+
+    public RdsType getType() {
+        return type;
+    }
+
+    public void setType(RdsType type) {
+        this.type = type;
+    }
+
+    public Set<RdsConfigPropertyJson> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Set<RdsConfigPropertyJson> properties) {
+        this.properties = properties;
     }
 }

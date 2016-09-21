@@ -9,9 +9,11 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATH
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -26,12 +28,16 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
+import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -75,7 +81,6 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -624,6 +629,60 @@ public class AmbariClusterService implements ClusterService {
             throw new NotFoundException(String.format("Cluster '%s' not found", id));
         }
         return cluster;
+    }
+
+    @Override
+    public ConfigsResponse retrieveOutputs(Long stackId, Set<BlueprintParameterJson> requests) throws CloudbreakSecuritySetupException, IOException {
+        Stack stack = stackService.get(stackId);
+        Cluster cluster = stack.getCluster();
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
+
+        List<String> targets = requests.stream().map(BlueprintParameterJson::getReferenceConfiguration).collect(Collectors.toList());
+        Map<String, String> results = ambariClient.getConfigValuesByConfigIds(targets);
+
+        if (cluster.getBlueprintInputs().getValue() != null) {
+            Map<String, String> bpI = cluster.getBlueprintInputs().get(Map.class);
+            if (bpI != null) {
+                for (Map.Entry<String, String> stringStringEntry  : bpI.entrySet()) {
+                    if (!results.keySet().contains(stringStringEntry.getKey())) {
+                        results.put(stringStringEntry.getKey(), stringStringEntry.getValue());
+                    }
+                }
+            }
+        }
+
+        for (BlueprintParameterJson request : requests) {
+            if (results.keySet().contains(request.getReferenceConfiguration())) {
+                results.put(request.getName(), results.get(request.getReferenceConfiguration()));
+                results.remove(request.getReferenceConfiguration());
+            }
+        }
+
+        prepareAdditionalInputParameters(results, cluster);
+
+        Set<BlueprintInputJson> blueprintInputJsons = new HashSet<>();
+
+        for (Map.Entry<String, String> stringStringEntry : results.entrySet()) {
+            for (BlueprintParameterJson blueprintParameter : requests) {
+                if (stringStringEntry.getKey().equals(blueprintParameter.getName())) {
+                    BlueprintInputJson blueprintInputJson = new BlueprintInputJson();
+                    blueprintInputJson.setName(blueprintParameter.getName());
+                    blueprintInputJson.setPropertyValue(stringStringEntry.getValue());
+                    blueprintInputJsons.add(blueprintInputJson);
+                    break;
+                }
+            }
+        }
+
+        ConfigsResponse configsResponse = new ConfigsResponse();
+        configsResponse.setInputs(blueprintInputJsons);
+        return configsResponse;
+    }
+
+    private void prepareAdditionalInputParameters(Map<String, String> results, Cluster cluster) {
+        results.put("REMOTE_CLUSTER_NAME", cluster.getName());
     }
 
 }

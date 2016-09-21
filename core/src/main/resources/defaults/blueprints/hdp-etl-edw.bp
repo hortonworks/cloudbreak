@@ -1,83 +1,150 @@
 {
-  "Blueprints": {
-    "blueprint_name": "hdp-etl-edw",
-    "stack_name": "HDP",
-    "stack_version": "2.4"
-  },
-  "configurations": [
+  "inputs": [
     {
-      "core-site": {
-        "fs.trash.interval": "4320"
-      }
-    },
-    {
-      "hdfs-site": {
-        "dfs.namenode.safemode.threshold-pct": "0.99"
-      }
-    },
-    {
-      "hive-site": {
-        "hive.exec.compress.output": "true",
-        "hive.merge.mapfiles": "true",
-        "hive.server2.tez.initialize.default.sessions": "true"
-      }
-    },
-    {
-      "mapred-site": {
-        "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
-        "mapreduce.map.output.compress": "true",
-        "mapreduce.output.fileoutputformat.compress": "true"
-      }
-    },
-    {
-      "yarn-site": {
-        "yarn.acl.enable": "true"
-      }
+      "name": "RANGER_ADMIN_URL",
+      "description": "test1",
+      "referenceConfiguration": "ranger.admin.url.ambari"
     }
   ],
-  "host_groups": [
-    {
-      "name": "master",
-      "configurations": [],
-      "components": [
-        { "name": "APP_TIMELINE_SERVER" },
-        { "name": "HCAT" },
-        { "name": "HDFS_CLIENT" },
-        { "name": "HISTORYSERVER" },
-        { "name": "HIVE_CLIENT" },
-        { "name": "HIVE_METASTORE" },
-        { "name": "HIVE_SERVER" },
-        { "name": "JOURNALNODE" },
-        { "name": "MAPREDUCE2_CLIENT" },
-        { "name": "METRICS_COLLECTOR" },
-        { "name": "METRICS_MONITOR" },
-        { "name": "MYSQL_SERVER" },
-        { "name": "NAMENODE" },
-        { "name": "PIG" },
-        { "name": "RESOURCEMANAGER" },
-        { "name": "SECONDARY_NAMENODE" },
-        { "name": "SPARK_CLIENT" },
-        { "name": "SPARK_JOBHISTORYSERVER" },
-        { "name": "SQOOP" },
-        { "name": "TEZ_CLIENT" },
-        { "name": "WEBHCAT_SERVER" },
-        { "name": "YARN_CLIENT" },
-        { "name": "ZOOKEEPER_CLIENT" },
-        { "name": "ZOOKEEPER_SERVER" }
-      ],
-      "cardinality": "1"
+  "blueprint": {
+    "Blueprints": {
+      "blueprint_name": "hdp-etl-edw",
+      "stack_name": "HDP",
+      "stack_version": "2.4"
     },
-    {
-      "name": "worker",
-      "configurations": [],
-      "components": [
-        { "name": "HIVE_CLIENT" },
-        { "name": "TEZ_CLIENT" },
-        { "name": "DATANODE" },
-        { "name": "METRICS_MONITOR" },
-        { "name": "NODEMANAGER" }
-      ],
-      "cardinality": "1+"
-    }
-  ]
+    "configurations": [
+      {
+        "core-site": {
+          "fs.trash.interval": "4320"
+        }
+      },
+      {
+        "hdfs-site": {
+          "dfs.namenode.safemode.threshold-pct": "0.99"
+        }
+      },
+      {
+        "hive-site": {
+          "hive.exec.compress.output": "true",
+          "hive.merge.mapfiles": "true",
+          "hive.server2.tez.initialize.default.sessions": "true"
+        }
+      },
+      {
+        "mapred-site": {
+          "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
+          "mapreduce.map.output.compress": "true",
+          "mapreduce.output.fileoutputformat.compress": "true"
+        }
+      },
+      {
+        "yarn-site": {
+          "yarn.acl.enable": "true"
+        }
+      }
+    ],
+    "host_groups": [
+      {
+        "name": "master",
+        "configurations": [],
+        "components": [
+          {
+            "name": "APP_TIMELINE_SERVER"
+          },
+          {
+            "name": "HCAT"
+          },
+          {
+            "name": "HDFS_CLIENT"
+          },
+          {
+            "name": "HISTORYSERVER"
+          },
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "HIVE_METASTORE"
+          },
+          {
+            "name": "HIVE_SERVER"
+          },
+          {
+            "name": "JOURNALNODE"
+          },
+          {
+            "name": "MAPREDUCE2_CLIENT"
+          },
+          {
+            "name": "METRICS_COLLECTOR"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "MYSQL_SERVER"
+          },
+          {
+            "name": "NAMENODE"
+          },
+          {
+            "name": "PIG"
+          },
+          {
+            "name": "RESOURCEMANAGER"
+          },
+          {
+            "name": "SECONDARY_NAMENODE"
+          },
+          {
+            "name": "SPARK_CLIENT"
+          },
+          {
+            "name": "SPARK_JOBHISTORYSERVER"
+          },
+          {
+            "name": "SQOOP"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "WEBHCAT_SERVER"
+          },
+          {
+            "name": "YARN_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_SERVER"
+          }
+        ],
+        "cardinality": "1"
+      },
+      {
+        "name": "worker",
+        "configurations": [],
+        "components": [
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "DATANODE"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          }
+        ],
+        "cardinality": "1+"
+      }
+    ]
+  }
 }

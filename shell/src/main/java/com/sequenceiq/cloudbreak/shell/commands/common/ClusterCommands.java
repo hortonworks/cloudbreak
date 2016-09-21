@@ -119,6 +119,7 @@ public class ClusterCommands implements BaseCommands {
             clusterRequest.setEmailNeeded(false);
             clusterRequest.setEnableSecurity(enableSecurity);
             clusterRequest.setHostGroups(hostGroupList);
+            clusterRequest.setBlueprintInputs(new HashSet<>());
 
             if (strategy != null) {
                 clusterRequest.setConfigStrategy(strategy);
