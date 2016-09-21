@@ -26,6 +26,10 @@ build-windows:
 generate-swagger:
 	swagger generate client -f http://localhost:9091/cb/api/v1/swagger.json
 
+generate-swagger-docker:
+	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.5.0 \
+	swagger generate client -f http://192.168.99.100:8080/cb/api/v1/swagger.json
+
 release: build
 	rm -rf release
 	glu release
