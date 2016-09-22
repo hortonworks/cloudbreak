@@ -123,9 +123,11 @@ Fill the missing fields (for the HiveMetastore only the name is required):
     "Name": "shared-metastore"
   },
   "ClusterInputs": {
+    "ATLAS_REST_ADDRESS": "http://ip-10-0-2-90.eu-west-1.compute.internal:21000",
+    "KAFKA_SERVERS": "ip-10-0-2-90.eu-west-1.compute.internal:6667",
     "LDAP_DOMAIN": "ad.seq.com",
     "LDAP_URL": "ldap://10.0.3.138:389",
-    "POLICYMGR_EXTERNAL_URL": "http://ip-10-0-2-11.eu-west-1.compute.internal:6080",
+    "POLICYMGR_EXTERNAL_URL": "http://ip-10-0-2-90.eu-west-1.compute.internal:6080",
     "RANGER_ADMIN_PASSWORD": "admin",
     "RANGER_DB_HOST": "metastore-eu.czdydiez9kxf.eu-west-1.rds.amazonaws.com",
     "RANGER_DB_NAME": "ranger",
@@ -133,7 +135,9 @@ Fill the missing fields (for the HiveMetastore only the name is required):
     "RANGER_DB_ROOT_PASSWORD": "Horton01",
     "RANGER_DB_ROOT_USER": "rootuser",
     "RANGER_DB_USER": "rangeradmin",
-    "REMOTE_CLUSTER_NAME": "krisz-shared-cluster"
+    "REMOTE_CLUSTER_NAME": "krisz-shared-cluster",
+    "SOLR_ZOOKEPERS_SERVERS": "ip-10-0-2-90.eu-west-1.compute.internal:2181",
+    "SOLR_ZOOKEPERS_URL": "ip-10-0-2-90.eu-west-1.compute.internal:2181/infra-solr"
   }
 }
 ```
