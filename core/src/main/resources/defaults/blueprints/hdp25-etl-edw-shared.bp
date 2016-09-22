@@ -2,39 +2,39 @@
   "inputs":[
     {
       "name":"RANGER_DB_ROOT_USER",
-      "referenceConfiguration":"admin-properties/properties/db_root_user"
+      "referenceConfiguration":"db_root_user"
     },
     {
       "name":"RANGER_DB_ROOT_PASSWORD",
-      "referenceConfiguration":"admin-properties/properties/db_root_password"
+      "referenceConfiguration":"db_root_password"
     },
     {
       "name":"RANGER_DB_USER",
-      "referenceConfiguration":"admin-properties/properties/db_user"
+      "referenceConfiguration":"db_user"
     },
     {
       "name":"RANGER_DB_PASSWORD",
-      "referenceConfiguration":"admin-properties/properties/db_password"
+      "referenceConfiguration":"db_password"
     },
     {
       "name":"RANGER_DB_NAME",
-      "referenceConfiguration":"admin-properties/properties/db_name"
+      "referenceConfiguration":"db_name"
     },
     {
       "name":"RANGER_DB_HOST",
-      "referenceConfiguration":"admin-properties/properties/db_host"
+      "referenceConfiguration":"db_host"
     },
     {
       "name":"RANGER_ADMIN_PASSWORD",
-      "referenceConfiguration":"ranger-env/properties/ranger_admin_password"
+      "referenceConfiguration":"ranger_admin_password"
     },
     {
       "name":"LDAP_URL",
-      "referenceConfiguration":"hive-site/hive.server2.authentication.ldap.url"
+      "referenceConfiguration":"hive.server2.authentication.ldap.url"
     },
     {
       "name":"LDAP_DOMAIN",
-      "referenceConfiguration":"hive-site/hive.server2.authentication.ldap.Domain"
+      "referenceConfiguration":"hive.server2.authentication.ldap.Domain"
     },
     {
       "name":"POLICYMGR_EXTERNAL_URL",
@@ -43,6 +43,22 @@
     {
       "name":"REMOTE_CLUSTER_NAME",
       "referenceConfiguration":"cluster_name"
+    },
+    {
+      "name":"SOLR_ZOOKEPERS_URL",
+      "referenceConfiguration":"xasecure.audit.destination.solr.zookeepers"
+    },
+    {
+      "name":"KAFKA_SERVERS",
+      "referenceConfiguration":"atlas.kafka.bootstrap.servers"
+    },
+    {
+      "name":"SOLR_ZOOKEPERS_SERVERS",
+      "referenceConfiguration":"atlas.kafka.zookeeper.connect"
+    },
+    {
+      "name":"ATLAS_REST_ADDRESS",
+      "referenceConfiguration":"atlas.rest.address"
     }
   ],
   "blueprint":{
@@ -120,8 +136,27 @@
         }
       },
       {
+        "ranger-hive-audit":{
+          "xasecure.audit.is.enabled":"true",
+          "xasecure.audit.destination.hdfs":"false",
+          "xasecure.audit.destination.solr":"true",
+          "xasecure.audit.destination.solr.zookeepers":"{{ SOLR_ZOOKEPERS_URL }}"
+        }
+      },
+      {
         "ranger-ugsync-site":{
           "ranger.usersync.enabled":"false"
+        }
+      },
+      {
+        "application-properties":{
+          "atlas.cluster.name":"{{ REMOTE_CLUSTER_NAME }}",
+          "atlas.kafka.bootstrap.servers":"{{ KAFKA_SERVERS }}",
+          "atlas.kafka.zookeeper.connect":"{{ SOLR_ZOOKEPERS_SERVERS }}",
+          "atlas.kafka.zookeeper.connection.timeout.ms":"20000",
+          "atlas.kafka.zookeeper.session.timeout.ms":"40000",
+          "atlas.rest.address":"{{ ATLAS_REST_ADDRESS }}",
+          "atlas.notification.embedded": "true"
         }
       }
     ],
@@ -215,6 +250,27 @@
           },
           {
             "name":"RANGER_TAGSYNC"
+          },
+          {
+            "name":"HBASE_MASTER"
+          },
+          {
+            "name":"INFRA_SOLR_CLIENT"
+          },
+          {
+            "name":"INFRA_SOLR"
+          },
+          {
+            "name":"KAFKA_BROKER"
+          },
+          {
+            "name":"ATLAS_SERVER"
+          },
+          {
+            "name":"HBASE_CLIENT"
+          },
+          {
+            "name":"ATLAS_CLIENT"
           }
         ],
         "cardinality":"1"
@@ -242,6 +298,18 @@
           },
           {
             "name":"NODEMANAGER"
+          },
+          {
+            "name":"INFRA_SOLR_CLIENT"
+          },
+          {
+            "name":"HBASE_REGIONSERVER"
+          },
+          {
+            "name":"HBASE_CLIENT"
+          },
+          {
+            "name":"ATLAS_CLIENT"
           }
         ],
         "cardinality":"1+"

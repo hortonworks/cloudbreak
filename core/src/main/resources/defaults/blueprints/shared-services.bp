@@ -115,7 +115,8 @@
             "ranger-hive-plugin-enabled":"Yes",
             "ranger-yarn-plugin-enabled":"No",
             "xasecure.audit.destination.hdfs.dir":"hdfs://%HOSTGROUP::master%:8020/ranger/audit",
-            "ranger_privelege_user_jdbc_url":"jdbc:postgresql://{{ RANGER_DB_HOST }}:5432"
+            "ranger_privelege_user_jdbc_url":"jdbc:postgresql://{{ RANGER_DB_HOST }}:5432",
+            "ranger-atlas-plugin-enabled":"Yes"
           }
         }
       },
@@ -135,8 +136,27 @@
           "properties":{
             "ranger.jpa.jdbc.driver":"org.postgresql.Driver",
             "ranger.jpa.jdbc.url":"jdbc:postgresql://{{ RANGER_DB_HOST }}:5432/{{ RANGER_DB_NAME }}",
-            "ranger.audit.source.type":"solr"
+            "ranger.audit.source.type":"solr",
+            "ranger.authentication.method":"ACTIVE_DIRECTORY",
+            "ranger.ldap.ad.domain":"{{ LDAP_DOMAIN }}",
+            "ranger.ldap.ad.base.dn":"{{ LDAP_SYNC_SEARCH_BASE }}"
           }
+        }
+      },
+      {
+        "application-properties":{
+          "atlas.authentication.method.ldap.ad.bind.dn":"{{ LDAP_BIND_DN }}",
+          "atlas.authentication.method.ldap.type":"ad",
+          "atlas.authentication.method.ldap":"true",
+          "atlas.authentication.method.ldap.ad.url":"{{ LDAP_URL }}",
+          "atlas.authentication.method.ldap.ad.base.dn":"{{ LDAP_SYNC_SEARCH_BASE }}",
+          "atlas.authentication.method.ldap.ad.domain":"{{ LDAP_DOMAIN }}",
+          "atlas.authorizer.impl":"ranger"
+        }
+      },
+      {
+        "ranger-atlas-plugin-properties":{
+          "ranger-atlas-plugin-enabled":"Yes"
         }
       }
     ],
