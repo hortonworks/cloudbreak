@@ -41,11 +41,14 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_SULTANS 1.7.0-dev.16
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.7.0-dev.16
 
+    env-import DOCKER_TAG_CBD_SMARTSENSE 0.1.0
+
     env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/cloudbreak-web
     env-import DOCKER_IMAGE_CLOUDBREAK_AUTH hortonworks/cloudbreak-auth
     env-import DOCKER_IMAGE_CLOUDBREAK_PERISCOPE hortonworks/cloudbreak-autoscale
     env-import DOCKER_IMAGE_CLOUDBREAK_SHELL hortonworks/cloudbreak-shell
+    env-import DOCKER_IMAGE_CBD_SMARTSENSE hortonworks/cbd-smartsense
 
     env-import CB_DOCKER_CONTAINER_AMBARI ""
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""

@@ -550,5 +550,17 @@ periscope:
         - /dev/urandom:/dev/random
     image: $DOCKER_IMAGE_CLOUDBREAK_PERISCOPE:$DOCKER_TAG_PERISCOPE
 
+cbdsmartsense:
+    environment:
+      - AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID
+      - AWS_INSTANCE_ID=$AWS_INSTANCE_ID
+      - ULU_HWX_CLOUD_DEFAULT_REGION=$ULU_HWX_CLOUD_DEFAULT_REGION
+      - CB_SMARTSENSE_CONFIGURE=$CB_SMARTSENSE_CONFIGURE
+    labels:
+      - traefik.enable=false
+    volumes:
+      - .:/var/lib/cloudbreak-deployment
+    image: $DOCKER_IMAGE_CBD_SMARTSENSE:$DOCKER_TAG_CBD_SMARTSENSE
+
 EOF
 }
