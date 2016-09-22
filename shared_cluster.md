@@ -1,5 +1,16 @@
 ## Shared cluster
 
+### Prerequisite
+#### LDAP/AD
+LDAP or AD is required for this setup. The easiest way to create one is to go to AWS Directory Service and create a Simple AD.
+Choose an arbitrary FQDN which will be resolvable in the VPC. In this case you can only launch these cluster described below
+in the same VPC that is selected here. The `Administrator` user and it's password will be required later so don't forget it.
+Unfortunately the user creation process cannot be automated, so you'll need to launch a Windows 2012 instance and join it to the created
+domain and then you can create users. 
+To join the Windows machine to the domain: Described in the `Managing an AWS Directory Service` section here: 
+https://blogs.aws.amazon.com/bigdata/post/Tx3J2RL8V6N72G7/Using-LDAP-via-AWS-Directory-Service-to-Access-and-Administer-Your-Hadoop-Enviro
+To install AD tools on Windows: http://docs.aws.amazon.com/directoryservice/latest/admin-guide/install_ad_tools.html
+
 ### Create the shared cluster
 
 It's possible to create a cluster where the Ranger and Atlas services are shared. In order to create such cluster generate
@@ -61,7 +72,7 @@ an existing VPC and existing Subnet. Once it's done it should look like this (th
   }
 }
 ```
-If the LDAP is an AWS Directory Service then it must be in the same VPC as the cluster in order to access it.
+By default the master node comes with m4.xlarge instance type, change it to `m4.2xlarge`. If the LDAP is an AWS Directory Service then it must be in the same VPC as the cluster in order to access it.
 To create the cluster:
 ```
 hdc create-cluster --cli-input-json shared-cluster.json
