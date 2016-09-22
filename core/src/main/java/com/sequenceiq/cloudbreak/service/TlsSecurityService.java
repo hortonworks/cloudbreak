@@ -194,7 +194,7 @@ public class TlsSecurityService {
         prepareCertDir(stackId);
         HttpClientConfig conf = buildTLSClientConfig(stackId, publicIp);
         return new GatewayConfig(publicIp, privateIp, hostname, gatewayPort, prepareCertDir(stackId), conf.getServerCert(), conf.getClientCert(),
-                conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKey());
+                conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem());
     }
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {

@@ -11,19 +11,12 @@ export PLATFORM_DISK_PREFIX=sd
 export LAZY_FORMAT_DISK_LIMIT=12
 export IS_GATEWAY=true
 export TMP_SSH_KEY="ssh-rsa test"
-export SIGN_KEY="ssh-rsa test"
 export PUBLIC_SSH_KEY="ssh-rsa public"
 export RELOCATE_DOCKER=true
 export SSH_USER=cloudbreak
+export SALT_BOOT_PASSWORD=pass
+export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=
 
 date >> /tmp/time.txt
 
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
-
-mkdir -p /etc/systemd/system/salt-bootstrap.service.d
-cat > /etc/systemd/system/salt-bootstrap.service.d/envs.conf << EOF
-[Service]
-Environment="SALTBOOT_USERNAME=cbadmin"
-Environment="SALTBOOT_PASSWORD=pass"
-EOF
-systemctl daemon-reload
