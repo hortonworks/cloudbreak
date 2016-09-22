@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.shell.commands.common;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,7 +19,6 @@ import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
-import com.sequenceiq.cloudbreak.shell.completion.PluginExecutionType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class RecipeCommands implements BaseCommands {
@@ -70,41 +68,20 @@ public class RecipeCommands implements BaseCommands {
         return select(null, name);
     }
 
-    @CliAvailabilityIndicator(value = { "recipe create --withParameters", "recipe create --withFile" })
+    @CliAvailabilityIndicator("recipe create")
     public boolean createAvailable() {
         return !shellContext.isMarathonMode();
     }
 
-    @CliCommand(value = "recipe create --withFile", help = "Add a new recipe with either --url or --file")
-    public String create(
-            @CliOption(key = "url", help = "URL of the Recipe to download from") String url,
-            @CliOption(key = "file", help = "File which contains the Recipe") File file,
-            @CliOption(key = "publicInAccount", help = "flags if the recipe is public in the account") Boolean publicInAccount) {
-        try {
-            String json = file == null ? IOUtils.toString(new URL(url)) : IOUtils.toString(new FileInputStream(file));
-            publicInAccount = publicInAccount == null ? false : publicInAccount;
-            IdJson id;
-            RecipeRequest recipeRequest = shellContext.objectMapper().readValue(json, RecipeRequest.class);
-            if (publicInAccount) {
-                id = shellContext.cloudbreakClient().recipeEndpoint().postPublic(recipeRequest);
-            } else {
-                id = shellContext.cloudbreakClient().recipeEndpoint().postPrivate(recipeRequest);
-            }
-            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), recipeRequest.getName());
-        } catch (Exception ex) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
-        }
-    }
-
-    @CliCommand(value = "recipe create --withParameters", help = "Create and store a new recipe")
-    public String storeRecipe(
+    @CliCommand(value = "recipe create", help = "Creates a new recipe")
+    public String createRecipe(
             @CliOption(key = "name", mandatory = true, help = "Unique name of the recepie") String name,
             @CliOption(key = "description", help = "Description of the recepie") String description,
-            @CliOption(key = "executionType", mandatory = true, help = "Type of recepie execution") PluginExecutionType executionType,
             @CliOption(key = "preInstallScriptFile", help = "Path of the pre install script file") File preInstallScriptFile,
             @CliOption(key = "postInstallScriptFile", help = "Path of the post install script file") File postInstallScriptFile,
             @CliOption(key = "timeout", help = "Timeout of the script execution") Integer timeout,
-            @CliOption(key = "publicInAccount", help = "flags if the recipe is public in the account") Boolean publicInAccount) {
+            @CliOption(key = "publicInAccount", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
+                    help = "flags if the recipe is public in the account") Boolean publicInAccount) {
         if (preInstallScriptFile != null && !preInstallScriptFile.exists()) {
             return "Pre install script file not exists.";
         } else if (postInstallScriptFile != null && !postInstallScriptFile.exists()) {
