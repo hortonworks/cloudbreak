@@ -8,12 +8,13 @@ import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATHON;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -639,27 +640,17 @@ public class AmbariClusterService implements ClusterService {
 
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
 
-        List<String> targets = requests.stream().map(BlueprintParameterJson::getReferenceConfiguration).collect(Collectors.toList());
-        Map<String, String> results = ambariClient.getConfigValuesByConfigIds(targets);
-
+        List<String> targets = new ArrayList<>();
+        Map<String, String> bpI = new HashMap<>();
         if (cluster.getBlueprintInputs().getValue() != null) {
-            Map<String, String> bpI = cluster.getBlueprintInputs().get(Map.class);
-            if (bpI != null) {
-                for (Map.Entry<String, String> stringStringEntry  : bpI.entrySet()) {
-                    if (!results.keySet().contains(stringStringEntry.getKey())) {
-                        results.put(stringStringEntry.getKey(), stringStringEntry.getValue());
-                    }
-                }
-            }
+            bpI = cluster.getBlueprintInputs().get(Map.class);
         }
-
-        for (BlueprintParameterJson request : requests) {
-            if (results.keySet().contains(request.getReferenceConfiguration())) {
-                results.put(request.getName(), results.get(request.getReferenceConfiguration()));
-                results.remove(request.getReferenceConfiguration());
-            }
+        prepareTargets(requests, targets, bpI);
+        Map<String, String> results = new HashMap<>();
+        if (cluster.getAmbariIp() != null) {
+            results = ambariClient.getConfigValuesByConfigIds(targets);
         }
-
+        prepareResults(requests, cluster, bpI, results);
         prepareAdditionalInputParameters(results, cluster);
 
         Set<BlueprintInputJson> blueprintInputJsons = new HashSet<>();
@@ -679,6 +670,43 @@ public class AmbariClusterService implements ClusterService {
         ConfigsResponse configsResponse = new ConfigsResponse();
         configsResponse.setInputs(blueprintInputJsons);
         return configsResponse;
+    }
+
+    private void prepareResults(Set<BlueprintParameterJson> requests, Cluster cluster, Map<String, String> bpI, Map<String, String> results) {
+        if (cluster.getBlueprintInputs().getValue() != null) {
+            if (bpI != null) {
+                for (Map.Entry<String, String> stringStringEntry  : bpI.entrySet()) {
+                    if (!results.keySet().contains(stringStringEntry.getKey())) {
+                        results.put(stringStringEntry.getKey(), stringStringEntry.getValue());
+                    }
+                }
+            }
+        }
+
+        for (BlueprintParameterJson request : requests) {
+            if (results.keySet().contains(request.getReferenceConfiguration())) {
+                results.put(request.getName(), results.get(request.getReferenceConfiguration()));
+                results.remove(request.getReferenceConfiguration());
+            }
+        }
+    }
+
+    private void prepareTargets(Set<BlueprintParameterJson> requests, List<String> targets, Map<String, String> bpI) {
+        for (BlueprintParameterJson request : requests) {
+            if (bpI != null) {
+                boolean contains = false;
+                for (Map.Entry<String, String> stringStringEntry  : bpI.entrySet()) {
+                    if (stringStringEntry.getKey().equals(request.getName())) {
+                        contains = true;
+                    }
+                }
+                if (!contains) {
+                    targets.add(request.getReferenceConfiguration());
+                }
+            } else {
+                targets.add(request.getReferenceConfiguration());
+            }
+        }
     }
 
     private void prepareAdditionalInputParameters(Map<String, String> results, Cluster cluster) {

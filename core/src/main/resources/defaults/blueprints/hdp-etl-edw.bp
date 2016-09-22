@@ -1,11 +1,5 @@
 {
-  "inputs": [
-    {
-      "name": "RANGER_ADMIN_URL",
-      "description": "test1",
-      "referenceConfiguration": "ranger.admin.url.ambari"
-    }
-  ],
+  "inputs": [],
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdp-etl-edw",
