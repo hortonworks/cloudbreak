@@ -402,13 +402,22 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 		}
 
 		var wg sync.WaitGroup
-		wg.Add(1)
 
+		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			configs := oAuth2Client.GetClusterConfig(*stack.ID, ambariBp.Inputs)
 			for _, input := range configs {
 				inputs[*input.Name] = *input.PropertyValue
+			}
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			network := oAuth2Client.GetNetworkById(stack.NetworkID)
+			if network.Parameters["internetGatewayId"] == nil {
+				skeleton.Network = &Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
 			}
 		}()
 
