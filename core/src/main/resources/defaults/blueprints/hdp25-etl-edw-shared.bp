@@ -114,7 +114,7 @@
       },
       {
         "ranger-env":{
-          "ranger_admin_password":"admin",
+          "ranger_admin_password":"{{ RANGER_ADMIN_PASSWORD }}",
           "ranger-hdfs-plugin-enabled":"No",
           "ranger-hive-plugin-enabled":"Yes",
           "ranger-yarn-plugin-enabled":"No",
