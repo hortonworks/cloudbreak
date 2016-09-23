@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -104,6 +105,25 @@ public class CredentialController implements CredentialEndpoint {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         credentialService.delete(name, user);
+    }
+
+    @Override
+    public Map<String, String> privateInteractiveLogin(CredentialRequest credentialRequest) {
+        CbUser user = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(user);
+        return interactiveLogin(user, credentialRequest, false);
+    }
+
+    @Override
+    public Map<String, String> publicInteractiveLogin(CredentialRequest credentialRequest) {
+        CbUser user = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(user);
+        return interactiveLogin(user, credentialRequest, true);
+    }
+
+    private Map<String, String> interactiveLogin(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
+        Credential credential = convert(credentialRequest, publicInAccount);
+        return credentialService.interactiveLogin(user, credential);
     }
 
     private CredentialResponse createCredential(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {

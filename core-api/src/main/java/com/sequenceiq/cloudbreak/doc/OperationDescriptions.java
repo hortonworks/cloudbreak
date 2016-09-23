@@ -57,6 +57,7 @@ public class OperationDescriptions {
         public static final String GET_BY_ID = "retrieve credential by id";
         public static final String DELETE_PRIVATE_BY_NAME = "delete private credential by name";
         public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private credential by name";
+        public static final String INTERACTIVE_LOGIN = "interactive login";
         public static final String DELETE_BY_ID = "delete credential by id";
         public static final String GET_JKS_FILE = "retrieve azure JKS file by credential id";
         public static final String PUT_CERTIFICATE_BY_ID = "update azure credential by credential id";

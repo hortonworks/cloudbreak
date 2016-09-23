@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -86,4 +87,16 @@ public interface CredentialEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.CredentialOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     void deletePrivate(@PathParam(value = "name") String name);
+
+    @POST
+    @Path("userinteractivelogin")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.CredentialOpDescription.INTERACTIVE_LOGIN, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
+    Map<String, String> privateInteractiveLogin(@Valid CredentialRequest credentialRequest);
+
+    @POST
+    @Path("accountinteractivelogin")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.CredentialOpDescription.INTERACTIVE_LOGIN, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
+    Map<String, String> publicInteractiveLogin(@Valid CredentialRequest credentialRequest);
 }
