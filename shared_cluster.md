@@ -73,6 +73,14 @@ an existing VPC and existing Subnet. Once it's done it should look like this (th
 }
 ```
 By default the master node comes with m4.xlarge instance type, change it to `m4.2xlarge`. If the LDAP is an AWS Directory Service then it must be in the same VPC as the cluster in order to access it.
+
+If the RDS flavour for the Ranger DB is Postgres, the following commands must be executed on the Ranger DB Host, before the cluster is created. Substitute the variables in the command with the right values. RDS_DB_NAME is the database created when the RDS instance is created.
+```
+psql -h ${RANGER_DB_HOST} ${RDS_DB_NAME} ${RANGER_DB_ROOT_PASSWORD} 
+CREATE ROLE ${RANGER_DB_USER} WITH PASSWORD '${RANGER_DB_PASSWORD}' CREATEROLE CREATEDB LOGIN;
+GRANT ROLE ${RANGER_DB_USER} TO ${RANGER_DB_ROOT_USER};
+```
+
 To create the cluster:
 ```
 hdc create-cluster --cli-input-json shared-cluster.json
