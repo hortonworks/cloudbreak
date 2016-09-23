@@ -120,14 +120,14 @@
           "ranger-yarn-plugin-enabled":"No",
           "xasecure.audit.destination.solr":"false",
           "xasecure.audit.destination.hdfs":"false",
-          "ranger_privelege_user_jdbc_url":"jdbc:postgresql://{{ RANGER_DB_HOST }}:5432",
+          "ranger_privelege_user_jdbc_url":"jdbc:postgresql://{{ RANGER_DB_HOST }}",
           "create_db_dbuser":"false"
         }
       },
       {
         "ranger-admin-site":{
           "ranger.jpa.jdbc.driver":"org.postgresql.Driver",
-          "ranger.jpa.jdbc.url":"jdbc:postgresql://{{ RANGER_DB_HOST }}:5432/{{ RANGER_DB_NAME }}"
+          "ranger.jpa.jdbc.url":"jdbc:postgresql://{{ RANGER_DB_HOST }}/{{ RANGER_DB_NAME }}"
         }
       },
       {
