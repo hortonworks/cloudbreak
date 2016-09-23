@@ -6,7 +6,7 @@ LDFLAGS=-ldflags "-X github.com/hortonworks/hdc-cli/cli.Version=${VERSION} -X gi
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 deps:
-	go get github.com/gliderlabs/glu
+	go get github.com/keyki/glu
 	go get github.com/tools/godep
 
 format:
