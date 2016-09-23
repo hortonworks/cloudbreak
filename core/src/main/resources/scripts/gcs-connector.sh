@@ -8,7 +8,7 @@
 : ${TEZ_TAR_NAME:=tez.tar.gz}
 : ${TMP_EXTRACT_DIR:=temp_extract_dir}
 
-main(){
+enable_gcs_connector() {
   SOURCE_JAR="$SOURCE_DIR/$STORAGE_JAR"
   if [ ! -f "$SOURCE_JAR" ]; then
     echo 'GC storage jar not found in the source directory, downloading it'
@@ -61,6 +61,16 @@ main(){
       echo "$tar_file_path does not exist!"
     fi
   done
+}
+
+main(){
+
+  if [ ! -f "/var/gcs-connector-enabled" ]; then
+    enable_gcs_connector
+    echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/gcs-connector-enabled
+  else
+    echo "The gcs-connector.sh has been executed previously."
+  fi
 }
 
 exec &>> "$LOGFILE"
