@@ -2,39 +2,39 @@
   "inputs":[
     {
       "name":"RANGER_DB_ROOT_USER",
-      "referenceConfiguration":"admin-properties/properties/db_root_user"
+      "referenceConfiguration":"db_root_user"
     },
     {
       "name":"RANGER_DB_ROOT_PASSWORD",
-      "referenceConfiguration":"admin-properties/properties/db_root_password"
+      "referenceConfiguration":"db_root_password"
     },
     {
       "name":"RANGER_DB_USER",
-      "referenceConfiguration":"admin-properties/properties/db_user"
+      "referenceConfiguration":"db_user"
     },
     {
       "name":"RANGER_DB_PASSWORD",
-      "referenceConfiguration":"admin-properties/properties/db_password"
+      "referenceConfiguration":"db_password"
     },
     {
       "name":"RANGER_DB_NAME",
-      "referenceConfiguration":"admin-properties/properties/db_name"
+      "referenceConfiguration":"db_name"
     },
     {
       "name":"RANGER_DB_HOST",
-      "referenceConfiguration":"admin-properties/properties/db_host"
+      "referenceConfiguration":"db_host"
     },
     {
       "name":"RANGER_ADMIN_PASSWORD",
-      "referenceConfiguration":"ranger-env/properties/ranger_admin_password"
+      "referenceConfiguration":"ranger_admin_password"
     },
     {
       "name":"LDAP_URL",
-      "referenceConfiguration":"hive-site/hive.server2.authentication.ldap.url"
+      "referenceConfiguration":"hive.server2.authentication.ldap.url"
     },
     {
       "name":"LDAP_DOMAIN",
-      "referenceConfiguration":"hive-site/hive.server2.authentication.ldap.Domain"
+      "referenceConfiguration":"hive.server2.authentication.ldap.Domain"
     },
     {
       "name":"LDAP_BIND_DN",
@@ -115,7 +115,7 @@
             "ranger-hive-plugin-enabled":"Yes",
             "ranger-yarn-plugin-enabled":"No",
             "xasecure.audit.destination.hdfs.dir":"hdfs://%HOSTGROUP::master%:8020/ranger/audit",
-            "ranger_privelege_user_jdbc_url":"jdbc:postgresql://{{ RANGER_DB_HOST }}:5432",
+            "ranger_privelege_user_jdbc_url":"jdbc:postgresql://{{ RANGER_DB_HOST }}",
             "ranger-atlas-plugin-enabled":"Yes"
           }
         }
@@ -135,7 +135,7 @@
         "ranger-admin-site":{
           "properties":{
             "ranger.jpa.jdbc.driver":"org.postgresql.Driver",
-            "ranger.jpa.jdbc.url":"jdbc:postgresql://{{ RANGER_DB_HOST }}:5432/{{ RANGER_DB_NAME }}",
+            "ranger.jpa.jdbc.url":"jdbc:postgresql://{{ RANGER_DB_HOST }}/{{ RANGER_DB_NAME }}",
             "ranger.audit.source.type":"solr",
             "ranger.authentication.method":"ACTIVE_DIRECTORY",
             "ranger.ldap.ad.domain":"{{ LDAP_DOMAIN }}",
