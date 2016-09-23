@@ -16,7 +16,7 @@ To install AD tools on Windows: http://docs.aws.amazon.com/directoryservice/late
 It's possible to create a cluster where the Ranger and Atlas services are shared. In order to create such cluster generate
 a cluster creation skeleton the following way:
 ```
-hdc create-cluster generate-cli-shared-skeleton --cluster-type "Shared"
+hdc create-cluster generate-cli-shared-skeleton --cluster-type "Enterprise Services: Apache Atlas, Apache Ranger"
 ```
 Once the skeleton is there you need to fill the fields. Please fill the network fields as well, because it only works in 
 an existing VPC and existing Subnet. Once it's done it should look like this (the values are for demonstration purpose only):
@@ -24,7 +24,7 @@ an existing VPC and existing Subnet. Once it's done it should look like this (th
 {
   "ClusterName": "krisz-shared-cluster",
   "HDPVersion": "2.5",
-  "ClusterType": "Shared",
+  "ClusterType": "Enterprise Services: Apache Atlas, Apache Ranger",
   "Master": {
     "InstanceType": "m4.2xlarge",
     "VolumeType": "gp2",
@@ -63,7 +63,7 @@ an existing VPC and existing Subnet. Once it's done it should look like this (th
     "LDAP_DOMAIN": "ad.seq.com",
     "LDAP_URL": "ldap://10.0.3.138:389",
     "RANGER_ADMIN_PASSWORD": "admin",
-    "RANGER_DB_HOST": "metastore-eu.czdydiez9kxf.eu-west-1.rds.amazonaws.com",
+    "RANGER_DB_HOST": "metastore-eu.czdydiez9kxf.eu-west-1.rds.amazonaws.com:5432",
     "RANGER_DB_NAME": "ranger",
     "RANGER_DB_PASSWORD": "rangeradmin",
     "RANGER_DB_ROOT_PASSWORD": "Horton01",
@@ -86,7 +86,7 @@ hdc describe-cluster --cluster-name krisz-shared-cluster --output json
 
 To create a cluster which is connected to the previously created cluster generate a new skeleton:
 ```
-hdc create-cluster generate-cli-shared-skeleton --cluster-type "Shared ephemeral" --cluster-name krisz-shared-cluster
+hdc create-cluster generate-cli-shared-skeleton --cluster-type "Enterprise ETL-EDW: Apache Hive 1.2.1" --cluster-name krisz-shared-cluster
 ```
 Note the you have to provide an extra cluster-name parameter where you specify which cluster do you want to connect to.
 This will pre-fill the fields that are required to connect to the specified cluster. It must be in the same VPC and Subnet as well.
@@ -95,7 +95,7 @@ Fill the missing fields (for the HiveMetastore only the name is required):
 {
   "ClusterName": "krisz-connected-cluster-1",
   "HDPVersion": "2.5",
-  "ClusterType": "Shared ephemeral",
+  "ClusterType": "Enterprise ETL-EDW: Apache Hive 1.2.1",
   "Master": {
     "InstanceType": "m4.2xlarge",
     "VolumeType": "gp2",
@@ -129,7 +129,7 @@ Fill the missing fields (for the HiveMetastore only the name is required):
     "LDAP_URL": "ldap://10.0.3.138:389",
     "POLICYMGR_EXTERNAL_URL": "http://ip-10-0-2-90.eu-west-1.compute.internal:6080",
     "RANGER_ADMIN_PASSWORD": "admin",
-    "RANGER_DB_HOST": "metastore-eu.czdydiez9kxf.eu-west-1.rds.amazonaws.com",
+    "RANGER_DB_HOST": "metastore-eu.czdydiez9kxf.eu-west-1.rds.amazonaws.com:5432",
     "RANGER_DB_NAME": "ranger",
     "RANGER_DB_PASSWORD": "rangeradmin",
     "RANGER_DB_ROOT_PASSWORD": "Horton01",
