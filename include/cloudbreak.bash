@@ -507,3 +507,20 @@ HINT
         sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:8085
 
 }
+
+util-smartsense() {
+
+  cloudbreak-config
+
+  docker rm -f cbd-smartsense 2> /dev/null || :
+
+  docker run -d \
+      --name cbd-smartsense \
+      -e AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID \
+      -e AWS_INSTANCE_ID=$AWS_INSTANCE_ID \
+      -e ULU_HWX_CLOUD_DEFAULT_REGION=$ULU_HWX_CLOUD_DEFAULT_REGION \
+      -e CB_SMARTSENSE_CONFIGURE=$CB_SMARTSENSE_CONFIGURE \
+      -l traefik.enable=false \
+      -v $PWD:/var/lib/cloudbreak-deployment \
+      $DOCKER_IMAGE_CBD_SMARTSENSE:$DOCKER_TAG_CBD_SMARTSENSE
+}

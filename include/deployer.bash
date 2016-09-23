@@ -499,6 +499,7 @@ main() {
         cmd-export util-token
         cmd-export util-local-dev
         cmd-export util-cleanup
+        cmd-export util-smartsense
     fi
 
     if [[ "$DEBUG" ]]; then
