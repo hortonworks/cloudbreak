@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
 import static java.lang.String.format;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.openstack.OpenStackSmartSenseIdGenerator;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 
@@ -61,6 +64,11 @@ public class OpenStackCredentialConnector implements CredentialConnector {
             LOGGER.error("Failed to create credential", e);
             return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, e, e.getMessage());
         }
+    }
+
+    @Override
+    public Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext, ExtendedCloudCredential extendedCloudCredential) {
+        throw new UnsupportedOperationException("Interactive login not supported on Openstack");
     }
 
     @Override

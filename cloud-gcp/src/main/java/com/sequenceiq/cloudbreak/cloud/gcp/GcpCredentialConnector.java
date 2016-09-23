@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
 @Service
 public class GcpCredentialConnector implements CredentialConnector {
@@ -59,6 +61,11 @@ public class GcpCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus create(AuthenticatedContext authenticatedContext) {
         return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.CREATED);
+    }
+
+    @Override
+    public Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext,  ExtendedCloudCredential extendedCloudCredential) {
+        throw new UnsupportedOperationException("Interactive login not supported on GCP");
     }
 
     private void listDisks(GcpContext gcpContext, Compute compute) throws IOException {
