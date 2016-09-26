@@ -23,6 +23,7 @@ public class ModelDescriptions {
         public static final String HOST_GROUP_COUNT = "number of host groups";
         public static final String STATUS = "status of the blueprint";
         public static final String INPUTS = "input parameters of the blueprint";
+        public static final String BLUEPRINT_PROPERTIES = "properties to extend the blueprint with";
     }
 
     public static class CredentialModelDescription {

@@ -115,7 +115,7 @@ public class BlueprintController implements BlueprintEndpoint {
     private IdJson createBlueprint(CbUser user, BlueprintRequest blueprintRequest, boolean publicInAccount) {
         Blueprint blueprint = conversionService.convert(blueprintRequest, Blueprint.class);
         blueprint.setPublicInAccount(publicInAccount);
-        blueprint = blueprintService.create(user, blueprint);
+        blueprint = blueprintService.create(user, blueprint, blueprintRequest.getProperties());
         return new IdJson(blueprint.getId());
     }
 

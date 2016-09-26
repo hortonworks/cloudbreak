@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -11,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
@@ -65,11 +69,28 @@ public class BlueprintService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Blueprint create(CbUser user, Blueprint blueprint) {
+    public Blueprint create(CbUser user, Blueprint blueprint, List<Map<String, Map<String, String>>> properties) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint;
         blueprint.setOwner(user.getUserId());
         blueprint.setAccount(user.getAccount());
+        if (properties != null && properties.size() != 0) {
+            LOGGER.info("Extend blueprint with the following properties: {}", properties);
+            Map<String, Map<String, String>> configs = new HashMap<>();
+            for (Map<String, Map<String, String>> property : properties) {
+                for (String key : property.keySet()) {
+                    Map<String, String> configValues = configs.get(key);
+                    if (configValues != null) {
+                        configValues.putAll(property.get(key));
+                    } else {
+                        configs.put(key, property.get(key));
+                    }
+                }
+            }
+            String extendedBlueprint = new AmbariClient().extendBlueprintGlobalConfiguration(blueprint.getBlueprintText(), configs);
+            LOGGER.info("Extended blueprint result: {}", extendedBlueprint);
+            blueprint.setBlueprintText(extendedBlueprint);
+        }
         try {
             savedBlueprint = blueprintRepository.save(blueprint);
         } catch (DataIntegrityViolationException ex) {
