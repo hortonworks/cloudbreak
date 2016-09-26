@@ -38,6 +38,6 @@ upload_s3:
 	ls -1 release | xargs -I@ aws s3 cp release/@ s3:///hdc-cli/@ --acl public-read
 
 linux-test: build-linux
-	docker run --rm -it -v ${PWD}/build/Linux/hdc:/usr/sbin/hdc --name hdc alpine sh
+	docker run --rm -it -v ${PWD}/build/Linux/:/usr/sbin/ --name hdc alpine sh
 
 .DEFAULT_GOAL := build
