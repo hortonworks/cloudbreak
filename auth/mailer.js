@@ -15,7 +15,8 @@ exports.sendMail = function(to, subject, templateFile, data) {
 
 sendSimpleEmail = function(to, subject, content) {
     var transport = null;
-    if (process.env.SL_SMTP_SENDER_USERNAME == null && process.env.SL_SMTP_SENDER_PASSWORD == null) {
+    if (!process.env.SL_SMTP_SENDER_USERNAME && !process.env.SL_SMTP_SENDER_PASSWORD) {
+        console.log('create transport to host ' + process.env.SL_SMTP_SENDER_HOST + " without credential");
         transport = nodemailer.createTransport(smtpTransport({
             host: process.env.SL_SMTP_SENDER_HOST,
             port: process.env.SL_SMTP_SENDER_PORT,
@@ -25,6 +26,7 @@ sendSimpleEmail = function(to, subject, content) {
             }
         }));
     } else {
+        console.log('create transport to host ' + process.env.SL_SMTP_SENDER_HOST + " with user " + process.env.SL_SMTP_SENDER_USERNAME + " and password");
         transport = nodemailer.createTransport(smtpTransport({
             host: process.env.SL_SMTP_SENDER_HOST,
             port: process.env.SL_SMTP_SENDER_PORT,
