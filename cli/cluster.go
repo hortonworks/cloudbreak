@@ -147,10 +147,10 @@ func CreateCluster(c *cli.Context) error {
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	blueprintId := oAuth2Client.GetBlueprintId(skeleton.ClusterType)
+	blueprint := oAuth2Client.GetBlueprintByName(skeleton.ClusterType)
 
 	var wg sync.WaitGroup
-	wg.Add(4)
+	wg.Add(5)
 
 	credentialId := make(chan int64, 1)
 	go oAuth2Client.CopyDefaultCredential(skeleton, credentialId, &wg)
@@ -163,6 +163,9 @@ func CreateCluster(c *cli.Context) error {
 
 	networkId := make(chan int64, 1)
 	go oAuth2Client.CreateNetwork(skeleton, networkId, &wg)
+
+	blueprintId := make(chan int64, 1)
+	go oAuth2Client.CreateBlueprint(skeleton, blueprint, blueprintId, &wg)
 
 	wg.Wait()
 
@@ -297,7 +300,7 @@ func CreateCluster(c *cli.Context) error {
 
 		clusterReq := models.ClusterRequest{
 			Name:            skeleton.ClusterName,
-			BlueprintID:     blueprintId,
+			BlueprintID:     <-blueprintId,
 			HostGroups:      hostGroups,
 			UserName:        skeleton.ClusterAndAmbariUser,
 			Password:        skeleton.ClusterAndAmbariPassword,
@@ -454,9 +457,10 @@ func getBaseSkeleton() *ClusterSkeleton {
 			VolumeSize:    40,
 			InstanceCount: 2,
 		},
-		WebAccess:     true,
-		InstanceRole:  "CREATE",
-		Network:       &Network{},
-		HiveMetastore: &HiveMetastore{},
+		WebAccess:      true,
+		InstanceRole:   "CREATE",
+		Network:        &Network{},
+		HiveMetastore:  &HiveMetastore{},
+		Configurations: []models.Configurations{},
 	}
 }

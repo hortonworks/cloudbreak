@@ -43,7 +43,8 @@ var AWSCreateClusterSkeletonHelp = `
    "Username": "hive-metastore-username",                                  // Username of the Hive metastore
    "Password": "hive-metastore-password",                                  // Password of the Hive metastore
    "URL": "hive.eu-west-1.rds.amazonaws.com:5432/hive",                    // Connection URL of the Hive metastore
-   "DatabaseType": "POSTGRES"                                              // Database type of the Hive metastore, accepted values: POSTGRES, MYSQL
+   "DatabaseType": "POSTGRES",                                             // Database type of the Hive metastore, accepted values: POSTGRES, MYSQL
+   "Configurations: [{"core-site":{"fs.trash.interval":"5000"}}]           // Custom configurations, format: [{"configuration-type": {"property-name": "property-value"}}, {"configuration-type2": {"property-name": "property-value"}}]
   }
 }`
 

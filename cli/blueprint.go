@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -21,6 +22,8 @@ func init() {
 	BlueprintMap["hdp-data-science"] = "Data Science: Apache Spark 1.6, Zeppelin"
 	BlueprintMap["hdp-etl-edw-tp"] = "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0"
 	BlueprintMap["hdp-etl-edw-spark2"] = "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0"
+	BlueprintMap["shared-services"] = "Enterprise Services: Apache Atlas, Apache Ranger"
+	BlueprintMap["hdp25-etl-edw-shared"] = "Enterprise ETL-EDW: Apache Hive 1.2.1"
 
 	BlueprintMap["EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0"] = "EDW-ETL: Apache Spark 2.0-preview"
 }
@@ -57,12 +60,6 @@ func ListBlueprints(c *cli.Context) error {
 	return nil
 }
 
-func (c *Cloudbreak) GetBlueprintId(name string) int64 {
-	bpResponse := c.GetBlueprintByName(name)
-	id, _ := strconv.Atoi(*bpResponse.ID)
-	return int64(id)
-}
-
 func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
 	defer timeTrack(time.Now(), "get blueprint by name")
 	log.Infof("[GetBlueprintByName] get blueprint by name: %s", name)
@@ -76,6 +73,40 @@ func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
 	id64 := int64(id)
 	log.Infof("[GetBlueprintByName] '%s' blueprint id: %d", name, id64)
 	return resp.Payload
+}
+
+func (c *Cloudbreak) CreateBlueprint(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse, channel chan int64, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	if len(skeleton.Configurations) == 0 {
+		log.Info("[CreateBlueprint] there are no custom configurations, use the default blueprint")
+		channel <- getBlueprintId(blueprint)
+		return
+	}
+
+	defer timeTrack(time.Now(), "create blueprint")
+
+	blueprintName := "b" + strconv.FormatInt(time.Now().UnixNano(), 10)
+
+	bpRequest := models.BlueprintRequest{
+		Name:            blueprintName,
+		AmbariBlueprint: blueprint.AmbariBlueprint,
+		Properties:      skeleton.Configurations,
+	}
+
+	resp, err := c.Cloudbreak.Blueprints.PostPublic(&blueprints.PostPublicParams{Body: &bpRequest})
+
+	if err != nil {
+		logErrorAndExit(c.CreateBlueprint, err.Error())
+	}
+
+	log.Infof("[CreateBlueprint] blueprint created, id: %d", resp.Payload.ID)
+	channel <- resp.Payload.ID
+}
+
+func getBlueprintId(blueprint *models.BlueprintResponse) int64 {
+	id, _ := strconv.Atoi(*blueprint.ID)
+	return int64(id)
 }
 
 func getFancyBlueprintName(blueprint *models.BlueprintResponse) string {
