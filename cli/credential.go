@@ -50,6 +50,15 @@ func CreateCredential(c *cli.Context) error {
 	return nil
 }
 
+func DeleteCredential(c *cli.Context) error {
+	checkRequiredFlags(c, DeleteCredential)
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	if err := oAuth2Client.DeleteCredential(c.String(FlCredentialName.Name)); err != nil {
+		logErrorAndExit(DeleteCredential, err.Error())
+	}
+	return nil
+}
+
 func (c *Cloudbreak) CopyDefaultCredential(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
 	defaultCred := c.GetCredential("aws-access")
 	credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
