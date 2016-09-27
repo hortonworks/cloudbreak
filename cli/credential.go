@@ -94,3 +94,18 @@ func (c *Cloudbreak) GetCredential(name string) models.CredentialResponse {
 	log.Infof("[GetCredential] found credential, name: %s id: %d", awsAccess.Name, awsAccess.ID)
 	return awsAccess
 }
+
+func (c *Cloudbreak) GetPublicCredentials() []*models.CredentialResponse {
+	defer timeTrack(time.Now(), "get public credentials")
+	resp, err := c.Cloudbreak.Credentials.GetCredentialsAccount(&credentials.GetCredentialsAccountParams{})
+	if err != nil {
+		logErrorAndExit(c.GetPublicCredentials, err.Error())
+	}
+	return resp.Payload
+}
+
+func (c *Cloudbreak) DeleteCredential(name string) error {
+	defer timeTrack(time.Now(), "delete credential")
+	log.Infof("[DeleteCredential] delete credential: %s", name)
+	return c.Cloudbreak.Credentials.DeleteCredentialsAccountName(&credentials.DeleteCredentialsAccountNameParams{Name: name})
+}

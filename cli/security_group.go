@@ -63,3 +63,18 @@ func (c *Cloudbreak) GetSecurityDetails(stack *models.StackResponse) (securityMa
 	}
 	return securityMap, err
 }
+
+func (c *Cloudbreak) GetPublicSecurityGroups() []*models.SecurityGroupJSON {
+	defer timeTrack(time.Now(), "get public security groups")
+	resp, err := c.Cloudbreak.Securitygroups.GetSecuritygroupsAccount(&securitygroups.GetSecuritygroupsAccountParams{})
+	if err != nil {
+		logErrorAndExit(c.GetPublicSecurityGroups, err.Error())
+	}
+	return resp.Payload
+}
+
+func (c *Cloudbreak) DeleteSecurityGroup(name string) error {
+	defer timeTrack(time.Now(), "delete security group")
+	log.Infof("[DeleteSecurityGroup] delete security group: %s", name)
+	return c.Cloudbreak.Securitygroups.DeleteSecuritygroupsAccountName(&securitygroups.DeleteSecuritygroupsAccountNameParams{Name: name})
+}

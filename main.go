@@ -178,6 +178,15 @@ func main() {
 			Action: hdc.ShowHiddenCommands,
 		},
 		{
+			Name:   "cleanup",
+			Usage:  "remove the unused resources",
+			Before: ConfigRead,
+			After:  StopSpinner,
+			Hidden: true,
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Action: hdc.CleanupResources,
+		},
+		{
 			Name:  "create-credential",
 			Usage: "create a new credential",
 			Flags: []cli.Flag{hdc.FlCredentialName, hdc.FlRoleARN, hdc.FlSSHKeyURL, hdc.FlSSHKeyPair,

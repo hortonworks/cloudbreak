@@ -57,3 +57,18 @@ func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64
 
 	wg.Done()
 }
+
+func (c *Cloudbreak) GetPublicTemplates() []*models.TemplateResponse {
+	defer timeTrack(time.Now(), "get public templates")
+	resp, err := c.Cloudbreak.Templates.GetTemplatesAccount(&templates.GetTemplatesAccountParams{})
+	if err != nil {
+		logErrorAndExit(c.GetPublicTemplates, err.Error())
+	}
+	return resp.Payload
+}
+
+func (c *Cloudbreak) DeleteTemplate(name string) error {
+	defer timeTrack(time.Now(), "delete template")
+	log.Infof("[DeleteTemplate] delete template: %s", name)
+	return c.Cloudbreak.Templates.DeleteTemplatesAccountName(&templates.DeleteTemplatesAccountNameParams{Name: name})
+}

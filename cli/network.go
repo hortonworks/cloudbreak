@@ -68,3 +68,18 @@ func (c *Cloudbreak) GetNetworkById(id int64) *models.NetworkJSON {
 	log.Infof("[GetNetwork] found network, name: %s", network.Name)
 	return network
 }
+
+func (c *Cloudbreak) GetPublicNetworks() []*models.NetworkJSON {
+	defer timeTrack(time.Now(), "get public networks")
+	resp, err := c.Cloudbreak.Networks.GetNetworksAccount(&networks.GetNetworksAccountParams{})
+	if err != nil {
+		logErrorAndExit(c.GetPublicNetworks, err.Error())
+	}
+	return resp.Payload
+}
+
+func (c *Cloudbreak) DeleteNetwork(name string) error {
+	defer timeTrack(time.Now(), "delete network")
+	log.Infof("[DeleteNetwork] delete network: %s", name)
+	return c.Cloudbreak.Networks.DeleteNetworksAccountName(&networks.DeleteNetworksAccountNameParams{Name: name})
+}

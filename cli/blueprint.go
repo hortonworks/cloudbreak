@@ -40,14 +40,10 @@ func (b *Blueprint) DataAsStringArray() []string {
 func ListBlueprints(c *cli.Context) error {
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	// make the request to get all items
-	respBlueprints, err := oAuth2Client.Cloudbreak.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
-	if err != nil {
-		logErrorAndExit(ListBlueprints, err.Error())
-	}
+	respBlueprints := oAuth2Client.GetPublicBlueprints()
 
 	var tableRows []Row
-	for _, blueprint := range respBlueprints.Payload {
+	for _, blueprint := range respBlueprints {
 		// this is a workaround, needs to be hidden, by not storing them as public
 		if !strings.HasPrefix(blueprint.Name, "b") {
 			row := &Blueprint{ClusterType: getFancyBlueprintName(blueprint), HDPVersion: blueprint.AmbariBlueprint.Blueprint.StackVersion}
@@ -58,6 +54,21 @@ func ListBlueprints(c *cli.Context) error {
 	output.WriteList(BlueprintHeader, tableRows)
 
 	return nil
+}
+
+func (c *Cloudbreak) GetPublicBlueprints() []*models.BlueprintResponse {
+	defer timeTrack(time.Now(), "get public blueprints")
+	resp, err := c.Cloudbreak.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
+	if err != nil {
+		logErrorAndExit(c.GetPublicBlueprints, err.Error())
+	}
+	return resp.Payload
+}
+
+func (c *Cloudbreak) DeleteBlueprint(name string) error {
+	defer timeTrack(time.Now(), "delete blueprint")
+	log.Infof("[DeleteBlueprint] delete blueprint: %s", name)
+	return c.Cloudbreak.Blueprints.DeletePublic(&blueprints.DeletePublicParams{Name: name})
 }
 
 func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
