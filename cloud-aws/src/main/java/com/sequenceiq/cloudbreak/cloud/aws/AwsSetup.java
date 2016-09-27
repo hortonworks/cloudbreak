@@ -144,8 +144,10 @@ public class AwsSetup implements Setup {
                 } else {
                     errorMessage = IMAGE_OPT_IN_REQUIRED_MSG;
                 }
+                throw new CloudConnectorException(errorMessage, e);
+            } else {
+                LOGGER.error(String.format("Image opt-in could not be validated for AMI '%s'.", imageName), e);
             }
-            throw new CloudConnectorException(errorMessage, e);
         }
     }
 
