@@ -12,7 +12,10 @@ deps:
 format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
-build: format build-darwin build-linux build-windows
+test:
+	go test github.com/hortonworks/hdc-cli/cli
+
+build: format test build-darwin build-linux build-windows
 
 build-darwin:
 	GOOS=darwin go build -a -installsuffix cgo ${LDFLAGS} -o build/Darwin/${BINARY} main.go
