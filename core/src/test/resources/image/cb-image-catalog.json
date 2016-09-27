@@ -244,8 +244,8 @@
             },
             "images": {
               "aws": {
-                "ap-northeast-1": "ap-northeast-1-ami-2.5.0.0-222-2.4.3.0-100",
-                "ap-northeast-2": "ap-northeast-2-ami-2.5.0.0-222-2.4.3.0-100"
+                "ap-northeast-1": "ap-northeast-1-ami-2.5.0.0-222-2.4.10.0-100",
+                "ap-northeast-2": "ap-northeast-2-ami-2.5.0.0-222-2.4.10.0-100"
               }
             }
           },
@@ -267,6 +267,122 @@
               "aws": {
                 "ap-northeast-1": "ap-northeast-1-ami-2.5.0.0-222-2.5.0.0-723",
                 "ap-northeast-2": "ap-northeast-2-ami-2.5.0.0-222-2.5.0.0-723"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ambari": {
+        "cb_versions": [
+          "1.4-rc2"
+        ],
+        "version": "2.5.0.0-222",
+        "repo": {
+          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.0.0-222/",
+          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.5.0.0-222/"
+        },
+        "hdp": [
+          {
+            "version": "2.4.10.0-22",
+            "repo": {
+              "stack": {
+                "repoid": "HDP-2.4",
+                "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos6/2.x/BUILDS/2.4.10.0-21",
+                "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.4.10.0-21"
+              },
+              "util": {
+                "repoid": "HDP-UTILS-1.1.0.20",
+                "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6",
+                "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos7"
+              }
+            },
+            "images": {
+              "aws": {
+                "ap-northeast-1": "ap-northeast-1-ami-2.5.0.0-222-2.4.10.0-22",
+                "ap-northeast-2": "ap-northeast-2-ami-2.5.0.0-222-2.4.10.0-22"
+              },
+              "azure": {
+                "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/2.5.0.0-222-2.4.10.0-22.vhd",
+                "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/2.5.0.0-222-2.4.10.0-22.vhd"
+              }
+            }
+          },
+          {
+            "version": "2.5.0.0-724",
+            "repo": {
+              "stack": {
+                "repoid": "HDP-2.4",
+                "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos6/2.x/BUILDS/2.5.0.0-723",
+                "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.5.0.0-723"
+              },
+              "util": {
+                "repoid": "HDP-UTILS-1.1.0.20",
+                "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6",
+                "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos7"
+              }
+            },
+            "images": {
+              "aws": {
+                "ap-northeast-1": "ap-northeast-1-ami-2.5.0.0-222-2.5.0.0-724",
+                "ap-northeast-2": "ap-northeast-2-ami-2.5.0.0-222-2.5.0.0-724"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "ambari": {
+        "cb_versions": [
+          "1.4-rc2"
+        ],
+        "version": "2.5.0.0-222",
+        "repo": {
+          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.0.0-222/",
+          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.5.0.0-222/"
+        },
+        "hdp": [
+          {
+            "version": "2.4.10.0-22",
+            "repo": {
+              "stack": {
+                "repoid": "HDP-2.4",
+                "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos6/2.x/BUILDS/2.4.10.0-21",
+                "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.4.10.0-21"
+              },
+              "util": {
+                "repoid": "HDP-UTILS-1.1.0.20",
+                "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6",
+                "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos7"
+              }
+            },
+            "images": {
+              "aws": {
+                "ap-northeast-1": "ap-northeast-1-ami-2.5.0.0-222-2.4.10.0-22-1",
+                "ap-northeast-2": "ap-northeast-2-ami-2.5.0.0-222-2.4.10.0-22-1"
+              }
+            }
+          },
+          {
+            "version": "2.5.0.0-724",
+            "repo": {
+              "stack": {
+                "repoid": "HDP-2.4",
+                "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos6/2.x/BUILDS/2.5.0.0-723",
+                "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.5.0.0-723"
+              },
+              "util": {
+                "repoid": "HDP-UTILS-1.1.0.20",
+                "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6",
+                "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos7"
+              }
+            },
+            "images": {
+              "aws": {
+                "ap-northeast-1": "ap-northeast-1-ami-2.5.0.0-222-2.5.0.0-724",
+                "ap-northeast-2": "ap-northeast-2-ami-2.5.0.0-222-2.5.0.0-724"
               }
             }
           }
