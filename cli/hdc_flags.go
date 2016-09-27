@@ -139,6 +139,12 @@ var (
 			Usage: "type of the cluster",
 		},
 	}
+	FlNetworkName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "network-name",
+		},
+	}
 )
 
 type RequiredFlag struct {

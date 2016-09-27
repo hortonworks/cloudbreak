@@ -206,6 +206,15 @@ func main() {
 			Action: hdc.DeleteCredential,
 		},
 		{
+			Name:   "delete-network",
+			Usage:  "delete a network",
+			Flags:  []cli.Flag{hdc.FlNetworkName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Hidden: true,
+			After:  StopSpinner,
+			Action: hdc.DeleteNetwork,
+		},
+		{
 			Name:   "list-credentials",
 			Usage:  "list the private credentials",
 			Before: ConfigRead,

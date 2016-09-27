@@ -4,6 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/networks"
 	"github.com/hortonworks/hdc-cli/models"
+	"github.com/urfave/cli"
 	"strconv"
 	"sync"
 	"time"
@@ -67,6 +68,15 @@ func (c *Cloudbreak) GetNetworkById(id int64) *models.NetworkJSON {
 	network := resp.Payload
 	log.Infof("[GetNetwork] found network, name: %s", network.Name)
 	return network
+}
+
+func DeleteNetwork(c *cli.Context) error {
+	checkRequiredFlags(c, DeleteCredential)
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	if err := oAuth2Client.DeleteNetwork(c.String(FlNetworkName.Name)); err != nil {
+		logErrorAndExit(DeleteNetwork, err.Error())
+	}
+	return nil
 }
 
 func (c *Cloudbreak) GetPublicNetworks() []*models.NetworkJSON {
