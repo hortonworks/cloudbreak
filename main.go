@@ -196,6 +196,14 @@ func main() {
 			After:  StopSpinner,
 			Action: hdc.CreateCredential,
 		},
+		{
+			Name:   "list-credentials",
+			Usage:  "list the private credentials",
+			Before: ConfigRead,
+			Hidden: true,
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Action: hdc.ListPrivateCredentials,
+		},
 	}...)
 
 	app.Run(os.Args)

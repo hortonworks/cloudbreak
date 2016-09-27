@@ -12,6 +12,17 @@ import (
 	"time"
 )
 
+var CredentialHeader []string = []string{"ID", "Name"}
+
+type Credential struct {
+	Id   int64  `json:"Id" yaml:"Id"`
+	Name string `json:"Name" yaml:"Name"`
+}
+
+func (c *Credential) DataAsStringArray() []string {
+	return []string{strconv.FormatInt(c.Id, 10), c.Name}
+}
+
 func CreateCredential(c *cli.Context) error {
 	checkRequiredFlags(c, CreateCredential)
 
@@ -108,4 +119,30 @@ func (c *Cloudbreak) DeleteCredential(name string) error {
 	defer timeTrack(time.Now(), "delete credential")
 	log.Infof("[DeleteCredential] delete credential: %s", name)
 	return c.Cloudbreak.Credentials.DeleteCredentialsAccountName(&credentials.DeleteCredentialsAccountNameParams{Name: name})
+}
+
+func ListPrivateCredentials(c *cli.Context) error {
+	checkRequiredFlags(c, CreateCredential)
+	defer timeTrack(time.Now(), "list the private credentials")
+
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	credResp := oAuth2Client.GetPrivateCredentials()
+
+	var tableRows []Row
+	for _, cred := range credResp {
+		row := &Credential{Id: *cred.ID, Name: cred.Name}
+		tableRows = append(tableRows, row)
+	}
+	output := Output{Format: c.String(FlOutput.Name)}
+	output.WriteList(CredentialHeader, tableRows)
+	return nil
+}
+
+func (c *Cloudbreak) GetPrivateCredentials() []*models.CredentialResponse {
+	defer timeTrack(time.Now(), "get private credentials")
+	resp, err := c.Cloudbreak.Credentials.GetCredentialsUser(&credentials.GetCredentialsUserParams{})
+	if err != nil {
+		logErrorAndExit(c.GetPrivateCredentials, err.Error())
+	}
+	return resp.Payload
 }
