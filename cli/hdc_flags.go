@@ -145,6 +145,24 @@ var (
 			Name: "network-name",
 		},
 	}
+	FlSubnet = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "subnet-cidr",
+		},
+	}
+	FlVPC = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "vpc",
+		},
+	}
+	FlIGW = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "igw",
+		},
+	}
 )
 
 type RequiredFlag struct {

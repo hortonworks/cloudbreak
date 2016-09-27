@@ -44,6 +44,37 @@ func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64,
 	channel <- resp.Payload.ID
 }
 
+func CreateNetworkCommand(c *cli.Context) error {
+	checkRequiredFlags(c, CreateCredential)
+	defer timeTrack(time.Now(), "create network")
+
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	networkName := c.String(FlNetworkName.Name)
+	log.Infof("[CreateNetworkCommand] create network with name: %s", networkName)
+
+	var vpcParams = make(map[string]interface{})
+	vpcParams["vpcId"] = c.String(FlVPC.Name)
+	vpcParams["internetGatewayId"] = c.String(FlIGW.Name)
+	subnet := c.String(FlSubnet.Name)
+
+	network := models.NetworkJSON{
+		Name:          networkName,
+		CloudPlatform: "AWS",
+		Parameters:    vpcParams,
+		SubnetCIDR:    &subnet,
+	}
+
+	resp, err := oAuth2Client.Cloudbreak.Networks.PostNetworksAccount(&networks.PostNetworksAccountParams{&network})
+
+	if err != nil {
+		logErrorAndExit(CreateNetworkCommand, err.Error())
+	}
+
+	log.Infof("[CreateNetworkCommand] network created, id: %d", resp.Payload.ID)
+	return nil
+}
+
 func (c *Cloudbreak) GetNetwork(name string) models.NetworkJSON {
 	log.Infof("[GetNetwork] sending get request to find network with name: %s", name)
 	resp, err := c.Cloudbreak.Networks.GetNetworksAccountName(&networks.GetNetworksAccountNameParams{Name: name})

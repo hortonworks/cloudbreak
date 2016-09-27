@@ -197,6 +197,16 @@ func main() {
 			Action: hdc.CreateCredential,
 		},
 		{
+			Name:  "create-network",
+			Usage: "create a new network",
+			Flags: []cli.Flag{hdc.FlNetworkName, hdc.FlSubnet, hdc.FlVPC, hdc.FlIGW,
+				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Hidden: true,
+			After:  StopSpinner,
+			Action: hdc.CreateNetworkCommand,
+		},
+		{
 			Name:   "delete-credential",
 			Usage:  "delete a credential",
 			Flags:  []cli.Flag{hdc.FlCredentialName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
