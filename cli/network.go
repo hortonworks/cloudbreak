@@ -10,6 +10,17 @@ import (
 	"time"
 )
 
+var NetworkHeader []string = []string{"ID", "Name"}
+
+type NetworkList struct {
+	Id   int64  `json:"Id" yaml:"Id"`
+	Name string `json:"Name" yaml:"Name"`
+}
+
+func (n *NetworkList) DataAsStringArray() []string {
+	return []string{strconv.FormatInt(n.Id, 10), n.Name}
+}
+
 func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
 	defer timeTrack(time.Now(), "create network")
 	defer wg.Done()
@@ -65,7 +76,7 @@ func CreateNetworkCommand(c *cli.Context) error {
 		SubnetCIDR:    &subnet,
 	}
 
-	resp, err := oAuth2Client.Cloudbreak.Networks.PostNetworksAccount(&networks.PostNetworksAccountParams{&network})
+	resp, err := oAuth2Client.Cloudbreak.Networks.PostNetworksUser(&networks.PostNetworksUserParams{&network})
 
 	if err != nil {
 		logErrorAndExit(CreateNetworkCommand, err.Error())
@@ -123,4 +134,30 @@ func (c *Cloudbreak) DeleteNetwork(name string) error {
 	defer timeTrack(time.Now(), "delete network")
 	log.Infof("[DeleteNetwork] delete network: %s", name)
 	return c.Cloudbreak.Networks.DeleteNetworksAccountName(&networks.DeleteNetworksAccountNameParams{Name: name})
+}
+
+func ListPrivateNetworks(c *cli.Context) error {
+	checkRequiredFlags(c, CreateCredential)
+	defer timeTrack(time.Now(), "list the private networks")
+
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	networkResp := oAuth2Client.GetPrivateNetworks()
+
+	var tableRows []Row
+	for _, net := range networkResp {
+		row := &NetworkList{Id: *net.ID, Name: net.Name}
+		tableRows = append(tableRows, row)
+	}
+	output := Output{Format: c.String(FlOutput.Name)}
+	output.WriteList(NetworkHeader, tableRows)
+	return nil
+}
+
+func (c *Cloudbreak) GetPrivateNetworks() []*models.NetworkJSON {
+	defer timeTrack(time.Now(), "get private networks")
+	resp, err := c.Cloudbreak.Networks.GetNetworksUser(&networks.GetNetworksUserParams{})
+	if err != nil {
+		logErrorAndExit(c.GetPrivateNetworks, err.Error())
+	}
+	return resp.Payload
 }

@@ -225,11 +225,19 @@ func main() {
 		},
 		{
 			Name:   "list-credentials",
-			Usage:  "list the private credentials",
+			Usage:  "list the credentials",
 			Before: ConfigRead,
 			Hidden: true,
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Action: hdc.ListPrivateCredentials,
+		},
+		{
+			Name:   "list-networks",
+			Usage:  "list the networks",
+			Before: ConfigRead,
+			Hidden: true,
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Action: hdc.ListPrivateNetworks,
 		},
 	}...)
 

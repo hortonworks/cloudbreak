@@ -46,7 +46,7 @@ func CreateCredential(c *cli.Context) error {
 	}
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	oAuth2Client.CreateCredential(c.String(FlCredentialName.Name), defaultCredential, c.String(FlSSHKeyPair.Name))
+	oAuth2Client.CreateCredential(c.String(FlCredentialName.Name), defaultCredential, c.String(FlSSHKeyPair.Name), false)
 	return nil
 }
 
@@ -62,11 +62,11 @@ func DeleteCredential(c *cli.Context) error {
 func (c *Cloudbreak) CopyDefaultCredential(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
 	defaultCred := c.GetCredential("aws-access")
 	credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	channel <- c.CreateCredential(credentialName, defaultCred, skeleton.SSHKeyName)
+	channel <- c.CreateCredential(credentialName, defaultCred, skeleton.SSHKeyName, true)
 	wg.Done()
 }
 
-func (c *Cloudbreak) CreateCredential(name string, defaultCredential models.CredentialResponse, existingKey string) int64 {
+func (c *Cloudbreak) CreateCredential(name string, defaultCredential models.CredentialResponse, existingKey string, public bool) int64 {
 	defer timeTrack(time.Now(), "create credential")
 	var credentialMap = make(map[string]interface{})
 	credentialMap["selector"] = "role-based"
@@ -81,14 +81,23 @@ func (c *Cloudbreak) CreateCredential(name string, defaultCredential models.Cred
 	}
 
 	log.Infof("[CreateCredential] sending credential create request with name: %s", name)
-	resp, err := c.Cloudbreak.Credentials.PostCredentialsAccount(&credentials.PostCredentialsAccountParams{&credReq})
-
-	if err != nil {
-		logErrorAndExit(c.CreateCredential, err.Error())
+	var id int64
+	if public {
+		resp, err := c.Cloudbreak.Credentials.PostCredentialsAccount(&credentials.PostCredentialsAccountParams{&credReq})
+		if err != nil {
+			logErrorAndExit(c.CreateCredential, err.Error())
+		}
+		id = resp.Payload.ID
+	} else {
+		resp, err := c.Cloudbreak.Credentials.PostCredentialsUser(&credentials.PostCredentialsUserParams{&credReq})
+		if err != nil {
+			logErrorAndExit(c.CreateCredential, err.Error())
+		}
+		id = resp.Payload.ID
 	}
 
-	log.Infof("[CreateCredential] credential created, id: %d", resp.Payload.ID)
-	return resp.Payload.ID
+	log.Infof("[CreateCredential] credential created, id: %d", id)
+	return id
 }
 
 func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models.CredentialResponse, error) {
