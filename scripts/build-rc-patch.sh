@@ -13,13 +13,17 @@ fi
 
 ./gradlew -Penv=jenkins -b build.gradle clean build -Prelease.scope=$SCOPE -Prelease.stage=rc --info --stacktrace
 
+set -x
 # fix beanwire issue with repackaging the jar
+find ./core/build/libs/
+
 file=$(find ./core/build/libs/ -name \*.jar)
 rm -rf ${dir:=repack}
 unzip -qoq $file -d $dir
 jar -cfm0 ${file%.jar}-repacked.jar $dir/META-INF/MANIFEST.MF -C $dir .
 mv ${file} ${file%.jar}.jar.bak
 mv ${file%.jar}-repacked.jar ${file}
+set +x
 
 ./gradlew -Penv=jenkins -b build.gradle release uploadArchives -Prelease.scope=$SCOPE -Prelease.stage=rc --info --stacktrace
 
