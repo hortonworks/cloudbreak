@@ -4,10 +4,23 @@
 
 MINOR_VERSION=$(echo "$BRANCH" | cut -d'-' -f 2)
 
+SCOPE=
 if [ "$(git tag -l "$MINOR_VERSION.0-rc.1")" == '' ]; then
-    ./gradlew -Penv=jenkins -b build.gradle clean build release uploadArchives -Prelease.scope=minor -Prelease.stage=rc --info --stacktrace
+    SCOPE=minor
 else
-    ./gradlew -Penv=jenkins -b build.gradle clean build release uploadArchives -Prelease.scope=patch -Prelease.stage=rc --info --stacktrace
+    SCOPE=patch
 fi
+
+./gradlew -Penv=jenkins -b build.gradle clean build -Prelease.scope=$SCOPE -Prelease.stage=rc --info --stacktrace
+
+# fix beanwire issue with repackaging the jar
+file=$(find ./core/build/libs/ -name \*.jar)
+rm -rf ${dir:=repack}
+unzip -qoq $file -d $dir
+jar -cfm0 ${file%.jar}-repacked.jar $dir/META-INF/MANIFEST.MF -C $dir .
+mv ${file} ${file%.jar}.jar.bak
+mv ${file%.jar}-repacked.jar ${file}
+
+./gradlew -Penv=jenkins -b build.gradle release uploadArchives -Prelease.scope=$SCOPE -Prelease.stage=rc --info --stacktrace
 
 echo VERSION=$(git describe --abbrev=0 --tags) > $WORKSPACE/version
