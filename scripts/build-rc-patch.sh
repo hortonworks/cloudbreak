@@ -11,7 +11,7 @@ else
     SCOPE=patch
 fi
 
-./gradlew -Penv=jenkins -b build.gradle clean build release -Prelease.scope=$SCOPE -Prelease.stage=rc --info --stacktrace
+./gradlew -Penv=jenkins -b build.gradle clean build  -Prelease.scope=$SCOPE -Prelease.stage=rc --info --stacktrace
 
 set -x
 # fix beanwire issue with repackaging the jar
@@ -25,6 +25,6 @@ mv ${file} ${file%.jar}.jar.bak
 mv ${file%.jar}-repacked.jar ${file}
 set +x
 
-./gradlew -Penv=jenkins -b build.gradle  uploadArchives --info --stacktrace
+./gradlew -Penv=jenkins -b build.gradle release uploadArchives -x jar -Prelease.scope=$SCOPE -Prelease.stage=rc  --info --stacktrace
 
 echo VERSION=$(git describe --abbrev=0 --tags) > $WORKSPACE/version
