@@ -1,6 +1,6 @@
 BINARY=hdc
 
-VERSION=1.7.0-rc.1
+VERSION=1.7.0-rc.2
 BUILD_TIME=$(shell date +%FT%T)
 LDFLAGS=-ldflags "-X github.com/hortonworks/hdc-cli/cli.Version=${VERSION} -X github.com/hortonworks/hdc-cli/cli.BuildTime=${BUILD_TIME}"
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
@@ -44,3 +44,5 @@ linux-test: build-linux
 	docker run --rm -it -v ${PWD}/build/Linux/:/usr/sbin/ --name hdc alpine sh
 
 .DEFAULT_GOAL := build
+
+.PHONY: build release

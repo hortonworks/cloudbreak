@@ -266,6 +266,7 @@ func CreateCluster(c *cli.Context) error {
 		var rdsConfig *models.RDSConfig = nil
 		var rdsId *int64 = nil
 		ms := skeleton.HiveMetastore
+		validate := false
 		if skeleton.HiveMetastore != nil {
 			if len(skeleton.HiveMetastore.URL) > 0 {
 				var connUrl string
@@ -281,6 +282,7 @@ func CreateCluster(c *cli.Context) error {
 					ConnectionURL:      connUrl,
 					DatabaseType:       ms.DatabaseType,
 					HdpVersion:         skeleton.HDPVersion,
+					Validated:          &validate,
 				}
 			} else if len(ms.Name) > 0 {
 				id, err := strconv.ParseInt(*oAuth2Client.GetRDSConfigByName(ms.Name).ID, 10, 64)
