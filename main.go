@@ -173,7 +173,6 @@ func main() {
 		{
 			Name:   "hidden",
 			Usage:  "shows the hidden commands",
-			Before: ConfigRead,
 			Hidden: true,
 			Action: hdc.ShowHiddenCommands,
 		},
