@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.AmbariCatalog;
@@ -28,11 +29,11 @@ public class HdpInfoSearchService {
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
 
-    public HDPInfo searchHDPInfo(String ambariVersion, String hdpVersion, String imageCatalogUrl) throws CloudbreakImageNotFoundException {
+    public HDPInfo searchHDPInfo(String platform, String ambariVersion, String hdpVersion, String imageCatalogUrl) throws CloudbreakImageNotFoundException {
         HDPInfo hdpInfo = null;
         if (ambariVersion != null && hdpVersion != null) {
             CloudbreakImageCatalog imageCatalog = imageCatalogProvider.getImageCatalog(imageCatalogUrl);
-            hdpInfo = prefixSearch(imageCatalog, cbVersion, ambariVersion, hdpVersion);
+            hdpInfo = prefixSearch(imageCatalog, platform, cbVersion, ambariVersion, hdpVersion);
             if (hdpInfo == null) {
                 throw new CloudbreakImageNotFoundException(
                         String.format("Failed to determine VM image from catalog! Cloudbreak version: %s, "
@@ -44,20 +45,27 @@ public class HdpInfoSearchService {
         return hdpInfo;
     }
 
-    private List<AmbariCatalog> ambariPrefixMatch(CloudbreakImageCatalog imageCatalog, String cbVersion, String ambariVersion) {
+    private List<AmbariCatalog> ambariPrefixMatch(CloudbreakImageCatalog imageCatalog, String platform, String cbVersion, String ambariVersion,
+            String hdpVersion) {
         if (imageCatalog == null) {
             return null;
         }
         List<AmbariCatalog> ambariCatalog;
-        if (!StringUtils.isEmpty(cbVersion) && !"unspecified".equals(cbVersion) && !cbVersion.contains("dev")) {
-            ambariCatalog = imageCatalog.getAmbariVersions().stream()
-                    .filter(p -> p.getAmbariInfo().getCbVersions().contains(cbVersion)).collect(Collectors.toList());
-        } else {
+        if (StringUtils.isEmpty(cbVersion) || "unspecified".equals(cbVersion)) {
             ambariCatalog = imageCatalog.getAmbariVersions().stream().collect(Collectors.toList());
+        } else {
+            ambariCatalog = imageCatalog.getAmbariVersions().stream().filter(p -> p.getAmbariInfo().getCbVersions().contains(cbVersion))
+                    .collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(ambariCatalog) && cbVersion.contains("dev")) {
+                ambariCatalog = imageCatalog.getAmbariVersions().stream().collect(Collectors.toList());
+            }
         }
         List<AmbariCatalog> ambariCatalogs = ambariCatalog.stream()
-                .filter(p -> p.getAmbariInfo().getVersion().startsWith(ambariVersion)).collect(Collectors.toList());
-        Collections.sort(ambariCatalogs, Collections.reverseOrder(new VersionComparator()));
+                .filter(p -> p.getAmbariInfo().getVersion().startsWith(ambariVersion))
+                .filter(p -> p.getAmbariInfo().getHdp().stream().anyMatch(hdp -> hdp.getVersion().startsWith(hdpVersion)))
+                .filter(p -> p.getAmbariInfo().getHdp().stream().anyMatch(hdp -> hdp.getImages().containsKey(platform)))
+                .collect(Collectors.toList());
+        Collections.sort(ambariCatalogs, new VersionComparator());
         LOGGER.info("Prefix matched Ambari versions: {}. Ambari search prefix: {}", ambariCatalogs, ambariVersion);
         return ambariCatalogs;
     }
@@ -66,7 +74,7 @@ public class HdpInfoSearchService {
         if (ambariCatalogs == null || ambariCatalogs.isEmpty()) {
             return null;
         }
-        return ambariCatalogs.get(0);
+        return ambariCatalogs.get(ambariCatalogs.size() - 1);
     }
 
     private List<HDPInfo> hdpPrefixMatch(AmbariCatalog ambariCatalog, String hdpVersion) {
@@ -75,7 +83,7 @@ public class HdpInfoSearchService {
         }
         List<HDPInfo> hdpInfos = ambariCatalog.getAmbariInfo().getHdp().stream()
                 .filter(p -> p.getVersion().startsWith(hdpVersion)).collect(Collectors.toList());
-        Collections.sort(hdpInfos, Collections.reverseOrder(new VersionComparator()));
+        Collections.sort(hdpInfos, new VersionComparator());
         LOGGER.info("Prefix matched HDP versions: {} for Ambari version: {}. HDP search prefix: {}", hdpInfos, ambariCatalog.getVersion(), hdpVersion);
         return hdpInfos;
 
@@ -85,14 +93,13 @@ public class HdpInfoSearchService {
         if (hdpInfos == null || hdpInfos.isEmpty()) {
             return null;
         }
-        return hdpInfos.get(0);
+        return hdpInfos.get(hdpInfos.size() - 1);
     }
 
-    private HDPInfo prefixSearch(CloudbreakImageCatalog imageCatalog, String cbVersion, String ambariVersion, String hdpVersion) {
-        List<AmbariCatalog> ambariCatalogs = ambariPrefixMatch(imageCatalog, cbVersion, ambariVersion);
+    private HDPInfo prefixSearch(CloudbreakImageCatalog imageCatalog, String platform, String cbVersion, String ambariVersion, String hdpVersion) {
+        List<AmbariCatalog> ambariCatalogs = ambariPrefixMatch(imageCatalog, platform, cbVersion, ambariVersion, hdpVersion);
         AmbariCatalog ambariCatalog = selectLatestAmbariCatalog(ambariCatalogs);
         List<HDPInfo> hdpInfos = hdpPrefixMatch(ambariCatalog, hdpVersion);
         return selectLatestHdpInfo(hdpInfos);
     }
-
 }

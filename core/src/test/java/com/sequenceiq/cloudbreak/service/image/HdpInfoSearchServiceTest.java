@@ -40,28 +40,28 @@ public class HdpInfoSearchServiceTest {
 
     @Test
     public void testWithNull() throws IOException, CloudbreakImageNotFoundException {
-        HDPInfo hdpInfo = underTest.searchHDPInfo(null, null, null);
+        HDPInfo hdpInfo = underTest.searchHDPInfo(null, null, null, null);
         Assert.assertNull("HDP info shall be null for null input", hdpInfo);
     }
 
     @Test(expected = CloudbreakImageNotFoundException.class)
     public void testWithNotExsisting1() throws CloudbreakImageNotFoundException {
-        underTest.searchHDPInfo("2.4.0.0-661", "2.4.3.0-21", null);
+        underTest.searchHDPInfo("aws", "2.4.0.0-661", "2.4.3.0-21", null);
 
     }
 
     @Test(expected = CloudbreakImageNotFoundException.class)
     public void testWithNotExsisting2() throws CloudbreakImageNotFoundException {
-        underTest.searchHDPInfo("2.4.0.0-660", "2.4.3.0-14", null);
+        underTest.searchHDPInfo("aws", "2.4.0.0-660", "2.4.3.0-14", null);
     }
 
     @Test
     public void testExactVersion() throws CloudbreakImageNotFoundException {
-        HDPInfo hdpInfo = underTest.searchHDPInfo("2.4.0.0-660", "2.4.3.0-21", null);
+        HDPInfo hdpInfo = underTest.searchHDPInfo("aws", "2.4.0.0-660", "2.4.3.0-21", null);
         Assert.assertEquals("ap-northeast-1-ami-2.4.0.0-660-2.4.3.0-21", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
         Assert.assertEquals("ap-northeast-2-ami-2.4.0.0-660-2.4.3.0-21", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
 
-        hdpInfo = underTest.searchHDPInfo("2.5.0.0-222", "2.5.0.0-723", null);
+        hdpInfo = underTest.searchHDPInfo("aws", "2.5.0.0-222", "2.5.0.0-723", null);
         Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.5.0.0-723", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
         Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.5.0.0-723", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
     }
@@ -70,11 +70,11 @@ public class HdpInfoSearchServiceTest {
     public void testExactVersionWithUnspecifiedCbVersion() throws CloudbreakImageNotFoundException {
         ReflectionTestUtils.setField(underTest, "cbVersion", "unspecified");
 
-        HDPInfo hdpInfo = underTest.searchHDPInfo("2.4.0.0-660", "2.4.3.0-21", null);
+        HDPInfo hdpInfo = underTest.searchHDPInfo("aws", "2.4.0.0-660", "2.4.3.0-21", null);
         Assert.assertEquals("ap-northeast-1-ami-2.4.0.0-660-2.4.3.0-21", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
         Assert.assertEquals("ap-northeast-2-ami-2.4.0.0-660-2.4.3.0-21", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
 
-        hdpInfo = underTest.searchHDPInfo("2.5.0.0-222", "2.5.0.0-723", null);
+        hdpInfo = underTest.searchHDPInfo("aws", "2.5.0.0-222", "2.5.0.0-723", null);
         Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.5.0.0-723", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
         Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.5.0.0-723", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
     }
@@ -83,11 +83,11 @@ public class HdpInfoSearchServiceTest {
     public void testExactVersionWithNullCbVersion() throws CloudbreakImageNotFoundException {
         ReflectionTestUtils.setField(underTest, "cbVersion", null);
 
-        HDPInfo hdpInfo = underTest.searchHDPInfo("2.4.0.0-660", "2.4.3.0-21", null);
+        HDPInfo hdpInfo = underTest.searchHDPInfo("aws", "2.4.0.0-660", "2.4.3.0-21", null);
         Assert.assertEquals("ap-northeast-1-ami-2.4.0.0-660-2.4.3.0-21", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
         Assert.assertEquals("ap-northeast-2-ami-2.4.0.0-660-2.4.3.0-21", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
 
-        hdpInfo = underTest.searchHDPInfo("2.5.0.0-222", "2.5.0.0-723", null);
+        hdpInfo = underTest.searchHDPInfo("aws", "2.5.0.0-222", "2.5.0.0-723", null);
         Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.5.0.0-723", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
         Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.5.0.0-723", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
     }
@@ -96,45 +96,75 @@ public class HdpInfoSearchServiceTest {
     public void testExactVersionWithSpecificCbVersion() throws CloudbreakImageNotFoundException {
         ReflectionTestUtils.setField(underTest, "cbVersion", "1.4-rc1");
 
-        HDPInfo hdpInfo = underTest.searchHDPInfo("2.5", "2.4", null);
-        Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.4.3.0-100", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
-        Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.4.3.0-100", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
+        HDPInfo hdpInfo = underTest.searchHDPInfo("aws", "2.5", "2.4", null);
+        Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.4.10.0-100", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
+        Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.4.10.0-100", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
 
-        hdpInfo = underTest.searchHDPInfo("2.5.0.0-222", "2.5.0.0-723", null);
+        hdpInfo = underTest.searchHDPInfo("aws", "2.5.0.0-222", "2.5.0.0-723", null);
         Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.5.0.0-723", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
         Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.5.0.0-723", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
     }
 
     @Test(expected = CloudbreakImageNotFoundException.class)
     public void testExactVersionWithSpecificCbVersionThatDoesNotExist1() throws CloudbreakImageNotFoundException {
-        ReflectionTestUtils.setField(underTest, "cbVersion", "1.4-rc2");
-        underTest.searchHDPInfo("2.5", "2.4", null);
+        ReflectionTestUtils.setField(underTest, "cbVersion", "1.4-rc3");
+        underTest.searchHDPInfo("aws", "2.5", "2.4", null);
     }
 
     @Test(expected = CloudbreakImageNotFoundException.class)
     public void testExactVersionWithSpecificCbVersionThatDoesNotExist2() throws CloudbreakImageNotFoundException {
-        ReflectionTestUtils.setField(underTest, "cbVersion", "1.4-rc2");
-        underTest.searchHDPInfo("2.5", "2.5", null);
+        ReflectionTestUtils.setField(underTest, "cbVersion", "1.4-rc3");
+        underTest.searchHDPInfo("aws", "2.5", "2.5", null);
     }
 
     @Test
     public void testExactVersionWithEmptyCbVersion() throws CloudbreakImageNotFoundException {
         ReflectionTestUtils.setField(underTest, "cbVersion", "");
 
-        HDPInfo hdpInfo = underTest.searchHDPInfo("2.4.0.0-660", "2.4.3.0-21", null);
+        HDPInfo hdpInfo = underTest.searchHDPInfo("aws", "2.4.0.0-660", "2.4.3.0-21", null);
         Assert.assertEquals("ap-northeast-1-ami-2.4.0.0-660-2.4.3.0-21", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
         Assert.assertEquals("ap-northeast-2-ami-2.4.0.0-660-2.4.3.0-21", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
 
-        hdpInfo = underTest.searchHDPInfo("2.5.0.0-222", "2.5.0.0-723", null);
+        hdpInfo = underTest.searchHDPInfo("aws", "2.5.0.0-222", "2.5.0.0-723", null);
         Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.5.0.0-723", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
         Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.5.0.0-723", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
     }
 
     @Test
     public void testPrefix() throws CloudbreakImageNotFoundException {
-        HDPInfo hdpInfo = underTest.searchHDPInfo("2.4", "2.4", null);
+        HDPInfo hdpInfo = underTest.searchHDPInfo("aws", "2.4", "2.4", null);
         Assert.assertEquals("ap-northeast-1-ami-2.4.0.0-770-2.4.10.0-100", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
         Assert.assertEquals("ap-northeast-2-ami-2.4.0.0-770-2.4.10.0-100", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
     }
 
+    @Test
+    public void testLatestAmbariVersionWithEmptyCbVersion() throws CloudbreakImageNotFoundException {
+        ReflectionTestUtils.setField(underTest, "cbVersion", "");
+
+        HDPInfo hdpInfo = underTest.searchHDPInfo("aws", "2.5", "2.4", null);
+        Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.4.10.0-22-1", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
+        Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.4.10.0-22-1", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
+    }
+
+    @Test
+    public void testLatestAmbariVersionWithCbVersion() throws CloudbreakImageNotFoundException {
+        ReflectionTestUtils.setField(underTest, "cbVersion", "1.4-rc2");
+
+        HDPInfo hdpInfo = underTest.searchHDPInfo("aws", "2.5", "2.4", null);
+        Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.4.10.0-22-1", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
+        Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.4.10.0-22-1", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
+    }
+
+    @Test
+    public void testLatestAmbariVersionWithDifferentClouds() throws CloudbreakImageNotFoundException {
+        ReflectionTestUtils.setField(underTest, "cbVersion", "1.4-rc2");
+
+        HDPInfo hdpInfo = underTest.searchHDPInfo("azure", "2.5", "2.4", null);
+        Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.4.10.0-22", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
+        Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.4.10.0-22", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
+
+        hdpInfo = underTest.searchHDPInfo("aws", "2.5", "2.4", null);
+        Assert.assertEquals("ap-northeast-1-ami-2.5.0.0-222-2.4.10.0-22-1", hdpInfo.getImages().get("aws").get("ap-northeast-1"));
+        Assert.assertEquals("ap-northeast-2-ami-2.5.0.0-222-2.4.10.0-22-1", hdpInfo.getImages().get("aws").get("ap-northeast-2"));
+    }
 }
