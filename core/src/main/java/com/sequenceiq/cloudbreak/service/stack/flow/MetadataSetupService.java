@@ -41,7 +41,7 @@ public class MetadataSetupService {
         saveInstanceMetaData(stack, collectCoreMetadata(stack), null);
     }
 
-    public Set<InstanceMetaData> saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus>  cloudVmMetaDataStatusList, InstanceStatus status) {
+    public Set<InstanceMetaData> saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         Boolean ambariServerFound = false;
         Set<InstanceMetaData> updatedInstanceMetadata = new HashSet<>();
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
