@@ -1,14 +1,9 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-
-@Embeddable
 public class BlueprintParameter implements ProvisionEntity {
 
     private String name;
     private String description;
-    @Column(columnDefinition = "TEXT")
     private String referenceConfiguration;
 
     public BlueprintParameter() {

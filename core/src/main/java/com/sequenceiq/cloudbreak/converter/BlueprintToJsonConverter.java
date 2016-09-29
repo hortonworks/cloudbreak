@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -14,7 +17,9 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
 public class BlueprintToJsonConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintResponse> {
@@ -33,7 +38,11 @@ public class BlueprintToJsonConverter extends AbstractConversionServiceAwareConv
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         blueprintJson.setStatus(entity.getStatus());
-        blueprintJson.setInputs(convertNodes(entity.getInputs()));
+        try {
+            blueprintJson.setInputs(convertInputParameters(entity.getInputParameters()));
+        } catch (IOException e) {
+            LOGGER.error(String.format("Blueprint's (%s, id:%s) input parameters could not be converted to JSON.", entity.getName(), entity.getId()), e);
+        }
         try {
             blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
         } catch (Exception e) {
@@ -43,14 +52,18 @@ public class BlueprintToJsonConverter extends AbstractConversionServiceAwareConv
         return blueprintJson;
     }
 
-    private Set<BlueprintParameterJson> convertNodes(Set<BlueprintParameter> records) {
+    private Set<BlueprintParameterJson> convertInputParameters(Json inputParameters) throws IOException {
         Set<BlueprintParameterJson> result = new HashSet<>();
-        for (BlueprintParameter record : records) {
-            BlueprintParameterJson json = new BlueprintParameterJson();
-            json.setDescription(record.getDescription());
-            json.setName(record.getName());
-            json.setReferenceConfiguration(record.getReferenceConfiguration());
-            result.add(json);
+        if (inputParameters != null && StringUtils.isNoneEmpty(inputParameters.getValue())) {
+            BlueprintInputParameters inputParametersObj = inputParameters.get(BlueprintInputParameters.class);
+            List<BlueprintParameter> parameters = inputParametersObj.getParameters();
+            for (BlueprintParameter record : parameters) {
+                BlueprintParameterJson json = new BlueprintParameterJson();
+                json.setDescription(record.getDescription());
+                json.setName(record.getName());
+                json.setReferenceConfiguration(record.getReferenceConfiguration());
+                result.add(json);
+            }
         }
         return result;
     }

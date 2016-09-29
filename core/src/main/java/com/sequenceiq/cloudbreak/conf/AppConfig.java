@@ -30,12 +30,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptorMapFactory;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -44,6 +46,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Configuration
 public class AppConfig implements ResourceLoaderAware {
@@ -198,7 +201,7 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    public StackServiceComponentDescriptorMapFactory stackServiceComponentDescriptorMapFactory() throws IOException {
+    public StackServiceComponentDescriptors stackServiceComponentDescriptors() throws Exception {
         Map<String, Integer> minCardinalityReps = Maps.newHashMap();
         minCardinalityReps.put("1", 1);
         minCardinalityReps.put("0-1", 0);
@@ -214,7 +217,32 @@ public class AppConfig implements ResourceLoaderAware {
         maxCardinalityReps.put("1+", Integer.MAX_VALUE);
         maxCardinalityReps.put("ALL", Integer.MAX_VALUE);
         String stackServiceComponentsJson = FileReaderUtils.readFileFromClasspath("hdp/hdp-services.json");
-        return new StackServiceComponentDescriptorMapFactory(stackServiceComponentsJson, minCardinalityReps, maxCardinalityReps);
+        return createServiceComponentDescriptors(stackServiceComponentsJson, minCardinalityReps, maxCardinalityReps);
+    }
+
+    private StackServiceComponentDescriptors createServiceComponentDescriptors(String stackServiceComponentsJson, Map<String, Integer> minCardinalityReps,
+            Map<String, Integer> maxCardinalityReps) throws Exception {
+        Map<String, StackServiceComponentDescriptor> stackServiceComponentDescriptorMap = Maps.newHashMap();
+        JsonNode rootNode = JsonUtil.readTree(stackServiceComponentsJson);
+        JsonNode itemsNode = rootNode.get("items");
+        for (JsonNode itemNode : itemsNode) {
+            JsonNode componentsNode = itemNode.get("components");
+            for (JsonNode componentNode : componentsNode) {
+                JsonNode stackServiceComponentsNode = componentNode.get("StackServiceComponents");
+                String componentName = stackServiceComponentsNode.get("component_name").asText();
+                String componentCategory = stackServiceComponentsNode.get("component_category").asText();
+                int minCardinality = parseCardinality(minCardinalityReps, stackServiceComponentsNode.get("cardinality").asText(), 0);
+                int maxCardinality = parseCardinality(maxCardinalityReps, stackServiceComponentsNode.get("cardinality").asText(), Integer.MAX_VALUE);
+                stackServiceComponentDescriptorMap.put(componentName, new StackServiceComponentDescriptor(componentName, componentCategory, minCardinality,
+                        maxCardinality));
+            }
+        }
+        return new StackServiceComponentDescriptors(stackServiceComponentDescriptorMap);
+    }
+
+    private int parseCardinality(Map<String, Integer> cardinalityReps, String cardinalityString, int defaultValue) {
+        Integer cardinality = cardinalityReps.get(cardinalityString);
+        return cardinality == null ? defaultValue : cardinality;
     }
 
     private List<Resource> loadEtcResources() {

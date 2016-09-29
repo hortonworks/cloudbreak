@@ -3,12 +3,15 @@ package com.sequenceiq.cloudbreak.converter;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -34,12 +37,12 @@ public class JsonToBlueprintConverterTest extends AbstractJsonConverterTest<Blue
     }
 
     @Test
-    public void testConvert() {
+    public void testConvert() throws JsonProcessingException {
         // GIVEN
         // WHEN
         Blueprint result = underTest.convert(getRequest("stack/blueprint.json"));
         // THEN
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, Arrays.asList("inputParameters"));
     }
 
     @Override

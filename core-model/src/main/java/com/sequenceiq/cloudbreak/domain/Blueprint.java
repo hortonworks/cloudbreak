@@ -1,15 +1,10 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,6 +15,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "Blueprint", uniqueConstraints = {
@@ -95,9 +92,9 @@ public class Blueprint implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "blueprint_parameter_inputs")
-    private Set<BlueprintParameter> inputs = new HashSet<>();
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json inputParameters;
 
     public Blueprint() {
 
@@ -183,11 +180,11 @@ public class Blueprint implements ProvisionEntity {
         this.status = status;
     }
 
-    public Set<BlueprintParameter> getInputs() {
-        return inputs;
+    public Json getInputParameters() {
+        return inputParameters;
     }
 
-    public void setInputs(Set<BlueprintParameter> inputs) {
-        this.inputs = inputs;
+    public void setInputParameters(Json inputParameters) {
+        this.inputParameters = inputParameters;
     }
 }
