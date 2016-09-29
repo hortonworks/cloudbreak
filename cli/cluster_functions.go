@@ -78,7 +78,6 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 		return errors.New("Stack definition is not returned from Cloudbreak")
 	}
 	c.ClusterName = stack.Name
-	c.Status = SafeStringConvert(stack.Status)
 
 	parameters := stack.Parameters
 	if len(parameters) > 0 && len(parameters["instanceProfileStrategy"]) > 0 {
@@ -89,13 +88,18 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 		}
 	}
 
+	c.Status = SafeStringConvert(stack.Status)
+	c.StatusReason = SafeStringConvert(stack.StatusReason)
 	if stack.Cluster != nil {
-		if c.Status == "AVAILABLE" {
-			c.Status = SafeStringConvert(stack.Cluster.Status)
-			c.StatusReason = SafeStringConvert(stack.Cluster.StatusReason)
-		} else {
-			c.StatusReason = SafeStringConvert(stack.StatusReason)
+		clusterStatus := SafeStringConvert(stack.Cluster.Status)
+		clusterStatusReason := SafeStringConvert(stack.Cluster.StatusReason)
+		if clusterStatus != "AVAILABLE" {
+			c.Status = clusterStatus
 		}
+		if clusterStatusReason != "" {
+			c.StatusReason = clusterStatusReason
+		}
+
 		c.ClusterAndAmbariUser = stack.Cluster.UserName
 		c.ClusterAndAmbariPassword = stack.Cluster.Password
 		if len(stack.Cluster.BlueprintInputs) > 0 {
