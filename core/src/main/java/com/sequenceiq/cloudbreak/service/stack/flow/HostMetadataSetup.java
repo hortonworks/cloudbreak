@@ -81,7 +81,7 @@ public class HostMetadataSetup {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             Map<String, String> members = hostOrchestrator.getMembers(gatewayConfig, privateIps);
-            LOGGER.info("Received host names from hosts: {}, original targets: {}", members.keySet(), privateIps);
+            LOGGER.info("Received host names from hosts: {}, original targets: {}", members.values(), privateIps);
             for (InstanceMetaData instanceMetaData : metadataToUpdate) {
                 String privateIp = instanceMetaData.getPrivateIp();
                 String address = members.get(privateIp);

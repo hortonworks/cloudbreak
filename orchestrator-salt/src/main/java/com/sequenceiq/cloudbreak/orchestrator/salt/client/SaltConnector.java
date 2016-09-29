@@ -33,6 +33,7 @@ import org.springframework.util.StreamUtils;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.client.SignUtil;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
@@ -157,12 +158,29 @@ public class SaltConnector implements Closeable {
         }
     }
 
-    public Map<String, String> members(List<String> privateIps) {
+    public Map<String, String> members(List<String> privateIps) throws CloudbreakOrchestratorFailedException {
         Map<String, List<String>> clients = singletonMap("clients", privateIps);
         GenericResponses responses = saltTarget.path(BOOT_HOSTNAME_ENDPOINT.getContextPath()).request()
                 .header(SIGN_HEADER, SignUtil.generateSignature(signatureKey, GSON.toJson(clients).getBytes()))
                 .post(Entity.json(clients)).readEntity(GenericResponses.class);
+        List<GenericResponse> failedResponses = responses.getResponses().stream()
+                .filter(genericResponse -> !ACCEPTED_STATUSES.contains(genericResponse.getStatusCode())).collect(Collectors.toList());
+        if (!failedResponses.isEmpty()) {
+            failedResponseErrorLog(failedResponses);
+            String failedNodeAddresses = failedResponses.stream().map(GenericResponse::getAddress).collect(Collectors.joining(","));
+            throw new CloudbreakOrchestratorFailedException("Hostname resolution failed for nodes: " + failedNodeAddresses);
+        }
         return responses.getResponses().stream().collect(Collectors.toMap(GenericResponse::getAddress, GenericResponse::getStatus));
+    }
+
+    private void failedResponseErrorLog(List<GenericResponse> failedResponses) {
+        StringBuilder failedResponsesErrorMessage = new StringBuilder();
+        failedResponsesErrorMessage.append("Failed response from salt bootstrap, endpoint: ").append(BOOT_HOSTNAME_ENDPOINT);
+        for (GenericResponse failedResponse : failedResponses) {
+            failedResponsesErrorMessage.append("\n").append("Status code: ").append(failedResponse.getStatusCode());
+            failedResponsesErrorMessage.append(" Error message: ").append(failedResponse.getStatus());
+        }
+        LOGGER.error(failedResponsesErrorMessage.toString());
     }
 
     private Form addAuth(Form form) {
