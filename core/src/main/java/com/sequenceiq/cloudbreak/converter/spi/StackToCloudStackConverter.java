@@ -145,10 +145,14 @@ public class StackToCloudStackConverter {
     }
 
     private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
+        LOGGER.info("Get first valid PrivateId of instanceGroups");
         long highest = 0;
         for (InstanceGroup instanceGroup : instanceGroups) {
+            LOGGER.info("Checking of instanceGroup: {}", instanceGroup.getGroupName());
             for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
                 Long privateId = metaData.getPrivateId();
+                LOGGER.info("InstanceMetaData metaData: privateId: {}, instanceGroupName: {}, instanceId: {}",
+                        privateId, metaData.getInstanceGroupName(), metaData.getInstanceId());
                 if (privateId == null) {
                     continue;
                 }
@@ -157,6 +161,7 @@ public class StackToCloudStackConverter {
                 }
             }
         }
+        LOGGER.info("highest privateId: {}", highest);
         return highest == 0 ? 0 : highest + 1;
     }
 

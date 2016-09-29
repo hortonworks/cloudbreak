@@ -9,7 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -18,7 +20,6 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 @Component
 public class AmbariClusterStatusUpdater {
@@ -42,21 +43,6 @@ public class AmbariClusterStatusUpdater {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
-    private enum Msg {
-        AMBARI_CLUSTER_COULD_NOT_SYNC("ambari.cluster.could.not.sync"),
-        AMBARI_CLUSTER_SYNCHRONIZED("ambari.cluster.synchronized");
-
-        private String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
-    }
-
     public void updateClusterStatus(Stack stack, Cluster cluster) throws CloudbreakSecuritySetupException {
         if (isStackOrClusterStatusInvalid(stack, cluster)) {
             String msg = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_COULD_NOT_SYNC.code(), Arrays.asList(stack.getStatus(),
@@ -65,11 +51,11 @@ public class AmbariClusterStatusUpdater {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), msg);
         } else if (cluster != null && cluster.getAmbariIp() != null) {
             Long stackId = stack.getId();
-            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
             clusterService.updateClusterMetadata(stackId);
             String blueprintName = cluster.getBlueprint().getBlueprintName();
-            ClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClientProvider.getAmbariClient(
-                    clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword()), blueprintName);
+            HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
+            ClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClient, blueprintName);
             updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
 
         }
@@ -112,5 +98,20 @@ public class AmbariClusterStatusUpdater {
             LOGGER.info("Cluster {} status hasn't changed: {}", cluster.getId(), cluster.getStatus());
         }
         return result;
+    }
+
+    private enum Msg {
+        AMBARI_CLUSTER_COULD_NOT_SYNC("ambari.cluster.could.not.sync"),
+        AMBARI_CLUSTER_SYNCHRONIZED("ambari.cluster.synchronized");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
     }
 }
