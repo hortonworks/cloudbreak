@@ -171,7 +171,7 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 
 func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context) {
 	if context.Bool(FlWait.Name) {
-		defer timeTrack(time.Now(), "cluster installation")
+		defer timeTrack(time.Now(), "cluster installation/update")
 
 		log.Infof("[WaitForClusterToFinish] wait for cluster to finish")
 		for {
@@ -187,11 +187,11 @@ func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context)
 			log.Infof("[WaitForClusterToFinish] stack status: %s, cluster status: %s", stackStatus, clusterStatus)
 
 			if stackStatus == desiredStatus && clusterStatus == desiredStatus {
-				log.Infof("[WaitForClusterToFinish] cluster successfully installed")
+				log.Infof("[WaitForClusterToFinish] cluster operation successfully finished")
 				break
 			}
 			if strings.Contains(stackStatus, "FAILED") || strings.Contains(clusterStatus, "FAILED") {
-				logErrorAndExit(c.waitForClusterToFinish, "cluster installation failed")
+				logErrorAndExit(c.waitForClusterToFinish, "cluster operation failed")
 			}
 
 			log.Infof("[WaitForClusterToFinish] cluster is in progress, wait for 20 seconds")

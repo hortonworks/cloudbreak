@@ -372,6 +372,7 @@ func ResizeCluster(c *cli.Context) error {
 		}
 	}
 
+	oAuth2Client.waitForClusterToFinish(*stack.ID, c)
 	return nil
 }
 
