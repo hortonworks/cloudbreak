@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -32,6 +34,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 
 @Component
 public class StackToCloudStackConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackToCloudStackConverter.class);
 
     @Inject
     private SecurityRuleRepository securityRuleRepository;
@@ -132,10 +136,14 @@ public class StackToCloudStackConverter {
     }
 
     private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
+        LOGGER.info("Get first valid PrivateId of instanceGroups");
         long highest = 0;
         for (InstanceGroup instanceGroup : instanceGroups) {
+            LOGGER.info("Checking of instanceGroup: {}", instanceGroup.getGroupName());
             for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
                 Long privateId = metaData.getPrivateId();
+                LOGGER.info("InstanceMetaData metaData: privateId: {}, instanceGroupName: {}, instanceId: {}",
+                        privateId, metaData.getInstanceGroup().getGroupName(), metaData.getInstanceId());
                 if (privateId == null) {
                     continue;
                 }
@@ -144,6 +152,7 @@ public class StackToCloudStackConverter {
                 }
             }
         }
+        LOGGER.info("highest privateId: {}", highest);
         return highest == 0 ? 0 : highest + 1;
     }
 
