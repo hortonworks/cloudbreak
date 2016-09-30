@@ -12,14 +12,6 @@ ambari-agent:
       - sls: ambari.repo
     - version: {{ ambari.version }}
 
-{% else %}
-
-set_parallel_execution:
-  file.replace:
-    - name: /etc/ambari-agent/conf/ambari-agent.ini
-    - pattern: parallel_execution=0
-    - repl: parallel_execution=1
-
 {% endif %}
 
 /etc/environment:
