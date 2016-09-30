@@ -151,6 +151,15 @@ func main() {
 			Action: hdc.ListClusters,
 		},
 		{
+			Name:  "register-metastore",
+			Usage: "register a new Hive metastore",
+			Flags: []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsDbType, hdc.FlHdpVersion,
+				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			After:  StopSpinner,
+			Action: hdc.CreateRDSConfig,
+		},
+		{
 			Name:   "resize-cluster",
 			Usage:  "change the number of worker nodes of an existing cluster",
 			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlScalingAdjustment, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},

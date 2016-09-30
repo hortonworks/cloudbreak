@@ -4,6 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/rdsconfigs"
 	"github.com/hortonworks/hdc-cli/models"
+	"github.com/urfave/cli"
 	"time"
 )
 
@@ -35,4 +36,32 @@ func (c *Cloudbreak) GetRDSConfigById(id int64) *models.RDSConfigResponse {
 	rdsConfig := resp.Payload
 	log.Infof("[GetRDSConfigById] found rds config, name: %s", rdsConfig.Name)
 	return rdsConfig
+}
+
+func CreateRDSConfig(c *cli.Context) error {
+	checkRequiredFlags(c, CreateCredential)
+	defer timeTrack(time.Now(), "create rds config")
+
+	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	validate := false
+	rdsConfig := models.RDSConfig{
+		Name:               c.String(FlRdsName.Name),
+		ConnectionUserName: c.String(FlRdsUsername.Name),
+		ConnectionPassword: c.String(FlRdsPassword.Name),
+		ConnectionURL:      c.String(FlRdsUrl.Name),
+		DatabaseType:       c.String(FlRdsDbType.Name),
+		Validated:          &validate,
+		HdpVersion:         c.String(FlHdpVersion.Name),
+	}
+
+	resp, err := oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount(&rdsconfigs.PostRdsconfigsAccountParams{&rdsConfig})
+
+	if err != nil {
+		logErrorAndExit(CreateRDSConfig, err.Error())
+	}
+
+	log.Infof("[CreateRDSConfig] RDS config created, id: %d", resp.Payload.ID)
+	return nil
 }

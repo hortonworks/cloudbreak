@@ -163,6 +163,48 @@ var (
 			Name: "igw",
 		},
 	}
+	FlRdsName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "rds-name",
+			Usage: "name of the RDS",
+		},
+	}
+	FlRdsUsername = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "rds-username",
+			Usage: "username of the RDS",
+		},
+	}
+	FlRdsPassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "rds-password",
+			Usage: "password of the RDS",
+		},
+	}
+	FlRdsUrl = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "rds-url",
+			Usage: "URL of the RDS",
+		},
+	}
+	FlRdsDbType = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "rds-database-type",
+			Usage: "database type of the RDS",
+		},
+	}
+	FlHdpVersion = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "hdp-version",
+			Usage: "HDP version",
+		},
+	}
 )
 
 type RequiredFlag struct {
