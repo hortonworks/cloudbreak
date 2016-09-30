@@ -149,10 +149,10 @@ public class StackToCloudStackConverter {
         long highest = 0;
         for (InstanceGroup instanceGroup : instanceGroups) {
             LOGGER.info("Checking of instanceGroup: {}", instanceGroup.getGroupName());
-            for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
+            for (InstanceMetaData metaData : instanceGroup.getAllInstanceMetaData()) {
                 Long privateId = metaData.getPrivateId();
-                LOGGER.info("InstanceMetaData metaData: privateId: {}, instanceGroupName: {}, instanceId: {}",
-                        privateId, metaData.getInstanceGroupName(), metaData.getInstanceId());
+                LOGGER.info("InstanceMetaData metaData: privateId: {}, instanceGroupName: {}, instanceId: {}, status: {}",
+                        privateId, metaData.getInstanceGroupName(), metaData.getInstanceId(), metaData.getInstanceStatus());
                 if (privateId == null) {
                     continue;
                 }
