@@ -45,10 +45,14 @@ type Network struct {
 	SubnetId string `json:"SubnetId" yaml:"SubnetId"`
 }
 
-type HiveMetastore struct {
+type MetaStore struct {
 	Name         string `json:"Name" yaml:"Name"`
 	Username     string `json:"Username" yaml:"Username"`
 	Password     string `json:"Password" yaml:"Password"`
 	URL          string `json:"URL" yaml:"URL"`
 	DatabaseType string `json:"DatabaseType" yaml:"DatabaseType"`
+}
+
+type HiveMetastore struct {
+	MetaStore
 }

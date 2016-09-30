@@ -127,7 +127,9 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 
 	if rdsConfig != nil {
 		rdsConfig := HiveMetastore{
-			Name: rdsConfig.Name,
+			MetaStore{
+				Name: rdsConfig.Name,
+			},
 		}
 		c.HiveMetastore = &rdsConfig
 	}

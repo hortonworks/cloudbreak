@@ -269,17 +269,11 @@ func CreateCluster(c *cli.Context) error {
 		validate := false
 		if skeleton.HiveMetastore != nil {
 			if len(skeleton.HiveMetastore.URL) > 0 {
-				var connUrl string
-				if ms.DatabaseType == POSTGRES {
-					connUrl = "jdbc:postgresql://" + ms.URL
-				} else {
-					connUrl = "jdbc:mysql://" + ms.URL
-				}
 				rdsConfig = &models.RDSConfig{
 					Name:               ms.Name,
 					ConnectionUserName: ms.Username,
 					ConnectionPassword: ms.Password,
-					ConnectionURL:      connUrl,
+					ConnectionURL:      extendRdsUrl(ms.URL, ms.DatabaseType),
 					DatabaseType:       ms.DatabaseType,
 					HdpVersion:         skeleton.HDPVersion,
 					Validated:          &validate,

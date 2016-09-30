@@ -138,17 +138,24 @@ func main() {
 		},
 		{
 			Name:   "list-cluster-types",
-			Usage:  "list available cluster types and HDP versions",
+			Usage:  "list the available cluster types and HDP versions",
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Action: hdc.ListBlueprints,
 		},
 		{
 			Name:   "list-clusters",
-			Usage:  "list available clusters",
+			Usage:  "list the available clusters",
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Action: hdc.ListClusters,
+		},
+		{
+			Name:   "list-metastores",
+			Usage:  "list the available metastores",
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.ListRDSConfigs,
 		},
 		{
 			Name:  "register-metastore",
