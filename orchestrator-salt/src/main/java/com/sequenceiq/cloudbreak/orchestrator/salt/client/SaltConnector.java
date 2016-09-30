@@ -30,9 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.client.SignUtil;
+import com.sequenceiq.cloudbreak.client.RsaKeyUtil;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -44,7 +45,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 public class SaltConnector implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltConnector.class);
-    private static final Gson GSON = new Gson();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final String SALT_USER = "saltuser";
     private static final String SALT_PASSWORD = "saltpass";
@@ -76,25 +77,23 @@ public class SaltConnector implements Closeable {
     }
 
     public GenericResponse health() {
-        GenericResponse response = saltTarget.path(SaltEndpoint.BOOT_HEALTH.getContextPath()).
-                request().get().readEntity(GenericResponse.class);
+        GenericResponse response = saltTarget.path(SaltEndpoint.BOOT_HEALTH.getContextPath()).request()
+                .get().readEntity(GenericResponse.class);
         LOGGER.info("Health response: {}", response);
         return response;
     }
 
     public GenericResponse pillar(Pillar pillar) {
-        GenericResponse response = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE
-                .getContextPath()).request()
-                .header(SIGN_HEADER, SignUtil.generateSignature(signatureKey, GSON.toJson(pillar).getBytes()))
+        GenericResponse response = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE.getContextPath()).request()
+                .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
                 .post(Entity.json(pillar)).readEntity(GenericResponse.class);
         LOGGER.info("Pillar response: {}", response);
         return response;
     }
 
     public GenericResponses action(SaltAction saltAction) {
-        GenericResponses responses = saltTarget.path(SaltEndpoint.BOOT_ACTION_DISTRIBUTE
-                .getContextPath()).request()
-                .header(SIGN_HEADER, SignUtil.generateSignature(signatureKey, GSON.toJson(saltAction).getBytes()))
+        GenericResponses responses = saltTarget.path(SaltEndpoint.BOOT_ACTION_DISTRIBUTE.getContextPath()).request()
+                .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(saltAction).getBytes()))
                 .post(Entity.json(saltAction)).readEntity(GenericResponses.class);
         LOGGER.info("SaltAction response: {}", responses);
         return responses;
@@ -118,9 +117,8 @@ public class SaltConnector implements Closeable {
                 }
             }
         }
-        T response = saltTarget.path(SaltEndpoint.SALT_RUN
-                .getContextPath()).request()
-                .header(SIGN_HEADER, SignUtil.generateSignature(signatureKey, GSON.toJson(form).getBytes()))
+        T response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
+                .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form)).readEntity(clazz);
         LOGGER.info("Salt run response: {}", response);
         return response;
@@ -134,8 +132,8 @@ public class SaltConnector implements Closeable {
         if (match != null && !match.isEmpty()) {
             form.param("match", match.stream().collect(Collectors.joining(",")));
         }
-        T response = saltTarget.path(SaltEndpoint.SALT_RUN
-                .getContextPath()).request()
+        T response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
+                .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form)).readEntity(clazz);
         LOGGER.info("SaltAction response: {}", response);
         return response;
@@ -148,7 +146,7 @@ public class SaltConnector implements Closeable {
                 .bodyPart(streamDataBodyPart);
         MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
         contentType = Boundary.addBoundary(contentType);
-        String signature = SignUtil.generateSignature(signatureKey, StreamUtils.copyToByteArray(inputStream));
+        String signature = RsaKeyUtil.generateSignature(signatureKey, StreamUtils.copyToByteArray(inputStream));
         inputStream.reset();
         Response response = saltTarget.path(SaltEndpoint.BOOT_FILE_UPLOAD.getContextPath()).request()
                 .header(SIGN_HEADER, signature)
@@ -161,7 +159,7 @@ public class SaltConnector implements Closeable {
     public Map<String, String> members(List<String> privateIps) throws CloudbreakOrchestratorFailedException {
         Map<String, List<String>> clients = singletonMap("clients", privateIps);
         GenericResponses responses = saltTarget.path(BOOT_HOSTNAME_ENDPOINT.getContextPath()).request()
-                .header(SIGN_HEADER, SignUtil.generateSignature(signatureKey, GSON.toJson(clients).getBytes()))
+                .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(clients).getBytes()))
                 .post(Entity.json(clients)).readEntity(GenericResponses.class);
         List<GenericResponse> failedResponses = responses.getResponses().stream()
                 .filter(genericResponse -> !ACCEPTED_STATUSES.contains(genericResponse.getStatusCode())).collect(Collectors.toList());
@@ -199,5 +197,13 @@ public class SaltConnector implements Closeable {
 
     public String getSaltPassword() {
         return saltPassword;
+    }
+
+    private String toJson(Object target) {
+        try {
+            return MAPPER.writeValueAsString(target);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 }

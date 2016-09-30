@@ -287,7 +287,7 @@ public class StackService {
 
                 SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys(stack.getId());
                 securityConfig.setSaltPassword(PasswordUtil.generatePassword());
-                securityConfig.setSaltBootPassword("cbadmin");
+                securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
                 securityConfig.setStack(stack);
                 securityConfigRepository.save(securityConfig);
                 stack.setSecurityConfig(securityConfig);

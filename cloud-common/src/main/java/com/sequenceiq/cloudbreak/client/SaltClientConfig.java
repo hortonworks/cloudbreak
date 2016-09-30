@@ -3,12 +3,12 @@ package com.sequenceiq.cloudbreak.client;
 public class SaltClientConfig {
     private final String saltPassword;
     private final String saltBootPassword;
-    private final String signatureKey;
+    private final String signatureKeyPem;
 
-    public SaltClientConfig(String saltPassword, String saltBootPassword, String signatureKey) {
+    public SaltClientConfig(String saltPassword, String saltBootPassword, String signatureKeyPem) {
         this.saltPassword = saltPassword;
         this.saltBootPassword = saltBootPassword;
-        this.signatureKey = signatureKey;
+        this.signatureKeyPem = signatureKeyPem;
     }
 
     public String getSaltPassword() {
@@ -19,7 +19,7 @@ public class SaltClientConfig {
         return saltBootPassword;
     }
 
-    public String getSignatureKey() {
-        return signatureKey;
+    public String getSignatureKeyPem() {
+        return signatureKeyPem;
     }
 }
