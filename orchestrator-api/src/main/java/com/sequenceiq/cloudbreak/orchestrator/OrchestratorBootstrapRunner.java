@@ -42,9 +42,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        if (mdcMap != null) {
-            MDC.setContextMap(mdcMap);
-        }
+        MDC.setContextMap(mdcMap);
         boolean success = false;
         int retryCount = 1;
         Exception actualException = null;
