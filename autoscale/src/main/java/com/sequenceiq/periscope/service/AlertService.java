@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,13 +81,7 @@ public class AlertService {
     }
 
     public Set<MetricAlert> removeMetricAlert(Cluster cluster, long alertId) {
-        Set<MetricAlert> metricAlerts = cluster.getMetricAlerts();
-        for (MetricAlert metricAlert : cluster.getMetricAlerts()) {
-            if (metricAlert.getId() == alertId) {
-                metricAlerts.remove(metricAlert);
-            }
-        }
-        return metricAlerts;
+        return cluster.getMetricAlerts().stream().filter(a -> a.getId() != alertId).collect(Collectors.toSet());
     }
 
     public Set<MetricAlert> getMetricAlerts(long clusterId) {
@@ -130,13 +125,7 @@ public class AlertService {
     }
 
     public Set<TimeAlert> removeTimeAlert(Cluster cluster, long alertId) {
-        Set<TimeAlert> timeAlerts = cluster.getTimeAlerts();
-        for (TimeAlert timeAlert : cluster.getTimeAlerts()) {
-            if (timeAlert.getId() == alertId) {
-                timeAlerts.remove(timeAlert);
-            }
-        }
-        return timeAlerts;
+        return cluster.getTimeAlerts().stream().filter(a -> a.getId() != alertId).collect(Collectors.toSet());
     }
 
     public BaseAlert getBaseAlert(long clusterId, long alertId) {
