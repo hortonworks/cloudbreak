@@ -3,16 +3,17 @@ package cli
 import (
 	"encoding/json"
 	"errors"
-	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/stacks"
-	"github.com/hortonworks/hdc-cli/models"
-	"github.com/urfave/cli"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/hdc-cli/client/stacks"
+	"github.com/hortonworks/hdc-cli/models"
+	"github.com/urfave/cli"
+	"gopkg.in/yaml.v2"
 )
 
 func (c *ClusterSkeleton) Json() string {

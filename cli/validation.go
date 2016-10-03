@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+
 	swagerrors "github.com/go-swagger/go-swagger/errors"
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 )
@@ -61,7 +62,7 @@ func (s *ClusterSkeleton) Validate() error {
 func (n *Network) Validate() []error {
 	var res []error = nil
 
-	if len(n.VpcId) > 0 || len(n.SubnetId) > 0 {
+	if !n.isEmpty() {
 		if err := validate.RequiredString("VpcId", "network", n.VpcId); err != nil {
 			res = append(res, err)
 		}
@@ -73,10 +74,14 @@ func (n *Network) Validate() []error {
 	return res
 }
 
+func (n *Network) isEmpty() bool {
+	return len(n.VpcId) == 0 && len(n.SubnetId) == 0
+}
+
 func (h *HiveMetastore) Validate() []error {
 	var res []error = nil
 
-	if len(h.DatabaseType) > 0 || len(h.Username) > 0 || len(h.Password) > 0 || len(h.URL) > 0 {
+	if !h.isEmpty() {
 		if err := validate.RequiredString("Name", "hivemetastore", h.Name); err != nil {
 			res = append(res, err)
 		}
@@ -97,4 +102,8 @@ func (h *HiveMetastore) Validate() []error {
 	}
 
 	return res
+}
+
+func (h *HiveMetastore) isEmpty() bool {
+	return len(h.Name) == 0 && len(h.DatabaseType) == 0 && len(h.Username) == 0 && len(h.Password) == 0 && len(h.URL) == 0
 }

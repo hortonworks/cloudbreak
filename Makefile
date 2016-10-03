@@ -13,7 +13,7 @@ format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
 test:
-	go test github.com/hortonworks/hdc-cli/cli
+	go test ./...
 
 build: format test build-darwin build-linux build-windows
 
