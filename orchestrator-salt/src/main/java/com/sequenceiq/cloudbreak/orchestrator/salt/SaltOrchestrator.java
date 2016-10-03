@@ -101,7 +101,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
         } catch (Exception e) {
-            LOGGER.error("Error occurred under the consul bootstrap", e);
+            LOGGER.error("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
