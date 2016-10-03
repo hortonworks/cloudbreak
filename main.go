@@ -57,7 +57,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "hdc"
-	app.Usage = "Hortonworks Data Cloud command line tool"
+	app.HelpName = "Hortonworks Data Cloud command line tool"
 	app.Version = hdc.Version + "-" + hdc.BuildTime
 	app.Author = "Hortonworks"
 
@@ -77,6 +77,7 @@ func main() {
 		return nil
 	}
 
+	cli.AppHelpTemplate = hdc.AppHelpTemplate
 	cli.HelpPrinter = hdc.PrintHelp
 	cli.CommandHelpTemplate = hdc.CommandHelpTemplate
 	cli.SubcommandHelpTemplate = hdc.SubCommandHelpTemplate
