@@ -53,7 +53,7 @@ var SharedDescription = `You can either start a new shared cluster or connect to
 	 the --` + FlClusterNameOptional.Name + ` option.`
 
 var AppHelpTemplate = `NAME:
-   {{.HelpName}}
+   Hortonworks Data Cloud command line tool
 
 USAGE:
    {{if .UsageText}}{{.UsageText}}{{else}}{{.Name}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}
@@ -77,7 +77,7 @@ COPYRIGHT:
 `
 
 var CommandHelpTemplate = `NAME:
-   {{.HelpName}}
+   Hortonworks Data Cloud command line tool
 
 USAGE:
    {{.HelpName}}{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{if .Category}}
@@ -97,7 +97,7 @@ OPTIONS:
 `
 
 var SubCommandHelpTemplate = `NAME:
-   {{.HelpName}}
+   Hortonworks Data Cloud command line tool
 
 USAGE:
    {{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}
@@ -115,7 +115,7 @@ OPTIONS:
 `
 
 var HiddenAppHelpTemplate = `NAME:
-   {{.HelpName}}
+   Hortonworks Data Cloud command line tool
 
 USAGE:
    {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}
