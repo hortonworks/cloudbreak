@@ -484,6 +484,10 @@ uluwatu:
         - ULU_IDENTITY_SERVICEID=identity.service.consul
         - ULU_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
         - ULU_PERISCOPE_SERVICEID=periscope.service.consul
+        - ULU_HWX_CLOUD_REGISTRATION_URL
+        - AWS_INSTANCE_ID
+        - AWS_ACCOUNT_ID
+        - AWS_AMI_ID
         - AZURE_TENANT_ID
         - AZURE_SUBSCRIPTION_ID
         - AWS_ACCESS_KEY_ID

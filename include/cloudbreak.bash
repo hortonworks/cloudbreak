@@ -233,6 +233,7 @@ cloudbreak-conf-ui() {
     env-import ULU_HWX_CLOUD_DEFAULT_VPC_ID ""
     env-import ULU_HWX_CLOUD_DEFAULT_IGW_ID ""
     env-import ULU_HWX_CLOUD_DEFAULT_SUBNET_ID ""
+    env-import ULU_HWX_CLOUD_REGISTRATION_URL ""
     env-import HWX_CLOUD_ENABLE_GOVERNANCE_AND_SECURITY "false"
 }
 
