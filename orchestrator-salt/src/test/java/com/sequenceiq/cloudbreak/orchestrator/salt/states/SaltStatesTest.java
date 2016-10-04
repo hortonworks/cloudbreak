@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
@@ -67,52 +66,6 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void pingTest() {
-        SaltStates.ping(saltConnector, target);
-        verify(saltConnector, times(1)).run(eq(target), eq("test.ping"), eq(LOCAL), eq(PingResponse.class));
-    }
-
-    @Test
-    public void ambariServerTest() {
-        String jobId = "1";
-        ApplyResponse applyResponse = createApplyResponse(jobId);
-        when(saltConnector.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, "ambari.server")).thenReturn(applyResponse);
-        String jid = SaltStates.ambariServer(saltConnector, target);
-        assertEquals(jobId, jid);
-        verify(saltConnector, times(1)).run(eq(target), eq("state.apply"), eq(LOCAL_ASYNC), eq(ApplyResponse.class), eq("ambari.server"));
-    }
-
-    @Test
-    public void ambariAgentTest() {
-        String jobId = "2";
-        ApplyResponse applyResponse = createApplyResponse(jobId);
-        when(saltConnector.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, "ambari.agent")).thenReturn(applyResponse);
-        String jid = SaltStates.ambariAgent(saltConnector, target);
-        assertEquals(jobId, jid);
-        verify(saltConnector, times(1)).run(eq(target), eq("state.apply"), eq(LOCAL_ASYNC), eq(ApplyResponse.class), eq("ambari.agent"));
-    }
-
-    @Test
-    public void kerberosTest() {
-        String jobId = "3";
-        ApplyResponse applyResponse = createApplyResponse(jobId);
-        when(saltConnector.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, "kerberos.server")).thenReturn(applyResponse);
-        String jid = SaltStates.kerberos(saltConnector, target);
-        assertEquals(jobId, jid);
-        verify(saltConnector, times(1)).run(eq(target), eq("state.apply"), eq(LOCAL_ASYNC), eq(ApplyResponse.class), eq("kerberos.server"));
-    }
-
-    private ApplyResponse createApplyResponse(String jobId) {
-        ApplyResponse applyResponse = new ApplyResponse();
-        List<Map<String, Object>> result = new ArrayList<>();
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("jid", jobId);
-        result.add(resultMap);
-        applyResponse.setResult(result);
-        return applyResponse;
-    }
-
-    @Test
     public void addRoleTest() {
         String role = "ambari-server";
         SaltStates.addGrain(saltConnector, target, "roles", role);
@@ -121,7 +74,7 @@ public class SaltStatesTest {
 
     @Test
     public void syncGrainsTest() {
-        SaltStates.syncGrains(saltConnector, target);
+        SaltStates.syncGrains(saltConnector);
         verify(saltConnector, times(1)).run(eq(Glob.ALL), eq("saltutil.sync_grains"), eq(LOCAL), eq(ApplyResponse.class));
     }
 

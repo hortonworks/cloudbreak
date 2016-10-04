@@ -1,0 +1,912 @@
+{
+  "return": [
+    {
+      "outputter": "highstate",
+      "data": {
+        "host-10-0-0-6.openstacklocal": {
+          "file_|-/etc/ambari-agent/conf/internal_hostname.sh_|-/etc/ambari-agent/conf/internal_hostname.sh_|-managed": {
+            "comment": "File /etc/ambari-agent/conf/internal_hostname.sh updated",
+            "name": "/etc/ambari-agent/conf/internal_hostname.sh",
+            "start_time": "12:39:37.838303",
+            "result": true,
+            "duration": "17.135 ms",
+            "__run_num__": 10,
+            "changes": {
+              "diff": "New file",
+              "mode": "0755"
+            }
+          },
+          "file_|-replace_etc_hosts_2_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.541430",
+            "result": true,
+            "duration": "2.963 ms",
+            "__run_num__": 1,
+            "changes": {}
+          },
+          "file_|-replace_etc_hosts_1_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.528676",
+            "result": true,
+            "duration": "12.505 ms",
+            "__run_num__": 0,
+            "changes": {}
+          },
+          "file_|-/home/admin/.ssh/authorized_keys_|-/home/admin/.ssh/authorized_keys_|-copy": {
+            "comment": "The target file \"/home/admin/.ssh/authorized_keys\" exists and will not be overwritten",
+            "name": "/home/admin/.ssh/authorized_keys",
+            "start_time": "12:39:09.588953",
+            "result": true,
+            "duration": "1.577 ms",
+            "__run_num__": 6,
+            "changes": {}
+          },
+          "file_|-set_internal_hostname_script_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:39:37.897832",
+            "result": true,
+            "duration": "12.068 ms",
+            "__run_num__": 14,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -18,6 +18,7 @@\n secured_url_port=8441\n \n [agent]\n+hostname_script=/etc/ambari-agent/conf/internal_hostname.sh\n public_hostname_script=/etc/ambari-agent/conf/public_hostname.sh\n logdir=/var/log/ambari-agent\n piddir=/var/run/ambari-agent\n"
+            }
+          },
+          "user_|-admin_|-admin_|-present": {
+            "comment": "User admin is present and up to date",
+            "name": "admin",
+            "start_time": "12:39:09.551584",
+            "result": true,
+            "duration": "35.505 ms",
+            "__run_num__": 4,
+            "changes": {}
+          },
+          "file_|-replace_etc_hosts_4_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.547822",
+            "result": true,
+            "duration": "2.93 ms",
+            "__run_num__": 3,
+            "changes": {}
+          },
+          "file_|-replace_etc_hosts_3_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.544659",
+            "result": true,
+            "duration": "2.883 ms",
+            "__run_num__": 2,
+            "changes": {}
+          },
+          "file_|-/etc/environment_|-/etc/environment_|-append": {
+            "comment": "Appended 1 lines",
+            "name": "/etc/environment",
+            "start_time": "12:39:37.443499",
+            "result": true,
+            "duration": "394.526 ms",
+            "__run_num__": 9,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -0,0 +1 @@\n+HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/usr/lib/hadoop/lib/*\n"
+            }
+          },
+          "service_|-start-ambari-agent_|-ambari-agent_|-running": {
+            "comment": "Service ambari-agent has been enabled, and is running",
+            "name": "ambari-agent",
+            "start_time": "12:39:37.961088",
+            "result": true,
+            "duration": "2623.633 ms",
+            "__run_num__": 18,
+            "changes": {
+              "ambari-agent": true
+            }
+          },
+          "file_|-/etc/ambari-agent/conf/public_hostname.sh_|-/etc/ambari-agent/conf/public_hostname.sh_|-managed": {
+            "comment": "File /etc/ambari-agent/conf/public_hostname.sh updated",
+            "name": "/etc/ambari-agent/conf/public_hostname.sh",
+            "start_time": "12:39:37.855650",
+            "result": true,
+            "duration": "20.05 ms",
+            "__run_num__": 11,
+            "changes": {
+              "diff": "New file",
+              "mode": "0755"
+            }
+          },
+          "file_|-set_ambari_server_address_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:39:37.875916",
+            "result": true,
+            "duration": "2.667 ms",
+            "__run_num__": 12,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -13,7 +13,7 @@\n # See the License for the specific\n \n [server]\n-hostname=localhost\n+hostname=10.0.0.3\n url_port=8440\n secured_url_port=8441\n \n"
+            }
+          },
+          "file_|-set_public_hostname_script_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:39:37.882170",
+            "result": true,
+            "duration": "12.087 ms",
+            "__run_num__": 13,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -18,6 +18,7 @@\n secured_url_port=8441\n \n [agent]\n+public_hostname_script=/etc/ambari-agent/conf/public_hostname.sh\n logdir=/var/log/ambari-agent\n piddir=/var/run/ambari-agent\n prefix=/var/lib/ambari-agent/data\n"
+            }
+          },
+          "module_|-start-ambari-agent_|-service.systemctl_reload_|-wait": {
+            "comment": "Module function service.systemctl_reload executed",
+            "name": "service.systemctl_reload",
+            "start_time": "12:39:37.924528",
+            "result": true,
+            "duration": "35.977 ms",
+            "__run_num__": 17,
+            "changes": {
+              "ret": true
+            }
+          },
+          "file_|-/etc/yum.repos.d/ambari.repo_|-/etc/yum.repos.d/ambari.repo_|-managed": {
+            "comment": "File /etc/yum.repos.d/ambari.repo updated",
+            "name": "/etc/yum.repos.d/ambari.repo",
+            "start_time": "12:39:09.590802",
+            "result": true,
+            "duration": "18.473 ms",
+            "__run_num__": 7,
+            "changes": {
+              "diff": "New file",
+              "mode": "0644"
+            }
+          },
+          "file_|-/home/admin/.ssh_|-/home/admin/.ssh_|-directory": {
+            "comment": "Directory /home/admin/.ssh is in the correct state",
+            "name": "/home/admin/.ssh",
+            "start_time": "12:39:09.587315",
+            "result": true,
+            "duration": "1.415 ms",
+            "__run_num__": 5,
+            "changes": {}
+          },
+          "file_|-/etc/systemd/system/ambari-agent.service_|-/etc/systemd/system/ambari-agent.service_|-managed": {
+            "comment": "File /etc/systemd/system/ambari-agent.service updated",
+            "name": "/etc/systemd/system/ambari-agent.service",
+            "start_time": "12:39:37.910138",
+            "result": true,
+            "duration": "12.699 ms",
+            "__run_num__": 15,
+            "changes": {
+              "diff": "New file",
+              "mode": "0644"
+            }
+          },
+          "pkg_|-ambari-agent_|-ambari-agent_|-installed": {
+            "comment": "1 targeted package was installed/updated.",
+            "name": "ambari-agent",
+            "start_time": "12:39:10.511511",
+            "result": true,
+            "duration": "26929.261 ms",
+            "__run_num__": 8,
+            "changes": {
+              "ambari-agent": {
+                "new": "2.4.0.1-1",
+                "old": ""
+              },
+              "gpg-pubkey.(none)": {
+                "new": "07513cad-4fe4cf94,352c64e5-52ae6884,f4a80eb5-53a7ff4b",
+                "old": "352c64e5-52ae6884,f4a80eb5-53a7ff4b"
+              }
+            }
+          }
+        },
+        "host-10-0-0-5.openstacklocal": {
+          "file_|-/etc/ambari-agent/conf/internal_hostname.sh_|-/etc/ambari-agent/conf/internal_hostname.sh_|-managed": {
+            "comment": "File /etc/ambari-agent/conf/internal_hostname.sh updated",
+            "name": "/etc/ambari-agent/conf/internal_hostname.sh",
+            "start_time": "12:39:35.956343",
+            "result": true,
+            "duration": 20.472,
+            "__run_num__": 10,
+            "changes": {
+              "diff": "New file",
+              "mode": "0755"
+            }
+          },
+          "file_|-replace_etc_hosts_2_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.510720",
+            "result": true,
+            "duration": 2.869,
+            "__run_num__": 1,
+            "changes": {}
+          },
+          "file_|-replace_etc_hosts_1_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.498324",
+            "result": true,
+            "duration": 12.131,
+            "__run_num__": 0,
+            "changes": {}
+          },
+          "file_|-/home/admin/.ssh/authorized_keys_|-/home/admin/.ssh/authorized_keys_|-copy": {
+            "comment": "The target file \"/home/admin/.ssh/authorized_keys\" exists and will not be overwritten",
+            "name": "/home/admin/.ssh/authorized_keys",
+            "start_time": "12:39:09.557943",
+            "result": true,
+            "duration": 1.605,
+            "__run_num__": 6,
+            "changes": {}
+          },
+          "file_|-set_internal_hostname_script_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:39:36.017761",
+            "result": true,
+            "duration": 12.495,
+            "__run_num__": 14,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -18,6 +18,7 @@\n secured_url_port=8441\n \n [agent]\n+hostname_script=/etc/ambari-agent/conf/internal_hostname.sh\n public_hostname_script=/etc/ambari-agent/conf/public_hostname.sh\n logdir=/var/log/ambari-agent\n piddir=/var/run/ambari-agent\n"
+            }
+          },
+          "user_|-admin_|-admin_|-present": {
+            "comment": "User admin is present and up to date",
+            "name": "admin",
+            "start_time": "12:39:09.520534",
+            "result": true,
+            "duration": 35.515,
+            "__run_num__": 4,
+            "changes": {}
+          },
+          "file_|-replace_etc_hosts_4_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.516872",
+            "result": true,
+            "duration": 2.811,
+            "__run_num__": 3,
+            "changes": {}
+          },
+          "file_|-replace_etc_hosts_3_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.513817",
+            "result": true,
+            "duration": 2.829,
+            "__run_num__": 2,
+            "changes": {}
+          },
+          "file_|-/etc/environment_|-/etc/environment_|-append": {
+            "comment": "Appended 1 lines",
+            "name": "/etc/environment",
+            "start_time": "12:39:35.595405",
+            "result": true,
+            "duration": 360.659,
+            "__run_num__": 9,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -0,0 +1 @@\n+HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/usr/lib/hadoop/lib/*\n"
+            }
+          },
+          "service_|-start-ambari-agent_|-ambari-agent_|-running": {
+            "comment": "Service ambari-agent has been enabled, and is running",
+            "name": "ambari-agent",
+            "start_time": "12:39:36.095797",
+            "result": true,
+            "duration": 2589.699,
+            "__run_num__": 18,
+            "changes": {
+              "ambari-agent": true
+            }
+          },
+          "file_|-/etc/ambari-agent/conf/public_hostname.sh_|-/etc/ambari-agent/conf/public_hostname.sh_|-managed": {
+            "comment": "File /etc/ambari-agent/conf/public_hostname.sh updated",
+            "name": "/etc/ambari-agent/conf/public_hostname.sh",
+            "start_time": "12:39:35.977045",
+            "result": true,
+            "duration": 17.193,
+            "__run_num__": 11,
+            "changes": {
+              "diff": "New file",
+              "mode": "0755"
+            }
+          },
+          "file_|-set_ambari_server_address_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:39:35.994469",
+            "result": true,
+            "duration": 2.71,
+            "__run_num__": 12,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -13,7 +13,7 @@\n # See the License for the specific\n \n [server]\n-hostname=localhost\n+hostname=10.0.0.3\n url_port=8440\n secured_url_port=8441\n \n"
+            }
+          },
+          "file_|-set_public_hostname_script_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:39:36.000833",
+            "result": true,
+            "duration": 13.27,
+            "__run_num__": 13,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -18,6 +18,7 @@\n secured_url_port=8441\n \n [agent]\n+public_hostname_script=/etc/ambari-agent/conf/public_hostname.sh\n logdir=/var/log/ambari-agent\n piddir=/var/run/ambari-agent\n prefix=/var/lib/ambari-agent/data\n"
+            }
+          },
+          "module_|-start-ambari-agent_|-service.systemctl_reload_|-wait": {
+            "comment": "Module function service.systemctl_reload executed",
+            "name": "service.systemctl_reload",
+            "start_time": "12:39:36.058465",
+            "result": true,
+            "duration": 36.72,
+            "__run_num__": 17,
+            "changes": {
+              "ret": true
+            }
+          },
+          "file_|-/etc/yum.repos.d/ambari.repo_|-/etc/yum.repos.d/ambari.repo_|-managed": {
+            "comment": "File /etc/yum.repos.d/ambari.repo updated",
+            "name": "/etc/yum.repos.d/ambari.repo",
+            "start_time": "12:39:09.559784",
+            "result": true,
+            "duration": 18.912,
+            "__run_num__": 7,
+            "changes": {
+              "diff": "New file",
+              "mode": "0644"
+            }
+          },
+          "file_|-/home/admin/.ssh_|-/home/admin/.ssh_|-directory": {
+            "comment": "Directory /home/admin/.ssh is in the correct state",
+            "name": "/home/admin/.ssh",
+            "start_time": "12:39:09.556301",
+            "result": true,
+            "duration": 1.423,
+            "__run_num__": 5,
+            "changes": {}
+          },
+          "file_|-/etc/systemd/system/ambari-agent.service_|-/etc/systemd/system/ambari-agent.service_|-managed": {
+            "comment": "File /etc/systemd/system/ambari-agent.service updated",
+            "name": "/etc/systemd/system/ambari-agent.service",
+            "start_time": "12:39:36.030542",
+            "result": true,
+            "duration": 26.123,
+            "__run_num__": 15,
+            "changes": {
+              "diff": "New file",
+              "mode": "0644"
+            }
+          },
+          "pkg_|-ambari-agent_|-ambari-agent_|-installed": {
+            "comment": "1 targeted package was installed/updated.",
+            "name": "ambari-agent",
+            "start_time": "12:39:10.383918",
+            "result": true,
+            "duration": 25208.745,
+            "__run_num__": 8,
+            "changes": {
+              "ambari-agent": {
+                "new": "2.4.0.1-1",
+                "old": ""
+              },
+              "gpg-pubkey.(none)": {
+                "new": "07513cad-4fe4cf94,352c64e5-52ae6884,f4a80eb5-53a7ff4b",
+                "old": "352c64e5-52ae6884,f4a80eb5-53a7ff4b"
+              }
+            }
+          }
+        },
+        "host-10-0-0-4.openstacklocal": {
+          "file_|-/etc/ambari-agent/conf/internal_hostname.sh_|-/etc/ambari-agent/conf/internal_hostname.sh_|-managed": {
+            "comment": "File /etc/ambari-agent/conf/internal_hostname.sh updated",
+            "name": "/etc/ambari-agent/conf/internal_hostname.sh",
+            "start_time": "12:39:34.532634",
+            "result": true,
+            "duration": 16.308,
+            "__run_num__": 10,
+            "changes": {
+              "diff": "New file",
+              "mode": "0755"
+            }
+          },
+          "file_|-replace_etc_hosts_2_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.535155",
+            "result": true,
+            "duration": 2.894,
+            "__run_num__": 1,
+            "changes": {}
+          },
+          "file_|-replace_etc_hosts_1_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.522601",
+            "result": true,
+            "duration": 12.261,
+            "__run_num__": 0,
+            "changes": {}
+          },
+          "file_|-/home/admin/.ssh/authorized_keys_|-/home/admin/.ssh/authorized_keys_|-copy": {
+            "comment": "The target file \"/home/admin/.ssh/authorized_keys\" exists and will not be overwritten",
+            "name": "/home/admin/.ssh/authorized_keys",
+            "start_time": "12:39:09.583640",
+            "result": true,
+            "duration": 1.62,
+            "__run_num__": 6,
+            "changes": {}
+          },
+          "file_|-set_internal_hostname_script_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:39:34.596709",
+            "result": true,
+            "duration": 15.282,
+            "__run_num__": 14,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -18,6 +18,7 @@\n secured_url_port=8441\n \n [agent]\n+hostname_script=/etc/ambari-agent/conf/internal_hostname.sh\n public_hostname_script=/etc/ambari-agent/conf/public_hostname.sh\n logdir=/var/log/ambari-agent\n piddir=/var/run/ambari-agent\n"
+            }
+          },
+          "user_|-admin_|-admin_|-present": {
+            "comment": "User admin is present and up to date",
+            "name": "admin",
+            "start_time": "12:39:09.545101",
+            "result": true,
+            "duration": 36.652,
+            "__run_num__": 4,
+            "changes": {}
+          },
+          "file_|-replace_etc_hosts_4_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.541395",
+            "result": true,
+            "duration": 2.848,
+            "__run_num__": 3,
+            "changes": {}
+          },
+          "file_|-replace_etc_hosts_3_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.538303",
+            "result": true,
+            "duration": 2.861,
+            "__run_num__": 2,
+            "changes": {}
+          },
+          "file_|-/etc/environment_|-/etc/environment_|-append": {
+            "comment": "Appended 1 lines",
+            "name": "/etc/environment",
+            "start_time": "12:39:34.116881",
+            "result": true,
+            "duration": 415.448,
+            "__run_num__": 9,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -0,0 +1 @@\n+HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/usr/lib/hadoop/lib/*\n"
+            }
+          },
+          "service_|-start-ambari-agent_|-ambari-agent_|-running": {
+            "comment": "Service ambari-agent has been enabled, and is running",
+            "name": "ambari-agent",
+            "start_time": "12:39:34.674125",
+            "result": true,
+            "duration": 2799.606,
+            "__run_num__": 18,
+            "changes": {
+              "ambari-agent": true
+            }
+          },
+          "file_|-/etc/ambari-agent/conf/public_hostname.sh_|-/etc/ambari-agent/conf/public_hostname.sh_|-managed": {
+            "comment": "File /etc/ambari-agent/conf/public_hostname.sh updated",
+            "name": "/etc/ambari-agent/conf/public_hostname.sh",
+            "start_time": "12:39:34.549381",
+            "result": true,
+            "duration": 17.521,
+            "__run_num__": 11,
+            "changes": {
+              "diff": "New file",
+              "mode": "0755"
+            }
+          },
+          "file_|-set_ambari_server_address_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:39:34.567185",
+            "result": true,
+            "duration": 3.109,
+            "__run_num__": 12,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -13,7 +13,7 @@\n # See the License for the specific\n \n [server]\n-hostname=localhost\n+hostname=10.0.0.3\n url_port=8440\n secured_url_port=8441\n \n"
+            }
+          },
+          "file_|-set_public_hostname_script_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:39:34.574413",
+            "result": true,
+            "duration": 18.14,
+            "__run_num__": 13,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -18,6 +18,7 @@\n secured_url_port=8441\n \n [agent]\n+public_hostname_script=/etc/ambari-agent/conf/public_hostname.sh\n logdir=/var/log/ambari-agent\n piddir=/var/run/ambari-agent\n prefix=/var/lib/ambari-agent/data\n"
+            }
+          },
+          "module_|-start-ambari-agent_|-service.systemctl_reload_|-wait": {
+            "comment": "Module function service.systemctl_reload executed",
+            "name": "service.systemctl_reload",
+            "start_time": "12:39:34.628586",
+            "result": true,
+            "duration": 44.879,
+            "__run_num__": 17,
+            "changes": {
+              "ret": true
+            }
+          },
+          "file_|-/etc/yum.repos.d/ambari.repo_|-/etc/yum.repos.d/ambari.repo_|-managed": {
+            "comment": "File /etc/yum.repos.d/ambari.repo updated",
+            "name": "/etc/yum.repos.d/ambari.repo",
+            "start_time": "12:39:09.585488",
+            "result": true,
+            "duration": 19.088,
+            "__run_num__": 7,
+            "changes": {
+              "diff": "New file",
+              "mode": "0644"
+            }
+          },
+          "file_|-/home/admin/.ssh_|-/home/admin/.ssh_|-directory": {
+            "comment": "Directory /home/admin/.ssh is in the correct state",
+            "name": "/home/admin/.ssh",
+            "start_time": "12:39:09.581989",
+            "result": true,
+            "duration": 1.424,
+            "__run_num__": 5,
+            "changes": {}
+          },
+          "file_|-/etc/systemd/system/ambari-agent.service_|-/etc/systemd/system/ambari-agent.service_|-managed": {
+            "comment": "File /etc/systemd/system/ambari-agent.service updated",
+            "name": "/etc/systemd/system/ambari-agent.service",
+            "start_time": "12:39:34.612297",
+            "result": true,
+            "duration": 14.309,
+            "__run_num__": 15,
+            "changes": {
+              "diff": "New file",
+              "mode": "0644"
+            }
+          },
+          "pkg_|-ambari-agent_|-ambari-agent_|-installed": {
+            "comment": "1 targeted package was installed/updated.",
+            "name": "ambari-agent",
+            "start_time": "12:39:10.542200",
+            "result": true,
+            "duration": 23572.076,
+            "__run_num__": 8,
+            "changes": {
+              "ambari-agent": {
+                "new": "2.4.0.1-1",
+                "old": ""
+              },
+              "gpg-pubkey.(none)": {
+                "new": "07513cad-4fe4cf94,352c64e5-52ae6884,f4a80eb5-53a7ff4b",
+                "old": "352c64e5-52ae6884,f4a80eb5-53a7ff4b"
+              }
+            }
+          }
+        },
+        "host-10-0-0-3.openstacklocal": {
+          "pkg_|-haveged_|-haveged_|-installed": {
+            "comment": "Package haveged is already installed.",
+            "name": "haveged",
+            "start_time": "12:39:10.484722",
+            "result": true,
+            "duration": 1122.224,
+            "__run_num__": 8,
+            "changes": {}
+          },
+          "file_|-/etc/ambari-agent/conf/internal_hostname.sh_|-/etc/ambari-agent/conf/internal_hostname.sh_|-managed": {
+            "comment": "File /etc/ambari-agent/conf/internal_hostname.sh updated",
+            "name": "/etc/ambari-agent/conf/internal_hostname.sh",
+            "start_time": "12:41:30.546549",
+            "result": true,
+            "duration": 13.407,
+            "__run_num__": 20,
+            "changes": {
+              "diff": "New file",
+              "mode": "0755"
+            }
+          },
+          "file_|-replace_etc_hosts_4_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.596321",
+            "result": true,
+            "duration": 2.922,
+            "__run_num__": 3,
+            "changes": {}
+          },
+          "file_|-/etc/systemd/system/ambari-agent.service_|-/etc/systemd/system/ambari-agent.service_|-managed": {
+            "comment": "File /etc/systemd/system/ambari-agent.service updated",
+            "name": "/etc/systemd/system/ambari-agent.service",
+            "start_time": "12:41:30.612214",
+            "result": true,
+            "duration": 8.888,
+            "__run_num__": 25,
+            "changes": {
+              "diff": "New file",
+              "mode": "0644"
+            }
+          },
+          "file_|-/etc/yum.repos.d/ambari.repo_|-/etc/yum.repos.d/ambari.repo_|-managed": {
+            "comment": "File /etc/yum.repos.d/ambari.repo updated",
+            "name": "/etc/yum.repos.d/ambari.repo",
+            "start_time": "12:39:09.640852",
+            "result": true,
+            "duration": 18.827,
+            "__run_num__": 7,
+            "changes": {
+              "diff": "New file",
+              "mode": "0644"
+            }
+          },
+          "module_|-start-ambari-server_|-service.systemctl_reload_|-wait": {
+            "comment": "Module function service.systemctl_reload executed",
+            "name": "service.systemctl_reload",
+            "start_time": "12:40:19.668369",
+            "result": true,
+            "duration": 66.086,
+            "__run_num__": 16,
+            "changes": {
+              "ret": true
+            }
+          },
+          "file_|-/home/admin/.ssh_|-/home/admin/.ssh_|-directory": {
+            "comment": "Directory /home/admin/.ssh is in the correct state",
+            "name": "/home/admin/.ssh",
+            "start_time": "12:39:09.637275",
+            "result": true,
+            "duration": 1.44,
+            "__run_num__": 5,
+            "changes": {}
+          },
+          "service_|-haveged_|-haveged_|-running": {
+            "comment": "Service haveged is already enabled, and is in the desired state",
+            "name": "haveged",
+            "start_time": "12:39:11.609507",
+            "result": true,
+            "duration": 357.266,
+            "__run_num__": 9,
+            "changes": {}
+          },
+          "file_|-/etc/environment_|-/etc/environment_|-append": {
+            "comment": "Appended 1 lines",
+            "name": "/etc/environment",
+            "start_time": "12:41:30.056002",
+            "result": true,
+            "duration": 490.262,
+            "__run_num__": 19,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -0,0 +1 @@\n+HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/usr/lib/hadoop/lib/*\n"
+            }
+          },
+          "service_|-start-ambari-agent_|-ambari-agent_|-running": {
+            "comment": "Service ambari-agent has been enabled, and is running",
+            "name": "ambari-agent",
+            "start_time": "12:41:30.665334",
+            "result": true,
+            "duration": 2608.627,
+            "__run_num__": 28,
+            "changes": {
+              "ambari-agent": true
+            }
+          },
+          "file_|-set_ambari_server_address_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:41:30.573080",
+            "result": true,
+            "duration": 2.719,
+            "__run_num__": 22,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -13,7 +13,7 @@\n # See the License for the specific\n \n [server]\n-hostname=localhost\n+hostname=10.0.0.3\n url_port=8440\n secured_url_port=8441\n \n"
+            }
+          },
+          "file_|-/etc/systemd/system/ambari-server.service_|-/etc/systemd/system/ambari-server.service_|-managed": {
+            "comment": "File /etc/systemd/system/ambari-server.service updated",
+            "name": "/etc/systemd/system/ambari-server.service",
+            "start_time": "12:40:19.652292",
+            "result": true,
+            "duration": 12.718,
+            "__run_num__": 14,
+            "changes": {
+              "diff": "New file",
+              "mode": "0644"
+            }
+          },
+          "file_|-replace_etc_hosts_1_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.577311",
+            "result": true,
+            "duration": 12.297,
+            "__run_num__": 0,
+            "changes": {}
+          },
+          "pkg_|-ambari-server_|-ambari-server_|-installed": {
+            "comment": "1 targeted package was installed/updated.",
+            "name": "ambari-server",
+            "start_time": "12:39:11.967459",
+            "result": true,
+            "duration": 67600.364,
+            "__run_num__": 10,
+            "changes": {
+              "postgresql-libs": {
+                "new": "9.2.15-1.el7_2",
+                "old": ""
+              },
+              "postgresql-server": {
+                "new": "9.2.15-1.el7_2",
+                "old": ""
+              },
+              "postgresql": {
+                "new": "9.2.15-1.el7_2",
+                "old": ""
+              },
+              "gpg-pubkey.(none)": {
+                "new": "07513cad-4fe4cf94,352c64e5-52ae6884,f4a80eb5-53a7ff4b",
+                "old": "352c64e5-52ae6884,f4a80eb5-53a7ff4b"
+              },
+              "ambari-server": {
+                "new": "2.4.0.1-1",
+                "old": ""
+              }
+            }
+          },
+          "file_|-/home/admin/.ssh/authorized_keys_|-/home/admin/.ssh/authorized_keys_|-copy": {
+            "comment": "The target file \"/home/admin/.ssh/authorized_keys\" exists and will not be overwritten",
+            "name": "/home/admin/.ssh/authorized_keys",
+            "start_time": "12:39:09.638987",
+            "result": true,
+            "duration": 1.62,
+            "__run_num__": 6,
+            "changes": {}
+          },
+          "user_|-admin_|-admin_|-present": {
+            "comment": "User admin is present and up to date",
+            "name": "admin",
+            "start_time": "12:39:09.600533",
+            "result": true,
+            "duration": 36.5,
+            "__run_num__": 4,
+            "changes": {}
+          },
+          "service_|-start-ambari-server_|-ambari-server_|-running": {
+            "comment": "Service ambari-server has been enabled, and is running",
+            "name": "ambari-server",
+            "start_time": "12:40:19.736175",
+            "result": true,
+            "duration": 60063.039,
+            "__run_num__": 17,
+            "changes": {
+              "ambari-server": true
+            }
+          },
+          "file_|-replace_etc_hosts_3_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.593178",
+            "result": true,
+            "duration": 2.91,
+            "__run_num__": 2,
+            "changes": {}
+          },
+          "file_|-/etc/ambari-agent/conf/public_hostname.sh_|-/etc/ambari-agent/conf/public_hostname.sh_|-managed": {
+            "comment": "File /etc/ambari-agent/conf/public_hostname.sh updated",
+            "name": "/etc/ambari-agent/conf/public_hostname.sh",
+            "start_time": "12:41:30.560169",
+            "result": true,
+            "duration": 12.68,
+            "__run_num__": 21,
+            "changes": {
+              "diff": "New file",
+              "mode": "0755"
+            }
+          },
+          "cmd_|-/var/lib/ambari-server/jdbc-drivers_|-cp -R /opt/jdbc-drivers /var/lib/ambari-server/jdbc-drivers_|-run": {
+            "comment": "Command \"cp -R /opt/jdbc-drivers /var/lib/ambari-server/jdbc-drivers\" run",
+            "name": "cp -R /opt/jdbc-drivers /var/lib/ambari-server/jdbc-drivers",
+            "start_time": "12:40:19.572657",
+            "result": true,
+            "duration": 36.418,
+            "__run_num__": 11,
+            "changes": {
+              "pid": 3223,
+              "retcode": 0,
+              "stderr": "",
+              "stdout": ""
+            }
+          },
+          "pkg_|-ambari-agent_|-ambari-agent_|-installed": {
+            "comment": "1 targeted package was installed/updated.",
+            "name": "ambari-agent",
+            "start_time": "12:41:19.800852",
+            "result": true,
+            "duration": 10252.08,
+            "__run_num__": 18,
+            "changes": {
+              "ambari-agent": {
+                "new": "2.4.0.1-1",
+                "old": ""
+              }
+            }
+          },
+          "file_|-replace_etc_hosts_2_|-/etc/hosts_|-replace": {
+            "comment": "No changes needed to be made",
+            "name": "/etc/hosts",
+            "start_time": "12:39:09.589885",
+            "result": true,
+            "duration": 3.055,
+            "__run_num__": 1,
+            "changes": {}
+          },
+          "file_|-set_internal_hostname_script_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:41:30.597006",
+            "result": true,
+            "duration": 14.938,
+            "__run_num__": 24,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -18,6 +18,7 @@\n secured_url_port=8441\n \n [agent]\n+hostname_script=/etc/ambari-agent/conf/internal_hostname.sh\n public_hostname_script=/etc/ambari-agent/conf/public_hostname.sh\n logdir=/var/log/ambari-agent\n piddir=/var/run/ambari-agent\n"
+            }
+          },
+          "file_|-set_install_timeout_|-/etc/ambari-server/conf/ambari.properties_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-server/conf/ambari.properties",
+            "start_time": "12:40:19.647599",
+            "result": true,
+            "duration": 4.455,
+            "__run_num__": 13,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -80,7 +80,7 @@\n # Default timeout in seconds before task is killed\n agent.task.timeout=900\n # Default timeout in seconds before package installation task is killed\n-agent.package.install.task.timeout=1800\n+agent.package.install.task.timeout=3600\n \n # Enables package installation retry on repository unavailability error\n agent.stack.retry.on_repo_unavailability=false\n"
+            }
+          },
+          "file_|-set_public_hostname_script_|-/etc/ambari-agent/conf/ambari-agent.ini_|-replace": {
+            "comment": "Changes were made",
+            "name": "/etc/ambari-agent/conf/ambari-agent.ini",
+            "start_time": "12:41:30.579479",
+            "result": true,
+            "duration": 13.786,
+            "__run_num__": 23,
+            "changes": {
+              "diff": "--- \n+++ \n@@ -18,6 +18,7 @@\n secured_url_port=8441\n \n [agent]\n+public_hostname_script=/etc/ambari-agent/conf/public_hostname.sh\n logdir=/var/log/ambari-agent\n piddir=/var/run/ambari-agent\n prefix=/var/lib/ambari-agent/data\n"
+            }
+          },
+          "module_|-start-ambari-agent_|-service.systemctl_reload_|-wait": {
+            "comment": "Module function service.systemctl_reload executed",
+            "name": "service.systemctl_reload",
+            "start_time": "12:41:30.623080",
+            "result": true,
+            "duration": 41.566,
+            "__run_num__": 27,
+            "changes": {
+              "ret": true
+            }
+          },
+          "file_|-/opt/ambari-server/ambari-server-init.sh_|-/opt/ambari-server/ambari-server-init.sh_|-managed": {
+            "comment": "File /opt/ambari-server/ambari-server-init.sh updated",
+            "name": "/opt/ambari-server/ambari-server-init.sh",
+            "start_time": "12:40:19.612153",
+            "result": true,
+            "duration": 35.179,
+            "__run_num__": 12,
+            "changes": {
+              "diff": "New file",
+              "mode": "0744"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

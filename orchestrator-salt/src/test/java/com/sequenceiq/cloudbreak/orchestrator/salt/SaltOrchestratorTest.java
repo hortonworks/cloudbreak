@@ -95,11 +95,11 @@ public class SaltOrchestratorTest {
 
         saltOrchestrator.bootstrap(gatewayConfig, targets, exitCriteriaModel);
 
-        verify(parallelOrchestratorComponentRunner, times(2)).submit(any(OrchestratorBootstrapRunner.class));
+        verify(parallelOrchestratorComponentRunner, times(1)).submit(any(OrchestratorBootstrapRunner.class));
 
-        verifyNew(OrchestratorBootstrapRunner.class, times(2))
+        verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(PillarSave.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-        verifyNew(OrchestratorBootstrapRunner.class, times(2))
+        verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(gatewayConfig), eq(targets));
     }
@@ -151,7 +151,7 @@ public class SaltOrchestratorTest {
         saltOrchestrator.runService(gatewayConfig, targets, saltPillarConfig, exitCriteriaModel);
 
         // verify pillar save
-        verifyNew(OrchestratorBootstrapRunner.class, times(1))
+        verifyNew(OrchestratorBootstrapRunner.class, times(2))
                 .withArguments(eq(pillarSave), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
 
         // verify ambari server role

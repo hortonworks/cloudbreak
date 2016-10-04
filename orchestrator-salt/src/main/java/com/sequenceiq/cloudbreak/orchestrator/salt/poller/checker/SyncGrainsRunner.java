@@ -4,7 +4,6 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
@@ -17,7 +16,7 @@ public class SyncGrainsRunner extends BaseSaltJobRunner {
 
     @Override
     public String submit(SaltConnector saltConnector) {
-        ApplyResponse grainsResult = SaltStates.syncGrains(saltConnector, new Compound(getTarget()));
+        ApplyResponse grainsResult = SaltStates.syncGrains(saltConnector);
         Set<String> strings = collectMissingNodes(collectNodes(grainsResult));
         setTarget(strings);
         return strings.toString();

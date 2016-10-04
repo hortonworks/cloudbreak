@@ -1,20 +1,21 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.states;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfoObject;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 
 public class JidInfoResponseTransformer {
 
     private JidInfoResponseTransformer() {
     }
 
-    public static Map<String, Map<String, RunnerInfoObject>> getHighStates(Map map) {
+    public static Map<String, List<RunnerInfo>> getHighStates(Map map) {
         Map<String, Object> stringObjectMap = ((Map<String, List<Map<String, Map<String, Object>>>>) map).get("return").get(0).get("data");
-        Map<String, Map<String, RunnerInfoObject>> result = new HashMap<>();
+        Map<String, List<RunnerInfo>> result = new HashMap<>();
         for (Map.Entry<String, Object> stringObjectEntry : stringObjectMap.entrySet()) {
             if (stringObjectEntry.getValue() instanceof Map) {
                 Map<String, Map<String, Object>> mapValue = (Map<String, Map<String, Object>>) stringObjectEntry.getValue();
@@ -32,12 +33,10 @@ public class JidInfoResponseTransformer {
         return result;
     }
 
-    public static Map<String, Map<String, RunnerInfoObject>> getSimpleStates(Map map) {
+    public static Map<String, List<RunnerInfo>> getSimpleStates(Map map) {
         Map<String, Map<String, Map<String, Object>>> stringMapMap =
                 ((Map<String, List<Map<String, Map<String, Map<String, Object>>>>>) map).get("return").get(0);
-
-        Map<String, Map<String, RunnerInfoObject>> result = new HashMap<>();
-
+        Map<String, List<RunnerInfo>> result = new HashMap<>();
         for (Map.Entry<String, Map<String, Map<String, Object>>> stringMapEntry : stringMapMap.entrySet()) {
             result.put(stringMapEntry.getKey(), runnerInfoObjects(stringMapEntry.getValue()));
         }
@@ -45,22 +44,31 @@ public class JidInfoResponseTransformer {
         return result;
     }
 
-    private static Map<String, RunnerInfoObject> runnerInfoObjects(Map<String, Map<String, Object>> map) {
-        Map<String, RunnerInfoObject> runnerInfoObjectMap = new HashMap<>();
+    private static List<RunnerInfo> runnerInfoObjects(Map<String, Map<String, Object>> map) {
+        List<RunnerInfo> runnerInfoList = new ArrayList<>();
         for (Map.Entry<String, Map<String, Object>> stringMapEntry : map.entrySet()) {
             Map<String, Object> value = stringMapEntry.getValue();
-            RunnerInfoObject runnerInfoObject = new RunnerInfoObject();
+            RunnerInfo runnerInfo = new RunnerInfo();
+            runnerInfo.setStateId(stringMapEntry.getKey());
             Object changes = value.get("changes");
-            runnerInfoObject.setChanges(changes == null ? Collections.emptyMap() : (Map<String, Object>) changes);
-            runnerInfoObject.setComment(String.valueOf(value.get("comment")));
-            runnerInfoObject.setDuration(String.valueOf(value.get("duration")));
-            runnerInfoObject.setName(String.valueOf(value.get("name")));
-            runnerInfoObject.setResult(Boolean.valueOf(String.valueOf(value.get("result"))));
+            runnerInfo.setChanges(changes == null ? Collections.emptyMap() : (Map<String, Object>) changes);
+            runnerInfo.setComment(String.valueOf(value.get("comment")));
+            double duration;
+            try {
+                String[] durationArray = String.valueOf(value.get("duration")).split(" ");
+                duration = Double.parseDouble(durationArray[0]);
+            } catch (NumberFormatException nfe) {
+                duration = 0.0;
+            }
+            runnerInfo.setDuration(duration);
+            runnerInfo.setName(String.valueOf(value.get("name")));
+            runnerInfo.setResult(Boolean.valueOf(String.valueOf(value.get("result"))));
             String runNum = String.valueOf(value.get("__run_num__"));
-            runnerInfoObject.setRunNum(runNum == null ? -1 : Integer.parseInt(runNum));
-            runnerInfoObject.setStartTime(String.valueOf(value.get("start_time")));
-            runnerInfoObjectMap.put(stringMapEntry.getKey(), runnerInfoObject);
+            runnerInfo.setRunNum(runNum == null ? -1 : Integer.parseInt(runNum));
+            runnerInfo.setStartTime(String.valueOf(value.get("start_time")));
+            runnerInfoList.add(runnerInfo);
         }
-        return runnerInfoObjectMap;
+        Collections.sort(runnerInfoList, new RunnerInfo.RunNumComparator());
+        return runnerInfoList;
     }
 }
