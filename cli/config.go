@@ -2,12 +2,13 @@ package cli
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"os"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
 )
 
 const (
@@ -35,7 +36,7 @@ func (c Config) Yaml() string {
 func Configure(c *cli.Context) error {
 	checkRequiredFlags(c, Configure)
 
-	err := WriteConfigToFile(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlOutput.Name))
+	err := WriteConfigToFile(GetHomeDirectory(), c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlOutput.Name))
 	if err != nil {
 		logErrorAndExit(Configure, err.Error())
 	}
@@ -50,8 +51,8 @@ func GetHomeDirectory() string {
 	return homeDir
 }
 
-func WriteConfigToFile(server string, username string, password string, output string) error {
-	hdcDir := GetHomeDirectory() + "/" + Hdc_dir
+func WriteConfigToFile(baseDir string, server string, username string, password string, output string) error {
+	hdcDir := baseDir + "/" + Hdc_dir
 	configFile := hdcDir + "/" + Config_file
 
 	if _, err := os.Stat(hdcDir); os.IsNotExist(err) {
@@ -74,8 +75,8 @@ func WriteConfigToFile(server string, username string, password string, output s
 	return nil
 }
 
-func ReadConfig() (*Config, error) {
-	hdcDir := GetHomeDirectory() + "/" + Hdc_dir
+func ReadConfig(baseDir string) (*Config, error) {
+	hdcDir := baseDir + "/" + Hdc_dir
 	configFile := hdcDir + "/" + Config_file
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {

@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	log "github.com/Sirupsen/logrus"
 	hdc "github.com/hortonworks/hdc-cli/cli"
 	"github.com/urfave/cli"
-	"os"
 )
 
 func ConfigRead(c *cli.Context) error {
@@ -14,7 +15,7 @@ func ConfigRead(c *cli.Context) error {
 	password := c.String(hdc.FlPassword.Name)
 	output := c.String(hdc.FlOutput.Name)
 
-	config, err := hdc.ReadConfig()
+	config, err := hdc.ReadConfig(hdc.GetHomeDirectory())
 	if err == nil {
 		if len(output) == 0 {
 			c.Set(hdc.FlOutput.Name, config.Output)

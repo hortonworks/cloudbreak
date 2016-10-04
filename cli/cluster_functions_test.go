@@ -8,9 +8,7 @@ import (
 	"github.com/hortonworks/hdc-cli/models"
 )
 
-type sw struct {
-	s string
-}
+type sw struct{ s string }
 
 func clusterSkeleton(stackParams map[string]string, credParams map[string]interface{}, netParams map[string]interface{}) (ClusterSkeleton, *models.StackResponse, *models.CredentialResponse, *models.BlueprintResponse, *models.NetworkJSON) {
 	skeleton := ClusterSkeleton{}
@@ -254,5 +252,44 @@ func TestFillWithSecurityMapDefaultPorts(t *testing.T) {
 
 	if skeleton.WebAccess != false {
 		t.Error("web access must be false")
+	}
+}
+
+func TestFillWithCluster(t *testing.T) {
+	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
+
+	inputs := make([]*models.BlueprintInputJSON, 0)
+	inputs = append(inputs, &models.BlueprintInputJSON{Name: &(&sw{"property"}).s, PropertyValue: &(&sw{"value"}).s})
+	sr.Cluster = &models.ClusterResponse{
+		Status:          &(&sw{"cluster-status"}).s,
+		StatusReason:    &(&sw{"cluster-reason"}).s,
+		BlueprintInputs: inputs,
+	}
+
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil)
+
+	if skeleton.Status != *sr.Cluster.Status {
+		t.Errorf("status not match %s == %s", *sr.Cluster.Status, skeleton.Status)
+	}
+	if skeleton.StatusReason != *sr.Cluster.StatusReason {
+		t.Errorf("status reason not match %s == %s", *sr.Cluster.StatusReason, skeleton.StatusReason)
+	}
+
+	if len(skeleton.ClusterInputs) != 1 || skeleton.ClusterInputs["property"] != "value" {
+		t.Errorf("cluster inputs not match map[property:value] == %s", skeleton.ClusterInputs)
+	}
+}
+
+func TestFillWithClusterAvailable(t *testing.T) {
+	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
+
+	sr.Cluster = &models.ClusterResponse{
+		Status: &(&sw{"AVAILABLE"}).s,
+	}
+
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil)
+
+	if skeleton.Status != *sr.Status {
+		t.Errorf("status not match %s == %s", *sr.Status, skeleton.Status)
 	}
 }
