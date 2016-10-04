@@ -12,20 +12,20 @@ tests:
   # integratontest.gcpcredential params must be set in application.yml
   - name: gcp_credential_test
     parameters:
-      credentialName: its-gcp-credandsmoke-cred
+      credentialName: its-gcp-credandsmoke-cred-eln
     classes:
       - com.sequenceiq.it.cloudbreak.GcpCredentialCreationTest
 
   - name: create vpc network
     parameters:
-      networkName: existing-vpc-network
+      networkName: existing-vpc-network-eln
       networkType: LAGACY_NETWORK
     classes:
       - com.sequenceiq.it.cloudbreak.GcpCreateVirtualNetworkTest
 
   - name: create gateway template
     parameters:
-      gcpName: it-gcp-credandsmoke-gateway
+      gcpName: it-gcp-credandsmoke-gateway-eln
       gcpInstanceType: n1-standard-4
       volumeType: pd-standard
       volumeCount: 1
@@ -36,7 +36,7 @@ tests:
 
   - name: create master template
     parameters:
-      gcpName: it-gcp-credandsmoke-master
+      gcpName: it-gcp-credandsmoke-master-eln
       gcpInstanceType: n1-highmem-8
       volumeType: pd-standard
       volumeCount: 2
@@ -47,7 +47,7 @@ tests:
 
   - name: create slave template
     parameters:
-      gcpName: it-gcp-credandsmoke-slave
+      gcpName: it-gcp-credandsmoke-slave-eln
       gcpInstanceType: n1-highcpu-4
       volumeType: pd-ssd
       volumeCount: 3
@@ -58,10 +58,10 @@ tests:
 
   - name: create cluster
     parameters:
-      stackName: it-gcp-cred
+      stackName: it-gcp-cred-eln
       region: europe-west1
       availabilityZone: europe-west1-b
-      clusterName: it-gcp-cred
+      clusterName: it-gcp-cred-eln
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
