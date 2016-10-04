@@ -155,12 +155,8 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	}
 
 	keys := make([]string, 0, len(securityMap))
-	for k := range securityMap {
+	for k, v := range securityMap {
 		keys = append(keys, k)
-	}
-	c.RemoteAccess = strings.Join(keys, ",")
-
-	for _, v := range securityMap {
 		for _, sr := range v {
 			log.Debugf("SecurityRule: %s", sr.Ports)
 			if strings.Join(SECURITY_GROUP_DEFAULT_PORTS, ",") != sr.Ports {
@@ -168,6 +164,7 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 			}
 		}
 	}
+	c.RemoteAccess = strings.Join(keys, ",")
 
 	return nil
 }

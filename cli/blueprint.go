@@ -1,14 +1,15 @@
 package cli
 
 import (
-	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/blueprints"
-	"github.com/hortonworks/hdc-cli/models"
-	"github.com/urfave/cli"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/hdc-cli/client/blueprints"
+	"github.com/hortonworks/hdc-cli/models"
+	"github.com/urfave/cli"
 )
 
 var BlueprintHeader []string = []string{"Cluster Type", "HDP Version"}
@@ -127,10 +128,9 @@ func getFancyBlueprintName(blueprint *models.BlueprintResponse) string {
 		fancyName := BlueprintMap[ambariBpName]
 		if len(fancyName) > 0 {
 			name = fancyName
-		} else {
-			name = blueprint.Name
 		}
-	} else {
+	}
+	if len(name) == 0 {
 		name = blueprint.Name
 	}
 	return name
