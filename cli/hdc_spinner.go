@@ -1,10 +1,10 @@
 package cli
 
 import (
-	"fmt"
 	"os"
 	"time"
 
+	"fmt"
 	"github.com/briandowns/spinner"
 )
 
@@ -25,6 +25,6 @@ func StartSpinner() {
 func StopSpinner() {
 	if Spinner != nil {
 		Spinner.Stop()
-		fmt.Print("\r")
+		fmt.Fprint(os.Stderr, "\r")
 	}
 }
