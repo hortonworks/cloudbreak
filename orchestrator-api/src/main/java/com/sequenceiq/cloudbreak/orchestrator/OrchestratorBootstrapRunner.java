@@ -49,6 +49,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         int retryCount = 1;
         Exception actualException = null;
         String type = orchestratorBootstrap.getClass().getSimpleName().replace("Bootstrap", "");
+        long initialStartTime = System.currentTimeMillis();
         while (!success && retryCount <= maxRetryCount) {
             if (isExitNeeded()) {
                 LOGGER.error(exitCriteria.exitMessage());
@@ -59,14 +60,17 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
                 LOGGER.info("Calling orchestrator bootstrap: {}, additional info: {}", type, orchestratorBootstrap);
                 orchestratorBootstrap.call();
                 long elapsedTime = System.currentTimeMillis() - startTime;
+                long totalElapsedTime = System.currentTimeMillis() - initialStartTime;
                 success = true;
-                LOGGER.info("Orchestrator component {} successfully started! Elapsed time: {} ms, additional info: {}", type, elapsedTime,
-                        orchestratorBootstrap);
+                LOGGER.info("Orchestrator component {} successfully started! Elapsed time: {} ms, Total elapsed time: {} ms, "
+                        + "additional info: {}", type, elapsedTime, totalElapsedTime, orchestratorBootstrap);
             } catch (Exception ex) {
                 long elapsedTime = System.currentTimeMillis() - startTime;
+                long totalElapsedTime = System.currentTimeMillis() - initialStartTime;
                 actualException = ex;
-                LOGGER.warn("Orchestrator component {} failed to start, retrying [{}/{}] Elapsed time: {} ms; Reason: {}, additional info: {}", type,
-                        retryCount, maxRetryCount, elapsedTime, actualException.getMessage(), orchestratorBootstrap);
+                LOGGER.warn("Orchestrator component {} failed to start, retrying [{}/{}] Elapsed time: {} ms, "
+                                + "Total elapsed time: {} ms, Reason: {}, additional info: {}",
+                        type, retryCount, maxRetryCount, elapsedTime, totalElapsedTime, actualException.getMessage(), orchestratorBootstrap);
                 retryCount++;
                 if (retryCount <= maxRetryCount) {
                     Thread.sleep(sleepTime);

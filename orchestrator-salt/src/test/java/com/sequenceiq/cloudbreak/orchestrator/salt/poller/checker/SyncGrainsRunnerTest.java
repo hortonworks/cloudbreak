@@ -50,7 +50,7 @@ public class SyncGrainsRunnerTest {
         nodes.put("10-0-0-2.example.com", "something");
         result.add(nodes);
         applyResponse.setResult(result);
-        PowerMockito.when(SaltStates.syncGrains(any(), any())).thenReturn(applyResponse);
+        PowerMockito.when(SaltStates.syncGrains(any())).thenReturn(applyResponse);
 
         SyncGrainsRunner syncGrainsRunner = new SyncGrainsRunner(targets, allNode);
 
