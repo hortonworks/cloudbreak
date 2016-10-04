@@ -18,21 +18,21 @@ tests:
 
   - name: create mock credential
     parameters:
-      credentialName: it-mock-credential
+      credentialName: it-mock-credential-scaling-salt
       publicKeyFile: raw:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3JiQtcQT48nn7Ax+yJLJqaWKRzczeJAda6x4JHFRqJW15pAmrSG7ld33V89yHeizAziLfhYYhw6uwN4aDKixS/XreQxZWyK2k/namyr8crFC83n6NNxlDa9DGujg61X8JoE2SyPHSVwhizfyoEmnkeyXJlsn6YtEnKfq23P4Di+p6I9xj7Ay52EzRHKMRMH8Q4kscKfp0taQKdOD2rCO1eOJ7vwCdMLjZc4H6TISk+lwnAJlDfbIdy6SO2jKIJvwoSjehfitWgGp8dGIEcV59GmO2aGlSwCqAwF6S9qP7O++5B5irFKc0TxuIplDSPL/yuCycWvz81FJKLTaUdJ6l
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockCredentialCreationTest
 
   - name: create mock network
     parameters:
-      networkName: it-mock-network
+      networkName: it-mock-network-scaling-salt
       subnetCIDR: 10.0.36.0/24
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockNetworkCreationTest
 
   - name: create gateway template
     parameters:
-      mockName: it-mock-smoke-gateway
+      mockName: it-mock-smoke-gateway-scaling-salt
       mockInstanceType: small
       volumeType: ssd
       volumeCount: 1
@@ -43,7 +43,7 @@ tests:
 
   - name: create master template
     parameters:
-      mockName: it-mock-some-master
+      mockName: it-mock-some-master-scaling-salt
       mockInstanceType: large
       volumeType: ephemeral
       volumeCount: 1
@@ -54,7 +54,7 @@ tests:
 
   - name: create slave template
     parameters:
-      mockName: it-mock-smoke-slave
+      mockName: it-mock-smoke-slave-scaling-salt
       mockInstanceType: large
       volumeType: magnetic
       volumeCount: 3
@@ -65,11 +65,11 @@ tests:
 
   - name: create cluster
     parameters: {
-      stackName: it-mock-stack,
+      stackName: it-mock-stack-scaling-salt,
       region: europe,
       threshold: 4,
       availabilityZone: europe-b,
-      clusterName: it-mock-cluster,
+      clusterName: it-mock-cluster-scaling-salt,
       checkAmbari: false,
       mockPort: 9443,
       orchestrator: SALT
