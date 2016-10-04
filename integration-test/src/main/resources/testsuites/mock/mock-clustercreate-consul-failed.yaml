@@ -17,20 +17,20 @@ tests:
 
   - name: create mock credential
     parameters:
-      credentialName: it-mock-credential
+      credentialName: it-mock-credential-cf
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockCredentialCreationTest
 
   - name: create mock network
     parameters:
-      networkName: it-mock-network
+      networkName: it-mock-network-cf
       subnetCIDR: 10.0.36.0/24
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockNetworkCreationTest
 
   - name: create gateway template
     parameters:
-      mockName: it-mock-smoke-gateway
+      mockName: it-mock-smoke-gateway-cf
       mockInstanceType: small
       volumeType: ssd
       volumeCount: 1
@@ -41,7 +41,7 @@ tests:
 
   - name: create master template
     parameters:
-      mockName: it-mock-some-master
+      mockName: it-mock-some-master-cf
       mockInstanceType: large
       volumeType: ephemeral
       volumeCount: 2
@@ -52,7 +52,7 @@ tests:
 
   - name: create slave template
     parameters:
-      mockName: it-mock-smoke-slave
+      mockName: it-mock-smoke-slave-cf
       mockInstanceType: large
       volumeType: magnetic
       volumeCount: 3
@@ -63,10 +63,10 @@ tests:
 
   - name: create cluster
     parameters: {
-      stackName: it-mock-stack,
+      stackName: it-mock-stack-cf,
       region: europe,
       availabilityZone: europe-b,
-      clusterName: it-mock-cluster,
+      clusterName: it-mock-cluster-cf,
       checkAmbari: false,
       mockPort: 7654
     }
