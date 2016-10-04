@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/hortonworks/hdc-cli/models"
@@ -227,9 +229,13 @@ func TestFillWithSecurityMap(t *testing.T) {
 
 	skeleton.fill(sr, cr, br, nil, sm, nj, nil)
 
-	expected := "master,worker"
-	if skeleton.RemoteAccess != expected {
-		t.Errorf("remote access not match %s == %s", expected, skeleton.RemoteAccess)
+	expected := []string{"master", "worker"}
+	sort.Strings(expected)
+	actual := strings.Split(skeleton.RemoteAccess, ",")
+	sort.Strings(actual)
+
+	if strings.Join(actual, "") != strings.Join(expected, "") {
+		t.Errorf("remote access not match %s == %s", expected, actual)
 	}
 	if skeleton.WebAccess != true {
 		t.Error("web access must be true")
