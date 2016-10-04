@@ -91,6 +91,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void bootstrap(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
+        LOGGER.info("Start SaltBootstrap on nodes: {}", targets);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             uploadSaltConfig(sc);
 
@@ -103,10 +104,12 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
+
         } catch (Exception e) {
             LOGGER.error("Error occurred under the consul bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+        LOGGER.info("SaltBootstrap finished");
     }
 
     @Override
@@ -125,6 +128,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, SaltPillarConfig pillarConfig,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+        LOGGER.info("Run Services on nodes: {}", allNodes);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             PillarSave hostSave = new PillarSave(sc, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain()));
             Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
@@ -163,6 +167,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.error("Error occurred during ambari bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+        LOGGER.info("Run Servcies on nodes finished: {}", allNodes);
     }
 
     @Override
@@ -311,7 +316,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void uploadSaltConfig(SaltConnector saltConnector) throws IOException {
         byte[] byteArray = zipSaltConfig();
-        LOGGER.info("Upload salt.zip to /tmp/salt.zip");
+        LOGGER.info("Upload salt.zip to server");
         saltConnector.upload("/srv", "salt.zip", new ByteArrayInputStream(byteArray));
     }
 

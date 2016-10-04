@@ -24,4 +24,10 @@ public class ApplyResponse {
         return result.get(0).get("jid").toString();
     }
 
+    @Override
+    public String toString() {
+        return "ApplyResponse{"
+                + "result=" + result
+                + '}';
+    }
 }

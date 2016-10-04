@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
@@ -41,11 +40,6 @@ public class SaltConnectorTest {
     //@Test
     public void testJid() {
         Object pingResponse = SaltStates.jidInfo(client, "20160510134036754632", Glob.ALL, StateType.SIMPLE);
-    }
-
-    //@Test
-    public void testConsul() {
-        Object pingResponse = SaltStates.consul(client, Glob.ALL);
     }
 
     //@Test
@@ -108,13 +102,6 @@ public class SaltConnectorTest {
         return minion;
     }
 
-
-    //@Test
-    public void testRunPing() {
-        PingResponse pingResponse = SaltStates.ping(client, Glob.ALL);
-        Assert.assertNotNull(pingResponse.getResult());
-    }
-
     //@Test
     public void testRunNetIf() {
         List<String> targets = Collections.singletonList("10.0.0.5");
@@ -127,18 +114,6 @@ public class SaltConnectorTest {
     public void testRunDeleteMinions() {
         List<String> targets = Collections.singletonList("10.0.0.5");
         Object object = SaltStates.removeMinions(client, targets);
-        Assert.assertNotNull(object);
-    }
-
-    //@Test
-    public void testRunConsul() {
-        Object object = SaltStates.consul(client, Glob.ALL);
-        Assert.assertNotNull(object);
-    }
-
-    //@Test
-    public void testRunHighstate() {
-        Object object = SaltStates.ambariAgent(client, Glob.ALL);
         Assert.assertNotNull(object);
     }
 
