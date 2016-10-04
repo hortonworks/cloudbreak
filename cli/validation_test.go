@@ -62,7 +62,7 @@ func TestNetworkSkeletonValidateVpcMissing(t *testing.T) {
 		s := convertErrorsToString(errors)
 		t.Errorf("not only VpcId not valid: %s", strings.Join(s, ", "))
 	} else if errors[0].Error() != "VpcId in network is required" {
-		t.Errorf("missing VpcId in network is required")
+		t.Error("missing VpcId in network is required")
 	}
 }
 
@@ -79,7 +79,7 @@ func TestNetworkSkeletonValidateSubnetMissing(t *testing.T) {
 		s := convertErrorsToString(errors)
 		t.Errorf("not only SubnetId not valid: %s", strings.Join(s, ", "))
 	} else if errors[0].Error() != "SubnetId in network is required" {
-		t.Errorf("missing SubnetId in network is required")
+		t.Error("missing SubnetId in network is required")
 	}
 }
 
