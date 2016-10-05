@@ -78,7 +78,10 @@ public class StackScalingService {
         if (hostMetadata != null) {
             try {
                 ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata);
-                hostMetadataRepository.delete(hostMetadata);
+                // Deleting by entity will not work because HostMetadata has a reference pointed
+                // from HostGroup and per JPA, we would need to clear that up.
+                // Reference: http://stackoverflow.com/a/22315188
+                hostMetadataRepository.delete(hostMetadata.getId());
                 eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
                                 Collections.singletonList(instanceMetaData.getInstanceId())));
