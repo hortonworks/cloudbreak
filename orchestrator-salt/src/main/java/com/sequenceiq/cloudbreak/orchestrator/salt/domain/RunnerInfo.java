@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
+import java.util.Comparator;
 import java.util.Map;
 
-public class RunnerInfoObject {
+public class RunnerInfo {
+
+    private String stateId;
 
     private String comment;
 
@@ -12,13 +15,21 @@ public class RunnerInfoObject {
 
     private boolean result;
 
-    private String duration;
+    private double duration;
 
-    private Integer runNum;
+    private int runNum;
 
     private Map<String, Object> changes;
 
-    public RunnerInfoObject() {
+    public RunnerInfo() {
+    }
+
+    public String getStateId() {
+        return stateId;
+    }
+
+    public void setStateId(String stateId) {
+        this.stateId = stateId;
     }
 
     public String getComment() {
@@ -53,19 +64,19 @@ public class RunnerInfoObject {
         this.result = result;
     }
 
-    public Integer getRunNum() {
+    public int getRunNum() {
         return runNum;
     }
 
-    public void setRunNum(Integer runNum) {
+    public void setRunNum(int runNum) {
         this.runNum = runNum;
     }
 
-    public String getDuration() {
+    public double getDuration() {
         return duration;
     }
 
-    public void setDuration(String duration) {
+    public void setDuration(double duration) {
         this.duration = duration;
     }
 
@@ -75,5 +86,23 @@ public class RunnerInfoObject {
 
     public void setChanges(Map<String, Object> changes) {
         this.changes = changes;
+    }
+
+    public static class RunNumComparator implements Comparator<RunnerInfo> {
+
+        @Override
+        public int compare(RunnerInfo o1, RunnerInfo o2) {
+            return Integer.compare(o1.getRunNum(), o2.getRunNum());
+        }
+
+    }
+
+    public static class DurationComparator implements Comparator<RunnerInfo> {
+
+        @Override
+        public int compare(RunnerInfo o1, RunnerInfo o2) {
+            return Double.compare(o1.getDuration(), o2.getDuration());
+        }
+
     }
 }

@@ -43,6 +43,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     @Override
     public Boolean call() throws Exception {
+        LOGGER.info("Bootstrapping of nodes [{}/{}]", originalTargets.size() - targets.size(), originalTargets.size());
         if (!targets.isEmpty()) {
             LOGGER.info("Missing targets for SaltBootstrap: {}", targets);
 
@@ -51,7 +52,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
             Set<Node> failedTargets = new HashSet<>();
 
-            LOGGER.info("Salt run response: {}", responses);
+            LOGGER.info("SaltBootstrap responses: {}", responses);
             for (GenericResponse genericResponse : responses.getResponses()) {
                 if (genericResponse.getStatusCode() != HttpStatus.OK.value()) {
                     LOGGER.info("Successfully distributed salt run to: " + genericResponse.getAddress());
@@ -62,8 +63,8 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             targets = failedTargets;
 
             if (!targets.isEmpty()) {
-                LOGGER.info("Missing nodes to run salt: %s", targets);
-                throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt: " + targets);
+                LOGGER.info("Missing nodes to run saltbootstrap: {}", targets);
+                throw new CloudbreakOrchestratorFailedException("There are missing nodes from saltbootstrap: " + targets);
             }
         }
 
@@ -75,8 +76,9 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             }
         });
         if (!targets.isEmpty()) {
-            throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt: " + targets);
+            throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt network response: " + targets);
         }
+        LOGGER.info("Bootstrapping of nodes completed: {}", originalTargets.size());
         return true;
     }
 

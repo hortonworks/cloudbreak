@@ -4,13 +4,16 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL_ASYNC;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
@@ -20,11 +23,11 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfoObject;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class SaltStates {
 
@@ -33,24 +36,8 @@ public class SaltStates {
     private SaltStates() {
     }
 
-    public static PingResponse ping(SaltConnector sc, Target<String> target) {
-        return sc.run(target, "test.ping", LOCAL, PingResponse.class);
-    }
-
-    public static String ambariServer(SaltConnector sc, Target<String> target) {
-        return applyState(sc, "ambari.server", target).getJid();
-    }
-
-    public static String ambariAgent(SaltConnector sc, Target<String> target) {
-        return applyState(sc, "ambari.agent", target).getJid();
-    }
-
     public static String ambariReset(SaltConnector sc, Target<String> target) {
         return applyState(sc, "ambari.reset", target).getJid();
-    }
-
-    public static String kerberos(SaltConnector sc, Target<String> target) {
-        return applyState(sc, "kerberos.server", target).getJid();
     }
 
     public static ApplyResponse addGrain(SaltConnector sc, Target<String> target, String key, String value) {
@@ -61,16 +48,12 @@ public class SaltStates {
         return sc.run(target, "grains.remove", LOCAL, ApplyResponse.class, key, value);
     }
 
-    public static ApplyResponse syncGrains(SaltConnector sc, Target<String> target) {
+    public static ApplyResponse syncGrains(SaltConnector sc) {
         return sc.run(Glob.ALL, "saltutil.sync_grains", LOCAL, ApplyResponse.class);
     }
 
     public static String highstate(SaltConnector sc) {
         return sc.run(Glob.ALL, "state.highstate", LOCAL_ASYNC, ApplyResponse.class).getJid();
-    }
-
-    public static String consul(SaltConnector sc, Target<String> target) {
-        return applyState(sc, "consul", target).getJid();
     }
 
     public static Multimap<String, String> jidInfo(SaltConnector sc, String jid, Target<String> target, StateType stateType) {
@@ -85,38 +68,45 @@ public class SaltStates {
     private static Multimap<String, String> applyStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
         Map jidInfo = sc.run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         LOGGER.info("Salt apply state jid info: {}", jidInfo);
-        Map<String, Map<String, RunnerInfoObject>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
+        Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
 
     private static Multimap<String, String> highStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
         Map jidInfo = sc.run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         LOGGER.info("Salt high state jid info: {}", jidInfo);
-        Map<String, Map<String, RunnerInfoObject>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
+        Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }
 
-    private static Multimap<String, String> collectMissingTargets(Map<String, Map<String, RunnerInfoObject>> stringRunnerInfoObjectMap) {
+    private static Multimap<String, String> collectMissingTargets(Map<String, List<RunnerInfo>> stringRunnerInfoObjectMap) {
         Multimap<String, String> missingTargetsWithErrors = ArrayListMultimap.create();
-        for (Map.Entry<String, Map<String, RunnerInfoObject>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
+        for (Map.Entry<String, List<RunnerInfo>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
             LOGGER.info("Collect missing targets from host: {}", stringMapEntry.getKey());
             logRunnerInfos(stringMapEntry);
-            for (Map.Entry<String, RunnerInfoObject> targetObject : stringMapEntry.getValue().entrySet()) {
-                if (targetObject.getValue().getResult()) {
-                    LOGGER.info("{} finished in {} ms.", targetObject.getValue().getComment(), targetObject.getValue().getDuration());
+            for (RunnerInfo targetObject : stringMapEntry.getValue()) {
+                if (targetObject.getResult()) {
+                    LOGGER.info("{} finished in {} ms.", targetObject.getComment(), targetObject.getDuration());
                 } else {
-                    LOGGER.info("{} job state is {}.", targetObject.getValue().getComment(), targetObject.getValue().getResult());
-                    missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getValue().getComment());
+                    LOGGER.info("{} job state is {}.", targetObject.getComment(), targetObject.getResult());
+                    missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getComment());
                 }
             }
         }
         return missingTargetsWithErrors;
     }
 
-    private static void logRunnerInfos(Map.Entry<String, Map<String, RunnerInfoObject>> stringMapEntry) {
-        stringMapEntry.getValue().entrySet().stream().sorted((o1, o2) -> Integer.compare(o1.getValue().getRunNum(), o2.getValue().getRunNum()))
-                .forEach(stringRunnerInfoObjectEntry ->
-                        LOGGER.info("Runner info: {} --- {}", stringRunnerInfoObjectEntry.getKey(), stringRunnerInfoObjectEntry.getValue().getComment()));
+    private static void logRunnerInfos(Map.Entry<String, List<RunnerInfo>> stringMapEntry) {
+        List<RunnerInfo> runnerInfos = stringMapEntry.getValue();
+        Collections.sort(runnerInfos, Collections.reverseOrder(new RunnerInfo.DurationComparator()));
+        double sum = runnerInfos.stream().mapToDouble(runnerInfo -> runnerInfo.getDuration()).sum();
+        try {
+            LOGGER.info("Salt states executed on: {} within: {} sec, details {}", stringMapEntry.getKey(),
+                    TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)), JsonUtil.writeValueAsString(runnerInfos));
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Failed to serialise runnerInfos. Salt states executed on: {} within: {} sec", stringMapEntry.getKey(),
+                    TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)));
+        }
     }
 
     public static boolean jobIsRunning(SaltConnector sc, String jid, Target<String> target) {
