@@ -81,7 +81,7 @@ func ListRDSConfigs(c *cli.Context) error {
 }
 
 func CreateRDSConfig(c *cli.Context) error {
-	checkRequiredFlags(c, CreateCredential)
+	checkRequiredFlags(c, CreateRDSConfig)
 	defer timeTrack(time.Now(), "create rds config")
 
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
