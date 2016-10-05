@@ -229,7 +229,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
             availabilityZones = cloudbreakClient.connectorEndpoint().getRegions().getAvailabilityZones();
             volumeTypes = cloudbreakClient.connectorEndpoint().getDisktypes().getDiskTypes();
             orchestrators = cloudbreakClient.connectorEndpoint().getOrchestratortypes().getOrchestrators();
-            Map<String, Collection<VmTypeJson>> virtualMachines = cloudbreakClient.connectorEndpoint().getVmTypes().getVirtualMachines();
+            Map<String, Collection<VmTypeJson>> virtualMachines = cloudbreakClient.connectorEndpoint().getVmTypes(true).getVirtualMachines();
             for (Map.Entry<String, Collection<VmTypeJson>> vmCloud : virtualMachines.entrySet()) {
                 List<Map<String, String>> tmp = new ArrayList<>();
                 for (VmTypeJson vmTypeJson : vmCloud.getValue()) {

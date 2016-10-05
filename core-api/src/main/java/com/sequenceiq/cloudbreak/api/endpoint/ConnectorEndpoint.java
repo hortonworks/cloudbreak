@@ -8,6 +8,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
@@ -24,7 +25,7 @@ public interface ConnectorEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    Map<String, JsonEntity> getPlatforms();
+    Map<String, JsonEntity> getPlatforms(@QueryParam("extended") Boolean extended);
 
     @GET
     @Path("variants")
@@ -59,12 +60,12 @@ public interface ConnectorEndpoint {
     @GET
     @Path(value = "connectors/vmtypes")
     @Produces(MediaType.APPLICATION_JSON)
-    PlatformVirtualMachinesJson getVmTypes();
+    PlatformVirtualMachinesJson getVmTypes(@QueryParam("extended") Boolean extended);
 
     @GET
     @Path(value = "vmtypes/{type}")
     @Produces(MediaType.APPLICATION_JSON)
-    Collection<VmTypeJson> getVmTypeByType(@PathParam(value = "type") String type);
+    Collection<VmTypeJson> getVmTypeByType(@PathParam(value = "type") String type, @QueryParam("extended") Boolean extended);
 
     @GET
     @Path(value = "connectors/regions")

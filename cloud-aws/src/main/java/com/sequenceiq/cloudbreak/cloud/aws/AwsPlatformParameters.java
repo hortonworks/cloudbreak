@@ -68,6 +68,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
     private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
+    private Map<AvailabilityZone, List<VmType>> sortListOfVmTypes = new HashMap<>();
     private Region defaultRegion;
     private VmType defaultVmType;
 
@@ -75,6 +76,7 @@ public class AwsPlatformParameters implements PlatformParameters {
     public void init() {
         this.regions = readRegions();
         this.vmTypes = readVmTypes();
+        this.sortListOfVmTypes = refineList();
         this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
         this.defaultVmType = nthElement(this.vmTypes.get(this.vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
     }
@@ -95,7 +97,7 @@ public class AwsPlatformParameters implements PlatformParameters {
                     addConfig(builder, configSpecification);
                 }
                 VmTypeMeta vmTypeMeta = builder.create();
-                tmpVmTypes.add(VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta));
+                tmpVmTypes.add(VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta, vmSpecification.getExtended()));
             }
             Collections.sort(tmpVmTypes, new StringTypesCompare());
             for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
@@ -107,6 +109,20 @@ public class AwsPlatformParameters implements PlatformParameters {
             return vmTypes;
         }
         return sortMap(vmTypes);
+    }
+
+    private Map<AvailabilityZone, List<VmType>> refineList() {
+        Map<AvailabilityZone, List<VmType>> resultMap = new HashMap<>();
+        for (Map.Entry<AvailabilityZone, List<VmType>> availabilityZoneListEntry : this.vmTypes.entrySet()) {
+            List<VmType> tmpList = new ArrayList<>();
+            for (VmType vmType : availabilityZoneListEntry.getValue()) {
+                if (!vmType.getExtended()) {
+                    tmpList.add(vmType);
+                }
+            }
+            resultMap.put(availabilityZoneListEntry.getKey(), tmpList);
+        }
+        return sortMap(resultMap);
     }
 
     private void addConfig(VmTypeMeta.VmTypeMetaBuilder builder, ConfigSpecification configSpecification) {
@@ -216,10 +232,16 @@ public class AwsPlatformParameters implements PlatformParameters {
     }
 
     @Override
-    public VmTypes vmTypes() {
+    public VmTypes vmTypes(Boolean extended) {
         Set<VmType> lists = new LinkedHashSet<>();
-        for (List<VmType> vmTypeList : vmTypes.values()) {
-            lists.addAll(vmTypeList);
+        if (extended) {
+            for (List<VmType> vmTypeList : vmTypes.values()) {
+                lists.addAll(vmTypeList);
+            }
+        } else {
+            for (List<VmType> vmTypeList : sortListOfVmTypes.values()) {
+                lists.addAll(vmTypeList);
+            }
         }
         return new VmTypes(lists, defaultVmType);
     }

@@ -97,11 +97,11 @@ public class OpenStackParameters implements PlatformParameters {
     }
 
     @Override
-    public VmTypes vmTypes() {
-        return new VmTypes(virtualMachines(), defaultVirtualMachine());
+    public VmTypes vmTypes(Boolean extended) {
+        return new VmTypes(virtualMachines(extended), defaultVirtualMachine());
     }
 
-    private Collection<VmType> virtualMachines() {
+    private Collection<VmType> virtualMachines(Boolean extended) {
         return new ArrayList<>();
     }
 

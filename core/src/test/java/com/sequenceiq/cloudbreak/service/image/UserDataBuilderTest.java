@@ -102,7 +102,7 @@ public class UserDataBuilderTest {
             }
 
             @Override
-            public VmTypes vmTypes() {
+            public VmTypes vmTypes(Boolean extended) {
                 return new VmTypes(new ArrayList<>(), VmType.vmType(""));
             }
         };

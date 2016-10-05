@@ -46,7 +46,7 @@ public interface PlatformParameters {
      *
      * @return the {@link VmTypes} of a platform
      */
-    VmTypes vmTypes();
+    VmTypes vmTypes(Boolean extended);
 
     /**
      * Return the availability zones of a platform

@@ -97,7 +97,7 @@ public class GcpPlatformParameters implements PlatformParameters {
                             .withMaximumPersistentDisksSizeGb(machineDefinitionView.getMaximumPersistentDisksSizeGb())
                             .create();
 
-                    VmType vmType  = VmType.vmTypeWithMeta(machineDefinitionView.getName(), vmTypeMeta);
+                    VmType vmType  = VmType.vmTypeWithMeta(machineDefinitionView.getName(), vmTypeMeta, true);
                     vmTypes.get(availabilityZone).add(vmType);
                 }
             }
@@ -204,7 +204,7 @@ public class GcpPlatformParameters implements PlatformParameters {
     }
 
     @Override
-    public VmTypes vmTypes() {
+    public VmTypes vmTypes(Boolean extended) {
         Set<VmType> lists = new LinkedHashSet<>();
         vmTypes.values().forEach(lists::addAll);
         return new VmTypes(lists, defaultVirtualMachine());
