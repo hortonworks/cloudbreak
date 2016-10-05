@@ -20,3 +20,5 @@ export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=
 date >> /tmp/time.txt
 
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
+
+if [ ! -f /bin/systemctl ]; then service salt-bootstrap restart; fi
