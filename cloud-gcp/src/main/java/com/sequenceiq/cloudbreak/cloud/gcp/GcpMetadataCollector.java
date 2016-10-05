@@ -66,7 +66,7 @@ public class GcpMetadataCollector implements MetadataCollector {
                 Instance executeInstance = getInstance(cloudContext, credential, compute, cloudResource.getName());
 
                 String privateIp = executeInstance.getNetworkInterfaces().get(0).getNetworkIP();
-                String publicIp = privateIp;
+                String publicIp = null;
                 List<AccessConfig> acl = executeInstance.getNetworkInterfaces().get(0).getAccessConfigs();
                 if (acl != null && acl.get(0) != null) {
                     publicIp = executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP();
