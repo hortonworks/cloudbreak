@@ -28,7 +28,7 @@ public class TemplateValidator {
         VmType vmType = null;
         VolumeParameterType volumeParameterType = null;
         Platform platform = Platform.platform(value.getCloudPlatform());
-        Map<Platform, Collection<VmType>> virtualMachines = cloudParameterService.getVmtypes().getVirtualMachines();
+        Map<Platform, Collection<VmType>> virtualMachines = cloudParameterService.getVmtypes(true).getVirtualMachines();
         PlatformDisks diskTypes = cloudParameterService.getDiskTypes();
 
         Map<Platform, Map<String, VolumeParameterType>> diskMappings = diskTypes.getDiskMappings();
