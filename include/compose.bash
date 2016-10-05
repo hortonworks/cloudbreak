@@ -488,6 +488,7 @@ uluwatu:
         - AWS_INSTANCE_ID
         - AWS_ACCOUNT_ID
         - AWS_AMI_ID
+        - HWX_DOC_LINK
         - AZURE_TENANT_ID
         - AZURE_SUBSCRIPTION_ID
         - AWS_ACCESS_KEY_ID
