@@ -1,17 +1,23 @@
 package cli
 
 import (
-	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/templates"
-	"github.com/hortonworks/hdc-cli/models"
 	"strconv"
 	"sync"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/hdc-cli/client/templates"
+	"github.com/hortonworks/hdc-cli/models"
 )
 
 func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
 	defer timeTrack(time.Now(), "create template")
+	defer wg.Done()
 
+	createTemplateImpl(skeleton, channel, c.Cloudbreak.Templates.PostTemplatesAccount)
+}
+
+func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTemplate func(params *templates.PostTemplatesAccountParams) (*templates.PostTemplatesAccountOK, error)) {
 	masterTemplateName := "mtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	workerTemplateName := "wtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
@@ -36,26 +42,24 @@ func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64
 	}
 
 	log.Infof("[CreateTemplate] sending master template create request with name: %s", masterTemplateName)
-	resp, err := c.Cloudbreak.Templates.PostTemplatesAccount(&templates.PostTemplatesAccountParams{&masterTemplateReqBody})
+	resp, err := postTemplate(&templates.PostTemplatesAccountParams{Body: &masterTemplateReqBody})
 
 	if err != nil {
-		logErrorAndExit(c.CreateTemplate, err.Error())
+		logErrorAndExit(createTemplateImpl, err.Error())
 	}
 
 	log.Infof("[CreateTemplate] master template created, id: %d", resp.Payload.ID)
 	channel <- resp.Payload.ID
 
 	log.Infof("[CreateTemplate] sending worker template create request with name: %s", masterTemplateName)
-	resp, err = c.Cloudbreak.Templates.PostTemplatesAccount(&templates.PostTemplatesAccountParams{&workerTemplateReqBody})
+	resp, err = postTemplate(&templates.PostTemplatesAccountParams{Body: &workerTemplateReqBody})
 
 	if err != nil {
-		logErrorAndExit(c.CreateTemplate, err.Error())
+		logErrorAndExit(createTemplateImpl, err.Error())
 	}
 
 	log.Infof("[CreateTemplate] worker template created, id: %d", resp.Payload.ID)
 	channel <- resp.Payload.ID
-
-	wg.Done()
 }
 
 func (c *Cloudbreak) GetPublicTemplates() []*models.TemplateResponse {

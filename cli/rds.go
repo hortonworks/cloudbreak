@@ -1,12 +1,13 @@
 package cli
 
 import (
+	"strings"
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/rdsconfigs"
 	"github.com/hortonworks/hdc-cli/models"
 	"github.com/urfave/cli"
-	"strings"
-	"time"
 )
 
 var RdsHeader []string = []string{"Name", "Username", "URL", "DatabaseType", "HDP Version"}
@@ -55,7 +56,12 @@ func ListRDSConfigs(c *cli.Context) error {
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	resp, err := oAuth2Client.Cloudbreak.Rdsconfigs.GetRdsconfigsAccount(&rdsconfigs.GetRdsconfigsAccountParams{})
+	output := Output{Format: c.String(FlOutput.Name)}
+	return listRDSConfigsImpl(oAuth2Client.Cloudbreak.Rdsconfigs.GetRdsconfigsAccount, output.WriteList)
+}
+
+func listRDSConfigsImpl(getConfigs func(params *rdsconfigs.GetRdsconfigsAccountParams) (*rdsconfigs.GetRdsconfigsAccountOK, error), writer func(header []string, tableRows []Row)) error {
+	resp, err := getConfigs(&rdsconfigs.GetRdsconfigsAccountParams{})
 
 	if err != nil {
 		logErrorAndExit(ListRDSConfigs, err.Error())
@@ -75,8 +81,8 @@ func ListRDSConfigs(c *cli.Context) error {
 		}
 		tableRows = append(tableRows, row)
 	}
-	output := Output{Format: c.String(FlOutput.Name)}
-	output.WriteList(RdsHeader, tableRows)
+
+	writer(RdsHeader, tableRows)
 	return nil
 }
 
@@ -87,18 +93,22 @@ func CreateRDSConfig(c *cli.Context) error {
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
+	return createRDSConfigImpl(c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount)
+}
+
+func createRDSConfigImpl(finder func(string) string, postConfig func(params *rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error)) error {
 	validate := false
 	rdsConfig := models.RDSConfig{
-		Name:               c.String(FlRdsName.Name),
-		ConnectionUserName: c.String(FlRdsUsername.Name),
-		ConnectionPassword: c.String(FlRdsPassword.Name),
-		ConnectionURL:      extendRdsUrl(c.String(FlRdsUrl.Name), c.String(FlRdsDbType.Name)),
-		DatabaseType:       c.String(FlRdsDbType.Name),
+		Name:               finder(FlRdsName.Name),
+		ConnectionUserName: finder(FlRdsUsername.Name),
+		ConnectionPassword: finder(FlRdsPassword.Name),
+		ConnectionURL:      extendRdsUrl(finder(FlRdsUrl.Name), finder(FlRdsDbType.Name)),
+		DatabaseType:       finder(FlRdsDbType.Name),
 		Validated:          &validate,
-		HdpVersion:         c.String(FlHdpVersion.Name),
+		HdpVersion:         finder(FlHdpVersion.Name),
 	}
 
-	resp, err := oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount(&rdsconfigs.PostRdsconfigsAccountParams{&rdsConfig})
+	resp, err := postConfig(&rdsconfigs.PostRdsconfigsAccountParams{Body: &rdsConfig})
 
 	if err != nil {
 		logErrorAndExit(CreateRDSConfig, err.Error())
