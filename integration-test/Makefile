@@ -12,7 +12,7 @@ endif
 
 all: download-cbd buildcb runtest
 
-runtest: create-image create-cloudbreak-context docker-compose check-results stop-containers
+runtest: create-image create-cloudbreak-context docker-compose stop-containers check-results
 
 download-cbd:
 	@echo "\n\033[1;96m--- download latest cbd\033[0m\n"
@@ -53,13 +53,13 @@ docker-compose:
 	@echo "\n\033[1;96m--- Test finished\033[0m\n"
 
 check-results:
-	@if grep -q 'skipped="0".*failed="0"' test-output/testng-results.xml; then echo "\n\033[0;92m+++ INTEGRATION TEST SUCCESSFULLY FINISHED +++\n"; else echo "\033[0;91m--- !!! INTEGRATION TEST FAILED, CHECK \033[1;93mtest-output\033[0;91m DIR FOR RESULTS !!! ---\n"; fi
+	@if grep -q 'skipped="0".*failed="0"' test-output/testng-results.xml; then echo "\n\033[0;92m+++ INTEGRATION TEST SUCCESSFULLY FINISHED +++\n"; else echo "\033[0;91m--- !!! INTEGRATION TEST FAILED, CHECK \033[1;93mtest-output\033[0;91m DIR FOR RESULTS !!! ---\n"; exit 1; fi
 
 stop-containers:
 	@echo "\n\033[1;96m--- Stop cbd containers"
 	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose stop;
 	@echo "\n\033[1;96m--- Save cloudbreak log to cloudbreak.log file"
-	@cd $(INTEGCB_LOCATION); .deps/bin/docker-compose logs --no-color cloudbreak &> ../cloudbreak.log;
+	@cd $(INTEGCB_LOCATION); docker logs cbreak_cloudbreak_1 &> ../cloudbreak.log;
 
 remove-test-containers:
 	@cd $(INTEGCB_LOCATION); ./cbd kill; ./cbd delete;
