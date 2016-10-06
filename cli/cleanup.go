@@ -1,11 +1,13 @@
 package cli
 
 import (
-	log "github.com/Sirupsen/logrus"
-	"github.com/urfave/cli"
 	"strings"
 	"sync"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/hdc-cli/models"
+	"github.com/urfave/cli"
 )
 
 func CleanupResources(c *cli.Context) error {
@@ -29,9 +31,14 @@ func CleanupResources(c *cli.Context) error {
 
 func (c *Cloudbreak) cleanupBlueprints(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, bp := range c.GetPublicBlueprints() {
+
+	cleanupBlueprintsImpl(c.GetPublicBlueprints, c.DeleteBlueprint)
+}
+
+func cleanupBlueprintsImpl(getBlueprints func() []*models.BlueprintResponse, deleteBlueprint func(name string) error) {
+	for _, bp := range getBlueprints() {
 		if bp.Name[0] == 'b' && len(BlueprintMap[*bp.AmbariBlueprint.Blueprint.Name]) > 0 {
-			if err := c.DeleteBlueprint(bp.Name); err != nil {
+			if err := deleteBlueprint(bp.Name); err != nil {
 				log.Warnf("[cleanupBlueprints] failed to delete blueprint: %s", bp.Name)
 				continue
 			}
@@ -41,9 +48,14 @@ func (c *Cloudbreak) cleanupBlueprints(wg *sync.WaitGroup) {
 
 func (c *Cloudbreak) cleanupTemplates(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, template := range c.GetPublicTemplates() {
+
+	cleanupTemplatesImpl(c.GetPublicTemplates, c.DeleteTemplate)
+}
+
+func cleanupTemplatesImpl(getTemplates func() []*models.TemplateResponse, deleteTemplate func(name string) error) {
+	for _, template := range getTemplates() {
 		if strings.Contains(template.Name, "mtempl") || strings.Contains(template.Name, "wtempl") {
-			if err := c.DeleteTemplate(template.Name); err != nil {
+			if err := deleteTemplate(template.Name); err != nil {
 				log.Warnf("[cleanupTemplates] failed to delete template: %s", template.Name)
 				continue
 			}
@@ -53,10 +65,15 @@ func (c *Cloudbreak) cleanupTemplates(wg *sync.WaitGroup) {
 
 func (c *Cloudbreak) cleanupCredentials(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, cred := range c.GetPublicCredentials() {
+
+	cleanupCredentialsImpl(c.GetPublicCredentials, c.DeleteCredential)
+}
+
+func cleanupCredentialsImpl(getCredentials func() []*models.CredentialResponse, deleteCredential func(name string) error) {
+	for _, cred := range getCredentials() {
 		credName := cred.Name
 		if len(credName) > 5 && credName[0:4] == "cred" {
-			if err := c.DeleteCredential(credName); err != nil {
+			if err := deleteCredential(credName); err != nil {
 				log.Warnf("[cleanupCredentials] failed to delete credential: %s", credName)
 				continue
 			}
@@ -66,10 +83,15 @@ func (c *Cloudbreak) cleanupCredentials(wg *sync.WaitGroup) {
 
 func (c *Cloudbreak) cleanupNetworks(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, network := range c.GetPublicNetworks() {
+
+	cleanupNetworksImpl(c.GetPublicNetworks, c.DeleteNetwork)
+}
+
+func cleanupNetworksImpl(getNetworks func() []*models.NetworkJSON, deleteNetwork func(name string) error) {
+	for _, network := range getNetworks() {
 		netName := network.Name
 		if len(netName) > 4 && netName[0:3] == "net" {
-			if err := c.DeleteNetwork(netName); err != nil {
+			if err := deleteNetwork(netName); err != nil {
 				log.Warnf("[cleanupNetworks] failed to delete network: %s", netName)
 				continue
 			}
@@ -79,10 +101,15 @@ func (c *Cloudbreak) cleanupNetworks(wg *sync.WaitGroup) {
 
 func (c *Cloudbreak) cleanupSecurityGroups(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, secGroup := range c.GetPublicSecurityGroups() {
+
+	cleanupSecurityGroupsImpl(c.GetPublicSecurityGroups, c.DeleteSecurityGroup)
+}
+
+func cleanupSecurityGroupsImpl(getGroups func() []*models.SecurityGroupJSON, deleteGroup func(name string) error) {
+	for _, secGroup := range getGroups() {
 		secGroupName := secGroup.Name
 		if len(secGroupName) > 5 && secGroupName[0:4] == "secg" {
-			if err := c.DeleteSecurityGroup(secGroupName); err != nil {
+			if err := deleteGroup(secGroupName); err != nil {
 				log.Warnf("[cleanupSecurityGroups] failed to delete security group: %s", secGroupName)
 				continue
 			}

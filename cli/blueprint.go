@@ -41,7 +41,12 @@ func (b *Blueprint) DataAsStringArray() []string {
 func ListBlueprints(c *cli.Context) error {
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	respBlueprints := oAuth2Client.GetPublicBlueprints()
+	output := Output{Format: c.String(FlOutput.Name)}
+	return listBlueprintsImpl(oAuth2Client.GetPublicBlueprints, output.WriteList)
+}
+
+func listBlueprintsImpl(getPublicBlueprints func() []*models.BlueprintResponse, writer func(header []string, tableRows []Row)) error {
+	respBlueprints := getPublicBlueprints()
 
 	var tableRows []Row
 	for _, blueprint := range respBlueprints {
@@ -51,8 +56,8 @@ func ListBlueprints(c *cli.Context) error {
 			tableRows = append(tableRows, row)
 		}
 	}
-	output := Output{Format: c.String(FlOutput.Name)}
-	output.WriteList(BlueprintHeader, tableRows)
+
+	writer(BlueprintHeader, tableRows)
 
 	return nil
 }
@@ -89,7 +94,10 @@ func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
 
 func (c *Cloudbreak) CreateBlueprint(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse, channel chan int64, wg *sync.WaitGroup) {
 	defer wg.Done()
+	createBlueprintImpl(skeleton, blueprint, channel, c.Cloudbreak.Blueprints.PostPublic)
+}
 
+func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse, channel chan int64, postPublicBlueprint func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error)) {
 	if len(skeleton.Configurations) == 0 {
 		log.Info("[CreateBlueprint] there are no custom configurations, use the default blueprint")
 		channel <- getBlueprintId(blueprint)
@@ -106,10 +114,10 @@ func (c *Cloudbreak) CreateBlueprint(skeleton ClusterSkeleton, blueprint *models
 		Properties:      skeleton.Configurations,
 	}
 
-	resp, err := c.Cloudbreak.Blueprints.PostPublic(&blueprints.PostPublicParams{Body: &bpRequest})
+	resp, err := postPublicBlueprint(&blueprints.PostPublicParams{Body: &bpRequest})
 
 	if err != nil {
-		logErrorAndExit(c.CreateBlueprint, err.Error())
+		logErrorAndExit(createBlueprintImpl, err.Error())
 	}
 
 	log.Infof("[CreateBlueprint] blueprint created, id: %d", resp.Payload.ID)
