@@ -94,7 +94,7 @@ cloudbreak-conf-images() {
     env-import CB_AWS_AMI_MAP ""
     env-import CB_OPENSTACK_IMAGE ""
     env-import CB_GCP_SOURCE_IMAGE_PATH ""
-
+    env-import CB_IMAGE_CATALOG_URL "https://s3-eu-west-1.amazonaws.com/cloudbreak-info/cb-image-catalog.json"
 }
 
 cloudbreak-conf-smtp() {

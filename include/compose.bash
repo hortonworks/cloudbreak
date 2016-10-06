@@ -399,6 +399,7 @@ cloudbreak:
         - AWS_INSTANCE_ID
         - AWS_ACCOUNT_ID
         - CB_PLATFORM_DEFAULT_REGIONS
+        - CB_IMAGE_CATALOG_URL
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
