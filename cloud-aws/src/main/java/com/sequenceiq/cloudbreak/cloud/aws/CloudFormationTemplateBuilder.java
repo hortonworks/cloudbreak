@@ -61,6 +61,10 @@ public class CloudFormationTemplateBuilder {
         model.put("existingRole", context.s3RoleAvailable);
         model.put("cbSubnet", (isNullOrEmptyList(context.existingSubnetCidr)) ? Lists.newArrayList(context.defaultSubnet)
                 : context.existingSubnetCidr);
+        if (isNoneEmpty(context.cloudbreakPublicIp)) {
+            model.put("cloudbreakPublicIp", context.cloudbreakPublicIp);
+            model.put("gatewayPort", context.gatewayPort);
+        }
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
@@ -115,6 +119,8 @@ public class CloudFormationTemplateBuilder {
         private boolean enableInstanceProfile;
         private boolean s3RoleAvailable;
         private String defaultSubnet;
+        private String cloudbreakPublicIp;
+        private int gatewayPort;
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;
@@ -168,6 +174,16 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withDefaultSubnet(String subnet) {
             this.defaultSubnet = subnet;
+            return this;
+        }
+
+        public ModelContext withCloudbreakPublicIp(String publicIp) {
+            this.cloudbreakPublicIp = publicIp;
+            return this;
+        }
+
+        public ModelContext withGatewayPort(int gatewayPort) {
+            this.gatewayPort = gatewayPort;
             return this;
         }
     }
