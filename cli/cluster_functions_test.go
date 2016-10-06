@@ -8,15 +8,13 @@ import (
 	"github.com/hortonworks/hdc-cli/models"
 )
 
-type sw struct{ s string }
-
 func clusterSkeleton(stackParams map[string]string, credParams map[string]interface{}, netParams map[string]interface{}) (ClusterSkeleton, *models.StackResponse, *models.CredentialResponse, *models.BlueprintResponse, *models.NetworkJSON) {
 	skeleton := ClusterSkeleton{}
 	sr := models.StackResponse{
 		Name:         "stack-name",
-		Status:       &(&sw{"status"}).s,
-		StatusReason: &(&sw{"status-reason"}).s,
-		HdpVersion:   &(&sw{"hdp-version"}).s,
+		Status:       &(&StringWrapper{"status"}).s,
+		StatusReason: &(&StringWrapper{"status-reason"}).s,
+		HdpVersion:   &(&StringWrapper{"hdp-version"}).s,
 		Parameters:   stackParams,
 	}
 	cr := models.CredentialResponse{
@@ -26,7 +24,7 @@ func clusterSkeleton(stackParams map[string]string, credParams map[string]interf
 		Name: "blueprint-name",
 		AmbariBlueprint: models.AmbariBlueprint{
 			Blueprint: models.Blueprint{
-				Name: &(&sw{"ambari-blueprint-name"}).s,
+				Name: &(&StringWrapper{"ambari-blueprint-name"}).s,
 			},
 		},
 	}
@@ -154,13 +152,13 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	tm := make(map[string]*models.TemplateResponse)
 	tm[MASTER] = &models.TemplateResponse{
 		InstanceType: "master",
-		VolumeType:   &(&sw{"type"}).s,
+		VolumeType:   &(&StringWrapper{"type"}).s,
 		VolumeSize:   &n,
 		VolumeCount:  n,
 	}
 	tm[WORKER] = &models.TemplateResponse{
 		InstanceType: "worker",
-		VolumeType:   &(&sw{"type"}).s,
+		VolumeType:   &(&StringWrapper{"type"}).s,
 		VolumeSize:   &n,
 		VolumeCount:  n,
 	}
@@ -259,10 +257,10 @@ func TestFillWithCluster(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
 	inputs := make([]*models.BlueprintInputJSON, 0)
-	inputs = append(inputs, &models.BlueprintInputJSON{Name: &(&sw{"property"}).s, PropertyValue: &(&sw{"value"}).s})
+	inputs = append(inputs, &models.BlueprintInputJSON{Name: &(&StringWrapper{"property"}).s, PropertyValue: &(&StringWrapper{"value"}).s})
 	sr.Cluster = &models.ClusterResponse{
-		Status:          &(&sw{"cluster-status"}).s,
-		StatusReason:    &(&sw{"cluster-reason"}).s,
+		Status:          &(&StringWrapper{"cluster-status"}).s,
+		StatusReason:    &(&StringWrapper{"cluster-reason"}).s,
 		BlueprintInputs: inputs,
 	}
 
@@ -284,7 +282,7 @@ func TestFillWithClusterAvailable(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
 	sr.Cluster = &models.ClusterResponse{
-		Status: &(&sw{"AVAILABLE"}).s,
+		Status: &(&StringWrapper{"AVAILABLE"}).s,
 	}
 
 	skeleton.fill(sr, cr, br, nil, nil, nj, nil)
