@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.common.type.RdsType;
@@ -20,6 +21,7 @@ public class RDSConfigJson {
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.NAME, required = true)
     private String name;
     @NotNull
+    @Pattern(regexp = "^jdbc:postgresql://[-\\w\\.]*:?\\d*/?\\w*", message = "Connection URL is not valid")
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.CONNECTION_URL, required = true)
     private String connectionURL;
     @NotNull
