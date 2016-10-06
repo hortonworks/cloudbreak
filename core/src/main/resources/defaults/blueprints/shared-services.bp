@@ -51,6 +51,10 @@
     {
       "name":"LDAP_SYNC_SEARCH_BASE",
       "referenceConfiguration":"ranger.usersync.ldap.user.searchbase"
+    },
+    {
+      "name":"LDAP_GROUP_SEARCH_BASE",
+      "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
     }
   ],
   "blueprint":{
@@ -62,7 +66,12 @@
     "configurations":[
       {
         "core-site":{
-          "fs.trash.interval":"4320"
+          "fs.trash.interval":"4320",
+          "hadoop.security.group.mapping":"org.apache.hadoop.security.LdapGroupsMapping",
+          "hadoop.security.group.mapping.ldap.url":"{{ LDAP_URL }}",
+          "hadoop.security.group.mapping.ldap.bind.user":"{{ LDAP_BIND_DN }}",
+          "hadoop.security.group.mapping.ldap.bind.password":"{{ LDAP_BIND_PASSWORD }}",
+          "hadoop.security.group.mapping.ldap.base":"{{ LDAP_GROUP_SEARCH_BASE }}"
         }
       },
       {
@@ -151,6 +160,7 @@
           "atlas.authentication.method.ldap.ad.url":"{{ LDAP_URL }}",
           "atlas.authentication.method.ldap.ad.base.dn":"{{ LDAP_SYNC_SEARCH_BASE }}",
           "atlas.authentication.method.ldap.ad.domain":"{{ LDAP_DOMAIN }}",
+          "atlas.authentication.method.ldap.ugi-groups":"false",
           "atlas.authorizer.impl":"ranger"
         }
       },
