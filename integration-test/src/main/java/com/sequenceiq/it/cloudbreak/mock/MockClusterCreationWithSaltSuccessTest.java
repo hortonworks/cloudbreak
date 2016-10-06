@@ -107,10 +107,10 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
 
-        verifyCalls(numberOfServers);
+        verifyCalls(numberOfServers, clusterName);
     }
 
-    private void verifyCalls(int numberOfServers) {
+    private void verifyCalls(int numberOfServers, String clusterName) {
         verify(SALT_BOOT_ROOT + "/health", "GET").exactTimes(1).verify();
         Verification distributeVerification = verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").exactTimes(1);
         new ServerAddressGenerator(numberOfServers).iterateOver(address -> distributeVerification.bodyContains("address\":\"" + address));
@@ -123,7 +123,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         verify(AMBARI_API_ROOT + "/blueprints/bp", "POST").exactTimes(1)
                 .bodyContains("blueprint_name").bodyContains("stack_name").bodyContains("stack_version").bodyContains("host_groups")
                 .exactTimes(1).verify();
-        verify(AMBARI_API_ROOT + "/clusters/it-mock-cluster", "POST").exactTimes(1).bodyContains("blueprint").bodyContains("default_password")
+        verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "POST").exactTimes(1).bodyContains("blueprint").bodyContains("default_password")
                 .bodyContains("host_groups").verify();
         verify(AMBARI_API_ROOT + "/clusters/ambari_cluster/requests/1", "GET").atLeast(1).verify();
         verify(AMBARI_API_ROOT + "/clusters/ambari_cluster/hosts", "GET").exactTimes(1).verify();
