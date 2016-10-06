@@ -486,6 +486,7 @@ uluwatu:
         - ULU_PERISCOPE_SERVICEID=periscope.service.consul
         - ULU_HWX_CLOUD_REGISTRATION_URL
         - AWS_INSTANCE_ID
+        - HWX_HCC_AVAILABLE
         - AWS_ACCOUNT_ID
         - AWS_AMI_ID
         - HWX_DOC_LINK

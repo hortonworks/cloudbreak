@@ -228,6 +228,7 @@ cloudbreak-conf-ui() {
     env-import ULU_SULTANS_ADDRESS  "https://$PUBLIC_IP/sl"
     env-import CB_HOST_ADDRESS  "http://$PUBLIC_IP:8080"
     env-import ULU_HWX_CLOUD_DEFAULT_CREDENTIAL ""
+    env-import HWX_HCC_AVAILABLE "false"
     env-import ULU_HWX_CLOUD_DEFAULT_SSH_KEY ""
     env-import ULU_HWX_CLOUD_DEFAULT_REGION ""
     env-import ULU_HWX_CLOUD_DEFAULT_VPC_ID ""
