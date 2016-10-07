@@ -184,6 +184,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
                 GenericResponse genericResponse = new GenericResponse();
                 genericResponse.setAddress(address);
                 genericResponse.setStatus("host-" + address.replace(".", "-"));
+                genericResponse.setStatusCode(200);
                 responses.add(genericResponse);
             });
             genericResponses.setResponses(responses);
