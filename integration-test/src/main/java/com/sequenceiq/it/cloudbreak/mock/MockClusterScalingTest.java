@@ -167,6 +167,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
                 GenericResponse genericResponse = new GenericResponse();
                 genericResponse.setAddress(address);
                 genericResponse.setStatus("host-" + address.replace(".", "-"));
+                genericResponse.setStatusCode(200);
                 responses.add(genericResponse);
             });
             genericResponses.setResponses(responses);
