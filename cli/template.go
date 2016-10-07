@@ -17,7 +17,7 @@ func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64
 	createTemplateImpl(skeleton, channel, c.Cloudbreak.Templates.PostTemplatesAccount)
 }
 
-func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTemplate func(params *templates.PostTemplatesAccountParams) (*templates.PostTemplatesAccountOK, error)) {
+func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTemplate func(*templates.PostTemplatesAccountParams) (*templates.PostTemplatesAccountOK, error)) {
 	masterTemplateName := "mtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	workerTemplateName := "wtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 

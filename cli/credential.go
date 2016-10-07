@@ -1,15 +1,16 @@
 package cli
 
 import (
-	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/credentials"
-	"github.com/hortonworks/hdc-cli/models"
-	"github.com/urfave/cli"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/hdc-cli/client/credentials"
+	"github.com/hortonworks/hdc-cli/models"
+	"github.com/urfave/cli"
 )
 
 var CredentialHeader []string = []string{"ID", "Name"}
@@ -28,26 +29,31 @@ func CreateCredential(c *cli.Context) error {
 
 	go StartSpinner()
 
-	sshKeyURL := c.String(FlSSHKeyURL.Name)
-	log.Infof("[CreateCredential] sending GET request for SSH key to %s", sshKeyURL)
 	client := &http.Client{Transport: TransportConfig}
-	resp, err := client.Get(sshKeyURL)
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	createCredential(c.String, client.Get, oAuth2Client.CreateCredential)
+	return nil
+}
+
+func createCredential(finder func(string) string, getResponse func(string) (*http.Response, error), createCredential func(string, models.CredentialResponse, string, bool) int64) int64 {
+	sshKeyURL := finder(FlSSHKeyURL.Name)
+	log.Infof("[CreateCredential] sending GET request for SSH key to %s", sshKeyURL)
+
+	resp, err := getResponse(sshKeyURL)
 	if err != nil {
-		logErrorAndExit(CreateCredential, err.Error())
+		logErrorAndExit(createCredential, err.Error())
 	}
 	sshKey, _ := ioutil.ReadAll(resp.Body)
 	log.Infof("[CreateCredential] SSH key recieved: %s", sshKey)
 
 	var credentialMap = make(map[string]interface{})
-	credentialMap["roleArn"] = c.String(FlRoleARN.Name)
+	credentialMap["roleArn"] = finder(FlRoleARN.Name)
 	defaultCredential := models.CredentialResponse{
 		Parameters: credentialMap,
 		PublicKey:  string(sshKey),
 	}
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	oAuth2Client.CreateCredential(c.String(FlCredentialName.Name), defaultCredential, c.String(FlSSHKeyPair.Name), true)
-	return nil
+	return createCredential(finder(FlCredentialName.Name), defaultCredential, finder(FlSSHKeyPair.Name), true)
 }
 
 func DeleteCredential(c *cli.Context) error {
@@ -60,14 +66,24 @@ func DeleteCredential(c *cli.Context) error {
 }
 
 func (c *Cloudbreak) CopyDefaultCredential(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
-	defaultCred := c.GetCredential("aws-access")
+	defer wg.Done()
+
+	copyDefaultCredentialImpl(skeleton, channel, c.GetCredential, c.CreateCredential)
+}
+
+func copyDefaultCredentialImpl(skeleton ClusterSkeleton, channel chan int64, getCred func(string) models.CredentialResponse, createCred func(string, models.CredentialResponse, string, bool) int64) {
+	defaultCred := getCred("aws-access")
 	credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	channel <- c.CreateCredential(credentialName, defaultCred, skeleton.SSHKeyName, true)
-	wg.Done()
+	channel <- createCred(credentialName, defaultCred, skeleton.SSHKeyName, true)
 }
 
 func (c *Cloudbreak) CreateCredential(name string, defaultCredential models.CredentialResponse, existingKey string, public bool) int64 {
 	defer timeTrack(time.Now(), "create credential")
+
+	return createCredentialImpl(name, defaultCredential, existingKey, public, c.Cloudbreak.Credentials.PostCredentialsAccount, c.Cloudbreak.Credentials.PostCredentialsUser)
+}
+
+func createCredentialImpl(name string, defaultCredential models.CredentialResponse, existingKey string, public bool, postAccountCredential func(*credentials.PostCredentialsAccountParams) (*credentials.PostCredentialsAccountOK, error), postUserCredential func(*credentials.PostCredentialsUserParams) (*credentials.PostCredentialsUserOK, error)) int64 {
 	var credentialMap = make(map[string]interface{})
 	credentialMap["selector"] = "role-based"
 	credentialMap["roleArn"] = defaultCredential.Parameters["roleArn"]
@@ -83,15 +99,15 @@ func (c *Cloudbreak) CreateCredential(name string, defaultCredential models.Cred
 	log.Infof("[CreateCredential] sending credential create request with name: %s", name)
 	var id int64
 	if public {
-		resp, err := c.Cloudbreak.Credentials.PostCredentialsAccount(&credentials.PostCredentialsAccountParams{&credReq})
+		resp, err := postAccountCredential(&credentials.PostCredentialsAccountParams{Body: &credReq})
 		if err != nil {
-			logErrorAndExit(c.CreateCredential, err.Error())
+			logErrorAndExit(createCredentialImpl, err.Error())
 		}
 		id = resp.Payload.ID
 	} else {
-		resp, err := c.Cloudbreak.Credentials.PostCredentialsUser(&credentials.PostCredentialsUserParams{&credReq})
+		resp, err := postUserCredential(&credentials.PostCredentialsUserParams{Body: &credReq})
 		if err != nil {
-			logErrorAndExit(c.CreateCredential, err.Error())
+			logErrorAndExit(createCredentialImpl, err.Error())
 		}
 		id = resp.Payload.ID
 	}
@@ -144,16 +160,22 @@ func ListPrivateCredentials(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list the private credentials")
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	credResp := oAuth2Client.GetPrivateCredentials()
+
+	output := Output{Format: c.String(FlOutput.Name)}
+	listPrivateCredentialsImpl(oAuth2Client.GetPrivateCredentials, output.WriteList)
+	return nil
+}
+
+func listPrivateCredentialsImpl(getPrivateCredentials func() []*models.CredentialResponse, writer func([]string, []Row)) {
+	credResp := getPrivateCredentials()
 
 	var tableRows []Row
 	for _, cred := range credResp {
 		row := &Credential{Id: *cred.ID, Name: cred.Name}
 		tableRows = append(tableRows, row)
 	}
-	output := Output{Format: c.String(FlOutput.Name)}
-	output.WriteList(CredentialHeader, tableRows)
-	return nil
+
+	writer(CredentialHeader, tableRows)
 }
 
 func (c *Cloudbreak) GetPrivateCredentials() []*models.CredentialResponse {

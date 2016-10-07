@@ -60,7 +60,7 @@ func ListRDSConfigs(c *cli.Context) error {
 	return listRDSConfigsImpl(oAuth2Client.Cloudbreak.Rdsconfigs.GetRdsconfigsAccount, output.WriteList)
 }
 
-func listRDSConfigsImpl(getConfigs func(params *rdsconfigs.GetRdsconfigsAccountParams) (*rdsconfigs.GetRdsconfigsAccountOK, error), writer func(header []string, tableRows []Row)) error {
+func listRDSConfigsImpl(getConfigs func(*rdsconfigs.GetRdsconfigsAccountParams) (*rdsconfigs.GetRdsconfigsAccountOK, error), writer func([]string, []Row)) error {
 	resp, err := getConfigs(&rdsconfigs.GetRdsconfigsAccountParams{})
 
 	if err != nil {
@@ -100,7 +100,7 @@ func CreateRDSConfig(c *cli.Context) error {
 	return createRDSConfigImpl(c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount)
 }
 
-func createRDSConfigImpl(finder func(string) string, postConfig func(params *rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error)) error {
+func createRDSConfigImpl(finder func(string) string, postConfig func(*rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error)) error {
 	validate := false
 	rdsConfig := models.RDSConfig{
 		Name:               finder(FlRdsName.Name),

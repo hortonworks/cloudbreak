@@ -45,7 +45,7 @@ func ListBlueprints(c *cli.Context) error {
 	return listBlueprintsImpl(oAuth2Client.GetPublicBlueprints, output.WriteList)
 }
 
-func listBlueprintsImpl(getPublicBlueprints func() []*models.BlueprintResponse, writer func(header []string, tableRows []Row)) error {
+func listBlueprintsImpl(getPublicBlueprints func() []*models.BlueprintResponse, writer func([]string, []Row)) error {
 	respBlueprints := getPublicBlueprints()
 
 	var tableRows []Row
@@ -97,7 +97,7 @@ func (c *Cloudbreak) CreateBlueprint(skeleton ClusterSkeleton, blueprint *models
 	createBlueprintImpl(skeleton, blueprint, channel, c.Cloudbreak.Blueprints.PostPublic)
 }
 
-func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse, channel chan int64, postPublicBlueprint func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error)) {
+func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse, channel chan int64, postPublicBlueprint func(*blueprints.PostPublicParams) (*blueprints.PostPublicOK, error)) {
 	if len(skeleton.Configurations) == 0 {
 		log.Info("[CreateBlueprint] there are no custom configurations, use the default blueprint")
 		channel <- getBlueprintId(blueprint)

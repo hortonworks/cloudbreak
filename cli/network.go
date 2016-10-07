@@ -1,13 +1,14 @@
 package cli
 
 import (
+	"strconv"
+	"sync"
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/networks"
 	"github.com/hortonworks/hdc-cli/models"
 	"github.com/urfave/cli"
-	"strconv"
-	"sync"
-	"time"
 )
 
 var NetworkHeader []string = []string{"ID", "Name"}
@@ -25,6 +26,10 @@ func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64,
 	defer timeTrack(time.Now(), "create network")
 	defer wg.Done()
 
+	createNetworkImpl(skeleton, channel, c.Cloudbreak.Networks.PostNetworksAccount, c.GetNetwork)
+}
+
+func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64, postNetwork func(*networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error), getNetwork func(string) models.NetworkJSON) {
 	networkName := "net" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	vpc := skeleton.Network
@@ -33,7 +38,7 @@ func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64,
 		vpcParams["vpcId"] = vpc.VpcId
 		vpcParams["subnetId"] = vpc.SubnetId
 	} else {
-		defaultNetwork := c.GetNetwork("aws-network")
+		defaultNetwork := getNetwork("aws-network")
 		vpcParams["vpcId"] = defaultNetwork.Parameters["vpcId"]
 		vpcParams["internetGatewayId"] = defaultNetwork.Parameters["internetGatewayId"]
 	}
@@ -45,10 +50,10 @@ func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64,
 	}
 
 	log.Infof("[CreateNetwork] sending network create request with name: %s", networkName)
-	resp, err := c.Cloudbreak.Networks.PostNetworksAccount(&networks.PostNetworksAccountParams{&network})
+	resp, err := postNetwork(&networks.PostNetworksAccountParams{Body: &network})
 
 	if err != nil {
-		logErrorAndExit(c.CreateNetwork, err.Error())
+		logErrorAndExit(createNetworkImpl, err.Error())
 	}
 
 	log.Infof("[CreateNetwork] network created, id: %d", resp.Payload.ID)
@@ -61,13 +66,17 @@ func CreateNetworkCommand(c *cli.Context) error {
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	networkName := c.String(FlNetworkName.Name)
+	return createNetworkCommandImpl(c.String, oAuth2Client.Cloudbreak.Networks.PostNetworksAccount)
+}
+
+func createNetworkCommandImpl(finder func(string) string, postNetwork func(*networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error)) error {
+	networkName := finder(FlNetworkName.Name)
 	log.Infof("[CreateNetworkCommand] create network with name: %s", networkName)
 
 	var vpcParams = make(map[string]interface{})
-	vpcParams["vpcId"] = c.String(FlVPC.Name)
-	vpcParams["internetGatewayId"] = c.String(FlIGW.Name)
-	subnet := c.String(FlSubnet.Name)
+	vpcParams["vpcId"] = finder(FlVPC.Name)
+	vpcParams["internetGatewayId"] = finder(FlIGW.Name)
+	subnet := finder(FlSubnet.Name)
 
 	network := models.NetworkJSON{
 		Name:          networkName,
@@ -76,7 +85,7 @@ func CreateNetworkCommand(c *cli.Context) error {
 		SubnetCIDR:    &subnet,
 	}
 
-	resp, err := oAuth2Client.Cloudbreak.Networks.PostNetworksAccount(&networks.PostNetworksAccountParams{&network})
+	resp, err := postNetwork(&networks.PostNetworksAccountParams{Body: &network})
 
 	if err != nil {
 		logErrorAndExit(CreateNetworkCommand, err.Error())
@@ -141,15 +150,21 @@ func ListPrivateNetworks(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list the private networks")
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	networkResp := oAuth2Client.GetPrivateNetworks()
+
+	output := Output{Format: c.String(FlOutput.Name)}
+	return listPrivateNetworksImpl(oAuth2Client.GetPrivateNetworks, output.WriteList)
+}
+
+func listPrivateNetworksImpl(getNetworks func() []*models.NetworkJSON, writer func([]string, []Row)) error {
+	networkResp := getNetworks()
 
 	var tableRows []Row
 	for _, net := range networkResp {
 		row := &NetworkList{Id: *net.ID, Name: net.Name}
 		tableRows = append(tableRows, row)
 	}
-	output := Output{Format: c.String(FlOutput.Name)}
-	output.WriteList(NetworkHeader, tableRows)
+
+	writer(NetworkHeader, tableRows)
 	return nil
 }
 
