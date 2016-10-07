@@ -90,6 +90,10 @@ func CreateRDSConfig(c *cli.Context) error {
 	checkRequiredFlags(c, CreateRDSConfig)
 	defer timeTrack(time.Now(), "create rds config")
 
+	if c.String(FlRdsDbType.Name) != POSTGRES {
+		logErrorAndExit(CreateRDSConfig, "Invalid DB type. Accepted value: "+POSTGRES)
+	}
+
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
@@ -102,7 +106,7 @@ func createRDSConfigImpl(finder func(string) string, postConfig func(params *rds
 		Name:               finder(FlRdsName.Name),
 		ConnectionUserName: finder(FlRdsUsername.Name),
 		ConnectionPassword: finder(FlRdsPassword.Name),
-		ConnectionURL:      extendRdsUrl(finder(FlRdsUrl.Name), finder(FlRdsDbType.Name)),
+		ConnectionURL:      extendRdsUrl(finder(FlRdsUrl.Name)),
 		DatabaseType:       finder(FlRdsDbType.Name),
 		Validated:          &validate,
 		HdpVersion:         finder(FlHdpVersion.Name),
@@ -118,15 +122,11 @@ func createRDSConfigImpl(finder func(string) string, postConfig func(params *rds
 	return nil
 }
 
-func extendRdsUrl(url string, dbType string) string {
+func extendRdsUrl(url string) string {
 	if strings.Contains(url, "jdbc:") {
 		return url
 	}
-	if dbType == POSTGRES {
-		return "jdbc:postgresql://" + url
-	} else {
-		return "jdbc:mysql://" + url
-	}
+	return "jdbc:postgresql://" + url
 }
 
 func rawRdsUrl(url string) string {
@@ -134,7 +134,6 @@ func rawRdsUrl(url string) string {
 		if strings.Contains(url, "postgresql") {
 			return url[len("jdbc:postgresql://"):]
 		}
-		return url[len("jdbc:mysql://"):]
 	}
 	return url
 }

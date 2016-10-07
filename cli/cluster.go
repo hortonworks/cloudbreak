@@ -273,7 +273,7 @@ func CreateCluster(c *cli.Context) error {
 					Name:               ms.Name,
 					ConnectionUserName: ms.Username,
 					ConnectionPassword: ms.Password,
-					ConnectionURL:      extendRdsUrl(ms.URL, ms.DatabaseType),
+					ConnectionURL:      extendRdsUrl(ms.URL),
 					DatabaseType:       ms.DatabaseType,
 					HdpVersion:         skeleton.HDPVersion,
 					Validated:          &validate,

@@ -141,8 +141,8 @@ func TestHiveMetastoreSkeletonValidateWrongDatabase(t *testing.T) {
 
 	if errors == nil {
 		t.Error("errors couldn't be nil")
-	} else if s := convertErrorsToString(errors); strings.Index(strings.Join(s, ""), "Accepted values are: POSTGRES and MYSQL") < 0 {
-		t.Error("not only POSTGRES or MYSQL approoved")
+	} else if s := convertErrorsToString(errors); strings.Index(strings.Join(s, ""), "Invalid database type. Accepted value is: POSTGRES") < 0 {
+		t.Error("only POSTGRES is approoved")
 	}
 }
 

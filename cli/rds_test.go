@@ -95,23 +95,15 @@ func TestCreateRDSConfigImpl(t *testing.T) {
 
 func TestExtendRdsUrlJdbc(t *testing.T) {
 	expected := "jdbc:postgresql"
-	actual := extendRdsUrl(expected, POSTGRES)
+	actual := extendRdsUrl(expected)
 	if actual != expected {
 		t.Errorf("url not match %s == %s", expected, actual)
 	}
 }
 
 func TestExtendRdsUrlPostgressql(t *testing.T) {
-	actual := extendRdsUrl("lh:5432/p", POSTGRES)
+	actual := extendRdsUrl("lh:5432/p")
 	expected := "jdbc:postgresql://lh:5432/p"
-	if actual != expected {
-		t.Errorf("url not match %s == %s", expected, actual)
-	}
-}
-
-func TestExtendRdsUrlMysql(t *testing.T) {
-	actual := extendRdsUrl("lh:3306/p", MYSQL)
-	expected := "jdbc:mysql://lh:3306/p"
 	if actual != expected {
 		t.Errorf("url not match %s == %s", expected, actual)
 	}
@@ -128,14 +120,6 @@ func TestRawRdsUtlNotJdbc(t *testing.T) {
 func TestRawRdsUtlPostgresql(t *testing.T) {
 	actual := rawRdsUrl("jdbc:postgresql://lh:5432/p")
 	expected := "lh:5432/p"
-	if actual != expected {
-		t.Errorf("url not match %s == %s", expected, actual)
-	}
-}
-
-func TestRawRdsUtlMysql(t *testing.T) {
-	actual := rawRdsUrl("jdbc:mysql://lh:3306/p")
-	expected := "lh:3306/p"
 	if actual != expected {
 		t.Errorf("url not match %s == %s", expected, actual)
 	}

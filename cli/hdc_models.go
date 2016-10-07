@@ -5,7 +5,6 @@ import "github.com/hortonworks/hdc-cli/models"
 const (
 	MASTER   = "master"
 	WORKER   = "worker"
-	MYSQL    = "MYSQL"
 	POSTGRES = "POSTGRES"
 )
 
