@@ -46,7 +46,7 @@ func CreateCredential(c *cli.Context) error {
 	}
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	oAuth2Client.CreateCredential(c.String(FlCredentialName.Name), defaultCredential, c.String(FlSSHKeyPair.Name), false)
+	oAuth2Client.CreateCredential(c.String(FlCredentialName.Name), defaultCredential, c.String(FlSSHKeyPair.Name), true)
 	return nil
 }
 

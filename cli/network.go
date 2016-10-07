@@ -76,7 +76,7 @@ func CreateNetworkCommand(c *cli.Context) error {
 		SubnetCIDR:    &subnet,
 	}
 
-	resp, err := oAuth2Client.Cloudbreak.Networks.PostNetworksUser(&networks.PostNetworksUserParams{&network})
+	resp, err := oAuth2Client.Cloudbreak.Networks.PostNetworksAccount(&networks.PostNetworksAccountParams{&network})
 
 	if err != nil {
 		logErrorAndExit(CreateNetworkCommand, err.Error())
