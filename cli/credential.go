@@ -156,7 +156,7 @@ func (c *Cloudbreak) DeleteCredential(name string) error {
 }
 
 func ListPrivateCredentials(c *cli.Context) error {
-	checkRequiredFlags(c, CreateCredential)
+	checkRequiredFlags(c, ListPrivateCredentials)
 	defer timeTrack(time.Now(), "list the private credentials")
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))

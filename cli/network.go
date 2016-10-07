@@ -61,7 +61,7 @@ func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64, postNetwork
 }
 
 func CreateNetworkCommand(c *cli.Context) error {
-	checkRequiredFlags(c, CreateCredential)
+	checkRequiredFlags(c, CreateNetworkCommand)
 	defer timeTrack(time.Now(), "create network")
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -146,7 +146,7 @@ func (c *Cloudbreak) DeleteNetwork(name string) error {
 }
 
 func ListPrivateNetworks(c *cli.Context) error {
-	checkRequiredFlags(c, CreateCredential)
+	checkRequiredFlags(c, ListPrivateNetworks)
 	defer timeTrack(time.Now(), "list the private networks")
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
