@@ -35,7 +35,7 @@ func (c *Cloudbreak) cleanupBlueprints(wg *sync.WaitGroup) {
 	cleanupBlueprintsImpl(c.GetPublicBlueprints, c.DeleteBlueprint)
 }
 
-func cleanupBlueprintsImpl(getBlueprints func() []*models.BlueprintResponse, deleteBlueprint func(name string) error) {
+func cleanupBlueprintsImpl(getBlueprints func() []*models.BlueprintResponse, deleteBlueprint func(string) error) {
 	for _, bp := range getBlueprints() {
 		if bp.Name[0] == 'b' && len(BlueprintMap[*bp.AmbariBlueprint.Blueprint.Name]) > 0 {
 			if err := deleteBlueprint(bp.Name); err != nil {
@@ -52,7 +52,7 @@ func (c *Cloudbreak) cleanupTemplates(wg *sync.WaitGroup) {
 	cleanupTemplatesImpl(c.GetPublicTemplates, c.DeleteTemplate)
 }
 
-func cleanupTemplatesImpl(getTemplates func() []*models.TemplateResponse, deleteTemplate func(name string) error) {
+func cleanupTemplatesImpl(getTemplates func() []*models.TemplateResponse, deleteTemplate func(string) error) {
 	for _, template := range getTemplates() {
 		if strings.Contains(template.Name, "mtempl") || strings.Contains(template.Name, "wtempl") {
 			if err := deleteTemplate(template.Name); err != nil {
@@ -69,7 +69,7 @@ func (c *Cloudbreak) cleanupCredentials(wg *sync.WaitGroup) {
 	cleanupCredentialsImpl(c.GetPublicCredentials, c.DeleteCredential)
 }
 
-func cleanupCredentialsImpl(getCredentials func() []*models.CredentialResponse, deleteCredential func(name string) error) {
+func cleanupCredentialsImpl(getCredentials func() []*models.CredentialResponse, deleteCredential func(string) error) {
 	for _, cred := range getCredentials() {
 		credName := cred.Name
 		if len(credName) > 5 && credName[0:4] == "cred" {
@@ -87,7 +87,7 @@ func (c *Cloudbreak) cleanupNetworks(wg *sync.WaitGroup) {
 	cleanupNetworksImpl(c.GetPublicNetworks, c.DeleteNetwork)
 }
 
-func cleanupNetworksImpl(getNetworks func() []*models.NetworkJSON, deleteNetwork func(name string) error) {
+func cleanupNetworksImpl(getNetworks func() []*models.NetworkJSON, deleteNetwork func(string) error) {
 	for _, network := range getNetworks() {
 		netName := network.Name
 		if len(netName) > 4 && netName[0:3] == "net" {
@@ -105,7 +105,7 @@ func (c *Cloudbreak) cleanupSecurityGroups(wg *sync.WaitGroup) {
 	cleanupSecurityGroupsImpl(c.GetPublicSecurityGroups, c.DeleteSecurityGroup)
 }
 
-func cleanupSecurityGroupsImpl(getGroups func() []*models.SecurityGroupJSON, deleteGroup func(name string) error) {
+func cleanupSecurityGroupsImpl(getGroups func() []*models.SecurityGroupJSON, deleteGroup func(string) error) {
 	for _, secGroup := range getGroups() {
 		secGroupName := secGroup.Name
 		if len(secGroupName) > 5 && secGroupName[0:4] == "secg" {

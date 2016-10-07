@@ -20,7 +20,7 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 	createSecurityGroupImpl(skeleton, channel, c.Cloudbreak.Securitygroups.PostSecuritygroupsAccount)
 }
 
-func createSecurityGroupImpl(skeleton ClusterSkeleton, channel chan int64, postSecGroup func(params *securitygroups.PostSecuritygroupsAccountParams) (*securitygroups.PostSecuritygroupsAccountOK, error)) {
+func createSecurityGroupImpl(skeleton ClusterSkeleton, channel chan int64, postSecGroup func(*securitygroups.PostSecuritygroupsAccountParams) (*securitygroups.PostSecuritygroupsAccountOK, error)) {
 	secGroupName := "secg" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	defaultPorts := SECURITY_GROUP_DEFAULT_PORTS
@@ -60,7 +60,7 @@ func (c *Cloudbreak) GetSecurityDetails(stack *models.StackResponse) (securityMa
 	return getSecurityDetailsImpl(stack, c.Cloudbreak.Securitygroups.GetSecuritygroupsID)
 }
 
-func getSecurityDetailsImpl(stack *models.StackResponse, getIds func(params *securitygroups.GetSecuritygroupsIDParams) (*securitygroups.GetSecuritygroupsIDOK, error)) (securityMap map[string][]*models.SecurityRule, err error) {
+func getSecurityDetailsImpl(stack *models.StackResponse, getIds func(*securitygroups.GetSecuritygroupsIDParams) (*securitygroups.GetSecuritygroupsIDOK, error)) (securityMap map[string][]*models.SecurityRule, err error) {
 	securityMap = make(map[string][]*models.SecurityRule)
 	for _, v := range stack.InstanceGroups {
 		if respSecurityGroup, err := getIds(&securitygroups.GetSecuritygroupsIDParams{ID: v.SecurityGroupID}); err == nil {
