@@ -6,6 +6,7 @@ spring:
     consul:
       host: consul.service.consul
 cb:
+  publicip:
   threadpool:
     core.size: 40
     capacity.size: 4000

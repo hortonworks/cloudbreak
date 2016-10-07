@@ -373,15 +373,19 @@
         "VpcId" : { "Ref" : "VPC" },
         </#if>
         "SecurityGroupIngress" : [
+          <#if cloudbreakPublicIp??>
+              { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "${cloudbreakPublicIp}/32"} ,
+              { "IpProtocol" : "tcp", "FromPort" : "${gatewayPort}", "ToPort" : "${gatewayPort}", "CidrIp" : "${cloudbreakPublicIp}/32"},
+          </#if>
           <#list group.rules as r>
             <#list r.ports as p>
               { "IpProtocol" : "${r.protocol}", "FromPort" : "${p}", "ToPort" : "${p}", "CidrIp" : "${r.cidr}"} ,
             </#list>
 		  </#list>
           <#list cbSubnet as s>
-                { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "${s}"} ,
-                { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${s}"} ,
-                { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${s}"}<#if (s_index + 1) != cbSubnet?size> ,</#if>
+              { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "${s}"} ,
+              { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${s}"} ,
+              { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "${s}"}<#if (s_index + 1) != cbSubnet?size> ,</#if>
           </#list>
         ]
       }

@@ -122,6 +122,10 @@ public class AwsResourceConnector implements ResourceConnector {
     @Inject
     private AwsTagPreparationService awsTagPreparationService;
 
+    @Value("${cb.publicip:}")
+    private String cloudbreakPublicIp;
+    @Value("${cb.nginx.port:9443}")
+    private int gatewayPort;
     @Value("${cb.aws.cf.template.new.path:}")
     private String awsCloudformationTemplatePath;
 
@@ -174,7 +178,9 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withS3RoleAvailable(s3RoleAvailable)
                 .withTemplatePath(awsCloudformationTemplatePath)
-                .withDefaultSubnet(subnet);
+                .withDefaultSubnet(subnet)
+                .withCloudbreakPublicIp(cloudbreakPublicIp)
+                .withGatewayPort(gatewayPort);
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
         client.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
