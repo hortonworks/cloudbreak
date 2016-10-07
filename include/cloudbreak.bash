@@ -197,6 +197,7 @@ cloudbreak-conf-defaults() {
     env-import CB_HOST_DISCOVERY_CUSTOM_DOMAIN ""
     env-import CB_SMARTSENSE_CONFIGURE "false"
     env-import TRAEFIK_MAX_IDLE_CONNECTION 100
+    env-import DEFAULT_INBOUND_ACCESS_IP ""
 }
 
 cloudbreak-conf-cloud-provider() {
