@@ -2,17 +2,19 @@ package cli
 
 import (
 	"fmt"
+	"sync"
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/cluster"
 	"github.com/hortonworks/hdc-cli/client/stacks"
 	"github.com/hortonworks/hdc-cli/models"
 	"github.com/urfave/cli"
-	"sync"
-	"time"
+
+	"strconv"
 
 	"github.com/hortonworks/hdc-cli/client/blueprints"
 	"github.com/hortonworks/hdc-cli/client/templates"
-	"strconv"
 )
 
 func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
@@ -27,6 +29,15 @@ func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
 
 func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeleton, error) {
 	defer timeTrack(time.Now(), "fetch cluster")
+
+	return fetchClusterImpl(stack, reduced, c.Cloudbreak.Blueprints.GetBlueprintsID, c.Cloudbreak.Templates.GetTemplatesID, c.GetSecurityDetails, c.GetCredentialById, c.GetNetworkById, c.GetRDSConfigById)
+}
+
+func fetchClusterImpl(stack *models.StackResponse, reduced bool, getBlueprint func(*blueprints.GetBlueprintsIDParams) (*blueprints.GetBlueprintsIDOK, error),
+	getTemplate func(*templates.GetTemplatesIDParams) (*templates.GetTemplatesIDOK, error),
+	getSecurityDetails func(*models.StackResponse) (securityMap map[string][]*models.SecurityRule, err error),
+	getCredential func(int64) (*models.CredentialResponse, error), getNetwork func(int64) *models.NetworkJSON, getRdsConfig func(int64) *models.RDSConfigResponse) (*ClusterSkeleton, error) {
+
 	var wg sync.WaitGroup
 
 	wg.Add(1)
@@ -34,7 +45,7 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 	go func() {
 		defer wg.Done()
 		if stack.Cluster != nil && stack.Cluster.BlueprintID != nil {
-			respBlueprint, _ := c.Cloudbreak.Blueprints.GetBlueprintsID(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
+			respBlueprint, _ := getBlueprint(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
 			blueprint = respBlueprint.Payload
 		}
 	}()
@@ -51,7 +62,7 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 			wg.Add(1)
 			go func(i int, instanceGroup *models.InstanceGroup) {
 				defer wg.Done()
-				respTemplate, err := c.Cloudbreak.Templates.GetTemplatesID(&templates.GetTemplatesIDParams{ID: instanceGroup.TemplateID})
+				respTemplate, err := getTemplate(&templates.GetTemplatesIDParams{ID: instanceGroup.TemplateID})
 				if err == nil {
 					templateMap[instanceGroup.Group] = respTemplate.Payload
 				} else {
@@ -63,27 +74,27 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			securityMap, _ = c.GetSecurityDetails(stack)
+			securityMap, _ = getSecurityDetails(stack)
 		}()
 
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			cred, _ := c.GetCredentialById(stack.CredentialID)
+			cred, _ := getCredential(stack.CredentialID)
 			credential = cred
 		}()
 
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			network = c.GetNetworkById(stack.NetworkID)
+			network = getNetwork(stack.NetworkID)
 		}()
 
 		if stack.Cluster != nil && stack.Cluster.RdsConfigID != nil {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				rdsConfig = c.GetRDSConfigById(*stack.Cluster.RdsConfigID)
+				rdsConfig = getRdsConfig(*stack.Cluster.RdsConfigID)
 			}()
 		}
 	}
@@ -107,14 +118,19 @@ func DescribeCluster(c *cli.Context) error {
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	stack := oAuth2Client.GetClusterByName(clusterName)
-	clusterSkeleton, _ := oAuth2Client.FetchCluster(stack, false)
-	clusterSkeleton.ClusterAndAmbariPassword = ""
+	clusterSkeleton := describeClusterImpl(clusterName, oAuth2Client.GetClusterByName, oAuth2Client.FetchCluster)
 
 	output := Output{Format: c.String(FlOutput.Name)}
 	output.Write(ClusterSkeletonHeader, clusterSkeleton)
 
 	return nil
+}
+
+func describeClusterImpl(clusterName string, getCluster func(string) *models.StackResponse, fetchCluster func(*models.StackResponse, bool) (*ClusterSkeleton, error)) *ClusterSkeleton {
+	stack := getCluster(clusterName)
+	clusterSkeleton, _ := fetchCluster(stack, false)
+	clusterSkeleton.ClusterAndAmbariPassword = ""
+	return clusterSkeleton
 }
 
 func TerminateCluster(c *cli.Context) error {
@@ -147,25 +163,37 @@ func CreateCluster(c *cli.Context) error {
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	blueprint := oAuth2Client.GetBlueprintByName(skeleton.ClusterType)
+	stackId := createClusterImpl(skeleton, oAuth2Client.GetBlueprintByName, oAuth2Client.CopyDefaultCredential, oAuth2Client.CreateTemplate, oAuth2Client.CreateSecurityGroup, oAuth2Client.CreateNetwork,
+		oAuth2Client.CreateBlueprint, oAuth2Client.Cloudbreak.Stacks.PostStacksUser, oAuth2Client.GetRDSConfigByName, oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster)
+
+	oAuth2Client.waitForClusterToFinish(stackId, c)
+	return nil
+}
+
+func createClusterImpl(skeleton ClusterSkeleton, getBlueprint func(string) *models.BlueprintResponse, copyCredential func(ClusterSkeleton, chan int64, *sync.WaitGroup),
+	createTemplate func(ClusterSkeleton, chan int64, *sync.WaitGroup), createSecurityGroup func(ClusterSkeleton, chan int64, *sync.WaitGroup), createNetwork func(ClusterSkeleton, chan int64, *sync.WaitGroup),
+	createBlueprint func(ClusterSkeleton, *models.BlueprintResponse, chan int64, *sync.WaitGroup), postStack func(*stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error),
+	getRdsConfig func(string) models.RDSConfigResponse, postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error)) int64 {
+
+	blueprint := getBlueprint(skeleton.ClusterType)
 
 	var wg sync.WaitGroup
 	wg.Add(5)
 
 	credentialId := make(chan int64, 1)
-	go oAuth2Client.CopyDefaultCredential(skeleton, credentialId, &wg)
+	go copyCredential(skeleton, credentialId, &wg)
 
 	templateIds := make(chan int64, 2)
-	go oAuth2Client.CreateTemplate(skeleton, templateIds, &wg)
+	go createTemplate(skeleton, templateIds, &wg)
 
 	var secGroupId = make(chan int64, 1)
-	go oAuth2Client.CreateSecurityGroup(skeleton, secGroupId, &wg)
+	go createSecurityGroup(skeleton, secGroupId, &wg)
 
 	networkId := make(chan int64, 1)
-	go oAuth2Client.CreateNetwork(skeleton, networkId, &wg)
+	go createNetwork(skeleton, networkId, &wg)
 
 	blueprintId := make(chan int64, 1)
-	go oAuth2Client.CreateBlueprint(skeleton, blueprint, blueprintId, &wg)
+	go createBlueprint(skeleton, blueprint, blueprintId, &wg)
 
 	wg.Wait()
 
@@ -226,7 +254,7 @@ func CreateCluster(c *cli.Context) error {
 		}
 
 		log.Infof("[CreateStack] sending stack create request with name: %s", skeleton.ClusterName)
-		resp, err := oAuth2Client.Cloudbreak.Stacks.PostStacksUser(&stacks.PostStacksUserParams{&stackReq})
+		resp, err := postStack(&stacks.PostStacksUserParams{Body: &stackReq})
 
 		if err != nil {
 			logErrorAndExit(CreateCluster, err.Error())
@@ -279,7 +307,7 @@ func CreateCluster(c *cli.Context) error {
 					Validated:          &validate,
 				}
 			} else if len(ms.Name) > 0 {
-				id, err := strconv.ParseInt(*oAuth2Client.GetRDSConfigByName(ms.Name).ID, 10, 64)
+				id, err := strconv.ParseInt(*getRdsConfig(ms.Name).ID, 10, 64)
 				if err != nil {
 					logErrorAndExit(CreateCluster, err.Error())
 				}
@@ -305,7 +333,7 @@ func CreateCluster(c *cli.Context) error {
 			BlueprintInputs: inputs,
 		}
 
-		resp, err := oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
+		resp, err := postCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
 
 		if err != nil {
 			logErrorAndExit(CreateCluster, err.Error())
@@ -314,8 +342,7 @@ func CreateCluster(c *cli.Context) error {
 		log.Infof("[CreateCluster] cluster created, id: %d", resp.Payload.ID)
 	}()
 
-	oAuth2Client.waitForClusterToFinish(stackId, c)
-	return nil
+	return stackId
 }
 
 func ValidateCreateClusterSkeleton(c *cli.Context) error {
@@ -337,7 +364,18 @@ func ResizeCluster(c *cli.Context) error {
 	}
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	stack := oAuth2Client.GetClusterByName(clusterName)
+
+	stack := resizeClusterImpl(clusterName, adjustment, oAuth2Client.GetClusterByName, oAuth2Client.Cloudbreak.Stacks.PutStacksID, oAuth2Client.Cloudbreak.Cluster.PutStacksIDCluster)
+
+	oAuth2Client.waitForClusterToFinish(*stack.ID, c)
+
+	return nil
+}
+
+func resizeClusterImpl(clusterName string, adjustment int32, getStack func(string) *models.StackResponse, putStack func(*stacks.PutStacksIDParams) error,
+	putCluster func(*cluster.PutStacksIDClusterParams) error) *models.StackResponse {
+
+	stack := getStack(clusterName)
 
 	if adjustment > 0 {
 		withClusterScale := true
@@ -349,7 +387,7 @@ func ResizeCluster(c *cli.Context) error {
 			},
 			Status: nil,
 		}
-		if err := oAuth2Client.Cloudbreak.Stacks.PutStacksID(&stacks.PutStacksIDParams{ID: *stack.ID, Body: update}); err != nil {
+		if err := putStack(&stacks.PutStacksIDParams{ID: *stack.ID, Body: update}); err != nil {
 			logErrorAndExit(ResizeCluster, err.Error())
 		}
 	} else {
@@ -361,13 +399,12 @@ func ResizeCluster(c *cli.Context) error {
 				WithStackUpdate:   &withStackScale,
 			},
 		}
-		if err := oAuth2Client.Cloudbreak.Cluster.PutStacksIDCluster(&cluster.PutStacksIDClusterParams{ID: *stack.ID, Body: update}); err != nil {
+		if err := putCluster(&cluster.PutStacksIDClusterParams{ID: *stack.ID, Body: update}); err != nil {
 			logErrorAndExit(ResizeCluster, err.Error())
 		}
 	}
 
-	oAuth2Client.waitForClusterToFinish(*stack.ID, c)
-	return nil
+	return stack
 }
 
 func GenerateCreateClusterSkeleton(c *cli.Context) error {
@@ -383,7 +420,20 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	clusterType := c.String(FlClusterType.Name)
-	ambariBp := oAuth2Client.GetBlueprintByName(clusterType)
+	clusterName := c.String(FlClusterNameOptional.Name)
+
+	generateCreateSharedClusterSkeletonImpl(skeleton, clusterType, clusterName, oAuth2Client.GetBlueprintByName, oAuth2Client.GetClusterByName, oAuth2Client.GetClusterConfig, oAuth2Client.GetNetworkById,
+		oAuth2Client.GetRDSConfigById)
+
+	Println(skeleton.JsonPretty())
+	return nil
+}
+
+func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterName string, clusterType string, getBlueprint func(string) *models.BlueprintResponse,
+	getCluster func(string) *models.StackResponse, getClusterConfig func(int64, []*models.BlueprintParameterJSON) []*models.BlueprintInputJSON, getNetwork func(int64) *models.NetworkJSON,
+	getRdsConfig func(int64) *models.RDSConfigResponse) {
+
+	ambariBp := getBlueprint(clusterType)
 
 	skeleton.ClusterType = clusterType
 	skeleton.HDPVersion = ambariBp.Blueprint.StackVersion
@@ -394,9 +444,8 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 	skeleton.ClusterInputs = inputs
 	log.Infof("[GenerateCreateSharedClusterSkeleton] inputs for cluster type: %+v", inputs)
 
-	clusterName := c.String(FlClusterNameOptional.Name)
 	if len(clusterName) > 0 {
-		stack := oAuth2Client.GetClusterByName(clusterName)
+		stack := getCluster(clusterName)
 		if *stack.Status != "AVAILABLE" && *stack.Cluster.Status != "AVAILABLE" {
 			logErrorAndExit(GenerateCreateSharedClusterSkeleton, "the cluster is not 'AVAILABLE' yet, please try again later")
 		}
@@ -406,7 +455,7 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			configs := oAuth2Client.GetClusterConfig(*stack.ID, ambariBp.Inputs)
+			configs := getClusterConfig(*stack.ID, ambariBp.Inputs)
 			for _, input := range configs {
 				inputs[*input.Name] = *input.PropertyValue
 			}
@@ -415,7 +464,7 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			network := oAuth2Client.GetNetworkById(stack.NetworkID)
+			network := getNetwork(stack.NetworkID)
 			if network.Parameters["internetGatewayId"] == nil {
 				skeleton.Network = &Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
 			}
@@ -425,16 +474,13 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				rdsConfig := oAuth2Client.GetRDSConfigById(*stack.Cluster.RdsConfigID)
+				rdsConfig := getRdsConfig(*stack.Cluster.RdsConfigID)
 				skeleton.HiveMetastore.Name = rdsConfig.Name
 			}()
 		}
 
 		wg.Wait()
 	}
-
-	Println(skeleton.JsonPretty())
-	return nil
 }
 
 func getBaseSkeleton() *ClusterSkeleton {

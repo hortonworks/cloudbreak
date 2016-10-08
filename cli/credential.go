@@ -83,7 +83,10 @@ func (c *Cloudbreak) CreateCredential(name string, defaultCredential models.Cred
 	return createCredentialImpl(name, defaultCredential, existingKey, public, c.Cloudbreak.Credentials.PostCredentialsAccount, c.Cloudbreak.Credentials.PostCredentialsUser)
 }
 
-func createCredentialImpl(name string, defaultCredential models.CredentialResponse, existingKey string, public bool, postAccountCredential func(*credentials.PostCredentialsAccountParams) (*credentials.PostCredentialsAccountOK, error), postUserCredential func(*credentials.PostCredentialsUserParams) (*credentials.PostCredentialsUserOK, error)) int64 {
+func createCredentialImpl(name string, defaultCredential models.CredentialResponse, existingKey string, public bool,
+	postAccountCredential func(*credentials.PostCredentialsAccountParams) (*credentials.PostCredentialsAccountOK, error),
+	postUserCredential func(*credentials.PostCredentialsUserParams) (*credentials.PostCredentialsUserOK, error)) int64 {
+
 	var credentialMap = make(map[string]interface{})
 	credentialMap["selector"] = "role-based"
 	credentialMap["roleArn"] = defaultCredential.Parameters["roleArn"]

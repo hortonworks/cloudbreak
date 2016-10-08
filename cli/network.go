@@ -29,7 +29,9 @@ func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64,
 	createNetworkImpl(skeleton, channel, c.Cloudbreak.Networks.PostNetworksAccount, c.GetNetwork)
 }
 
-func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64, postNetwork func(*networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error), getNetwork func(string) models.NetworkJSON) {
+func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64, postNetwork func(*networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error),
+	getNetwork func(string) models.NetworkJSON) {
+
 	networkName := "net" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	vpc := skeleton.Network

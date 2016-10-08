@@ -174,29 +174,33 @@ func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context)
 		defer timeTrack(time.Now(), "cluster installation/update")
 
 		log.Infof("[WaitForClusterToFinish] wait for cluster to finish")
-		for {
-			resp, err := c.Cloudbreak.Stacks.GetStacksID(&stacks.GetStacksIDParams{ID: stackId})
+		waitForClusterToFinishImpl(stackId, c.Cloudbreak.Stacks.GetStacksID)
+	}
+}
 
-			if err != nil {
-				logErrorAndExit(c.waitForClusterToFinish, err.Error())
-			}
+func waitForClusterToFinishImpl(stackId int64, getStack func(params *stacks.GetStacksIDParams) (*stacks.GetStacksIDOK, error)) {
+	for {
+		resp, err := getStack(&stacks.GetStacksIDParams{ID: stackId})
 
-			desiredStatus := "AVAILABLE"
-			stackStatus := *resp.Payload.Status
-			clusterStatus := *resp.Payload.Cluster.Status
-			log.Infof("[WaitForClusterToFinish] stack status: %s, cluster status: %s", stackStatus, clusterStatus)
-
-			if stackStatus == desiredStatus && clusterStatus == desiredStatus {
-				log.Infof("[WaitForClusterToFinish] cluster operation successfully finished")
-				break
-			}
-			if strings.Contains(stackStatus, "FAILED") || strings.Contains(clusterStatus, "FAILED") {
-				logErrorAndExit(c.waitForClusterToFinish, "cluster operation failed")
-			}
-
-			log.Infof("[WaitForClusterToFinish] cluster is in progress, wait for 20 seconds")
-			time.Sleep(20 * time.Second)
+		if err != nil {
+			logErrorAndExit(waitForClusterToFinishImpl, err.Error())
 		}
+
+		desiredStatus := "AVAILABLE"
+		stackStatus := *resp.Payload.Status
+		clusterStatus := *resp.Payload.Cluster.Status
+		log.Infof("[WaitForClusterToFinish] stack status: %s, cluster status: %s", stackStatus, clusterStatus)
+
+		if stackStatus == desiredStatus && clusterStatus == desiredStatus {
+			log.Infof("[WaitForClusterToFinish] cluster operation successfully finished")
+			break
+		}
+		if strings.Contains(stackStatus, "FAILED") || strings.Contains(clusterStatus, "FAILED") {
+			logErrorAndExit(waitForClusterToFinishImpl, "cluster operation failed")
+		}
+
+		log.Infof("[WaitForClusterToFinish] cluster is in progress, wait for 20 seconds")
+		time.Sleep(20 * time.Second)
 	}
 }
 
@@ -205,32 +209,36 @@ func (c *Cloudbreak) waitForClusterToTerminate(clusterName string, context *cli.
 		defer timeTrack(time.Now(), "cluster termination")
 
 		log.Infof("[waitForClusterToTerminate] wait for cluster to terminate")
-		for {
-			resp, err := c.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
+		waitForClusterToTerminateImpl(clusterName, c.Cloudbreak.Stacks.GetStacksUserName)
+	}
+}
 
-			if err != nil {
-				errorMessage := err.Error()
-				// shouldn't happen, but handle anyway
-				if strings.Contains(errorMessage, "status 404") {
-					log.Infof("[waitForClusterToTerminate] cluster is terminated")
-					break
-				}
-				logErrorAndExit(c.waitForClusterToTerminate, errorMessage)
-			}
+func waitForClusterToTerminateImpl(clusterName string, getStack func(*stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error)) {
+	for {
+		resp, err := getStack(&stacks.GetStacksUserNameParams{Name: clusterName})
 
-			stackStatus := *resp.Payload.Status
-			log.Infof("[waitForClusterToTerminate] stack status: %s", stackStatus)
-
-			if strings.Contains(stackStatus, "FAILED") {
-				logErrorAndExit(c.waitForClusterToTerminate, "cluster termination failed")
-			}
-			if strings.Contains(stackStatus, "DELETE_COMPLETED") {
+		if err != nil {
+			errorMessage := err.Error()
+			// shouldn't happen, but handle anyway
+			if strings.Contains(errorMessage, "status 404") {
 				log.Infof("[waitForClusterToTerminate] cluster is terminated")
 				break
 			}
-
-			log.Infof("[waitForClusterToTerminate] cluster is in progress, wait for 20 seconds")
-			time.Sleep(20 * time.Second)
+			logErrorAndExit(waitForClusterToTerminateImpl, errorMessage)
 		}
+
+		stackStatus := *resp.Payload.Status
+		log.Infof("[waitForClusterToTerminate] stack status: %s", stackStatus)
+
+		if strings.Contains(stackStatus, "FAILED") {
+			logErrorAndExit(waitForClusterToTerminateImpl, "cluster termination failed")
+		}
+		if strings.Contains(stackStatus, "DELETE_COMPLETED") {
+			log.Infof("[waitForClusterToTerminate] cluster is terminated")
+			break
+		}
+
+		log.Infof("[waitForClusterToTerminate] cluster is in progress, wait for 20 seconds")
+		time.Sleep(20 * time.Second)
 	}
 }

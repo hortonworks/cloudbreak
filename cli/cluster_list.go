@@ -1,13 +1,15 @@
 package cli
 
 import (
+	"sync"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/stacks"
-	"sync"
+
+	"time"
 
 	"github.com/hortonworks/hdc-cli/models"
 	"github.com/urfave/cli"
-	"time"
 )
 
 var ClusterListHeader = []string{"Cluster Name", "Status", "HDP Version", "Cluster Type"}
@@ -39,8 +41,15 @@ func (c *ClusterNode) DataAsStringArray() []string {
 func ListClusters(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list clusters")
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	output := Output{Format: c.String(FlOutput.Name)}
 
-	respStacks, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUser(&stacks.GetStacksUserParams{})
+	return listClustersImpl(oAuth2Client.Cloudbreak.Stacks.GetStacksUser, oAuth2Client.FetchCluster, output.WriteList)
+}
+
+func listClustersImpl(getStacks func(*stacks.GetStacksUserParams) (*stacks.GetStacksUserOK, error),
+	fetchCluster func(*models.StackResponse, bool) (*ClusterSkeleton, error), writer func([]string, []Row)) error {
+
+	respStacks, err := getStacks(&stacks.GetStacksUserParams{})
 	if err != nil {
 		log.Error(err)
 		return err
@@ -50,9 +59,9 @@ func ListClusters(c *cli.Context) error {
 	for i, stack := range respStacks.Payload {
 		wg.Add(1)
 		go func(i int, stack *models.StackResponse) {
-
 			defer wg.Done()
-			clusterSkeleton, _ := oAuth2Client.FetchCluster(stack, true)
+
+			clusterSkeleton, _ := fetchCluster(stack, true)
 			clusters[i] = *clusterSkeleton
 
 		}(i, stack)
@@ -70,8 +79,8 @@ func ListClusters(c *cli.Context) error {
 		}
 		tableRows[i] = clusterListElement
 	}
-	output := Output{Format: c.String(FlOutput.Name)}
-	output.WriteList(ClusterListHeader, tableRows)
+
+	writer(ClusterListHeader, tableRows)
 
 	return nil
 }
@@ -85,10 +94,17 @@ func ListClusterNodes(c *cli.Context) error {
 	}
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	output := Output{Format: c.String(FlOutput.Name)}
 
-	respStack, err := oAuth2Client.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: clusterName})
+	listClusterNodesImpl(clusterName, oAuth2Client.Cloudbreak.Stacks.GetStacksUserName, output.WriteList)
+
+	return nil
+}
+
+func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error), writer func([]string, []Row)) {
+	respStack, err := getStack(&stacks.GetStacksUserNameParams{Name: clusterName})
 	if err != nil {
-		logErrorAndExit(ListClusterNodes, err.Error())
+		logErrorAndExit(listClusterNodesImpl, err.Error())
 	}
 
 	var tableRows []Row
@@ -114,7 +130,5 @@ func ListClusterNodes(c *cli.Context) error {
 		}
 	}
 
-	output := Output{Format: c.String(FlOutput.Name)}
-	output.WriteList(ClusterNodeHeader, tableRows)
-	return nil
+	writer(ClusterNodeHeader, tableRows)
 }
