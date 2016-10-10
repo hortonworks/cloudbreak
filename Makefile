@@ -21,13 +21,13 @@ build-docker:
 	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} golang:1.7.1 make build
 
 build-darwin:
-	GOOS=darwin go build -a -installsuffix cgo ${LDFLAGS} -o build/Darwin/${BINARY} main.go
+	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Darwin/${BINARY} main.go
 
 build-linux:
-	GOOS=linux go build -a -installsuffix cgo ${LDFLAGS} -o build/Linux/${BINARY} main.go
+	GOOS=linux CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Linux/${BINARY} main.go
 
 build-windows:
-	GOOS=windows go build -a -installsuffix cgo ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
+	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
 generate-swagger:
 	swagger generate client -f http://localhost:9091/cb/api/v1/swagger.json
