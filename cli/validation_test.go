@@ -146,7 +146,7 @@ func TestHiveMetastoreSkeletonValidateWrongDatabase(t *testing.T) {
 	}
 }
 
-func TestHiveMetastoreSkeletonValidateAllGood(t *testing.T) {
+func TestHiveMetastoreSkeletonValidateAllGoodNew(t *testing.T) {
 	skeleton := HiveMetastore{
 		MetaStore: MetaStore{
 			Name:         "name",
@@ -156,6 +156,16 @@ func TestHiveMetastoreSkeletonValidateAllGood(t *testing.T) {
 			URL:          "url",
 		},
 	}
+
+	errors := skeleton.Validate()
+
+	if errors != nil {
+		t.Errorf("validation went fail: %s", strings.Join(convertErrorsToString(errors), ", "))
+	}
+}
+
+func TestHiveMetastoreSkeletonValidateAllGoodExisting(t *testing.T) {
+	skeleton := HiveMetastore{MetaStore: MetaStore{Name: "name"}}
 
 	errors := skeleton.Validate()
 

@@ -81,7 +81,7 @@ func (n *Network) isEmpty() bool {
 func (h *HiveMetastore) Validate() []error {
 	var res []error = nil
 
-	if !h.isEmpty() {
+	if h.isNew() {
 		if err := validate.RequiredString("Name", "hivemetastore", h.Name); err != nil {
 			res = append(res, err)
 		}
@@ -104,6 +104,6 @@ func (h *HiveMetastore) Validate() []error {
 	return res
 }
 
-func (h *HiveMetastore) isEmpty() bool {
-	return len(h.Name) == 0 && len(h.DatabaseType) == 0 && len(h.Username) == 0 && len(h.Password) == 0 && len(h.URL) == 0
+func (h *HiveMetastore) isNew() bool {
+	return len(h.DatabaseType) > 0 || len(h.Username) > 0 || len(h.Password) > 0 || len(h.URL) > 0
 }
