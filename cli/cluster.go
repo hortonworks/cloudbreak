@@ -35,7 +35,7 @@ func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*C
 
 func fetchClusterImpl(stack *models.StackResponse, reduced bool, getBlueprint func(*blueprints.GetBlueprintsIDParams) (*blueprints.GetBlueprintsIDOK, error),
 	getTemplate func(*templates.GetTemplatesIDParams) (*templates.GetTemplatesIDOK, error),
-	getSecurityDetails func(*models.StackResponse) (securityMap map[string][]*models.SecurityRule, err error),
+	getSecurityDetails func(*models.StackResponse) (map[string][]*models.SecurityRule, error),
 	getCredential func(int64) (*models.CredentialResponse, error), getNetwork func(int64) *models.NetworkJSON, getRdsConfig func(int64) *models.RDSConfigResponse) (*ClusterSkeleton, error) {
 
 	var wg sync.WaitGroup

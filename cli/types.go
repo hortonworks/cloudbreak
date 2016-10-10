@@ -1,5 +1,9 @@
 package cli
 
-type StringWrapper struct {
+type stringWrapper struct {
 	s string
+}
+
+type int64Wrapper struct {
+	i int64
 }

@@ -33,7 +33,7 @@ func TestCleanupBlueprintsImplNotGeneratedButStartsWithB(t *testing.T) {
 		Name: "bname",
 		AmbariBlueprint: models.AmbariBlueprint{
 			Blueprint: models.Blueprint{
-				Name: &(&StringWrapper{"name"}).s,
+				Name: &(&stringWrapper{"name"}).s,
 			},
 		},
 	}

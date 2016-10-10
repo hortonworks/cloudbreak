@@ -28,7 +28,7 @@ func TestListBlueprintsImplNotPrefixed(t *testing.T) {
 			Name: "name" + strconv.Itoa(i),
 			AmbariBlueprint: models.AmbariBlueprint{
 				Blueprint: models.Blueprint{
-					Name:         &(&StringWrapper{"blueprint-name"}).s,
+					Name:         &(&stringWrapper{"blueprint-name"}).s,
 					StackVersion: "version" + strconv.Itoa(i),
 				},
 			},
@@ -55,7 +55,7 @@ func TestCreateBlueprintImplDefaultBlueprint(t *testing.T) {
 	blueprintId := make(chan int64, 1)
 
 	blueprint := models.BlueprintResponse{
-		ID: &(&StringWrapper{"123"}).s,
+		ID: &(&stringWrapper{"123"}).s,
 	}
 	resolver := func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error) {
 		return nil, nil
@@ -79,7 +79,7 @@ func TestCreateBlueprintImplNonDefaultBlueprint(t *testing.T) {
 	blueprintId := make(chan int64, 1)
 
 	blueprint := models.BlueprintResponse{
-		ID: &(&StringWrapper{"123"}).s,
+		ID: &(&stringWrapper{"123"}).s,
 	}
 	expected := int64(321)
 	resolver := func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error) {
@@ -95,7 +95,7 @@ func TestCreateBlueprintImplNonDefaultBlueprint(t *testing.T) {
 }
 
 func TestGetBlueprintId(t *testing.T) {
-	bp := models.BlueprintResponse{ID: &(&StringWrapper{"123"}).s}
+	bp := models.BlueprintResponse{ID: &(&stringWrapper{"123"}).s}
 
 	id := getBlueprintId(&bp)
 
@@ -109,7 +109,7 @@ func TestGetFancyBlueprintNameIsEmpty(t *testing.T) {
 	bp := &models.BlueprintResponse{
 		Name: "name",
 		AmbariBlueprint: models.AmbariBlueprint{
-			Blueprint: models.Blueprint{Name: &(&StringWrapper{""}).s},
+			Blueprint: models.Blueprint{Name: &(&stringWrapper{""}).s},
 		},
 	}
 
@@ -125,7 +125,7 @@ func TestGetFancyBlueprintNameNotExists(t *testing.T) {
 	bp := &models.BlueprintResponse{
 		Name: "name",
 		AmbariBlueprint: models.AmbariBlueprint{
-			Blueprint: models.Blueprint{Name: &(&StringWrapper{"blueprint-name"}).s},
+			Blueprint: models.Blueprint{Name: &(&stringWrapper{"blueprint-name"}).s},
 		},
 	}
 
