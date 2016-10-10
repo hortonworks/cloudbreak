@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +27,11 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @Component
 public class SmartSenseConfigProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartSenseConfigProvider.class);
     private static final String SMART_SENSE_SERVER_CONFIG_FILE = "hst-server-conf";
     private static final String HST_SERVER_COMPONENT = "HST_SERVER";
     private static final String HST_AGENT_COMPONENT = "HST_AGENT";
+    private static final String NAMENODE_COMPONENT = "NAMENODE";
 
     @Value("${cb.smartsense.configure:false}")
     private boolean configureSmartSense;
@@ -64,13 +68,15 @@ public class SmartSenseConfigProvider {
     private String addSmartSenseServerToBp(String blueprintText, Set<HostGroup> hostGroups, Set<String> hostGroupNames) {
         if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT, blueprintText)) {
             String aHostGroupName = hostGroupNames.stream().findFirst().get();
-            Optional<String> hostGroupWithOneNode = hostGroups.stream()
-                    .filter(hostGroup -> hostGroup.getHostMetadata().size() == 1)
-                    .map(getHostGroupNameMapper())
+            String finalBlueprintText = blueprintText;
+            Optional<String> hostGroupNameOfNameNode = hostGroupNames
+                    .stream()
+                    .filter(hostGroupName -> blueprintProcessor.getComponentsInHostGroup(finalBlueprintText, hostGroupName).contains(NAMENODE_COMPONENT))
                     .findFirst();
-            if (hostGroupWithOneNode.isPresent()) {
-                aHostGroupName = hostGroupWithOneNode.get();
+            if (hostGroupNameOfNameNode.isPresent()) {
+                aHostGroupName = hostGroupNameOfNameNode.get();
             }
+            LOGGER.info("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
             blueprintText = blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, Collections.singletonList(aHostGroupName), blueprintText);
         }
         return blueprintText;
