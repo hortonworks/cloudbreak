@@ -400,6 +400,7 @@ cloudbreak:
         - AWS_ACCOUNT_ID
         - CB_PLATFORM_DEFAULT_REGIONS
         - CB_IMAGE_CATALOG_URL
+        - "CB_PUBLICIP=$DEFAULT_INBOUND_ACCESS_IP"
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
