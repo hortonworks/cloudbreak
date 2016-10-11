@@ -79,7 +79,7 @@ func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
 	defer timeTrack(time.Now(), "get blueprint by name")
 	log.Infof("[GetBlueprintByName] get blueprint by name: %s", name)
 
-	resp, err := c.Cloudbreak.Blueprints.GetPrivate(&blueprints.GetPrivateParams{Name: getRealBlueprintName(name)})
+	resp, err := c.Cloudbreak.Blueprints.GetPublic(&blueprints.GetPublicParams{Name: getRealBlueprintName(name)})
 	if err != nil {
 		logErrorAndExit(c.GetBlueprintByName, err.Error())
 	}
