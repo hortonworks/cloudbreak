@@ -13,7 +13,7 @@ format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
 test:
-	go test ./...
+	go test -race ./...
 
 build: format test build-darwin build-linux build-windows
 
