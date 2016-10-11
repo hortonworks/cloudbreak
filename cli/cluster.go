@@ -422,7 +422,7 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 	clusterType := c.String(FlClusterType.Name)
 	clusterName := c.String(FlClusterNameOptional.Name)
 
-	generateCreateSharedClusterSkeletonImpl(skeleton, clusterType, clusterName, oAuth2Client.GetBlueprintByName, oAuth2Client.GetClusterByName, oAuth2Client.GetClusterConfig, oAuth2Client.GetNetworkById,
+	generateCreateSharedClusterSkeletonImpl(skeleton, clusterName, clusterType, oAuth2Client.GetBlueprintByName, oAuth2Client.GetClusterByName, oAuth2Client.GetClusterConfig, oAuth2Client.GetNetworkById,
 		oAuth2Client.GetRDSConfigById)
 
 	Println(skeleton.JsonPretty())
