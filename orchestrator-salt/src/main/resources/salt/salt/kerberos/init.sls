@@ -1,5 +1,10 @@
 {%- from 'kerberos/settings.sls' import kerberos with context %}
 
+haveged:
+  pkg.installed: []
+  service.running:
+    - enable: True
+
 /etc/krb5.conf:
   file.managed:
     - source: salt://kerberos/config/krb5.conf
