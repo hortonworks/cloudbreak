@@ -422,7 +422,7 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 	clusterType := c.String(FlClusterType.Name)
 	clusterName := c.String(FlClusterNameOptional.Name)
 
-	generateCreateSharedClusterSkeletonImpl(skeleton, clusterType, clusterName, oAuth2Client.GetBlueprintByName, oAuth2Client.GetClusterByName, oAuth2Client.GetClusterConfig, oAuth2Client.GetNetworkById,
+	generateCreateSharedClusterSkeletonImpl(skeleton, clusterName, clusterType, oAuth2Client.GetBlueprintByName, oAuth2Client.GetClusterByName, oAuth2Client.GetClusterConfig, oAuth2Client.GetNetworkById,
 		oAuth2Client.GetRDSConfigById)
 
 	Println(skeleton.JsonPretty())
@@ -485,7 +485,7 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 
 func getBaseSkeleton() *ClusterSkeleton {
 	return &ClusterSkeleton{
-		ClusterType: "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",
+		ClusterType: "EDW-ETL: Apache Spark 2.0, Apache Hive 2",
 		HDPVersion:  "2.5",
 		Master: InstanceConfig{
 			InstanceType: "m4.xlarge",

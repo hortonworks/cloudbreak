@@ -25,8 +25,6 @@ func init() {
 	BlueprintMap["hdp-etl-edw-spark2"] = "EDW-ETL: Apache Spark 2.0, Apache Hive 2"
 	BlueprintMap["shared-services"] = "Enterprise Services: Apache Atlas, Apache Ranger"
 	BlueprintMap["hdp25-etl-edw-shared"] = "Enterprise ETL-EDW: Apache Hive 1.2.1"
-
-	BlueprintMap["EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0"] = "EDW-ETL: Apache Spark 2.0-preview"
 }
 
 type Blueprint struct {
@@ -81,7 +79,7 @@ func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
 	defer timeTrack(time.Now(), "get blueprint by name")
 	log.Infof("[GetBlueprintByName] get blueprint by name: %s", name)
 
-	resp, err := c.Cloudbreak.Blueprints.GetPrivate(&blueprints.GetPrivateParams{Name: getRealBlueprintName(name)})
+	resp, err := c.Cloudbreak.Blueprints.GetPublic(&blueprints.GetPublicParams{Name: getRealBlueprintName(name)})
 	if err != nil {
 		logErrorAndExit(c.GetBlueprintByName, err.Error())
 	}
