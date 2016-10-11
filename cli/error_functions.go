@@ -2,13 +2,16 @@ package cli
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
-	"github.com/urfave/cli"
 	"os"
 	"reflect"
 	"runtime"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/urfave/cli"
 )
+
+var exit func(code int) = os.Exit
 
 type RESTError struct {
 	Response interface{}
@@ -27,13 +30,13 @@ func logMissingParameterAndExit(c *cli.Context, caller interface{}, message ...s
 		logErrorMessage(caller, message[0])
 	}
 	cli.ShowSubcommandHelp(c)
-	os.Exit(1)
+	exit(1)
 }
 
 func logErrorAndExit(caller interface{}, message string) {
 	StopSpinner()
 	logErrorMessage(caller, message)
-	os.Exit(1)
+	exit(1)
 }
 
 func logErrorMessage(caller interface{}, message string) {

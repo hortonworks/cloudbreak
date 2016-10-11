@@ -170,9 +170,11 @@ func CreateCluster(c *cli.Context) error {
 	return nil
 }
 
-func createClusterImpl(skeleton ClusterSkeleton, getBlueprint func(string) *models.BlueprintResponse, copyCredential func(ClusterSkeleton, chan int64, *sync.WaitGroup),
-	createTemplate func(ClusterSkeleton, chan int64, *sync.WaitGroup), createSecurityGroup func(ClusterSkeleton, chan int64, *sync.WaitGroup), createNetwork func(ClusterSkeleton, chan int64, *sync.WaitGroup),
-	createBlueprint func(ClusterSkeleton, *models.BlueprintResponse, chan int64, *sync.WaitGroup), postStack func(*stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error),
+func createClusterImpl(skeleton ClusterSkeleton, getBlueprint func(string) *models.BlueprintResponse,
+	copyCredential func(ClusterSkeleton, chan int64, *sync.WaitGroup), createTemplate func(ClusterSkeleton, chan int64, *sync.WaitGroup),
+	createSecurityGroup func(ClusterSkeleton, chan int64, *sync.WaitGroup), createNetwork func(ClusterSkeleton, chan int64, *sync.WaitGroup),
+	createBlueprint func(ClusterSkeleton, *models.BlueprintResponse, chan int64, *sync.WaitGroup),
+	postStack func(*stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error),
 	getRdsConfig func(string) models.RDSConfigResponse, postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error)) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
@@ -448,6 +450,7 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 		stack := getCluster(clusterName)
 		if *stack.Status != "AVAILABLE" && *stack.Cluster.Status != "AVAILABLE" {
 			logErrorAndExit(GenerateCreateSharedClusterSkeleton, "the cluster is not 'AVAILABLE' yet, please try again later")
+			return
 		}
 
 		var wg sync.WaitGroup
