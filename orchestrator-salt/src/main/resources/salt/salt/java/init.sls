@@ -1,3 +1,7 @@
+
+#java-1.7.0-openjdk-devel:
+#  pkg.installed: []
+
 set_dns_ttl:
   file.replace:
     - name: /usr/lib/jvm/java/jre/lib/security/java.security

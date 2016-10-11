@@ -1,15 +1,11 @@
 base:
   '*':
     - discovery
-    - users
-
-  'platform:AWS':
-    - match: pillar
-    - dns
+    - java
 
   'roles:kerberos_server':
     - match: grain
-    - kerberos.server
+    - kerberos
 
   'roles:ambari_server':
     - match: grain
@@ -19,20 +15,18 @@ base:
     - match: grain
     - ambari.agent
 
-  'G@recipes:post and G@roles:knox_gateway':
-    - match: compound
-    - ldap
-
-  'I@platform:AWS and G@roles:smartsense':
-    - match: compound
+  'roles:smartsense':
+    - match: grain
     - smartsense
 
   'recipes:pre':
     - match: grain
     - pre-recipes
 
+  'G@recipes:post and G@roles:knox_gateway':
+    - match: compound
+    - ldap
+
   'recipes:post':
     - match: grain
     - post-recipes
-    - users.add-to-group
-
