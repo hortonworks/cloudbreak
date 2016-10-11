@@ -5,11 +5,6 @@
 include:
   - ambari.repo
 
-haveged:
-  pkg.installed: []
-  service.running:
-    - enable: True
-
 ambari-server:
   pkg.installed:
     - require:
