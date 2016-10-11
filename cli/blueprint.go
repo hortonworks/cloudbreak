@@ -25,8 +25,6 @@ func init() {
 	BlueprintMap["hdp-etl-edw-spark2"] = "EDW-ETL: Apache Spark 2.0, Apache Hive 2"
 	BlueprintMap["shared-services"] = "Enterprise Services: Apache Atlas, Apache Ranger"
 	BlueprintMap["hdp25-etl-edw-shared"] = "Enterprise ETL-EDW: Apache Hive 1.2.1"
-
-	BlueprintMap["EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0"] = "EDW-ETL: Apache Spark 2.0-preview"
 }
 
 type Blueprint struct {
