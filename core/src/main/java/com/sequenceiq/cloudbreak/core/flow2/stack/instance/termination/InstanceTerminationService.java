@@ -45,13 +45,17 @@ public class InstanceTerminationService {
         String hostName = instanceMetaData.getDiscoveryFQDN();
         if (stack.getCluster() != null) {
             HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
-            if (hostMetadata != null && HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
+            if (hostMetadata == null) {
+                LOGGER.info("Nothing to remove since hostmetadata is null");
+            } else if (hostMetadata != null && HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
                 throw new ScalingFailedException(String.format("Host (%s) is in HEALTHY state. Cannot be removed.", hostName));
             }
         }
-        String instanceGroupName = instanceMetaData.getInstanceGroup().getGroupName();
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP, UPDATE_IN_PROGRESS.name(),
-                hostName, instanceGroupName);
+        if (hostName != null) {
+            String instanceGroupName = instanceMetaData.getInstanceGroup().getGroupName();
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP, UPDATE_IN_PROGRESS.name(),
+                    hostName, instanceGroupName);
+        }
     }
 
     public void finishInstanceTermination(InstanceTerminationContext context, RemoveInstanceResult payload) {

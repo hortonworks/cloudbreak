@@ -39,3 +39,4 @@ hs_err_pid
 node_modules/
 npm-debug.log
 start-local.sh
+cloudbreak.log
