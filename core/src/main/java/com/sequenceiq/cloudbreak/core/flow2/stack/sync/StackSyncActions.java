@@ -93,7 +93,7 @@ public class StackSyncActions {
     }
 
     @Bean(name = "SYNC_FAILED_STATE")
-    public  Action stackSyncFailedAction() {
+    public Action stackSyncFailedAction() {
         return new AbstractStackFailureAction<StackSyncState, StackSyncEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
@@ -131,7 +131,8 @@ public class StackSyncActions {
             Long stackId = payload.getStackId();
             Stack stack = stackService.getById(stackId);
             MDCBuilder.buildMdcContext(stack);
-            List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataRepository.findNotTerminatedForStack(stackId));
+            //We need a find all in stack where we have hostmetadata associated
+            List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataRepository.findAllInStack(stackId));
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                     location);

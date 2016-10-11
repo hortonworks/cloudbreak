@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATH
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -151,23 +152,6 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
-
-    private enum Msg {
-        AMBARI_CLUSTER_START_IGNORED("ambari.cluster.start.ignored"),
-        AMBARI_CLUSTER_STOP_IGNORED("ambari.cluster.stop.ignored"),
-        AMBARI_CLUSTER_HOST_STATUS_UPDATED("ambari.cluster.host.status.updated"),
-        AMBARI_CLUSTER_START_REQUESTED("ambari.cluster.start.requested");
-
-        private String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
-    }
 
     @Override
     @Transactional(Transactional.TxType.NEVER)
@@ -437,10 +421,14 @@ public class AmbariClusterService implements ClusterService {
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
             AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), stack.getCluster().getUserName(),
                     stack.getCluster().getPassword());
+            Map<String, Integer> hostGroupCounter = new HashMap<>();
             Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
             Map<String, String> hostStatuses = ambariClient.getHostStatuses();
             for (HostMetadata host : hosts) {
                 if (hostStatuses.containsKey(host.getHostName())) {
+                    String hgName = host.getHostGroup().getName();
+                    Integer hgCounter = hostGroupCounter.getOrDefault(hgName, 0) + 1;
+                    hostGroupCounter.put(hgName, hgCounter);
                     HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostStatuses.get(host.getHostName()))
                             ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
                     boolean stateChanged = updateHostMetadataByHostState(stack, host.getHostName(), newState);
@@ -449,10 +437,24 @@ public class AmbariClusterService implements ClusterService {
                     }
                 }
             }
+            hostGroupCounter(cluster.getId(), hostGroupCounter);
         } catch (CloudbreakSecuritySetupException e) {
             throw new CloudbreakServiceException(e);
         }
         return cluster;
+    }
+
+    private void hostGroupCounter(Long clusterId, Map<String, Integer> hostGroupCounter) {
+        LOGGER.info("Counted hostgroups: {}", hostGroupCounter);
+        Set<HostGroup> hostGroups = hostGroupService.getByCluster(clusterId);
+        for (HostGroup hostGroup : hostGroups) {
+            Integer hgCounter = hostGroupCounter.getOrDefault(hostGroup.getName(), 0);
+            if (!hgCounter.equals(hostGroup.getConstraint().getHostCount())) {
+                hostGroup.getConstraint().setHostCount(hgCounter);
+                constraintRepository.save(hostGroup.getConstraint());
+                LOGGER.info("Updated HostCount for hostgroup: {}, counter: {}", hostGroup.getName(), hgCounter);
+            }
+        }
     }
 
     private void updateInstanceMetadataStateToRegistered(Long stackId, HostMetadata host) {
@@ -624,6 +626,23 @@ public class AmbariClusterService implements ClusterService {
             throw new NotFoundException(String.format("Cluster '%s' not found", id));
         }
         return cluster;
+    }
+
+    private enum Msg {
+        AMBARI_CLUSTER_START_IGNORED("ambari.cluster.start.ignored"),
+        AMBARI_CLUSTER_STOP_IGNORED("ambari.cluster.stop.ignored"),
+        AMBARI_CLUSTER_HOST_STATUS_UPDATED("ambari.cluster.host.status.updated"),
+        AMBARI_CLUSTER_START_REQUESTED("ambari.cluster.start.requested");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
     }
 
 }
