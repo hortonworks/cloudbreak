@@ -399,6 +399,7 @@ cloudbreak:
         - AWS_INSTANCE_ID
         - AWS_ACCOUNT_ID
         - CB_PLATFORM_DEFAULT_REGIONS
+        - CB_DEFAULT_SUBSCRIPTION_ADDRESS
         - CB_IMAGE_CATALOG_URL
         - "CB_PUBLICIP=$DEFAULT_INBOUND_ACCESS_IP"
     labels:
@@ -488,6 +489,7 @@ uluwatu:
         - ULU_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
         - ULU_PERISCOPE_SERVICEID=periscope.service.consul
         - ULU_HWX_CLOUD_REGISTRATION_URL
+        - ULU_SUBSCRIBE_TO_NOTIFICATIONS
         - AWS_INSTANCE_ID
         - HWX_HCC_AVAILABLE
         - AWS_ACCOUNT_ID
