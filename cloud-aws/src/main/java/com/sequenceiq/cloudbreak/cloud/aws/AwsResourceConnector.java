@@ -124,6 +124,8 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Value("${cb.publicip:}")
     private String cloudbreakPublicIp;
+    @Value("${cb.aws.default.inbound.security.group:}")
+    private String defaultInboundSecurityGroup;
     @Value("${cb.nginx.port:9443}")
     private int gatewayPort;
     @Value("${cb.aws.cf.template.new.path:}")
@@ -180,6 +182,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withTemplatePath(awsCloudformationTemplatePath)
                 .withDefaultSubnet(subnet)
                 .withCloudbreakPublicIp(cloudbreakPublicIp)
+                .withDefaultInboundSecurityGroup(defaultInboundSecurityGroup)
                 .withGatewayPort(gatewayPort);
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
