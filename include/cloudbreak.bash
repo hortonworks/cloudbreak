@@ -199,6 +199,8 @@ cloudbreak-conf-defaults() {
     env-import CB_SMARTSENSE_CONFIGURE "false"
     env-import TRAEFIK_MAX_IDLE_CONNECTION 100
     env-import DEFAULT_INBOUND_ACCESS_IP ""
+    env-import CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP ""
+    env-import CB_AWS_VPC ""
 }
 
 cloudbreak-conf-cloud-provider() {

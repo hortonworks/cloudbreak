@@ -402,6 +402,8 @@ cloudbreak:
         - CB_DEFAULT_SUBSCRIPTION_ADDRESS
         - CB_IMAGE_CATALOG_URL
         - "CB_PUBLICIP=$DEFAULT_INBOUND_ACCESS_IP"
+        - CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP
+        - CB_AWS_VPC
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
