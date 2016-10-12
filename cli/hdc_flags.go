@@ -3,6 +3,7 @@ package cli
 import (
 	"github.com/urfave/cli"
 	"reflect"
+	"strconv"
 )
 
 var REQUIRED RequiredFlag = RequiredFlag{true}
@@ -196,6 +197,7 @@ var (
 		StringFlag: cli.StringFlag{
 			Name:  "rds-database-type",
 			Usage: "database type of the RDS",
+			Value: POSTGRES,
 		},
 	}
 	FlHdpVersion = StringFlag{
@@ -203,6 +205,7 @@ var (
 		StringFlag: cli.StringFlag{
 			Name:  "hdp-version",
 			Usage: "HDP version",
+			Value: strconv.FormatFloat(SUPPORTED_HDP_VERSIONS[0], 'f', 6, 64)[0:3],
 		},
 	}
 )
