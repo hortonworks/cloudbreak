@@ -63,8 +63,11 @@ public class CloudFormationTemplateBuilder {
                 : context.existingSubnetCidr);
         if (isNoneEmpty(context.cloudbreakPublicIp)) {
             model.put("cloudbreakPublicIp", context.cloudbreakPublicIp);
-            model.put("gatewayPort", context.gatewayPort);
         }
+        if (isNoneEmpty(context.defaultInboundSecurityGroup)) {
+            model.put("defaultInboundSecurityGroup", context.defaultInboundSecurityGroup);
+        }
+        model.put("gatewayPort", context.gatewayPort);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
@@ -119,6 +122,7 @@ public class CloudFormationTemplateBuilder {
         private boolean enableInstanceProfile;
         private boolean s3RoleAvailable;
         private String defaultSubnet;
+        private String defaultInboundSecurityGroup;
         private String cloudbreakPublicIp;
         private int gatewayPort;
 
@@ -179,6 +183,11 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withCloudbreakPublicIp(String publicIp) {
             this.cloudbreakPublicIp = publicIp;
+            return this;
+        }
+
+        public ModelContext withDefaultInboundSecurityGroup(String securityGroup) {
+            this.defaultInboundSecurityGroup = securityGroup;
             return this;
         }
 
