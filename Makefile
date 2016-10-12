@@ -15,6 +15,14 @@ format:
 test:
 	go test -race ./...
 
+coverage:
+	go test github.com/hortonworks/hdc-cli/cli -cover
+
+coverage-html:
+	go test github.com/hortonworks/hdc-cli/cli -coverprofile fmt
+	@go tool cover -html=fmt
+	@rm -f fmt
+
 build: format test build-darwin build-linux build-windows
 
 build-docker:
