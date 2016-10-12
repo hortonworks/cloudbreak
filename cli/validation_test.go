@@ -32,7 +32,7 @@ func TestClusterSkeletonValidateInstanceCountIsZero(t *testing.T) {
 func TestClusterSkeletonValidateAllGood(t *testing.T) {
 	skeleton := ClusterSkeleton{
 		ClusterName:              "name",
-		HDPVersion:               "version",
+		HDPVersion:               "2.5",
 		ClusterType:              "type",
 		Worker:                   InstanceConfig{InstanceCount: 1},
 		SSHKeyName:               "ssh",
@@ -171,6 +171,66 @@ func TestHiveMetastoreSkeletonValidateAllGoodExisting(t *testing.T) {
 
 	if errors != nil {
 		t.Errorf("validation went fail: %s", strings.Join(convertErrorsToString(errors), ", "))
+	}
+}
+
+func TestInvalidHDPVersion(t *testing.T) {
+	skeleton := ClusterSkeleton{
+		ClusterName:              "name",
+		HDPVersion:               "2.4",
+		ClusterType:              "type",
+		Worker:                   InstanceConfig{InstanceCount: 1},
+		SSHKeyName:               "ssh",
+		RemoteAccess:             "remote",
+		WebAccess:                true,
+		ClusterAndAmbariUser:     "user",
+		ClusterAndAmbariPassword: "pass",
+	}
+
+	errors := skeleton.Validate()
+
+	if errors == nil {
+		t.Error("validation should fail for HDP version")
+	}
+}
+
+func TestInvalidHDPVersionSimpleNumber(t *testing.T) {
+	skeleton := ClusterSkeleton{
+		ClusterName:              "name",
+		HDPVersion:               "2",
+		ClusterType:              "type",
+		Worker:                   InstanceConfig{InstanceCount: 1},
+		SSHKeyName:               "ssh",
+		RemoteAccess:             "remote",
+		WebAccess:                true,
+		ClusterAndAmbariUser:     "user",
+		ClusterAndAmbariPassword: "pass",
+	}
+
+	errors := skeleton.Validate()
+
+	if errors == nil {
+		t.Error("validation should fail for HDP version")
+	}
+}
+
+func TestInvalidHDPVersionForNonNumber(t *testing.T) {
+	skeleton := ClusterSkeleton{
+		ClusterName:              "name",
+		HDPVersion:               "something",
+		ClusterType:              "type",
+		Worker:                   InstanceConfig{InstanceCount: 1},
+		SSHKeyName:               "ssh",
+		RemoteAccess:             "remote",
+		WebAccess:                true,
+		ClusterAndAmbariUser:     "user",
+		ClusterAndAmbariPassword: "pass",
+	}
+
+	errors := skeleton.Validate()
+
+	if errors == nil {
+		t.Error("validation should fail for HDP version")
 	}
 }
 

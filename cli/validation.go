@@ -3,8 +3,10 @@ package cli
 import (
 	"errors"
 
+	"fmt"
 	swagerrors "github.com/go-swagger/go-swagger/errors"
 	"github.com/go-swagger/go-swagger/httpkit/validate"
+	"strconv"
 )
 
 func (s *ClusterSkeleton) Validate() error {
@@ -13,6 +15,9 @@ func (s *ClusterSkeleton) Validate() error {
 		res = append(res, err)
 	}
 	if err := validate.RequiredString("HDPVersion", "body", string(s.HDPVersion)); err != nil {
+		res = append(res, err)
+	}
+	if err := validateHDPVersion(string(s.HDPVersion)); err != nil {
 		res = append(res, err)
 	}
 	if err := validate.RequiredString("ClusterType", "body", string(s.ClusterType)); err != nil {
@@ -106,4 +111,20 @@ func (h *HiveMetastore) Validate() []error {
 
 func (h *HiveMetastore) isNew() bool {
 	return len(h.DatabaseType) > 0 || len(h.Username) > 0 || len(h.Password) > 0 || len(h.URL) > 0
+}
+
+func validateHDPVersion(version string) error {
+	if hdp, err := strconv.ParseFloat(version, 10); err != nil || !isVersionSupported(hdp) {
+		return errors.New(fmt.Sprintf("Invalid HDP version. Accepted value(s): %v", SUPPORTED_HDP_VERSIONS))
+	}
+	return nil
+}
+
+func isVersionSupported(version float64) bool {
+	for _, v := range SUPPORTED_HDP_VERSIONS {
+		if v == version {
+			return true
+		}
+	}
+	return false
 }

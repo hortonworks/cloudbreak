@@ -8,6 +8,8 @@ const (
 	POSTGRES = "POSTGRES"
 )
 
+var SUPPORTED_HDP_VERSIONS = [...]float64{2.5}
+
 var ClusterSkeletonHeader []string = []string{"Cluster Name", "HDP Version", "Cluster Type", "Master", "Worker",
 	"SSH Key Name", "Remote Access", "WebAccess", "User", "Status", "Status Reason"}
 

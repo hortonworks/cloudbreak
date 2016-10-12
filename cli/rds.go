@@ -94,6 +94,10 @@ func CreateRDSConfig(c *cli.Context) error {
 		logErrorAndExit(CreateRDSConfig, "Invalid DB type. Accepted value: "+POSTGRES)
 	}
 
+	if err := validateHDPVersion(c.String(FlHdpVersion.Name)); err != nil {
+		logErrorAndExit(CreateRDSConfig, err.Error())
+	}
+
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
