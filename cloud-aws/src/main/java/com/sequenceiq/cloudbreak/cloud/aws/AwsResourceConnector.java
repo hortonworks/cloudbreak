@@ -170,8 +170,8 @@ public class AwsResourceConnector implements ResourceConnector {
         }
 
         String cidr = stack.getNetwork().getSubnet().getCidr();
-        String subnet = existingVPC && !existingSubnet && cidr == null ? findNonOverLappingCIDR(ac, stack) : cidr;
-        String inboundSecurityGroup = StringUtils.isNoneEmpty(cloudbreakVpc) && existingVPC && awsNetworkView.getExistingVPC().equals(cloudbreakVpc)
+        String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? findNonOverLappingCIDR(ac, stack) : cidr;
+        String inboundSecurityGroup = deployingToSameVPC(awsNetworkView, existingVPC)
                 ? defaultInboundSecurityGroup : "";
 
         CloudFormationTemplateBuilder.ModelContext modelContext = new CloudFormationTemplateBuilder.ModelContext()
@@ -206,6 +206,14 @@ public class AwsResourceConnector implements ResourceConnector {
 
         List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, client, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
         return check(ac, cloudResources);
+    }
+
+    private boolean isNoCIDRProvided(boolean existingVPC, boolean existingSubnet, String cidr) {
+        return existingVPC && !existingSubnet && cidr == null;
+    }
+
+    private boolean deployingToSameVPC(AwsNetworkView awsNetworkView, boolean existingVPC) {
+        return StringUtils.isNoneEmpty(cloudbreakVpc) && existingVPC && awsNetworkView.getExistingVPC().equals(cloudbreakVpc);
     }
 
     private CreateStackRequest createCreateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String subnet, String cfTemplate) {
