@@ -172,8 +172,12 @@ public-ip-resolver-command() {
             if curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-hostname &>/dev/null ; then
                 echo "curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-hostname"
             else
-                warn "Public hostname not found setting up loopback as PUBLLIC_IP"
-                echo "echo 127.0.0.1"
+                if curl -m 1 -f -s 169.254.169.254/latest/meta-data/local-ipv4 &>/dev/null ; then
+                     echo "curl -m 1 -f -s 169.254.169.254/latest/meta-data/local-ipv4"
+                else
+                    warn "Public hostname not found setting up loopback as PUBLLIC_IP"
+                    echo "echo 127.0.0.1"
+                fi
             fi
             return
         fi
