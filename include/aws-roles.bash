@@ -95,7 +95,7 @@ aws-show-role-inline-policies() {
         $AWS iam get-role-policy \
             --role-name $roleName \
             --policy-name $p \
-            --query "PolicyDocument.Statement[][Effect,Action[0],Resource[0]]" --out text
+            --query "PolicyDocument.Statement[]"
     done
 }
 
@@ -126,9 +126,9 @@ aws-show-role() {
     
     declare roleName=$1
 
-    : ${roleName:= $AWS_ROLE_NAME}
+    : ${roleName:=$AWS_ROLE_NAME}
 
-    local arnName=$($AWS iam get-role --role-name cbreak-deployer --query 'Role.Arn' --out text)
+    local arnName=$($AWS iam get-role --role-name $roleName --query 'Role.Arn' --out text)
      info "Full reference: $arnName"
 
     aws-show-role-assumers $roleName
