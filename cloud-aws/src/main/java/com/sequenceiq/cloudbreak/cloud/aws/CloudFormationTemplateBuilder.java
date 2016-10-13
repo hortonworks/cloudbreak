@@ -16,11 +16,11 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -32,23 +32,21 @@ public class CloudFormationTemplateBuilder {
 
     public String build(ModelContext context) {
         Map<String, Object> model = new HashMap<>();
-        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(context.stack.getParameters());
+        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(context.stack);
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
         for (Group group : context.stack.getGroups()) {
-            InstanceTemplate instanceTemplate = group.getInstances().get(0).getTemplate();
-            Boolean encrypted = instanceTemplate.getParameter("encrypted", Boolean.class);
-            encrypted = encrypted == null ? Boolean.FALSE : encrypted;
+            AwsInstanceView awsInstanceView = new AwsInstanceView(group.getInstances().get(0).getTemplate());
             awsGroupViews.add(
                     new AwsGroupView(
                             group.getInstances().size(),
                             group.getType().name(),
-                            instanceTemplate.getFlavor(),
+                            awsInstanceView.getFlavor(),
                             group.getName(),
-                            instanceTemplate.getVolumes().size(),
-                            encrypted.equals(Boolean.TRUE),
-                            instanceTemplate.getVolumeSize(),
-                            instanceTemplate.getVolumeType(),
-                            getSpotPrice(instanceTemplate),
+                            awsInstanceView.getVolumes().size(),
+                            awsInstanceView.isEncryptedVolumes(),
+                            awsInstanceView.getVolumeSize(),
+                            awsInstanceView.getVolumeType(),
+                            awsInstanceView.getSpotPrice(),
                             group.getSecurity().getRules()
                     )
             );
@@ -93,14 +91,6 @@ public class CloudFormationTemplateBuilder {
     private boolean isDedicatedInstancesParamExistAndTrue(CloudStack stack) {
         return stack.getParameters().containsKey("dedicatedInstances")
                 && Boolean.valueOf(stack.getParameters().get("dedicatedInstances"));
-    }
-
-    private Double getSpotPrice(InstanceTemplate instanceTemplate) {
-        try {
-            return instanceTemplate.getParameter("spotPrice", Double.class);
-        } catch (ClassCastException e) {
-            return instanceTemplate.getParameter("spotPrice", Integer.class).doubleValue();
-        }
     }
 
     public static class ModelContext {
