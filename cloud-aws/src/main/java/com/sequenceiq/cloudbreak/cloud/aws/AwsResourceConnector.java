@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +127,8 @@ public class AwsResourceConnector implements ResourceConnector {
     private String cloudbreakPublicIp;
     @Value("${cb.aws.default.inbound.security.group:}")
     private String defaultInboundSecurityGroup;
+    @Value("${cb.aws.vpc:}")
+    private String cloudbreakVpc;
     @Value("${cb.nginx.port:9443}")
     private int gatewayPort;
     @Value("${cb.aws.cf.template.new.path:}")
@@ -167,7 +170,9 @@ public class AwsResourceConnector implements ResourceConnector {
         }
 
         String cidr = stack.getNetwork().getSubnet().getCidr();
-        String subnet = existingVPC && !existingSubnet && cidr == null ? findNonOverLappingCIDR(ac, stack) : cidr;
+        String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? findNonOverLappingCIDR(ac, stack) : cidr;
+        String inboundSecurityGroup = deployingToSameVPC(awsNetworkView, existingVPC)
+                ? defaultInboundSecurityGroup : "";
 
         CloudFormationTemplateBuilder.ModelContext modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(ac)
@@ -182,7 +187,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withTemplatePath(awsCloudformationTemplatePath)
                 .withDefaultSubnet(subnet)
                 .withCloudbreakPublicIp(cloudbreakPublicIp)
-                .withDefaultInboundSecurityGroup(defaultInboundSecurityGroup)
+                .withDefaultInboundSecurityGroup(inboundSecurityGroup)
                 .withGatewayPort(gatewayPort);
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
@@ -201,6 +206,14 @@ public class AwsResourceConnector implements ResourceConnector {
 
         List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, client, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
         return check(ac, cloudResources);
+    }
+
+    private boolean isNoCIDRProvided(boolean existingVPC, boolean existingSubnet, String cidr) {
+        return existingVPC && !existingSubnet && cidr == null;
+    }
+
+    private boolean deployingToSameVPC(AwsNetworkView awsNetworkView, boolean existingVPC) {
+        return StringUtils.isNoneEmpty(cloudbreakVpc) && existingVPC && awsNetworkView.getExistingVPC().equals(cloudbreakVpc);
     }
 
     private CreateStackRequest createCreateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String subnet, String cfTemplate) {
