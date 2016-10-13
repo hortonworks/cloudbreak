@@ -145,7 +145,7 @@
 <td style="line-height:1px; font-size:1px;" height="15" colspan="2">&nbsp;</td>
 </tr>
 <tr ><td style="font-size:11px; line-height:16px; font-family:Arial, Helvetica, sans-serif; text-align:left; color:#ffffff; " class="block" ><div class="mktEditable" id="footer" >&copy; 2011-2016 Hortonworks Inc. All Rights Reserved.<br>
-<a href="http://hortonworks.github.io/hdp-aws/terms/" style="text-decoration:none; color:#ffffff;">Terms of Use</a>&nbsp;&nbsp;- &nbsp;&nbsp;<a href="https://community.hortonworks.com/topics/hortonworks-cloud.html" style="text-decoration:none; color:#ffffff;">Hortonworks Community Connection</a></div>
+</div>
 </td>
 <td style="text-align:right; padding-top:5px; " valign="middle" class="block top-pad" ><div class="mktEditable" id="social-icons" ><a href="https://www.facebook.com/hortonworks"><img src="http://info.hortonworks.com/rs/h2source/images/facebook-icon-white.jpg" alt="Facebook" border="0"></a>&nbsp;<a href="https://twitter.com/hortonworks"><img src="http://info.hortonworks.com/rs/h2source/images/twitter-icon-white.jpg" alt="Twitter" border="0"></a>&nbsp;<a href="https://www.linkedin.com/company/hortonworks"><img src="http://info.hortonworks.com/rs/h2source/images/linkedin-icon-white.jpg" alt="Linkedin" border="0"></a></div>
 </td>
