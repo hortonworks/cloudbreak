@@ -161,12 +161,11 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "volumeType", help = "volumeType of the template") AwsVolumeType volumeType,
             @CliOption(key = "encrypted", help = "use encrypted disks") Boolean encrypted,
             @CliOption(key = "spotPrice", help = "spotPrice of the template") Double spotPrice,
-            @CliOption(key = "sshLocation", specifiedDefaultValue = "0.0.0.0/0", help = "sshLocation of the template") String sshLocation,
             @CliOption(key = "publicInAccount", help = "flags if the template is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the template") String description,
             @CliOption(key = "topologyId", help = "Id of a topology the template belongs to") Long platformId
     ) {
-        return createEc2Template(name, instanceType, volumeCount, volumeSize, volumeType, encrypted, spotPrice, sshLocation, publicInAccount,
+        return createEc2Template(name, instanceType, volumeCount, volumeSize, volumeType, encrypted, spotPrice, publicInAccount,
                 description, platformId);
     }
 
@@ -179,15 +178,17 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "volumeType", help = "volumeType of the template") AwsVolumeType volumeType,
             @CliOption(key = "encrypted", help = "use encrypted disks") Boolean encrypted,
             @CliOption(key = "spotPrice", help = "spotPrice of the template") Double spotPrice,
-            @CliOption(key = "sshLocation", specifiedDefaultValue = "0.0.0.0/0", help = "sshLocation of the template") String sshLocation,
             @CliOption(key = "publicInAccount", help = "flags if the template is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the template") String description,
             @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId
     ) {
         Map<String, Object> params = new HashMap<>();
-        params.put("sshLocation", sshLocation == null ? "0.0.0.0/0" : sshLocation);
-        params.put("spotPrice", spotPrice == null ? null : spotPrice.toString());
-        params.put("encrypted", encrypted == null ? null : encrypted.toString());
+        if (spotPrice != null) {
+            params.put("spotPrice", spotPrice);
+        }
+        if (encrypted != null) {
+            params.put("encrypted", encrypted);
+        }
         return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volumeType == null ? "gp2" : volumeType.getName(),
                 publicInAccount, description, params, platformId, PLATFORM);
     }
@@ -219,7 +220,7 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "orchestrator", help = "select orchestrator variant version") AwsOrchestratorType orchestratorType,
             @CliOption(key = "dedicatedInstances", help = "request dedicated instances on AWS") Boolean dedicatedInstances,
             @CliOption(key = "instanceProfileStrategy", help = "seamless S3 access type", specifiedDefaultValue = "false")
-            InstanceProfileStrategy instanceProfileStrategy,
+                    InstanceProfileStrategy instanceProfileStrategy,
             @CliOption(key = "s3Role", help = "seamless S3 access role", specifiedDefaultValue = "false") String s3Role,
             @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
 

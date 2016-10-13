@@ -6,13 +6,14 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public class AwsInstanceProfileView {
 
     private Map<String, String> parameters;
 
-    public AwsInstanceProfileView(Map<String, String> parameters) {
-        this.parameters = parameters;
+    public AwsInstanceProfileView(CloudStack stack) {
+        this.parameters = stack.getParameters();
     }
 
     public boolean isEnableInstanceProfileStrategy() {

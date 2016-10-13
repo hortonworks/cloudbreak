@@ -77,6 +77,7 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -85,7 +86,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -138,7 +138,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 ac.getCloudContext().getLocation().getRegion().value());
         String snapshotId = getEbsSnapshotIdIfNeeded(ac, stack);
         Network network = stack.getNetwork();
-        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack.getParameters());
+        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         boolean existingVPC = awsNetworkView.isExistingVPC();
         boolean existingSubnet = awsNetworkView.isExistingSubnet();
@@ -264,7 +264,7 @@ public class AwsResourceConnector implements ResourceConnector {
 
     private List<Parameter> getStackParameters(AuthenticatedContext ac, CloudStack stack, String stackName, String newSubnetCidr) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
-        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack.getParameters());
+        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
         String keyPairName = awsClient.getKeyPairName(ac);
         if (awsClient.existingKeyPairNameSpecified(ac)) {
             keyPairName = awsClient.getExistingKeyPairName(ac);
@@ -391,10 +391,8 @@ public class AwsResourceConnector implements ResourceConnector {
     private boolean isEncryptedVolumeRequested(CloudStack stack) {
         for (Group group : stack.getGroups()) {
             for (CloudInstance cloudInstance : group.getInstances()) {
-                InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
-                Boolean encrypted = instanceTemplate.getParameter("encrypted", Boolean.class);
-                encrypted = encrypted == null ? Boolean.FALSE : encrypted;
-                if (encrypted.equals(Boolean.TRUE)) {
+                AwsInstanceView awsInstanceView = new AwsInstanceView(cloudInstance.getTemplate());
+                if (awsInstanceView.isEncryptedVolumes()) {
                     return true;
                 }
             }
