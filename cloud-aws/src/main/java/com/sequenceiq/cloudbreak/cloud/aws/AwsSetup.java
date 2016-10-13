@@ -45,6 +45,7 @@ import com.amazonaws.util.json.JSONObject;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -95,16 +96,9 @@ public class AwsSetup implements Setup {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String region = ac.getCloudContext().getLocation().getRegion().value();
-        if (!awsSpotinstanceEnabled) {
-            for (Group group : stack.getGroups()) {
-                if (group.getInstances().get(0).getParameter("spotPrice", Double.class) != null) {
-                    throw new CloudConnectorException(String.format("Spot instances are not supported on this AMI: %s", stack.getImage()));
-                }
-            }
-        }
-
+        verifySpotInstances(stack);
         AwsCredentialView awsCredentialView = new AwsCredentialView(ac.getCloudCredential());
-        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack.getParameters());
+        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
         validateImageOptIn(awsCredentialView, region, stack.getImage().getImageName());
         if (awsClient.roleBasedCredential(awsCredentialView) && awsInstanceProfileView.isCreateInstanceProfile()) {
             validateInstanceProfileCreation(awsCredentialView);
@@ -124,6 +118,18 @@ public class AwsSetup implements Setup {
         }
         validateExistingKeyPair(ac, credentialView, region);
         LOGGER.debug("setup has been executed");
+    }
+
+    private void verifySpotInstances(CloudStack stack) {
+        if (!awsSpotinstanceEnabled) {
+            for (Group group : stack.getGroups()) {
+                if (group.getInstances() != null
+                        && !group.getInstances().isEmpty()
+                        && new AwsInstanceView(group.getInstances().get(0).getTemplate()).getSpotPrice() != null) {
+                    throw new CloudConnectorException(String.format("Spot instances are not supported on this AMI: %s", stack.getImage()));
+                }
+            }
+        }
     }
 
     private void validateImageOptIn(AwsCredentialView credentialView, String region, String imageName) {
