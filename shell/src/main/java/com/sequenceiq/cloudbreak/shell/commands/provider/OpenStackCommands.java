@@ -85,7 +85,7 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "keystoneAuthScope", help = "keystoneAuthScope of the credential for cb-keystone-v3*") String keystoneAuthScope,
             @CliOption(key = "domainName", help = "domainName of the credential for cb-keystone-v3-default-scope") String domainName,
             @CliOption(key = "projectDomainName", help = "projectDomainName of the credential for cb-keystone-v3-project-scope")
-            String projectDomainName,
+                    String projectDomainName,
             @CliOption(key = "projectName", help = "projectName of the credential for cb-keystone-v3-project-scope") String projectName,
             @CliOption(key = "sshKeyPath", help = "path of a public SSH key file") File sshKeyPath,
             @CliOption(key = "sshKeyUrl", help = "URL of a public SSH key file") String sshKeyUrl,
@@ -140,11 +140,14 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "publicNetID", help = "ID of the available and desired OpenStack public network") String publicNetID,
             @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the network") String description,
-            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
+            @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId,
+            @CliOption(key = "networkingOption", help = "Networking option: self-service, provider",
+                    unspecifiedDefaultValue = "self-service") String networkingOption
     ) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("networkId", networkId);
         parameters.put("subnetId", subnetId);
+        parameters.put("networkingOption", networkingOption);
         if (publicNetID != null) {
             parameters.put("publicNetId", publicNetID);
         }
@@ -192,17 +195,27 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the template") String name,
             @CliOption(key = "instanceType", mandatory = true, help = "instanceType of the template") String instanceType,
             @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
-            @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
+            @CliOption(key = "volumeSize", help = "volumeSize(GB) of the template") Integer volumeSize,
             @CliOption(key = "publicInAccount", help = "flags if the template is public in the account") Boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the template") String description,
             @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId
     ) {
         Map<String, Object> parameters = new HashMap<>();
-        if (volumeCount < 1) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException("Count of volumes could not be smaller than 1.");
+
+        if (volumeCount == 0) {
+            volumeSize = null;
         }
-        if (volumeSize < TEN) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException("Size of volumes could not be smaller than 10 Gb.");
+
+        if (volumeCount < 0) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Count of volumes could not be smaller than 0.");
+        }
+
+        if (volumeCount > 0) {
+            if (volumeSize == null) {
+                throw shellContext.exceptionTransformer().transformToRuntimeException("volumeSize parameter must be specified");
+            } else if (volumeSize < TEN) {
+                throw shellContext.exceptionTransformer().transformToRuntimeException("Size of volumes could not be smaller than 10 Gb.");
+            }
         }
         return baseTemplateCommands.create(name, instanceType, volumeCount, volumeSize, "HDD", publicInAccount, description, parameters, platformId, PLATFORM);
     }
@@ -225,7 +238,7 @@ public class OpenStackCommands implements CommandMarker {
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
-            @CliOption(key = "availabilityZone", help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
+            @CliOption(key = "availabilityZone", mandatory = true, help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
             @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account") Boolean publicInAccount,
             @CliOption(key = "ambariVersion", help = "Ambari version") String ambariVersion,
             @CliOption(key = "hdpVersion", help = "HDP version") String hdpVersion,

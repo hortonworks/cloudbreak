@@ -39,6 +39,13 @@ public class NovaInstanceView {
         return instance.getPrivateId();
     }
 
+    public int getVolumesCount() {
+        if (instance.getVolumes() == null) {
+            return 0;
+        }
+        return instance.getVolumes().size();
+    }
+
     public List<CinderVolumeView> getVolumes() {
         List<CinderVolumeView> list = new ArrayList<>();
         int index = 0;

@@ -104,7 +104,12 @@
                                     <p id="sl_region" class="form-control-static">{{$root.displayNames.getRegion(activeCluster.cloudPlatform, activeCluster.region)}}</p>
                                 </div>
                             </div>
-
+                            <div class="form-group" ng-show="activeCluster.availabilityZone">
+                                <label class="col-sm-3 control-label" for="sl_availabilityZone">{{msg.active_cluster_availability_zone_label}}</label>
+                                <div class="col-sm-9">
+                                    <p id="sl_region" class="form-control-static">{{activeCluster.availabilityZone}}</p>
+                                </div>
+                            </div>
                             <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
                                 <label class="col-sm-3 control-label" for="sl_cloudStatus">{{msg.active_cluster_status_label}}</label>
                                 <div class="col-sm-9">

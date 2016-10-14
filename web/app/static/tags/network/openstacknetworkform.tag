@@ -271,6 +271,16 @@
                         <!-- .col-sm-9 -->
                     </div>
 
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="networkingOptionSelect">{{msg.network_openstack_form_network_option_label}}</label>
+                        <div class="col-sm-9">
+                            <select class="form-control" id="networkingOptionSelect" name="networkingOptionSelect" ng-model="network.parameters.networkingOption" required>
+                                <option ng-option value="self-service" ng-selected="true">{{msg.network_select_networking_option_self_service}}</option>
+                                <option ng-option value="provider">{{msg.network_select_networking_option_provider}}</option>
+                            </select>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="openstack_network_public">{{msg.public_in_account_label}}</label>

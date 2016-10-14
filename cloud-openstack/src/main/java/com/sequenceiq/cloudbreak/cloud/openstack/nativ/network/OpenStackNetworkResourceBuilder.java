@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
+import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
@@ -38,8 +39,9 @@ public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkRes
             throws Exception {
         OSClient osClient = createOSClient(auth);
         try {
-            String networkId = utils.isExistingNetwork(network) ? utils.getCustomNetworkId(network) : context.getParameter(NETWORK_ID, String.class);
-            if (!utils.isExistingNetwork(network)) {
+            NeutronNetworkView neutronView = new NeutronNetworkView(network);
+            String networkId = neutronView.isExistingNetwork() ? neutronView.getCustomNetworkId() : context.getParameter(NETWORK_ID, String.class);
+            if (!neutronView.isExistingNetwork()) {
                 org.openstack4j.model.network.Network osNetwork = Builders.network()
                         .name(buildableResource.getName())
                         .tenantId(context.getStringParameter(OpenStackConstants.TENANT_ID))
@@ -59,7 +61,8 @@ public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkRes
         try {
             OSClient osClient = createOSClient(auth);
             deAllocateFloatingIps(context, osClient);
-            if (!utils.isExistingNetwork(network)) {
+            NeutronNetworkView neutronView = new NeutronNetworkView(network);
+            if (!neutronView.isExistingNetwork()) {
                 ActionResponse response = osClient.networking().network().delete(resource.getReference());
                 return checkDeleteResponse(response, resourceType(), auth, resource, "Network deletion failed");
             }

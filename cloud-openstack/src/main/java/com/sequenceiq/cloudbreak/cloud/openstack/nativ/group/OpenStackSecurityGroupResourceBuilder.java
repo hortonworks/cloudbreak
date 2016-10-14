@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.OpenStackResourceException;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
+import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
@@ -47,7 +48,8 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
                     securityGroupService.createRule(createRule(securityGroupId, osProtocol, cidr, port, port));
                 }
             }
-            String subnetCidr = utils.isExistingSubnet(network) ? utils.getExistingSubnetCidr(auth, network) : network.getSubnet().getCidr();
+            NeutronNetworkView neutronView = new NeutronNetworkView(network);
+            String subnetCidr = neutronView.isExistingSubnet() ? utils.getExistingSubnetCidr(auth, neutronView) : network.getSubnet().getCidr();
             securityGroupService.createRule(createRule(securityGroupId, IPProtocol.TCP, subnetCidr, MIN_PORT, MAX_PORT));
             securityGroupService.createRule(createRule(securityGroupId, IPProtocol.UDP, subnetCidr, MIN_PORT, MAX_PORT));
             securityGroupService.createRule(createRule(securityGroupId, IPProtocol.ICMP, "0.0.0.0/0"));

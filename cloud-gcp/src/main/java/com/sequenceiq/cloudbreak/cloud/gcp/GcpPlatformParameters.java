@@ -65,7 +65,7 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @PostConstruct
     public void init() {
-        this.regions = readRegions();
+        this.regions = readRegionsGcp();
         this.vmTypes = readVmTypes();
 
         this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
@@ -110,7 +110,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         return sortMap(vmTypes);
     }
 
-    private Map<Region, List<AvailabilityZone>> readRegions() {
+    private Map<Region, List<AvailabilityZone>> readRegionsGcp() {
         Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
         String zone = getDefinition(gcpZoneParameterDefinitionPath, "zone");
         try {
