@@ -48,7 +48,7 @@
     </div>
 </div>
 
-<div class="form-group" ng-class="{ 'has-error': openstackTemplateForm.openstack_tvolumesize.$dirty && openstackTemplateForm.openstack_tvolumesize.$invalid }">
+<div class="form-group" ng-class="{ 'has-error': openstackTemplateForm.openstack_tvolumesize.$dirty && openstackTemplateForm.openstack_tvolumesize.$invalid } " ng-hide="openstackTemp.volumeCount === 0">
     <label class="col-sm-3 control-label" for="openstack_tvolumesize">{{msg.template_form_volume_size_label}}</label>
 
     <div class="col-sm-9">

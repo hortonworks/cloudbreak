@@ -33,8 +33,9 @@ public class OpenStackSubnetResourceBuilder extends AbstractOpenStackNetworkReso
     public CloudResource build(OpenStackContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource)
             throws Exception {
         try {
-            String subnetId = utils.isExistingSubnet(network) ? utils.getCustomSubnetId(network) : context.getParameter(SUBNET_ID, String.class);
-            if (!utils.isExistingSubnet(network)) {
+            NeutronNetworkView neutronView = new NeutronNetworkView(network);
+            String subnetId = neutronView.isExistingSubnet() ? neutronView.getCustomSubnetId() : context.getParameter(SUBNET_ID, String.class);
+            if (!neutronView.isExistingSubnet()) {
                 OSClient osClient = createOSClient(auth);
                 NeutronNetworkView networkView = new NeutronNetworkView(network);
                 Subnet subnet = Builders.subnet().name(resource.getName())
@@ -56,7 +57,8 @@ public class OpenStackSubnetResourceBuilder extends AbstractOpenStackNetworkReso
     @Override
     public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         try {
-            if (!utils.isExistingSubnet(network)) {
+            NeutronNetworkView neutronView = new NeutronNetworkView(network);
+            if (!neutronView.isExistingSubnet()) {
                 OSClient osClient = createOSClient(auth);
                 ActionResponse response = osClient.networking().subnet().delete(resource.getReference());
                 return checkDeleteResponse(response, resourceType(), auth, resource, "Subnet deletion failed");

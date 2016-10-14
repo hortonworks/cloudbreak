@@ -19,8 +19,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
@@ -44,8 +46,8 @@ public class HeatTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String build(String stackName, List<Group> groups, Image instanceUserData, boolean existingNetwork,
-                        boolean existingSubnet, boolean assignFloatingIp) {
+    public String build(Location location, String stackName, List<Group> groups, Image instanceUserData, boolean existingNetwork,
+            boolean existingSubnet, NeutronNetworkView neutronNetworkView) {
         try {
             List<NovaInstanceView> novaInstances = new OpenStackGroupView(groups).getFlatNovaView();
             Map<String, Object> model = new HashMap<>();
@@ -56,7 +58,11 @@ public class HeatTemplateBuilder {
             model.put("groups", groups);
             model.put("existingNetwork", existingNetwork);
             model.put("existingSubnet", existingSubnet);
-            model.put("assignFloatingIp", assignFloatingIp);
+            model.put("network", neutronNetworkView);
+            AvailabilityZone az = location.getAvailabilityZone();
+            if (az != null && az.value() != null) {
+                model.put("availability_zone", az.value());
+            }
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
             LOGGER.debug("Generated Heat template: {}", generatedTemplate);
             return generatedTemplate;
@@ -69,17 +75,17 @@ public class HeatTemplateBuilder {
         KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
         NeutronNetworkView neutronView = new NeutronNetworkView(network);
         Map<String, String> parameters = new HashMap<>();
-        if (neutronView.assignFloatingIp()) {
+        if (neutronView.isAssignFloatingIp()) {
             parameters.put("public_net_id", neutronView.getPublicNetId());
         }
         parameters.put("image_id", image.getImageName());
         parameters.put("key_name", osCredential.getKeyPairName());
         if (existingNetwork) {
-            parameters.put("app_net_id", openStackUtil.getCustomNetworkId(network));
+            parameters.put("app_net_id", neutronView.getCustomNetworkId());
             if (isNoneEmpty(existingSubnetCidr)) {
-                parameters.put("subnet_id", openStackUtil.getCustomSubnetId(network));
+                parameters.put("subnet_id", neutronView.getCustomSubnetId());
             } else {
-                parameters.put("router_id", openStackUtil.getCustomRouterId(network));
+                parameters.put("router_id", neutronView.getCustomRouterId());
             }
         }
         parameters.put("app_net_cidr", isBlank(existingSubnetCidr) ? neutronView.getSubnetCIDR() : existingSubnetCidr);

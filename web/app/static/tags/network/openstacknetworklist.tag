@@ -33,4 +33,12 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+    <div class="form-group" ng-if="network.parameters.networkingOption">
+            <label class="col-sm-3 control-label" for="{{network.name}}-networkingOption">{{msg.network_openstack_form_network_option_label}}</label>
+
+            <div class="col-sm-9">
+                <p id="{{network.name}}-networkingOption" class="form-control-static">{{network.parameters.networkingOption}}</p>
+            </div>
+            <!-- .col-sm-9 -->
+    </div>
 </form>

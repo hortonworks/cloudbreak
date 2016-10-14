@@ -1002,7 +1002,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.$watch('cluster.region', function() {
-            if ($rootScope.activeCredential !== undefined && ($rootScope.activeCredential.cloudPlatform === 'AWS' || $rootScope.activeCredential.cloudPlatform === 'GCP')) {
+            if ($rootScope.activeCredential !== undefined && ($rootScope.activeCredential.cloudPlatform === 'AWS' || $rootScope.activeCredential.cloudPlatform === 'OPENSTACK' || $rootScope.activeCredential.cloudPlatform === 'GCP')) {
                 if ($scope.cluster.region === null) {
                     $scope.cluster.availabilityZone = null;
                 } else {

@@ -1,0 +1,10 @@
+{
+  "items": [
+    {
+      "name": "RegionOne",
+      "zones": [
+        "nova"
+      ]
+    }
+  ]
+}

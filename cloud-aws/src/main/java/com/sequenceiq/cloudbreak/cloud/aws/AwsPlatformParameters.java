@@ -30,9 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.RegionSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
-import com.sequenceiq.cloudbreak.cloud.model.RegionsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
@@ -63,9 +61,6 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
 
-    @Value("${cb.aws.zone.parameter.definition.path:}")
-    private String awsZoneParameterDefinitionPath;
-
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
     private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
     private Region defaultRegion;
@@ -73,7 +68,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @PostConstruct
     public void init() {
-        this.regions = readRegions();
+        this.regions = readRegions(resourceDefinition("zone"));
         this.vmTypes = readVmTypes();
         this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
         this.defaultVmType = nthElement(this.vmTypes.get(this.vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
@@ -130,25 +125,6 @@ public class AwsPlatformParameters implements PlatformParameters {
                 Integer.valueOf(configSpecification.getMaximumSize()),
                 Integer.valueOf(configSpecification.getMinimumNumber()),
                 configSpecification.getMaximumNumberWithLimit());
-    }
-
-    private Map<Region, List<AvailabilityZone>> readRegions() {
-        Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
-        String zone = getDefinition(awsZoneParameterDefinitionPath, "zone");
-        try {
-            RegionsSpecification oRegions = JsonUtil.readValue(zone, RegionsSpecification.class);
-            for (RegionSpecification regionSpecification : oRegions.getItems()) {
-                List<AvailabilityZone> av = new ArrayList<>();
-                for (String s : regionSpecification.getZones()) {
-                    av.add(AvailabilityZone.availabilityZone(s));
-                }
-                Collections.sort(av, new StringTypesCompare());
-                regions.put(Region.region(regionSpecification.getName()), av);
-            }
-        } catch (IOException e) {
-            return regions;
-        }
-        return sortMap(regions);
     }
 
     private String getDefinition(String parameter, String type) {
