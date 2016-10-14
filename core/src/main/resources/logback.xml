@@ -4,7 +4,7 @@
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%date{ISO8601} [%thread] %method:%line %highlight(%-5level) %logger{5} - [owner:%X{owner:-spring}] [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
+            <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -26,7 +26,7 @@
                 <file>owners_log/${owner}.log</file>
                 <append>false</append>
                 <encoder>
-                    <pattern>%date{ISO8601} [%thread] %method:%line %highlight(%-5level) %logger{5} - [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
+                    <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
                 </encoder>
             </appender>
         </sift>
