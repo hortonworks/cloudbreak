@@ -19,7 +19,7 @@ func TestListClustersImpl(t *testing.T) {
 	getStacks := func(params *stacks.GetStacksUserParams) (*stacks.GetStacksUserOK, error) {
 		return &stacks.GetStacksUserOK{Payload: resps}, nil
 	}
-	var once sync.Once
+	mtx := sync.Mutex{}
 	expected := make([]ClusterSkeleton, 0)
 	fetchCluster := func(stack *models.StackResponse, reduced bool) (*ClusterSkeleton, error) {
 		u := strconv.FormatInt(*stack.ID, 10)
@@ -30,7 +30,10 @@ func TestListClustersImpl(t *testing.T) {
 			Status:      "status" + u,
 		}
 
-		once.Do(func() { expected = append(expected, skeleton) })
+		mtx.Lock()
+		expected = append(expected, skeleton)
+		mtx.Unlock()
+
 		return &skeleton, nil
 	}
 	var rows []Row
