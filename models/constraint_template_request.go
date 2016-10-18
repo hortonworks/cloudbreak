@@ -20,7 +20,6 @@ type ConstraintTemplateRequest struct {
 	/* number of CPU cores needed for the Ambari node
 
 	Required: true
-	Read Only: true
 	*/
 	CPU float64 `json:"cpu"`
 
@@ -34,14 +33,12 @@ type ConstraintTemplateRequest struct {
 	/* disk size needed for an Ambari node (GB)
 
 	Required: true
-	Read Only: true
 	*/
 	Disk float64 `json:"disk"`
 
 	/* memory needed for the Ambari container (GB)
 
 	Required: true
-	Read Only: true
 	*/
 	Memory float64 `json:"memory"`
 
@@ -57,7 +54,6 @@ type ConstraintTemplateRequest struct {
 	/* type of orchestrator
 
 	Required: true
-	Read Only: true
 	*/
 	OrchestratorType string `json:"orchestratorType"`
 }

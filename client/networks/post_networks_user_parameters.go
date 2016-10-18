@@ -25,11 +25,11 @@ for the post networks user operation typically these are written to a http.Reque
 type PostNetworksUserParams struct {
 
 	/*Body*/
-	Body *models.NetworkJSON
+	Body *models.NetworkRequest
 }
 
 // WithBody adds the body to the post networks user params
-func (o *PostNetworksUserParams) WithBody(body *models.NetworkJSON) *PostNetworksUserParams {
+func (o *PostNetworksUserParams) WithBody(body *models.NetworkRequest) *PostNetworksUserParams {
 	o.Body = body
 	return o
 }
@@ -40,7 +40,7 @@ func (o *PostNetworksUserParams) WriteToRequest(r client.Request, reg strfmt.Reg
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models.NetworkJSON)
+		o.Body = new(models.NetworkRequest)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

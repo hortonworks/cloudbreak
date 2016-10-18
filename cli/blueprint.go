@@ -91,8 +91,7 @@ func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
 		logErrorAndExit(c.GetBlueprintByName, err.Error())
 	}
 
-	id, _ := strconv.Atoi(*resp.Payload.ID)
-	id64 := int64(id)
+	id64 := *resp.Payload.ID
 	log.Infof("[GetBlueprintByName] '%s' blueprint id: %d", name, id64)
 	return resp.Payload
 }
@@ -105,7 +104,7 @@ func (c *Cloudbreak) CreateBlueprint(skeleton ClusterSkeleton, blueprint *models
 func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse, channel chan int64, postPublicBlueprint func(*blueprints.PostPublicParams) (*blueprints.PostPublicOK, error)) {
 	if len(skeleton.Configurations) == 0 {
 		log.Info("[CreateBlueprint] there are no custom configurations, use the default blueprint")
-		channel <- getBlueprintId(blueprint)
+		channel <- *blueprint.ID
 		return
 	}
 
@@ -126,12 +125,7 @@ func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models.BlueprintRe
 	}
 
 	log.Infof("[CreateBlueprint] blueprint created, id: %d", resp.Payload.ID)
-	channel <- resp.Payload.ID
-}
-
-func getBlueprintId(blueprint *models.BlueprintResponse) int64 {
-	id, _ := strconv.Atoi(*blueprint.ID)
-	return int64(id)
+	channel <- *resp.Payload.ID
 }
 
 func getFancyBlueprintName(blueprint *models.BlueprintResponse) string {

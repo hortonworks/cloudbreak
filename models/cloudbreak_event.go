@@ -27,7 +27,7 @@ type CloudbreakEvent struct {
 	 */
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
 
-	/* id of the referenced blueprint
+	/* blueprint id for the cluster
 	 */
 	BlueprintID *int64 `json:"blueprintId,omitempty"`
 

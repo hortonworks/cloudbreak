@@ -46,7 +46,7 @@ func NewGetOK() *GetOK {
 successful operation
 */
 type GetOK struct {
-	Payload *models.AccountPreferences
+	Payload *models.AccountPreference
 }
 
 func (o *GetOK) Error() string {
@@ -55,7 +55,7 @@ func (o *GetOK) Error() string {
 
 func (o *GetOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.AccountPreferences)
+	o.Payload = new(models.AccountPreference)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

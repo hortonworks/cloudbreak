@@ -25,11 +25,11 @@ for the post operation typically these are written to a http.Request
 type PostParams struct {
 
 	/*Body*/
-	Body *models.AccountPreferences
+	Body *models.AccountPreference
 }
 
 // WithBody adds the body to the post params
-func (o *PostParams) WithBody(body *models.AccountPreferences) *PostParams {
+func (o *PostParams) WithBody(body *models.AccountPreference) *PostParams {
 	o.Body = body
 	return o
 }
@@ -40,7 +40,7 @@ func (o *PostParams) WriteToRequest(r client.Request, reg strfmt.Registry) error
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models.AccountPreferences)
+		o.Body = new(models.AccountPreference)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

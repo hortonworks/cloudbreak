@@ -36,11 +36,11 @@ func (c *InstanceConfig) Yaml() string {
 	return string(j)
 }
 
-func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroup, template *models.TemplateResponse) error {
+func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroupResponse, template *models.TemplateResponse) error {
 	c.InstanceCount = instanceGroup.NodeCount
 	c.InstanceType = template.InstanceType
 	c.VolumeType = SafeStringConvert(template.VolumeType)
-	c.VolumeSize = SafeInt32Convert(template.VolumeSize)
+	c.VolumeSize = template.VolumeSize
 	c.VolumeCount = template.VolumeCount
 	return nil
 }
@@ -72,8 +72,8 @@ func assembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 }
 
 func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.CredentialResponse, blueprint *models.BlueprintResponse,
-	templateMap map[string]*models.TemplateResponse, securityMap map[string][]*models.SecurityRule,
-	network *models.NetworkJSON, rdsConfig *models.RDSConfigResponse) error {
+	templateMap map[string]*models.TemplateResponse, securityMap map[string][]*models.SecurityRuleResponse,
+	network *models.NetworkResponse, rdsConfig *models.RDSConfigResponse) error {
 
 	if stack == nil {
 		return errors.New("Stack definition is not returned from Cloudbreak")
@@ -101,8 +101,8 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 			c.StatusReason = clusterStatusReason
 		}
 
-		c.ClusterAndAmbariUser = stack.Cluster.UserName
-		c.ClusterAndAmbariPassword = stack.Cluster.Password
+		c.ClusterAndAmbariUser = SafeStringConvert(stack.Cluster.UserName)
+		c.ClusterAndAmbariPassword = SafeStringConvert(stack.Cluster.Password)
 		if len(stack.Cluster.BlueprintInputs) > 0 {
 			var inputs = make(map[string]string)
 			for _, input := range stack.Cluster.BlueprintInputs {

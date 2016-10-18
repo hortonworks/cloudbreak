@@ -10,15 +10,11 @@ import (
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 )
 
-/*SecurityRule security rule
+/*SecurityRuleRequest security rule request
 
-swagger:model SecurityRule
+swagger:model SecurityRuleRequest
 */
-type SecurityRule struct {
-
-	/* id of the resource
-	 */
-	ID *int64 `json:"id,omitempty"`
+type SecurityRuleRequest struct {
 
 	/* flag for making the rule modifiable
 	 */
@@ -45,8 +41,8 @@ type SecurityRule struct {
 	Subnet string `json:"subnet"`
 }
 
-// Validate validates this security rule
-func (m *SecurityRule) Validate(formats strfmt.Registry) error {
+// Validate validates this security rule request
+func (m *SecurityRuleRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validatePorts(formats); err != nil {
@@ -70,7 +66,7 @@ func (m *SecurityRule) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SecurityRule) validatePorts(formats strfmt.Registry) error {
+func (m *SecurityRuleRequest) validatePorts(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("ports", "body", string(m.Ports)); err != nil {
 		return err
@@ -83,7 +79,7 @@ func (m *SecurityRule) validatePorts(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SecurityRule) validateProtocol(formats strfmt.Registry) error {
+func (m *SecurityRuleRequest) validateProtocol(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("protocol", "body", string(m.Protocol)); err != nil {
 		return err
@@ -92,7 +88,7 @@ func (m *SecurityRule) validateProtocol(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SecurityRule) validateSubnet(formats strfmt.Registry) error {
+func (m *SecurityRuleRequest) validateSubnet(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("subnet", "body", string(m.Subnet)); err != nil {
 		return err

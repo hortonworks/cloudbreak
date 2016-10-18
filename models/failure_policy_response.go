@@ -12,13 +12,13 @@ import (
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 )
 
-/*FailurePolicy failure policy
+/*FailurePolicyResponse failure policy response
 
-swagger:model FailurePolicy
+swagger:model FailurePolicyResponse
 */
-type FailurePolicy struct {
+type FailurePolicyResponse struct {
 
-	/* adjustment type
+	/* type of  adjustment
 
 	Required: true
 	*/
@@ -33,8 +33,8 @@ type FailurePolicy struct {
 	Threshold *int64 `json:"threshold,omitempty"`
 }
 
-// Validate validates this failure policy
-func (m *FailurePolicy) Validate(formats strfmt.Registry) error {
+// Validate validates this failure policy response
+func (m *FailurePolicyResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdjustmentType(formats); err != nil {
@@ -48,25 +48,25 @@ func (m *FailurePolicy) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-var failurePolicyTypeAdjustmentTypePropEnum []interface{}
+var failurePolicyResponseTypeAdjustmentTypePropEnum []interface{}
 
-func (m *FailurePolicy) validateAdjustmentTypeEnum(path, location string, value string) error {
-	if failurePolicyTypeAdjustmentTypePropEnum == nil {
+func (m *FailurePolicyResponse) validateAdjustmentTypeEnum(path, location string, value string) error {
+	if failurePolicyResponseTypeAdjustmentTypePropEnum == nil {
 		var res []string
 		if err := json.Unmarshal([]byte(`["EXACT","PERCENTAGE","BEST_EFFORT"]`), &res); err != nil {
 			return err
 		}
 		for _, v := range res {
-			failurePolicyTypeAdjustmentTypePropEnum = append(failurePolicyTypeAdjustmentTypePropEnum, v)
+			failurePolicyResponseTypeAdjustmentTypePropEnum = append(failurePolicyResponseTypeAdjustmentTypePropEnum, v)
 		}
 	}
-	if err := validate.Enum(path, location, value, failurePolicyTypeAdjustmentTypePropEnum); err != nil {
+	if err := validate.Enum(path, location, value, failurePolicyResponseTypeAdjustmentTypePropEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *FailurePolicy) validateAdjustmentType(formats strfmt.Registry) error {
+func (m *FailurePolicyResponse) validateAdjustmentType(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("adjustmentType", "body", string(m.AdjustmentType)); err != nil {
 		return err

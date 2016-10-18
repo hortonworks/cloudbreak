@@ -29,8 +29,9 @@ func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64,
 	createNetworkImpl(skeleton, channel, c.Cloudbreak.Networks.PostNetworksAccount, c.GetNetwork)
 }
 
-func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64, postNetwork func(*networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error),
-	getNetwork func(string) models.NetworkJSON) {
+func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64,
+	postNetwork func(*networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error),
+	getNetwork func(string) models.NetworkResponse) {
 
 	networkName := "net" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
@@ -45,7 +46,7 @@ func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64, postNetwork
 		vpcParams["internetGatewayId"] = defaultNetwork.Parameters["internetGatewayId"]
 	}
 
-	network := models.NetworkJSON{
+	network := models.NetworkRequest{
 		Name:          networkName,
 		CloudPlatform: "AWS",
 		Parameters:    vpcParams,
@@ -59,7 +60,7 @@ func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64, postNetwork
 	}
 
 	log.Infof("[CreateNetwork] network created, id: %d", resp.Payload.ID)
-	channel <- resp.Payload.ID
+	channel <- *resp.Payload.ID
 }
 
 func CreateNetworkCommand(c *cli.Context) error {
@@ -80,7 +81,7 @@ func createNetworkCommandImpl(finder func(string) string, postNetwork func(*netw
 	vpcParams["internetGatewayId"] = finder(FlIGW.Name)
 	subnet := finder(FlSubnet.Name)
 
-	network := models.NetworkJSON{
+	network := models.NetworkRequest{
 		Name:          networkName,
 		CloudPlatform: "AWS",
 		Parameters:    vpcParams,
@@ -97,7 +98,7 @@ func createNetworkCommandImpl(finder func(string) string, postNetwork func(*netw
 	return nil
 }
 
-func (c *Cloudbreak) GetNetwork(name string) models.NetworkJSON {
+func (c *Cloudbreak) GetNetwork(name string) models.NetworkResponse {
 	log.Infof("[GetNetwork] sending get request to find network with name: %s", name)
 	resp, err := c.Cloudbreak.Networks.GetNetworksAccountName(&networks.GetNetworksAccountNameParams{Name: name})
 
@@ -110,7 +111,7 @@ func (c *Cloudbreak) GetNetwork(name string) models.NetworkJSON {
 	return defaultNetwork
 }
 
-func (c *Cloudbreak) GetNetworkById(id int64) *models.NetworkJSON {
+func (c *Cloudbreak) GetNetworkById(id int64) *models.NetworkResponse {
 	log.Infof("[GetNetwork] sending get request to find network with id: %d", id)
 	resp, err := c.Cloudbreak.Networks.GetNetworksID(&networks.GetNetworksIDParams{ID: id})
 
@@ -132,7 +133,7 @@ func DeleteNetwork(c *cli.Context) error {
 	return nil
 }
 
-func (c *Cloudbreak) GetPublicNetworks() []*models.NetworkJSON {
+func (c *Cloudbreak) GetPublicNetworks() []*models.NetworkResponse {
 	defer timeTrack(time.Now(), "get public networks")
 	resp, err := c.Cloudbreak.Networks.GetNetworksAccount(&networks.GetNetworksAccountParams{})
 	if err != nil {
@@ -157,7 +158,7 @@ func ListPrivateNetworks(c *cli.Context) error {
 	return listPrivateNetworksImpl(oAuth2Client.GetPrivateNetworks, output.WriteList)
 }
 
-func listPrivateNetworksImpl(getNetworks func() []*models.NetworkJSON, writer func([]string, []Row)) error {
+func listPrivateNetworksImpl(getNetworks func() []*models.NetworkResponse, writer func([]string, []Row)) error {
 	networkResp := getNetworks()
 
 	var tableRows []Row
@@ -170,7 +171,7 @@ func listPrivateNetworksImpl(getNetworks func() []*models.NetworkJSON, writer fu
 	return nil
 }
 
-func (c *Cloudbreak) GetPrivateNetworks() []*models.NetworkJSON {
+func (c *Cloudbreak) GetPrivateNetworks() []*models.NetworkResponse {
 	defer timeTrack(time.Now(), "get private networks")
 	resp, err := c.Cloudbreak.Networks.GetNetworksUser(&networks.GetNetworksUserParams{})
 	if err != nil {

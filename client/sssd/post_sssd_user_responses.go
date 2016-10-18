@@ -46,7 +46,7 @@ func NewPostSssdUserOK() *PostSssdUserOK {
 successful operation
 */
 type PostSssdUserOK struct {
-	Payload *models.ID
+	Payload *models.SssdConfigResponse
 }
 
 func (o *PostSssdUserOK) Error() string {
@@ -55,7 +55,7 @@ func (o *PostSssdUserOK) Error() string {
 
 func (o *PostSssdUserOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ID)
+	o.Payload = new(models.SssdConfigResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

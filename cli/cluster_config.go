@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (c *Cloudbreak) GetClusterConfig(id int64, inputs []*models.BlueprintParameterJSON) []*models.BlueprintInputJSON {
+func (c *Cloudbreak) GetClusterConfig(id int64, inputs []*models.BlueprintParameter) []*models.BlueprintInput {
 	defer timeTrack(time.Now(), "get cluster config by id")
 
 	log.Infof("[GetClusterConfig] get cluster config for stack id: %d", id)

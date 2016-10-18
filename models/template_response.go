@@ -50,17 +50,12 @@ type TemplateResponse struct {
 	Name string `json:"name"`
 
 	/* cloud specific parameters for template
-
-	Required: true
-	*/
-	Parameters map[string]interface{} `json:"parameters"`
+	 */
+	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
 	/* resource is visible in account
-
-	Required: true
-	Read Only: true
-	*/
-	Public bool `json:"public"`
+	 */
+	Public *bool `json:"public,omitempty"`
 
 	/* id of the topology the resource belongs to
 	 */
@@ -73,8 +68,10 @@ type TemplateResponse struct {
 	VolumeCount int32 `json:"volumeCount"`
 
 	/* size of volumes
-	 */
-	VolumeSize *int32 `json:"volumeSize,omitempty"`
+
+	Required: true
+	*/
+	VolumeSize int32 `json:"volumeSize"`
 
 	/* type of the volumes
 	 */
@@ -105,17 +102,12 @@ func (m *TemplateResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateParameters(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validatePublic(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateVolumeCount(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateVolumeSize(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -182,27 +174,18 @@ func (m *TemplateResponse) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *TemplateResponse) validateParameters(formats strfmt.Registry) error {
-
-	if err := validate.Required("parameters", "body", m.Parameters); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *TemplateResponse) validatePublic(formats strfmt.Registry) error {
-
-	if err := validate.Required("public", "body", bool(m.Public)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *TemplateResponse) validateVolumeCount(formats strfmt.Registry) error {
 
 	if err := validate.Required("volumeCount", "body", int32(m.VolumeCount)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *TemplateResponse) validateVolumeSize(formats strfmt.Registry) error {
+
+	if err := validate.Required("volumeSize", "body", int32(m.VolumeSize)); err != nil {
 		return err
 	}
 

@@ -16,7 +16,7 @@ swagger:model Id
 */
 type ID struct {
 
-	/* id
+	/* id of the resource
 
 	Required: true
 	*/

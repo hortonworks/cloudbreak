@@ -46,7 +46,7 @@ func NewPostConstraintsAccountOK() *PostConstraintsAccountOK {
 successful operation
 */
 type PostConstraintsAccountOK struct {
-	Payload *models.ID
+	Payload *models.ConstraintTemplateResponse
 }
 
 func (o *PostConstraintsAccountOK) Error() string {
@@ -55,7 +55,7 @@ func (o *PostConstraintsAccountOK) Error() string {
 
 func (o *PostConstraintsAccountOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ID)
+	o.Payload = new(models.ConstraintTemplateResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

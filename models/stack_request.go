@@ -29,10 +29,9 @@ type StackRequest struct {
 
 	/* type of cloud provider
 
-	Required: true
 	Read Only: true
 	*/
-	CloudPlatform string `json:"cloudPlatform"`
+	CloudPlatform *string `json:"cloudPlatform,omitempty"`
 
 	/* credential resource id for the stack
 
@@ -42,7 +41,7 @@ type StackRequest struct {
 
 	/* failure policy in case of failures
 	 */
-	FailurePolicy *FailurePolicy `json:"failurePolicy,omitempty"`
+	FailurePolicy *FailurePolicyRequest `json:"failurePolicy,omitempty"`
 
 	/* specific version of HDP
 	 */
@@ -52,11 +51,11 @@ type StackRequest struct {
 	 */
 	ImageCatalog *string `json:"imageCatalog,omitempty"`
 
-	/* instance groups
+	/* collection of instance groupst
 
 	Required: true
 	*/
-	InstanceGroups []*InstanceGroup `json:"instanceGroups"`
+	InstanceGroups []*InstanceGroups `json:"instanceGroups"`
 
 	/* name of the stack
 
@@ -102,11 +101,6 @@ type StackRequest struct {
 func (m *StackRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateCredentialID(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -140,15 +134,6 @@ func (m *StackRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *StackRequest) validateCloudPlatform(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("cloudPlatform", "body", string(m.CloudPlatform)); err != nil {
-		return err
-	}
-
 	return nil
 }
 

@@ -54,8 +54,9 @@ func TestCreateBlueprintImplDefaultBlueprint(t *testing.T) {
 	skeleton := ClusterSkeleton{}
 	blueprintId := make(chan int64, 1)
 
+	id := int64(123)
 	blueprint := models.BlueprintResponse{
-		ID: &(&stringWrapper{"123"}).s,
+		ID: &id,
 	}
 	resolver := func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error) {
 		return nil, nil
@@ -63,10 +64,9 @@ func TestCreateBlueprintImplDefaultBlueprint(t *testing.T) {
 
 	createBlueprintImpl(skeleton, &blueprint, blueprintId, resolver)
 
-	expected := int64(123)
 	actual := <-blueprintId
 	if actual != actual {
-		t.Errorf("id not maatch %d == %d", expected, actual)
+		t.Errorf("id not maatch %d == %d", id, actual)
 	}
 }
 
@@ -77,13 +77,13 @@ func TestCreateBlueprintImplNonDefaultBlueprint(t *testing.T) {
 		Configurations: confs,
 	}
 	blueprintId := make(chan int64, 1)
-
+	id := int64(123)
 	blueprint := models.BlueprintResponse{
-		ID: &(&stringWrapper{"123"}).s,
+		ID: &id,
 	}
 	expected := int64(321)
 	resolver := func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error) {
-		return &blueprints.PostPublicOK{Payload: &models.ID{ID: expected}}, nil
+		return &blueprints.PostPublicOK{Payload: &models.BlueprintResponse{ID: &expected}}, nil
 	}
 
 	createBlueprintImpl(skeleton, &blueprint, blueprintId, resolver)
@@ -91,17 +91,6 @@ func TestCreateBlueprintImplNonDefaultBlueprint(t *testing.T) {
 	actual := <-blueprintId
 	if actual != actual {
 		t.Errorf("id not maatch %d == %d", expected, actual)
-	}
-}
-
-func TestGetBlueprintId(t *testing.T) {
-	bp := models.BlueprintResponse{ID: &(&stringWrapper{"123"}).s}
-
-	id := getBlueprintId(&bp)
-
-	expected := int64(123)
-	if id != expected {
-		t.Errorf("id not match %d == %d", expected, id)
 	}
 }
 

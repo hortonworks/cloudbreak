@@ -28,11 +28,10 @@ type SssdConfigRequest struct {
 
 	/* search base of the database
 
-	Required: true
 	Max Length: 255
 	Min Length: 10
 	*/
-	BaseSearch string `json:"baseSearch"`
+	BaseSearch string `json:"baseSearch,omitempty"`
 
 	/* custom configuration
 	 */
@@ -69,30 +68,23 @@ type SssdConfigRequest struct {
 	Name string `json:"name"`
 
 	/* provider type
-
-	Required: true
-	*/
-	ProviderType string `json:"providerType"`
+	 */
+	ProviderType *string `json:"providerType,omitempty"`
 
 	/* schema of the database
-
-	Required: true
-	*/
-	Schema string `json:"schema"`
+	 */
+	Schema *string `json:"schema,omitempty"`
 
 	/* TLS behavior of the connection
-
-	Required: true
-	*/
-	TLSReqcert string `json:"tlsReqcert"`
+	 */
+	TLSReqcert *string `json:"tlsReqcert,omitempty"`
 
 	/* comma-separated list of URIs of the LDAP servers
 
-	Required: true
 	Max Length: 255
 	Min Length: 10
 	*/
-	URL string `json:"url"`
+	URL string `json:"url,omitempty"`
 }
 
 // Validate validates this sssd config request
@@ -174,8 +166,8 @@ func (m *SssdConfigRequest) validateAdServer(formats strfmt.Registry) error {
 
 func (m *SssdConfigRequest) validateBaseSearch(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("baseSearch", "body", string(m.BaseSearch)); err != nil {
-		return err
+	if swag.IsZero(m.BaseSearch) { // not required
+		return nil
 	}
 
 	if err := validate.MinLength("baseSearch", "body", string(m.BaseSearch), 10); err != nil {
@@ -281,11 +273,11 @@ func (m *SssdConfigRequest) validateProviderTypeEnum(path, location string, valu
 
 func (m *SssdConfigRequest) validateProviderType(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("providerType", "body", string(m.ProviderType)); err != nil {
-		return err
+	if swag.IsZero(m.ProviderType) { // not required
+		return nil
 	}
 
-	if err := m.validateProviderTypeEnum("providerType", "body", m.ProviderType); err != nil {
+	if err := m.validateProviderTypeEnum("providerType", "body", *m.ProviderType); err != nil {
 		return err
 	}
 
@@ -312,11 +304,11 @@ func (m *SssdConfigRequest) validateSchemaEnum(path, location string, value stri
 
 func (m *SssdConfigRequest) validateSchema(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("schema", "body", string(m.Schema)); err != nil {
-		return err
+	if swag.IsZero(m.Schema) { // not required
+		return nil
 	}
 
-	if err := m.validateSchemaEnum("schema", "body", m.Schema); err != nil {
+	if err := m.validateSchemaEnum("schema", "body", *m.Schema); err != nil {
 		return err
 	}
 
@@ -343,11 +335,11 @@ func (m *SssdConfigRequest) validateTLSReqcertEnum(path, location string, value 
 
 func (m *SssdConfigRequest) validateTLSReqcert(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("tlsReqcert", "body", string(m.TLSReqcert)); err != nil {
-		return err
+	if swag.IsZero(m.TLSReqcert) { // not required
+		return nil
 	}
 
-	if err := m.validateTLSReqcertEnum("tlsReqcert", "body", m.TLSReqcert); err != nil {
+	if err := m.validateTLSReqcertEnum("tlsReqcert", "body", *m.TLSReqcert); err != nil {
 		return err
 	}
 
@@ -356,8 +348,8 @@ func (m *SssdConfigRequest) validateTLSReqcert(formats strfmt.Registry) error {
 
 func (m *SssdConfigRequest) validateURL(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("url", "body", string(m.URL)); err != nil {
-		return err
+	if swag.IsZero(m.URL) { // not required
+		return nil
 	}
 
 	if err := validate.MinLength("url", "body", string(m.URL), 10); err != nil {

@@ -13,11 +13,11 @@ import (
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 )
 
-/*AccountPreferences account preferences
+/*AccountPreference account preference
 
-swagger:model AccountPreferences
+swagger:model AccountPreference
 */
-type AccountPreferences struct {
+type AccountPreference struct {
 
 	/* allowed instance types in the account (empty list for no restriction)
 	 */
@@ -32,24 +32,21 @@ type AccountPreferences struct {
 
 	/* max number of clusters in the account (0 when unlimited)
 
-	Required: true
 	Minimum: 0
 	*/
-	MaxNumberOfClusters int64 `json:"maxNumberOfClusters"`
+	MaxNumberOfClusters *int64 `json:"maxNumberOfClusters,omitempty"`
 
 	/* max number of clusters for user within the account (0 when unlimited)
 
-	Required: true
 	Minimum: 0
 	*/
-	MaxNumberOfClustersPerUser int64 `json:"maxNumberOfClustersPerUser"`
+	MaxNumberOfClustersPerUser *int64 `json:"maxNumberOfClustersPerUser,omitempty"`
 
 	/* max number of vms in a cluster of account (0 when unlimited)
 
-	Required: true
 	Minimum: 0
 	*/
-	MaxNumberOfNodesPerCluster int64 `json:"maxNumberOfNodesPerCluster"`
+	MaxNumberOfNodesPerCluster *int64 `json:"maxNumberOfNodesPerCluster,omitempty"`
 
 	/* list of the cloudplatforms visible on the UI
 	 */
@@ -63,8 +60,8 @@ type AccountPreferences struct {
 	UserTimeToLive int64 `json:"userTimeToLive"`
 }
 
-// Validate validates this account preferences
-func (m *AccountPreferences) Validate(formats strfmt.Registry) error {
+// Validate validates this account preference
+func (m *AccountPreference) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAllowedInstanceTypes(formats); err != nil {
@@ -103,7 +100,7 @@ func (m *AccountPreferences) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *AccountPreferences) validateAllowedInstanceTypes(formats strfmt.Registry) error {
+func (m *AccountPreference) validateAllowedInstanceTypes(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.AllowedInstanceTypes) { // not required
 		return nil
@@ -120,7 +117,7 @@ func (m *AccountPreferences) validateAllowedInstanceTypes(formats strfmt.Registr
 	return nil
 }
 
-func (m *AccountPreferences) validateClusterTimeToLive(formats strfmt.Registry) error {
+func (m *AccountPreference) validateClusterTimeToLive(formats strfmt.Registry) error {
 
 	if err := validate.Required("clusterTimeToLive", "body", int64(m.ClusterTimeToLive)); err != nil {
 		return err
@@ -133,46 +130,46 @@ func (m *AccountPreferences) validateClusterTimeToLive(formats strfmt.Registry) 
 	return nil
 }
 
-func (m *AccountPreferences) validateMaxNumberOfClusters(formats strfmt.Registry) error {
+func (m *AccountPreference) validateMaxNumberOfClusters(formats strfmt.Registry) error {
 
-	if err := validate.Required("maxNumberOfClusters", "body", int64(m.MaxNumberOfClusters)); err != nil {
-		return err
+	if swag.IsZero(m.MaxNumberOfClusters) { // not required
+		return nil
 	}
 
-	if err := validate.MinimumInt("maxNumberOfClusters", "body", int64(m.MaxNumberOfClusters), 0, false); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *AccountPreferences) validateMaxNumberOfClustersPerUser(formats strfmt.Registry) error {
-
-	if err := validate.Required("maxNumberOfClustersPerUser", "body", int64(m.MaxNumberOfClustersPerUser)); err != nil {
-		return err
-	}
-
-	if err := validate.MinimumInt("maxNumberOfClustersPerUser", "body", int64(m.MaxNumberOfClustersPerUser), 0, false); err != nil {
+	if err := validate.MinimumInt("maxNumberOfClusters", "body", int64(*m.MaxNumberOfClusters), 0, false); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *AccountPreferences) validateMaxNumberOfNodesPerCluster(formats strfmt.Registry) error {
+func (m *AccountPreference) validateMaxNumberOfClustersPerUser(formats strfmt.Registry) error {
 
-	if err := validate.Required("maxNumberOfNodesPerCluster", "body", int64(m.MaxNumberOfNodesPerCluster)); err != nil {
-		return err
+	if swag.IsZero(m.MaxNumberOfClustersPerUser) { // not required
+		return nil
 	}
 
-	if err := validate.MinimumInt("maxNumberOfNodesPerCluster", "body", int64(m.MaxNumberOfNodesPerCluster), 0, false); err != nil {
+	if err := validate.MinimumInt("maxNumberOfClustersPerUser", "body", int64(*m.MaxNumberOfClustersPerUser), 0, false); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *AccountPreferences) validateUserTimeToLive(formats strfmt.Registry) error {
+func (m *AccountPreference) validateMaxNumberOfNodesPerCluster(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MaxNumberOfNodesPerCluster) { // not required
+		return nil
+	}
+
+	if err := validate.MinimumInt("maxNumberOfNodesPerCluster", "body", int64(*m.MaxNumberOfNodesPerCluster), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *AccountPreference) validateUserTimeToLive(formats strfmt.Registry) error {
 
 	if err := validate.Required("userTimeToLive", "body", int64(m.UserTimeToLive)); err != nil {
 		return err

@@ -21,7 +21,7 @@ type ConfigsRequest struct {
 	Required: true
 	Unique: true
 	*/
-	Requests []*BlueprintParameterJSON `json:"requests"`
+	Requests []*BlueprintParameter `json:"requests"`
 }
 
 // Validate validates this configs request

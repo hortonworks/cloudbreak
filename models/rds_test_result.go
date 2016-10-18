@@ -16,7 +16,7 @@ swagger:model RdsTestResult
 */
 type RdsTestResult struct {
 
-	/* connection result
+	/* result of RDS connection test
 
 	Required: true
 	*/

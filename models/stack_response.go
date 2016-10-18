@@ -33,10 +33,9 @@ type StackResponse struct {
 
 	/* type of cloud provider
 
-	Required: true
 	Read Only: true
 	*/
-	CloudPlatform string `json:"cloudPlatform"`
+	CloudPlatform *string `json:"cloudPlatform,omitempty"`
 
 	/* details of the Cloudbreak that provisioned the stack
 	 */
@@ -58,7 +57,7 @@ type StackResponse struct {
 
 	/* failure policy in case of failures
 	 */
-	FailurePolicy *FailurePolicy `json:"failurePolicy,omitempty"`
+	FailurePolicy *FailurePolicyResponse `json:"failurePolicy,omitempty"`
 
 	/* port of the gateway secured proxy
 	 */
@@ -78,7 +77,7 @@ type StackResponse struct {
 
 	/* instance groups
 	 */
-	InstanceGroups []*InstanceGroup `json:"instanceGroups,omitempty"`
+	InstanceGroups []*InstanceGroupResponse `json:"instanceGroups,omitempty"`
 
 	/* name of the stack
 
@@ -140,11 +139,6 @@ type StackResponse struct {
 func (m *StackResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateCredentialID(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -183,15 +177,6 @@ func (m *StackResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *StackResponse) validateCloudPlatform(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("cloudPlatform", "body", string(m.CloudPlatform)); err != nil {
-		return err
-	}
-
 	return nil
 }
 

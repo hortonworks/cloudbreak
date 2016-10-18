@@ -39,7 +39,7 @@ func (a *Client) Get(params *GetParams) (*GetOK, error) {
 		PathPattern:        "/accountpreferences",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetReader{formats: a.formats},
 	})
@@ -54,26 +54,26 @@ Post posts account preferences of admin user
 
 Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
 */
-func (a *Client) Post(params *PostParams) error {
+func (a *Client) Post(params *PostParams) (*PostOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewPostParams()
 	}
 
-	_, err := a.transport.Submit(&client.Operation{
+	result, err := a.transport.Submit(&client.Operation{
 		ID:                 "post",
 		Method:             "POST",
 		PathPattern:        "/accountpreferences",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostReader{formats: a.formats},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*PostOK), nil
 }
 
 /*
@@ -81,26 +81,26 @@ Put updates account preferences of admin user
 
 Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
 */
-func (a *Client) Put(params *PutParams) error {
+func (a *Client) Put(params *PutParams) (*PutOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewPutParams()
 	}
 
-	_, err := a.transport.Submit(&client.Operation{
+	result, err := a.transport.Submit(&client.Operation{
 		ID:                 "put",
 		Method:             "PUT",
 		PathPattern:        "/accountpreferences",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PutReader{formats: a.formats},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*PutOK), nil
 }
 
 /*
@@ -120,7 +120,7 @@ func (a *Client) Validate(params *ValidateParams) error {
 		PathPattern:        "/accountpreferences/validate",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &ValidateReader{formats: a.formats},
 	})

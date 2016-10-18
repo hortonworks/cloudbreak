@@ -39,7 +39,7 @@ func (a *Client) DeleteRecipesAccountName(params *DeleteRecipesAccountNameParams
 		PathPattern:        "/recipes/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteRecipesAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteRecipesID(params *DeleteRecipesIDParams) error {
 		PathPattern:        "/recipes/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteRecipesIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteRecipesUserName(params *DeleteRecipesUserNameParams) erro
 		PathPattern:        "/recipes/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteRecipesUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetRecipesAccount(params *GetRecipesAccountParams) (*GetRecipes
 		PathPattern:        "/recipes/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetRecipesAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetRecipesAccountName(params *GetRecipesAccountNameParams) (*Ge
 		PathPattern:        "/recipes/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetRecipesAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetRecipesID(params *GetRecipesIDParams) (*GetRecipesIDOK, erro
 		PathPattern:        "/recipes/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetRecipesIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetRecipesUser(params *GetRecipesUserParams) (*GetRecipesUserOK
 		PathPattern:        "/recipes/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetRecipesUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetRecipesUserName(params *GetRecipesUserNameParams) (*GetRecip
 		PathPattern:        "/recipes/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetRecipesUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostRecipesAccount(params *PostRecipesAccountParams) (*PostReci
 		PathPattern:        "/recipes/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostRecipesAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostRecipesUser(params *PostRecipesUserParams) (*PostRecipesUse
 		PathPattern:        "/recipes/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostRecipesUserReader{formats: a.formats},
 	})

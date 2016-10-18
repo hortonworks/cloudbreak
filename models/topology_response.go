@@ -17,27 +17,33 @@ swagger:model TopologyResponse
 */
 type TopologyResponse struct {
 
-	/* cloud platform
-	 */
-	CloudPlatform *string `json:"cloudPlatform,omitempty"`
+	/* type of cloud provider
 
-	/* description
-	 */
+	Required: true
+	*/
+	CloudPlatform string `json:"cloudPlatform"`
+
+	/* description of the resource
+
+	Max Length: 1000
+	Min Length: 0
+	*/
 	Description *string `json:"description,omitempty"`
 
-	/* endpoint
-	 */
-	Endpoint *string `json:"endpoint,omitempty"`
-
-	/* id
+	/* id of the resource
 	 */
 	ID *int64 `json:"id,omitempty"`
 
-	/* name
-	 */
-	Name *string `json:"name,omitempty"`
+	/* name of the resource
 
-	/* nodes
+	Required: true
+	Max Length: 100
+	Min Length: 5
+	Pattern: ([a-z][-a-z0-9]*[a-z0-9])
+	*/
+	Name string `json:"name"`
+
+	/* topology mapping
 	 */
 	Nodes map[string]string `json:"nodes,omitempty"`
 }
@@ -45,6 +51,21 @@ type TopologyResponse struct {
 // Validate validates this topology response
 func (m *TopologyResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateCloudPlatform(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateDescription(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateNodes(formats); err != nil {
 		// prop
@@ -54,6 +75,53 @@ func (m *TopologyResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *TopologyResponse) validateCloudPlatform(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("cloudPlatform", "body", string(m.CloudPlatform)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *TopologyResponse) validateDescription(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Description) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *TopologyResponse) validateName(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("name", "body", string(m.Name), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("name", "body", string(m.Name), 100); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
+		return err
+	}
+
 	return nil
 }
 

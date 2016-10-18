@@ -16,11 +16,11 @@ func TestCreateSecurityGroupImplNoWebAccess(t *testing.T) {
 	}
 	c := make(chan int64, 1)
 	expectedId := int64(1)
-	var actualGroup *models.SecurityGroupJSON
+	var actualGroup *models.SecurityGroupRequest
 	postSecGroup := func(params *securitygroups.PostSecuritygroupsAccountParams) (*securitygroups.PostSecuritygroupsAccountOK, error) {
 		actualGroup = params.Body
 		resp := securitygroups.PostSecuritygroupsAccountOK{
-			Payload: &models.ID{ID: expectedId},
+			Payload: &models.SecurityGroupResponse{ID: &expectedId},
 		}
 		return &resp, nil
 	}
@@ -56,11 +56,12 @@ func TestCreateSecurityGroupImplNoWebAccess(t *testing.T) {
 func TestCreateSecurityGroupImplWebAccess(t *testing.T) {
 	skeleton := ClusterSkeleton{WebAccess: true}
 	c := make(chan int64, 1)
-	var actualGroup *models.SecurityGroupJSON
+	var actualGroup *models.SecurityGroupRequest
 	postSecGroup := func(params *securitygroups.PostSecuritygroupsAccountParams) (*securitygroups.PostSecuritygroupsAccountOK, error) {
 		actualGroup = params.Body
+		id := int64(1)
 		resp := securitygroups.PostSecuritygroupsAccountOK{
-			Payload: &models.ID{ID: int64(1)},
+			Payload: &models.SecurityGroupResponse{ID: &id},
 		}
 		return &resp, nil
 	}
@@ -78,18 +79,20 @@ func TestCreateSecurityGroupImplWebAccess(t *testing.T) {
 }
 
 func TestGetSecurityDetailsImpl(t *testing.T) {
-	groups := []*models.InstanceGroup{
-		{SecurityGroupID: int64(1)},
-		{SecurityGroupID: int64(2)},
+	id1 := int64(1)
+	id2 := int64(2)
+	groups := []*models.InstanceGroupResponse{
+		{SecurityGroupID: &id1},
+		{SecurityGroupID: &id2},
 	}
 	stack := &models.StackResponse{
 		InstanceGroups: groups,
 	}
-	rules := make(map[string][]*models.SecurityRule)
-	rules["subnet1"] = []*models.SecurityRule{{Subnet: "first"}, {Subnet: "sec"}}
-	rules["subnet2"] = []*models.SecurityRule{{Subnet: "subnet"}}
+	rules := make(map[string][]*models.SecurityRuleResponse)
+	rules["subnet1"] = []*models.SecurityRuleResponse{{Subnet: "first"}, {Subnet: "sec"}}
+	rules["subnet2"] = []*models.SecurityRuleResponse{{Subnet: "subnet"}}
 	getIds := func(params *securitygroups.GetSecuritygroupsIDParams) (*securitygroups.GetSecuritygroupsIDOK, error) {
-		return &securitygroups.GetSecuritygroupsIDOK{Payload: &models.SecurityGroupJSON{
+		return &securitygroups.GetSecuritygroupsIDOK{Payload: &models.SecurityGroupResponse{
 			SecurityRules: rules["subnet"+strconv.FormatInt(params.ID, 10)],
 		}}, nil
 	}

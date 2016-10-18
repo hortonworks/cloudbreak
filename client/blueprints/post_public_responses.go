@@ -46,7 +46,7 @@ func NewPostPublicOK() *PostPublicOK {
 successful operation
 */
 type PostPublicOK struct {
-	Payload *models.ID
+	Payload *models.BlueprintResponse
 }
 
 func (o *PostPublicOK) Error() string {
@@ -55,7 +55,7 @@ func (o *PostPublicOK) Error() string {
 
 func (o *PostPublicOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ID)
+	o.Payload = new(models.BlueprintResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

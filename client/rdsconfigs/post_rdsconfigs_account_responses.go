@@ -46,7 +46,7 @@ func NewPostRdsconfigsAccountOK() *PostRdsconfigsAccountOK {
 successful operation
 */
 type PostRdsconfigsAccountOK struct {
-	Payload *models.ID
+	Payload *models.RDSConfigResponse
 }
 
 func (o *PostRdsconfigsAccountOK) Error() string {
@@ -55,7 +55,7 @@ func (o *PostRdsconfigsAccountOK) Error() string {
 
 func (o *PostRdsconfigsAccountOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ID)
+	o.Payload = new(models.RDSConfigResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

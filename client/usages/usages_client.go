@@ -39,7 +39,7 @@ func (a *Client) Generate(params *GenerateParams) error {
 		PathPattern:        "/usages/generate",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GenerateReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) GetAccount(params *GetAccountParams) (*GetAccountOK, error) {
 		PathPattern:        "/usages/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetAccountReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) GetDeployer(params *GetDeployerParams) (*GetDeployerOK, error) 
 		PathPattern:        "/usages",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetDeployerReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetUser(params *GetUserParams) (*GetUserOK, error) {
 		PathPattern:        "/usages/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetUserReader{formats: a.formats},
 	})

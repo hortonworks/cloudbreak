@@ -46,7 +46,7 @@ func NewPostStacksIDClusterOK() *PostStacksIDClusterOK {
 successful operation
 */
 type PostStacksIDClusterOK struct {
-	Payload *models.ID
+	Payload *models.ClusterResponse
 }
 
 func (o *PostStacksIDClusterOK) Error() string {
@@ -55,7 +55,7 @@ func (o *PostStacksIDClusterOK) Error() string {
 
 func (o *PostStacksIDClusterOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ID)
+	o.Payload = new(models.ClusterResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

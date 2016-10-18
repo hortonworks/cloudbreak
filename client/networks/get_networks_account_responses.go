@@ -46,7 +46,7 @@ func NewGetNetworksAccountOK() *GetNetworksAccountOK {
 successful operation
 */
 type GetNetworksAccountOK struct {
-	Payload []*models.NetworkJSON
+	Payload []*models.NetworkResponse
 }
 
 func (o *GetNetworksAccountOK) Error() string {

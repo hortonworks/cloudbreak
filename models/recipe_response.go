@@ -41,10 +41,9 @@ type RecipeResponse struct {
 
 	/* list of consul plugins with execution types
 
-	Required: true
 	Unique: true
 	*/
-	Plugins []string `json:"plugins"`
+	Plugins []string `json:"plugins,omitempty"`
 
 	/* additional plugin properties
 	 */
@@ -129,8 +128,8 @@ func (m *RecipeResponse) validateName(formats strfmt.Registry) error {
 
 func (m *RecipeResponse) validatePlugins(formats strfmt.Registry) error {
 
-	if err := validate.Required("plugins", "body", m.Plugins); err != nil {
-		return err
+	if swag.IsZero(m.Plugins) { // not required
+		return nil
 	}
 
 	if err := validate.UniqueItems("plugins", "body", m.Plugins); err != nil {

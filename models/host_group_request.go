@@ -13,23 +13,17 @@ import (
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 )
 
-/*HostGroup host group
+/*HostGroupRequest host group request
 
-swagger:model HostGroup
+swagger:model HostGroupRequest
 */
-type HostGroup struct {
+type HostGroupRequest struct {
 
 	/* instance group or resource constraint for a hostgroup
 
 	Required: true
 	*/
 	Constraint *Constraint `json:"constraint"`
-
-	/* metadata
-
-	Unique: true
-	*/
-	Metadata []*HostMetadata `json:"metadata,omitempty"`
 
 	/* name of the resource
 
@@ -44,16 +38,11 @@ type HostGroup struct {
 	RecipeIds []int64 `json:"recipeIds,omitempty"`
 }
 
-// Validate validates this host group
-func (m *HostGroup) Validate(formats strfmt.Registry) error {
+// Validate validates this host group request
+func (m *HostGroupRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConstraint(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateMetadata(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -74,7 +63,7 @@ func (m *HostGroup) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *HostGroup) validateConstraint(formats strfmt.Registry) error {
+func (m *HostGroupRequest) validateConstraint(formats strfmt.Registry) error {
 
 	if m.Constraint != nil {
 
@@ -86,31 +75,7 @@ func (m *HostGroup) validateConstraint(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *HostGroup) validateMetadata(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Metadata) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("metadata", "body", m.Metadata); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Metadata); i++ {
-
-		if m.Metadata[i] != nil {
-
-			if err := m.Metadata[i].Validate(formats); err != nil {
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *HostGroup) validateName(formats strfmt.Registry) error {
+func (m *HostGroupRequest) validateName(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
 		return err
@@ -119,7 +84,7 @@ func (m *HostGroup) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *HostGroup) validateRecipeIds(formats strfmt.Registry) error {
+func (m *HostGroupRequest) validateRecipeIds(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.RecipeIds) { // not required
 		return nil

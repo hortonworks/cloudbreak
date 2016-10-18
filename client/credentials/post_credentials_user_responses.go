@@ -46,7 +46,7 @@ func NewPostCredentialsUserOK() *PostCredentialsUserOK {
 successful operation
 */
 type PostCredentialsUserOK struct {
-	Payload *models.ID
+	Payload *models.CredentialResponse
 }
 
 func (o *PostCredentialsUserOK) Error() string {
@@ -55,7 +55,7 @@ func (o *PostCredentialsUserOK) Error() string {
 
 func (o *PostCredentialsUserOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ID)
+	o.Payload = new(models.CredentialResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -39,7 +39,7 @@ func (a *Client) DeleteCredentialsAccountName(params *DeleteCredentialsAccountNa
 		PathPattern:        "/credentials/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteCredentialsAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteCredentialsID(params *DeleteCredentialsIDParams) error {
 		PathPattern:        "/credentials/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteCredentialsIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteCredentialsUserName(params *DeleteCredentialsUserNamePara
 		PathPattern:        "/credentials/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteCredentialsUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetCredentialsAccount(params *GetCredentialsAccountParams) (*Ge
 		PathPattern:        "/credentials/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetCredentialsAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetCredentialsAccountName(params *GetCredentialsAccountNamePara
 		PathPattern:        "/credentials/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetCredentialsAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetCredentialsID(params *GetCredentialsIDParams) (*GetCredentia
 		PathPattern:        "/credentials/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetCredentialsIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetCredentialsUser(params *GetCredentialsUserParams) (*GetCrede
 		PathPattern:        "/credentials/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetCredentialsUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetCredentialsUserName(params *GetCredentialsUserNameParams) (*
 		PathPattern:        "/credentials/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetCredentialsUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostCredentialsAccount(params *PostCredentialsAccountParams) (*
 		PathPattern:        "/credentials/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostCredentialsAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostCredentialsUser(params *PostCredentialsUserParams) (*PostCr
 		PathPattern:        "/credentials/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostCredentialsUserReader{formats: a.formats},
 	})

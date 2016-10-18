@@ -18,12 +18,16 @@ swagger:model LdapConfigResponse
 type LdapConfigResponse struct {
 
 	/* bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)
-	 */
-	BindDn *string `json:"bindDn,omitempty"`
+
+	Required: true
+	*/
+	BindDn string `json:"bindDn"`
 
 	/* password for the provided bind DN
-	 */
-	BindPassword *string `json:"bindPassword,omitempty"`
+
+	Required: true
+	*/
+	BindPassword string `json:"bindPassword"`
 
 	/* description of the resource
 
@@ -75,10 +79,8 @@ type LdapConfigResponse struct {
 	ServerPort int32 `json:"serverPort"`
 
 	/* determines if LDAP or LDAP over SSL is to be used
-
-	Required: true
-	*/
-	ServerSSL bool `json:"serverSSL"`
+	 */
+	ServerSSL *bool `json:"serverSSL,omitempty"`
 
 	/* template for user search for authentication (e.g. dc=hadoop,dc=apache,dc=org)
 
@@ -94,6 +96,16 @@ type LdapConfigResponse struct {
 // Validate validates this ldap config response
 func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateBindDn(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateBindPassword(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateDescription(formats); err != nil {
 		// prop
@@ -115,11 +127,6 @@ func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateServerSSL(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateUserSearchBase(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -128,6 +135,24 @@ func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *LdapConfigResponse) validateBindDn(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("bindDn", "body", string(m.BindDn)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *LdapConfigResponse) validateBindPassword(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("bindPassword", "body", string(m.BindPassword)); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -185,15 +210,6 @@ func (m *LdapConfigResponse) validateServerPort(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaximumInt("serverPort", "body", int64(m.ServerPort), 65535, false); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *LdapConfigResponse) validateServerSSL(formats strfmt.Registry) error {
-
-	if err := validate.Required("serverSSL", "body", bool(m.ServerSSL)); err != nil {
 		return err
 	}
 

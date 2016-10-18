@@ -25,7 +25,7 @@ type Client struct {
 /*
 DeleteSssdAccountName deletes public owned or private s s s d config by name
 
-SSSD configs are defining external user database configuration for Hadoop containers.
+SSSD configs are defining external user database configuration for provisioned clusters.
 */
 func (a *Client) DeleteSssdAccountName(params *DeleteSssdAccountNameParams) error {
 	// TODO: Validate the params before sending
@@ -39,7 +39,7 @@ func (a *Client) DeleteSssdAccountName(params *DeleteSssdAccountNameParams) erro
 		PathPattern:        "/sssd/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteSssdAccountNameReader{formats: a.formats},
 	})
@@ -52,7 +52,7 @@ func (a *Client) DeleteSssdAccountName(params *DeleteSssdAccountNameParams) erro
 /*
 DeleteSssdID deletes s s s d config by id
 
-SSSD configs are defining external user database configuration for Hadoop containers.
+SSSD configs are defining external user database configuration for provisioned clusters.
 */
 func (a *Client) DeleteSssdID(params *DeleteSssdIDParams) error {
 	// TODO: Validate the params before sending
@@ -66,7 +66,7 @@ func (a *Client) DeleteSssdID(params *DeleteSssdIDParams) error {
 		PathPattern:        "/sssd/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteSssdIDReader{formats: a.formats},
 	})
@@ -79,7 +79,7 @@ func (a *Client) DeleteSssdID(params *DeleteSssdIDParams) error {
 /*
 DeleteSssdUserName deletes private s s s d config by name
 
-SSSD configs are defining external user database configuration for Hadoop containers.
+SSSD configs are defining external user database configuration for provisioned clusters.
 */
 func (a *Client) DeleteSssdUserName(params *DeleteSssdUserNameParams) error {
 	// TODO: Validate the params before sending
@@ -93,7 +93,7 @@ func (a *Client) DeleteSssdUserName(params *DeleteSssdUserNameParams) error {
 		PathPattern:        "/sssd/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteSssdUserNameReader{formats: a.formats},
 	})
@@ -106,7 +106,7 @@ func (a *Client) DeleteSssdUserName(params *DeleteSssdUserNameParams) error {
 /*
 GetSssdAccount retrieves public and private owned s s s d configs
 
-SSSD configs are defining external user database configuration for Hadoop containers.
+SSSD configs are defining external user database configuration for provisioned clusters.
 */
 func (a *Client) GetSssdAccount(params *GetSssdAccountParams) (*GetSssdAccountOK, error) {
 	// TODO: Validate the params before sending
@@ -120,7 +120,7 @@ func (a *Client) GetSssdAccount(params *GetSssdAccountParams) (*GetSssdAccountOK
 		PathPattern:        "/sssd/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetSssdAccountReader{formats: a.formats},
 	})
@@ -133,7 +133,7 @@ func (a *Client) GetSssdAccount(params *GetSssdAccountParams) (*GetSssdAccountOK
 /*
 GetSssdAccountName retrieves a public or private owned s s s d config by name
 
-SSSD configs are defining external user database configuration for Hadoop containers.
+SSSD configs are defining external user database configuration for provisioned clusters.
 */
 func (a *Client) GetSssdAccountName(params *GetSssdAccountNameParams) (*GetSssdAccountNameOK, error) {
 	// TODO: Validate the params before sending
@@ -147,7 +147,7 @@ func (a *Client) GetSssdAccountName(params *GetSssdAccountNameParams) (*GetSssdA
 		PathPattern:        "/sssd/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetSssdAccountNameReader{formats: a.formats},
 	})
@@ -160,7 +160,7 @@ func (a *Client) GetSssdAccountName(params *GetSssdAccountNameParams) (*GetSssdA
 /*
 GetSssdID retrieves s s s d config by id
 
-SSSD configs are defining external user database configuration for Hadoop containers.
+SSSD configs are defining external user database configuration for provisioned clusters.
 */
 func (a *Client) GetSssdID(params *GetSssdIDParams) (*GetSssdIDOK, error) {
 	// TODO: Validate the params before sending
@@ -174,7 +174,7 @@ func (a *Client) GetSssdID(params *GetSssdIDParams) (*GetSssdIDOK, error) {
 		PathPattern:        "/sssd/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetSssdIDReader{formats: a.formats},
 	})
@@ -187,7 +187,7 @@ func (a *Client) GetSssdID(params *GetSssdIDParams) (*GetSssdIDOK, error) {
 /*
 GetSssdUser retrieves private s s s d configs
 
-SSSD configs are defining external user database configuration for Hadoop containers.
+SSSD configs are defining external user database configuration for provisioned clusters.
 */
 func (a *Client) GetSssdUser(params *GetSssdUserParams) (*GetSssdUserOK, error) {
 	// TODO: Validate the params before sending
@@ -201,7 +201,7 @@ func (a *Client) GetSssdUser(params *GetSssdUserParams) (*GetSssdUserOK, error) 
 		PathPattern:        "/sssd/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetSssdUserReader{formats: a.formats},
 	})
@@ -214,7 +214,7 @@ func (a *Client) GetSssdUser(params *GetSssdUserParams) (*GetSssdUserOK, error) 
 /*
 GetSssdUserName retrieves a private s s s d config by name
 
-SSSD configs are defining external user database configuration for Hadoop containers.
+SSSD configs are defining external user database configuration for provisioned clusters.
 */
 func (a *Client) GetSssdUserName(params *GetSssdUserNameParams) (*GetSssdUserNameOK, error) {
 	// TODO: Validate the params before sending
@@ -228,7 +228,7 @@ func (a *Client) GetSssdUserName(params *GetSssdUserNameParams) (*GetSssdUserNam
 		PathPattern:        "/sssd/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetSssdUserNameReader{formats: a.formats},
 	})
@@ -241,7 +241,7 @@ func (a *Client) GetSssdUserName(params *GetSssdUserNameParams) (*GetSssdUserNam
 /*
 PostSssdAccount creates s s s d config as public resource
 
-SSSD configs are defining external user database configuration for Hadoop containers.
+SSSD configs are defining external user database configuration for provisioned clusters.
 */
 func (a *Client) PostSssdAccount(params *PostSssdAccountParams) (*PostSssdAccountOK, error) {
 	// TODO: Validate the params before sending
@@ -255,7 +255,7 @@ func (a *Client) PostSssdAccount(params *PostSssdAccountParams) (*PostSssdAccoun
 		PathPattern:        "/sssd/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostSssdAccountReader{formats: a.formats},
 	})
@@ -268,7 +268,7 @@ func (a *Client) PostSssdAccount(params *PostSssdAccountParams) (*PostSssdAccoun
 /*
 PostSssdUser creates s s s d config as private resource
 
-SSSD configs are defining external user database configuration for Hadoop containers.
+SSSD configs are defining external user database configuration for provisioned clusters.
 */
 func (a *Client) PostSssdUser(params *PostSssdUserParams) (*PostSssdUserOK, error) {
 	// TODO: Validate the params before sending
@@ -282,7 +282,7 @@ func (a *Client) PostSssdUser(params *PostSssdUserParams) (*PostSssdUserOK, erro
 		PathPattern:        "/sssd/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostSssdUserReader{formats: a.formats},
 	})

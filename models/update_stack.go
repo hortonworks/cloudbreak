@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
+	"github.com/go-swagger/go-swagger/swag"
 
 	"github.com/go-swagger/go-swagger/errors"
 	"github.com/go-swagger/go-swagger/httpkit/validate"
@@ -18,16 +19,13 @@ swagger:model UpdateStack
 */
 type UpdateStack struct {
 
-	/* instance group adjustment
+	/* instnce group adjustment
 	 */
 	InstanceGroupAdjustment *InstanceGroupAdjustment `json:"instanceGroupAdjustment,omitempty"`
 
-	// TODO must be a pointer !
-	/* status
-
-	Required: true
-	*/
-	Status *string `json:"status"`
+	/* status of the scale request
+	 */
+	Status *string `json:"status,omitempty"`
 }
 
 // Validate validates this update stack
@@ -65,8 +63,8 @@ func (m *UpdateStack) validateStatusEnum(path, location string, value string) er
 
 func (m *UpdateStack) validateStatus(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("status", "body", string(*m.Status)); err != nil {
-		return err
+	if swag.IsZero(m.Status) { // not required
+		return nil
 	}
 
 	if err := m.validateStatusEnum("status", "body", *m.Status); err != nil {

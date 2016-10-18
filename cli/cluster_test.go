@@ -44,7 +44,7 @@ func TestFetchClusterImplReduced(t *testing.T) {
 func TestFetchClusterImplNotReduced(t *testing.T) {
 	stack := &models.StackResponse{
 		CredentialID: int64(1),
-		InstanceGroups: []*models.InstanceGroup{
+		InstanceGroups: []*models.InstanceGroupResponse{
 			{
 				Group:      MASTER,
 				TemplateID: int64(1),
@@ -62,7 +62,7 @@ func TestFetchClusterImplNotReduced(t *testing.T) {
 	}
 
 	var secDetailsCalled bool
-	getSecurityDetails := func(stack *models.StackResponse) (map[string][]*models.SecurityRule, error) {
+	getSecurityDetails := func(stack *models.StackResponse) (map[string][]*models.SecurityRuleResponse, error) {
 		secDetailsCalled = true
 		return nil, nil
 	}
@@ -74,7 +74,7 @@ func TestFetchClusterImplNotReduced(t *testing.T) {
 	}
 
 	var networkCalled bool
-	getNetwork := func(id int64) *models.NetworkJSON {
+	getNetwork := func(id int64) *models.NetworkResponse {
 		networkCalled = true
 		return nil
 	}
@@ -196,16 +196,19 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 			c <- int64(x + 10)
 		})
 	}
+	id := int64(1)
 	getRdsConfig := func(string) models.RDSConfigResponse {
-		return models.RDSConfigResponse{ID: &(&stringWrapper{"1"}).s}
+		return models.RDSConfigResponse{ID: &id}
 	}
+	stackId := int64(20)
 	postStack := func(params *stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error) {
 		actualStack = params.Body
-		return &stacks.PostStacksUserOK{Payload: &models.ID{ID: int64(20)}}, nil
+		return &stacks.PostStacksUserOK{Payload: &models.StackResponse{ID: &stackId}}, nil
 	}
+	clusterId := int64(30)
 	postCluster := func(params *cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error) {
 		actualCluster = params.Body
-		return &cluster.PostStacksIDClusterOK{Payload: &models.ID{ID: int64(30)}}, nil
+		return &cluster.PostStacksIDClusterOK{Payload: &models.ClusterResponse{ID: &clusterId}}, nil
 	}
 
 	actualId = createClusterImpl(*skeleton, getBlueprint,
@@ -353,13 +356,13 @@ func TestGenerateCreateSharedClusterSkeletonImplMinimalConfig(t *testing.T) {
 			Status: &(&stringWrapper{"AVAILABLE"}).s,
 		}
 	}
-	getClusterConfig := func(id int64, params []*models.BlueprintParameterJSON) []*models.BlueprintInputJSON {
+	getClusterConfig := func(id int64, params []*models.BlueprintParameter) []*models.BlueprintInput {
 		return nil
 	}
-	getNetwork := func(id int64) *models.NetworkJSON {
+	getNetwork := func(id int64) *models.NetworkResponse {
 		np := make(map[string]interface{})
 		np["internetGatewayId"] = "igw"
-		return &models.NetworkJSON{Parameters: np}
+		return &models.NetworkResponse{Parameters: np}
 	}
 
 	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, getClusterConfig, getNetwork, nil)
@@ -381,7 +384,7 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 					Name: &(&stringWrapper{"blueprint"}).s,
 				},
 			},
-			Inputs: []*models.BlueprintParameterJSON{{Name: &(&stringWrapper{"bp-param-name"}).s}},
+			Inputs: []*models.BlueprintParameter{{Name: &(&stringWrapper{"bp-param-name"}).s}},
 		}
 	}
 	getCluster := func(string) *models.StackResponse {
@@ -391,14 +394,14 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 			Cluster: &models.ClusterResponse{RdsConfigID: &(&int64Wrapper{int64(2)}).i},
 		}
 	}
-	getClusterConfig := func(id int64, params []*models.BlueprintParameterJSON) []*models.BlueprintInputJSON {
-		return []*models.BlueprintInputJSON{{Name: &(&stringWrapper{"key"}).s, PropertyValue: &(&stringWrapper{"value"}).s}}
+	getClusterConfig := func(id int64, params []*models.BlueprintParameter) []*models.BlueprintInput {
+		return []*models.BlueprintInput{{Name: &(&stringWrapper{"key"}).s, PropertyValue: &(&stringWrapper{"value"}).s}}
 	}
-	getNetwork := func(id int64) *models.NetworkJSON {
+	getNetwork := func(id int64) *models.NetworkResponse {
 		np := make(map[string]interface{})
 		np["vpcId"] = "vpcId"
 		np["subnetId"] = "subnetId"
-		return &models.NetworkJSON{Parameters: np}
+		return &models.NetworkResponse{Parameters: np}
 	}
 	getRdsConfig := func(id int64) *models.RDSConfigResponse {
 		return &models.RDSConfigResponse{Name: "rds-name"}

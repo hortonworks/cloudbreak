@@ -54,9 +54,9 @@ func TestListClustersImpl(t *testing.T) {
 }
 
 func TestListClusterNodesImplWithoutDiscoveryFQDN(t *testing.T) {
-	groups := make([]*models.InstanceGroup, 0)
+	groups := make([]*models.InstanceGroupResponse, 0)
 	for i := 0; i <= 3; i++ {
-		groups = append(groups, &models.InstanceGroup{Metadata: []*models.InstanceMetaData{{}}})
+		groups = append(groups, &models.InstanceGroupResponse{Metadata: []*models.InstanceMetaData{{}}})
 	}
 	getStack := func(params *stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error) {
 		return &stacks.GetStacksUserNameOK{Payload: &models.StackResponse{InstanceGroups: groups}}, nil
@@ -72,7 +72,7 @@ func TestListClusterNodesImplWithoutDiscoveryFQDN(t *testing.T) {
 
 func TestListClusterNodesImplWithoutMaster(t *testing.T) {
 	var expectedCount int
-	groups := make([]*models.InstanceGroup, 0)
+	groups := make([]*models.InstanceGroupResponse, 0)
 	for i := 0; i <= 3; i++ {
 		metas := make([]*models.InstanceMetaData, 0)
 		for j := 0; j <= 3; j++ {
@@ -86,7 +86,7 @@ func TestListClusterNodesImplWithoutMaster(t *testing.T) {
 				PrivateIP:     &(&stringWrapper{"privip" + u}).s,
 			})
 		}
-		groups = append(groups, &models.InstanceGroup{Metadata: metas})
+		groups = append(groups, &models.InstanceGroupResponse{Metadata: metas})
 	}
 	getStack := func(params *stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error) {
 		return &stacks.GetStacksUserNameOK{Payload: &models.StackResponse{InstanceGroups: groups}}, nil
@@ -109,7 +109,7 @@ func TestListClusterNodesImplWithoutMaster(t *testing.T) {
 }
 
 func TestListClusterNodesImplWithMaster(t *testing.T) {
-	groups := []*models.InstanceGroup{{
+	groups := []*models.InstanceGroupResponse{{
 		Metadata: []*models.InstanceMetaData{{
 			InstanceGroup: &(&stringWrapper{MASTER}).s,
 			DiscoveryFQDN: &(&stringWrapper{"fqdn"}).s,

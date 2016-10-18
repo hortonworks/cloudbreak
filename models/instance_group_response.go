@@ -13,11 +13,11 @@ import (
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 )
 
-/*InstanceGroup instance group
+/*InstanceGroupResponse instance group response
 
-swagger:model InstanceGroup
+swagger:model InstanceGroupResponse
 */
-type InstanceGroup struct {
+type InstanceGroupResponse struct {
 
 	/* name of the instance group
 
@@ -31,7 +31,7 @@ type InstanceGroup struct {
 	*/
 	ID *int64 `json:"id,omitempty"`
 
-	/* metadata
+	/* metadata of instances
 
 	Read Only: true
 	Unique: true
@@ -47,10 +47,8 @@ type InstanceGroup struct {
 	NodeCount int32 `json:"nodeCount"`
 
 	/* security group resource id for the instance group
-
-	Required: true
-	*/
-	SecurityGroupID int64 `json:"securityGroupId"`
+	 */
+	SecurityGroupID *int64 `json:"securityGroupId,omitempty"`
 
 	/* referenced template id
 
@@ -63,8 +61,8 @@ type InstanceGroup struct {
 	Type *string `json:"type,omitempty"`
 }
 
-// Validate validates this instance group
-func (m *InstanceGroup) Validate(formats strfmt.Registry) error {
+// Validate validates this instance group response
+func (m *InstanceGroupResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateGroup(formats); err != nil {
@@ -78,11 +76,6 @@ func (m *InstanceGroup) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateNodeCount(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateSecurityGroupID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -103,7 +96,7 @@ func (m *InstanceGroup) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *InstanceGroup) validateGroup(formats strfmt.Registry) error {
+func (m *InstanceGroupResponse) validateGroup(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("group", "body", string(m.Group)); err != nil {
 		return err
@@ -112,7 +105,7 @@ func (m *InstanceGroup) validateGroup(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *InstanceGroup) validateMetadata(formats strfmt.Registry) error {
+func (m *InstanceGroupResponse) validateMetadata(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Metadata) { // not required
 		return nil
@@ -136,7 +129,7 @@ func (m *InstanceGroup) validateMetadata(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *InstanceGroup) validateNodeCount(formats strfmt.Registry) error {
+func (m *InstanceGroupResponse) validateNodeCount(formats strfmt.Registry) error {
 
 	if err := validate.Required("nodeCount", "body", int32(m.NodeCount)); err != nil {
 		return err
@@ -153,16 +146,7 @@ func (m *InstanceGroup) validateNodeCount(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *InstanceGroup) validateSecurityGroupID(formats strfmt.Registry) error {
-
-	if err := validate.Required("securityGroupId", "body", int64(m.SecurityGroupID)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *InstanceGroup) validateTemplateID(formats strfmt.Registry) error {
+func (m *InstanceGroupResponse) validateTemplateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("templateId", "body", int64(m.TemplateID)); err != nil {
 		return err
@@ -171,25 +155,25 @@ func (m *InstanceGroup) validateTemplateID(formats strfmt.Registry) error {
 	return nil
 }
 
-var instanceGroupTypeTypePropEnum []interface{}
+var instanceGroupResponseTypeTypePropEnum []interface{}
 
-func (m *InstanceGroup) validateTypeEnum(path, location string, value string) error {
-	if instanceGroupTypeTypePropEnum == nil {
+func (m *InstanceGroupResponse) validateTypeEnum(path, location string, value string) error {
+	if instanceGroupResponseTypeTypePropEnum == nil {
 		var res []string
 		if err := json.Unmarshal([]byte(`["GATEWAY","CORE"]`), &res); err != nil {
 			return err
 		}
 		for _, v := range res {
-			instanceGroupTypeTypePropEnum = append(instanceGroupTypeTypePropEnum, v)
+			instanceGroupResponseTypeTypePropEnum = append(instanceGroupResponseTypeTypePropEnum, v)
 		}
 	}
-	if err := validate.Enum(path, location, value, instanceGroupTypeTypePropEnum); err != nil {
+	if err := validate.Enum(path, location, value, instanceGroupResponseTypeTypePropEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *InstanceGroup) validateType(formats strfmt.Registry) error {
+func (m *InstanceGroupResponse) validateType(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Type) { // not required
 		return nil

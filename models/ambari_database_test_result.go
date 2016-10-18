@@ -16,7 +16,7 @@ swagger:model AmbariDatabaseTestResult
 */
 type AmbariDatabaseTestResult struct {
 
-	/* error
+	/* result of Ambari database test
 
 	Required: true
 	*/

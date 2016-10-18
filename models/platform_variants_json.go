@@ -21,7 +21,7 @@ type PlatformVariantsJSON struct {
 	 */
 	DefaultVariants map[string]string `json:"defaultVariants,omitempty"`
 
-	/* platform to variants
+	/* platform variants
 	 */
 	PlatformToVariants map[string][]string `json:"platformToVariants,omitempty"`
 }

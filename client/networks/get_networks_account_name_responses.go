@@ -46,7 +46,7 @@ func NewGetNetworksAccountNameOK() *GetNetworksAccountNameOK {
 successful operation
 */
 type GetNetworksAccountNameOK struct {
-	Payload *models.NetworkJSON
+	Payload *models.NetworkResponse
 }
 
 func (o *GetNetworksAccountNameOK) Error() string {
@@ -55,7 +55,7 @@ func (o *GetNetworksAccountNameOK) Error() string {
 
 func (o *GetNetworksAccountNameOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.NetworkJSON)
+	o.Payload = new(models.NetworkResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

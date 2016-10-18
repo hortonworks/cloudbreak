@@ -16,7 +16,7 @@ swagger:model AmbariAddress
 */
 type AmbariAddress struct {
 
-	/* ambari address
+	/* ambari server address
 
 	Required: true
 	*/

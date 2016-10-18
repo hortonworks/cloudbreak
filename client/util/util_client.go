@@ -37,7 +37,7 @@ func (a *Client) TestAmbariDatabase(params *TestAmbariDatabaseParams) (*TestAmba
 		PathPattern:        "/util/ambari-database",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &TestAmbariDatabaseReader{formats: a.formats},
 	})
@@ -62,7 +62,7 @@ func (a *Client) TestRdsConnection(params *TestRdsConnectionParams) (*TestRdsCon
 		PathPattern:        "/util/rds",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &TestRdsConnectionReader{formats: a.formats},
 	})

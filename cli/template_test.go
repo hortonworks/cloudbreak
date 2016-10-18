@@ -40,7 +40,7 @@ func TestCreateTemplateImpl(t *testing.T) {
 			actualWorkerTemplate = params.Body
 		}
 		resp := templates.PostTemplatesAccountOK{
-			Payload: &models.ID{ID: id},
+			Payload: &models.TemplateResponse{ID: &id},
 		}
 		return &resp, nil
 	}
@@ -75,8 +75,8 @@ func validateTemplate(kind string, config InstanceConfig, expId int64, actual *m
 	if *actual.VolumeType != config.VolumeType {
 		t.Errorf(kind+" volume type not match %s == %s", config.VolumeType, *actual.VolumeType)
 	}
-	if *actual.VolumeSize != config.VolumeSize {
-		t.Errorf(kind+" volume size not match %d == %d", config.VolumeSize, *actual.VolumeSize)
+	if actual.VolumeSize != config.VolumeSize {
+		t.Errorf(kind+" volume size not match %d == %d", config.VolumeSize, actual.VolumeSize)
 	}
 	if actual.VolumeCount != config.VolumeCount {
 		t.Errorf(kind+" volume count not match %d == %d", config.VolumeCount, actual.VolumeCount)

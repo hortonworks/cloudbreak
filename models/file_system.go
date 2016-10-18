@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
+	"github.com/go-swagger/go-swagger/swag"
 
 	"github.com/go-swagger/go-swagger/errors"
 	"github.com/go-swagger/go-swagger/httpkit/validate"
@@ -19,10 +20,8 @@ swagger:model FileSystem
 type FileSystem struct {
 
 	/* true if fs.defaultFS should point to this filesystem
-
-	Required: true
-	*/
-	DefaultFs bool `json:"defaultFs"`
+	 */
+	DefaultFs *bool `json:"defaultFs,omitempty"`
 
 	/* name of the filesystem
 
@@ -31,10 +30,8 @@ type FileSystem struct {
 	Name string `json:"name"`
 
 	/* configuration of the filesystem access as key-value pairs
-
-	Required: true
-	*/
-	Properties map[string]string `json:"properties"`
+	 */
+	Properties map[string]string `json:"properties,omitempty"`
 
 	/* type of the filesystem
 
@@ -46,11 +43,6 @@ type FileSystem struct {
 // Validate validates this file system
 func (m *FileSystem) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateDefaultFs(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
 
 	if err := m.validateName(formats); err != nil {
 		// prop
@@ -73,15 +65,6 @@ func (m *FileSystem) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileSystem) validateDefaultFs(formats strfmt.Registry) error {
-
-	if err := validate.Required("defaultFs", "body", bool(m.DefaultFs)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *FileSystem) validateName(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
@@ -92,6 +75,10 @@ func (m *FileSystem) validateName(formats strfmt.Registry) error {
 }
 
 func (m *FileSystem) validateProperties(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Properties) { // not required
+		return nil
+	}
 
 	if err := validate.Required("properties", "body", m.Properties); err != nil {
 		return err

@@ -12,6 +12,8 @@ import (
 	"github.com/hortonworks/hdc-cli/client/accountpreferences"
 	"github.com/hortonworks/hdc-cli/client/blueprints"
 	"github.com/hortonworks/hdc-cli/client/cluster"
+	"github.com/hortonworks/hdc-cli/client/clustertemplates"
+	"github.com/hortonworks/hdc-cli/client/connectors"
 	"github.com/hortonworks/hdc-cli/client/constraints"
 	"github.com/hortonworks/hdc-cli/client/credentials"
 	"github.com/hortonworks/hdc-cli/client/events"
@@ -20,8 +22,10 @@ import (
 	"github.com/hortonworks/hdc-cli/client/rdsconfigs"
 	"github.com/hortonworks/hdc-cli/client/recipes"
 	"github.com/hortonworks/hdc-cli/client/securitygroups"
+	"github.com/hortonworks/hdc-cli/client/settings"
 	"github.com/hortonworks/hdc-cli/client/sssd"
 	"github.com/hortonworks/hdc-cli/client/stacks"
+	"github.com/hortonworks/hdc-cli/client/subscriptions"
 	"github.com/hortonworks/hdc-cli/client/templates"
 	"github.com/hortonworks/hdc-cli/client/topologies"
 	"github.com/hortonworks/hdc-cli/client/usages"
@@ -37,7 +41,7 @@ func NewHTTPClient(formats strfmt.Registry) *Cloudbreak {
 	if formats == nil {
 		formats = strfmt.Default
 	}
-	transport := httptransport.New("localhost", "/", []string{"http", "https"})
+	transport := httptransport.New("localhost", "/", []string{"", "http", "https"})
 	return New(transport, formats)
 }
 
@@ -51,6 +55,10 @@ func New(transport client.Transport, formats strfmt.Registry) *Cloudbreak {
 	cli.Blueprints = blueprints.New(transport, formats)
 
 	cli.Cluster = cluster.New(transport, formats)
+
+	cli.Clustertemplates = clustertemplates.New(transport, formats)
+
+	cli.Connectors = connectors.New(transport, formats)
 
 	cli.Constraints = constraints.New(transport, formats)
 
@@ -68,9 +76,13 @@ func New(transport client.Transport, formats strfmt.Registry) *Cloudbreak {
 
 	cli.Securitygroups = securitygroups.New(transport, formats)
 
+	cli.Settings = settings.New(transport, formats)
+
 	cli.Sssd = sssd.New(transport, formats)
 
 	cli.Stacks = stacks.New(transport, formats)
+
+	cli.Subscriptions = subscriptions.New(transport, formats)
 
 	cli.Templates = templates.New(transport, formats)
 
@@ -93,6 +105,10 @@ type Cloudbreak struct {
 
 	Cluster *cluster.Client
 
+	Clustertemplates *clustertemplates.Client
+
+	Connectors *connectors.Client
+
 	Constraints *constraints.Client
 
 	Credentials *credentials.Client
@@ -109,9 +125,13 @@ type Cloudbreak struct {
 
 	Securitygroups *securitygroups.Client
 
+	Settings *settings.Client
+
 	Sssd *sssd.Client
 
 	Stacks *stacks.Client
+
+	Subscriptions *subscriptions.Client
 
 	Templates *templates.Client
 
@@ -136,6 +156,10 @@ func (c *Cloudbreak) SetTransport(transport client.Transport) {
 
 	c.Cluster.SetTransport(transport)
 
+	c.Clustertemplates.SetTransport(transport)
+
+	c.Connectors.SetTransport(transport)
+
 	c.Constraints.SetTransport(transport)
 
 	c.Credentials.SetTransport(transport)
@@ -152,9 +176,13 @@ func (c *Cloudbreak) SetTransport(transport client.Transport) {
 
 	c.Securitygroups.SetTransport(transport)
 
+	c.Settings.SetTransport(transport)
+
 	c.Sssd.SetTransport(transport)
 
 	c.Stacks.SetTransport(transport)
+
+	c.Subscriptions.SetTransport(transport)
 
 	c.Templates.SetTransport(transport)
 

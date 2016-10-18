@@ -11,15 +11,17 @@ import (
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 )
 
-/*SecurityGroupJSON security group json
+/*NetworkResponse network response
 
-swagger:model SecurityGroupJson
+swagger:model NetworkResponse
 */
-type SecurityGroupJSON struct {
+type NetworkResponse struct {
 
-	/* account id of the resource owner that is provided by OAuth provider
-	 */
-	Account *string `json:"account,omitempty"`
+	/* type of cloud provider
+
+	Required: true
+	*/
+	CloudPlatform string `json:"cloudPlatform"`
 
 	/* description of the resource
 
@@ -29,7 +31,9 @@ type SecurityGroupJSON struct {
 	Description *string `json:"description,omitempty"`
 
 	/* id of the resource
-	 */
+
+	Read Only: true
+	*/
 	ID *int64 `json:"id,omitempty"`
 
 	/* name of the resource
@@ -41,26 +45,33 @@ type SecurityGroupJSON struct {
 	*/
 	Name string `json:"name"`
 
-	/* id of the resource owner that is provided by OAuth provider
+	/* provider specific parameters of the specified network
 	 */
-	Owner *string `json:"owner,omitempty"`
+	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
 	/* resource is visible in account
 
-	Required: true
+	Read Only: true
 	*/
-	PublicInAccount bool `json:"publicInAccount"`
+	PublicInAccount *bool `json:"publicInAccount,omitempty"`
 
-	/* list of security rules that relates to the security group
+	/* the subnet definition of the network in CIDR format
+	 */
+	SubnetCIDR *string `json:"subnetCIDR,omitempty"`
 
-	Required: true
-	*/
-	SecurityRules []*SecurityRule `json:"securityRules"`
+	/* id of the topology the resource belongs to
+	 */
+	TopologyID *int64 `json:"topologyId,omitempty"`
 }
 
-// Validate validates this security group json
-func (m *SecurityGroupJSON) Validate(formats strfmt.Registry) error {
+// Validate validates this network response
+func (m *NetworkResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateCloudPlatform(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateDescription(formats); err != nil {
 		// prop
@@ -72,23 +83,22 @@ func (m *SecurityGroupJSON) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validatePublicInAccount(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateSecurityRules(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
 	return nil
 }
 
-func (m *SecurityGroupJSON) validateDescription(formats strfmt.Registry) error {
+func (m *NetworkResponse) validateCloudPlatform(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("cloudPlatform", "body", string(m.CloudPlatform)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *NetworkResponse) validateDescription(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Description) { // not required
 		return nil
@@ -105,7 +115,7 @@ func (m *SecurityGroupJSON) validateDescription(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SecurityGroupJSON) validateName(formats strfmt.Registry) error {
+func (m *NetworkResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
 		return err
@@ -121,35 +131,6 @@ func (m *SecurityGroupJSON) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *SecurityGroupJSON) validatePublicInAccount(formats strfmt.Registry) error {
-
-	if err := validate.Required("publicInAccount", "body", bool(m.PublicInAccount)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *SecurityGroupJSON) validateSecurityRules(formats strfmt.Registry) error {
-
-	if err := validate.Required("securityRules", "body", m.SecurityRules); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.SecurityRules); i++ {
-
-		if m.SecurityRules[i] != nil {
-
-			if err := m.SecurityRules[i].Validate(formats); err != nil {
-				return err
-			}
-		}
-
 	}
 
 	return nil

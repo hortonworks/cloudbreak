@@ -44,10 +44,8 @@ type CredentialRequest struct {
 	Name string `json:"name"`
 
 	/* cloud specific parameters for credential
-
-	Required: true
-	*/
-	Parameters map[string]interface{} `json:"parameters"`
+	 */
+	Parameters map[string]interface{} `json:"parameters,omitempty"`
 
 	/* public key for accessing instances
 
@@ -75,11 +73,6 @@ func (m *CredentialRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateParameters(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -136,15 +129,6 @@ func (m *CredentialRequest) validateName(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("name", "body", string(m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *CredentialRequest) validateParameters(formats strfmt.Registry) error {
-
-	if err := validate.Required("parameters", "body", m.Parameters); err != nil {
 		return err
 	}
 

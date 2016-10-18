@@ -39,7 +39,7 @@ type ClusterResponse struct {
 
 	Unique: true
 	*/
-	BlueprintInputs []*BlueprintInputJSON `json:"blueprintInputs,omitempty"`
+	BlueprintInputs []*BlueprintInput `json:"blueprintInputs,omitempty"`
 
 	/* name of the cluster
 	 */
@@ -61,7 +61,7 @@ type ClusterResponse struct {
 
 	Unique: true
 	*/
-	HostGroups []*HostGroup `json:"hostGroups,omitempty"`
+	HostGroups []*HostGroupResponse `json:"hostGroups,omitempty"`
 
 	/* duration - how long the cluster is running in hours
 	 */
@@ -88,10 +88,8 @@ type ClusterResponse struct {
 	Name *string `json:"name,omitempty"`
 
 	/* ambari password
-
-	Required: true
-	*/
-	Password string `json:"password"`
+	 */
+	Password *string `json:"password,omitempty"`
 
 	/* RDS configuration id for the cluster
 	 */
@@ -118,10 +116,8 @@ type ClusterResponse struct {
 	StatusReason *string `json:"statusReason,omitempty"`
 
 	/* ambari username
-
-	Required: true
-	*/
-	UserName string `json:"userName"`
+	 */
+	UserName *string `json:"userName,omitempty"`
 }
 
 // Validate validates this cluster response
@@ -143,17 +139,7 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validatePassword(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateServiceEndPoints(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateUserName(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -243,15 +229,6 @@ func (m *ClusterResponse) validateHostGroups(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterResponse) validatePassword(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("password", "body", string(m.Password)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *ClusterResponse) validateServiceEndPoints(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.ServiceEndPoints) { // not required
@@ -259,15 +236,6 @@ func (m *ClusterResponse) validateServiceEndPoints(formats strfmt.Registry) erro
 	}
 
 	if err := validate.Required("serviceEndPoints", "body", m.ServiceEndPoints); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ClusterResponse) validateUserName(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("userName", "body", string(m.UserName)); err != nil {
 		return err
 	}
 

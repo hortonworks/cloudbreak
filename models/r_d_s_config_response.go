@@ -4,14 +4,14 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"encoding/json"
-	"strconv"
-
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
-	"github.com/go-swagger/go-swagger/swag"
 
 	"github.com/go-swagger/go-swagger/errors"
 	"github.com/go-swagger/go-swagger/httpkit/validate"
+
+	"encoding/json"
+	"github.com/go-swagger/go-swagger/swag"
+	"strconv"
 )
 
 /*RDSConfigResponse r d s config response
@@ -19,8 +19,7 @@ import (
 swagger:model RDSConfigResponse
 */
 type RDSConfigResponse struct {
-
-	/* cluster names
+	/* list of clusters which use config
 
 	Unique: true
 	*/
@@ -44,7 +43,7 @@ type RDSConfigResponse struct {
 	*/
 	ConnectionUserName string `json:"connectionUserName"`
 
-	/* creation date
+	/* creation time of the resource in long
 	 */
 	CreationDate *int64 `json:"creationDate,omitempty"`
 
@@ -62,7 +61,7 @@ type RDSConfigResponse struct {
 
 	/* id of the resource
 	 */
-	ID *string `json:"id,omitempty"`
+	ID *int64 `json:"id,omitempty"`
 
 	/* Name of the RDS configuration resource
 
@@ -74,7 +73,7 @@ type RDSConfigResponse struct {
 
 	Unique: true
 	*/
-	Properties []*RdsConfigPropertyJSON `json:"properties,omitempty"`
+	Properties []*RdsConfigProperty `json:"properties,omitempty"`
 
 	/* resource is visible in account
 	 */
@@ -146,7 +145,8 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 
 func (m *RDSConfigResponse) validateClusterNames(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.ClusterNames) { // not required
+	if swag.IsZero(m.ClusterNames) {
+		// not required
 		return nil
 	}
 
@@ -180,6 +180,10 @@ func (m *RDSConfigResponse) validateConnectionURL(formats strfmt.Registry) error
 		return err
 	}
 
+	if err := validate.Pattern("connectionURL", "body", string(m.ConnectionURL), `^jdbc:postgresql://[-\w\.]*:?\d*/?\w*`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -197,7 +201,7 @@ var rDSConfigResponseTypeDatabaseTypePropEnum []interface{}
 func (m *RDSConfigResponse) validateDatabaseTypeEnum(path, location string, value string) error {
 	if rDSConfigResponseTypeDatabaseTypePropEnum == nil {
 		var res []string
-		if err := json.Unmarshal([]byte(`["POSTGRES","MYSQL"]`), &res); err != nil {
+		if err := json.Unmarshal([]byte(`["POSTGRES"]`), &res); err != nil {
 			return err
 		}
 		for _, v := range res {
@@ -243,7 +247,8 @@ func (m *RDSConfigResponse) validateName(formats strfmt.Registry) error {
 
 func (m *RDSConfigResponse) validateProperties(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Properties) { // not required
+	if swag.IsZero(m.Properties) {
+		// not required
 		return nil
 	}
 
@@ -285,7 +290,8 @@ func (m *RDSConfigResponse) validateTypeEnum(path, location string, value string
 
 func (m *RDSConfigResponse) validateType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Type) { // not required
+	if swag.IsZero(m.Type) {
+		// not required
 		return nil
 	}
 

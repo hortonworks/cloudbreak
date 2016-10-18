@@ -16,7 +16,7 @@ swagger:model StackValidationRequest
 */
 type StackValidationRequest struct {
 
-	/* id of the referenced blueprint
+	/* blueprint id for the cluster
 
 	Required: true
 	*/
@@ -26,19 +26,19 @@ type StackValidationRequest struct {
 	 */
 	FileSystem *FileSystem `json:"fileSystem,omitempty"`
 
-	/* host groups
+	/* collection of hostgroups
 
 	Required: true
 	Unique: true
 	*/
-	HostGroups []*HostGroup `json:"hostGroups"`
+	HostGroups []*HostGroupRequest `json:"hostGroups"`
 
-	/* instance groups
+	/* collection of instance groupst
 
 	Required: true
 	Unique: true
 	*/
-	InstanceGroups []*InstanceGroup `json:"instanceGroups"`
+	InstanceGroups []*InstanceGroups `json:"instanceGroups"`
 
 	/* network resource id for the stack
 

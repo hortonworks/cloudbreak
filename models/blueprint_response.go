@@ -43,13 +43,13 @@ type BlueprintResponse struct {
 
 	/* id of the resource
 	 */
-	ID *string `json:"id,omitempty"`
+	ID *int64 `json:"id,omitempty"`
 
 	/* input parameters of the blueprint
 
 	Unique: true
 	*/
-	Inputs []*BlueprintParameterJSON `json:"inputs,omitempty"`
+	Inputs []*BlueprintParameter `json:"inputs,omitempty"`
 
 	/* name of the resource
 

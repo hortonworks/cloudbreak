@@ -46,7 +46,7 @@ func NewGetSecuritygroupsIDOK() *GetSecuritygroupsIDOK {
 successful operation
 */
 type GetSecuritygroupsIDOK struct {
-	Payload *models.SecurityGroupJSON
+	Payload *models.SecurityGroupResponse
 }
 
 func (o *GetSecuritygroupsIDOK) Error() string {
@@ -55,7 +55,7 @@ func (o *GetSecuritygroupsIDOK) Error() string {
 
 func (o *GetSecuritygroupsIDOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.SecurityGroupJSON)
+	o.Payload = new(models.SecurityGroupResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

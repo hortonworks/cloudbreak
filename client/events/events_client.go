@@ -39,7 +39,7 @@ func (a *Client) GetEvents(params *GetEventsParams) (*GetEventsOK, error) {
 		PathPattern:        "/events",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetEventsReader{formats: a.formats},
 	})

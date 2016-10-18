@@ -25,11 +25,11 @@ for the post securitygroups user operation typically these are written to a http
 type PostSecuritygroupsUserParams struct {
 
 	/*Body*/
-	Body *models.SecurityGroupJSON
+	Body *models.SecurityGroupRequest
 }
 
 // WithBody adds the body to the post securitygroups user params
-func (o *PostSecuritygroupsUserParams) WithBody(body *models.SecurityGroupJSON) *PostSecuritygroupsUserParams {
+func (o *PostSecuritygroupsUserParams) WithBody(body *models.SecurityGroupRequest) *PostSecuritygroupsUserParams {
 	o.Body = body
 	return o
 }
@@ -40,7 +40,7 @@ func (o *PostSecuritygroupsUserParams) WriteToRequest(r client.Request, reg strf
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models.SecurityGroupJSON)
+		o.Body = new(models.SecurityGroupRequest)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

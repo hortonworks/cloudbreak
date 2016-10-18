@@ -19,38 +19,31 @@ swagger:model UpdateCluster
 */
 type UpdateCluster struct {
 
-	/* ambari stack details
+	/* details of the Ambari stack
 	 */
 	AmbariStackDetails *AmbariStackDetails `json:"ambariStackDetails,omitempty"`
 
-	/* id of the referenced blueprint
+	/* blueprint id for the cluster
 	 */
 	BlueprintID *int64 `json:"blueprintId,omitempty"`
 
 	/* host group adjustment
+	 */
+	HostGroupAdjustment *HostGroupAdjustment `json:"hostGroupAdjustment,omitempty"`
 
-	Required: true
-	*/
-	HostGroupAdjustment *HostGroupAdjustment `json:"hostGroupAdjustment"`
-
-	/* hostgroups
+	/* collection of hostgroups
 
 	Unique: true
 	*/
-	Hostgroups []*HostGroup `json:"hostgroups,omitempty"`
+	Hostgroups []*HostGroupBase `json:"hostgroups,omitempty"`
 
-	// TODO must be a pointer !
-	/* status
+	/* request status
+	 */
+	Status *string `json:"status,omitempty"`
 
-	Required: true
-	*/
-	Status *string `json:"status"`
-
-	/* user name password json
-
-	Required: true
-	*/
-	UserNamePasswordJSON *UserNamePasswordJSON `json:"userNamePasswordJson"`
+	/* user details
+	 */
+	UserNamePasswordJSON *UserNamePassword `json:"userNamePasswordJson,omitempty"`
 
 	/* validate blueprint
 	 */
@@ -60,11 +53,6 @@ type UpdateCluster struct {
 // Validate validates this update cluster
 func (m *UpdateCluster) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateHostGroupAdjustment(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
 
 	if err := m.validateHostgroups(formats); err != nil {
 		// prop
@@ -76,26 +64,9 @@ func (m *UpdateCluster) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateUserNamePasswordJSON(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *UpdateCluster) validateHostGroupAdjustment(formats strfmt.Registry) error {
-
-	if m.HostGroupAdjustment != nil {
-
-		if err := m.HostGroupAdjustment.Validate(formats); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -143,24 +114,12 @@ func (m *UpdateCluster) validateStatusEnum(path, location string, value string) 
 
 func (m *UpdateCluster) validateStatus(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("status", "body", string(*m.Status)); err != nil {
-		return err
+	if swag.IsZero(m.Status) { // not required
+		return nil
 	}
 
 	if err := m.validateStatusEnum("status", "body", *m.Status); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *UpdateCluster) validateUserNamePasswordJSON(formats strfmt.Registry) error {
-
-	if m.UserNamePasswordJSON != nil {
-
-		if err := m.UserNamePasswordJSON.Validate(formats); err != nil {
-			return err
-		}
 	}
 
 	return nil

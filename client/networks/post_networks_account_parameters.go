@@ -25,11 +25,11 @@ for the post networks account operation typically these are written to a http.Re
 type PostNetworksAccountParams struct {
 
 	/*Body*/
-	Body *models.NetworkJSON
+	Body *models.NetworkRequest
 }
 
 // WithBody adds the body to the post networks account params
-func (o *PostNetworksAccountParams) WithBody(body *models.NetworkJSON) *PostNetworksAccountParams {
+func (o *PostNetworksAccountParams) WithBody(body *models.NetworkRequest) *PostNetworksAccountParams {
 	o.Body = body
 	return o
 }
@@ -40,7 +40,7 @@ func (o *PostNetworksAccountParams) WriteToRequest(r client.Request, reg strfmt.
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models.NetworkJSON)
+		o.Body = new(models.NetworkRequest)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

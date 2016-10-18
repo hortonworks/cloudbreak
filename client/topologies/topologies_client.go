@@ -39,7 +39,7 @@ func (a *Client) DeleteTopologiesAccountID(params *DeleteTopologiesAccountIDPara
 		PathPattern:        "/topologies/account/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteTopologiesAccountIDReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) GetTopologiesAccount(params *GetTopologiesAccountParams) (*GetT
 		PathPattern:        "/topologies/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetTopologiesAccountReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) GetTopologiesAccountID(params *GetTopologiesAccountIDParams) (*
 		PathPattern:        "/topologies/account/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetTopologiesAccountIDReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) PostTopologiesAccount(params *PostTopologiesAccountParams) (*Po
 		PathPattern:        "/topologies/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostTopologiesAccountReader{formats: a.formats},
 	})

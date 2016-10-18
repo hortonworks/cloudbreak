@@ -21,7 +21,7 @@ type ConfigsResponse struct {
 	Required: true
 	Unique: true
 	*/
-	Inputs []*BlueprintInputJSON `json:"inputs"`
+	Inputs []*BlueprintInput `json:"inputs"`
 }
 
 // Validate validates this configs response

@@ -8,7 +8,7 @@ import (
 	"github.com/hortonworks/hdc-cli/models"
 )
 
-func clusterSkeleton(stackParams map[string]string, credParams map[string]interface{}, netParams map[string]interface{}) (ClusterSkeleton, *models.StackResponse, *models.CredentialResponse, *models.BlueprintResponse, *models.NetworkJSON) {
+func clusterSkeleton(stackParams map[string]string, credParams map[string]interface{}, netParams map[string]interface{}) (ClusterSkeleton, *models.StackResponse, *models.CredentialResponse, *models.BlueprintResponse, *models.NetworkResponse) {
 	skeleton := ClusterSkeleton{}
 	sr := models.StackResponse{
 		Name:         "stack-name",
@@ -28,7 +28,7 @@ func clusterSkeleton(stackParams map[string]string, credParams map[string]interf
 			},
 		},
 	}
-	nj := models.NetworkJSON{
+	nj := models.NetworkResponse{
 		Parameters: netParams,
 	}
 
@@ -142,9 +142,9 @@ func TestFillWithRDSConfig(t *testing.T) {
 func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	groups := make([]*models.InstanceGroup, 0)
-	groups = append(groups, &models.InstanceGroup{Group: MASTER, NodeCount: 1})
-	groups = append(groups, &models.InstanceGroup{Group: WORKER, NodeCount: 2})
+	groups := make([]*models.InstanceGroupResponse, 0)
+	groups = append(groups, &models.InstanceGroupResponse{Group: MASTER, NodeCount: 1})
+	groups = append(groups, &models.InstanceGroupResponse{Group: WORKER, NodeCount: 2})
 	sr.InstanceGroups = groups
 
 	n := int32(10)
@@ -153,19 +153,19 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	tm[MASTER] = &models.TemplateResponse{
 		InstanceType: "master",
 		VolumeType:   &(&stringWrapper{"type"}).s,
-		VolumeSize:   &n,
+		VolumeSize:   n,
 		VolumeCount:  n,
 	}
 	tm[WORKER] = &models.TemplateResponse{
 		InstanceType: "worker",
 		VolumeType:   &(&stringWrapper{"type"}).s,
-		VolumeSize:   &n,
+		VolumeSize:   n,
 		VolumeCount:  n,
 	}
 
-	sm := make(map[string][]*models.SecurityRule)
-	rules := make([]*models.SecurityRule, 0)
-	rules = append(rules, &models.SecurityRule{Ports: "ports"})
+	sm := make(map[string][]*models.SecurityRuleResponse)
+	rules := make([]*models.SecurityRuleResponse, 0)
+	rules = append(rules, &models.SecurityRuleResponse{Ports: "ports"})
 	sm["master"] = rules
 
 	skeleton.fill(sr, cr, br, tm, sm, nj, nil)
@@ -179,8 +179,8 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	if skeleton.Master.VolumeType != *tm[MASTER].VolumeType {
 		t.Errorf("master volume type not match %s == %s", *tm[MASTER].VolumeType, skeleton.Master.VolumeType)
 	}
-	if skeleton.Master.VolumeSize != *tm[MASTER].VolumeSize {
-		t.Errorf("master volume size not match %d == %d", *tm[MASTER].VolumeSize, skeleton.Master.VolumeSize)
+	if skeleton.Master.VolumeSize != tm[MASTER].VolumeSize {
+		t.Errorf("master volume size not match %d == %d", tm[MASTER].VolumeSize, skeleton.Master.VolumeSize)
 	}
 	if skeleton.Master.VolumeCount != tm[MASTER].VolumeCount {
 		t.Errorf("master volume count not match %d == %d", tm[MASTER].VolumeCount, skeleton.Master.VolumeCount)
@@ -194,8 +194,8 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	if skeleton.Worker.VolumeType != *tm[WORKER].VolumeType {
 		t.Errorf("worker volume type not match %s == %s", *tm[WORKER].VolumeType, skeleton.Worker.VolumeType)
 	}
-	if skeleton.Worker.VolumeSize != *tm[WORKER].VolumeSize {
-		t.Errorf("worker volume size not match %d == %d", *tm[WORKER].VolumeSize, skeleton.Worker.VolumeSize)
+	if skeleton.Worker.VolumeSize != tm[WORKER].VolumeSize {
+		t.Errorf("worker volume size not match %d == %d", tm[WORKER].VolumeSize, skeleton.Worker.VolumeSize)
 	}
 	if skeleton.Worker.VolumeCount != tm[WORKER].VolumeCount {
 		t.Errorf("worker volume count not match %d == %d", tm[WORKER].VolumeCount, skeleton.Worker.VolumeCount)
@@ -217,9 +217,9 @@ func TestFillWithSshKey(t *testing.T) {
 func TestFillWithSecurityMap(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	sm := make(map[string][]*models.SecurityRule)
-	rules := make([]*models.SecurityRule, 0)
-	rules = append(rules, &models.SecurityRule{Ports: "ports"})
+	sm := make(map[string][]*models.SecurityRuleResponse)
+	rules := make([]*models.SecurityRuleResponse, 0)
+	rules = append(rules, &models.SecurityRuleResponse{Ports: "ports"})
 	sm["master"] = rules
 	sm["worker"] = rules
 
@@ -241,9 +241,9 @@ func TestFillWithSecurityMap(t *testing.T) {
 func TestFillWithSecurityMapDefaultPorts(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	sm := make(map[string][]*models.SecurityRule)
-	rules := make([]*models.SecurityRule, 0)
-	rules = append(rules, &models.SecurityRule{Ports: "22,443,9443"})
+	sm := make(map[string][]*models.SecurityRuleResponse)
+	rules := make([]*models.SecurityRuleResponse, 0)
+	rules = append(rules, &models.SecurityRuleResponse{Ports: "22,443,9443"})
 	sm["master"] = rules
 
 	skeleton.fill(sr, cr, br, nil, sm, nj, nil)
@@ -256,8 +256,8 @@ func TestFillWithSecurityMapDefaultPorts(t *testing.T) {
 func TestFillWithCluster(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	inputs := make([]*models.BlueprintInputJSON, 0)
-	inputs = append(inputs, &models.BlueprintInputJSON{Name: &(&stringWrapper{"property"}).s, PropertyValue: &(&stringWrapper{"value"}).s})
+	inputs := make([]*models.BlueprintInput, 0)
+	inputs = append(inputs, &models.BlueprintInput{Name: &(&stringWrapper{"property"}).s, PropertyValue: &(&stringWrapper{"value"}).s})
 	sr.Cluster = &models.ClusterResponse{
 		Status:          &(&stringWrapper{"cluster-status"}).s,
 		StatusReason:    &(&stringWrapper{"cluster-reason"}).s,

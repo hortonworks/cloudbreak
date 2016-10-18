@@ -39,7 +39,7 @@ func (a *Client) DeleteSecuritygroupsAccountName(params *DeleteSecuritygroupsAcc
 		PathPattern:        "/securitygroups/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteSecuritygroupsAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteSecuritygroupsID(params *DeleteSecuritygroupsIDParams) er
 		PathPattern:        "/securitygroups/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteSecuritygroupsIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteSecuritygroupsUserName(params *DeleteSecuritygroupsUserNa
 		PathPattern:        "/securitygroups/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteSecuritygroupsUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetSecuritygroupsAccount(params *GetSecuritygroupsAccountParams
 		PathPattern:        "/securitygroups/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetSecuritygroupsAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetSecuritygroupsAccountName(params *GetSecuritygroupsAccountNa
 		PathPattern:        "/securitygroups/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetSecuritygroupsAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetSecuritygroupsID(params *GetSecuritygroupsIDParams) (*GetSec
 		PathPattern:        "/securitygroups/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetSecuritygroupsIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetSecuritygroupsUser(params *GetSecuritygroupsUserParams) (*Ge
 		PathPattern:        "/securitygroups/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetSecuritygroupsUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetSecuritygroupsUserName(params *GetSecuritygroupsUserNamePara
 		PathPattern:        "/securitygroups/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetSecuritygroupsUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostSecuritygroupsAccount(params *PostSecuritygroupsAccountPara
 		PathPattern:        "/securitygroups/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostSecuritygroupsAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostSecuritygroupsUser(params *PostSecuritygroupsUserParams) (*
 		PathPattern:        "/securitygroups/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostSecuritygroupsUserReader{formats: a.formats},
 	})

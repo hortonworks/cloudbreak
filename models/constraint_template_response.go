@@ -20,7 +20,6 @@ type ConstraintTemplateResponse struct {
 	/* number of CPU cores needed for the Ambari node
 
 	Required: true
-	Read Only: true
 	*/
 	CPU float64 `json:"cpu"`
 
@@ -34,7 +33,6 @@ type ConstraintTemplateResponse struct {
 	/* disk size needed for an Ambari node (GB)
 
 	Required: true
-	Read Only: true
 	*/
 	Disk float64 `json:"disk"`
 
@@ -45,7 +43,6 @@ type ConstraintTemplateResponse struct {
 	/* memory needed for the Ambari container (GB)
 
 	Required: true
-	Read Only: true
 	*/
 	Memory float64 `json:"memory"`
 
@@ -61,14 +58,12 @@ type ConstraintTemplateResponse struct {
 	/* type of orchestrator
 
 	Required: true
-	Read Only: true
 	*/
 	OrchestratorType string `json:"orchestratorType"`
 
 	/* resource is visible in account
 
 	Required: true
-	Read Only: true
 	*/
 	PublicInAccount bool `json:"publicInAccount"`
 }

@@ -111,7 +111,7 @@ func TestCreateCredentialImplPublic(t *testing.T) {
 	var actualCredential *models.CredentialRequest
 	postAccountCredentail := func(params *credentials.PostCredentialsAccountParams) (*credentials.PostCredentialsAccountOK, error) {
 		actualCredential = params.Body
-		return &credentials.PostCredentialsAccountOK{Payload: &models.ID{ID: expectedId}}, nil
+		return &credentials.PostCredentialsAccountOK{Payload: &models.CredentialResponse{ID: &expectedId}}, nil
 	}
 	defaultParams := make(map[string]interface{})
 	defaultParams["roleArn"] = "role"
@@ -146,7 +146,7 @@ func TestCreateCredentialImplPublic(t *testing.T) {
 func TestCreateCredentialImplPrivate(t *testing.T) {
 	expectedId := int64(1)
 	postUserCredential := func(params *credentials.PostCredentialsUserParams) (*credentials.PostCredentialsUserOK, error) {
-		return &credentials.PostCredentialsUserOK{Payload: &models.ID{ID: expectedId}}, nil
+		return &credentials.PostCredentialsUserOK{Payload: &models.CredentialResponse{ID: &expectedId}}, nil
 	}
 
 	actualId := createCredentialImpl("name", models.CredentialResponse{}, "ssh-key", false, nil, postUserCredential)

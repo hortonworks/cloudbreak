@@ -11,17 +11,15 @@ import (
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 )
 
-/*NetworkJSON network json
+/*SecurityGroupResponse security group response
 
-swagger:model NetworkJson
+swagger:model SecurityGroupResponse
 */
-type NetworkJSON struct {
+type SecurityGroupResponse struct {
 
-	/* type of cloud provider
-
-	Required: true
-	*/
-	CloudPlatform string `json:"cloudPlatform"`
+	/* account id of the resource owner that is provided by OAuth provider
+	 */
+	Account *string `json:"account,omitempty"`
 
 	/* description of the resource
 
@@ -31,9 +29,7 @@ type NetworkJSON struct {
 	Description *string `json:"description,omitempty"`
 
 	/* id of the resource
-
-	Read Only: true
-	*/
+	 */
 	ID *int64 `json:"id,omitempty"`
 
 	/* name of the resource
@@ -45,36 +41,24 @@ type NetworkJSON struct {
 	*/
 	Name string `json:"name"`
 
-	/* provider specific parameters of the specified network
-
-	Required: true
-	*/
-	Parameters map[string]interface{} `json:"parameters"`
+	/* id of the resource owner that is provided by OAuth provider
+	 */
+	Owner *string `json:"owner,omitempty"`
 
 	/* resource is visible in account
 
 	Required: true
-	Read Only: true
 	*/
 	PublicInAccount bool `json:"publicInAccount"`
 
-	/* the subnet definition of the network in CIDR format
+	/* list of security rules that relates to the security group
 	 */
-	SubnetCIDR *string `json:"subnetCIDR,omitempty"`
-
-	/* id of the topology the resource belongs to
-	 */
-	TopologyID *int64 `json:"topologyId,omitempty"`
+	SecurityRules []*SecurityRuleResponse `json:"securityRules,omitempty"`
 }
 
-// Validate validates this network json
-func (m *NetworkJSON) Validate(formats strfmt.Registry) error {
+// Validate validates this security group response
+func (m *SecurityGroupResponse) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateCloudPlatform(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
 
 	if err := m.validateDescription(formats); err != nil {
 		// prop
@@ -86,12 +70,12 @@ func (m *NetworkJSON) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateParameters(formats); err != nil {
+	if err := m.validatePublicInAccount(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validatePublicInAccount(formats); err != nil {
+	if err := m.validateSecurityRules(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -102,16 +86,7 @@ func (m *NetworkJSON) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *NetworkJSON) validateCloudPlatform(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("cloudPlatform", "body", string(m.CloudPlatform)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *NetworkJSON) validateDescription(formats strfmt.Registry) error {
+func (m *SecurityGroupResponse) validateDescription(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Description) { // not required
 		return nil
@@ -128,7 +103,7 @@ func (m *NetworkJSON) validateDescription(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *NetworkJSON) validateName(formats strfmt.Registry) error {
+func (m *SecurityGroupResponse) validateName(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
 		return err
@@ -149,19 +124,30 @@ func (m *NetworkJSON) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *NetworkJSON) validateParameters(formats strfmt.Registry) error {
+func (m *SecurityGroupResponse) validatePublicInAccount(formats strfmt.Registry) error {
 
-	if err := validate.Required("parameters", "body", m.Parameters); err != nil {
+	if err := validate.Required("publicInAccount", "body", bool(m.PublicInAccount)); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *NetworkJSON) validatePublicInAccount(formats strfmt.Registry) error {
+func (m *SecurityGroupResponse) validateSecurityRules(formats strfmt.Registry) error {
 
-	if err := validate.Required("publicInAccount", "body", bool(m.PublicInAccount)); err != nil {
-		return err
+	if swag.IsZero(m.SecurityRules) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.SecurityRules); i++ {
+
+		if m.SecurityRules[i] != nil {
+
+			if err := m.SecurityRules[i].Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

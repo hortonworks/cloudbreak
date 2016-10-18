@@ -46,7 +46,7 @@ func NewGetSecuritygroupsAccountOK() *GetSecuritygroupsAccountOK {
 successful operation
 */
 type GetSecuritygroupsAccountOK struct {
-	Payload []*models.SecurityGroupJSON
+	Payload []*models.SecurityGroupResponse
 }
 
 func (o *GetSecuritygroupsAccountOK) Error() string {

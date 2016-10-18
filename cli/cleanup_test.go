@@ -167,11 +167,11 @@ func TestCleanupCredentialsImplGenerated(t *testing.T) {
 }
 
 func TestCleanupNetworksImplNotGenerated(t *testing.T) {
-	items := make([]*models.NetworkJSON, 0)
-	items = append(items, &models.NetworkJSON{Name: "net"})
-	items = append(items, &models.NetworkJSON{Name: "netn"})
-	items = append(items, &models.NetworkJSON{Name: "longnetname"})
-	getItems := func() []*models.NetworkJSON {
+	items := make([]*models.NetworkResponse, 0)
+	items = append(items, &models.NetworkResponse{Name: "net"})
+	items = append(items, &models.NetworkResponse{Name: "netn"})
+	items = append(items, &models.NetworkResponse{Name: "longnetname"})
+	getItems := func() []*models.NetworkResponse {
 		return items
 	}
 	var deleteCalled []string
@@ -188,9 +188,9 @@ func TestCleanupNetworksImplNotGenerated(t *testing.T) {
 }
 
 func TestCleanupNetworksImplGenerated(t *testing.T) {
-	items := make([]*models.NetworkJSON, 0)
-	items = append(items, &models.NetworkJSON{Name: "network"})
-	getItems := func() []*models.NetworkJSON {
+	items := make([]*models.NetworkResponse, 0)
+	items = append(items, &models.NetworkResponse{Name: "network"})
+	getItems := func() []*models.NetworkResponse {
 		return items
 	}
 	var deleteCalled []string
@@ -207,11 +207,11 @@ func TestCleanupNetworksImplGenerated(t *testing.T) {
 }
 
 func TestCleanupSecurityGroupImplNotGenerated(t *testing.T) {
-	items := make([]*models.SecurityGroupJSON, 0)
-	items = append(items, &models.SecurityGroupJSON{Name: "secg"})
-	items = append(items, &models.SecurityGroupJSON{Name: "secgn"})
-	items = append(items, &models.SecurityGroupJSON{Name: "longsecgname"})
-	getItems := func() []*models.SecurityGroupJSON {
+	items := make([]*models.SecurityGroupResponse, 0)
+	items = append(items, &models.SecurityGroupResponse{Name: "secg"})
+	items = append(items, &models.SecurityGroupResponse{Name: "secgn"})
+	items = append(items, &models.SecurityGroupResponse{Name: "longsecgname"})
+	getItems := func() []*models.SecurityGroupResponse {
 		return items
 	}
 	var deleteCalled []string
@@ -228,9 +228,9 @@ func TestCleanupSecurityGroupImplNotGenerated(t *testing.T) {
 }
 
 func TestCleanupSecurityGroupImplGenerated(t *testing.T) {
-	items := make([]*models.SecurityGroupJSON, 0)
-	items = append(items, &models.SecurityGroupJSON{Name: "secgroup"})
-	getItems := func() []*models.SecurityGroupJSON {
+	items := make([]*models.SecurityGroupResponse, 0)
+	items = append(items, &models.SecurityGroupResponse{Name: "secgroup"})
+	getItems := func() []*models.SecurityGroupResponse {
 		return items
 	}
 	var deleteCalled []string

@@ -5,11 +5,14 @@ package accountpreferences
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/go-swagger/go-swagger/client"
 	"github.com/go-swagger/go-swagger/httpkit"
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
+
+	"github.com/hortonworks/hdc-cli/models"
 )
 
 // PostReader is a Reader for the Post structure.
@@ -21,40 +24,43 @@ type PostReader struct {
 func (o *PostReader) ReadResponse(response client.Response, consumer httpkit.Consumer) (interface{}, error) {
 	switch response.Code() {
 
-	default:
-		result := NewPostDefault(response.Code())
+	case 200:
+		result := NewPostOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
-		return nil, result
+		return result, nil
+
+	default:
+		return nil, client.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
-// NewPostDefault creates a PostDefault with default headers values
-func NewPostDefault(code int) *PostDefault {
-	return &PostDefault{
-		_statusCode: code,
-	}
+// NewPostOK creates a PostOK with default headers values
+func NewPostOK() *PostOK {
+	return &PostOK{}
 }
 
-/*PostDefault handles this case with default header values.
+/*PostOK handles this case with default header values.
 
 successful operation
 */
-type PostDefault struct {
-	_statusCode int
+type PostOK struct {
+	Payload *models.AccountPreference
 }
 
-// Code gets the status code for the post default response
-func (o *PostDefault) Code() int {
-	return o._statusCode
+func (o *PostOK) Error() string {
+	return fmt.Sprintf("[POST /accountpreferences][%d] postOK  %+v", 200, o.Payload)
 }
 
-func (o *PostDefault) Error() string {
-	return fmt.Sprintf("[POST /accountpreferences][%d] post default ", o._statusCode)
-}
+func (o *PostOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-func (o *PostDefault) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
+	o.Payload = new(models.AccountPreference)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

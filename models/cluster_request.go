@@ -19,15 +19,15 @@ swagger:model ClusterRequest
 */
 type ClusterRequest struct {
 
-	/* ambari database details
+	/* details of the external Ambari database
 	 */
 	AmbariDatabaseDetails *AmbariDatabaseDetails `json:"ambariDatabaseDetails,omitempty"`
 
-	/* ambari repo details json
+	/* details of the Ambari package repository
 	 */
-	AmbariRepoDetailsJSON *AmbariRepoDetailsJSON `json:"ambariRepoDetailsJson,omitempty"`
+	AmbariRepoDetailsJSON *AmbariRepoDetails `json:"ambariRepoDetailsJson,omitempty"`
 
-	/* ambari stack details
+	/* details of the Ambari stack
 	 */
 	AmbariStackDetails *AmbariStackDetails `json:"ambariStackDetails,omitempty"`
 
@@ -41,7 +41,7 @@ type ClusterRequest struct {
 
 	Unique: true
 	*/
-	BlueprintInputs []*BlueprintInputJSON `json:"blueprintInputs,omitempty"`
+	BlueprintInputs []*BlueprintInput `json:"blueprintInputs,omitempty"`
 
 	/* config recommendation strategy
 	 */
@@ -62,7 +62,7 @@ type ClusterRequest struct {
 	 */
 	EmailTo *string `json:"emailTo,omitempty"`
 
-	/* enable security
+	/* enable Kerberos security
 	 */
 	EnableSecurity *bool `json:"enableSecurity,omitempty"`
 
@@ -70,18 +70,17 @@ type ClusterRequest struct {
 	 */
 	EnableShipyard *bool `json:"enableShipyard,omitempty"`
 
-	/* file system
+	/* external file system configuration
 	 */
 	FileSystem *FileSystem `json:"fileSystem,omitempty"`
 
-	/* host groups
+	/* collection of hostgroups
 
-	Required: true
 	Unique: true
 	*/
-	HostGroups []*HostGroup `json:"hostGroups"`
+	HostGroups []*HostGroupRequest `json:"hostGroups,omitempty"`
 
-	/* kerberos admin
+	/* kerberos admin user
 
 	Max Length: 15
 	Min Length: 5
@@ -95,7 +94,7 @@ type ClusterRequest struct {
 	*/
 	KerberosMasterKey string `json:"kerberosMasterKey,omitempty"`
 
-	/* kerberos password
+	/* kerberos admin password
 
 	Max Length: 50
 	Min Length: 5
@@ -131,7 +130,7 @@ type ClusterRequest struct {
 	 */
 	RdsConfigID *int64 `json:"rdsConfigId,omitempty"`
 
-	/* rds config json
+	/* details of the external database for Hadoop components
 	 */
 	RdsConfigJSON *RDSConfig `json:"rdsConfigJson,omitempty"`
 
@@ -301,8 +300,8 @@ func (m *ClusterRequest) validateDescription(formats strfmt.Registry) error {
 
 func (m *ClusterRequest) validateHostGroups(formats strfmt.Registry) error {
 
-	if err := validate.Required("hostGroups", "body", m.HostGroups); err != nil {
-		return err
+	if swag.IsZero(m.HostGroups) { // not required
+		return nil
 	}
 
 	if err := validate.UniqueItems("hostGroups", "body", m.HostGroups); err != nil {

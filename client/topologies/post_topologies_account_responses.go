@@ -46,7 +46,7 @@ func NewPostTopologiesAccountOK() *PostTopologiesAccountOK {
 successful operation
 */
 type PostTopologiesAccountOK struct {
-	Payload *models.ID
+	Payload *models.TopologyResponse
 }
 
 func (o *PostTopologiesAccountOK) Error() string {
@@ -55,7 +55,7 @@ func (o *PostTopologiesAccountOK) Error() string {
 
 func (o *PostTopologiesAccountOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ID)
+	o.Payload = new(models.TopologyResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -87,7 +87,7 @@ func (c *Cloudbreak) cleanupNetworks(wg *sync.WaitGroup) {
 	cleanupNetworksImpl(c.GetPublicNetworks, c.DeleteNetwork)
 }
 
-func cleanupNetworksImpl(getNetworks func() []*models.NetworkJSON, deleteNetwork func(string) error) {
+func cleanupNetworksImpl(getNetworks func() []*models.NetworkResponse, deleteNetwork func(string) error) {
 	for _, network := range getNetworks() {
 		netName := network.Name
 		if len(netName) > 4 && netName[0:3] == "net" {
@@ -105,7 +105,7 @@ func (c *Cloudbreak) cleanupSecurityGroups(wg *sync.WaitGroup) {
 	cleanupSecurityGroupsImpl(c.GetPublicSecurityGroups, c.DeleteSecurityGroup)
 }
 
-func cleanupSecurityGroupsImpl(getGroups func() []*models.SecurityGroupJSON, deleteGroup func(string) error) {
+func cleanupSecurityGroupsImpl(getGroups func() []*models.SecurityGroupResponse, deleteGroup func(string) error) {
 	for _, secGroup := range getGroups() {
 		secGroupName := secGroup.Name
 		if len(secGroupName) > 5 && secGroupName[0:4] == "secg" {

@@ -65,7 +65,7 @@ func TestCreateRDSConfigImpl(t *testing.T) {
 	var actual *models.RDSConfig
 	postConfig := func(params *rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error) {
 		actual = params.Body
-		return &rdsconfigs.PostRdsconfigsAccountOK{Payload: &models.ID{ID: expectedId}}, nil
+		return &rdsconfigs.PostRdsconfigsAccountOK{Payload: &models.RDSConfigResponse{ID: &expectedId}}, nil
 	}
 
 	createRDSConfigImpl(finder, postConfig)

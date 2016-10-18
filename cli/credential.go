@@ -106,13 +106,13 @@ func createCredentialImpl(name string, defaultCredential models.CredentialRespon
 		if err != nil {
 			logErrorAndExit(createCredentialImpl, err.Error())
 		}
-		id = resp.Payload.ID
+		id = *resp.Payload.ID
 	} else {
 		resp, err := postUserCredential(&credentials.PostCredentialsUserParams{Body: &credReq})
 		if err != nil {
 			logErrorAndExit(createCredentialImpl, err.Error())
 		}
-		id = resp.Payload.ID
+		id = *resp.Payload.ID
 	}
 
 	log.Infof("[CreateCredential] credential created, id: %d", id)

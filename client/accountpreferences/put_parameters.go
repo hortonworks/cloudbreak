@@ -25,11 +25,11 @@ for the put operation typically these are written to a http.Request
 type PutParams struct {
 
 	/*Body*/
-	Body *models.AccountPreferences
+	Body *models.AccountPreference
 }
 
 // WithBody adds the body to the put params
-func (o *PutParams) WithBody(body *models.AccountPreferences) *PutParams {
+func (o *PutParams) WithBody(body *models.AccountPreference) *PutParams {
 	o.Body = body
 	return o
 }
@@ -40,7 +40,7 @@ func (o *PutParams) WriteToRequest(r client.Request, reg strfmt.Registry) error 
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models.AccountPreferences)
+		o.Body = new(models.AccountPreference)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {

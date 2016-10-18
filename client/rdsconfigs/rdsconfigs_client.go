@@ -39,7 +39,7 @@ func (a *Client) DeleteRdsconfigsAccountName(params *DeleteRdsconfigsAccountName
 		PathPattern:        "/rdsconfigs/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteRdsconfigsAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteRdsconfigsID(params *DeleteRdsconfigsIDParams) error {
 		PathPattern:        "/rdsconfigs/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteRdsconfigsIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteRdsconfigsUserName(params *DeleteRdsconfigsUserNameParams
 		PathPattern:        "/rdsconfigs/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &DeleteRdsconfigsUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetRdsconfigsAccount(params *GetRdsconfigsAccountParams) (*GetR
 		PathPattern:        "/rdsconfigs/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetRdsconfigsAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetRdsconfigsAccountName(params *GetRdsconfigsAccountNameParams
 		PathPattern:        "/rdsconfigs/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetRdsconfigsAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetRdsconfigsID(params *GetRdsconfigsIDParams) (*GetRdsconfigsI
 		PathPattern:        "/rdsconfigs/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetRdsconfigsIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetRdsconfigsUser(params *GetRdsconfigsUserParams) (*GetRdsconf
 		PathPattern:        "/rdsconfigs/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetRdsconfigsUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetRdsconfigsUserName(params *GetRdsconfigsUserNameParams) (*Ge
 		PathPattern:        "/rdsconfigs/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &GetRdsconfigsUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostRdsconfigsAccount(params *PostRdsconfigsAccountParams) (*Po
 		PathPattern:        "/rdsconfigs/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostRdsconfigsAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostRdsconfigsUser(params *PostRdsconfigsUserParams) (*PostRdsc
 		PathPattern:        "/rdsconfigs/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
+		Schemes:            []string{"", "http", "https"},
 		Params:             params,
 		Reader:             &PostRdsconfigsUserReader{formats: a.formats},
 	})

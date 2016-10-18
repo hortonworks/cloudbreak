@@ -46,7 +46,7 @@ func NewPostRecipesAccountOK() *PostRecipesAccountOK {
 successful operation
 */
 type PostRecipesAccountOK struct {
-	Payload *models.ID
+	Payload *models.RecipeResponse
 }
 
 func (o *PostRecipesAccountOK) Error() string {
@@ -55,7 +55,7 @@ func (o *PostRecipesAccountOK) Error() string {
 
 func (o *PostRecipesAccountOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ID)
+	o.Payload = new(models.RecipeResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
