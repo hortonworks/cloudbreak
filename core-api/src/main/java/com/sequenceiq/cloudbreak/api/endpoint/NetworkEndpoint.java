@@ -12,8 +12,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
+import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -24,14 +24,14 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/networks")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/networks", description = ControllerDescription.NETWORK_DESCRIPTION)
+@Api(value = "/networks", description = ControllerDescription.NETWORK_DESCRIPTION, protocols = "http, https")
 public interface NetworkEndpoint {
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.NetworkOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.NETWORK_NOTES)
-    NetworkJson get(@PathParam("id") Long id);
+    NetworkResponse get(@PathParam("id") Long id);
 
     @DELETE
     @Path("{id}")
@@ -43,19 +43,19 @@ public interface NetworkEndpoint {
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.NetworkOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.NETWORK_NOTES)
-    IdJson postPublic(@Valid NetworkJson networkJson);
+    NetworkResponse postPublic(@Valid NetworkRequest networkRequest);
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.NetworkOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.NETWORK_NOTES)
-    Set<NetworkJson> getPublics();
+    Set<NetworkResponse> getPublics();
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.NetworkOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.NETWORK_NOTES)
-    NetworkJson getPublic(@PathParam(value = "name") String name);
+    NetworkResponse getPublic(@PathParam(value = "name") String name);
 
     @DELETE
     @Path("account/{name}")
@@ -67,19 +67,19 @@ public interface NetworkEndpoint {
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.NetworkOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.NETWORK_NOTES)
-    IdJson postPrivate(@Valid NetworkJson networkJson);
+    NetworkResponse postPrivate(@Valid NetworkRequest networkRequest);
 
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.NetworkOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.NETWORK_NOTES)
-    Set<NetworkJson> getPrivates();
+    Set<NetworkResponse> getPrivates();
 
     @GET
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.NetworkOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.NETWORK_NOTES)
-    NetworkJson getPrivate(@PathParam(value = "name") String name);
+    NetworkResponse getPrivate(@PathParam(value = "name") String name);
 
     @DELETE
     @Path("user/{name}")

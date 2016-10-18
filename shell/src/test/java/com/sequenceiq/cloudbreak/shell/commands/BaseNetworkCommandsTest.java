@@ -24,7 +24,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseNetworkCommands;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
@@ -136,11 +136,11 @@ public class BaseNetworkCommandsTest {
         underTest.show(null, "test1");
     }
 
-    private NetworkJson networkJson() {
-        NetworkJson networkJson = new NetworkJson();
-        networkJson.setName("test1");
-        networkJson.setId(50L);
-        return networkJson;
+    private NetworkResponse networkJson() {
+        NetworkResponse networkResponse = new NetworkResponse();
+        networkResponse.setName("test1");
+        networkResponse.setId(50L);
+        return networkResponse;
     }
 
 }

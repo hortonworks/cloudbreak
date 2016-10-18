@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupBase;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -75,7 +75,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         CbUser user = (CbUser) data[DecorationData.USER.ordinal()];
         Long blueprintId = (Long) data[DecorationData.BLUEPRINT_ID.ordinal()];
         Long ldapConfigId = (Long) data[DecorationData.LDAP_CONFIG_ID.ordinal()];
-        Set<HostGroupJson> hostGroupsJsons = (Set<HostGroupJson>) data[DecorationData.HOSTGROUP_JSONS.ordinal()];
+        Set<HostGroupBase> hostGroupsJsons = (Set<HostGroupBase>) data[DecorationData.HOSTGROUP_JSONS.ordinal()];
         subject.setBlueprint(blueprintService.get(blueprintId));
         subject.setHostGroups(convertHostGroupsFromJson(stackId, user, subject, hostGroupsJsons));
         boolean validate = (boolean) data[DecorationData.VALIDATE_BLUEPRINT.ordinal()];
@@ -101,9 +101,9 @@ public class ClusterDecorator implements Decorator<Cluster> {
         return subject;
     }
 
-    private Set<HostGroup> convertHostGroupsFromJson(Long stackId, CbUser user, Cluster cluster, Set<HostGroupJson> hostGroupsJsons) {
+    private Set<HostGroup> convertHostGroupsFromJson(Long stackId, CbUser user, Cluster cluster, Set<HostGroupBase> hostGroupsJsons) {
         Set<HostGroup> hostGroups = new HashSet<>();
-        for (HostGroupJson json : hostGroupsJsons) {
+        for (HostGroupBase json : hostGroupsJsons) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
             hostGroup.setCluster(cluster);
             hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, user, json.getConstraint(), json.getRecipeIds(), true);

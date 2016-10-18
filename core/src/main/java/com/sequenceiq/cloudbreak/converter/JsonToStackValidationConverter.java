@@ -11,8 +11,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.FluentIterable;
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -57,9 +57,9 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
         return stackValidation;
     }
 
-    private Set<HostGroup> convertHostGroupsFromJson(Set<InstanceGroup> instanceGroups, final Set<HostGroupJson> hostGroupsJsons) {
+    private Set<HostGroup> convertHostGroupsFromJson(Set<InstanceGroup> instanceGroups, final Set<HostGroupRequest> hostGroupsJsons) {
         Set<HostGroup> hostGroups = new HashSet<>();
-        for (final HostGroupJson json : hostGroupsJsons) {
+        for (final HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = new HostGroup();
             hostGroup.setName(json.getName());
             Constraint constraint = conversionService.convert(json.getConstraint(), Constraint.class);
@@ -78,8 +78,8 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
         return hostGroups;
     }
 
-    private Set<InstanceGroup> convertInstanceGroups(Set<InstanceGroupJson> instanceGroupJsons) {
-        return (Set<InstanceGroup>) getConversionService().convert(instanceGroupJsons, TypeDescriptor.forObject(instanceGroupJsons),
+    private Set<InstanceGroup> convertInstanceGroups(Set<InstanceGroupRequest> instanceGroupRequests) {
+        return (Set<InstanceGroup>) getConversionService().convert(instanceGroupRequests, TypeDescriptor.forObject(instanceGroupRequests),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroup.class)));
     }
 }

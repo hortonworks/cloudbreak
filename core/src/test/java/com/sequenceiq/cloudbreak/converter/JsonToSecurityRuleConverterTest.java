@@ -5,10 +5,10 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
-public class JsonToSecurityRuleConverterTest extends AbstractJsonConverterTest<SecurityRuleJson> {
+public class JsonToSecurityRuleConverterTest extends AbstractJsonConverterTest<SecurityRuleRequest> {
 
     private JsonToSecurityRuleConverter underTest;
 
@@ -27,7 +27,7 @@ public class JsonToSecurityRuleConverterTest extends AbstractJsonConverterTest<S
     }
 
     @Override
-    public Class<SecurityRuleJson> getRequestClass() {
-        return SecurityRuleJson.class;
+    public Class<SecurityRuleRequest> getRequestClass() {
+        return SecurityRuleRequest.class;
     }
 }

@@ -5,27 +5,27 @@ import java.util.Set;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 @Component
-public class InstanceGroupToJsonConverter extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupJson> {
+public class InstanceGroupToJsonConverter extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupResponse> {
 
     @Override
-    public InstanceGroupJson convert(InstanceGroup entity) {
-        InstanceGroupJson instanceGroupJson = new InstanceGroupJson();
-        instanceGroupJson.setGroup(entity.getGroupName());
-        instanceGroupJson.setId(entity.getId());
-        instanceGroupJson.setNodeCount(entity.getNodeCount());
-        instanceGroupJson.setTemplateId(entity.getTemplate().getId());
-        instanceGroupJson.setType(entity.getInstanceGroupType());
-        instanceGroupJson.setMetadata(convertEntitiesToJson(entity.getInstanceMetaData()));
+    public InstanceGroupResponse convert(InstanceGroup entity) {
+        InstanceGroupResponse instanceGroupResponse = new InstanceGroupResponse();
+        instanceGroupResponse.setGroup(entity.getGroupName());
+        instanceGroupResponse.setId(entity.getId());
+        instanceGroupResponse.setNodeCount(entity.getNodeCount());
+        instanceGroupResponse.setTemplateId(entity.getTemplate().getId());
+        instanceGroupResponse.setType(entity.getInstanceGroupType());
+        instanceGroupResponse.setMetadata(convertEntitiesToJson(entity.getInstanceMetaData()));
         if (entity.getSecurityGroup() != null) {
-            instanceGroupJson.setSecurityGroupId(entity.getSecurityGroup().getId());
+            instanceGroupResponse.setSecurityGroupId(entity.getSecurityGroup().getId());
         }
-        return instanceGroupJson;
+        return instanceGroupResponse;
     }
 
     private Set<InstanceMetaDataJson> convertEntitiesToJson(Set<InstanceMetaData> metadata) {

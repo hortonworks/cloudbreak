@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -35,14 +34,14 @@ public class BlueprintController implements BlueprintEndpoint {
     private BlueprintLoaderService blueprintLoaderService;
 
     @Override
-    public IdJson postPrivate(BlueprintRequest blueprintRequest) {
+    public BlueprintResponse postPrivate(BlueprintRequest blueprintRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createBlueprint(user, blueprintRequest, false);
     }
 
     @Override
-    public IdJson postPublic(BlueprintRequest blueprintRequest) {
+    public BlueprintResponse postPublic(BlueprintRequest blueprintRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createBlueprint(user, blueprintRequest, true);
@@ -112,11 +111,11 @@ public class BlueprintController implements BlueprintEndpoint {
         blueprintService.delete(name, user);
     }
 
-    private IdJson createBlueprint(CbUser user, BlueprintRequest blueprintRequest, boolean publicInAccount) {
+    private BlueprintResponse createBlueprint(CbUser user, BlueprintRequest blueprintRequest, boolean publicInAccount) {
         Blueprint blueprint = conversionService.convert(blueprintRequest, Blueprint.class);
         blueprint.setPublicInAccount(publicInAccount);
         blueprint = blueprintService.create(user, blueprint, blueprintRequest.getProperties());
-        return new IdJson(blueprint.getId());
+        return conversionService.convert(blueprint, BlueprintResponse.class);
     }
 
     private Set<BlueprintResponse> toJsonList(Set<Blueprint> blueprints) {

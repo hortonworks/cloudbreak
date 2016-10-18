@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 
 public class FailurePolicyToJsonConverterTest extends AbstractEntityConverterTest<FailurePolicy> {
@@ -23,7 +23,7 @@ public class FailurePolicyToJsonConverterTest extends AbstractEntityConverterTes
     public void testConvert() {
         // GIVEN
         // WHEN
-        FailurePolicyJson result = underTest.convert(getSource());
+        FailurePolicyResponse result = underTest.convert(getSource());
         // THEN
         assertEquals(AdjustmentType.BEST_EFFORT, result.getAdjustmentType());
         assertAllFieldsNotNull(result);

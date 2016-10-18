@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -31,14 +30,14 @@ public class ClusterTemplateController implements ClusterTemplateEndpoint {
     private ConversionService conversionService;
 
     @Override
-    public IdJson postPrivate(ClusterTemplateRequest clusterTemplateRequest) {
+    public ClusterTemplateResponse postPrivate(ClusterTemplateRequest clusterTemplateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createClusterTemplateRequest(user, clusterTemplateRequest, false);
     }
 
     @Override
-    public IdJson postPublic(ClusterTemplateRequest clusterTemplateRequest) {
+    public ClusterTemplateResponse postPublic(ClusterTemplateRequest clusterTemplateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createClusterTemplateRequest(user, clusterTemplateRequest, true);
@@ -104,11 +103,11 @@ public class ClusterTemplateController implements ClusterTemplateEndpoint {
         clusterTemplateService.delete(name, user);
     }
 
-    private IdJson createClusterTemplateRequest(CbUser user, ClusterTemplateRequest clusterTemplateRequest, boolean publicInAccount) {
+    private ClusterTemplateResponse createClusterTemplateRequest(CbUser user, ClusterTemplateRequest clusterTemplateRequest, boolean publicInAccount) {
         ClusterTemplate clusterTemplate = conversionService.convert(clusterTemplateRequest, ClusterTemplate.class);
         clusterTemplate.setPublicInAccount(publicInAccount);
         clusterTemplate = clusterTemplateService.create(user, clusterTemplate);
-        return new IdJson(clusterTemplate.getId());
+        return conversionService.convert(clusterTemplate, ClusterTemplateResponse.class);
     }
 
     private Set<ClusterTemplateResponse> toJsonList(Set<ClusterTemplate> clusterTemplates) {

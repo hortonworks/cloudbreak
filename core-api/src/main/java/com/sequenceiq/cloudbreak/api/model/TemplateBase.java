@@ -8,7 +8,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -40,8 +39,6 @@ public abstract class TemplateBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.INSTANCE_TYPE, required = true)
     private String instanceType;
-    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount;
 
     @ApiModelProperty(ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;
@@ -92,15 +89,6 @@ public abstract class TemplateBase implements JsonEntity {
 
     public void setVolumeCount(Integer volumeCount) {
         this.volumeCount = volumeCount;
-    }
-
-    @JsonProperty("public")
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public String getVolumeType() {

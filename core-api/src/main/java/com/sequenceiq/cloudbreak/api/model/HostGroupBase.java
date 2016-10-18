@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -10,12 +9,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("HostGroup")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class HostGroupJson {
+public abstract class HostGroupBase {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
@@ -28,9 +25,6 @@ public class HostGroupJson {
 
     @ApiModelProperty(value = HostGroupModelDescription.RECIPE_IDS)
     private Set<Long> recipeIds;
-
-    @ApiModelProperty(value = HostGroupModelDescription.METADATA)
-    private Set<HostMetadataJson> metadata = new HashSet<>();
 
     public String getName() {
         return name;
@@ -56,11 +50,4 @@ public class HostGroupJson {
         this.recipeIds = recipeIds;
     }
 
-    public Set<HostMetadataJson> getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(Set<HostMetadataJson> metadata) {
-        this.metadata = metadata;
-    }
 }

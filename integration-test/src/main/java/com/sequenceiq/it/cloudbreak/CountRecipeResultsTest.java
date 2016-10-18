@@ -23,7 +23,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -45,7 +45,7 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
         StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
-        List<InstanceGroupJson> instanceGroups = stackEndpoint.get(Long.valueOf(stackId)).getInstanceGroups();
+        List<InstanceGroupResponse> instanceGroups = stackEndpoint.get(Long.valueOf(stackId)).getInstanceGroups();
         String[] files = lookingFor.split(",");
         List<String> publicIps = getPublicIps(instanceGroups, Arrays.asList(searchRecipesOnHosts.split(",")));
         List<Future> futures = new ArrayList<>(publicIps.size() * files.length);
@@ -73,9 +73,9 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
         Assert.assertEquals(count.get(), require.intValue(), "The number of existing files is different than required.");
     }
 
-    private List<String> getPublicIps(List<InstanceGroupJson> instanceGroups, List<String> hostGroupsWithRecipe) {
+    private List<String> getPublicIps(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupsWithRecipe) {
         List<String> ips = new ArrayList<>();
-        for (InstanceGroupJson instanceGroup : instanceGroups) {
+        for (InstanceGroupResponse instanceGroup : instanceGroups) {
             if (hostGroupsWithRecipe.contains(instanceGroup.getGroup())) {
                 for (InstanceMetaDataJson metaData : instanceGroup.getMetadata()) {
                     ips.add(metaData.getPublicIp());

@@ -19,8 +19,8 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
@@ -55,14 +55,14 @@ public class MockStackCreationFailedTest extends AbstractMockIntegrationTest {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
-        List<InstanceGroupJson> igMap = new ArrayList<>();
+        List<InstanceGroupRequest> igMap = new ArrayList<>();
         for (InstanceGroup ig : instanceGroups) {
-            InstanceGroupJson instanceGroupJson = new InstanceGroupJson();
-            instanceGroupJson.setGroup(ig.getName());
-            instanceGroupJson.setNodeCount(ig.getNodeCount());
-            instanceGroupJson.setTemplateId(Long.valueOf(ig.getTemplateId()));
-            instanceGroupJson.setType(InstanceGroupType.valueOf(ig.getType()));
-            igMap.add(instanceGroupJson);
+            InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
+            instanceGroupRequest.setGroup(ig.getName());
+            instanceGroupRequest.setNodeCount(ig.getNodeCount());
+            instanceGroupRequest.setTemplateId(Long.valueOf(ig.getTemplateId()));
+            instanceGroupRequest.setType(InstanceGroupType.valueOf(ig.getType()));
+            igMap.add(instanceGroupRequest);
         }
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
@@ -72,10 +72,10 @@ public class MockStackCreationFailedTest extends AbstractMockIntegrationTest {
         stackRequest.setCredentialId(Long.valueOf(credentialId));
         stackRequest.setRegion(region);
         stackRequest.setOnFailureAction(OnFailureAction.valueOf(onFailureAction));
-        FailurePolicyJson failurePolicyJson = new FailurePolicyJson();
-        failurePolicyJson.setAdjustmentType(AdjustmentType.valueOf(adjustmentType));
-        failurePolicyJson.setThreshold(threshold);
-        stackRequest.setFailurePolicy(failurePolicyJson);
+        FailurePolicyRequest failurePolicyRequest = new FailurePolicyRequest();
+        failurePolicyRequest.setAdjustmentType(AdjustmentType.valueOf(adjustmentType));
+        failurePolicyRequest.setThreshold(threshold);
+        stackRequest.setFailurePolicy(failurePolicyRequest);
         stackRequest.setNetworkId(Long.valueOf(networkId));
         stackRequest.setPlatformVariant(variant);
         stackRequest.setAvailabilityZone(availabilityZone);

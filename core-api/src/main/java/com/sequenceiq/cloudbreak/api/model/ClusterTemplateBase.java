@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class ClusterTemplateBase implements JsonEntity {
+public abstract class ClusterTemplateBase implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ClusterTemplateModelDescription.NAME, required = true)

@@ -31,7 +31,9 @@ public class StackResponse extends StackBase {
     private String statusReason;
     @Valid
     @ApiModelProperty
-    private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
+    private List<InstanceGroupResponse> instanceGroups = new ArrayList<>();
+    @ApiModelProperty(StackModelDescription.FAILURE_POLICY)
+    private FailurePolicyResponse failurePolicy;
     @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
     private OrchestratorResponse orchestrator;
     @ApiModelProperty(StackModelDescription.CREATED)
@@ -67,11 +69,11 @@ public class StackResponse extends StackBase {
         this.id = id;
     }
 
-    public List<InstanceGroupJson> getInstanceGroups() {
+    public List<InstanceGroupResponse> getInstanceGroups() {
         return instanceGroups;
     }
 
-    public void setInstanceGroups(List<InstanceGroupJson> instanceGroups) {
+    public void setInstanceGroups(List<InstanceGroupResponse> instanceGroups) {
         this.instanceGroups = instanceGroups;
     }
 
@@ -146,5 +148,13 @@ public class StackResponse extends StackBase {
 
     public void setCloudbreakDetails(CloudbreakDetailsJson cloudbreakDetails) {
         this.cloudbreakDetails = cloudbreakDetails;
+    }
+
+    public FailurePolicyResponse getFailurePolicy() {
+        return failurePolicy;
+    }
+
+    public void setFailurePolicy(FailurePolicyResponse failurePolicy) {
+        this.failurePolicy = failurePolicy;
     }
 }

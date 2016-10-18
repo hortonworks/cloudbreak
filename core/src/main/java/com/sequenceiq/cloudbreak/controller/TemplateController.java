@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
@@ -39,7 +38,7 @@ public class TemplateController implements TemplateEndpoint {
     private ConversionService conversionService;
 
     @Override
-    public IdJson postPrivate(TemplateRequest templateRequest) {
+    public TemplateResponse postPrivate(TemplateRequest templateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         templateValidator.validateTemplateRequest(templateRequest);
@@ -47,7 +46,7 @@ public class TemplateController implements TemplateEndpoint {
     }
 
     @Override
-    public IdJson postPublic(TemplateRequest templateRequest) {
+    public TemplateResponse postPublic(TemplateRequest templateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         templateValidator.validateTemplateRequest(templateRequest);
@@ -117,10 +116,10 @@ public class TemplateController implements TemplateEndpoint {
         templateService.delete(name, user);
     }
 
-    private IdJson createTemplate(CbUser user, TemplateRequest templateRequest, boolean publicInAccount) {
+    private TemplateResponse createTemplate(CbUser user, TemplateRequest templateRequest, boolean publicInAccount) {
         Template template = convert(templateRequest, publicInAccount);
         template = templateService.create(user, template);
-        return new IdJson(template.getId());
+        return conversionService.convert(template, TemplateResponse.class);
     }
 
     private Template convert(TemplateRequest templateRequest, boolean publicInAccount) {

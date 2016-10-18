@@ -22,7 +22,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import com.sequenceiq.cloudbreak.api.endpoint.SssdConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -78,8 +77,10 @@ public class SssdConfigCommandsTest {
         Resource resource = new ClassPathResource(classPackage + "/" + getClass().getSimpleName() + ".class");
         dummyFile = resource.getFile();
         given(cloudbreakClient.sssdConfigEndpoint()).willReturn(sssdConfigEndpoint);
-        given(sssdConfigEndpoint.postPrivate(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
-        given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(new IdJson(1L));
+        SssdConfigResponse sssdConfigResponse = new SssdConfigResponse();
+        sssdConfigResponse.setId(1L);
+        given(sssdConfigEndpoint.postPrivate(any(SssdConfigRequest.class))).willReturn(sssdConfigResponse);
+        given(sssdConfigEndpoint.postPublic(any(SssdConfigRequest.class))).willReturn(sssdConfigResponse);
         given(sssdConfigEndpoint.get(anyLong())).willReturn(dummyResult);
         given(sssdConfigEndpoint.getPublic(anyString())).willReturn(dummyResult);
         given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);

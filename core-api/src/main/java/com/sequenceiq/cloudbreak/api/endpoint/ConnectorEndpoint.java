@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/connectors")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/connectors", description = ControllerDescription.CONNECTOR_DESCRIPTION)
+@Api(value = "/connectors", description = ControllerDescription.CONNECTOR_DESCRIPTION, protocols = "http, https")
 public interface ConnectorEndpoint {
 
     @GET

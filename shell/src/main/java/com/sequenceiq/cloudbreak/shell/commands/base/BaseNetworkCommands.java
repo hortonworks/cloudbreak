@@ -9,8 +9,8 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
+import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
 import com.sequenceiq.cloudbreak.shell.commands.NetworkCommands;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
@@ -90,7 +90,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
                 createHintAndAddNetworkToContext(idOfNetwork, provider);
                 msg = "Network is selected with id: " + idOfNetwork;
             } else if (networkName != null) {
-                NetworkJson aPublic = shellContext.cloudbreakClient().networkEndpoint().getPublic(networkName);
+                NetworkResponse aPublic = shellContext.cloudbreakClient().networkEndpoint().getPublic(networkName);
                 if (aPublic != null) {
                     createHintAndAddNetworkToContext(Long.valueOf(aPublic.getId()), aPublic.getCloudPlatform());
                     msg = "Network is selected with name: " + networkName;
@@ -112,7 +112,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     @Override
     public String list() throws Exception {
         try {
-            Set<NetworkJson> publics = shellContext.cloudbreakClient().networkEndpoint().getPublics();
+            Set<NetworkResponse> publics = shellContext.cloudbreakClient().networkEndpoint().getPublics();
             return shellContext.outputTransformer().render(shellContext.responseTransformer().transformToMap(publics, "id", "name"), "ID", "INFO");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
@@ -141,10 +141,10 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     public String show(Long id, String name) throws Exception {
         try {
             if (id != null) {
-                NetworkJson networkJson = shellContext.cloudbreakClient().networkEndpoint().get(id);
-                return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(networkJson), "FIELD", "VALUE");
+                NetworkResponse networkResponse = shellContext.cloudbreakClient().networkEndpoint().get(id);
+                return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(networkResponse), "FIELD", "VALUE");
             } else if (name != null) {
-                NetworkJson aPublic = shellContext.cloudbreakClient().networkEndpoint().getPublic(name);
+                NetworkResponse aPublic = shellContext.cloudbreakClient().networkEndpoint().getPublic(name);
                 return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(aPublic), "FIELD", "VALUE");
             }
             return "Network could not be found!";
@@ -162,27 +162,26 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     public String create(String name, String subnet, Boolean publicInAccount, String description, Long platformId, Map<String, Object> parameters,
             String platform) {
         try {
-            NetworkJson networkJson = new NetworkJson();
-            networkJson.setName(name);
-            networkJson.setDescription(description);
-            networkJson.setPublicInAccount(publicInAccount == null ? false : publicInAccount);
-            networkJson.setCloudPlatform(platform);
-            networkJson.setParameters(parameters);
-            networkJson.setSubnetCIDR(subnet);
+            NetworkRequest networkRequest = new NetworkRequest();
+            networkRequest.setName(name);
+            networkRequest.setDescription(description);
+            networkRequest.setCloudPlatform(platform);
+            networkRequest.setParameters(parameters);
+            networkRequest.setSubnetCIDR(subnet);
             if (platformId != null) {
                 checkTopologyForResource(shellContext.cloudbreakClient().topologyEndpoint().getPublics(), platformId, platform);
             }
-            networkJson.setTopologyId(platformId);
+            networkRequest.setTopologyId(platformId);
 
-            IdJson id;
+            Long id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().networkEndpoint().postPublic(networkJson);
+                id = shellContext.cloudbreakClient().networkEndpoint().postPublic(networkRequest).getId();
             } else {
-                id = shellContext.cloudbreakClient().networkEndpoint().postPrivate(networkJson);
+                id = shellContext.cloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId();
             }
-            createHintAndAddNetworkToContext(id.getId(), platform);
-            return String.format(CREATE_SUCCESS_MSG, id.getId(), name);
+            createHintAndAddNetworkToContext(id, platform);
+            return String.format(CREATE_SUCCESS_MSG, id, name);
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -201,8 +200,8 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
 
     private void refreshNetworksInContext() {
         shellContext.getNetworksByProvider().clear();
-        Set<NetworkJson> publics = shellContext.cloudbreakClient().networkEndpoint().getPublics();
-        for (NetworkJson network : publics) {
+        Set<NetworkResponse> publics = shellContext.cloudbreakClient().networkEndpoint().getPublics();
+        for (NetworkResponse network : publics) {
             shellContext.putNetwork(Long.valueOf(network.getId()), network.getCloudPlatform());
         }
         if (!shellContext.getNetworksByProvider().containsKey(shellContext.getActiveNetworkId())) {

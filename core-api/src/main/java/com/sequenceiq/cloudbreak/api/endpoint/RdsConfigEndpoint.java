@@ -12,7 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -25,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/rdsconfigs")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/rdsconfigs", description = ControllerDescription.RDSCONFIG_DESCRIPTION)
+@Api(value = "/rdsconfigs", description = ControllerDescription.RDSCONFIG_DESCRIPTION, protocols = "http, https")
 public interface RdsConfigEndpoint {
 
     @GET
@@ -44,7 +43,7 @@ public interface RdsConfigEndpoint {
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES)
-    IdJson postPrivate(@Valid RDSConfigJson rdsConfigJson);
+    RDSConfigResponse postPrivate(@Valid RDSConfigJson rdsConfigJson);
 
     @GET
     @Path("user")
@@ -68,7 +67,7 @@ public interface RdsConfigEndpoint {
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES)
-    IdJson postPublic(@Valid RDSConfigJson rdsConfigJson);
+    RDSConfigResponse postPublic(@Valid RDSConfigJson rdsConfigJson);
 
     @GET
     @Path("account")

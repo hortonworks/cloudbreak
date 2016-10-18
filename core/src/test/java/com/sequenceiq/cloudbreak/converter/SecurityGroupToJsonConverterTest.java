@@ -16,8 +16,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 
 public class SecurityGroupToJsonConverterTest extends AbstractEntityConverterTest<SecurityGroup> {
@@ -38,9 +38,9 @@ public class SecurityGroupToJsonConverterTest extends AbstractEntityConverterTes
     public void testConvert() {
         // GIVEN
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new ArrayList<SecurityRuleJson>());
+                .willReturn(new ArrayList<SecurityRuleRequest>());
         // WHEN
-        SecurityGroupJson result = underTest.convert(getSource());
+        SecurityGroupResponse result = underTest.convert(getSource());
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("owner", "account"));
     }

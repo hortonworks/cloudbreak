@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
@@ -183,7 +182,7 @@ public class MarathonCommands implements CommandMarker {
             @CliOption(key = "diskSize", mandatory = true, help = "Disk in Gb of the marathon constraint (10Gb - 1000Gb)") Double disk,
             @CliOption(key = "description", help = "Description of the marathon stack") String description,
             @CliOption(key = "publicInAccount", help = "flags if the constraint is public in the account") Boolean publicInAccount) {
-        IdJson idJson;
+        Long id;
         try {
             ConstraintTemplateRequest constraintTemplateRequest = new ConstraintTemplateRequest();
             constraintTemplateRequest.setName(name);
@@ -194,11 +193,11 @@ public class MarathonCommands implements CommandMarker {
             constraintTemplateRequest.setOrchestratorType(OrchestratorConstants.MARATHON);
             publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
-                idJson = cloudbreakClient.constraintTemplateEndpoint().postPublic(constraintTemplateRequest);
+                id = cloudbreakClient.constraintTemplateEndpoint().postPublic(constraintTemplateRequest).getId();
             } else {
-                idJson = cloudbreakClient.constraintTemplateEndpoint().postPrivate(constraintTemplateRequest);
+                id = cloudbreakClient.constraintTemplateEndpoint().postPrivate(constraintTemplateRequest).getId();
             }
-            return "Marathon template was created with id: " + idJson.getId();
+            return "Marathon template was created with id: " + id;
         } catch (Exception ex) {
             throw exceptionTransformer.transformToRuntimeException(ex);
         }

@@ -5,10 +5,10 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 
-public class JsonToHostGroupConverterTest extends AbstractJsonConverterTest<HostGroupJson> {
+public class JsonToHostGroupConverterTest extends AbstractJsonConverterTest<HostGroupRequest> {
 
     private JsonToHostGroupConverter underTest;
 
@@ -27,7 +27,7 @@ public class JsonToHostGroupConverterTest extends AbstractJsonConverterTest<Host
     }
 
     @Override
-    public Class<HostGroupJson> getRequestClass() {
-        return HostGroupJson.class;
+    public Class<HostGroupRequest> getRequestClass() {
+        return HostGroupRequest.class;
     }
 }

@@ -19,7 +19,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -99,8 +99,9 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
     }
 
     private Set<InstanceGroup> convertInstanceGroups(StackRequest source, Stack stack) {
-        List<InstanceGroupJson> instanceGroupJsons = source.getInstanceGroups();
-        Set<InstanceGroup> convertedSet = (Set<InstanceGroup>) getConversionService().convert(instanceGroupJsons, TypeDescriptor.forObject(instanceGroupJsons),
+        List<InstanceGroupRequest> instanceGroupRequests = source.getInstanceGroups();
+        Set<InstanceGroup> convertedSet = (Set<InstanceGroup>) getConversionService().convert(instanceGroupRequests,
+                TypeDescriptor.forObject(instanceGroupRequests),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroup.class)));
         boolean gatewaySpecified = false;
         for (InstanceGroup instanceGroup : convertedSet) {

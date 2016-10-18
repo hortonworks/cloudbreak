@@ -9,36 +9,37 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
-import com.sequenceiq.cloudbreak.api.model.HostMetadataJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.HostMetadataResponse;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
-public class HostGroupToJsonConverter extends AbstractConversionServiceAwareConverter<HostGroup, HostGroupJson> {
+public class HostGroupToJsonConverter extends AbstractConversionServiceAwareConverter<HostGroup, HostGroupResponse> {
 
     @Inject
     private ConversionService conversionService;
 
     @Override
-    public HostGroupJson convert(HostGroup source) {
-        HostGroupJson hostGroupJson = new HostGroupJson();
-        hostGroupJson.setName(source.getName());
-        hostGroupJson.setConstraint(conversionService.convert(source.getConstraint(), ConstraintJson.class));
-        hostGroupJson.setRecipeIds(getRecipeIds(source.getRecipes()));
-        hostGroupJson.setMetadata(getHostMetadata(source.getHostMetadata()));
-        return hostGroupJson;
+    public HostGroupResponse convert(HostGroup source) {
+        HostGroupResponse hostGroupBase = new HostGroupResponse();
+        hostGroupBase.setId(source.getId());
+        hostGroupBase.setName(source.getName());
+        hostGroupBase.setConstraint(conversionService.convert(source.getConstraint(), ConstraintJson.class));
+        hostGroupBase.setRecipeIds(getRecipeIds(source.getRecipes()));
+        hostGroupBase.setMetadata(getHostMetadata(source.getHostMetadata()));
+        return hostGroupBase;
     }
 
-    private Set<HostMetadataJson> getHostMetadata(final Set<HostMetadata> hostMetadata) {
+    private Set<HostMetadataResponse> getHostMetadata(final Set<HostMetadata> hostMetadata) {
         return hostMetadata.stream().map(metadata -> {
-            HostMetadataJson hostMetadataJson = new HostMetadataJson();
-            hostMetadataJson.setId(metadata.getId());
-            hostMetadataJson.setGroupName(metadata.getHostGroup().getName());
-            hostMetadataJson.setName(metadata.getHostName());
-            hostMetadataJson.setState(metadata.getHostMetadataState().name());
-            return hostMetadataJson;
+            HostMetadataResponse hostMetadataBase = new HostMetadataResponse();
+            hostMetadataBase.setId(metadata.getId());
+            hostMetadataBase.setGroupName(metadata.getHostGroup().getName());
+            hostMetadataBase.setName(metadata.getHostName());
+            hostMetadataBase.setState(metadata.getHostMetadataState().name());
+            return hostMetadataBase;
         }).collect(Collectors.toSet());
     }
 

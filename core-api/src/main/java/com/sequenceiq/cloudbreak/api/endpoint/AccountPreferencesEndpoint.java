@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/accountpreferences")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/accountpreferences", description = ControllerDescription.ACCOUNT_PREFERENCES_DESCRIPTION)
+@Api(value = "/accountpreferences", description = ControllerDescription.ACCOUNT_PREFERENCES_DESCRIPTION, protocols = "http, https")
 public interface AccountPreferencesEndpoint {
 
     @GET
@@ -32,12 +32,12 @@ public interface AccountPreferencesEndpoint {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.PUT_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
-    void put(@Valid AccountPreferencesJson updateRequest);
+    AccountPreferencesJson put(@Valid AccountPreferencesJson updateRequest);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
-    void post(@Valid AccountPreferencesJson updateRequest);
+    AccountPreferencesJson post(@Valid AccountPreferencesJson updateRequest);
 
     @GET
     @Path("validate")

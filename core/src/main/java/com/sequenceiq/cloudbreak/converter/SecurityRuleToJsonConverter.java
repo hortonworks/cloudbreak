@@ -3,15 +3,15 @@ package com.sequenceiq.cloudbreak.converter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 @Component
-public class SecurityRuleToJsonConverter extends AbstractConversionServiceAwareConverter<SecurityRule, SecurityRuleJson> {
+public class SecurityRuleToJsonConverter extends AbstractConversionServiceAwareConverter<SecurityRule, SecurityRuleResponse> {
 
     @Override
-    public SecurityRuleJson convert(SecurityRule entity) {
-        SecurityRuleJson json = new SecurityRuleJson(entity.getCidr());
+    public SecurityRuleResponse convert(SecurityRule entity) {
+        SecurityRuleResponse json = new SecurityRuleResponse(entity.getCidr());
         json.setId(entity.getId());
         json.setPorts(StringUtils.join(entity.getPorts(), ","));
         json.setProtocol(entity.getProtocol());

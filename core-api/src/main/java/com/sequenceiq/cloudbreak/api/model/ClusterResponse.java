@@ -43,7 +43,7 @@ public class ClusterResponse {
     private Boolean ldapRequired = false;
     @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
     private Long sssdConfigId;
-    private Set<HostGroupJson> hostGroups;
+    private Set<HostGroupResponse> hostGroups;
     private AmbariStackDetailsJson ambariStackDetails;
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_ID)
     private Long rdsConfigId;
@@ -141,11 +141,11 @@ public class ClusterResponse {
         this.blueprintId = blueprintId;
     }
 
-    public Set<HostGroupJson> getHostGroups() {
+    public Set<HostGroupResponse> getHostGroups() {
         return hostGroups;
     }
 
-    public void setHostGroups(Set<HostGroupJson> hostGroups) {
+    public void setHostGroups(Set<HostGroupResponse> hostGroups) {
         this.hostGroups = hostGroups;
     }
 

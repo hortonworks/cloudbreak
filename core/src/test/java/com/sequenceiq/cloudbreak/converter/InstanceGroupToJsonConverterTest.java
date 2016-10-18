@@ -16,7 +16,7 @@ import org.springframework.core.convert.TypeDescriptor;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -42,7 +42,7 @@ public class InstanceGroupToJsonConverterTest extends AbstractEntityConverterTes
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(getInstanceMetaData(getSource()));
         // WHEN
-        InstanceGroupJson result = underTest.convert(getSource());
+        InstanceGroupResponse result = underTest.convert(getSource());
         // THEN
         assertEquals(1, result.getNodeCount());
         assertEquals(InstanceGroupType.CORE, result.getType());

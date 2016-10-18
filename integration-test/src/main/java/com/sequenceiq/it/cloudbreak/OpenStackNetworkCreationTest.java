@@ -10,7 +10,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 
 public class OpenStackNetworkCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.openstack.publicNetId}")
@@ -25,16 +25,16 @@ public class OpenStackNetworkCreationTest extends AbstractCloudbreakIntegrationT
         publicNetId = getPublicNetId(publicNetId, defaultPublicNetId);
         // WHEN
         // TODO: publicInAccount
-        NetworkJson networkJson = new NetworkJson();
-        networkJson.setDescription("OpenStack network for integration testing");
-        networkJson.setName(networkName);
-        networkJson.setSubnetCIDR(subnetCIDR);
+        NetworkRequest networkRequest = new NetworkRequest();
+        networkRequest.setDescription("OpenStack network for integration testing");
+        networkRequest.setName(networkName);
+        networkRequest.setSubnetCIDR(subnetCIDR);
         Map<String, Object> map = new HashMap<>();
         map.put("publicNetId", publicNetId);
-        networkJson.setParameters(map);
-        networkJson.setCloudPlatform("OPENSTACK");
+        networkRequest.setParameters(map);
+        networkRequest.setCloudPlatform("OPENSTACK");
 
-        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkJson).getId().toString();
+        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);

@@ -8,11 +8,13 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ClusterRequest {
 
     @Size(max = 40, min = 5, message = "The length of the cluster's name has to be in range of 5 to 40")
@@ -32,7 +34,7 @@ public class ClusterRequest {
 
     @Valid
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.HOSTGROUPS)
-    private Set<HostGroupJson> hostGroups;
+    private Set<HostGroupRequest> hostGroups;
 
     @ApiModelProperty(ClusterModelDescription.EMAIL_NEEDED)
     private Boolean emailNeeded = Boolean.FALSE;
@@ -133,11 +135,11 @@ public class ClusterRequest {
         this.blueprintId = blueprintId;
     }
 
-    public Set<HostGroupJson> getHostGroups() {
+    public Set<HostGroupRequest> getHostGroups() {
         return hostGroups;
     }
 
-    public void setHostGroups(Set<HostGroupJson> hostGroups) {
+    public void setHostGroups(Set<HostGroupRequest> hostGroups) {
         this.hostGroups = hostGroups;
     }
 

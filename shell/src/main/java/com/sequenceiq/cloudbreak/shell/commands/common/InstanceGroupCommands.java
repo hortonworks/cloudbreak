@@ -10,7 +10,7 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
 import com.google.common.primitives.Longs;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
@@ -68,7 +68,7 @@ public class InstanceGroupCommands implements CommandMarker {
             if (instanceGroupSecurityGroupId != null) {
                 securityGroupId = instanceGroupSecurityGroupId.getName();
             } else if (instanceGroupSecurityGroupName != null) {
-                SecurityGroupJson aPublic = shellContext.cloudbreakClient().securityGroupEndpoint().getPublic(instanceGroupSecurityGroupName.getName());
+                SecurityGroupResponse aPublic = shellContext.cloudbreakClient().securityGroupEndpoint().getPublic(instanceGroupSecurityGroupName.getName());
                 if (aPublic != null) {
                     securityGroupId = aPublic.getId().toString();
                 } else {

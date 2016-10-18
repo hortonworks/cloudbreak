@@ -28,7 +28,7 @@ import com.amazonaws.services.cloudformation.model.Output;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackStatus;
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 
 public class AwsCreateVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
 
@@ -65,16 +65,15 @@ public class AwsCreateVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
             throw new RuntimeException(e);
         }
 
-        NetworkJson networkJson = new NetworkJson();
-        networkJson.setName(networkName);
-        networkJson.setDescription(description);
-        networkJson.setParameters(networkMap);
+        NetworkRequest networkRequest = new NetworkRequest();
+        networkRequest.setName(networkName);
+        networkRequest.setDescription(description);
+        networkRequest.setParameters(networkMap);
         if (!existingSubnet) {
-            networkJson.setSubnetCIDR("10.0.0.0/24");
+            networkRequest.setSubnetCIDR("10.0.0.0/24");
         }
-        networkJson.setCloudPlatform("AWS");
-        networkJson.setPublicInAccount(publicInAccount);
-        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkJson).getId().toString();
+        networkRequest.setCloudPlatform("AWS");
+        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId().toString();
         getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);
     }
 

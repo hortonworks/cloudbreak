@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/settings")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/settings", description = ControllerDescription.SETTINGS_DESCRIPTION)
+@Api(value = "/settings", description = ControllerDescription.SETTINGS_DESCRIPTION, protocols = "http, https")
 public interface SettingsEndpoint {
 
     @GET

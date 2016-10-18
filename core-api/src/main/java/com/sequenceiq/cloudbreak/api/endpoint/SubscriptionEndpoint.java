@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/subscriptions")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/subscriptions", description = ControllerDescription.SUBSCRIPTION_DESCRIPTION)
+@Api(value = "/subscriptions", description = ControllerDescription.SUBSCRIPTION_DESCRIPTION, protocols = "http, https")
 public interface SubscriptionEndpoint {
 
     @POST

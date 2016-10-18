@@ -6,11 +6,9 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
-abstract class SssdConfigBase implements JsonEntity {
+public abstract class SssdConfigBase implements JsonEntity {
 
     @Size(max = 100, min = 1, message = "The length of the config's name has to be in range of 1 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",

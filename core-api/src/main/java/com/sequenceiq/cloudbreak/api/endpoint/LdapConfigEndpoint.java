@@ -12,7 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -25,20 +24,20 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/ldap")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/ldap", description = ControllerDescription.LDAP_CONFIG_DESCRIPTION)
+@Api(value = "/ldap", description = ControllerDescription.LDAP_CONFIG_DESCRIPTION, protocols = "http, https")
 public interface LdapConfigEndpoint {
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
-    IdJson postPrivate(@Valid LdapConfigRequest ldapConfigRequest);
+    LdapConfigResponse postPrivate(@Valid LdapConfigRequest ldapConfigRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
-    IdJson postPublic(@Valid LdapConfigRequest ldapConfigRequest);
+    LdapConfigResponse postPublic(@Valid LdapConfigRequest ldapConfigRequest);
 
     @GET
     @Path("user")

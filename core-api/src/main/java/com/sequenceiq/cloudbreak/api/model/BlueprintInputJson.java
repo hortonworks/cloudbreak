@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel("BlueprintInput")
 public class BlueprintInputJson implements JsonEntity {
 
     private String name;
