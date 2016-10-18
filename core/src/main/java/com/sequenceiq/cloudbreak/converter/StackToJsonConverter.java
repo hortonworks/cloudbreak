@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -69,7 +69,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         stackJson.setRegion(source.getRegion());
         stackJson.setAvailabilityZone(source.getAvailabilityZone());
         stackJson.setOnFailureAction(source.getOnFailureActionAction());
-        List<InstanceGroupJson> templateGroups = new ArrayList<>();
+        List<InstanceGroupResponse> templateGroups = new ArrayList<>();
         templateGroups.addAll(convertInstanceGroups(source.getInstanceGroups()));
         stackJson.setInstanceGroups(templateGroups);
         if (source.getCluster() != null) {
@@ -78,7 +78,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
             stackJson.setCluster(new ClusterResponse());
         }
         if (source.getFailurePolicy() != null) {
-            stackJson.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicyJson.class));
+            stackJson.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicyResponse.class));
         }
         if (source.getNetwork() == null) {
             stackJson.setNetworkId(null);
@@ -119,9 +119,9 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         return stackJson;
     }
 
-    private Set<InstanceGroupJson> convertInstanceGroups(Set<InstanceGroup> instanceGroups) {
-        return (Set<InstanceGroupJson>) getConversionService().convert(instanceGroups, TypeDescriptor.forObject(instanceGroups),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroupJson.class)));
+    private Set<InstanceGroupResponse> convertInstanceGroups(Set<InstanceGroup> instanceGroups) {
+        return (Set<InstanceGroupResponse>) getConversionService().convert(instanceGroups, TypeDescriptor.forObject(instanceGroups),
+                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroupResponse.class)));
     }
 
 }

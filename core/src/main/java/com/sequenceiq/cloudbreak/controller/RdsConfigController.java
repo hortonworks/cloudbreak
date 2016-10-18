@@ -10,7 +10,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.RdsConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -38,14 +37,14 @@ public class RdsConfigController implements RdsConfigEndpoint {
     private ConversionService conversionService;
 
     @Override
-    public IdJson postPrivate(RDSConfigJson rdsConfigRequest) {
+    public RDSConfigResponse postPrivate(RDSConfigJson rdsConfigRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createRdsConfig(user, rdsConfigRequest, false);
     }
 
     @Override
-    public IdJson postPublic(RDSConfigJson rdsConfigRequest) {
+    public RDSConfigResponse postPublic(RDSConfigJson rdsConfigRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createRdsConfig(user, rdsConfigRequest, true);
@@ -111,7 +110,7 @@ public class RdsConfigController implements RdsConfigEndpoint {
         rdsConfigService.delete(name, user);
     }
 
-    private IdJson createRdsConfig(CbUser user, RDSConfigJson rdsConfigJson, boolean publicInAccount) {
+    private RDSConfigResponse createRdsConfig(CbUser user, RDSConfigJson rdsConfigJson, boolean publicInAccount) {
         if (rdsConfigJson.isValidated()) {
             rdsConnectionValidator.validateRdsConnection(rdsConfigJson);
         }
@@ -122,7 +121,7 @@ public class RdsConfigController implements RdsConfigEndpoint {
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateKeyValueException(APIResourceType.RDS_CONFIG, rdsConfig.getName(), e);
         }
-        return new IdJson(rdsConfig.getId());
+        return conversionService.convert(rdsConfig, RDSConfigResponse.class);
     }
 
     private Set<RDSConfigResponse> toJsonList(Set<RDSConfig> rdsConfigs) {

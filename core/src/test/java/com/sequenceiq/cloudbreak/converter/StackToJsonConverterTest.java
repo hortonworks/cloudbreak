@@ -20,9 +20,9 @@ import org.springframework.core.convert.TypeDescriptor;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -64,11 +64,11 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ImageJson())
                 .willReturn(new ClusterResponse())
-                .willReturn(new FailurePolicyJson())
+                .willReturn(new FailurePolicyResponse())
                 .willReturn(new OrchestratorResponse())
                 .willReturn(new CloudbreakDetailsJson());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<InstanceGroupJson>());
+                .willReturn(new HashSet<InstanceGroupRequest>());
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
@@ -81,11 +81,11 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ImageJson())
                 .willReturn(new ClusterResponse())
-                .willReturn(new FailurePolicyJson())
+                .willReturn(new FailurePolicyResponse())
                 .willReturn(new OrchestratorResponse())
                 .willReturn(new CloudbreakDetailsJson());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<InstanceGroupJson>());
+                .willReturn(new HashSet<InstanceGroupRequest>());
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
@@ -98,11 +98,11 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         getSource().setCluster(null);
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ImageJson())
-                .willReturn(new FailurePolicyJson())
+                .willReturn(new FailurePolicyResponse())
                 .willReturn(new OrchestratorResponse())
                 .willReturn(new CloudbreakDetailsJson());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<InstanceGroupJson>());
+                .willReturn(new HashSet<InstanceGroupRequest>());
         getSource().setCluster(null);
         // WHEN
         StackResponse result = underTest.convert(getSource());
@@ -120,7 +120,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
                 .willReturn(new OrchestratorResponse())
                 .willReturn(new CloudbreakDetailsJson());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<InstanceGroupJson>());
+                .willReturn(new HashSet<InstanceGroupRequest>());
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
@@ -134,11 +134,11 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ImageJson())
                 .willReturn(new ClusterResponse())
-                .willReturn(new FailurePolicyJson())
+                .willReturn(new FailurePolicyResponse())
                 .willReturn(new OrchestratorResponse())
                 .willReturn(new CloudbreakDetailsJson());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
-                .willReturn(new HashSet<InstanceGroupJson>());
+                .willReturn(new HashSet<InstanceGroupRequest>());
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN

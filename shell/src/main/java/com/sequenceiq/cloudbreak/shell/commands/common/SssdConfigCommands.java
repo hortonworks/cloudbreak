@@ -11,7 +11,6 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
@@ -116,13 +115,13 @@ public class SssdConfigCommands implements BaseCommands {
             request.setAdServer(adServer);
             request.setKerberosServer(kerberosServer);
             request.setKerberosRealm(kerberosRealm);
-            IdJson id;
+            Long id;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPublic(request);
+                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPublic(request).getId();
             } else {
-                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPrivate(request);
+                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPrivate(request).getId();
             }
-            return String.format("SSSD config created with id: '%d' and name: '%s'", id.getId(), request.getName());
+            return String.format("SSSD config created with id: '%d' and name: '%s'", id, request.getName());
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -144,13 +143,13 @@ public class SssdConfigCommands implements BaseCommands {
             request.setDescription(description);
             String config = IOUtils.toString(new FileInputStream(configFile));
             request.setConfiguration(config);
-            IdJson id;
+            Long id;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPublic(request);
+                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPublic(request).getId();
             } else {
-                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPrivate(request);
+                id = shellContext.cloudbreakClient().sssdConfigEndpoint().postPrivate(request).getId();
             }
-            return String.format("SSSD config created with id: '%d' and name: '%s'", id.getId(), request.getName());
+            return String.format("SSSD config created with id: '%d' and name: '%s'", id, request.getName());
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

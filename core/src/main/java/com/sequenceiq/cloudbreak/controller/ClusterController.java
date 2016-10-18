@@ -24,8 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupBase;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
@@ -99,7 +98,7 @@ public class ClusterController implements ClusterEndpoint {
     private ComponentConfigProvider componentConfigProvider;
 
     @Override
-    public IdJson post(Long stackId, ClusterRequest request) throws Exception {
+    public ClusterResponse post(Long stackId, ClusterRequest request) throws Exception {
         CbUser user = authenticatedUserService.getCbUser();
         if (request.getEnableSecurity()
                 && (request.getKerberosMasterKey() == null || request.getKerberosAdmin() == null || request.getKerberosPassword() == null)) {
@@ -127,8 +126,8 @@ public class ClusterController implements ClusterEndpoint {
         components = addAmbariRepoConfig(components, request, stack);
         components = addHDPRepoConfig(components, request, stack);
         components = addAmbariDatabaseConfig(components, request, stack);
-        clusterService.create(user, stackId, cluster, components);
-        return new IdJson(cluster.getId());
+        Cluster resp = clusterService.create(user, stackId, cluster, components);
+        return conversionService.convert(resp, ClusterResponse.class);
     }
 
     private void validateRdsConnection(ClusterRequest request) {
@@ -271,7 +270,7 @@ public class ClusterController implements ClusterEndpoint {
     private void recreateCluster(Long stackId, UpdateClusterJson updateJson) {
         CbUser user = authenticatedUserService.getCbUser();
         Set<HostGroup> hostGroups = new HashSet<>();
-        for (HostGroupJson json : updateJson.getHostgroups()) {
+        for (HostGroupBase json : updateJson.getHostgroups()) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
             hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, user, json.getConstraint(), json.getRecipeIds(), false);
             hostGroups.add(hostGroup);

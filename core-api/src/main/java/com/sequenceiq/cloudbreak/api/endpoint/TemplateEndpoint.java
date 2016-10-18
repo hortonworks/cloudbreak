@@ -12,7 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -25,20 +24,20 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/templates")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/templates", description = ControllerDescription.TEMPLATE_DESCRIPTION)
+@Api(value = "/templates", description = ControllerDescription.TEMPLATE_DESCRIPTION, protocols = "http, https")
 public interface TemplateEndpoint {
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.TemplateOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES)
-    IdJson postPrivate(@Valid TemplateRequest templateRequest);
+    TemplateResponse postPrivate(@Valid TemplateRequest templateRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.TemplateOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES)
-    IdJson postPublic(@Valid TemplateRequest templateRequest);
+    TemplateResponse postPublic(@Valid TemplateRequest templateRequest);
 
     @GET
     @Path("user")

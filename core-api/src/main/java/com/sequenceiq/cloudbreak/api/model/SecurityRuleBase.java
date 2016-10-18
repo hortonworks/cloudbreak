@@ -5,15 +5,11 @@ import javax.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("SecurityRule")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SecurityRuleJson implements JsonEntity {
+public abstract class SecurityRuleBase implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.ID)
-    private Long id;
     @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.SUBNET, required = true)
     @Pattern(regexp =
             "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
@@ -28,10 +24,10 @@ public class SecurityRuleJson implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.MODIFIABLE)
     private boolean modifiable;
 
-    public SecurityRuleJson() {
+    public SecurityRuleBase() {
     }
 
-    public SecurityRuleJson(String subnet) {
+    public SecurityRuleBase(String subnet) {
         this.subnet = subnet;
     }
 
@@ -41,14 +37,6 @@ public class SecurityRuleJson implements JsonEntity {
 
     public void setSubnet(String subnet) {
         this.subnet = subnet;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getPorts() {

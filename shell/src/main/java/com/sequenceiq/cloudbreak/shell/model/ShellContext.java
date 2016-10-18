@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -190,7 +190,7 @@ public class ShellContext {
     public void prepareInstanceGroups(StackResponse stack) {
         this.instanceGroups = new HashMap<>();
         this.activeInstanceGroups = new HashSet<>();
-        for (InstanceGroupJson instanceGroup : stack.getInstanceGroups()) {
+        for (InstanceGroupResponse instanceGroup : stack.getInstanceGroups()) {
             this.activeInstanceGroups.add(instanceGroup.getGroup());
             instanceGroups.put(
                     instanceGroup.getGroup(),

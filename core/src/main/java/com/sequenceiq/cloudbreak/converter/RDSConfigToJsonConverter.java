@@ -28,10 +28,14 @@ public class RDSConfigToJsonConverter extends AbstractConversionServiceAwareConv
         json.setConnectionUserName(source.getConnectionUserName());
         json.setConnectionPassword(source.getConnectionPassword());
         json.setDatabaseType(source.getDatabaseType());
-        json.setId(source.getId().toString());
+        json.setId(source.getId());
         json.setPublicInAccount(source.isPublicInAccount());
         json.setCreationDate(source.getCreationDate());
-        json.setClusterNames(source.getClusters().stream().map(cluster -> cluster.getName()).collect(Collectors.toSet()));
+        if (source.getClusters() != null) {
+            json.setClusterNames(source.getClusters().stream().map(cluster -> cluster.getName()).collect(Collectors.toSet()));
+        } else {
+            json.setClusterNames(new HashSet<>());
+        }
         json.setHdpVersion(source.getHdpVersion());
         json.setType(source.getType() == null ? RdsType.HIVE : source.getType());
         if (source.getAttributes() != null) {

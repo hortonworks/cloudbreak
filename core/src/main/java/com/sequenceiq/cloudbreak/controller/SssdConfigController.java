@@ -9,7 +9,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.SssdConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -31,14 +30,14 @@ public class SssdConfigController implements SssdConfigEndpoint {
     private SssdConfigService sssdConfigService;
 
     @Override
-    public IdJson postPrivate(SssdConfigRequest sssdConfigRequest) {
+    public SssdConfigResponse postPrivate(SssdConfigRequest sssdConfigRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createConfig(user, sssdConfigRequest, false);
     }
 
     @Override
-    public IdJson postPublic(SssdConfigRequest sssdConfigRequest) {
+    public SssdConfigResponse postPublic(SssdConfigRequest sssdConfigRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createConfig(user, sssdConfigRequest, true);
@@ -105,11 +104,11 @@ public class SssdConfigController implements SssdConfigEndpoint {
         sssdConfigService.delete(name, user);
     }
 
-    private IdJson createConfig(CbUser user, SssdConfigRequest request, boolean publicInAccount) {
+    private SssdConfigResponse createConfig(CbUser user, SssdConfigRequest request, boolean publicInAccount) {
         SssdConfig config = conversionService.convert(request, SssdConfig.class);
         config.setPublicInAccount(publicInAccount);
         config = sssdConfigService.create(user, config);
-        return new IdJson(config.getId());
+        return conversionService.convert(config, SssdConfigResponse.class);
     }
 
     private Set<SssdConfigResponse> toJsonSet(Set<SssdConfig> configs) {

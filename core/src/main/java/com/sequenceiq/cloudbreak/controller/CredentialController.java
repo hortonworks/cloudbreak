@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -33,14 +32,14 @@ public class CredentialController implements CredentialEndpoint {
     private AuthenticatedUserService authenticatedUserService;
 
     @Override
-    public IdJson postPrivate(CredentialRequest credentialRequest) {
+    public CredentialResponse postPrivate(CredentialRequest credentialRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createCredential(user, credentialRequest, false);
     }
 
     @Override
-    public IdJson postPublic(CredentialRequest credentialRequest) {
+    public CredentialResponse postPublic(CredentialRequest credentialRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createCredential(user, credentialRequest, true);
@@ -107,10 +106,10 @@ public class CredentialController implements CredentialEndpoint {
         credentialService.delete(name, user);
     }
 
-    private IdJson createCredential(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
+    private CredentialResponse createCredential(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
         Credential credential = convert(credentialRequest, publicInAccount);
         credential = credentialService.create(user, credential);
-        return new IdJson(credential.getId());
+        return conversionService.convert(credential, CredentialResponse.class);
     }
 
     private Credential convert(CredentialRequest json, boolean publicInAccount) {

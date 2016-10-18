@@ -14,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -25,20 +24,20 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/credentials")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/credentials", description = ControllerDescription.CREDENTIAL_DESCRIPTION)
+@Api(value = "/credentials", description = ControllerDescription.CREDENTIAL_DESCRIPTION, protocols = "http, https")
 public interface CredentialEndpoint {
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.CredentialOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
-    IdJson postPrivate(@Valid CredentialRequest credentialRequest);
+    CredentialResponse postPrivate(@Valid CredentialRequest credentialRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.CredentialOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
-    IdJson postPublic(@Valid CredentialRequest credentialRequest);
+    CredentialResponse postPublic(@Valid CredentialRequest credentialRequest);
 
     @GET
     @Path("user")

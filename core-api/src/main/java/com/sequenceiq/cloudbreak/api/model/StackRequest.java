@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,9 +17,21 @@ public class StackRequest extends StackBase {
     @Valid
     @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
     private OrchestratorRequest orchestrator;
-
+    @Valid
+    @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
+    private List<InstanceGroupRequest> instanceGroups = new ArrayList<>();
+    @ApiModelProperty(StackModelDescription.FAILURE_POLICY)
+    private FailurePolicyRequest failurePolicy;
     @ApiModelProperty(value = StackModelDescription.IMAGE_CATALOG)
     private String imageCatalog;
+
+    public FailurePolicyRequest getFailurePolicy() {
+        return failurePolicy;
+    }
+
+    public void setFailurePolicy(FailurePolicyRequest failurePolicy) {
+        this.failurePolicy = failurePolicy;
+    }
 
     public OrchestratorRequest getOrchestrator() {
         return orchestrator;
@@ -33,4 +48,13 @@ public class StackRequest extends StackBase {
     public void setImageCatalog(String imageCatalog) {
         this.imageCatalog = imageCatalog;
     }
+
+    public List<InstanceGroupRequest> getInstanceGroups() {
+        return instanceGroups;
+    }
+
+    public void setInstanceGroups(List<InstanceGroupRequest> instanceGroups) {
+        this.instanceGroups = instanceGroups;
+    }
+
 }

@@ -23,7 +23,7 @@ import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
@@ -109,8 +109,8 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     }
 
     private Cluster provideViewDefinitions(Cluster source) {
-        if ((source.getAttributes().getValue() == null || ambariViewProvider.isViewDefinitionNotProvided(source))
-                && !Strings.isNullOrEmpty(source.getAmbariIp())) {
+        if (!Strings.isNullOrEmpty(source.getAmbariIp())
+                && (source.getAttributes().getValue() == null || ambariViewProvider.isViewDefinitionNotProvided(source))) {
             try {
                 HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(source.getStack().getId(), source.getAmbariIp());
                 AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, source.getStack().getGatewayPort(),
@@ -142,10 +142,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     }
 
-    private Set<HostGroupJson> convertHostGroupsToJson(Set<HostGroup> hostGroups) {
-        Set<HostGroupJson> jsons = new HashSet<>();
+    private Set<HostGroupResponse> convertHostGroupsToJson(Set<HostGroup> hostGroups) {
+        Set<HostGroupResponse> jsons = new HashSet<>();
         for (HostGroup hostGroup : hostGroups) {
-            jsons.add(getConversionService().convert(hostGroup, HostGroupJson.class));
+            jsons.add(getConversionService().convert(hostGroup, HostGroupResponse.class));
         }
         return jsons;
     }

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,30 +49,40 @@ public class BlueprintLoaderService {
         Iterable<Blueprint> allBlueprint = blueprintRepository.findAll();
         for (String blueprintStrings : blueprintArray) {
             String[] split = blueprintStrings.split("=");
-            if (!blueprintStrings.isEmpty() && (split.length == 2 || split.length == 1) && !split[0].isEmpty()) {
+            if (isBlueprintNamePreConfigured(blueprintStrings, split)) {
                 try {
                     String bpDefaultText = blueprintUtils.readDefaultBlueprintFromFile(split);
                     LOGGER.info("Updating default blueprint with name '{}'.", split[0]);
                     for (Blueprint blueprint : allBlueprint) {
                         if (blueprint.getName().equals(split[0]) && blueprint.getStatus().equals(ResourceStatus.DEFAULT)) {
-                            LOGGER.info("Blueprint {} is a default blueprint with name '{}'. Updating with the new config.",
-                                    blueprint.getId(), blueprint.getName());
-                            JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(bpDefaultText);
-                            JsonNode blueprintText = jsonNode.get("blueprint");
-                            JsonNode inputs = jsonNode.get("inputs");
-                            BlueprintInputParameters inputParameters = new BlueprintInputParameters(prepareInputs(inputs));
-                            blueprint.setInputParameters(new Json(inputParameters));
-                            blueprint.setBlueprintText(blueprintText.toString());
-                            blueprint.setHostGroupCount(blueprintUtils.countHostGroups(blueprintText));
-                            blueprint.setBlueprintName(blueprintUtils.getBlueprintName(blueprintText));
-                            blueprintRepository.save(blueprint);
+                            readAndUpdateBlueprint(bpDefaultText, blueprint);
                         }
                     }
-                } catch (IOException e) {
-                    LOGGER.info("Updating default blueprint with name '{}' wasn't successful because default blueprint file couldn't read: {}.", split[0], e);
+                } catch (FileNotFoundException e) {
+                    LOGGER.error("Failed to update blueprint because file not found on path: {}.", split[0]);
+                } catch (Exception e) {
+                    LOGGER.error("Updating default blueprint with name '{}' wasn't successful because error occurred under the update process: {}.",
+                            split[0], e);
                 }
             }
         }
+    }
+
+    private boolean isBlueprintNamePreConfigured(String blueprintStrings, String[] split) {
+        return !blueprintStrings.isEmpty() && (split.length == 2 || split.length == 1) && !split[0].isEmpty();
+    }
+
+    private void readAndUpdateBlueprint(String bpDefaultText, Blueprint blueprint) throws Exception {
+        LOGGER.info("Blueprint {} is a default blueprint with name '{}'. Updating with the new config.", blueprint.getId(), blueprint.getName());
+        JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(bpDefaultText);
+        JsonNode blueprintText = jsonNode.get("blueprint");
+        JsonNode inputs = jsonNode.get("inputs");
+        BlueprintInputParameters inputParameters = new BlueprintInputParameters(prepareInputs(inputs));
+        blueprint.setInputParameters(new Json(inputParameters));
+        blueprint.setBlueprintText(blueprintText.toString());
+        blueprint.setHostGroupCount(blueprintUtils.countHostGroups(blueprintText));
+        blueprint.setBlueprintName(blueprintUtils.getBlueprintName(blueprintText));
+        blueprintRepository.save(blueprint);
     }
 
     private List<BlueprintParameter> prepareInputs(JsonNode inputs) throws com.fasterxml.jackson.core.JsonProcessingException {

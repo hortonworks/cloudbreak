@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -51,14 +51,14 @@ public class CleanupService {
                 deleteTemplate(cloudbreakClient, String.valueOf(template.getId()));
             }
         }
-        Set<NetworkJson> networks = cloudbreakClient.networkEndpoint().getPrivates();
-        for (NetworkJson network : networks) {
+        Set<NetworkResponse> networks = cloudbreakClient.networkEndpoint().getPrivates();
+        for (NetworkResponse network : networks) {
             if (network.getName().startsWith("it-")) {
                 deleteNetwork(cloudbreakClient, String.valueOf(network.getId()));
             }
         }
-        Set<SecurityGroupJson> secgroups = cloudbreakClient.securityGroupEndpoint().getPrivates();
-        for (SecurityGroupJson secgroup : secgroups) {
+        Set<SecurityGroupResponse> secgroups = cloudbreakClient.securityGroupEndpoint().getPrivates();
+        for (SecurityGroupResponse secgroup : secgroups) {
             if (secgroup.getName().startsWith("it-")) {
                 deleteSecurityGroup(cloudbreakClient, String.valueOf(secgroup.getId()));
             }
@@ -115,8 +115,8 @@ public class CleanupService {
         boolean result = false;
         if (securityGroupId != null) {
             SecurityGroupEndpoint securityGroupEndpoint = cloudbreakClient.securityGroupEndpoint();
-            SecurityGroupJson securityGroupJson = securityGroupEndpoint.get(Long.valueOf(securityGroupId));
-            if (!securityGroupJson.getName().equals(itProps.getDefaultSecurityGroup())) {
+            SecurityGroupResponse securityGroupResponse = securityGroupEndpoint.get(Long.valueOf(securityGroupId));
+            if (!securityGroupResponse.getName().equals(itProps.getDefaultSecurityGroup())) {
                 securityGroupEndpoint.delete(Long.valueOf(securityGroupId));
                 result = true;
             }

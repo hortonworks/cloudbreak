@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class LdapConfigBase implements JsonEntity {
+public abstract class LdapConfigBase implements JsonEntity {
 
     @Size(max = 100, min = 1, message = "The length of the ldap config's name has to be in range of 1 to 100")
     @NotNull

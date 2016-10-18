@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AccountPreferencesModelDe
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("AccountPreferences")
+@ApiModel("AccountPreference")
 public class AccountPreferencesJson implements JsonEntity {
 
     @Min(value = 0, message = "The maximum number of clusters has to be greater than '-1'")

@@ -10,7 +10,6 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
@@ -146,7 +145,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
         publicInAccount = publicInAccount == null ? false : publicInAccount;
 
         try {
-            IdJson id;
+            Long id;
             TemplateRequest templateRequest = new TemplateRequest();
             templateRequest.setCloudPlatform(platform);
             templateRequest.setName(name);
@@ -162,12 +161,12 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
             templateRequest.setTopologyId(platformId);
 
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().templateEndpoint().postPublic(templateRequest);
+                id = shellContext.cloudbreakClient().templateEndpoint().postPublic(templateRequest).getId();
             } else {
-                id = shellContext.cloudbreakClient().templateEndpoint().postPrivate(templateRequest);
+                id = shellContext.cloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId();
             }
             createOrSelectBlueprintHint();
-            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), name);
+            return String.format(CREATE_SUCCESS_MESSAGE, id, name);
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

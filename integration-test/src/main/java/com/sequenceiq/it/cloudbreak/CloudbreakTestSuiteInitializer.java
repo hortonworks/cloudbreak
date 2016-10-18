@@ -119,7 +119,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             blueprintName = defaultBlueprintName;
         }
         if (StringUtils.hasLength(blueprintName)) {
-            String resourceId = endpoint.getPublic(blueprintName).getId();
+            String resourceId = endpoint.getPublic(blueprintName).getId().toString();
             if (resourceId != null) {
                 itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, resourceId);
             }

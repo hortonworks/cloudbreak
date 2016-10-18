@@ -3,23 +3,23 @@ package com.sequenceiq.cloudbreak.converter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 
-public class JsonToFailurePolicyConverterTest extends AbstractJsonConverterTest<FailurePolicyJson> {
+public class JsonToFailurePolicyConverterTest extends AbstractJsonConverterTest<FailurePolicy> {
 
-    private JsonToFailurePolicyConverter underTest;
+    private FailurePolicyToJsonConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new JsonToFailurePolicyConverter();
+        underTest = new FailurePolicyToJsonConverter();
     }
 
     @Test
     public void testConvert() {
         // GIVEN
         // WHEN
-        FailurePolicy result = underTest.convert(getRequest("stack/failure-policy.json"));
+        FailurePolicyResponse result = underTest.convert(getRequest("stack/failure-policy.json"));
         // THEN
         assertAllFieldsNotNull(result);
     }
@@ -28,13 +28,13 @@ public class JsonToFailurePolicyConverterTest extends AbstractJsonConverterTest<
     public void testConvertWithoutThreshold() {
         // GIVEN
         // WHEN
-        FailurePolicy result = underTest.convert(getRequest("stack/failure-policy-without-threshold.json"));
+        FailurePolicyResponse result = underTest.convert(getRequest("stack/failure-policy-without-threshold.json"));
         // THEN
         assertAllFieldsNotNull(result);
     }
 
     @Override
-    public Class<FailurePolicyJson> getRequestClass() {
-        return FailurePolicyJson.class;
+    public Class<FailurePolicy> getRequestClass() {
+        return FailurePolicy.class;
     }
 }

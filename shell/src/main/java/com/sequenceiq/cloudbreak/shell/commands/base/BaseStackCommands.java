@@ -13,10 +13,10 @@ import org.springframework.shell.core.annotation.CliOption;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.FailurePolicyJson;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
+import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
@@ -247,7 +247,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             validateAvailabilityZone(region, availabilityZone);
             publicInAccount = publicInAccount == null ? false : publicInAccount;
             wait = wait == null ? false : wait;
-            IdJson id;
+            Long id;
             StackRequest stackRequest = new StackRequest();
             stackRequest.setName(name);
             stackRequest.setRegion(region.getName());
@@ -257,11 +257,11 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             }
             stackRequest.setOnFailureAction(onFailureAction == null ? OnFailureAction.DO_NOTHING : OnFailureAction.valueOf(onFailureAction.name()));
             stackRequest.setNetworkId(shellContext.getActiveNetworkId());
-            FailurePolicyJson failurePolicyJson = new FailurePolicyJson();
+            FailurePolicyRequest failurePolicyRequest = new FailurePolicyRequest();
             stackRequest.setCredentialId(Long.valueOf(shellContext.getCredentialId()));
-            failurePolicyJson.setAdjustmentType(adjustmentType == null ? AdjustmentType.BEST_EFFORT : AdjustmentType.valueOf(adjustmentType.name()));
-            failurePolicyJson.setThreshold(threshold == null ? 1L : threshold);
-            stackRequest.setFailurePolicy(failurePolicyJson);
+            failurePolicyRequest.setAdjustmentType(adjustmentType == null ? AdjustmentType.BEST_EFFORT : AdjustmentType.valueOf(adjustmentType.name()));
+            failurePolicyRequest.setThreshold(threshold == null ? 1L : threshold);
+            stackRequest.setFailurePolicy(failurePolicyRequest);
             stackRequest.setPlatformVariant(platformVariant == null ? "" : platformVariant.getName());
             stackRequest.setCloudPlatform(platform);
             stackRequest.setParameters(params);
@@ -271,39 +271,39 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
             orchestratorRequest.setType(orchestrator);
             stackRequest.setOrchestrator(orchestratorRequest);
-            List<InstanceGroupJson> instanceGroupJsonList = new ArrayList<>();
+            List<InstanceGroupRequest> instanceGroupRequestList = new ArrayList<>();
             for (Map.Entry<String, InstanceGroupEntry> stringObjectEntry : shellContext.getInstanceGroups().entrySet()) {
                 InstanceGroupEntry instanceGroupEntry = stringObjectEntry.getValue();
-                InstanceGroupJson instanceGroupJson = new InstanceGroupJson();
-                instanceGroupJson.setType(InstanceGroupType.valueOf(instanceGroupEntry.getType()));
-                instanceGroupJson.setTemplateId(instanceGroupEntry.getTemplateId());
-                instanceGroupJson.setNodeCount(instanceGroupEntry.getNodeCount());
-                instanceGroupJson.setGroup(stringObjectEntry.getKey());
-                instanceGroupJson.setSecurityGroupId(instanceGroupEntry.getSecurityGroupId());
-                instanceGroupJsonList.add(instanceGroupJson);
+                InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
+                instanceGroupRequest.setType(InstanceGroupType.valueOf(instanceGroupEntry.getType()));
+                instanceGroupRequest.setTemplateId(instanceGroupEntry.getTemplateId());
+                instanceGroupRequest.setNodeCount(instanceGroupEntry.getNodeCount());
+                instanceGroupRequest.setGroup(stringObjectEntry.getKey());
+                instanceGroupRequest.setSecurityGroupId(instanceGroupEntry.getSecurityGroupId());
+                instanceGroupRequestList.add(instanceGroupRequest);
             }
-            stackRequest.setInstanceGroups(instanceGroupJsonList);
+            stackRequest.setInstanceGroups(instanceGroupRequestList);
 
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().stackEndpoint().postPublic(stackRequest);
+                id = shellContext.cloudbreakClient().stackEndpoint().postPublic(stackRequest).getId();
             } else {
-                id = shellContext.cloudbreakClient().stackEndpoint().postPrivate(stackRequest);
+                id = shellContext.cloudbreakClient().stackEndpoint().postPrivate(stackRequest).getId();
             }
             StackResponse stackResponse = new StackResponse();
             stackResponse.setName(stackRequest.getName());
-            stackResponse.setId(id.getId());
-            shellContext.addStack(id.getId().toString(), name);
+            stackResponse.setId(id);
+            shellContext.addStack(id.toString(), name);
             shellContext.setHint(Hints.CREATE_CLUSTER);
 
             if (wait) {
-                CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(id.getId(), Status.AVAILABLE.name());
+                CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(id, Status.AVAILABLE.name());
                 if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                     throw shellContext.exceptionTransformer().transformToRuntimeException("Stack creation failed:" + waitResult.getReason());
                 } else {
                     return "Stack creation finished with name: " + name;
                 }
             }
-            return String.format("Stack creation started with id: '%s' and name: '%s'", id.getId(), name);
+            return String.format("Stack creation started with id: '%s' and name: '%s'", id, name);
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -494,9 +494,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         return null;
     }
 
-    private Map<String, List<String>> collectMetadata(List<InstanceGroupJson> instanceGroups, final String group) {
+    private Map<String, List<String>> collectMetadata(List<InstanceGroupResponse> instanceGroups, final String group) {
         final Map<String, List<String>> returnValues = new HashMap<>();
-        for (InstanceGroupJson instanceGroup : instanceGroups) {
+        for (InstanceGroupResponse instanceGroup : instanceGroups) {
             List<String> list = new ArrayList<>();
             for (InstanceMetaDataJson instanceMetaDataJson : instanceGroup.getMetadata()) {
                 if (instanceMetaDataJson.getPublicIp() != null) {

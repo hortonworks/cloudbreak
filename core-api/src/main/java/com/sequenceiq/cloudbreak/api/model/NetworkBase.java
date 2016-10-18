@@ -7,20 +7,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class NetworkJson implements JsonEntity {
-    @ApiModelProperty(value = ModelDescriptions.ID)
-    private Long id;
+public abstract class NetworkBase implements JsonEntity {
     @Size(max = 100, min = 1, message = "The length of the network's name has to be in range of 1 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The network's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -30,8 +24,6 @@ public class NetworkJson implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
     @Size(max = 1000)
     private String description;
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
-    private boolean publicInAccount;
     @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.SUBNET_CIDR)
     @ValidSubnet
     private String subnetCIDR;
@@ -42,16 +34,6 @@ public class NetworkJson implements JsonEntity {
     private Map<String, Object> parameters = new HashMap<>();
     @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;
-
-    @JsonProperty("id")
-    public Long getId() {
-        return id;
-    }
-
-    @JsonIgnore
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -67,16 +49,6 @@ public class NetworkJson implements JsonEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @JsonProperty("publicInAccount")
-    public boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    @JsonIgnore
-    public void setPublicInAccount(boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
     public String getSubnetCIDR() {

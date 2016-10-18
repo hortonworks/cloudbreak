@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import io.swagger.annotations.ApiModel;
 
+@ApiModel("RdsConfigProperty")
 public class RdsConfigPropertyJson implements JsonEntity {
 
     private String name;

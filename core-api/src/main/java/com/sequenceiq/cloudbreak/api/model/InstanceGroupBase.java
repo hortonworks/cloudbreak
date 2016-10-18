@@ -1,17 +1,11 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -19,10 +13,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("InstanceGroup")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InstanceGroupJson implements JsonEntity {
+public abstract class InstanceGroupBase implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.ID)
-    private Long id;
     @NotNull
     @ApiModelProperty(value = InstanceGroupModelDescription.TEMPLATE_ID, required = true)
     private Long templateId;
@@ -39,21 +31,9 @@ public class InstanceGroupJson implements JsonEntity {
     private String group;
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_TYPE)
     private InstanceGroupType type = InstanceGroupType.CORE;
-    @ApiModelProperty(InstanceGroupModelDescription.METADATA)
-    private Set<InstanceMetaDataJson> metadata = new HashSet<>();
 
-    public InstanceGroupJson() {
+    public InstanceGroupBase() {
 
-    }
-
-    @JsonProperty("id")
-    public Long getId() {
-        return id;
-    }
-
-    @JsonIgnore
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Long getTemplateId() {
@@ -86,16 +66,6 @@ public class InstanceGroupJson implements JsonEntity {
 
     public void setSecurityGroupId(Long securityGroupId) {
         this.securityGroupId = securityGroupId;
-    }
-
-    @JsonProperty("metadata")
-    public Set<InstanceMetaDataJson> getMetadata() {
-        return metadata;
-    }
-
-    @JsonIgnore
-    public void setMetadata(Set<InstanceMetaDataJson> metadata) {
-        this.metadata = metadata;
     }
 
     public InstanceGroupType getType() {

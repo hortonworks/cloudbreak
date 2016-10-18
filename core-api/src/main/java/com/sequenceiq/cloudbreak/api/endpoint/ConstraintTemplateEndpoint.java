@@ -14,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -25,20 +24,20 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/constraints")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/constraints", description = ControllerDescription.CONSTRAINT_TEMPLATE_DESCRIPTION)
+@Api(value = "/constraints", description = ControllerDescription.CONSTRAINT_TEMPLATE_DESCRIPTION, protocols = "http, https")
 public interface ConstraintTemplateEndpoint {
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
-    IdJson postPrivate(@Valid ConstraintTemplateRequest constraintTemplateRequest);
+    ConstraintTemplateResponse postPrivate(@Valid ConstraintTemplateRequest constraintTemplateRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConstraintOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CONSTRAINT_NOTES)
-    IdJson postPublic(ConstraintTemplateRequest constraintTemplateRequest);
+    ConstraintTemplateResponse postPublic(ConstraintTemplateRequest constraintTemplateRequest);
 
     @GET
     @Path("user")

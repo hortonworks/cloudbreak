@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
-import io.swagger.jaxrs.listing.ApiListingResource;
 
 @ApplicationPath(CoreApi.API_ROOT_CONTEXT)
 //TODO find a working solution for storing response codes globally
@@ -61,13 +60,12 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setVersion(cbVersion);
         swaggerConfig.setSchemes(new String[]{"http, https"});
         swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
-        swaggerConfig.setLicense("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
+        swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
         swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api");
         swaggerConfig.setScan(true);
+        swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);
         SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, swaggerConfig);
-
-        packages(getClass().getPackage().getName(), ApiListingResource.class.getPackage().getName());
     }
 
     private void registerExceptionMappers() {
@@ -125,5 +123,7 @@ public class EndpointConfig extends ResourceConfig {
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
+
     }
 }

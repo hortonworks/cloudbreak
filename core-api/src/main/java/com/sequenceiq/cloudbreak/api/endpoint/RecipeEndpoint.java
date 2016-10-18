@@ -12,7 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -25,20 +24,20 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/recipes")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/recipes", description = ControllerDescription.RECIPE_DESCRIPTION)
+@Api(value = "/recipes", description = ControllerDescription.RECIPE_DESCRIPTION, protocols = "http, https")
 public interface RecipeEndpoint {
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RecipeOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES)
-    IdJson postPrivate(@Valid RecipeRequest recipeRequest);
+    RecipeResponse postPrivate(@Valid RecipeRequest recipeRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RecipeOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES)
-    IdJson postPublic(@Valid RecipeRequest recipeRequest);
+    RecipeResponse postPublic(@Valid RecipeRequest recipeRequest);
 
     @GET
     @Path("user")

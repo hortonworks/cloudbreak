@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -24,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/clustertemplates")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/clustertemplates", description = ControllerDescription.CLUSTER_TEMPLATE_DESCRIPTION)
+@Api(value = "/clustertemplates", description = ControllerDescription.CLUSTER_TEMPLATE_DESCRIPTION, protocols = "http, https")
 public interface ClusterTemplateEndpoint {
 
     @GET
@@ -43,7 +42,7 @@ public interface ClusterTemplateEndpoint {
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES)
-    IdJson postPrivate(ClusterTemplateRequest clusterTemplateRequest);
+    ClusterTemplateResponse postPrivate(ClusterTemplateRequest clusterTemplateRequest);
 
     @GET
     @Path("user")
@@ -69,7 +68,7 @@ public interface ClusterTemplateEndpoint {
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES)
-    IdJson postPublic(ClusterTemplateRequest clusterTemplateRequest);
+    ClusterTemplateResponse postPublic(ClusterTemplateRequest clusterTemplateRequest);
 
     @GET
     @Path("account")

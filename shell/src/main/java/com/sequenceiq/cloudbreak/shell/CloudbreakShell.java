@@ -24,9 +24,9 @@ import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.event.ShellStatus;
 import org.springframework.shell.event.ShellStatusListener;
 
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
@@ -166,12 +166,12 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         initRecipeAccessibility();
         initSssdConfigAccessibility();
         initRdsConfigAccessibility();
-        Set<NetworkJson> publics = cloudbreakClient.networkEndpoint().getPublics();
-        for (NetworkJson network : publics) {
+        Set<NetworkResponse> publics = cloudbreakClient.networkEndpoint().getPublics();
+        for (NetworkResponse network : publics) {
             context.putNetwork(Long.valueOf(network.getId()), network.getCloudPlatform());
         }
-        Set<SecurityGroupJson> securityGroups = cloudbreakClient.securityGroupEndpoint().getPublics();
-        for (SecurityGroupJson securityGroup : securityGroups) {
+        Set<SecurityGroupResponse> securityGroups = cloudbreakClient.securityGroupEndpoint().getPublics();
+        for (SecurityGroupResponse securityGroup : securityGroups) {
             context.putSecurityGroup(securityGroup.getId(), securityGroup.getName());
         }
         Set<RDSConfigResponse> rdsConfigResponses = cloudbreakClient.rdsConfigEndpoint().getPublics();

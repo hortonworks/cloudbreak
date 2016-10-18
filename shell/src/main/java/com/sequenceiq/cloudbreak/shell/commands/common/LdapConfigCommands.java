@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.shell.commands.common;
 
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -9,7 +8,6 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
@@ -64,13 +62,13 @@ public class LdapConfigCommands implements BaseCommands {
             config.setUserSearchBase(userSearchBase);
             config.setUserSearchFilter(userSearchFilter);
             config.setPrincipalRegex(principalRegex);
-            IdJson id;
+            Long id;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().ldapConfigEndpoint().postPublic(config);
+                id = shellContext.cloudbreakClient().ldapConfigEndpoint().postPublic(config).getId();
             } else {
-                id = shellContext.cloudbreakClient().ldapConfigEndpoint().postPrivate(config);
+                id = shellContext.cloudbreakClient().ldapConfigEndpoint().postPrivate(config).getId();
             }
-            return String.format("Ldap config created with id: '%d' and name: '%s'", id.getId(), config.getName());
+            return String.format("Ldap config created with id: '%d' and name: '%s'", id, config.getName());
         } catch (Exception e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }

@@ -11,10 +11,10 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
+@ApiModel("BlueprintResponse")
 public class BlueprintResponse extends BlueprintBase {
     @ApiModelProperty(value = ModelDescriptions.ID)
-    private String id;
+    private Long id;
     @ApiModelProperty(value = BlueprintModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
     @ApiModelProperty(value = BlueprintModelDescription.HOST_GROUP_COUNT)
@@ -42,11 +42,11 @@ public class BlueprintResponse extends BlueprintBase {
         this.hostGroupCount = hostGroupCount;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -10,9 +10,9 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
@@ -50,40 +50,39 @@ public class SecurityGroupCommands implements BaseCommands {
                     udpRules.put(rule.get("subnet"), rule.get("ports"));
                 }
             }
-            IdJson id;
-            SecurityGroupJson securityGroupJson = new SecurityGroupJson();
-            securityGroupJson.setName(name);
-            securityGroupJson.setDescription(description);
-            securityGroupJson.setPublicInAccount(publicInAccount);
-            List<SecurityRuleJson> securityRuleJsonList = new ArrayList<>();
+            Long id;
+            SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
+            securityGroupRequest.setName(name);
+            securityGroupRequest.setDescription(description);
+            List<SecurityRuleRequest> securityRuleRequestList = new ArrayList<>();
 
             for (Map.Entry<String, String> stringStringEntry : tcpRules.entrySet()) {
-                SecurityRuleJson securityRuleJson = new SecurityRuleJson();
-                securityRuleJson.setPorts(stringStringEntry.getValue());
-                securityRuleJson.setSubnet(stringStringEntry.getKey());
-                securityRuleJson.setProtocol("tcp");
-                securityRuleJsonList.add(securityRuleJson);
+                SecurityRuleRequest securityRuleRequest = new SecurityRuleRequest();
+                securityRuleRequest.setPorts(stringStringEntry.getValue());
+                securityRuleRequest.setSubnet(stringStringEntry.getKey());
+                securityRuleRequest.setProtocol("tcp");
+                securityRuleRequestList.add(securityRuleRequest);
             }
 
             for (Map.Entry<String, String> stringStringEntry : udpRules.entrySet()) {
-                SecurityRuleJson securityRuleJson = new SecurityRuleJson();
-                securityRuleJson.setPorts(stringStringEntry.getValue());
-                securityRuleJson.setSubnet(stringStringEntry.getKey());
-                securityRuleJson.setProtocol("udp");
-                securityRuleJsonList.add(securityRuleJson);
+                SecurityRuleRequest securityRuleRequest = new SecurityRuleRequest();
+                securityRuleRequest.setPorts(stringStringEntry.getValue());
+                securityRuleRequest.setSubnet(stringStringEntry.getKey());
+                securityRuleRequest.setProtocol("udp");
+                securityRuleRequestList.add(securityRuleRequest);
             }
 
-            securityGroupJson.setSecurityRules(securityRuleJsonList);
+            securityGroupRequest.setSecurityRules(securityRuleRequestList);
             publicInAccount = publicInAccount == null ? false : publicInAccount;
 
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().securityGroupEndpoint().postPublic(securityGroupJson);
+                id = shellContext.cloudbreakClient().securityGroupEndpoint().postPublic(securityGroupRequest).getId();
             } else {
-                id = shellContext.cloudbreakClient().securityGroupEndpoint().postPrivate(securityGroupJson);
+                id = shellContext.cloudbreakClient().securityGroupEndpoint().postPrivate(securityGroupRequest).getId();
             }
-            shellContext.putSecurityGroup(id.getId(), name);
+            shellContext.putSecurityGroup(id, name);
             setHint();
-            return String.format(CREATE_SUCCESS_MSG, id.getId(), name);
+            return String.format(CREATE_SUCCESS_MSG, id, name);
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -158,9 +157,9 @@ public class SecurityGroupCommands implements BaseCommands {
     @CliCommand(value = "securitygroup list", help = "Shows the currently available security groups")
     public String list() {
         try {
-            Set<SecurityGroupJson> publics = shellContext.cloudbreakClient().securityGroupEndpoint().getPublics();
+            Set<SecurityGroupResponse> publics = shellContext.cloudbreakClient().securityGroupEndpoint().getPublics();
             Map<Long, String> updatedGroups = new HashMap<>();
-            for (SecurityGroupJson aPublic : publics) {
+            for (SecurityGroupResponse aPublic : publics) {
                 updatedGroups.put(aPublic.getId(), aPublic.getName());
             }
             shellContext.setSecurityGroups(updatedGroups);
@@ -182,11 +181,11 @@ public class SecurityGroupCommands implements BaseCommands {
             Long id = groupId == null ? null : groupId;
             String name = groupName == null ? null : groupName;
             if (id != null) {
-                SecurityGroupJson securityGroupJson = shellContext.cloudbreakClient().securityGroupEndpoint().get(id);
-                return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(securityGroupJson),
+                SecurityGroupResponse securityGroupResponse = shellContext.cloudbreakClient().securityGroupEndpoint().get(id);
+                return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(securityGroupResponse),
                         "FIELD", "VALUE");
             } else if (name != null) {
-                SecurityGroupJson aPublic = shellContext.cloudbreakClient().securityGroupEndpoint().getPublic(name);
+                SecurityGroupResponse aPublic = shellContext.cloudbreakClient().securityGroupEndpoint().getPublic(name);
                 return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(aPublic), "FIELD", "VALUE");
             }
             return "Security group could not be found!";
@@ -214,8 +213,8 @@ public class SecurityGroupCommands implements BaseCommands {
 
     private void refreshSecurityGroupsInContext() {
         shellContext.getSecurityGroups().clear();
-        Set<SecurityGroupJson> publics = shellContext.cloudbreakClient().securityGroupEndpoint().getPublics();
-        for (SecurityGroupJson securityGroup : publics) {
+        Set<SecurityGroupResponse> publics = shellContext.cloudbreakClient().securityGroupEndpoint().getPublics();
+        for (SecurityGroupResponse securityGroup : publics) {
             shellContext.putSecurityGroup(securityGroup.getId(), securityGroup.getName());
         }
     }

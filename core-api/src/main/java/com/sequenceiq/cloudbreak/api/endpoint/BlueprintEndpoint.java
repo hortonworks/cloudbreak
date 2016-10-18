@@ -14,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -25,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/blueprints")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/blueprints", description = ControllerDescription.BLUEPRINT_DESCRIPTION)
+@Api(value = "/blueprints", description = ControllerDescription.BLUEPRINT_DESCRIPTION, protocols = "http, https")
 public interface BlueprintEndpoint {
 
     @GET
@@ -44,7 +43,7 @@ public interface BlueprintEndpoint {
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.BLUEPRINT_NOTES)
-    IdJson postPrivate(@Valid BlueprintRequest blueprintRequest);
+    BlueprintResponse postPrivate(@Valid BlueprintRequest blueprintRequest);
 
     @GET
     @Path("user")
@@ -68,7 +67,7 @@ public interface BlueprintEndpoint {
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.BLUEPRINT_NOTES)
-    IdJson postPublic(@Valid BlueprintRequest blueprintRequest);
+    BlueprintResponse postPublic(@Valid BlueprintRequest blueprintRequest);
 
     @GET
     @Path("account")

@@ -5,7 +5,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 
@@ -17,13 +17,13 @@ public class MockNetworkCreationTest extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         // WHEN
         // TODO: publicInAccount
-        NetworkJson networkJson = new NetworkJson();
-        networkJson.setDescription("Mock network for integration testing");
-        networkJson.setName(networkName);
-        networkJson.setSubnetCIDR(subnetCIDR);
-        networkJson.setCloudPlatform("MOCK");
+        NetworkRequest networkRequest = new NetworkRequest();
+        networkRequest.setDescription("Mock network for integration testing");
+        networkRequest.setName(networkName);
+        networkRequest.setSubnetCIDR(subnetCIDR);
+        networkRequest.setCloudPlatform("MOCK");
 
-        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkJson).getId().toString();
+        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);
         getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);

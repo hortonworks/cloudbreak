@@ -28,7 +28,7 @@ import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Subnetwork;
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class GcpCreateVirtualNetworkTest extends AbstractCloudbreakIntegrationTest {
@@ -96,21 +96,20 @@ public class GcpCreateVirtualNetworkTest extends AbstractCloudbreakIntegrationTe
             }
         }
 
-        NetworkJson networkJson = new NetworkJson();
-        networkJson.setName(networkName);
-        networkJson.setDescription(description);
+        NetworkRequest networkRequest = new NetworkRequest();
+        networkRequest.setName(networkName);
+        networkRequest.setDescription(description);
         if (NEW_SUBNET_IN_EXISTING_NETWORK.equals(networkType)) {
-            networkJson.setSubnetCIDR(subnetCIDR);
+            networkRequest.setSubnetCIDR(subnetCIDR);
         }
         Map<String, Object> map = new HashMap<>();
         map.put("networkId", vpcName);
         if (EXISTING_SUBNET_IN_EXISTING_NETWORK.equals(networkType)) {
             map.put("subnetId", vpcSubnet);
         }
-        networkJson.setParameters(map);
-        networkJson.setCloudPlatform("GCP");
-        networkJson.setPublicInAccount(publicInAccount);
-        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkJson).getId().toString();
+        networkRequest.setParameters(map);
+        networkRequest.setCloudPlatform("GCP");
+        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId().toString();
         getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);
     }
 

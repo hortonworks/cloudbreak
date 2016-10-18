@@ -12,10 +12,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TopologyBase implements JsonEntity {
-
-    @ApiModelProperty(ModelDescriptions.ID)
-    private Long id;
+public abstract class TopologyBase implements JsonEntity {
 
     @Size(max = 100, min = 5, message = "The length of the topology's name has to be in range of 5 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
@@ -34,14 +31,6 @@ public class TopologyBase implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.TopologyModelDescription.NODES)
     private Map<String, String> nodes;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
