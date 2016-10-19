@@ -33,7 +33,7 @@ public class ImageCatalogProvider {
             if (catalogUrl.startsWith("http")) {
                 Client client = RestClientUtil.get();
                 WebTarget target = client.target(catalogUrl);
-                return (CloudbreakImageCatalog) target.request().get().getEntity();
+                return target.request().get().readEntity(CloudbreakImageCatalog.class);
             } else {
                 LOGGER.warn("Image catalog URL is not valid: {}", catalogUrl);
             }
