@@ -18,8 +18,7 @@ public abstract class InstanceGroupBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = InstanceGroupModelDescription.TEMPLATE_ID, required = true)
     private Long templateId;
-    @NotNull
-    @ApiModelProperty(value = InstanceGroupModelDescription.SECURITY_GROUP_ID, required = true)
+    @ApiModelProperty(value = InstanceGroupModelDescription.SECURITY_GROUP_ID)
     private Long securityGroupId;
     @Min(value = 1, message = "The node count has to be greater than 0")
     @Max(value = 100000, message = "The node count has to be less than 100000")
