@@ -1,19 +1,29 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.RegionSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
+import com.sequenceiq.cloudbreak.cloud.model.RegionsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 /**
  * Platform parameters.
@@ -92,6 +102,24 @@ public interface PlatformParameters {
 
     default <T extends StringType> T nthElement(Collection<T> data, int n) {
         return data.stream().skip(n).findFirst().orElse(null);
+    }
+
+    default Map<Region, List<AvailabilityZone>> readRegions(String zone) {
+        Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+        try {
+            RegionsSpecification oRegions = JsonUtil.readValue(zone, RegionsSpecification.class);
+            for (RegionSpecification regionSpecification : oRegions.getItems()) {
+                List<AvailabilityZone> av = new ArrayList<>();
+                for (String s : regionSpecification.getZones()) {
+                    av.add(AvailabilityZone.availabilityZone(s));
+                }
+                Collections.sort(av, new StringTypesCompare());
+                regions.put(Region.region(regionSpecification.getName()), av);
+            }
+        } catch (IOException e) {
+            return regions;
+        }
+        return sortMap(regions);
     }
 
 }

@@ -39,10 +39,10 @@
         </select>
     </div>
 </div>
-<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AWS' && cluster.region && showAdvancedOptionForm) || (activeCredential.cloudPlatform == 'GCP' && cluster.region)">
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AWS' && cluster.region && showAdvancedOptionForm) || (activeCredential.cloudPlatform == 'GCP' && cluster.region) || (activeCredential.cloudPlatform == 'OPENSTACK' && cluster.region)">
     <label class="col-sm-3 control-label" for="selectavailabilityZone">{{msg.availability_zone}}</label>
     <div class="col-sm-8">
-        <select class="form-control" id="selectavailabilityZone" ng-model="cluster.availabilityZone" ng-required="activeCredential.cloudPlatform === 'GCP'">
+        <select class="form-control" id="selectavailabilityZone" ng-model="cluster.availabilityZone" ng-required="(activeCredential.cloudPlatform === 'GCP') || (activeCredential.cloudPlatform === 'OPENSTACK')">
             <option ng-repeat="avZone in avZones" value="{{avZone}}">{{avZone}}</option>
         </select>
     </div>
@@ -112,7 +112,7 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-sm btn-default" ng-disabled="!cluster.name || (activeCredential !== undefined && !cluster.region)" ng-click="activeStack === undefined ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
+                <button type="button" class="btn btn-sm btn-sm btn-default" ng-disabled="!cluster.name || (activeCredential !== undefined && !cluster.region) || (activeCredential.cloudPlatform == 'OPENSTACK' && !cluster.availabilityZone)" ng-click="activeStack === undefined ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
                     {{activeStack === undefined ? msg.cluster_form_ambari_network_tag : msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>

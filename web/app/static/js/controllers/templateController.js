@@ -63,7 +63,6 @@ angular.module('uluwatuControllers').controller('templateController', [
 
         $scope.createAwsTemplate = function() {
             $scope.awsTemp.cloudPlatform = 'AWS';
-            $scope.awsTemp.parameters.sshLocation = '0.0.0.0/0';
             if ($scope.awsTemp.public) {
                 AccountTemplate.save($scope.awsTemp, function(result) {
                     handleAwsTemplateSuccess(result)
@@ -93,6 +92,10 @@ angular.module('uluwatuControllers').controller('templateController', [
 
         $scope.createOpenstackTemplate = function() {
             $scope.openstackTemp.cloudPlatform = 'OPENSTACK';
+            if($scope.openstackTemp.volumeCount === 0){
+                $scope.openstackTemp.volumeSize = null
+            }
+
             if ($scope.openstackTemp.public) {
                 AccountTemplate.save($scope.openstackTemp, function(result) {
                     handleOpenstackTemplateSuccess(result)
@@ -289,8 +292,8 @@ angular.module('uluwatuControllers').controller('templateController', [
                 }
             } else {
                 templateTemp.maxDiskNumber = 24;
-                templateTemp.minDiskNumber = 1;
-                templateTemp.minDiskSize = 10;
+                templateTemp.minDiskNumber = 0;
+                templateTemp.minDiskSize = 1;
                 templateTemp.maxDiskSize = 10000;
                 templateTemp.CPUs = null;
                 templateTemp.RAMs = null;
@@ -308,7 +311,6 @@ angular.module('uluwatuControllers').controller('templateController', [
                 volumeType: $rootScope.params.defaultDisks.AWS,
                 instanceType: $rootScope.params.defaultVmTypes.AWS,
                 parameters: {
-                    sshLocation: "0.0.0.0/0",
                     encrypted: false
                 }
             };
@@ -333,11 +335,10 @@ angular.module('uluwatuControllers').controller('templateController', [
             }
         }
 
-
         function initializeOpenstackTemp() {
             $scope.openstackTemp = {
                 volumeCount: 1,
-                volumeSize: 100,
+                volumeSize: 10,
                 volumeType: "HDD",
                 parameters: {}
             }

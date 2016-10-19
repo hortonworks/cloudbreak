@@ -52,7 +52,9 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class AppConfig implements ResourceLoaderAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
-    private static final String ETC_DIR = "/etc/cloudbreak";
+
+    @Value("${cb.etc.config.dir}")
+    private String etcConfigDir;
 
     @Value("#{'${cb.supported.container.orchestrators:}'.split(',')}")
     private List<String> orchestrators;
@@ -246,7 +248,7 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     private List<Resource> loadEtcResources() {
-        File folder = new File(ETC_DIR);
+        File folder = new File(etcConfigDir);
         File[] listOfFiles = folder.listFiles();
         List<Resource> resources = new ArrayList<>();
         if (listOfFiles != null) {

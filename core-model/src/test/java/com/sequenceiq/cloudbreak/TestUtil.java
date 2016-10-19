@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -88,13 +90,13 @@ public class TestUtil {
     private TestUtil() {
     }
 
-    public static String getFilePath(Class clazz, String fileName) {
+    public static Path getFilePath(Class clazz, String fileName) {
         try {
             URL resource = clazz.getResource(fileName);
-            return resource.toURI().getPath();
+            return Paths.get(resource.toURI());
         } catch (Exception ex) {
             LOGGER.error("{}: {}", ex.getMessage(), ex);
-            return "";
+            return null;
         }
     }
 

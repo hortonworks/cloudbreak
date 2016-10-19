@@ -187,15 +187,18 @@ angular.module('uluwatuControllers').controller('networkController', ['$scope', 
             delete $scope.network.parameters.networkId
             delete $scope.network.parameters.subnetId
             delete $scope.network.parameters.routerId
+            delete $scope.network.parameters.networkingOption
         }
 
         $scope.selectOpenstackNetworkType2 = function() {
             delete $scope.network.parameters.subnetId
+            delete $scope.network.parameters.networkingOption
         }
 
         $scope.selectOpenstackNetworkType3 = function() {
             delete $scope.network.subnetCIDR
             delete $scope.network.parameters.routerId
+            $scope.network.parameters.networkingOption = 'self-service'
         }
     }
 ]);

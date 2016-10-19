@@ -80,13 +80,13 @@ public class MockPlatformParameters implements PlatformParameters {
 
     @PostConstruct
     public void init() {
-        this.regions = readRegions();
+        this.regions = readRegionsMock();
         this.vmTypes = readVmTypes();
         this.defaultRegion = this.regions.keySet().iterator().next();
         this.defaultVmType = this.vmTypes.get(this.vmTypes.keySet().iterator().next()).get(0);
     }
 
-    private Map<Region, List<AvailabilityZone>> readRegions() {
+    private Map<Region, List<AvailabilityZone>> readRegionsMock() {
         Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
         regions.put(Region.region("USA"), getAvailabilityZones(USA_AVAILABILITY_ZONES));
         regions.put(Region.region("Europe"), getAvailabilityZones(EUROPE_AVAILABILITY_ZONES));

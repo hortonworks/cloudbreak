@@ -13,7 +13,7 @@ public class FileReaderUtilsTest {
 
     @Test
     public void readFileInBase64WhenFileExist() throws IOException {
-        String result = FileReaderUtils.readFileFromPath(TestUtil.getFilePath(getClass(), "testfile.txt"));
+        String result = FileReaderUtils.readFileFromPathBase64(TestUtil.getFilePath(getClass(), "testfile.txt").toString());
         assertEquals("YXBwbGUgYXBwbGUgYXBwbGU=", result);
     }
 
@@ -35,13 +35,13 @@ public class FileReaderUtilsTest {
 
     @Test
     public void readFileFromPathToStringWhenFileExist() throws IOException {
-        String result = FileReaderUtils.readFileFromPathToString(TestUtil.getFilePath(getClass(), "testfile.txt"));
+        String result = FileReaderUtils.readFileFromPath(TestUtil.getFilePath(getClass(), "testfile.txt"));
         assertEquals("apple apple apple", result);
     }
 
     @Test(expected = IOException.class)
     public void readFileFromPathToStringWhenFileNotExist() throws IOException {
-        FileReaderUtils.readFileFromPathToString(TestUtil.getFilePath(getClass(), "testfile-not-exist.txt"));
+        FileReaderUtils.readFileFromPath(TestUtil.getFilePath(getClass(), "testfile-not-exist.txt"));
     }
 
     @Test

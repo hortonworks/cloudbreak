@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
 
 import java.util.ArrayList;
@@ -12,6 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -27,13 +33,38 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
 public class OpenStackParameters implements PlatformParameters {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackParameters.class);
+
     private static final Integer START_LABEL = 97;
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("vd", START_LABEL);
+
+    @Value("${cb.openstack.regions:}")
+    private String openstackRegionDefinition;
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+    private Region defaultRegion;
+
+    @PostConstruct
+    public void init() {
+        String zone;
+        if (StringUtils.isEmpty(openstackRegionDefinition)) {
+            zone = resourceDefinition("zone");
+        } else {
+            zone = openstackRegionDefinition;
+        }
+        LOGGER.info("Zone definition for OpenStack: {}", zone);
+        this.regions = readRegions(zone);
+        this.defaultRegion = nthElement(this.regions.keySet(), 0);
+    }
 
     @Override
     public ScriptParams scriptParams() {
@@ -61,29 +92,17 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Override
     public Regions regions() {
-        return new Regions(getRegions(), defaultRegion());
-    }
-
-    private Collection<Region> getRegions() {
-        Collection<Region> regions = new ArrayList<>();
-        regions.add(region("local"));
-        return regions;
-    }
-
-    private Region defaultRegion() {
-        return region("local");
+        return new Regions(regions.keySet(), defaultRegion);
     }
 
     @Override
     public AvailabilityZones availabilityZones() {
-        Map<Region, List<AvailabilityZone>> availabiltyZones = new HashMap<>();
-        availabiltyZones.put(region("local"), new ArrayList<>());
-        return new AvailabilityZones(availabiltyZones);
+        return new AvailabilityZones(regions);
     }
 
     @Override
     public String resourceDefinition(String resource) {
-        return FileReaderUtils.readFileFromClasspathQuietly("definitions/openstack-" + resource + ".json");
+        return cloudbreakResourceReaderService.resourceDefinition("openstack", resource);
     }
 
     @Override

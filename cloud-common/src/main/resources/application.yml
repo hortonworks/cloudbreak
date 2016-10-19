@@ -7,6 +7,7 @@ spring:
       host: consul.service.consul
 cb:
   publicip:
+  etc.config.dir: /etc/cloudbreak
   threadpool:
     core.size: 40
     capacity.size: 4000

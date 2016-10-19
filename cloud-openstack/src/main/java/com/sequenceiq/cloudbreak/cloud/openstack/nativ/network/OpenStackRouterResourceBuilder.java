@@ -32,7 +32,8 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
 
     @Override
     public CloudResource create(OpenStackContext context, AuthenticatedContext auth, Network network) {
-        if (utils.isExistingSubnet(network)) {
+        NeutronNetworkView neutronNetwork = new NeutronNetworkView(network);
+        if (neutronNetwork.isExistingSubnet()) {
             throw new ResourceNotNeededException("Router isn't needed when a subnet is reused.");
         }
         return super.create(context, auth, network);
@@ -44,8 +45,8 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
         try {
             OSClient osClient = createOSClient(auth);
             NeutronNetworkView networkView = new NeutronNetworkView(network);
-            String routerId = utils.getCustomRouterId(network);
-            if (!utils.isExistingNetwork(network)) {
+            String routerId = networkView.getCustomRouterId();
+            if (!networkView.isExistingNetwork()) {
                 Router router = Builders.router()
                         .name(resource.getName())
                         .adminStateUp(true)
@@ -57,7 +58,7 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
                 }
                 routerId = newRouter.getId();
             }
-            if (!utils.isExistingSubnet(network)) {
+            if (!networkView.isExistingSubnet()) {
                 osClient.networking().router().attachInterface(routerId, AttachInterfaceType.SUBNET, context.getStringParameter(OpenStackConstants.SUBNET_ID));
             }
             return createPersistedResource(resource, routerId);
@@ -70,11 +71,11 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
     public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         try {
             OSClient osClient = createOSClient(auth);
-            String subnetId = context.getStringParameter(OpenStackConstants.SUBNET_ID);
-            if (!utils.isExistingSubnet(network)) {
-                osClient.networking().router().detachInterface(resource.getReference(), subnetId, null);
+            NeutronNetworkView networkView = new NeutronNetworkView(network);
+            if (!networkView.isExistingSubnet()) {
+                osClient.networking().router().detachInterface(resource.getReference(), networkView.getCustomSubnetId(), null);
             }
-            if (!utils.isExistingNetwork(network)) {
+            if (!networkView.isExistingNetwork()) {
                 ActionResponse response = osClient.networking().router().delete(resource.getReference());
                 return checkDeleteResponse(response, resourceType(), auth, resource, "Router deletion failed");
             }
