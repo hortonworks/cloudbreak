@@ -34,7 +34,6 @@ import com.sequenceiq.periscope.utils.FileReaderUtils;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
-import io.swagger.jaxrs.listing.ApiListingResource;
 
 @ApplicationPath(AutoscaleApi.API_ROOT_CONTEXT)
 //TODO find a working solution for storing response codes globally
@@ -51,14 +50,15 @@ public class EndpointConfig  extends ResourceConfig {
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setTitle("Auto-scaling API");
         beanConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/auto-scaling-introduction"));
-        beanConfig.setVersion("1.4.0");
-        beanConfig.setSchemes(new String[]{"http"});
+        beanConfig.setVersion("1.9.0");
+        beanConfig.setSchemes(new String[]{"http, https"});
         beanConfig.setBasePath(AutoscaleApi.API_ROOT_CONTEXT);
+        beanConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
         beanConfig.setResourcePackage("com.sequenceiq.periscope.api");
         beanConfig.setScan(true);
+        beanConfig.setContact("https://hortonworks.com/contact-sales/");
+        beanConfig.setPrettyPrint(true);
         SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, beanConfig);
-
-        packages(getClass().getPackage().getName(), ApiListingResource.class.getPackage().getName());
     }
 
     private void registerExceptionMappers() {
@@ -90,5 +90,6 @@ public class EndpointConfig  extends ResourceConfig {
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
     }
 }

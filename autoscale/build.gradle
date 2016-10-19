@@ -44,11 +44,11 @@ dependencies {
     compile group: 'org.mybatis',                   name: 'mybatis-migrations',                     version: '3.2.0'
 
 
-    compile group: 'io.springfox',                  name: 'springfox-swagger2',             version: '2.5.0'
-    compile group: 'io.springfox',                  name: 'springfox-core',                 version: '2.5.0'
-    compile group: 'io.springfox',                  name: 'springfox-swagger-ui',           version: '2.5.0'
-    compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',                  version: swaggerVersion
+    compile group: 'io.springfox',                  name: 'springfox-swagger2',                     version: '2.5.0'
+    compile group: 'io.springfox',                  name: 'springfox-core',                         version: '2.5.0'
+    compile group: 'io.springfox',                  name: 'springfox-swagger-ui',                   version: '2.5.0'
 
+    compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',                  version: swaggerVersion
     testCompile group: 'junit',                     name: 'junit',                                  version: '4.11'
     testCompile group: 'org.mockito',               name: 'mockito-all',                            version: '1.9.5'
     testCompile group: 'org.springframework',       name: 'spring-test',                            version: springFrameworkVersion
