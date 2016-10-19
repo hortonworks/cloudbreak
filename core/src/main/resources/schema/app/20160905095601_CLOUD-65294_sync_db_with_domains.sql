@@ -294,3 +294,194 @@ ALTER TABLE topology
 -- //@UNDO
 -- SQL to undo the change goes here.
 
+-- account_preferences
+
+ALTER TABLE account_preferences
+    ALTER COLUMN maxnumberofclusters SET NOT NULL,
+    ALTER COLUMN maxnumberofnodespercluster SET NOT NULL,
+    ALTER COLUMN maxnumberofclustersperuser SET NOT NULL;
+
+-- blueprint
+
+ALTER TABLE blueprint
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN blueprintname DROP NOT NULL,
+    ALTER COLUMN blueprinttext DROP NOT NULL,
+    ALTER COLUMN hostgroupcount SET NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL;
+
+-- cloudbreakevent
+
+ALTER TABLE cloudbreakevent
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN cloud DROP NOT NULL,
+    ALTER COLUMN eventmessage DROP NOT NULL,
+    ALTER COLUMN eventtimestamp DROP NOT NULL,
+    ALTER COLUMN eventtype DROP NOT NULL,
+    ALTER COLUMN nodecount DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL,
+    ALTER COLUMN region DROP NOT NULL,
+    ALTER COLUMN stackid DROP NOT NULL,
+    ALTER COLUMN stackname DROP NOT NULL,
+    ALTER COLUMN stackstatus DROP NOT NULL;
+
+-- cloudbreakusage
+
+ALTER TABLE cloudbreakusage
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN costs DROP NOT NULL,
+    ALTER COLUMN day DROP NOT NULL,
+    ALTER COLUMN instancegroup DROP NOT NULL,
+    ALTER COLUMN instancehours DROP NOT NULL,
+    ALTER COLUMN instancetype DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL,
+    ALTER COLUMN provider DROP NOT NULL,
+    ALTER COLUMN region DROP NOT NULL,
+    ALTER COLUMN stackid DROP NOT NULL,
+    ALTER COLUMN stackname DROP NOT NULL;
+
+-- cluster
+
+ALTER TABLE cluster
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN emailneeded DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL,
+    ALTER COLUMN secure DROP NOT NULL,
+    ALTER COLUMN status DROP NOT NULL,
+    ALTER COLUMN username DROP NOT NULL,
+    ALTER COLUMN password DROP NOT NULL,
+    ALTER COLUMN configstrategy DROP NOT NULL;
+
+-- clustertemplate
+
+ALTER TABLE clustertemplate
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL;
+
+-- component
+
+ALTER TABLE component
+    ALTER COLUMN componenttype SET NOT NULL,
+    ALTER COLUMN attributes SET NOT NULL;
+
+-- constrainttemplate
+
+ALTER TABLE constrainttemplate
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL,
+    ALTER COLUMN status DROP NOT NULL;
+
+-- credential
+
+ALTER TABLE credential
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL;
+
+-- flowlog
+
+ALTER TABLE flowlog
+    ALTER COLUMN stackid DROP NOT NULL,
+    ALTER COLUMN finalized DROP NOT NULL;
+
+-- hostgroup
+
+ALTER TABLE hostgroup
+    ALTER COLUMN name DROP NOT NULL,
+    ALTER COLUMN cluster_id DROP NOT NULL;
+
+-- hostmetadata
+
+ALTER TABLE hostmetadata
+    ALTER COLUMN hostname DROP NOT NULL,
+    ALTER COLUMN hostgroup_id DROP NOT NULL,
+    ALTER COLUMN hostmetadatastate DROP NOT NULL;
+
+-- instancegroup
+
+ALTER TABLE instancegroup
+    ALTER COLUMN groupname DROP NOT NULL,
+    ALTER COLUMN instancegrouptype DROP NOT NULL,
+    ALTER COLUMN nodecount DROP NOT NULL,
+    ALTER COLUMN stack_id DROP NOT NULL;
+
+-- instancemetadata
+
+ALTER TABLE instancemetadata
+    ALTER COLUMN instancestatus DROP NOT NULL;
+
+-- ldapconfig
+
+ALTER TABLE ldapconfig
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL,
+    ALTER COLUMN serverssl DROP NOT NULL,
+    ALTER COLUMN binddn DROP NOT NULL,
+    ALTER COLUMN bindpassword DROP NOT NULL;
+
+-- network
+
+ALTER TABLE network
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL,
+    ALTER COLUMN status DROP NOT NULL;
+
+-- rdsconfig
+
+ALTER TABLE rdsconfig
+    ALTER COLUMN connectionurl DROP NOT NULL,
+    ALTER COLUMN connectionusername DROP NOT NULL,
+    ALTER COLUMN connectionpassword DROP NOT NULL,
+    ALTER COLUMN databasetype DROP NOT NULL,
+    ALTER COLUMN creationdate SET NOT NULL;
+
+-- recipe
+
+ALTER TABLE recipe
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN name DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL;
+
+-- resource
+
+ALTER TABLE resource
+    ALTER COLUMN resourcetype DROP NOT NULL,
+    ALTER COLUMN resourcestatus DROP NOT NULL;
+
+-- securitygroup
+
+ALTER TABLE securitygroup
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL,
+    ALTER COLUMN status DROP NOT NULL;
+
+-- sssdconfig
+
+ALTER TABLE sssdconfig
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL;
+
+-- stack
+
+ALTER TABLE stack
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN onfailureactionaction DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL,
+    ALTER COLUMN region DROP NOT NULL,
+    ALTER COLUMN status DROP NOT NULL,
+    ALTER COLUMN created SET NOT NULL,
+    ALTER COLUMN gatewayport SET NOT NULL;
+
+-- template
+
+ALTER TABLE template
+    ALTER COLUMN account DROP NOT NULL,
+    ALTER COLUMN owner DROP NOT NULL,
+    ALTER COLUMN volumecount DROP NOT NULL,
+    ALTER COLUMN instancetype DROP NOT NULL,
+    ALTER COLUMN status DROP NOT NULL;
+
+-- topology
+
+ALTER TABLE topology
+    ALTER COLUMN owner DROP NOT NULL,
+    ALTER COLUMN deleted DROP NOT NULL;
