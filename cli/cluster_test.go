@@ -414,3 +414,17 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 		t.Errorf("json not match %s == %s", string(expected), skeleton.Json())
 	}
 }
+
+func TestGenerateBaseSkeletonWithValidClusterType(t *testing.T) {
+	skeleton := getBaseSkeleton()
+	valid := false
+	for _, v := range BlueprintMap {
+		if v == skeleton.ClusterType {
+			valid = true
+			break
+		}
+	}
+	if !valid {
+		t.Errorf("the generated cluster skeleton contains an invalid cluster type: %s", skeleton.ClusterType)
+	}
+}
