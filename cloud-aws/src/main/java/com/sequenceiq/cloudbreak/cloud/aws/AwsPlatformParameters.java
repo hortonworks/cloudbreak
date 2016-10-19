@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -41,14 +42,14 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class AwsPlatformParameters implements PlatformParameters {
-    public static final VolumeParameterConfig EBS_MAGNETIC_CONFIG = new VolumeParameterConfig(VolumeParameterType.MAGNETIC, 1, 1024, 1, 24);
-    public static final VolumeParameterConfig EBS_SSD_CONFIG = new VolumeParameterConfig(VolumeParameterType.SSD, 1, 17592, 1, 24);
+
     public static final String DEDICATED_INSTANCES = "dedicatedInstances";
     public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
     public static final String S3_ROLE = "s3Role";
@@ -60,6 +61,9 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
     private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
@@ -178,7 +182,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @Override
     public String resourceDefinition(String resource) {
-        return FileReaderUtils.readFileFromClasspathQuietly("definitions/aws-" + resource + ".json");
+        return cloudbreakResourceReaderService.resourceDefinition("aws", resource);
     }
 
     @Override

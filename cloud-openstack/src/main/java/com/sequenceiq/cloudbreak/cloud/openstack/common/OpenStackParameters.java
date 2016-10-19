@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,8 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
 public class OpenStackParameters implements PlatformParameters {
@@ -45,6 +46,9 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Value("${cb.openstack.regions:}")
     private String openstackRegionDefinition;
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
     private Region defaultRegion;
@@ -98,7 +102,7 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Override
     public String resourceDefinition(String resource) {
-        return FileReaderUtils.readFileFromClasspathQuietly("definitions/openstack-" + resource + ".json");
+        return cloudbreakResourceReaderService.resourceDefinition("openstack", resource);
     }
 
     @Override

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -57,6 +59,9 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Value("${cb.gcp.zone.parameter.definition.path:}")
     private String gcpZoneParameterDefinitionPath;
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
     private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
@@ -97,7 +102,7 @@ public class GcpPlatformParameters implements PlatformParameters {
                             .withMaximumPersistentDisksSizeGb(machineDefinitionView.getMaximumPersistentDisksSizeGb())
                             .create();
 
-                    VmType vmType  = VmType.vmTypeWithMeta(machineDefinitionView.getName(), vmTypeMeta);
+                    VmType vmType = VmType.vmTypeWithMeta(machineDefinitionView.getName(), vmTypeMeta);
                     vmTypes.get(availabilityZone).add(vmType);
                 }
             }
@@ -182,7 +187,7 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public String resourceDefinition(String resource) {
-        return FileReaderUtils.readFileFromClasspathQuietly("definitions/gcp-" + resource + ".json");
+        return cloudbreakResourceReaderService.resourceDefinition("gcp", resource);
     }
 
     private String getDefinition(String parameter, String type) {
@@ -223,16 +228,16 @@ public class GcpPlatformParameters implements PlatformParameters {
             this.value = value;
         }
 
+        public static String getUrl(String projectId, AvailabilityZone zone, String volumeId) {
+            return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone.value(), volumeId);
+        }
+
         public String value() {
             return value;
         }
 
         public String getUrl(String projectId, AvailabilityZone zone) {
             return getUrl(projectId, zone, value);
-        }
-
-        public static String getUrl(String projectId, AvailabilityZone zone, String volumeId) {
-            return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone.value(), volumeId);
         }
     }
 }
