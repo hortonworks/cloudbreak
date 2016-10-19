@@ -19,47 +19,48 @@ import com.sequenceiq.periscope.api.model.AmbariJson;
 import com.sequenceiq.periscope.api.model.ClusterJson;
 import com.sequenceiq.periscope.api.model.StateJson;
 import com.sequenceiq.periscope.doc.ApiDescription;
+import com.sequenceiq.periscope.doc.ApiDescription.ClusterNotes;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Path("/clusters")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/clusters", description = CLUSTERS_DESCRIPTION)
+@Api(value = "/clusters", description = CLUSTERS_DESCRIPTION, protocols = "http,https")
 public interface ClusterEndpoint {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_POST, produces = JSON, notes = ApiDescription.ClusterNotes.NOTES)
+    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_POST, produces = JSON, notes = ClusterNotes.NOTES)
     ClusterJson addCluster(AmbariJson ambariServer);
 
     @PUT
     @Path(value = "{clusterId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_PUT, produces = JSON, notes = ApiDescription.ClusterNotes.NOTES)
+    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_PUT, produces = JSON, notes = ClusterNotes.NOTES)
     ClusterJson modifyCluster(AmbariJson ambariServer, @PathParam(value = "clusterId") Long clusterId);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_GET_ALL, produces = JSON, notes = ApiDescription.ClusterNotes.NOTES)
+    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_GET_ALL, produces = JSON, notes = ClusterNotes.NOTES)
     List<ClusterJson> getClusters();
 
     @GET
     @Path("{clusterId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_GET, produces = JSON, notes = ApiDescription.ClusterNotes.NOTES)
+    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_GET, produces = JSON, notes = ClusterNotes.NOTES)
     ClusterJson getCluster(@PathParam(value = "clusterId") Long clusterId);
 
     @DELETE
     @Path("{clusterId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_DELETE, produces = JSON, notes = ApiDescription.ClusterNotes.NOTES)
+    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_DELETE, produces = JSON, notes = ClusterNotes.NOTES)
     void deleteCluster(@PathParam(value = "clusterId") Long clusterId);
 
     @POST
     @Path("{clusterId}/state")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_SET_STATE, produces = JSON, notes = ApiDescription.ClusterNotes.NOTES)
+    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_SET_STATE, produces = JSON, notes = ClusterNotes.NOTES)
     ClusterJson setState(@PathParam(value = "clusterId") Long clusterId, StateJson stateJson);
 
 }
