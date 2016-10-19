@@ -27,6 +27,13 @@ func init() {
 	BlueprintMap["hdp-etl-edw-tp"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0"
 }
 
+func getDefaultClusterType() string {
+	for _, v := range BlueprintMap {
+		return v
+	}
+	return ""
+}
+
 type Blueprint struct {
 	ClusterType string `json:"ClusterType" yaml:"ClusterType"`
 	HDPVersion  string `json:"HDPVersion" yaml:"HDPVersion"`

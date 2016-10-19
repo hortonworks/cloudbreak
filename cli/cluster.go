@@ -488,7 +488,7 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 
 func getBaseSkeleton() *ClusterSkeleton {
 	return &ClusterSkeleton{
-		ClusterType: "EDW-ETL: Apache Spark 2.0, Apache Hive 2",
+		ClusterType: getDefaultClusterType(),
 		HDPVersion:  "2.5",
 		Master: InstanceConfig{
 			InstanceType: "m4.xlarge",
