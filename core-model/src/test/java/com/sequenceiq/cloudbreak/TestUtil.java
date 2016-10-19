@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,7 @@ import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 public class TestUtil {
 
@@ -87,13 +89,13 @@ public class TestUtil {
     private TestUtil() {
     }
 
-    public static String getFilePath(Class clazz, String fileName) {
+    public static Path getFilePath(Class clazz, String fileName) {
         try {
             URL resource = clazz.getResource(fileName);
-            return resource.toURI().getPath();
+            return Paths.get(resource.toURI());
         } catch (Exception ex) {
             LOGGER.error("{}: {}", ex.getMessage(), ex);
-            return "";
+            return null;
         }
     }
 

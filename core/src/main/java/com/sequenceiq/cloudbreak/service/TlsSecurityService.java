@@ -109,7 +109,7 @@ public class TlsSecurityService {
 
     private String readSecurityFile(Long stackId, String fileName) throws CloudbreakSecuritySetupException {
         try {
-            return FileReaderUtils.readFileFromPathToString(Paths.get(getCertDir(stackId) + "/" + fileName).toString());
+            return FileReaderUtils.readFileFromPath(Paths.get(getCertDir(stackId) + "/" + fileName));
         } catch (IOException | SecurityException se) {
             throw new CloudbreakSecuritySetupException("Failed to read file: " + getCertDir(stackId) + "/" + fileName);
         }

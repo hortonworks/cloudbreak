@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -56,6 +58,9 @@ public class ArmPlatformParameters implements PlatformParameters {
 
     @Value("${cb.arm.zone.parameter.definition.path:}")
     private String armZoneParameterDefinitionPath;
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
     private List<VmType> vmTypes = new ArrayList<>();
@@ -161,7 +166,7 @@ public class ArmPlatformParameters implements PlatformParameters {
 
     @Override
     public String resourceDefinition(String resource) {
-        return FileReaderUtils.readFileFromClasspathQuietly("definitions/arm-" + resource + ".json");
+        return cloudbreakResourceReaderService.resourceDefinition("arm", resource);
     }
 
     @Override

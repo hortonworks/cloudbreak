@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -41,18 +40,22 @@ public final class FileReaderUtils {
         return sb.toString();
     }
 
-    public static String readFileFromPath(String fileName) throws IOException {
+    public static String readFileFromPathBase64(String fileName) throws IOException {
         String br = IOUtils.toString(new FileInputStream(fileName));
         return BaseEncoding.base64().encode(br.getBytes());
     }
 
-    public static String readBinaryFileFromPath(String fileName) throws IOException {
-        Path path = Paths.get(fileName);
+    public static String readBinaryFileFromPath(Path path) throws IOException {
+        if (path == null) {
+            throw new IOException("File path must not be null");
+        }
         return BaseEncoding.base64().encode(Files.readAllBytes(path));
     }
 
-    public static String readFileFromPathToString(String fileName) throws IOException {
-        Path path = Paths.get(fileName);
+    public static String readFileFromPath(Path path) throws IOException {
+        if (path == null) {
+            throw new IOException("File path must not be null");
+        }
         return new String(Files.readAllBytes(path));
     }
 
