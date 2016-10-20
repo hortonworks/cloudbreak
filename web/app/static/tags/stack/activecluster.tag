@@ -82,7 +82,7 @@
                                     <p id="sl_platformVariant" class="form-control-static">{{activeCluster.platformVariant}}</p>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" ng-show="activeCluster.cluster && activeCluster.cluster.userName">
                                 <label class="col-sm-3 control-label" for="sl_username">{{msg.active_cluster_username_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_username" class="form-control-static">{{activeCluster.cluster.userName}}
@@ -170,7 +170,7 @@
                                                         <p id="sl_nodecount" class="form-control-static">{{group.nodeCount}}</p>
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
+                                                <div class="form-group" ng-show="$root.activeClusterBlueprint">
                                                     <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
                                                     <div class="col-sm-5 col-lg-6">
                                                         <div class="host-group-table row" ng-repeat="hostgroup in $root.activeClusterBlueprint.ambariBlueprint.host_groups|filter: { name: group.group }:true">
@@ -206,7 +206,7 @@
                                                         <p id="sl_nodecount" class="form-control-static">{{group.constraint.hostCount}}</p>
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
+                                                <div class="form-group" ng-show="$root.activeClusterBlueprint">
                                                     <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
                                                     <div class="col-sm-5 col-lg-6">
                                                         <div class="host-group-table row" ng-repeat="hostgroup in $root.activeClusterBlueprint.ambariBlueprint.host_groups|filter: { name: group.name }:true">
