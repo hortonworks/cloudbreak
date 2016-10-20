@@ -8,6 +8,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.mapper.AccessDeniedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.AuthenticationCredentialsNotFoundExceptionMapper;
@@ -57,8 +58,12 @@ public class EndpointConfig extends ResourceConfig {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("Cloudbreak API");
         swaggerConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/cloudbreak-introduction"));
-        swaggerConfig.setVersion(cbVersion);
-        swaggerConfig.setSchemes(new String[]{"http, https"});
+        if (Strings.isNullOrEmpty(cbVersion)) {
+            swaggerConfig.setVersion("1.9.0");
+        } else {
+            swaggerConfig.setVersion(cbVersion);
+        }
+        swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
         swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api");

@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/topologies")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/topologies", description = ControllerDescription.TOPOLOGY_DESCRIPTION, protocols = "http, https")
+@Api(value = "/topologies", description = ControllerDescription.TOPOLOGY_DESCRIPTION, protocols = "http,https")
 public interface TopologyEndpoint {
 
     @GET

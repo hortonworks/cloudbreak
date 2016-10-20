@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/securitygroups")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/securitygroups", description = ControllerDescription.SECURITY_GROUPS_DESCRIPTION, protocols = "http, https")
+@Api(value = "/securitygroups", description = ControllerDescription.SECURITY_GROUPS_DESCRIPTION, protocols = "http,https")
 public interface SecurityGroupEndpoint {
 
     @POST

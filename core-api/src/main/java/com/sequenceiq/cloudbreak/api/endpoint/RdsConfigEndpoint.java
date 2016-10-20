@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/rdsconfigs")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/rdsconfigs", description = ControllerDescription.RDSCONFIG_DESCRIPTION, protocols = "http, https")
+@Api(value = "/rdsconfigs", description = ControllerDescription.RDSCONFIG_DESCRIPTION, protocols = "http,https")
 public interface RdsConfigEndpoint {
 
     @GET

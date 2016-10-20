@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/sssd")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/sssd", description = ControllerDescription.SSSDCONFIG_DESCRIPTION, protocols = "http, https")
+@Api(value = "/sssd", description = ControllerDescription.SSSDCONFIG_DESCRIPTION, protocols = "http,https")
 public interface SssdConfigEndpoint {
 
     @POST

@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/stacks")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/cluster", description = ControllerDescription.CLUSTER_DESCRIPTION, protocols = "http, https")
+@Api(value = "/cluster", description = ControllerDescription.CLUSTER_DESCRIPTION, protocols = "http,https")
 public interface ClusterEndpoint {
 
     @POST
