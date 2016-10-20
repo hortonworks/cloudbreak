@@ -1,6 +1,58 @@
 {
   "host_groups": [
     {
+      "name": "host_group_master_1",
+      "configurations": [],
+      "components": [
+        { "name": "ZOOKEEPER_SERVER" },
+        { "name": "HISTORYSERVER" },
+        { "name": "OOZIE_CLIENT" },
+        { "name": "NAMENODE" },
+        { "name": "OOZIE_SERVER" },
+        { "name": "HDFS_CLIENT" },
+        { "name": "YARN_CLIENT" },
+        { "name": "FALCON_SERVER" },
+        { "name": "METRICS_MONITOR" },
+        { "name": "MAPREDUCE2_CLIENT" }
+      ],
+      "cardinality": "1"
+    },
+    {
+      "name": "host_group_master_2",
+      "configurations": [],
+      "components": [
+        { "name": "ZOOKEEPER_SERVER" },
+        { "name": "PIG" },
+        { "name": "ZOOKEEPER_CLIENT" },
+        { "name": "HIVE_SERVER" },
+        { "name": "METRICS_MONITOR" },
+        { "name": "TEZ_CLIENT" },
+        { "name": "HIVE_METASTORE" },
+        { "name": "HDFS_CLIENT" },
+        { "name": "YARN_CLIENT" },
+        { "name": "MYSQL_SERVER" },
+        { "name": "MAPREDUCE2_CLIENT" },
+        { "name": "RESOURCEMANAGER" },
+        { "name": "WEBHCAT_SERVER" }
+      ],
+      "cardinality": "1"
+    },
+    {
+      "name": "host_group_master_3",
+      "configurations": [],
+      "components": [
+        { "name": "ZOOKEEPER_SERVER" },
+        { "name": "APP_TIMELINE_SERVER" },
+        { "name": "TEZ_CLIENT" },
+        { "name": "HBASE_MASTER" },
+        { "name": "HBASE_CLIENT" },
+        { "name": "HDFS_CLIENT" },
+        { "name": "METRICS_MONITOR" },
+        { "name": "SECONDARY_NAMENODE" }
+      ],
+      "cardinality": "1"
+    },
+    {
       "name": "host_group_client_1",
       "configurations": [],
       "components": [
@@ -24,21 +76,6 @@
       "cardinality": "1"
     },
     {
-      "name": "host_group_master_3",
-      "configurations": [],
-      "components": [
-        { "name": "ZOOKEEPER_SERVER" },
-        { "name": "APP_TIMELINE_SERVER" },
-        { "name": "TEZ_CLIENT" },
-        { "name": "HBASE_MASTER" },
-        { "name": "HBASE_CLIENT" },
-        { "name": "HDFS_CLIENT" },
-        { "name": "METRICS_MONITOR" },
-        { "name": "SECONDARY_NAMENODE" }
-      ],
-      "cardinality": "1"
-    },
-    {
       "name": "host_group_slave_1",
       "configurations": [],
       "components": [
@@ -48,43 +85,6 @@
         { "name": "DATANODE" }
       ],
       "cardinality": "6"
-    },
-    {
-      "name": "host_group_master_2",
-      "configurations": [],
-      "components": [
-        { "name": "ZOOKEEPER_SERVER" },
-        { "name": "PIG" },
-        { "name": "ZOOKEEPER_CLIENT" },
-        { "name": "HIVE_SERVER" },
-        { "name": "METRICS_MONITOR" },
-        { "name": "TEZ_CLIENT" },
-        { "name": "HIVE_METASTORE" },
-        { "name": "HDFS_CLIENT" },
-        { "name": "YARN_CLIENT" },
-        { "name": "MYSQL_SERVER" },
-        { "name": "MAPREDUCE2_CLIENT" },
-        { "name": "RESOURCEMANAGER" },
-        { "name": "WEBHCAT_SERVER" }
-      ],
-      "cardinality": "1"
-    },
-    {
-      "name": "host_group_master_1",
-      "configurations": [],
-      "components": [
-        { "name": "ZOOKEEPER_SERVER" },
-        { "name": "HISTORYSERVER" },
-        { "name": "OOZIE_CLIENT" },
-        { "name": "NAMENODE" },
-        { "name": "OOZIE_SERVER" },
-        { "name": "HDFS_CLIENT" },
-        { "name": "YARN_CLIENT" },
-        { "name": "FALCON_SERVER" },
-        { "name": "METRICS_MONITOR" },
-        {"name": "MAPREDUCE2_CLIENT" }
-      ],
-      "cardinality": "1"
     }
   ],
   "Blueprints": {

@@ -14,11 +14,14 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class NovaInstanceView {
 
-    private InstanceTemplate instance;
+    private final String stackName;
 
-    private InstanceGroupType type;
+    private final InstanceTemplate instance;
 
-    public NovaInstanceView(InstanceTemplate instance, InstanceGroupType type) {
+    private final InstanceGroupType type;
+
+    public NovaInstanceView(String stackName, InstanceTemplate instance, InstanceGroupType type) {
+        this.stackName = stackName;
         this.instance = instance;
         this.type = type;
     }
@@ -32,7 +35,13 @@ public class NovaInstanceView {
     }
 
     public String getInstanceId() {
-        return instance.getGroupName().replaceAll("_", "") + "_" + instance.getPrivateId();
+        return instance.getGroupName().replaceAll("[_-]", "") + "_" + instance.getPrivateId();
+    }
+
+    public String getName() {
+        String stackName = this.stackName.replaceAll("_", "-");
+        String shortenedGroupName = instance.getGroupName().replaceAll("host|group|[_-]", "").trim();
+        return stackName + "-" + shortenedGroupName + "-" + instance.getPrivateId();
     }
 
     public long getPrivateId() {
