@@ -85,7 +85,7 @@
                                 <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
                                 <div class="col-sm-5 col-lg-6">
                                     <div class="host-group-table row" ng-repeat="hostgroup in blueprint.ambariBlueprint.host_groups|filter: { name: group.group }:true">
-                                        <div class="list-group">
+                                        <div class="list-group col-sm-12">
                                             <a href="" class="list-group-item active" style="text-decoration: none;    font-size: 15px;">{{hostgroup.name}}</a>
                                             <a href="" ng-repeat="component in hostgroup.components" class="list-group-item" style="text-decoration: none;    font-size: 15px;">{{component.name}}</a>
                                         </div>
@@ -113,7 +113,7 @@
                                 <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
                                 <div class="col-sm-5 col-lg-6">
                                     <div class="host-group-table row" ng-repeat="hostgroup in blueprint.ambariBlueprint.host_groups|filter: { name: group.name }:true">
-                                        <div class="list-group">
+                                        <div class="list-group col-sm-12">
                                             <a href="" class="list-group-item active" style="text-decoration: none;    font-size: 15px;">{{hostgroup.name}}</a>
                                             <a href="" ng-repeat="component in hostgroup.components" class="list-group-item" style="text-decoration: none;    font-size: 15px;">{{component.name}}</a>
                                         </div>
