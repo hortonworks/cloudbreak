@@ -8,9 +8,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 
 public class OpenStackGroupView {
 
-    private List<Group> groups;
+    private final String stackName;
 
-    public OpenStackGroupView(List<Group> groups) {
+    private final List<Group> groups;
+
+    public OpenStackGroupView(String stackName, List<Group> groups) {
+        this.stackName = stackName;
         this.groups = groups;
     }
 
@@ -19,7 +22,7 @@ public class OpenStackGroupView {
         List<NovaInstanceView> novaInstances = new ArrayList<>();
         for (Group group : groups) {
             for (CloudInstance instance : group.getInstances()) {
-                NovaInstanceView novaInstance = new NovaInstanceView(instance.getTemplate(), group.getType());
+                NovaInstanceView novaInstance = new NovaInstanceView(stackName, instance.getTemplate(), group.getType());
                 novaInstances.add(novaInstance);
             }
         }

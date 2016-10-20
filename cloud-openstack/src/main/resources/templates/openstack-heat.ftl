@@ -103,6 +103,7 @@ ${core_user_data}
     type: OS::Nova::Server
     properties:
       image: { get_param: image_id }
+      name: ${agent.name}
       flavor: ${agent.flavor}
       <#if availability_zone?has_content>
       availability_zone : ${availability_zone}

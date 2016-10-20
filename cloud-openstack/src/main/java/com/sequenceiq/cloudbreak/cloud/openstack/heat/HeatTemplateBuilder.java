@@ -49,7 +49,7 @@ public class HeatTemplateBuilder {
     public String build(Location location, String stackName, List<Group> groups, Image instanceUserData, boolean existingNetwork,
             boolean existingSubnet, NeutronNetworkView neutronNetworkView) {
         try {
-            List<NovaInstanceView> novaInstances = new OpenStackGroupView(groups).getFlatNovaView();
+            List<NovaInstanceView> novaInstances = new OpenStackGroupView(stackName, groups).getFlatNovaView();
             Map<String, Object> model = new HashMap<>();
             model.put("cb_stack_name", openStackUtil.adjustStackNameLength(stackName));
             model.put("agents", novaInstances);
