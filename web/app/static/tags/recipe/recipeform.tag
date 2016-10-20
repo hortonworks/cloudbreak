@@ -77,7 +77,7 @@
 
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
-            <a id="createRecipe" class="btn btn-success btn-block" ng-disabled="recipeCreationForm.$invalid" ng-click="createRecipe()" role="button"><i class="fa fa-plus fa-fw"></i>{{msg.recipe_form_create}}</a>
+            <a id="createRecipe" class="btn btn-success btn-block" ng-disabled="recipeCreationForm.$invalid || (recipeType == 'SCRIPT' && $parent.preInstallScript == '' && $parent.postInstallScript == '')" ng-click="createRecipe()" role="button"><i class="fa fa-plus fa-fw"></i>{{msg.recipe_form_create}}</a>
         </div>
     </div>
 
