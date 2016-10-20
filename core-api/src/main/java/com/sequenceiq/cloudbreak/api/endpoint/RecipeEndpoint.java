@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/recipes")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/recipes", description = ControllerDescription.RECIPE_DESCRIPTION, protocols = "http, https")
+@Api(value = "/recipes", description = ControllerDescription.RECIPE_DESCRIPTION, protocols = "http,https")
 public interface RecipeEndpoint {
 
     @POST

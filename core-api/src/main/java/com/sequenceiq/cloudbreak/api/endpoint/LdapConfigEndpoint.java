@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/ldap")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/ldap", description = ControllerDescription.LDAP_CONFIG_DESCRIPTION, protocols = "http, https")
+@Api(value = "/ldap", description = ControllerDescription.LDAP_CONFIG_DESCRIPTION, protocols = "http,https")
 public interface LdapConfigEndpoint {
 
     @POST

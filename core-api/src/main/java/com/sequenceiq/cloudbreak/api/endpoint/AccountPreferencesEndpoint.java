@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/accountpreferences")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/accountpreferences", description = ControllerDescription.ACCOUNT_PREFERENCES_DESCRIPTION, protocols = "http, https")
+@Api(value = "/accountpreferences", description = ControllerDescription.ACCOUNT_PREFERENCES_DESCRIPTION, protocols = "http,https")
 public interface AccountPreferencesEndpoint {
 
     @GET

@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/clustertemplates")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/clustertemplates", description = ControllerDescription.CLUSTER_TEMPLATE_DESCRIPTION, protocols = "http, https")
+@Api(value = "/clustertemplates", description = ControllerDescription.CLUSTER_TEMPLATE_DESCRIPTION, protocols = "http,https")
 public interface ClusterTemplateEndpoint {
 
     @GET

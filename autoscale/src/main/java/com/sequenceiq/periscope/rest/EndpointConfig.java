@@ -51,7 +51,7 @@ public class EndpointConfig  extends ResourceConfig {
         beanConfig.setTitle("Auto-scaling API");
         beanConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/auto-scaling-introduction"));
         beanConfig.setVersion("1.9.0");
-        beanConfig.setSchemes(new String[]{"http, https"});
+        beanConfig.setSchemes(new String[]{"http", "https"});
         beanConfig.setBasePath(AutoscaleApi.API_ROOT_CONTEXT);
         beanConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
         beanConfig.setResourcePackage("com.sequenceiq.periscope.api");
