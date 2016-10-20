@@ -80,7 +80,7 @@
     </div>
 </div>
 
-<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP') && cluster.fileSystem.type != 'LOCAL'">
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type != 'LOCAL'">
     <label class="col-sm-3 control-label" for="asdefaultfs">{{msg.filesystem_default_fs}}</label>
     <div class="col-sm-8">
         <input type="checkbox" id="asdefaultfs" ng-model="cluster.fileSystem.defaultFs" ng-disabled="activeCredential.cloudPlatform == 'GCP'" name="asdefaultfs">

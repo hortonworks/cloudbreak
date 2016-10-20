@@ -8,7 +8,7 @@
                 <i class="fa fa-angle-down fa-2x fa-fw-forced"></i>
             </a>
             <h4>
-                <span class="badge pull-right">{{$root.credentials.length + ($root.importedStacks | filter:filterByImportedStack).length}}</span> {{msg.credential_manage_title}}
+                <span class="badge pull-right">{{countList($root.credentials) + ($root.importedStacks | filter:filterByImportedStack).length}}</span> {{msg.credential_manage_title}}
             </h4>
         </div>
 
