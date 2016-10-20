@@ -3,7 +3,7 @@
     {
       "name": "RegionOne",
       "zones": [
-        "nova"
+        "infra", "demo", "SE", "PS", "PM"
       ]
     }
   ]
