@@ -30,6 +30,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -50,6 +52,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -68,6 +71,12 @@ public class SaltOrchestratorTest {
     private ArgumentCaptor<Set<String>> ipSet;
     private ExitCriteriaModel exitCriteriaModel;
 
+    @Mock
+    private HostDiscoveryService hostDiscoveryService;
+
+    @InjectMocks
+    private SaltOrchestrator saltOrchestrator;
+
     @Before
     public void setUp() throws Exception {
         gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "10-0-0-1", 9443, "/certdir", "servercert", "clientcert", "clientkey", "saltpasswd");
@@ -80,13 +89,13 @@ public class SaltOrchestratorTest {
         PowerMockito.whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);
         parallelOrchestratorComponentRunner = mock(ParallelOrchestratorComponentRunner.class);
         when(parallelOrchestratorComponentRunner.submit(any())).thenReturn(CompletableFuture.completedFuture(true));
+        when(hostDiscoveryService.determineDomain()).thenReturn(".example.com");
         exitCriteria = mock(ExitCriteria.class);
         exitCriteriaModel = mock(ExitCriteriaModel.class);
     }
 
     @Test
     public void bootstrapTest() throws Exception {
-        SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
         PowerMockito.whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
@@ -100,7 +109,7 @@ public class SaltOrchestratorTest {
                 .withArguments(any(PillarSave.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
         verifyNew(OrchestratorBootstrapRunner.class, times(2))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(gatewayConfig), eq(targets));
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(gatewayConfig), eq(targets), eq(".example.com"));
     }
 
     @Test
@@ -108,14 +117,13 @@ public class SaltOrchestratorTest {
         PowerMockito.whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
         PowerMockito.whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
 
-        SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
         saltOrchestrator.bootstrapNewNodes(gatewayConfig, targets, exitCriteriaModel);
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(gatewayConfig), eq(targets));
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(gatewayConfig), eq(targets), eq(".example.com"));
     }
 
     @Test
@@ -143,7 +151,6 @@ public class SaltOrchestratorTest {
         SaltJobIdTracker saltJobIdTracker = mock(SaltJobIdTracker.class);
         whenNew(SaltJobIdTracker.class).withAnyArguments().thenReturn(saltJobIdTracker);
 
-        SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
         SaltPillarConfig saltPillarConfig = new SaltPillarConfig();

@@ -33,12 +33,14 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     private final GatewayConfig gatewayConfig;
     private final Set<Node> originalTargets;
     private Set<Node> targets;
+    private String domain;
 
-    public SaltBootstrap(SaltConnector sc, GatewayConfig gatewayConfig, Set<Node> targets) {
+    public SaltBootstrap(SaltConnector sc, GatewayConfig gatewayConfig, Set<Node> targets, String domain) {
         this.sc = sc;
         this.gatewayConfig = gatewayConfig;
         this.originalTargets = Collections.unmodifiableSet(targets);
         this.targets = targets;
+        this.domain = domain;
     }
 
     @Override
@@ -89,6 +91,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             SaltMaster master = new SaltMaster();
             master.setAddress(getGatewayPrivateIp());
             master.setAuth(auth);
+            master.setDomain(domain);
             saltAction.setMaster(master);
             //set due to compatibility reason
             saltAction.setServer(getGatewayPrivateIp());
@@ -109,6 +112,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         minion.setRoles(Collections.emptyList());
         minion.setServer(getGatewayPrivateIp());
         minion.setHostGroup(node.getHostGroup());
+        minion.setDomain(domain);
         return minion;
     }
 
