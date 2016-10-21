@@ -4,6 +4,10 @@ VERSION ?= snapshot
 BUILD_TIME=$(shell date +%FT%T)
 LDFLAGS=-ldflags "-X github.com/hortonworks/hdc-cli/cli.Version=${VERSION} -X github.com/hortonworks/hdc-cli/cli.BuildTime=${BUILD_TIME}"
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
+CB_IP = $(shell echo \${IP})
+ifeq ($(CB_IP),)
+        CB_IP = 192.168.99.100
+endif
 
 deps:
 	go get github.com/keyki/glu
@@ -42,7 +46,7 @@ generate-swagger:
 
 generate-swagger-docker:
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.5.0 \
-	swagger generate client -f http://192.168.99.100:8080/cb/api/v1/swagger.json
+	swagger generate client -f http://$(CB_IP):8080/cb/api/v1/swagger.json
 
 release: build
 	rm -rf release
