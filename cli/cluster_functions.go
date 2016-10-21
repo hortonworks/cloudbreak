@@ -40,8 +40,8 @@ func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroupResponse, templ
 	c.InstanceCount = instanceGroup.NodeCount
 	c.InstanceType = template.InstanceType
 	c.VolumeType = SafeStringConvert(template.VolumeType)
-	c.VolumeSize = template.VolumeSize
-	c.VolumeCount = template.VolumeCount
+	c.VolumeSize = &template.VolumeSize
+	c.VolumeCount = &template.VolumeCount
 	return nil
 }
 

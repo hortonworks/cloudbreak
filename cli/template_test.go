@@ -14,14 +14,14 @@ func TestCreateTemplateImpl(t *testing.T) {
 		Master: InstanceConfig{
 			InstanceType: "master",
 			VolumeType:   "master-volume",
-			VolumeSize:   32,
-			VolumeCount:  1,
+			VolumeSize:   &(&int32Wrapper{32}).i,
+			VolumeCount:  &(&int32Wrapper{1}).i,
 		},
 		Worker: InstanceConfig{
 			InstanceType: "worker",
 			VolumeType:   "worker-volume",
-			VolumeSize:   64,
-			VolumeCount:  2,
+			VolumeSize:   &(&int32Wrapper{64}).i,
+			VolumeCount:  &(&int32Wrapper{2}).i,
 		},
 	}
 	c := make(chan int64, 2)

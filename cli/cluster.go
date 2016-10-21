@@ -505,14 +505,14 @@ func getBaseSkeleton() *ClusterSkeleton {
 		Master: InstanceConfig{
 			InstanceType: "m4.xlarge",
 			VolumeType:   "gp2",
-			VolumeCount:  1,
-			VolumeSize:   32,
+			VolumeCount:  &(&int32Wrapper{1}).i,
+			VolumeSize:   &(&int32Wrapper{32}).i,
 		},
 		Worker: InstanceConfig{
 			InstanceType:  "m3.xlarge",
 			VolumeType:    "ephemeral",
-			VolumeCount:   2,
-			VolumeSize:    40,
+			VolumeCount:   &(&int32Wrapper{2}).i,
+			VolumeSize:    &(&int32Wrapper{40}).i,
 			InstanceCount: 2,
 		},
 		WebAccess:      true,

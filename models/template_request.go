@@ -54,16 +54,12 @@ type TemplateRequest struct {
 	TopologyID *int64 `json:"topologyId,omitempty"`
 
 	/* number of volumes
-
-	Required: true
-	*/
-	VolumeCount int32 `json:"volumeCount"`
+	 */
+	VolumeCount *int32 `json:"volumeCount,omitempty"`
 
 	/* size of volumes
-
-	Required: true
-	*/
-	VolumeSize int32 `json:"volumeSize"`
+	 */
+	VolumeSize *int32 `json:"volumeSize,omitempty"`
 
 	/* type of the volumes
 	 */
@@ -90,16 +86,6 @@ func (m *TemplateRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateVolumeCount(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateVolumeSize(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -160,24 +146,6 @@ func (m *TemplateRequest) validateName(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("name", "body", string(m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *TemplateRequest) validateVolumeCount(formats strfmt.Registry) error {
-
-	if err := validate.Required("volumeCount", "body", int32(m.VolumeCount)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *TemplateRequest) validateVolumeSize(formats strfmt.Registry) error {
-
-	if err := validate.Required("volumeSize", "body", int32(m.VolumeSize)); err != nil {
 		return err
 	}
 

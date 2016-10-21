@@ -36,8 +36,8 @@ type ClusterSkeleton struct {
 type InstanceConfig struct {
 	InstanceType  string `json:"InstanceType" yaml:"InstanceType"`
 	VolumeType    string `json:"VolumeType" yaml:"VolumeType"`
-	VolumeSize    int32  `json:"VolumeSize" yaml:"VolumeSize"`
-	VolumeCount   int32  `json:"VolumeCount" yaml:"VolumeCount"`
+	VolumeSize    *int32 `json:"VolumeSize" yaml:"VolumeSize"`
+	VolumeCount   *int32 `json:"VolumeCount" yaml:"VolumeCount"`
 	InstanceCount int32  `json:"InstanceCount,omitempty" yaml:"InstanceCount,omitempty"`
 }
 

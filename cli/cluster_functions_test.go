@@ -179,10 +179,10 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	if skeleton.Master.VolumeType != *tm[MASTER].VolumeType {
 		t.Errorf("master volume type not match %s == %s", *tm[MASTER].VolumeType, skeleton.Master.VolumeType)
 	}
-	if skeleton.Master.VolumeSize != tm[MASTER].VolumeSize {
+	if *skeleton.Master.VolumeSize != tm[MASTER].VolumeSize {
 		t.Errorf("master volume size not match %d == %d", tm[MASTER].VolumeSize, skeleton.Master.VolumeSize)
 	}
-	if skeleton.Master.VolumeCount != tm[MASTER].VolumeCount {
+	if *skeleton.Master.VolumeCount != tm[MASTER].VolumeCount {
 		t.Errorf("master volume count not match %d == %d", tm[MASTER].VolumeCount, skeleton.Master.VolumeCount)
 	}
 	if skeleton.Worker.InstanceCount != 2 {
@@ -194,10 +194,10 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	if skeleton.Worker.VolumeType != *tm[WORKER].VolumeType {
 		t.Errorf("worker volume type not match %s == %s", *tm[WORKER].VolumeType, skeleton.Worker.VolumeType)
 	}
-	if skeleton.Worker.VolumeSize != tm[WORKER].VolumeSize {
+	if *skeleton.Worker.VolumeSize != tm[WORKER].VolumeSize {
 		t.Errorf("worker volume size not match %d == %d", tm[WORKER].VolumeSize, skeleton.Worker.VolumeSize)
 	}
-	if skeleton.Worker.VolumeCount != tm[WORKER].VolumeCount {
+	if *skeleton.Worker.VolumeCount != tm[WORKER].VolumeCount {
 		t.Errorf("worker volume count not match %d == %d", tm[WORKER].VolumeCount, skeleton.Worker.VolumeCount)
 	}
 }
