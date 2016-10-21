@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -156,8 +157,8 @@ public class AwsCommands implements CommandMarker {
     public String createTemplate(
             @CliOption(key = "name", mandatory = true, help = "Name of the template") String name,
             @CliOption(key = "instanceType", mandatory = true, help = "instanceType of the template") AwsInstanceType instanceType,
-            @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
-            @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
+            @CliOption(key = "volumeCount", help = "volumeCount of the template") Integer volumeCount,
+            @CliOption(key = "volumeSize", help = "volumeSize(GB) of the template") Integer volumeSize,
             @CliOption(key = "volumeType", help = "volumeType of the template") AwsVolumeType volumeType,
             @CliOption(key = "encrypted", help = "use encrypted disks") Boolean encrypted,
             @CliOption(key = "spotPrice", help = "spotPrice of the template") Double spotPrice,
@@ -173,8 +174,8 @@ public class AwsCommands implements CommandMarker {
     public String createEc2Template(
             @CliOption(key = "name", mandatory = true, help = "Name of the template") String name,
             @CliOption(key = "instanceType", mandatory = true, help = "instanceType of the template") AwsInstanceType instanceType,
-            @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
-            @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
+            @CliOption(key = "volumeCount", help = "volumeCount of the template") Integer volumeCount,
+            @CliOption(key = "volumeSize", help = "volumeSize(GB) of the template") Integer volumeSize,
             @CliOption(key = "volumeType", help = "volumeType of the template") AwsVolumeType volumeType,
             @CliOption(key = "encrypted", help = "use encrypted disks") Boolean encrypted,
             @CliOption(key = "spotPrice", help = "spotPrice of the template") Double spotPrice,
@@ -182,6 +183,19 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "description", help = "Description of the template") String description,
             @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId
     ) {
+        String volType = volumeType == null ? "gp2" : volumeType.getName();
+        if (!"ephemeral".equals(volType) && (volumeCount == null || volumeSize == null)) {
+            StringJoiner joiner = new StringJoiner(", ");
+            if (volumeCount == null) {
+                joiner.add("--volumeCount");
+            }
+            if (volumeSize == null) {
+                joiner.add("--volumeSize");
+            }
+
+            return "You should specify option (" + joiner.toString() + ")";
+        }
+
         Map<String, Object> params = new HashMap<>();
         if (spotPrice != null) {
             params.put("spotPrice", spotPrice);
@@ -189,7 +203,7 @@ public class AwsCommands implements CommandMarker {
         if (encrypted != null) {
             params.put("encrypted", encrypted);
         }
-        return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volumeType == null ? "gp2" : volumeType.getName(),
+        return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volType,
                 publicInAccount, description, params, platformId, PLATFORM);
     }
 

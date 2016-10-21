@@ -80,13 +80,14 @@ angular.module('uluwatuControllers').controller('templateController', [
             }
 
             function handleAwsTemplateSuccess(result) {
-                $scope.awsTemp.id = result.id;
-                $rootScope.templates.push($scope.awsTemp);
-                initializeAwsTemp();
-                $scope.showSuccess($filter("format")($rootScope.msg.aws_template_success, String(result.id)));
-                $scope.awsTemplateForm.$setPristine();
-                collapseCreateTemplateFormPanel();
-                $scope.unShowErrorMessageAlert();
+                GlobalTemplate.get({ id: result.id }, function(templ) {
+                     $rootScope.templates.push(templ);
+                     initializeAwsTemp();
+                     $scope.showSuccess($filter("format")($rootScope.msg.aws_template_success, String(result.id)));
+                     $scope.awsTemplateForm.$setPristine();
+                     collapseCreateTemplateFormPanel();
+                     $scope.unShowErrorMessageAlert();
+                });
             }
         }
 
@@ -289,6 +290,10 @@ angular.module('uluwatuControllers').controller('templateController', [
                     templateTemp.volumeSize = templateTemp.minDiskSize;
                 } else if (templateTemp.volumeSize > templateTemp.maxDiskSize) {
                     templateTemp.volumeSize = templateTemp.maxDiskSize;
+                }
+                if (volumeType == 'ephemeral') {
+                    templateTemp.volumeCount = null;
+                    templateTemp.volumeSize = null;
                 }
             } else {
                 templateTemp.maxDiskNumber = 24;

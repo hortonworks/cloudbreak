@@ -12,6 +12,10 @@ public class TemplateResponse extends TemplateBase {
     private Long id;
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
+    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_COUNT, required = true)
+    private Integer volumeCount;
+    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_SIZE, required = true)
+    private Integer volumeSize;
 
     public Long getId() {
         return id;
@@ -28,5 +32,21 @@ public class TemplateResponse extends TemplateBase {
 
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
+    }
+
+    public Integer getVolumeSize() {
+        return volumeSize;
+    }
+
+    public void setVolumeSize(Integer volumeSize) {
+        this.volumeSize = volumeSize;
+    }
+
+    public Integer getVolumeCount() {
+        return volumeCount;
+    }
+
+    public void setVolumeCount(Integer volumeCount) {
+        this.volumeCount = volumeCount;
     }
 }

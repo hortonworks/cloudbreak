@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidato
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.template.DefaultTemplateLoaderService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
@@ -34,6 +35,9 @@ public class TemplateController implements TemplateEndpoint {
     private TemplateValidator templateValidator;
 
     @Autowired
+    private Decorator<Template> templateDecorator;
+
+    @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
@@ -41,7 +45,6 @@ public class TemplateController implements TemplateEndpoint {
     public TemplateResponse postPrivate(TemplateRequest templateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        templateValidator.validateTemplateRequest(templateRequest);
         return createTemplate(user, templateRequest, false);
     }
 
@@ -49,7 +52,6 @@ public class TemplateController implements TemplateEndpoint {
     public TemplateResponse postPublic(TemplateRequest templateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        templateValidator.validateTemplateRequest(templateRequest);
         return createTemplate(user, templateRequest, true);
     }
 
@@ -117,7 +119,9 @@ public class TemplateController implements TemplateEndpoint {
     }
 
     private TemplateResponse createTemplate(CbUser user, TemplateRequest templateRequest, boolean publicInAccount) {
+        templateValidator.validateTemplateRequest(templateRequest);
         Template template = convert(templateRequest, publicInAccount);
+        template = templateDecorator.decorate(template);
         template = templateService.create(user, template);
         return conversionService.convert(template, TemplateResponse.class);
     }
