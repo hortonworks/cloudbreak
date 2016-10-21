@@ -83,10 +83,13 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         Set<String> flowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(stackId);
         LOGGER.debug("flow cancellation arrived: ids: {}", flowIds);
         for (String id : flowIds) {
+            String flowChainId = runningFlows.getFlowChainId(id);
+            if (flowChainId != null) {
+                flowChains.removeFullFlowChain(flowChainId);
+            }
             Flow flow = runningFlows.remove(id);
             if (flow != null) {
                 flowLogService.cancel(stackId, id);
-                flowChains.removeFlowChain(runningFlows.getFlowChainId(id));
             }
         }
     }
@@ -96,7 +99,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         flowLogService.close(stackId, flowId);
         Flow flow = runningFlows.remove(flowId);
         if (flow.isFlowFailed()) {
-            flowChains.removeFlowChain(flowChainId);
+            flowChains.removeFullFlowChain(flowChainId);
         } else if (flowChainId != null) {
             flowChains.triggerNextFlow(flowChainId);
         }

@@ -24,9 +24,14 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
     @Override
     public void accept(Event<? extends Payload> event) {
         String key = (String) event.getKey();
+        String parentFlowChainId = getFlowChainId(event);
         FlowEventChainFactory flowEventChainFactory = flowChainConfigMap.get(key);
         String flowChainId = UUID.randomUUID().toString();
-        flowChains.putFlowChain(flowChainId, flowEventChainFactory.createFlowTriggerEventQueue(event.getData()));
+        flowChains.putFlowChain(flowChainId, parentFlowChainId, flowEventChainFactory.createFlowTriggerEventQueue(event.getData()));
         flowChains.triggerNextFlow(flowChainId);
+    }
+
+    private String getFlowChainId(Event<?> event) {
+        return event.getHeaders().get("FLOW_CHAIN_ID");
     }
 }
