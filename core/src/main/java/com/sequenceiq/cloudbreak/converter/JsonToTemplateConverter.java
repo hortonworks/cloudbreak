@@ -25,8 +25,8 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
         template.setName(source.getName());
         template.setDescription(source.getDescription());
         template.setStatus(ResourceStatus.USER_MANAGED);
-        template.setVolumeCount(source.getVolumeCount() == null ? 0 : source.getVolumeCount());
-        template.setVolumeSize(source.getVolumeSize() == null ? 0 : source.getVolumeSize());
+        template.setVolumeCount(source.getVolumeCount());
+        template.setVolumeSize(source.getVolumeSize());
         template.setCloudPlatform(source.getCloudPlatform());
         template.setInstanceType(source.getInstanceType());
         String volumeType = source.getVolumeType();

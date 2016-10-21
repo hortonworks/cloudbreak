@@ -28,12 +28,7 @@ public abstract class TemplateBase implements JsonEntity {
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_COUNT, required = true)
-    private Integer volumeCount;
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_SIZE, required = true)
-    private Integer volumeSize;
+
     @ApiModelProperty(ModelDescriptions.TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
     @NotNull
@@ -73,22 +68,6 @@ public abstract class TemplateBase implements JsonEntity {
 
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
-    }
-
-    public Integer getVolumeSize() {
-        return volumeSize;
-    }
-
-    public void setVolumeSize(Integer volumeSize) {
-        this.volumeSize = volumeSize;
-    }
-
-    public Integer getVolumeCount() {
-        return volumeCount;
-    }
-
-    public void setVolumeCount(Integer volumeCount) {
-        this.volumeCount = volumeCount;
     }
 
     public String getVolumeType() {

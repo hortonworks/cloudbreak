@@ -40,7 +40,7 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group" ng-hide="template.volumeType === 'ephemeral'">
+    <div class="form-group">
         <label class="col-sm-3 control-label" for="awsvolumesize">{{msg.template_form_volume_size_label}}</label>
 
         <div class="col-sm-9">
