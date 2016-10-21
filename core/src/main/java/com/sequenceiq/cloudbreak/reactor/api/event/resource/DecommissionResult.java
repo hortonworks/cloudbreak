@@ -20,4 +20,11 @@ public class DecommissionResult extends AbstractClusterScaleResult<DecommissionR
     public Set<String> getHostNames() {
         return hostNames;
     }
+
+    @Override
+    public String toString() {
+        return "DecommissionResult{"
+                + "hostNames=" + hostNames
+                + '}';
+    }
 }

@@ -40,17 +40,21 @@ public class HostFilterService {
 
     public List<HostMetadata> filterHostsForDecommission(Cluster cluster, Set<HostMetadata> hosts, String hostGroup) throws CloudbreakSecuritySetupException {
         List<HostMetadata> filteredList = new ArrayList<>(hosts);
+        LOGGER.info("Ambari service config, hostGroup: {}, originalList: {}", hostGroup, filteredList);
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(cluster.getStack().getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getStack().getGatewayPort(), cluster.getUserName(),
                 cluster.getPassword());
         Map<String, String> config = configurationService.getConfiguration(ambariClient, hostGroup);
+        LOGGER.info("Ambari service config, hostGroup: {}, config: {}", hostGroup, config);
         for (HostFilter hostFilter : hostFilters) {
             try {
                 filteredList = hostFilter.filter(cluster.getId(), config, filteredList);
+                LOGGER.info("Filtered with hostfilter: {}, filteredList: {}", hostFilter.getClass().getSimpleName(), filteredList);
             } catch (HostFilterException e) {
                 LOGGER.warn("Filter didn't succeed, moving to next filter", e);
             }
         }
+        LOGGER.info("Returned filtered hosts: {}", filteredList);
         return filteredList;
     }
 }

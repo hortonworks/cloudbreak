@@ -258,8 +258,11 @@ public class AmbariDecommissioner {
     private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication, int adjustment,
             List<HostMetadata> filteredHostList) {
         int removeCount = Math.abs(adjustment);
+        LOGGER.info("removeCount: {}, replication: {}, filteredHostList size: {}, filteredHostList: {}",
+                removeCount, replication, filteredHostList.size(), filteredHostList);
         Map<String, Map<Long, Long>> dfsSpace = getDFSSpace(stack, client);
         Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
+        LOGGER.info("sortedAscending: {}", sortedAscending);
         Map<String, Long> selectedNodes = selectNodes(sortedAscending, filteredHostList, removeCount);
         Map<String, Long> remainingNodes = removeSelected(sortedAscending, selectedNodes);
         LOGGER.info("Selected nodes for decommission: {}", selectedNodes);
@@ -290,6 +293,7 @@ public class AmbariDecommissioner {
     }
 
     private Map<String, Long> selectNodes(Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {
+        LOGGER.info("sortedAscending: {}, filteredHostList: {}", sortedAscending, filteredHostList);
         Map<String, Long> select = new HashMap<>();
         int i = 0;
         for (String host : sortedAscending.keySet()) {

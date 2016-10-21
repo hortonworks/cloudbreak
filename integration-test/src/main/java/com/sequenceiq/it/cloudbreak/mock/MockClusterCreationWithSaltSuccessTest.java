@@ -183,7 +183,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
             new ServerAddressGenerator(numberOfServers).iterateOver(address -> {
                 GenericResponse genericResponse = new GenericResponse();
                 genericResponse.setAddress(address);
-                genericResponse.setStatus("host-" + address.replace(".", "-"));
+                genericResponse.setStatus("host-" + address.replace(".", "-") + ".example.com");
                 responses.add(genericResponse);
             });
             genericResponses.setResponses(responses);
