@@ -31,7 +31,7 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
 
     @Override
     public String initEvent() {
-        return FlowTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
+        return FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
     }
 
     @Override

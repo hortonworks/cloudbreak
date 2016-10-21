@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<StackEvent> {
     @Override
     public String initEvent() {
-        return FlowTriggers.FULL_PROVISION_TRIGGER_EVENT;
+        return FlowChainTriggers.FULL_PROVISION_TRIGGER_EVENT;
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
@@ -34,12 +35,12 @@ public class ReactorFlowManager {
     private ErrorHandlerAwareFlowEventFactory eventFactory;
 
     public void triggerProvisioning(Long stackId) {
-        String selector = FlowTriggers.FULL_PROVISION_TRIGGER_EVENT;
+        String selector = FlowChainTriggers.FULL_PROVISION_TRIGGER_EVENT;
         reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 
     public void triggerStackStart(Long stackId) {
-        String selector = FlowTriggers.FULL_START_TRIGGER_EVENT;
+        String selector = FlowChainTriggers.FULL_START_TRIGGER_EVENT;
         StackEvent startTriggerEvent = new StackEvent(selector, stackId);
         reactor.notify(selector, eventFactory.createEvent(startTriggerEvent, selector));
     }
@@ -50,7 +51,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerStackUpscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment) {
-        String selector = FlowTriggers.FULL_UPSCALE_TRIGGER_EVENT;
+        String selector = FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
         StackAndClusterUpscaleTriggerEvent stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
                 stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
                 instanceGroupAdjustment.getWithClusterEvent() ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
@@ -96,7 +97,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterReInstall(Long stackId) {
-        String selector = FlowTriggers.CLUSTER_RESET_CHAIN_TRIGGER_EVENT;
+        String selector = FlowChainTriggers.CLUSTER_RESET_CHAIN_TRIGGER_EVENT;
         reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 
@@ -114,7 +115,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterDownscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
-        String selector = FlowTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
+        String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
         ScalingType scalingType = hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER;
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
                 hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment(), scalingType);
@@ -127,7 +128,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterStop(Long stackId) {
-        String selector = FlowTriggers.FULL_STOP_TRIGGER_EVENT;
+        String selector = FlowChainTriggers.FULL_STOP_TRIGGER_EVENT;
         reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 
@@ -137,7 +138,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerFullSync(Long stackId) {
-        String selector = FlowTriggers.FULL_SYNC_TRIGGER_EVENT;
+        String selector = FlowChainTriggers.FULL_SYNC_TRIGGER_EVENT;
         reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 
@@ -146,4 +147,3 @@ public class ReactorFlowManager {
         reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 }
-
