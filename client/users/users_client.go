@@ -39,7 +39,7 @@ func (a *Client) EvictUserDetails(params *EvictUserDetailsParams) (*EvictUserDet
 		PathPattern:        "/users/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &EvictUserDetailsReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) HasResources(params *HasResourcesParams) (*HasResourcesOK, erro
 		PathPattern:        "/users/{id}/resources",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &HasResourcesReader{formats: a.formats},
 	})

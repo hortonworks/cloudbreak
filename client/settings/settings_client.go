@@ -39,7 +39,7 @@ func (a *Client) GetAllSettings(params *GetAllSettingsParams) (*GetAllSettingsOK
 		PathPattern:        "/settings/all",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetAllSettingsReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) GetDatabaseConfigSettings(params *GetDatabaseConfigSettingsPara
 		PathPattern:        "/settings/database",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetDatabaseConfigSettingsReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) GetRecipeSettings(params *GetRecipeSettingsParams) (*GetRecipeS
 		PathPattern:        "/settings/recipe",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetRecipeSettingsReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetSssdConfigSettings(params *GetSssdConfigSettingsParams) (*Ge
 		PathPattern:        "/settings/sssd",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetSssdConfigSettingsReader{formats: a.formats},
 	})

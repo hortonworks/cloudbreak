@@ -39,7 +39,7 @@ func (a *Client) DeleteNetworksAccountName(params *DeleteNetworksAccountNamePara
 		PathPattern:        "/networks/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteNetworksAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteNetworksID(params *DeleteNetworksIDParams) error {
 		PathPattern:        "/networks/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteNetworksIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteNetworksUserName(params *DeleteNetworksUserNameParams) er
 		PathPattern:        "/networks/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteNetworksUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetNetworksAccount(params *GetNetworksAccountParams) (*GetNetwo
 		PathPattern:        "/networks/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetNetworksAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetNetworksAccountName(params *GetNetworksAccountNameParams) (*
 		PathPattern:        "/networks/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetNetworksAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetNetworksID(params *GetNetworksIDParams) (*GetNetworksIDOK, e
 		PathPattern:        "/networks/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetNetworksIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetNetworksUser(params *GetNetworksUserParams) (*GetNetworksUse
 		PathPattern:        "/networks/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetNetworksUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetNetworksUserName(params *GetNetworksUserNameParams) (*GetNet
 		PathPattern:        "/networks/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetNetworksUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostNetworksAccount(params *PostNetworksAccountParams) (*PostNe
 		PathPattern:        "/networks/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostNetworksAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostNetworksUser(params *PostNetworksUserParams) (*PostNetworks
 		PathPattern:        "/networks/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostNetworksUserReader{formats: a.formats},
 	})

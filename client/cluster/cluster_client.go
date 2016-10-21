@@ -39,7 +39,7 @@ func (a *Client) DeleteStacksIDCluster(params *DeleteStacksIDClusterParams) erro
 		PathPattern:        "/stacks/{id}/cluster",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteStacksIDClusterReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) GetStacksAccountNameCluster(params *GetStacksAccountNameCluster
 		PathPattern:        "/stacks/account/{name}/cluster",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetStacksAccountNameClusterReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) GetStacksIDCluster(params *GetStacksIDClusterParams) (*GetStack
 		PathPattern:        "/stacks/{id}/cluster",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetStacksIDClusterReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetStacksUserNameCluster(params *GetStacksUserNameClusterParams
 		PathPattern:        "/stacks/user/{name}/cluster",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetStacksUserNameClusterReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) PostStacksIDCluster(params *PostStacksIDClusterParams) (*PostSt
 		PathPattern:        "/stacks/{id}/cluster",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostStacksIDClusterReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) PutStacksIDCluster(params *PutStacksIDClusterParams) error {
 		PathPattern:        "/stacks/{id}/cluster",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PutStacksIDClusterReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetConfigs(params *GetConfigsParams) (*GetConfigsOK, error) {
 		PathPattern:        "/stacks/{id}/cluster/config",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetConfigsReader{formats: a.formats},
 	})

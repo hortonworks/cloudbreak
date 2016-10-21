@@ -39,7 +39,7 @@ func (a *Client) DeleteTemplatesAccountName(params *DeleteTemplatesAccountNamePa
 		PathPattern:        "/templates/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteTemplatesAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteTemplatesID(params *DeleteTemplatesIDParams) error {
 		PathPattern:        "/templates/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteTemplatesIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteTemplatesUserName(params *DeleteTemplatesUserNameParams) 
 		PathPattern:        "/templates/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteTemplatesUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetTemplatesAccount(params *GetTemplatesAccountParams) (*GetTem
 		PathPattern:        "/templates/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetTemplatesAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetTemplatesAccountName(params *GetTemplatesAccountNameParams) 
 		PathPattern:        "/templates/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetTemplatesAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetTemplatesID(params *GetTemplatesIDParams) (*GetTemplatesIDOK
 		PathPattern:        "/templates/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetTemplatesIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetTemplatesUser(params *GetTemplatesUserParams) (*GetTemplates
 		PathPattern:        "/templates/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetTemplatesUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetTemplatesUserName(params *GetTemplatesUserNameParams) (*GetT
 		PathPattern:        "/templates/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetTemplatesUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostTemplatesAccount(params *PostTemplatesAccountParams) (*Post
 		PathPattern:        "/templates/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostTemplatesAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostTemplatesUser(params *PostTemplatesUserParams) (*PostTempla
 		PathPattern:        "/templates/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostTemplatesUserReader{formats: a.formats},
 	})

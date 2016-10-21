@@ -39,7 +39,7 @@ func (a *Client) Subscribe(params *SubscribeParams) (*SubscribeOK, error) {
 		PathPattern:        "/subscriptions",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &SubscribeReader{formats: a.formats},
 	})

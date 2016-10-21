@@ -39,7 +39,7 @@ func (a *Client) DeleteConstraintsAccountName(params *DeleteConstraintsAccountNa
 		PathPattern:        "/constraints/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteConstraintsAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteConstraintsID(params *DeleteConstraintsIDParams) error {
 		PathPattern:        "/constraints/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteConstraintsIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteConstraintsUserName(params *DeleteConstraintsUserNamePara
 		PathPattern:        "/constraints/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteConstraintsUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetConstraintsAccount(params *GetConstraintsAccountParams) (*Ge
 		PathPattern:        "/constraints/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetConstraintsAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetConstraintsAccountName(params *GetConstraintsAccountNamePara
 		PathPattern:        "/constraints/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetConstraintsAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetConstraintsID(params *GetConstraintsIDParams) (*GetConstrain
 		PathPattern:        "/constraints/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetConstraintsIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetConstraintsUser(params *GetConstraintsUserParams) (*GetConst
 		PathPattern:        "/constraints/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetConstraintsUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetConstraintsUserName(params *GetConstraintsUserNameParams) (*
 		PathPattern:        "/constraints/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetConstraintsUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostConstraintsAccount(params *PostConstraintsAccountParams) (*
 		PathPattern:        "/constraints/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostConstraintsAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostConstraintsUser(params *PostConstraintsUserParams) (*PostCo
 		PathPattern:        "/constraints/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostConstraintsUserReader{formats: a.formats},
 	})

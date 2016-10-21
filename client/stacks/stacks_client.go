@@ -39,7 +39,7 @@ func (a *Client) DeleteStacksAccountName(params *DeleteStacksAccountNameParams) 
 		PathPattern:        "/stacks/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteStacksAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteStacksID(params *DeleteStacksIDParams) error {
 		PathPattern:        "/stacks/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteStacksIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteStacksUserName(params *DeleteStacksUserNameParams) error 
 		PathPattern:        "/stacks/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteStacksUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetStacksAccount(params *GetStacksAccountParams) (*GetStacksAcc
 		PathPattern:        "/stacks/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetStacksAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetStacksAccountName(params *GetStacksAccountNameParams) (*GetS
 		PathPattern:        "/stacks/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetStacksAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetStacksID(params *GetStacksIDParams) (*GetStacksIDOK, error) 
 		PathPattern:        "/stacks/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetStacksIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetStacksUser(params *GetStacksUserParams) (*GetStacksUserOK, e
 		PathPattern:        "/stacks/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetStacksUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetStacksUserName(params *GetStacksUserNameParams) (*GetStacksU
 		PathPattern:        "/stacks/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetStacksUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostStacksAccount(params *PostStacksAccountParams) (*PostStacks
 		PathPattern:        "/stacks/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostStacksAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostStacksUser(params *PostStacksUserParams) (*PostStacksUserOK
 		PathPattern:        "/stacks/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostStacksUserReader{formats: a.formats},
 	})
@@ -309,7 +309,7 @@ func (a *Client) PostStacksValidate(params *PostStacksValidateParams) error {
 		PathPattern:        "/stacks/validate",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostStacksValidateReader{formats: a.formats},
 	})
@@ -336,7 +336,7 @@ func (a *Client) PutStacksID(params *PutStacksIDParams) error {
 		PathPattern:        "/stacks/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PutStacksIDReader{formats: a.formats},
 	})
@@ -363,7 +363,7 @@ func (a *Client) DeleteInstance(params *DeleteInstanceParams) error {
 		PathPattern:        "/stacks/{stackId}/{instanceId}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteInstanceReader{formats: a.formats},
 	})
@@ -390,7 +390,7 @@ func (a *Client) GetCertificate(params *GetCertificateParams) (*GetCertificateOK
 		PathPattern:        "/stacks/{id}/certificate",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetCertificateReader{formats: a.formats},
 	})
@@ -417,7 +417,7 @@ func (a *Client) GetStackForAmbari(params *GetStackForAmbariParams) (*GetStackFo
 		PathPattern:        "/stacks/ambari",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetStackForAmbariReader{formats: a.formats},
 	})
@@ -444,7 +444,7 @@ func (a *Client) Status(params *StatusParams) (*StatusOK, error) {
 		PathPattern:        "/stacks/{id}/status",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &StatusReader{formats: a.formats},
 	})
@@ -471,7 +471,7 @@ func (a *Client) Variants(params *VariantsParams) (*VariantsOK, error) {
 		PathPattern:        "/stacks/platformVariants",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &VariantsReader{formats: a.formats},
 	})

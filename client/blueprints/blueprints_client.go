@@ -39,7 +39,7 @@ func (a *Client) GetBlueprintsID(params *GetBlueprintsIDParams) (*GetBlueprintsI
 		PathPattern:        "/blueprints/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetBlueprintsIDReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) Delete(params *DeleteParams) error {
 		PathPattern:        "/blueprints/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeletePrivate(params *DeletePrivateParams) error {
 		PathPattern:        "/blueprints/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeletePrivateReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) DeletePublic(params *DeletePublicParams) error {
 		PathPattern:        "/blueprints/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeletePublicReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetPrivate(params *GetPrivateParams) (*GetPrivateOK, error) {
 		PathPattern:        "/blueprints/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetPrivateReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetPrivates(params *GetPrivatesParams) (*GetPrivatesOK, error) 
 		PathPattern:        "/blueprints/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetPrivatesReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetPublic(params *GetPublicParams) (*GetPublicOK, error) {
 		PathPattern:        "/blueprints/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetPublicReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetPublics(params *GetPublicsParams) (*GetPublicsOK, error) {
 		PathPattern:        "/blueprints/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetPublicsReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostPrivate(params *PostPrivateParams) (*PostPrivateOK, error) 
 		PathPattern:        "/blueprints/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostPrivateReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostPublic(params *PostPublicParams) (*PostPublicOK, error) {
 		PathPattern:        "/blueprints/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostPublicReader{formats: a.formats},
 	})

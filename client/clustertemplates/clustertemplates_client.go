@@ -39,7 +39,7 @@ func (a *Client) DeleteClustertemplatesAccountName(params *DeleteClustertemplate
 		PathPattern:        "/clustertemplates/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteClustertemplatesAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteClustertemplatesID(params *DeleteClustertemplatesIDParams
 		PathPattern:        "/clustertemplates/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteClustertemplatesIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteClustertemplatesUserName(params *DeleteClustertemplatesUs
 		PathPattern:        "/clustertemplates/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteClustertemplatesUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetClustertemplatesAccount(params *GetClustertemplatesAccountPa
 		PathPattern:        "/clustertemplates/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetClustertemplatesAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetClustertemplatesAccountName(params *GetClustertemplatesAccou
 		PathPattern:        "/clustertemplates/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetClustertemplatesAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetClustertemplatesID(params *GetClustertemplatesIDParams) (*Ge
 		PathPattern:        "/clustertemplates/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetClustertemplatesIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetClustertemplatesUser(params *GetClustertemplatesUserParams) 
 		PathPattern:        "/clustertemplates/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetClustertemplatesUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetClustertemplatesUserName(params *GetClustertemplatesUserName
 		PathPattern:        "/clustertemplates/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetClustertemplatesUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostClustertemplatesAccount(params *PostClustertemplatesAccount
 		PathPattern:        "/clustertemplates/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostClustertemplatesAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostClustertemplatesUser(params *PostClustertemplatesUserParams
 		PathPattern:        "/clustertemplates/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostClustertemplatesUserReader{formats: a.formats},
 	})

@@ -39,7 +39,7 @@ func (a *Client) DeleteLdapAccountName(params *DeleteLdapAccountNameParams) erro
 		PathPattern:        "/ldap/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteLdapAccountNameReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) DeleteLdapID(params *DeleteLdapIDParams) error {
 		PathPattern:        "/ldap/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteLdapIDReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) DeleteLdapUserName(params *DeleteLdapUserNameParams) error {
 		PathPattern:        "/ldap/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteLdapUserNameReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetLdapAccount(params *GetLdapAccountParams) (*GetLdapAccountOK
 		PathPattern:        "/ldap/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetLdapAccountReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetLdapAccountName(params *GetLdapAccountNameParams) (*GetLdapA
 		PathPattern:        "/ldap/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetLdapAccountNameReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetLdapID(params *GetLdapIDParams) (*GetLdapIDOK, error) {
 		PathPattern:        "/ldap/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetLdapIDReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetLdapUser(params *GetLdapUserParams) (*GetLdapUserOK, error) 
 		PathPattern:        "/ldap/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetLdapUserReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetLdapUserName(params *GetLdapUserNameParams) (*GetLdapUserNam
 		PathPattern:        "/ldap/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetLdapUserNameReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) PostLdapAccount(params *PostLdapAccountParams) (*PostLdapAccoun
 		PathPattern:        "/ldap/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostLdapAccountReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) PostLdapUser(params *PostLdapUserParams) (*PostLdapUserOK, erro
 		PathPattern:        "/ldap/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PostLdapUserReader{formats: a.formats},
 	})
