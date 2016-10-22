@@ -78,7 +78,7 @@ If the RDS flavour for the Ranger DB is Postgres, the following commands must be
 ```
 psql -h ${RANGER_DB_HOST} ${RDS_DB_NAME} ${RANGER_DB_ROOT_PASSWORD} 
 CREATE ROLE ${RANGER_DB_USER} WITH PASSWORD '${RANGER_DB_PASSWORD}' CREATEROLE CREATEDB LOGIN;
-GRANT ROLE ${RANGER_DB_USER} TO ${RANGER_DB_ROOT_USER};
+GRANT ${RANGER_DB_USER} TO ${RANGER_DB_ROOT_USER};
 ```
 
 To create the cluster:
