@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +56,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -73,8 +76,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.smartsense.configure:false}")
     private boolean configureSmartSense;
 
-    @Value("${cb.host.discovery.custom.domain:}")
-    private String customDomain;
+    @Inject
+    private HostDiscoveryService hostDiscoveryService;
 
     private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
     private ExitCriteria exitCriteria;
@@ -91,7 +94,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         LOGGER.info("Start SaltBootstrap on nodes: {}", targets);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             uploadSaltConfig(sc);
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, targets);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, targets, hostDiscoveryService.determineDomain());
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -106,7 +109,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, targets);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, targets, hostDiscoveryService.determineDomain());
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -126,7 +129,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
-            PillarSave hostSave = new PillarSave(sc, allNodes, !StringUtils.isEmpty(customDomain));
+            PillarSave hostSave = new PillarSave(sc, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain()));
             saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
             saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
@@ -141,11 +144,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> server = Sets.newHashSet(gatewayConfig.getPrivateAddress());
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
 
-            LOGGER.info("Pillar saved, starting to set up discovery...");
-            //run discovery only
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
-
-            LOGGER.info("Pillar saved, discovery has been set up with highstate");
+            LOGGER.info("Pillar saved, setting up grains...");
 
             // ambari server
             runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitCriteriaModel);

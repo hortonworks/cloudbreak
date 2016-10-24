@@ -6,6 +6,8 @@ public class SaltMaster {
 
     private SaltAuth auth;
 
+    private String domain;
+
     public String getAddress() {
         return address;
     }
@@ -20,5 +22,13 @@ public class SaltMaster {
 
     public void setAuth(SaltAuth auth) {
         this.auth = auth;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }
