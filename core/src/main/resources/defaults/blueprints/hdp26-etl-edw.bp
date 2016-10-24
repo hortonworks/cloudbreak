@@ -1,0 +1,186 @@
+{
+  "inputs": [],
+  "blueprint": {
+    "Blueprints": {
+      "blueprint_name": "hdp-etl-edw",
+      "stack_name": "HDP",
+      "stack_version": "2.6"
+    },
+    "configurations": [
+      {
+        "core-site": {
+          "fs.trash.interval": "4320"
+        }
+      },
+      {
+        "hdfs-site": {
+          "dfs.namenode.safemode.threshold-pct": "0.99"
+        }
+      },
+      {
+        "hive-site": {
+          "hive.exec.compress.output": "true",
+          "hive.merge.mapfiles": "true",
+          "hive.server2.tez.initialize.default.sessions": "true"
+        }
+      },
+      {
+        "mapred-site": {
+          "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
+          "mapreduce.map.output.compress": "true",
+          "mapreduce.output.fileoutputformat.compress": "true"
+        }
+      },
+      {
+        "yarn-site": {
+          "yarn.acl.enable": "true"
+        }
+      },
+      {
+      "druid-overlord" : {
+        "properties_attributes" : { },
+        "properties" : {
+          "druid.indexer.storage.type" : "metadata",
+          "druid.indexer.runner.type" : "remote",
+          "druid.service" : "druid/overlord",
+          "druid.port" : "8090"
+        }
+      }
+    },
+      {
+      "druid-middlemanager" : {
+        "properties_attributes" : { },
+        "properties" : {
+          "druid.indexer.task.hadoopWorkingPath" : "/tmp/druid-indexing",
+          "druid.server.http.numThreads" : "50",
+          "druid.indexer.runner.startPort" : "8100",
+          "druid.worker.capacity" : "3",
+          "druid.processing.numThreads" : "2",
+          "druid.indexer.runner.javaOpts" : "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
+          "druid.indexer.task.baseTaskDir" : "/tmp/persistent/tasks",
+          "druid.processing.buffer.sizeBytes" : "256000000",
+          "druid.service" : "druid/middlemanager",
+          "druid.port" : "8091"
+        }
+      }
+    }
+    ],
+    "host_groups": [
+      {
+        "name": "master",
+        "configurations": [],
+        "components": [
+          {
+            "name": "APP_TIMELINE_SERVER"
+          },
+          {
+            "name": "HCAT"
+          },
+          {
+            "name": "HDFS_CLIENT"
+          },
+          {
+            "name": "HISTORYSERVER"
+          },
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "HIVE_METASTORE"
+          },
+          {
+            "name": "HIVE_SERVER"
+          },
+          {
+            "name": "JOURNALNODE"
+          },
+          {
+            "name": "LIVY_SERVER"
+          },
+          {
+            "name": "MAPREDUCE2_CLIENT"
+          },
+          {
+            "name": "METRICS_COLLECTOR"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "MYSQL_SERVER"
+          },
+          {
+            "name": "NAMENODE"
+          },
+          {
+            "name": "PIG"
+          },
+          {
+            "name": "RESOURCEMANAGER"
+          },
+          {
+            "name": "SECONDARY_NAMENODE"
+          },
+          {
+            "name": "SPARK_CLIENT"
+          },
+          {
+            "name": "SPARK_JOBHISTORYSERVER"
+          },
+          {
+            "name": "SQOOP"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "WEBHCAT_SERVER"
+          },
+          {
+            "name": "YARN_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_SERVER"
+          },
+          {
+            "name" : "DRUID_OVERLORD",
+            "provision_action": "INSTALL_ONLY"
+          }
+        ],
+        "cardinality": "1"
+      },
+      {
+        "name": "worker",
+        "configurations": [],
+        "components": [
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "SPARK_CLIENT"
+          },
+          {
+            "name": "DATANODE"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          },
+          {
+            "name" : "DRUID_MIDDLEMANAGER",
+            "provision_action": "INSTALL_ONLY"
+          }
+        ],
+        "cardinality": "1+"
+      }
+    ]
+  }
+}
