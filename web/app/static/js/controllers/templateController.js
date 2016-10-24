@@ -261,7 +261,8 @@ angular.module('uluwatuControllers').controller('templateController', [
             return volume !== 'ephemeral';
         }
 
-        $scope.changeInstanceType = function(instanceType, volumeType, platform, templateTemp) {
+        $scope.changeInstanceType = function(instanceType, volumeType, platform, templateTemp, instanceTypeChanged) {
+            instanceTypeChanged = instanceTypeChanged || false;
             var actualInstanceType = $filter('filter')($rootScope.params.vmTypes[platform], {
                 value: instanceType
             }, true)[0];
@@ -270,6 +271,12 @@ angular.module('uluwatuControllers').controller('templateController', [
                 var diskConfig = $filter('filter')(actualInstanceType.vmTypeMetaJson.configs, {
                     volumeParameterType: diskMapping
                 }, true)[0];
+                if (instanceTypeChanged && (diskConfig == null || diskConfig === undefined || diskConfig.maximumNumber == 0)) {
+                    templateTemp.volumeType = volumeType = $rootScope.params.defaultDisks[platform];
+                    diskConfig = $filter('filter')(actualInstanceType.vmTypeMetaJson.configs, {
+                        volumeParameterType: $rootScope.params.diskMappings[platform][volumeType]
+                    }, true)[0];
+                }
                 templateTemp.maxDiskNumber = diskConfig.maximumNumber;
                 templateTemp.minDiskNumber = diskConfig.minimumNumber;
                 templateTemp.minDiskSize = diskConfig.minimumSize;
@@ -279,16 +286,20 @@ angular.module('uluwatuControllers').controller('templateController', [
                 if (templateTemp.maxDiskNumber === templateTemp.minDiskNumber) {
                     templateTemp.volumeCount = templateTemp.maxDiskNumber;
                 } else if (templateTemp.volumeCount < templateTemp.minDiskNumber) {
-                    templateTemp.volumeCount = templateTemp.minDiskNumber;
+                    templateTemp.volumeCount = defaultAwsVolumeCount;
                 } else if (templateTemp.volumeCount > templateTemp.maxDiskNumber) {
                     templateTemp.volumeCount = templateTemp.maxDiskNumber;
+                } else {
+                    templateTemp.volumeCount = defaultAwsVolumeCount;
                 }
                 if (templateTemp.minDiskSize === templateTemp.maxDiskSize) {
                     templateTemp.volumeSize = templateTemp.maxDiskSize;
                 } else if (templateTemp.volumeSize < templateTemp.minDiskSize) {
-                    templateTemp.volumeSize = templateTemp.minDiskSize;
+                    templateTemp.volumeSize = defaultAwsVolumeSize;
                 } else if (templateTemp.volumeSize > templateTemp.maxDiskSize) {
                     templateTemp.volumeSize = templateTemp.maxDiskSize;
+                } else {
+                    templateTemp.volumeSize = defaultAwsVolumeSize;
                 }
             } else {
                 templateTemp.maxDiskNumber = 24;
@@ -304,10 +315,12 @@ angular.module('uluwatuControllers').controller('templateController', [
             angular.element(document.querySelector('#panel-create-templates-collapse-btn')).click();
         }
 
+        var defaultAwsVolumeCount = 1;
+        var defaultAwsVolumeSize = 100;
         function initializeAwsTemp() {
             $scope.awsTemp = {
-                volumeCount: 1,
-                volumeSize: 100,
+                volumeCount: defaultAwsVolumeCount,
+                volumeSize: defaultAwsVolumeSize,
                 volumeType: $rootScope.params.defaultDisks.AWS,
                 instanceType: $rootScope.params.defaultVmTypes.AWS,
                 parameters: {
