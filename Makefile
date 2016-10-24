@@ -16,8 +16,11 @@ deps:
 format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
+vet:
+	go vet -race github.com/hortonworks/hdc-cli/cli
+
 test:
-	go test -race ./...
+	go test -race github.com/hortonworks/hdc-cli/cli
 
 coverage:
 	go test github.com/hortonworks/hdc-cli/cli -cover
@@ -27,7 +30,7 @@ coverage-html:
 	@go tool cover -html=fmt
 	@rm -f fmt
 
-build: format test build-darwin build-linux build-windows
+build: format vet test build-darwin build-linux build-windows
 
 build-docker:
 	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} golang:1.7.1 make build
