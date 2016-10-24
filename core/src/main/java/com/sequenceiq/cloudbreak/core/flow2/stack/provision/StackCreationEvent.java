@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
@@ -23,6 +24,8 @@ public enum StackCreationEvent implements FlowEvent {
     COLLECT_METADATA_FAILED_EVENT(CollectMetadataResult.failureSelector(CollectMetadataResult.class)),
     SSHFINGERPRINTS_EVENT(GetSSHFingerprintsResult.selector(GetSSHFingerprintsResult.class)),
     SSHFINGERPRINTS_FAILED_EVENT(GetSSHFingerprintsResult.failureSelector(GetSSHFingerprintsResult.class)),
+    GET_TLS_INFO_FINISHED_EVENT(GetTlsInfoResult.selector(GetTlsInfoResult.class)),
+    GET_TLS_INFO_FAILED_EVENT(GetTlsInfoResult.failureSelector(GetTlsInfoResult.class)),
     TLS_SETUP_FINISHED_EVENT("TLS_SETUP_FINISHED_EVENT"),
     STACK_CREATION_FAILED_EVENT("STACK_CREATION_FAILED"),
     STACK_CREATION_FINISHED_EVENT("STACK_CREATION_FINISHED"),

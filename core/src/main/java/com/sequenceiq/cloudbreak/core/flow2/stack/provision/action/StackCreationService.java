@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -47,11 +48,13 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -99,6 +102,8 @@ public class StackCreationService {
     private StackToCloudStackConverter cloudStackConverter;
     @Inject
     private FlowMessageService flowMessageService;
+    @Inject
+    private GatewayConfigService gatewayConfigService;
 
     public void startProvisioning(StackContext context) {
         Stack stack = context.getStack();
@@ -156,12 +161,25 @@ public class StackCreationService {
         return stackService.getById(stack.getId());
     }
 
+    public Stack saveTlsInfo(StackContext context, TlsInfo tlsInfo) {
+        boolean usePrivateIpToTls = tlsInfo.usePrivateIpToTls();
+        Stack stack = context.getStack();
+        if (usePrivateIpToTls) {
+            SecurityConfig securityConfig = stack.getSecurityConfig();
+            securityConfig.setUsePrivateIpToTls(usePrivateIpToTls);
+            stackUpdater.updateStackSecurityConfig(stack, securityConfig);
+            stack = stackService.getById(stack.getId());
+            LOGGER.info("Update Stack and it's SecurityConfig to use private ip when TLS is built.");
+        }
+        return stack;
+    }
+
     public Stack setupTls(StackContext context, GetSSHFingerprintsResult sshFingerprints) throws CloudbreakException {
         LOGGER.info("Fingerprint has been determined: {}", sshFingerprints.getSshFingerprints());
         Stack stack = context.getStack();
-        InstanceMetaData firstInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
-        tlsSetupService.setupTls(stack, stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next().getPublicIpWrapper(),
-                firstInstance.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
+        InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
+        String ipToTls = gatewayConfigService.getGatewayIp(stack);
+        tlsSetupService.setupTls(stack, ipToTls, gatewayInstance.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
         return stackService.getById(stack.getId());
     }
 

@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 
 /**
@@ -126,4 +127,12 @@ public interface ResourceConnector {
     List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext,
             CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms);
 
+    /**
+     * Gets the Cloud platform related tls info.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @return the platform related tls info
+     */
+
+    TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack);
 }

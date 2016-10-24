@@ -50,6 +50,9 @@ public class SecurityConfig implements ProvisionEntity {
     @OneToOne(fetch = FetchType.LAZY)
     private Stack stack;
 
+    @Column(nullable = false)
+    private boolean usePrivateIpToTls;
+
     public SecurityConfig() {
     }
 
@@ -123,5 +126,13 @@ public class SecurityConfig implements ProvisionEntity {
 
     public void setStack(Stack stack) {
         this.stack = stack;
+    }
+
+    public boolean usePrivateIpToTls() {
+        return usePrivateIpToTls;
+    }
+
+    public void setUsePrivateIpToTls(boolean usePrivateIpToTls) {
+        this.usePrivateIpToTls = usePrivateIpToTls;
     }
 }
