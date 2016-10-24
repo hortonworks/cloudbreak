@@ -13,24 +13,24 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 @Component
 public class ClusterServiceRunner {
@@ -52,6 +52,8 @@ public class ClusterServiceRunner {
     private ClusterContainerRunner containerRunner;
     @Inject
     private ClusterHostServiceRunner hostRunner;
+    @Inject
+    private GatewayConfigService gatewayConfigService;
 
     public void runAmbariServices(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
@@ -76,10 +78,8 @@ public class ClusterServiceRunner {
             clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup);
         } else if (orchestratorType.hostOrchestrator()) {
             hostRunner.runAmbariServices(stack);
-            InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-            String gatewayPublicIp = gatewayInstance.getPublicIpWrapper();
-            HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayPublicIp);
+            String gatewayIp = gatewayConfigService.getGatewayIp(stack);
+            HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayIp);
             clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
             Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
             for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {

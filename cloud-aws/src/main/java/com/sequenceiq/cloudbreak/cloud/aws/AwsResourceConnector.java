@@ -89,6 +89,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -574,6 +575,14 @@ public class AwsResourceConnector implements ResourceConnector {
         amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         LOGGER.info("Terminated instances in stack '{}': '{}'", auth.getCloudContext().getId(), instanceIds);
         return check(auth, resources);
+    }
+
+    @Override
+    public TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
+        Network network = cloudStack.getNetwork();
+        AwsNetworkView networkView = new AwsNetworkView(network);
+        boolean sameVPC = deployingToSameVPC(networkView, networkView.isExistingVPC());
+        return new TlsInfo(sameVPC);
     }
 
     private void scheduleStatusChecks(CloudStack stack, AuthenticatedContext ac, AmazonCloudFormationClient cloudFormationClient) {

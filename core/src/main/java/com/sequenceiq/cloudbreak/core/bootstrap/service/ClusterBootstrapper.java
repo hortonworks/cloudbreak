@@ -132,6 +132,7 @@ public class ClusterBootstrapper {
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance);
+            String gatewayIp = gatewayConfigService.getGatewayIp(stack, gatewayInstance);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     hostBootstrapApiCheckerTask,
@@ -148,7 +149,7 @@ public class ClusterBootstrapper {
                     MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
             Orchestrator orchestrator = stack.getOrchestrator();
-            orchestrator.setApiEndpoint(gatewayInstance.getPublicIpWrapper() + ":" + stack.getGatewayPort());
+            orchestrator.setApiEndpoint(gatewayIp + ":" + stack.getGatewayPort());
             orchestrator.setType(hostOrchestrator.name());
             orchestratorRepository.save(orchestrator);
             if (TIMEOUT.equals(allNodesAvailabilityPolling)) {
@@ -168,6 +169,7 @@ public class ClusterBootstrapper {
             InstanceGroup gateway = stack.getGatewayInstanceGroup();
             InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance);
+            String gatewayIp = gatewayConfigService.getGatewayIp(stack, gatewayInstance);
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(SWARM);
             PollingResult bootstrapApiPolling = containerBootstrapApiPollingService.pollWithTimeoutSingleFailure(
                     containerBootstrapApiCheckerTask,
@@ -176,7 +178,7 @@ public class ClusterBootstrapper {
                     MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
 
-            List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator.getMaxBootstrapNodes(), gatewayInstance.getPublicIpWrapper());
+            List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator.getMaxBootstrapNodes(), gatewayIp);
             containerOrchestrator.bootstrap(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(0), stack.getConsulServers(),
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
             if (nodeMap.size() > 1) {
@@ -205,7 +207,7 @@ public class ClusterBootstrapper {
             validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
             // TODO: put it in orchestrator api
             Orchestrator orchestrator = new Orchestrator();
-            orchestrator.setApiEndpoint(gatewayInstance.getPublicIpWrapper() + ":" + stack.getGatewayPort());
+            orchestrator.setApiEndpoint(gatewayIp + ":" + stack.getGatewayPort());
             orchestrator.setType("SWARM");
             orchestratorRepository.save(orchestrator);
             stack.setOrchestrator(orchestrator);
@@ -249,7 +251,8 @@ public class ClusterBootstrapper {
     private void bootstrapNewNodesOnHost(Stack stack, InstanceMetaData gatewayInstance, Set<Node> nodes, GatewayConfig gatewayConfig)
             throws CloudbreakException, CloudbreakOrchestratorException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-        List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, hostOrchestrator.getMaxBootstrapNodes(), gatewayInstance.getPublicIpWrapper());
+        String gatewayIp = gatewayConfigService.getGatewayIp(stack, gatewayInstance);
+        List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, hostOrchestrator.getMaxBootstrapNodes(), gatewayIp);
         PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithTimeoutSingleFailure(
                 hostBootstrapApiCheckerTask,
                 new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator),
@@ -282,7 +285,8 @@ public class ClusterBootstrapper {
     private void bootstrapNewNodesInContainer(Stack stack, InstanceMetaData gatewayInstance, Set<Node> nodes, GatewayConfig gatewayConfig)
             throws CloudbreakException, CloudbreakOrchestratorException {
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(SWARM);
-        List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator.getMaxBootstrapNodes(), gatewayInstance.getPublicIpWrapper());
+        String gatewayIpToTls = gatewayConfigService.getGatewayIp(stack, gatewayInstance);
+        List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator.getMaxBootstrapNodes(), gatewayIpToTls);
         for (Set<Node> aNodeMap : nodeMap) {
             containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), aNodeMap,
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), null));

@@ -27,8 +27,26 @@ public class GatewayConfigService {
 
     public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance)
             throws CloudbreakSecuritySetupException {
-        return tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(),
+        return tlsSecurityService.buildGatewayConfig(stack.getId(), getGatewayIp(stack, gatewayInstance),
                 stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), getSaltClientConfig(stack));
+    }
+
+    public String getGatewayIp(Stack stack) {
+        InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
+        return getGatewayIp(stack, gatewayInstance);
+    }
+
+    public String getGatewayIp(InstanceMetaData gatewayInstance) {
+        Stack stack = gatewayInstance.getInstanceGroup().getStack();
+        return getGatewayIp(stack);
+    }
+
+    public String getGatewayIp(Stack stack, InstanceMetaData gatewayInstance) {
+        String gatewayIP = gatewayInstance.getPublicIpWrapper();
+        if (stack.getSecurityConfig().usePrivateIpToTls()) {
+            gatewayIP = gatewayInstance.getPrivateIp();
+        }
+        return gatewayIP;
     }
 
     private SaltClientConfig getSaltClientConfig(Stack stack) {

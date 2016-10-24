@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Component
@@ -25,6 +26,8 @@ public class StackUpdater {
     private ResourceRepository resourceRepository;
     @Inject
     private StatusToPollGroupConverter statusToPollGroupConverter;
+    @Inject
+    private SecurityConfigRepository securityConfigRepository;
 
     public Stack updateStackStatus(Long stackId, Status status) {
         return doUpdateStackStatus(stackId, status, "");
@@ -46,6 +49,12 @@ public class StackUpdater {
 
     public void removeStackResources(List<Resource> resources) {
         resourceRepository.delete(resources);
+    }
+
+    public Stack updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {
+        securityConfig = securityConfigRepository.save(securityConfig);
+        stack.setSecurityConfig(securityConfig);
+        return stackRepository.save(stack);
     }
 
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
