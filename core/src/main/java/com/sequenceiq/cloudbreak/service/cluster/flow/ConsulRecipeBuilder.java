@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Plugin;
@@ -19,16 +18,17 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 @Component
 public class ConsulRecipeBuilder implements RecipeBuilder {
 
-    private static final int NAME_LENGTH = 10;
-
     @Override
-    public List<Recipe> buildRecipes(List<RecipeScript> recipeScripts, Map<String, String> properties) {
+    public List<Recipe> buildRecipes(String recipeName, List<RecipeScript> recipeScripts, Map<String, String> properties) {
         List<Recipe> recipes = new ArrayList<>();
         int index = 0;
         for (RecipeScript script : recipeScripts) {
             Recipe recipe = new Recipe();
-            String recipeName = RandomStringUtils.random(NAME_LENGTH, true, true);
-            recipe.setName(recipeName);
+            if (recipeScripts.size() > 1) {
+                recipe.setName(recipeName + "-" + index);
+            } else {
+                recipe.setName(recipeName);
+            }
             String tomlContent = new StringBuilder()
                     .append(String.format("[plugin]\nname=\"%s\"\ndescription=\"\"\nversion=\"1.0\"\n", recipeName))
                     .append("maintainer_name=\"Cloudbreak\"\n")

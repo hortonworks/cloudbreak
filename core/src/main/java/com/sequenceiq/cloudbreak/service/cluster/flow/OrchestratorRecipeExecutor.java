@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPES;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,8 @@ import javax.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.util.Joiner;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -28,6 +32,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
 @Component
 public class OrchestratorRecipeExecutor {
@@ -37,13 +43,23 @@ public class OrchestratorRecipeExecutor {
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
+
     @Inject
     private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
+
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
 
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         Map<String, List<RecipeModel>> recipeMap = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
                 .collect(Collectors.toMap(HostGroup::getName, h -> convert(h.getRecipes())));
+
+        recipesEvent(stack.getId(), stack.getStatus(), recipeMap);
+
         InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
         GatewayConfig gatewayConfig = tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance.getPublicIpWrapper(), stack.getGatewayPort(),
                 gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), stack.getSaltPassword());
@@ -112,5 +128,45 @@ public class OrchestratorRecipeExecutor {
             }
         }
         return agents;
+    }
+
+    private void recipesEvent(Long stackId, Status status, Map<String, List<RecipeModel>> recipeMap) {
+        List<String> recipes = new ArrayList<>();
+        for (String hostGroupName : recipeMap.keySet()) {
+            List<String> recipeNamesPerHostgroup = new ArrayList<>();
+            List<RecipeModel> recipeModels = recipeMap.get(hostGroupName);
+            for (RecipeModel rm : recipeModels) {
+                //filter out default recipes
+                if (!DEFAULT_RECIPES.contains(rm.getName())) {
+                    recipeNamesPerHostgroup.add(rm.getName());
+                }
+            }
+            if (!recipeNamesPerHostgroup.isEmpty()) {
+                String recipeNamesStr = Joiner.on(',').join(recipeNamesPerHostgroup);
+                recipes.add(String.format("%s:[%s]", hostGroupName, recipeNamesStr));
+            }
+        }
+
+        if (!recipes.isEmpty()) {
+            Collections.sort(recipes);
+            String messageStr = Joiner.on(';').join(recipes);
+            cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(),
+                    cloudbreakMessagesService.getMessage(OrchestratorRecipeExecutor.Msg.EXECUTE_RECIPES.code(), Collections.singletonList(messageStr)));
+        }
+    }
+
+    private enum Msg {
+
+        EXECUTE_RECIPES("recipes.execute");
+
+        private String code;
+
+        Msg(String msgCode) {
+            code = msgCode;
+        }
+
+        public String code() {
+            return code;
+        }
     }
 }
