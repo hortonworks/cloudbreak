@@ -68,7 +68,7 @@ public class SaltBootstrapTest {
         targets.add(new Node("10.0.0.2", null, null));
         targets.add(new Node("10.0.0.3", null, null));
 
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, gatewayConfig, targets);
+        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, gatewayConfig, targets, null);
         try {
             saltBootstrap.call();
         } catch (Exception e) {
@@ -89,7 +89,7 @@ public class SaltBootstrapTest {
         String missingNodeIp = "10.0.0.3";
         targets.add(new Node(missingNodeIp, null, null));
 
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, gatewayConfig, targets);
+        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, gatewayConfig, targets, null);
         try {
             saltBootstrap.call();
             fail("should throw exception");

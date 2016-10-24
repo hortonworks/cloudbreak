@@ -27,7 +27,7 @@
     <label class="col-sm-3 control-label" for="aws_tinstanceType">{{msg.template_form_instance_type_label}}</label>
 
     <div class="col-sm-9">
-        <select class="form-control" id="aws_tinstanceType" name="aws_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.AWS" ng-model="awsTemp.instanceType" ng-change="changeInstanceType(awsTemp.instanceType, awsTemp.volumeType, 'AWS', awsTemp)" required>
+        <select class="form-control" id="aws_tinstanceType" name="aws_tinstanceType" ng-options="instanceType.value as instanceType.value for instanceType in $root.params.vmTypes.AWS" ng-model="awsTemp.instanceType" ng-change="changeInstanceType(awsTemp.instanceType, awsTemp.volumeType, 'AWS', awsTemp, true)" required>
         </select>
         <div class="help-block ng-binding" ng-show="awsTemp.CPUs && awsTemp.RAMs">{{msg.template_form_vm_info | format: awsTemp.CPUs:awsTemp.RAMs}}</div>
     </div>

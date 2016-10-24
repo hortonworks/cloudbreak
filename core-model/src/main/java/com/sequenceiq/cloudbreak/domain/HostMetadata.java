@@ -101,4 +101,13 @@ public class HostMetadata {
         return EqualsBuilder.reflectionEquals(this, o, "hostGroup");
     }
 
+    @Override
+    public String toString() {
+        return "HostMetadata{"
+                + "id=" + id
+                + ", hostName='" + hostName + '\''
+                + ", hostGroupName=" + (hostGroup != null ? hostGroup.getName() : null)
+                + ", hostMetadataState=" + hostMetadataState
+                + '}';
+    }
 }

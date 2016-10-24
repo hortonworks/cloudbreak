@@ -9,6 +9,8 @@ public class Minion {
     private String server;
     private String hostGroup;
 
+    private String domain;
+
     public String getAddress() {
         return address;
     }
@@ -39,5 +41,13 @@ public class Minion {
 
     public void setHostGroup(String hostGroup) {
         this.hostGroup = hostGroup;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }
