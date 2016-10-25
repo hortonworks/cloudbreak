@@ -477,7 +477,11 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackService.getById(stackId);
         Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
         if (cluster == null) {
-            throw new BadRequestException(String.format("Cluster not exists on stack with '%s' id.", stackId));
+            throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stackId));
+        }
+        if (componentConfigProvider.getAmbariDatabase(stackId) != null) {
+            throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop " +
+                    "and then create it using DDL scripts from /var/lib/ambari-server/resources");
         }
         if (validateBlueprint) {
             blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stack.getInstanceGroups());
