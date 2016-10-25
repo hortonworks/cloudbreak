@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-: ${LOGFILE:=/var/log/recipes/hdfs-home.log}
-
 create_user_home() {
   export DOMAIN=$(dnsdomainname)
 su hdfs<<EOF
@@ -26,5 +24,4 @@ main(){
   create_user_home $USER
 }
 
-exec &>> "$LOGFILE"
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
