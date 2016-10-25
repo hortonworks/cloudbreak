@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -22,10 +23,17 @@ public class AwsPollTaskFactory {
     @Inject
     private ApplicationContext applicationContext;
 
-    public PollTask<Boolean> newAwsCloudformationStatusCheckerTask(AuthenticatedContext authenticatedContext, AmazonCloudFormationClient client,
-            StackStatus successStatus, StackStatus errorStatus, List<StackStatus> stackErrorStatuses, String cloudFormationStackName, boolean cancellable) {
-        return createPollTask(AwsCloudformationStatusCheckerTask.NAME, authenticatedContext, client, successStatus, errorStatus,
-                stackErrorStatuses, cloudFormationStackName, cancellable);
+    public PollTask<Boolean> newAwsCreateStackStatusCheckerTask(AuthenticatedContext authenticatedContext, AmazonCloudFormationClient cfClient,
+            AmazonAutoScalingClient asClient, StackStatus successStatus, StackStatus errorStatus, List<StackStatus> stackErrorStatuses,
+            String cloudFormationStackName) {
+        return createPollTask(AwsCreateStackStatusCheckerTask.NAME, authenticatedContext, cfClient, asClient, successStatus, errorStatus,
+                stackErrorStatuses, cloudFormationStackName);
+    }
+
+    public PollTask<Boolean> newAwsTerminateStackStatusCheckerTask(AuthenticatedContext authenticatedContext, AmazonCloudFormationClient cfClient,
+            StackStatus successStatus, StackStatus errorStatus, List<StackStatus> stackErrorStatuses, String cloudFormationStackName) {
+        return createPollTask(AwsTerminateStackStatusCheckerTask.NAME, authenticatedContext, cfClient, successStatus, errorStatus,
+                stackErrorStatuses, cloudFormationStackName);
     }
 
     public PollTask<Boolean> newEbsVolumeStatusCheckerTask(AuthenticatedContext authenticatedContext, CloudStack stack,
