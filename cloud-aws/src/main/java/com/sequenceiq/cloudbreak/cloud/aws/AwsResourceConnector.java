@@ -134,8 +134,10 @@ public class AwsResourceConnector implements ResourceConnector {
         resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
         Long stackId = ac.getCloudContext().getId();
-        AmazonCloudFormationClient client = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        String regionName = ac.getCloudContext().getLocation().getRegion().value();
+        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
+        AmazonAutoScalingClient asClient = awsClient.createAutoScalingClient(credentialView, regionName);
         String snapshotId = getEbsSnapshotIdIfNeeded(ac, stack);
         Network network = stack.getNetwork();
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
@@ -146,10 +148,8 @@ public class AwsResourceConnector implements ResourceConnector {
         boolean s3RoleAvailable = awsInstanceProfileView.isS3RoleAvailable();
         boolean enableInstanceProfile = awsInstanceProfileView.isEnableInstanceProfileStrategy();
         List<String> existingSubnetCidr = existingSubnet ? getExistingSubnetCidr(ac, stack) : null;
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
         boolean mapPublicIpOnLaunch = true;
         if (existingVPC && existingSubnet) {
             DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
@@ -177,10 +177,10 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withDefaultSubnet(subnet);
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
-        client.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
+        cfClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stackId);
-        PollTask<Boolean> task = awsPollTaskFactory.newAwsCloudformationStatusCheckerTask(ac, client,
-                CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, cFStackName, true);
+        PollTask<Boolean> task = awsPollTaskFactory.newAwsCreateStackStatusCheckerTask(ac, cfClient, asClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES,
+                cFStackName);
         try {
             Boolean statePollerResult = task.call();
             if (!task.completed(statePollerResult)) {
@@ -190,7 +190,7 @@ public class AwsResourceConnector implements ResourceConnector {
             throw new CloudConnectorException(e.getMessage(), e);
         }
 
-        List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, client, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
+        List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, cfClient, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
         return check(ac, cloudResources);
     }
 
@@ -408,18 +408,18 @@ public class AwsResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         LOGGER.info("Deleting stack: {}", ac.getCloudContext().getId());
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        String regionName = ac.getCloudContext().getLocation().getRegion().value();
         if (resources != null && !resources.isEmpty()) {
-            AmazonCloudFormationClient client = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
-                    ac.getCloudContext().getLocation().getRegion().value());
+            AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
             String cFStackName = getCloudFormationStackResource(resources).getName();
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", cFStackName, ac.getCloudContext().getId());
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
             try {
-                client.describeStacks(describeStacksRequest);
+                cfClient.describeStacks(describeStacksRequest);
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().contains(cFStackName + " does not exist")) {
-                    AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                            ac.getCloudContext().getLocation().getRegion().value());
+                    AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
                     releaseReservedIp(amazonEC2Client, resources);
                     return Collections.emptyList();
                 } else {
@@ -428,9 +428,9 @@ public class AwsResourceConnector implements ResourceConnector {
             }
             resumeAutoScalingPolicies(ac, stack);
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
-            client.deleteStack(deleteStackRequest);
-            PollTask<Boolean> task = awsPollTaskFactory.newAwsCloudformationStatusCheckerTask(ac, client,
-                    DELETE_COMPLETE, DELETE_FAILED, ERROR_STATUSES, cFStackName, false);
+            cfClient.deleteStack(deleteStackRequest);
+            PollTask<Boolean> task = awsPollTaskFactory.newAwsTerminateStackStatusCheckerTask(ac, cfClient, DELETE_COMPLETE, DELETE_FAILED, ERROR_STATUSES,
+                    cFStackName);
             try {
                 Boolean statePollerResult = task.call();
                 if (!task.completed(statePollerResult)) {
@@ -439,12 +439,10 @@ public class AwsResourceConnector implements ResourceConnector {
             } catch (Exception e) {
                 throw new CloudConnectorException(e.getMessage(), e);
             }
-            AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                    ac.getCloudContext().getLocation().getRegion().value());
+            AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
         } else {
-            AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                    ac.getCloudContext().getLocation().getRegion().value());
+            AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
             LOGGER.info("No CloudFormation stack saved for stack.");
         }
