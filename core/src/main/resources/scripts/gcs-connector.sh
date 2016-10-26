@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-: ${LOGFILE:=/var/log/recipes/gcs-connector.log}
-
 : ${SOURCE_DIR:=/usr/lib/hadoop/lib}
 : ${STORAGE_JAR:=gcs-connector-latest-hadoop2.jar}
 : ${MR_TAR_NAME:=mapreduce.tar.gz}
@@ -73,5 +71,4 @@ main(){
   fi
 }
 
-exec &>> "$LOGFILE"
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
