@@ -50,9 +50,9 @@ cb:
 
   mail:
     smtp:
-    auth: true
-    type: smtp
-    starttls.enable: true
+      auth: true
+      type: smtp
+      starttls.enable: true
   success.cluster.installer.mail.template.path: templates/cluster-installer-mail-success.ftl
   failed.cluster.installer.mail.template.path: templates/cluster-installer-mail-fail.ftl
 
