@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-: ${LOGFILE:=/var/log/recipes/dash-hdfs.log}
-
 : ${SOURCE_DIR:=/data/jars}
 : ${STORAGE_JAR:=dash-azure-storage-2.2.0.jar}
 : ${MR_TAR_NAME:=mapreduce.tar.gz}
@@ -67,5 +65,4 @@ main(){
   done
 }
 
-exec &>> "$LOGFILE"
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
