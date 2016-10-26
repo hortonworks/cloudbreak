@@ -79,7 +79,6 @@ public class RecipeCommands implements BaseCommands {
             @CliOption(key = "description", help = "Description of the recepie") String description,
             @CliOption(key = "preInstallScriptFile", help = "Path of the pre install script file") File preInstallScriptFile,
             @CliOption(key = "postInstallScriptFile", help = "Path of the post install script file") File postInstallScriptFile,
-            @CliOption(key = "timeout", help = "Timeout of the script execution") Integer timeout,
             @CliOption(key = "publicInAccount", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "flags if the recipe is public in the account") Boolean publicInAccount) {
         if (preInstallScriptFile != null && !preInstallScriptFile.exists()) {
@@ -106,7 +105,6 @@ public class RecipeCommands implements BaseCommands {
             RecipeRequest recipeRequest = new RecipeRequest();
             recipeRequest.setName(name);
             recipeRequest.setDescription(description);
-            recipeRequest.setTimeout(timeout);
             recipeRequest.setPlugins(plugins);
             IdJson id;
             if (publicInAccount) {
@@ -142,7 +140,6 @@ public class RecipeCommands implements BaseCommands {
             map.put("id", recipeMap.getId().toString());
             map.put("name", recipeMap.getName());
             map.put("description", recipeMap.getDescription());
-            map.put("timeout", recipeMap.getTimeout().toString());
 
             return shellContext.outputTransformer().render(map, "FIELD", "INFO") + "\n\n"
                     + shellContext.outputTransformer().render(recipeMap.getProperties(), "CONSUL-KEY", "VALUE") + "\n\n"

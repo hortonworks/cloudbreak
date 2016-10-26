@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class RecipeEngine {
 
     public static final Set<String> DEFAULT_RECIPES =  Sets.newHashSet("hdfs-home", "smartsense-capture-schedule");
-    public static final int DEFAULT_RECIPE_TIMEOUT = 15;
     private static final String SSSD_CONFIG = "sssd-config-";
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 

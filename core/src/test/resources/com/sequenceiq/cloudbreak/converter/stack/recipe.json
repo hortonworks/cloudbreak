@@ -1,7 +1,6 @@
 {
   "name" : "recipe-01",
   "description" : "my first recipe",
-  "timeout" : 10,
   "properties": {
     "recipes.gcp-p12.p12-encoded": "<base64-encoded-p12-file>"
   },

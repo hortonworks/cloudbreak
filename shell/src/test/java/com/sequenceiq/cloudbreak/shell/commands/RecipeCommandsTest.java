@@ -64,7 +64,6 @@ public class RecipeCommandsTest {
         MockitoAnnotations.initMocks(this);
         dummyResult = new RecipeResponse();
         dummyResult.setId(RECIPE_ID);
-        dummyResult.setTimeout(1);
         dummyResult.setPlugins(Collections.emptySet());
         dummyResult.setProperties(Collections.<String, String>emptyMap());
         given(cloudbreakClient.recipeEndpoint()).willReturn(recipeEndpoint);
@@ -131,7 +130,7 @@ public class RecipeCommandsTest {
     @Test
     public void testStoreRecipePreScriptExistsAndPublic() throws Exception {
 
-        underTest.createRecipe("name", null, new File(getClass().getResource("/store-recipe-test").getFile()), null, null,
+        underTest.createRecipe("name", null, new File(getClass().getResource("/store-recipe-test").getFile()), null,
                 true);
         verify(recipeEndpoint, times(1)).postPublic(any(RecipeRequest.class));
         verify(recipeEndpoint, times(0)).postPrivate(any(RecipeRequest.class));
@@ -139,7 +138,7 @@ public class RecipeCommandsTest {
 
     @Test
     public void testStoreRecipePostScriptExistsAndPrivate() throws Exception {
-        underTest.createRecipe("name", null, null, new File(getClass().getResource("/store-recipe-test").getFile()), null,
+        underTest.createRecipe("name", null, null, new File(getClass().getResource("/store-recipe-test").getFile()),
                 false);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
         verify(recipeEndpoint, times(1)).postPrivate(any(RecipeRequest.class));
@@ -147,19 +146,19 @@ public class RecipeCommandsTest {
 
     @Test
     public void testStoreRecipeMissingScriptFiles() throws Exception {
-        underTest.createRecipe("name", null, null, null, null, null);
+        underTest.createRecipe("name", null, null, null, null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipeNotExistsPreScriptFile() throws Exception {
-        underTest.createRecipe("name", null, new File(""), null, null, null);
+        underTest.createRecipe("name", null, new File(""), null, null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipeNotExistsPostScriptFile() throws Exception {
-        underTest.createRecipe("name", null, null, new File(""), null, null);
+        underTest.createRecipe("name", null, null, new File(""), null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 }
