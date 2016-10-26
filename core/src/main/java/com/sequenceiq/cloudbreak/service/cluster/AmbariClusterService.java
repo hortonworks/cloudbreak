@@ -33,12 +33,14 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
+import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -482,7 +484,12 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackService.getById(stackId);
         Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
         if (cluster == null) {
-            throw new BadRequestException(String.format("Cluster not exists on stack with '%s' id.", stackId));
+            throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stackId));
+        }
+        AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(stackId);
+        if (ambariDatabase != null && !DatabaseVendor.EMBEDDED.value().equals(ambariDatabase.getVendor())) {
+            throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
+                    + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
         }
         if (validateBlueprint) {
             blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stack.getInstanceGroups());
