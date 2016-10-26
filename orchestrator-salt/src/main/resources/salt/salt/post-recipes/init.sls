@@ -11,7 +11,7 @@
 
 run_post_script_{{ scrip_name }}:
   cmd.run:
-    - name: sh -x /opt/scripts/post/{{ scrip_name }} 2>&1 | tee -a /var/log/recipes/post-{{ scrip_name }}.log
+    - name: sh -x /opt/scripts/post/{{ scrip_name }} 2>&1 | tee -a /var/log/recipes/post-{{ scrip_name }}.log && exit ${PIPESTATUS[0]}
     - onlyif:
       - ls /opt/scripts/post/{{ scrip_name }}
 {% endfor %}

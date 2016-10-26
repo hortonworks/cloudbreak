@@ -143,7 +143,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             if ($rootScope.activeCluster.instanceGroups.length > 0) {
                 $rootScope.activeCluster.instanceGroups.forEach(function(value) {
                     var tmpRecipes = $filter('filter')($rootScope.activeCluster.cluster.hostGroups, {
-                        instanceGroupName: value.group
+                        name: value.group
                     }, true)[0];
                     hostGroups.push({
                         name: actualBp[0].ambariBlueprint.host_groups[index].name,

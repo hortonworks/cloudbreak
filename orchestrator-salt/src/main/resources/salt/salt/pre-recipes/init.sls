@@ -15,7 +15,7 @@ create_recipe_log_dir:
 
 run_pre_script_{{ scrip_name }}:
   cmd.run:
-    - name: sh -x /opt/scripts/pre/{{ scrip_name }} 2>&1 | tee -a /var/log/recipes/pre-{{ scrip_name }}.log
+    - name: sh -x /opt/scripts/pre/{{ scrip_name }} 2>&1 | tee -a /var/log/recipes/pre-{{ scrip_name }}.log && exit ${PIPESTATUS[0]}
     - onlyif:
       - ls /opt/scripts/pre/{{ scrip_name }}
 {% endfor %}
