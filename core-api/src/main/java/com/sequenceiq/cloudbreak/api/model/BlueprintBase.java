@@ -19,8 +19,7 @@ public abstract class BlueprintBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @NotNull
-    @ApiModelProperty(value = BlueprintModelDescription.AMBARI_BLUEPRINT, required = true)
+    @ApiModelProperty(value = BlueprintModelDescription.AMBARI_BLUEPRINT)
     private String ambariBlueprint;
 
     @Size(max = 1000)
