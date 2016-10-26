@@ -8,7 +8,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidPlugin;
@@ -25,10 +24,6 @@ public abstract class RecipeBase implements JsonEntity {
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
-
-    @JsonPropertyDescription("Recipe timeout in minutes.")
-    @ApiModelProperty(RecipeModelDescription.TIMEOUT)
-    private Integer timeout;
 
     @ValidPlugin
     @ApiModelProperty(value = RecipeModelDescription.PLUGINS)
@@ -52,14 +47,6 @@ public abstract class RecipeBase implements JsonEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Integer getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(Integer timeout) {
-        this.timeout = timeout;
     }
 
     public Set<String> getPlugins() {

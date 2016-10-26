@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @Component
 public class RecipeEngine {
 
-    public static final int DEFAULT_RECIPE_TIMEOUT = 15;
+    public static final Set<String> DEFAULT_RECIPES =  Sets.newHashSet("hdfs-home", "smartsense-capture-schedule");
     private static final String SSSD_CONFIG = "sssd-config-";
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
@@ -120,10 +120,11 @@ public class RecipeEngine {
     }
 
     private void addFsRecipesToHostGroups(Set<HostGroup> hostGroups, String blueprintText, FileSystem fs) throws IOException {
+        String scriptName = fs.getType().toLowerCase();
         FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
         FileSystemConfiguration fsConfiguration = getFileSystemConfiguration(fs);
         List<RecipeScript> recipeScripts = fsConfigurator.getScripts(fsConfiguration);
-        List<Recipe> fsRecipes = recipeBuilder.buildRecipes(recipeScripts, fs.getProperties());
+        List<Recipe> fsRecipes = recipeBuilder.buildRecipes(scriptName, recipeScripts, fs.getProperties());
         for (Recipe recipe : fsRecipes) {
             for (HostGroup hostGroup : hostGroups) {
                 hostGroup.addRecipe(recipe);
@@ -149,7 +150,7 @@ public class RecipeEngine {
         List<String> payload;
         if (config.getConfiguration() != null) {
             String configName = SSSD_CONFIG + config.getId();
-                    payload = Collections.singletonList(configName);
+            payload = Collections.singletonList(configName);
         } else {
             payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
                     config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
@@ -173,7 +174,7 @@ public class RecipeEngine {
                 if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", cluster.getUserName());
                     RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL);
-                    Recipe recipe = recipeBuilder.buildRecipes(Collections.singletonList(recipeScript), Collections.emptyMap()).get(0);
+                    Recipe recipe = recipeBuilder.buildRecipes("hdfs-home", Collections.singletonList(recipeScript), Collections.emptyMap()).get(0);
                     hostGroup.addRecipe(recipe);
                     break;
                 }
@@ -192,7 +193,8 @@ public class RecipeEngine {
                     if (isComponentPresent(blueprintText, "HST_AGENT", hostGroup)) {
                         String script = FileReaderUtils.readFileFromClasspath("scripts/smartsense-capture-schedule.sh");
                         RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL);
-                        Recipe recipe = recipeBuilder.buildRecipes(Collections.singletonList(recipeScript), Collections.emptyMap()).get(0);
+                        Recipe recipe = recipeBuilder.buildRecipes("smartsense-capture-schedule",
+                                Collections.singletonList(recipeScript), Collections.emptyMap()).get(0);
                         hostGroup.addRecipe(recipe);
                         break;
                     }

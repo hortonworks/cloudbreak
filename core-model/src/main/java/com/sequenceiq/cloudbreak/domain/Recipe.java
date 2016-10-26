@@ -60,8 +60,6 @@ public class Recipe implements ProvisionEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Plugin> plugins;
 
-    private Integer timeout;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")
     @Column(name = "value", columnDefinition = "TEXT", length = 100000)
@@ -140,11 +138,4 @@ public class Recipe implements ProvisionEntity {
         this.publicInAccount = publicInAccount;
     }
 
-    public Integer getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(Integer timeout) {
-        this.timeout = timeout;
-    }
 }
