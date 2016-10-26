@@ -14,6 +14,7 @@ run_post_script_{{ scrip_name }}:
     - name: sh -x /opt/scripts/post/{{ scrip_name }} 2>&1 | tee -a /var/log/recipes/post-{{ scrip_name }}.log
     - onlyif:
       - ls /opt/scripts/post/{{ scrip_name }}
+    - unless: ls /var/log/recipes/post-{{ scrip_name }}.log
 {% endfor %}
 {% endif %}
 {% endfor %}
