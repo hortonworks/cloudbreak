@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
-
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -19,7 +17,6 @@ public class JsonToRecipeConverter extends AbstractConversionServiceAwareConvert
         recipe.setDescription(json.getDescription());
         recipe.setKeyValues(json.getProperties());
         recipe.setPlugins(json.getPlugins().stream().map(Plugin::new).collect(Collectors.toSet()));
-        recipe.setTimeout(json.getTimeout() == null ? DEFAULT_RECIPE_TIMEOUT : json.getTimeout());
         return recipe;
     }
 }

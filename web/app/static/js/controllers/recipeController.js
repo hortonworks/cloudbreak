@@ -134,7 +134,6 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
             $scope.recipe = {
                 name: "",
                 description: "",
-                timeout: 15,
                 properties: {},
                 plugins: {}
             }

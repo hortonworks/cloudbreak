@@ -16,15 +16,6 @@
         </div>
     </div>
 
-    <div class="form-group" ng-class="{ 'has-error': recipeCreationForm.recipetimeout.$dirty && recipeCreationForm.recipetimeout.$invalid }">
-        <label class="col-sm-3 control-label" for="recipetimeout">{{msg.timeout_label}}</label>
-        <div class="col-sm-9">
-            <input type="number" class="form-control" name="recipetimeout" ng-model="recipe.timeout" ng-min="1" ng-max="100000" id="recipetimeout" placeholder="{{msg.recipe_timeout_placeholder}}">
-            <div class="help-block" ng-show="recipeCreationForm.recipetimeout.$dirty && recipeCreationForm.recipetimeout.$invalid"><i class="fa fa-warning"></i> {{msg.recipe_timeout_placeholder}}
-            </div>
-        </div>
-    </div>
-
     <div class="form-group">
         <label class="col-sm-3 control-label" for="recipetype">{{msg.plugins_label}}</label>
         <div class="col-sm-9">

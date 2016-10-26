@@ -407,7 +407,6 @@ public class TestUtil {
             recipe.setDescription("description");
             recipe.setId((long) (i + 1));
             recipe.setName("recipe-" + (i + 1));
-            recipe.setTimeout(100);
             recipe.setPublicInAccount(true);
             recipe.setPlugins(createRecipePlugins());
             recipe.setKeyValues(new HashMap<>());

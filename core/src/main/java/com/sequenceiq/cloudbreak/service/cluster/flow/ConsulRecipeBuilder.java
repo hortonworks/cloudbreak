@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPE_TIMEOUT;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +46,6 @@ public class ConsulRecipeBuilder implements RecipeBuilder {
             }
             plugins.add(new Plugin("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes())));
             recipe.setPlugins(plugins);
-            recipe.setTimeout(DEFAULT_RECIPE_TIMEOUT);
             if (index == 0) {
                 recipe.setKeyValues(properties);
             } else {
