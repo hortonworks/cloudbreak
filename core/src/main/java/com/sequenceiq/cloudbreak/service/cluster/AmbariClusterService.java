@@ -523,6 +523,19 @@ public class AmbariClusterService implements ClusterService {
                 } catch (JsonProcessingException e) {
                     throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", hdpRepoUpdate));
                 }
+            } else {
+                Component component = componentConfigProvider
+                        .getComponent(stack.getId(), ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name());
+                hdpRepo.setHdpVersion(hdpRepoUpdate.getHdpVersion());
+                hdpRepo.setVerify(hdpRepoUpdate.isVerify());
+                hdpRepo.setStack(hdpRepoUpdate.getStack());
+                hdpRepo.setUtil(hdpRepoUpdate.getUtil());
+                try {
+                    component.setAttributes(new Json(hdpRepo));
+                    componentConfigProvider.store(component);
+                } catch (JsonProcessingException e) {
+                    throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", hdpRepoUpdate));
+                }
             }
         }
     }
