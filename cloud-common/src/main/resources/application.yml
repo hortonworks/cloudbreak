@@ -98,7 +98,10 @@ cb:
     gcp.resource.name.length: 63
     aws.resource.name.length: 50
     openstack.resource.name.length: 120
-  
+
+    salt.new.service.retry: 90
+    salt.recipe.execution.retry: 90
+
   address.resolving.timeout: 60000
   
   eventbus.threadpool.core.size: 100
