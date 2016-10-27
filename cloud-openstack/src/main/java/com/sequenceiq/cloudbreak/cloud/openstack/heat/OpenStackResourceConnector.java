@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
@@ -147,6 +148,11 @@ public class OpenStackResourceConnector implements ResourceConnector {
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
                 authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
+    }
+
+    @Override
+    public TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
+        return new TlsInfo(false);
     }
 
     @Override

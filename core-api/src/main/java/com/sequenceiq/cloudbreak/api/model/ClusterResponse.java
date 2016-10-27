@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,16 +34,16 @@ public class ClusterResponse {
     private String statusReason;
     @ApiModelProperty(ModelDescriptions.StackModelDescription.AMBARI_IP)
     private String ambariServerIp;
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME, required = true)
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME)
     private String userName;
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD)
     private String password;
     private boolean secure;
     @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)
     private Boolean ldapRequired = false;
     @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
     private Long sssdConfigId;
-    private Set<HostGroupJson> hostGroups;
+    private Set<HostGroupResponse> hostGroups;
     private AmbariStackDetailsJson ambariStackDetails;
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_ID)
     private Long rdsConfigId;
@@ -56,6 +57,8 @@ public class ClusterResponse {
     private Long ldapConfigId;
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
     private Map<String, Object> attributes;
+    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
+    private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
 
     public Boolean getEnableShipyard() {
         return enableShipyard;
@@ -138,11 +141,11 @@ public class ClusterResponse {
         this.blueprintId = blueprintId;
     }
 
-    public Set<HostGroupJson> getHostGroups() {
+    public Set<HostGroupResponse> getHostGroups() {
         return hostGroups;
     }
 
-    public void setHostGroups(Set<HostGroupJson> hostGroups) {
+    public void setHostGroups(Set<HostGroupResponse> hostGroups) {
         this.hostGroups = hostGroups;
     }
 
@@ -240,5 +243,13 @@ public class ClusterResponse {
 
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
+    }
+
+    public Set<BlueprintInputJson> getBlueprintInputs() {
+        return blueprintInputs;
+    }
+
+    public void setBlueprintInputs(Set<BlueprintInputJson> blueprintInputs) {
+        this.blueprintInputs = blueprintInputs;
     }
 }

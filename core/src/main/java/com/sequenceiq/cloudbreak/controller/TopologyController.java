@@ -9,7 +9,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.TopologyEndpoint;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.TopologyRequest;
 import com.sequenceiq.cloudbreak.api.model.TopologyResponse;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -53,12 +52,12 @@ public class TopologyController implements TopologyEndpoint {
     }
 
     @Override
-    public IdJson postPublic(TopologyRequest topologyRequest) {
+    public TopologyResponse postPublic(TopologyRequest topologyRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Topology topology = conversionService.convert(topologyRequest, Topology.class);
         topology = topologyService.create(user, topology);
-        return new IdJson(topology.getId());
+        return conversionService.convert(topology, TopologyResponse.class);
     }
 
     @Override

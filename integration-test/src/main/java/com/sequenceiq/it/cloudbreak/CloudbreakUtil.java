@@ -12,7 +12,7 @@ import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -147,9 +147,9 @@ public class CloudbreakUtil {
     }
 
     private static int getNodeCount(StackResponse stackResponse) {
-        List<InstanceGroupJson> instanceGroups = stackResponse.getInstanceGroups();
+        List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
         int nodeCount = 0;
-        for (InstanceGroupJson instanceGroup : instanceGroups) {
+        for (InstanceGroupResponse instanceGroup : instanceGroups) {
             if (!instanceGroup.getGroup().equals("cbgateway")) {
                 nodeCount += instanceGroup.getNodeCount();
             }

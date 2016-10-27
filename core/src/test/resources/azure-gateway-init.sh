@@ -14,6 +14,8 @@ export TMP_SSH_KEY="ssh-rsa test"
 export PUBLIC_SSH_KEY="ssh-rsa public"
 export RELOCATE_DOCKER=true
 export SSH_USER=cloudbreak
+export SALT_BOOT_PASSWORD=pass
+export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=
 
 date >> /tmp/time.txt
 

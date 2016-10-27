@@ -9,7 +9,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -31,14 +30,14 @@ public class RecipeController implements RecipeEndpoint {
     private AuthenticatedUserService authenticatedUserService;
 
     @Override
-    public IdJson postPublic(RecipeRequest recipeRequest) {
+    public RecipeResponse postPublic(RecipeRequest recipeRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createRecipe(user, recipeRequest, true);
     }
 
     @Override
-    public IdJson postPrivate(RecipeRequest recipeRequest) {
+    public RecipeResponse postPrivate(RecipeRequest recipeRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createRecipe(user, recipeRequest, false);
@@ -104,11 +103,11 @@ public class RecipeController implements RecipeEndpoint {
         recipeService.delete(name, user);
     }
 
-    private IdJson createRecipe(CbUser user, RecipeRequest recipeRequest, boolean publicInAccount) {
+    private RecipeResponse createRecipe(CbUser user, RecipeRequest recipeRequest, boolean publicInAccount) {
         Recipe recipe = conversionService.convert(recipeRequest, Recipe.class);
         recipe.setPublicInAccount(publicInAccount);
         recipe = recipeService.create(user, recipe);
-        return new IdJson(recipe.getId());
+        return conversionService.convert(recipe, RecipeResponse.class);
     }
 
     private Set<RecipeResponse> toJsonSet(Set<Recipe> recipes) {

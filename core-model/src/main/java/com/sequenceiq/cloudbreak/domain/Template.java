@@ -83,19 +83,27 @@ public class Template {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
     private String instanceType;
 
+    @Column(nullable = false)
     private String owner;
+
+    @Column(nullable = false)
     private String account;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
+    @Column(nullable = false)
     private Integer volumeCount;
     private Integer volumeSize;
     private String volumeType;
 
+    @Column(nullable = false)
     private boolean deleted;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 

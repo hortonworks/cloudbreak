@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 public enum RDSDatabase {
-    POSTGRES("postgres", "org.postgresql.Driver", "Existing PostgreSQL Database"),
-    MYSQL("mysql", "com.mysql.jdbc.Driver", "Existing MySQL / MariaDB Database");
+    POSTGRES("postgres", "org.postgresql.Driver", "Existing PostgreSQL Database");
 
     private String dbName;
     private String dbDriver;

@@ -10,7 +10,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 
 import com.sequenceiq.cloudbreak.core.init.CloudbreakCleanupAction;
 
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
 @EnableAutoConfiguration
+@EnableSwagger2
 @ComponentScan(basePackages = "com.sequenceiq.cloudbreak")
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class CloudbreakApplication {

@@ -41,17 +41,17 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
     }
 
     @Override
-    public void put(AccountPreferencesJson updateRequest) {
+    public AccountPreferencesJson put(AccountPreferencesJson updateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        service.saveOne(user, convert(updateRequest));
+        return convert(service.saveOne(user, convert(updateRequest)));
     }
 
     @Override
-    public void post(AccountPreferencesJson updateRequest) {
+    public AccountPreferencesJson post(AccountPreferencesJson updateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        service.saveOne(user, convert(updateRequest));
+        return convert(service.saveOne(user, convert(updateRequest)));
     }
 
     @Override

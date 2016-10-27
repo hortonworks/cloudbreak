@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class LdapConfigBase implements JsonEntity {
+public abstract class LdapConfigBase implements JsonEntity {
 
     @Size(max = 100, min = 1, message = "The length of the ldap config's name has to be in range of 1 to 100")
     @NotNull
@@ -32,13 +32,15 @@ public class LdapConfigBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.SERVER_PORT, required = true)
     private Integer serverPort;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.IS_SERVER_SSL, required = true)
-    private Boolean serverSSL;
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.IS_SERVER_SSL)
+    private Boolean serverSSL = Boolean.FALSE;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_DN)
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_DN, required = true)
     private String bindDn;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_PASSWORD)
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_PASSWORD, required = true)
     private String bindPassword;
 
     @NotNull

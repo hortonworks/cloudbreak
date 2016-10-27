@@ -21,7 +21,7 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.microsoft.azure.Azure;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 
 public class AzureUseAnExistingSubnetInAnExistingVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
 
@@ -56,17 +56,16 @@ public class AzureUseAnExistingSubnetInAnExistingVpcNetworkTest extends Abstract
                 .withSubnet(vpcSubnet, "10.0.0.0/16")
                 .create();
 
-        NetworkJson networkJson = new NetworkJson();
-        networkJson.setName(networkName);
-        networkJson.setDescription(description);
+        NetworkRequest networkRequest = new NetworkRequest();
+        networkRequest.setName(networkName);
+        networkRequest.setDescription(description);
         Map<String, Object> map = new HashMap<>();
         map.put("networkId", vpcName);
         map.put("subnetId", vpcSubnet);
         map.put("resourceGroupName", resourceGroupName);
-        networkJson.setParameters(map);
-        networkJson.setCloudPlatform("AZURE_RM");
-        networkJson.setPublicInAccount(publicInAccount);
-        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkJson).getId().toString();
+        networkRequest.setParameters(map);
+        networkRequest.setCloudPlatform("AZURE_RM");
+        String id = getCloudbreakClient().networkEndpoint().postPrivate(networkRequest).getId().toString();
         getItContext().putContextParam(CloudbreakITContextConstants.NETWORK_ID, id, true);
     }
 }

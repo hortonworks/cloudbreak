@@ -15,7 +15,6 @@ public class JsonToTopologyConverter extends AbstractConversionServiceAwareConve
     @Override
     public Topology convert(TopologyRequest source) {
         Topology result = new Topology();
-        result.setId(source.getId());
         result.setName(source.getName());
         result.setDescription(source.getDescription());
         result.setCloudPlatform(source.getCloudPlatform());

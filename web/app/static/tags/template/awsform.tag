@@ -48,8 +48,9 @@
     <label class="col-sm-3 control-label" for="aws_tvolumecount">{{msg.template_form_volume_count_label}}</label>
 
     <div class="col-sm-9">
-        <input type="number" name="aws_tvolumecount" class="form-control" ng-model="awsTemp.volumeCount" id="aws_tvolumecount" min="{{awsTemp.minDiskNumber}}" max="{{awsTemp.maxDiskNumber}}" placeholder="{{msg.template_form_volume_count_placeholder | format: awsTemp.minDiskNumber:(awsTemp.maxDiskNumber)}}" required>
+        <input type="number" name="aws_tvolumecount" class="form-control" ng-model="awsTemp.volumeCount" id="aws_tvolumecount" min="{{awsTemp.minDiskNumber}}" max="{{awsTemp.maxDiskNumber}}" placeholder="{{msg.template_form_volume_count_placeholder | format: awsTemp.minDiskNumber:(awsTemp.maxDiskNumber)}}" ng-hide="awsTemp.volumeType == 'ephemeral'">
 
+        <input type="text" class="form-control" name="aws_ephemeral_volumecount" id="aws_ephemeral_volumecount" ng-disabled="true" ng-hide="awsTemp.volumeType !== 'ephemeral'" value="{{awsTemp.maxDiskNumber}}">
         <div class="help-block" ng-show="awsTemplateForm.aws_tvolumecount.$dirty && awsTemplateForm.aws_tvolumecount.$invalid"><i class="fa fa-warning"></i> {{msg.volume_count_invalid | format: awsTemp.minDiskNumber:(awsTemp.maxDiskNumber)}}
         </div>
         <!-- .col-sm-9 -->

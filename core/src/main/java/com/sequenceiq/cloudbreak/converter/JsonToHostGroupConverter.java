@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 
 @Component
-public class JsonToHostGroupConverter extends AbstractConversionServiceAwareConverter<HostGroupJson, HostGroup> {
+public class JsonToHostGroupConverter extends AbstractConversionServiceAwareConverter<HostGroupRequest, HostGroup> {
     @Override
-    public HostGroup convert(HostGroupJson source) {
+    public HostGroup convert(HostGroupRequest source) {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName(source.getName());
         return hostGroup;

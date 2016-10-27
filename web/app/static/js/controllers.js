@@ -205,6 +205,11 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             return $rootScope.params.platforms.indexOf(platform) > -1
         }
 
+        $scope.countList = function(list) {
+            var resList = $filter('filter')(list, $scope.filterByVisiblePlatform);
+            return resList.length;
+        }
+
         $scope.filterByVisiblePlatform = function(resource) {
             if (resource.cloudPlatform) {
                 return $scope.isVisible(resource.cloudPlatform)

@@ -8,7 +8,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
 import com.sequenceiq.cloudbreak.api.endpoint.LdapConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.domain.CbUser;
@@ -29,14 +28,14 @@ public class LdapController implements LdapConfigEndpoint {
     private LdapConfigService ldapConfigService;
 
     @Override
-    public IdJson postPrivate(LdapConfigRequest ldapConfigRequest) {
+    public LdapConfigResponse postPrivate(LdapConfigRequest ldapConfigRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createConfig(user, ldapConfigRequest, false);
     }
 
     @Override
-    public IdJson postPublic(LdapConfigRequest ldapConfigRequest) {
+    public LdapConfigResponse postPublic(LdapConfigRequest ldapConfigRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createConfig(user, ldapConfigRequest, true);
@@ -103,11 +102,11 @@ public class LdapController implements LdapConfigEndpoint {
         ldapConfigService.delete(name, user);
     }
 
-    private IdJson createConfig(CbUser user, LdapConfigRequest request, boolean publicInAccount) {
+    private LdapConfigResponse createConfig(CbUser user, LdapConfigRequest request, boolean publicInAccount) {
         LdapConfig config = conversionService.convert(request, LdapConfig.class);
         config.setPublicInAccount(publicInAccount);
         config = ldapConfigService.create(user, config);
-        return new IdJson(config.getId());
+        return conversionService.convert(config, LdapConfigResponse.class);
     }
 
     private Set<LdapConfigResponse> toJsonSet(Set<LdapConfig> configs) {

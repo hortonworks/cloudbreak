@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -61,22 +61,22 @@ public class ClusterCommands implements BaseCommands {
                     help = "Ambari repo base url: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates") String ambariRepoBaseURL,
             @CliOption(key = "ambariRepoGpgKey",
                     help = "Ambari repo GPG key url") String ambariRepoGpgKey,
-            @CliOption(key = "stack", mandatory = false, help = "Stack definition name, like HDP") String stack,
-            @CliOption(key = "version", mandatory = false, help = "Stack definition version") String version,
-            @CliOption(key = "os", mandatory = false, help = "Stack OS to select package manager, default is RedHat") String os,
-            @CliOption(key = "stackRepoId", mandatory = false, help = "Stack repository id") String stackRepoId,
-            @CliOption(key = "stackBaseURL", mandatory = false, help = "Stack url") String stackBaseURL,
-            @CliOption(key = "utilsRepoId", mandatory = false, help = "Stack utils repoId") String utilsRepoId,
-            @CliOption(key = "utilsBaseURL", mandatory = false, help = "Stack utils URL") String utilsBaseURL,
-            @CliOption(key = "verify", mandatory = false, help = "Whether to verify the URLs or not") Boolean verify,
-            @CliOption(key = "connectionURL", mandatory = false, help = "JDBC connection URL (jdbc:<db-type>://<address>:<port>/<db>)") String connectionURL,
-            @CliOption(key = "databaseType", mandatory = false, help = "Type of the external database (MYSQL, POSTGRES)") RDSDatabase databaseType,
-            @CliOption(key = "connectionUserName", mandatory = false, help = "Username to use for the jdbc connection") String connectionUserName,
-            @CliOption(key = "connectionPassword", mandatory = false, help = "Password to use for the jdbc connection") String connectionPassword,
-            @CliOption(key = "hdpVersion", mandatory = false, help = "Compatible HDP version for the jdbc configuration") String hdpVersion,
-            @CliOption(key = "validated", mandatory = false, unspecifiedDefaultValue = "true", specifiedDefaultValue = "true",
+            @CliOption(key = "stack", help = "Stack definition name, like HDP") String stack,
+            @CliOption(key = "version", help = "Stack definition version") String version,
+            @CliOption(key = "os", help = "Stack OS to select package manager, default is RedHat") String os,
+            @CliOption(key = "stackRepoId", help = "Stack repository id") String stackRepoId,
+            @CliOption(key = "stackBaseURL", help = "Stack url") String stackBaseURL,
+            @CliOption(key = "utilsRepoId", help = "Stack utils repoId") String utilsRepoId,
+            @CliOption(key = "utilsBaseURL", help = "Stack utils URL") String utilsBaseURL,
+            @CliOption(key = "verify", help = "Whether to verify the URLs or not") Boolean verify,
+            @CliOption(key = "connectionURL", help = "JDBC connection URL (jdbc:<db-type>://<address>:<port>/<db>)") String connectionURL,
+            @CliOption(key = "databaseType", help = "Type of the external database (MYSQL, POSTGRES)") RDSDatabase databaseType,
+            @CliOption(key = "connectionUserName", help = "Username to use for the jdbc connection") String connectionUserName,
+            @CliOption(key = "connectionPassword", help = "Password to use for the jdbc connection") String connectionPassword,
+            @CliOption(key = "hdpVersion", help = "Compatible HDP version for the jdbc configuration") String hdpVersion,
+            @CliOption(key = "validated", unspecifiedDefaultValue = "true", specifiedDefaultValue = "true",
                     help = "the jdbc config parameters will be validated") Boolean validated,
-            @CliOption(key = "enableSecurity", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false",
+            @CliOption(key = "enableSecurity", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false",
                     help = "Kerberos security status") Boolean enableSecurity,
             @CliOption(key = "kerberosMasterKey", specifiedDefaultValue = "key", help = "Kerberos mater key") String kerberosMasterKey,
             @CliOption(key = "kerberosAdmin", specifiedDefaultValue = "admin", help = "Kerberos admin name") String kerberosAdmin,
@@ -87,12 +87,12 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "enableShipyard", help = "Run shipyard in cluster") Boolean enableShipyard,
             @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
-            Set<HostGroupJson> hostGroupList = new HashSet<>();
+            Set<HostGroupRequest> hostGroupList = new HashSet<>();
             Set<Map.Entry<String, NodeCountEntry>> entries = (Set<Map.Entry<String, NodeCountEntry>>) (shellContext.isMarathonMode()
                     ? shellContext.getMarathonHostGroups().entrySet() : shellContext.getHostGroups().entrySet());
             for (Map.Entry<String, NodeCountEntry> entry : entries) {
-                HostGroupJson hostGroupJson = new HostGroupJson();
-                hostGroupJson.setName(entry.getKey());
+                HostGroupRequest hostGroupBase = new HostGroupRequest();
+                hostGroupBase.setName(entry.getKey());
 
                 ConstraintJson constraintJson = new ConstraintJson();
 
@@ -100,12 +100,12 @@ public class ClusterCommands implements BaseCommands {
                 if (shellContext.isMarathonMode()) {
                     constraintJson.setConstraintTemplateName(((MarathonHostgroupEntry) entry.getValue()).getConstraintName());
                 } else {
-                    hostGroupJson.setRecipeIds(((HostgroupEntry) entry.getValue()).getRecipeIdSet());
+                    hostGroupBase.setRecipeIds(((HostgroupEntry) entry.getValue()).getRecipeIdSet());
                     constraintJson.setInstanceGroupName(entry.getKey());
                 }
 
-                hostGroupJson.setConstraint(constraintJson);
-                hostGroupList.add(hostGroupJson);
+                hostGroupBase.setConstraint(constraintJson);
+                hostGroupList.add(hostGroupBase);
             }
 
             wait = wait == null ? false : wait;
@@ -119,6 +119,7 @@ public class ClusterCommands implements BaseCommands {
             clusterRequest.setEmailNeeded(false);
             clusterRequest.setEnableSecurity(enableSecurity);
             clusterRequest.setHostGroups(hostGroupList);
+            clusterRequest.setBlueprintInputs(new HashSet<>());
 
             if (strategy != null) {
                 clusterRequest.setConfigStrategy(strategy);

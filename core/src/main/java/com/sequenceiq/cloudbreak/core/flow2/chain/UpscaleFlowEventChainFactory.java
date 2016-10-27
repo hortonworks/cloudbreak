@@ -29,7 +29,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
 
     @Override
     public String initEvent() {
-        return FlowTriggers.FULL_UPSCALE_TRIGGER_EVENT;
+        return FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
     }
 
     @Override

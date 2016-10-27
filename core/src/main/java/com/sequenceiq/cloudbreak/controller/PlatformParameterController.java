@@ -36,10 +36,10 @@ public class PlatformParameterController implements ConnectorEndpoint {
     private ConversionService conversionService;
 
     @Override
-    public Map<String, JsonEntity> getPlatforms() {
+    public Map<String, JsonEntity> getPlatforms(Boolean extended) {
         PlatformVariants pv = cloudParameterService.getPlatformVariants();
         PlatformDisks diskTypes = cloudParameterService.getDiskTypes();
-        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes();
+        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(extended);
         PlatformRegions regions = cloudParameterService.getRegions();
         PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
 
@@ -96,14 +96,14 @@ public class PlatformParameterController implements ConnectorEndpoint {
     }
 
     @Override
-    public PlatformVirtualMachinesJson getVmTypes() {
-        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes();
+    public PlatformVirtualMachinesJson getVmTypes(Boolean extended) {
+        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(extended);
         return conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class);
     }
 
     @Override
-    public Collection<VmTypeJson> getVmTypeByType(String type) {
-        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes();
+    public Collection<VmTypeJson> getVmTypeByType(String type, Boolean extended) {
+        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(extended);
         Collection<VmTypeJson> vmTypes = conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class)
                 .getVirtualMachines().get(type.toUpperCase());
         return vmTypes == null ? new ArrayList<>() : vmTypes;

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.host;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -37,4 +38,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
     void tearDown(GatewayConfig gatewayConfig, List<String> hostnames) throws CloudbreakOrchestratorException;
+
+    Map<String, String> getMembers(GatewayConfig gatewayConfig, List<String> privateIps) throws CloudbreakOrchestratorException;
 }

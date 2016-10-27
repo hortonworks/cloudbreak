@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
 @Service
 public class AwsCredentialConnector implements CredentialConnector {
@@ -78,6 +81,11 @@ public class AwsCredentialConnector implements CredentialConnector {
             }
         }
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
+    }
+
+    @Override
+    public Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext, ExtendedCloudCredential extendedCloudCredential) {
+        throw new UnsupportedOperationException("Interactive login not supported on AWS");
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import java.util.Set;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -16,7 +18,10 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
+import com.sequenceiq.cloudbreak.common.type.RdsType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "RDSConfig", uniqueConstraints = {
@@ -79,26 +84,43 @@ public class RDSConfig {
     @SequenceGenerator(name = "rdsconfig_generator", sequenceName = "rdsconfig_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String connectionURL;
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private RDSDatabase databaseType;
+    @Column(nullable = false)
     private String connectionUserName;
+    @Column(nullable = false)
     private String connectionPassword;
     private Long creationDate;
+    @Column(nullable = false)
     private String hdpVersion;
 
+    @Column(nullable = false)
     private String owner;
+    @Column(nullable = false)
     private String account;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
     @OneToMany(mappedBy = "rdsConfig")
     private Set<Cluster> clusters;
+
+    @Enumerated(EnumType.STRING)
+    private RdsType type = RdsType.HIVE;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json attributes;
 
     public Long getId() {
         return id;
@@ -202,5 +224,21 @@ public class RDSConfig {
 
     public void setClusters(Set<Cluster> clusters) {
         this.clusters = clusters;
+    }
+
+    public RdsType getType() {
+        return type;
+    }
+
+    public void setType(RdsType type) {
+        this.type = type;
+    }
+
+    public Json getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Json attributes) {
+        this.attributes = attributes;
     }
 }

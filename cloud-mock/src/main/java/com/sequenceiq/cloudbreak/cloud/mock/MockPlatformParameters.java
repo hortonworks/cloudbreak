@@ -109,7 +109,7 @@ public class MockPlatformParameters implements PlatformParameters {
 
         List<VmType> vmTypeList = new ArrayList<>();
         for (MockedVmTypes vmType : MockedVmTypes.values()) {
-            vmTypeList.add(VmType.vmTypeWithMeta(vmType.value, vmType.getVmTypeMeta()));
+            vmTypeList.add(VmType.vmTypeWithMeta(vmType.value, vmType.getVmTypeMeta(), true));
         }
 
         for (AvailabilityZone availabilityZone : availabilityZoneList) {
@@ -150,7 +150,7 @@ public class MockPlatformParameters implements PlatformParameters {
     }
 
     @Override
-    public VmTypes vmTypes() {
+    public VmTypes vmTypes(Boolean extended) {
         Set<VmType> lists = new LinkedHashSet<>();
         for (List<VmType> vmTypeList : vmTypes.values()) {
             lists.addAll(vmTypeList);

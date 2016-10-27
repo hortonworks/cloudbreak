@@ -41,8 +41,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.hibernate.annotations.Type;
-
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
@@ -208,57 +206,86 @@ public class Stack implements ProvisionEntity {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
     @SequenceGenerator(name = "stack_generator", sequenceName = "stack_id_seq", allocationSize = 1)
     private Long id;
+
     @Column(nullable = false)
     private String name;
-    private String owner;
-    private String account;
-    private boolean publicInAccount;
-    private String region;
-    private String availabilityZone;
+
     @Column(nullable = false)
+    private String owner;
+
+    @Column(nullable = false)
+    private String account;
+
+    @Column(nullable = false)
+    private boolean publicInAccount;
+
+    @Column(nullable = false)
+    private String region;
+
+    private String availabilityZone;
+
     private Integer gatewayPort;
+
     // TODO remove
     private int consulServers;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
+
     @Column(columnDefinition = "TEXT")
     private String statusReason;
+
     @Enumerated(EnumType.STRING)
     private Status status;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")
-    @Column(name = "value", columnDefinition = "TEXT", length = 100000)
+    @Column(name = "value", columnDefinition = "TEXT", length = 100000, nullable = false)
     private Map<String, String> parameters;
+
     @OneToOne
     private Credential credential;
+
     @Column(columnDefinition = "TEXT")
     private String platformVariant;
+
     @Column(columnDefinition = "TEXT")
     private String cloudPlatform;
+
     @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Cluster cluster;
+
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Resource> resources = new HashSet<>();
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OnFailureAction onFailureActionAction = OnFailureAction.ROLLBACK;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private FailurePolicy failurePolicy;
+
     @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private SecurityConfig securityConfig;
+
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
+
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Component> components = new HashSet<>();
+
     @Version
     private Long version;
+
     @ManyToOne
     private Network network;
+
     @OneToOne
     private Orchestrator orchestrator;
+
     private Long created;
+
     private Boolean relocateDocker;
-    @Type(type = "encrypted_string")
-    private String saltPassword;
 
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
@@ -450,14 +477,6 @@ public class Stack implements ProvisionEntity {
 
     public void setRelocateDocker(Boolean relocateDocker) {
         this.relocateDocker = relocateDocker;
-    }
-
-    public String getSaltPassword() {
-        return saltPassword;
-    }
-
-    public void setSaltPassword(String saltPassword) {
-        this.saltPassword = saltPassword;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {

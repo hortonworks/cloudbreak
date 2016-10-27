@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.shell.commands.common;
 
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -9,7 +8,6 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
@@ -34,7 +32,7 @@ public class LdapConfigCommands implements BaseCommands {
             @CliOption(key = "description", help = "Description of the config") String description,
             @CliOption(key = "serverHost", mandatory = true, help = "Public host or IP address of LDAP server") String serverHost,
             @CliOption(key = "serverPort", mandatory = true, help = "Port of LDAP server (typically: 389 or 636 for LDAPS)") Integer serverPort,
-            @CliOption(key = "serverSSL", mandatory = true, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
+            @CliOption(key = "serverSSL", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "Determines if LDAP or LDAP over SSL is to be used") Boolean serverSSL,
             @CliOption(key = "bindDn", mandatory = true,
                     help = "Bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)") String bindDn,
@@ -64,13 +62,13 @@ public class LdapConfigCommands implements BaseCommands {
             config.setUserSearchBase(userSearchBase);
             config.setUserSearchFilter(userSearchFilter);
             config.setPrincipalRegex(principalRegex);
-            IdJson id;
+            Long id;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().ldapConfigEndpoint().postPublic(config);
+                id = shellContext.cloudbreakClient().ldapConfigEndpoint().postPublic(config).getId();
             } else {
-                id = shellContext.cloudbreakClient().ldapConfigEndpoint().postPrivate(config);
+                id = shellContext.cloudbreakClient().ldapConfigEndpoint().postPrivate(config).getId();
             }
-            return String.format("Ldap config created with id: '%d' and name: '%s'", id.getId(), config.getName());
+            return String.format("Ldap config created with id: '%d' and name: '%s'", id, config.getName());
         } catch (Exception e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }

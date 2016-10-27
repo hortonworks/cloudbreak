@@ -9,8 +9,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.service.securitygroup.DefaultSecurityGroupCreator;
@@ -32,19 +32,19 @@ public class SecurityGroupController implements SecurityGroupEndpoint {
     private AuthenticatedUserService authenticatedUserService;
 
     @Override
-    public IdJson postPrivate(SecurityGroupJson securityGroupJson) {
+    public SecurityGroupResponse postPrivate(SecurityGroupRequest securityGroupRequest) {
         CbUser user = authenticatedUserService.getCbUser();
-        return createSecurityGroup(user, securityGroupJson, false);
+        return createSecurityGroup(user, securityGroupRequest, false);
     }
 
     @Override
-    public IdJson postPublic(SecurityGroupJson securityGroupJson) {
+    public SecurityGroupResponse postPublic(SecurityGroupRequest securityGroupRequest) {
         CbUser user = authenticatedUserService.getCbUser();
-        return createSecurityGroup(user, securityGroupJson, true);
+        return createSecurityGroup(user, securityGroupRequest, true);
     }
 
     @Override
-    public Set<SecurityGroupJson> getPrivates() {
+    public Set<SecurityGroupResponse> getPrivates() {
         CbUser user = authenticatedUserService.getCbUser();
         defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
         Set<SecurityGroup> securityGroups = securityGroupService.retrievePrivateSecurityGroups(user);
@@ -52,7 +52,7 @@ public class SecurityGroupController implements SecurityGroupEndpoint {
     }
 
     @Override
-    public Set<SecurityGroupJson> getPublics() {
+    public Set<SecurityGroupResponse> getPublics() {
         CbUser user = authenticatedUserService.getCbUser();
         defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
         Set<SecurityGroup> securityGroups = securityGroupService.retrieveAccountSecurityGroups(user);
@@ -60,20 +60,20 @@ public class SecurityGroupController implements SecurityGroupEndpoint {
     }
 
     @Override
-    public SecurityGroupJson get(Long id) {
+    public SecurityGroupResponse get(Long id) {
         SecurityGroup securityGroup = securityGroupService.get(id);
         return convert(securityGroup);
     }
 
     @Override
-    public SecurityGroupJson getPrivate(String name) {
+    public SecurityGroupResponse getPrivate(String name) {
         CbUser user = authenticatedUserService.getCbUser();
         SecurityGroup securityGroup = securityGroupService.getPrivateSecurityGroup(name, user);
         return convert(securityGroup);
     }
 
     @Override
-    public SecurityGroupJson getPublic(String name) {
+    public SecurityGroupResponse getPublic(String name) {
         CbUser user = authenticatedUserService.getCbUser();
         SecurityGroup securityGroup = securityGroupService.getPublicSecurityGroup(name, user);
         return convert(securityGroup);
@@ -97,24 +97,24 @@ public class SecurityGroupController implements SecurityGroupEndpoint {
         securityGroupService.delete(name, user);
     }
 
-    private IdJson createSecurityGroup(CbUser user, SecurityGroupJson securityGroupJson, boolean publicInAccount) {
-        SecurityGroup securityGroup = convert(securityGroupJson, publicInAccount);
+    private SecurityGroupResponse createSecurityGroup(CbUser user, SecurityGroupRequest securityGroupRequest, boolean publicInAccount) {
+        SecurityGroup securityGroup = convert(securityGroupRequest, publicInAccount);
         securityGroup = securityGroupService.create(user, securityGroup);
-        return new IdJson(securityGroup.getId());
+        return conversionService.convert(securityGroup, SecurityGroupResponse.class);
     }
 
-    private SecurityGroup convert(SecurityGroupJson securityGroupJson, boolean publicInAccount) {
-        SecurityGroup securityGroup = conversionService.convert(securityGroupJson, SecurityGroup.class);
+    private SecurityGroup convert(SecurityGroupRequest securityGroupRequest, boolean publicInAccount) {
+        SecurityGroup securityGroup = conversionService.convert(securityGroupRequest, SecurityGroup.class);
         securityGroup.setPublicInAccount(publicInAccount);
         return securityGroup;
     }
 
-    private SecurityGroupJson convert(SecurityGroup securityGroup) {
-        return conversionService.convert(securityGroup, SecurityGroupJson.class);
+    private SecurityGroupResponse convert(SecurityGroup securityGroup) {
+        return conversionService.convert(securityGroup, SecurityGroupResponse.class);
     }
 
-    private Set<SecurityGroupJson> convert(Set<SecurityGroup> securityGroups) {
-        Set<SecurityGroupJson> jsons = new HashSet<>();
+    private Set<SecurityGroupResponse> convert(Set<SecurityGroup> securityGroups) {
+        Set<SecurityGroupResponse> jsons = new HashSet<>();
         for (SecurityGroup securityGroup : securityGroups) {
             jsons.add(convert(securityGroup));
         }

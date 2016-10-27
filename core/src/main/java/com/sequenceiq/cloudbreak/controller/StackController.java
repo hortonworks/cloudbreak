@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
@@ -70,14 +69,14 @@ public class StackController implements StackEndpoint {
     private StackValidator stackValidator;
 
     @Override
-    public IdJson postPrivate(StackRequest stackRequest) {
+    public StackResponse postPrivate(StackRequest stackRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createStack(user, stackRequest, false);
     }
 
     @Override
-    public IdJson postPublic(StackRequest stackRequest) {
+    public StackResponse postPublic(StackRequest stackRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createStack(user, stackRequest, true);
@@ -213,7 +212,7 @@ public class StackController implements StackEndpoint {
         return conversionService.convert(pv, PlatformVariantsJson.class);
     }
 
-    private IdJson createStack(CbUser user, StackRequest stackRequest, boolean publicInAccount) {
+    private StackResponse createStack(CbUser user, StackRequest stackRequest, boolean publicInAccount) {
         stackValidator.validate(stackRequest);
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
@@ -224,7 +223,7 @@ public class StackController implements StackEndpoint {
             stackService.validateOrchestrator(stack.getOrchestrator());
         }
         stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion(), stackRequest.getImageCatalog());
-        return new IdJson(stack.getId());
+        return conversionService.convert(stack, StackResponse.class);
     }
 
     private void validateAccountPreferences(Stack stack, CbUser user) {

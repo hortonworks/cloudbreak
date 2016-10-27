@@ -570,9 +570,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     }
 
                     $rootScope.activeCluster = $rootScope.clusters[actClusterIndex] = success;
-                    $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, {
-                        id: $rootScope.activeCluster.blueprintId.toString()
-                    }, true)[0];
+                    if ($rootScope.activeCluster.blueprintId) {
+                        $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, {id: $rootScope.activeCluster.blueprintId }, true)[0];
+                    }
                     if (typeof($rootScope.activeCluster.credentialId) !== "undefined" && $rootScope.activeCluster.credentialId) {
                         if ($rootScope.activeCluster.cloudPlatform) {
                             $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {

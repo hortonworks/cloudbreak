@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -14,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -25,20 +25,20 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/credentials")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/credentials", description = ControllerDescription.CREDENTIAL_DESCRIPTION, position = 1)
+@Api(value = "/credentials", description = ControllerDescription.CREDENTIAL_DESCRIPTION, protocols = "http,https")
 public interface CredentialEndpoint {
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.CredentialOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
-    IdJson postPrivate(@Valid CredentialRequest credentialRequest);
+    CredentialResponse postPrivate(@Valid CredentialRequest credentialRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.CredentialOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
-    IdJson postPublic(@Valid CredentialRequest credentialRequest);
+    CredentialResponse postPublic(@Valid CredentialRequest credentialRequest);
 
     @GET
     @Path("user")
@@ -87,4 +87,16 @@ public interface CredentialEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.CredentialOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
     void deletePrivate(@PathParam(value = "name") String name);
+
+    @POST
+    @Path("userinteractivelogin")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.CredentialOpDescription.INTERACTIVE_LOGIN, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
+    Map<String, String> privateInteractiveLogin(@Valid CredentialRequest credentialRequest);
+
+    @POST
+    @Path("accountinteractivelogin")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.CredentialOpDescription.INTERACTIVE_LOGIN, produces = ContentType.JSON, notes = Notes.CREDENTIAL_NOTES)
+    Map<String, String> publicInteractiveLogin(@Valid CredentialRequest credentialRequest);
 }

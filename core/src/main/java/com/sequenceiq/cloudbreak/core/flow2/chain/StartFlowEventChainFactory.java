@@ -14,7 +14,7 @@ public class StartFlowEventChainFactory implements FlowEventChainFactory<StackEv
 
     @Override
     public String initEvent() {
-        return FlowTriggers.FULL_START_TRIGGER_EVENT;
+        return FlowChainTriggers.FULL_START_TRIGGER_EVENT;
     }
 
     @Override

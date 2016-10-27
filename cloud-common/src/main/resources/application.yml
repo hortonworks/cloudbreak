@@ -6,6 +6,7 @@ spring:
     consul:
       host: consul.service.consul
 cb:
+  publicip:
   etc.config.dir: /etc/cloudbreak
   threadpool:
     core.size: 40
@@ -41,7 +42,9 @@ cb:
     hostkey.verify: false
     external.id: provision-ambari
     cf.template.new.path: templates/aws-cf-stack.ftl
-  
+    default.inbound.security.group:
+    vpc:
+
   blueprint.defaults: hdp-small-default;hdp-spark-cluster;hdp-streaming-cluster;hdp-etl-edw;hdp25-data-science;hdp25-edw-analytics;hdp25-etl-edw;hdp25-etl-edw-spark2
   template.defaults: minviable-gcp,minviable-azure,minviable-aws
   custom.user.data: |

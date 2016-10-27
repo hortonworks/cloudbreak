@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariRepoDetailsDescript
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("AmbariRepoDetailsJson")
+@ApiModel("AmbariRepoDetails")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AmbariRepoDetailsJson {
 

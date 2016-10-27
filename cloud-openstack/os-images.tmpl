@@ -1,2 +1,2 @@
 openstack:{{$atlas:=httpget "https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cloudbreak/openstack.image/search" | json | pointer "/versions/0"}}
-  default: {{ $atlas.id | replace ".img" "" }}
+  default: {{ $atlas.metadata.image_name }}

@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServ
 public class ResetFlowEventChainFactory implements FlowEventChainFactory<StackEvent> {
     @Override
     public String initEvent() {
-        return FlowTriggers.CLUSTER_RESET_CHAIN_TRIGGER_EVENT;
+        return FlowChainTriggers.CLUSTER_RESET_CHAIN_TRIGGER_EVENT;
     }
 
     @Override

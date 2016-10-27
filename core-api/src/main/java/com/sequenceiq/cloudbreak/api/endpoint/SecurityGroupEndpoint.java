@@ -12,8 +12,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -24,50 +24,50 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/securitygroups")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/securitygroups", description = ControllerDescription.SECURITY_GROUPS_DESCRIPTION, position = 9)
+@Api(value = "/securitygroups", description = ControllerDescription.SECURITY_GROUPS_DESCRIPTION, protocols = "http,https")
 public interface SecurityGroupEndpoint {
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    IdJson postPrivate(@Valid SecurityGroupJson securityGroupJson);
+    SecurityGroupResponse postPrivate(@Valid SecurityGroupRequest securityGroupRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    IdJson postPublic(@Valid SecurityGroupJson securityGroupJson);
+    SecurityGroupResponse postPublic(@Valid SecurityGroupRequest securityGroupRequest);
 
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    Set<SecurityGroupJson> getPrivates();
+    Set<SecurityGroupResponse> getPrivates();
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    Set<SecurityGroupJson> getPublics();
+    Set<SecurityGroupResponse> getPublics();
 
     @GET
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    SecurityGroupJson getPrivate(@PathParam(value = "name") String name);
+    SecurityGroupResponse getPrivate(@PathParam(value = "name") String name);
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    SecurityGroupJson getPublic(@PathParam(value = "name") String name);
+    SecurityGroupResponse getPublic(@PathParam(value = "name") String name);
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
-    SecurityGroupJson get(@PathParam(value = "id") Long id);
+    SecurityGroupResponse get(@PathParam(value = "id") Long id);
 
     @DELETE
     @Path("{id}")

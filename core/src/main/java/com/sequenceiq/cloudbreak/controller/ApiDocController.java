@@ -10,6 +10,6 @@ public class ApiDocController {
 
     @RequestMapping(value = "/apidocs", method = RequestMethod.GET)
     public ModelAndView apiDocs() {
-        return new ModelAndView("redirect:/api/index.html");
+        return new ModelAndView("redirect:swagger-ui.html");
     }
 }

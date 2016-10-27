@@ -17,7 +17,7 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
-import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 
 public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterTest<HostGroup> {
@@ -38,7 +38,7 @@ public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterT
     public void testConvert() {
         // GIVEN
         // WHEN
-        HostGroupJson result = underTest.convert(getSource());
+        HostGroupResponse result = underTest.convert(getSource());
         // THEN
         assertEquals(1, result.getMetadata().size());
         assertTrue(result.getRecipeIds().contains(1L));
@@ -51,7 +51,7 @@ public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterT
         // GIVEN
         getSource().setRecipes(new HashSet<>());
         // WHEN
-        HostGroupJson result = underTest.convert(getSource());
+        HostGroupResponse result = underTest.convert(getSource());
         // THEN
         assertEquals(1, result.getMetadata().size());
         assertFalse(result.getRecipeIds().contains(1L));

@@ -15,7 +15,6 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
@@ -106,13 +105,13 @@ public class RecipeCommands implements BaseCommands {
             recipeRequest.setName(name);
             recipeRequest.setDescription(description);
             recipeRequest.setPlugins(plugins);
-            IdJson id;
+            Long id;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().recipeEndpoint().postPublic(recipeRequest);
+                id = shellContext.cloudbreakClient().recipeEndpoint().postPublic(recipeRequest).getId();
             } else {
-                id = shellContext.cloudbreakClient().recipeEndpoint().postPrivate(recipeRequest);
+                id = shellContext.cloudbreakClient().recipeEndpoint().postPrivate(recipeRequest).getId();
             }
-            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), recipeRequest.getName());
+            return String.format(CREATE_SUCCESS_MESSAGE, id, recipeRequest.getName());
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

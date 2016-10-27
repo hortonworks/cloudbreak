@@ -6,11 +6,9 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
-abstract class SssdConfigBase implements JsonEntity {
+public abstract class SssdConfigBase implements JsonEntity {
 
     @Size(max = 100, min = 1, message = "The length of the config's name has to be in range of 1 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
@@ -21,18 +19,18 @@ abstract class SssdConfigBase implements JsonEntity {
     @Size(max = 1000, message = "The length of the config's description has to be less than 1000")
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
-    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.PROVIDER_TYPE, required = true)
+    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.PROVIDER_TYPE)
     private SssdProviderType providerType;
     @Size(min = 10, max = 255, message = "The length of the config's url has to be in range of 10 to 255")
-    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.URL, required = true)
+    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.URL)
     private String url;
-    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.SCHEMA, required = true)
+    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.SCHEMA)
     private SssdSchemaType schema;
     @Size(min = 10, max = 255, message = "The length of the config's search base has to be in range of 10 to 255")
-    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.BASE_SEARCH, required = true)
+    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.BASE_SEARCH)
     private String baseSearch;
-    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.TLS_REQUCERT, required = true)
-    private SssdTlsReqcertType tlsReqcert;
+    @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.TLS_REQUCERT)
+    private SssdTlsReqcertType tlsReqcert = SssdTlsReqcertType.HARD;
     @Size(max = 255, message = "The length of the active directory server has to be less than 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.AD_SERVER)
     private String adServer;

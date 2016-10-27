@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 
 @Configuration
 public class StackCreationActions {
+    public static final String TLS_INFO_KEY = "TLS_INFO";
     @Inject
     private ImageService imageService;
     @Inject
@@ -138,6 +141,25 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, CollectMetadataResult payload, Map<Object, Object> variables) throws Exception {
                 Stack stack = stackCreationService.setupMetadata(context, payload);
+                StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),
+                        context.getCloudStack());
+                sendEvent(newContext);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                CloudStack cloudStack = cloudStackConverter.convert(context.getStack());
+                return new GetTlsInfoRequest<GetTlsInfoResult>(context.getCloudContext(), context.getCloudCredential(), cloudStack);
+            }
+        };
+    }
+
+    @Bean(name = "GET_TLS_INFO_STATE")
+    public Action getTlsInfoAction() {
+        return new AbstractStackCreationAction<GetTlsInfoResult>(GetTlsInfoResult.class) {
+            @Override
+            protected void doExecute(StackContext context, GetTlsInfoResult payload, Map<Object, Object> variables) throws Exception {
+                Stack stack = stackCreationService.saveTlsInfo(context, payload.getTlsInfo());
                 StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),
                         context.getCloudStack());
                 sendEvent(newContext);

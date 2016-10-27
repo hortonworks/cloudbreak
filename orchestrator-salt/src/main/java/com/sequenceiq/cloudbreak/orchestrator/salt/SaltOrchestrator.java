@@ -98,19 +98,13 @@ public class SaltOrchestrator implements HostOrchestrator {
         LOGGER.info("Start SaltBootstrap on nodes: {}", targets);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             uploadSaltConfig(sc);
-
-            PillarSave ambariServer = new PillarSave(sc, gatewayConfig.getPrivateAddress());
-            Callable<Boolean> saltPillarRunner = runner(ambariServer, exitCriteria, exitCriteriaModel);
-            Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
-            saltPillarRunnerFuture.get();
-
             SaltBootstrap saltBootstrap = new SaltBootstrap(sc, gatewayConfig, targets, hostDiscoveryService.determineDomain());
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
 
         } catch (Exception e) {
-            LOGGER.error("Error occurred under the consul bootstrap", e);
+            LOGGER.error("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
         LOGGER.info("SaltBootstrap finished");
@@ -134,9 +128,14 @@ public class SaltOrchestrator implements HostOrchestrator {
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         LOGGER.info("Run Services on nodes: {}", allNodes);
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            PillarSave hostSave = new PillarSave(sc, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain()));
-            Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
+            PillarSave ambariServer = new PillarSave(sc, gatewayConfig.getPrivateAddress());
+            Callable<Boolean> saltPillarRunner = runner(ambariServer, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
+            saltPillarRunnerFuture.get();
+
+            PillarSave hostSave = new PillarSave(sc, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain()));
+            saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
+            saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
             for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
@@ -253,8 +252,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig) {
-        SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug);
-        try {
+        try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
             if (saltConnector.health().getStatusCode() == HttpStatus.OK.value()) {
                 return true;
             }
@@ -272,6 +270,15 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public int getMaxBootstrapNodes() {
         return MAX_NODES;
+    }
+
+    @Override
+    public Map<String, String> getMembers(GatewayConfig gatewayConfig, List<String> privateIps) throws CloudbreakOrchestratorException {
+        try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
+            return saltConnector.members(privateIps);
+        } catch (IOException e) {
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
     }
 
     private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,

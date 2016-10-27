@@ -156,7 +156,7 @@ public class Flow2HandlerTest {
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, times(0)).get(eq(FLOW_ID));
         verify(runningFlows, times(0)).put(any(Flow.class), isNull(String.class));
-        verify(flowChains, times(1)).removeFlowChain(anyString());
+        verify(flowChains, times(1)).removeFullFlowChain(anyString());
         verify(flowChains, times(0)).triggerNextFlow(anyString());
     }
 
@@ -168,7 +168,7 @@ public class Flow2HandlerTest {
         dummyEvent.setKey(Flow2Handler.FLOW_CANCEL);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1)).cancel(anyLong(), eq(FLOW_ID));
-        verify(flowChains, times(1)).removeFlowChain(eq(FLOW_CHAIN_ID));
+        verify(flowChains, times(1)).removeFullFlowChain(eq(FLOW_CHAIN_ID));
     }
 
     private static class OwnFlowState implements FlowState {

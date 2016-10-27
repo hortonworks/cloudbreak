@@ -5,12 +5,10 @@ import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processT
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +18,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -48,9 +44,6 @@ public class EmailSenderService {
 
     @Value("${cb.failed.cluster.installer.mail.template.path:}")
     private String failedClusterMailTemplatePath;
-
-    @Value("${cb.telemetry.mail.address:aws-marketplace@hortonworks.com}")
-    private String telemetryMailAddress;
 
     @Value("${cb.smartsense.configure:false}")
     private boolean configureSmartSense;
@@ -204,39 +197,6 @@ public class EmailSenderService {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
         sendEmail(user, email, failedClusterMailTemplatePath, "Cluster termination failed", getEmailModel(user.getGivenName(),
                 ambariServer, State.TERMINATION_FAILURE, clusterName));
-    }
-
-    @Async
-    public void sendTelemetryMailIfNeeded(Stack stack, Status status) {
-        Cluster cluster = stack.getCluster();
-        String smartSenseId = (String) stack.getCredential().getAttributes().getMap().get(CloudCredential.SMART_SENSE_ID);
-        Map<String, Object> telemetryMailMap = new LinkedHashMap<>();
-        if (configureSmartSense && !StringUtils.isEmpty(smartSenseId)) {
-            telemetryMailMap.put("Date", dateFormat.format(new Date()));
-            if (!Strings.isNullOrEmpty(accountId)) {
-                telemetryMailMap.put("Account ID", accountId);
-            }
-            telemetryMailMap.put("Smartsense ID", smartSenseId);
-            telemetryMailMap.put("Cluster ID", cluster.getId());
-            telemetryMailMap.put("Cluster type", getClusterType(stack, cluster));
-            telemetryMailMap.put("Node count", stack.getFullNodeCount());
-            telemetryMailMap.put("Instance type(s)", getInstanceTypes(stack));
-            telemetryMailMap.put("Running time", getRunningTime(cluster));
-            telemetryMailMap.put("Status", status.normalizedStatusName());
-            if (!Strings.isNullOrEmpty(templateVersion)) {
-                telemetryMailMap.put("Version", templateVersion);
-            }
-            if (!Strings.isNullOrEmpty(awsInstanceId)) {
-                telemetryMailMap.put("Controller Instance ID", awsInstanceId);
-            }
-            telemetryMailMap.put("Master Instance ID", getMasterInstanceId(stack));
-
-            StringBuilder telemetryMailBodyBuilder = new StringBuilder();
-            for (String key : telemetryMailMap.keySet()) {
-                telemetryMailBodyBuilder.append(key).append(": ").append(telemetryMailMap.get(key)).append("<br />");
-            }
-            mailSender.send(emailMimeMessagePreparator.prepareMessage(telemetryMailAddress, "Telemetry", telemetryMailBodyBuilder.toString()));
-        }
     }
 
     private String getClusterType(Stack stack, Cluster cluster) {

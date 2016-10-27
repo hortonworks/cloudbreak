@@ -67,7 +67,7 @@
                 </ul>
                 <div id="myTabContent" class="tab-content">
                     <div role="tabpanel" class="tab-pane fade active review-tab" ng-class="{true:'in', false:''}[group.group == cluster.activeGroup]" ng-hide="group.group != cluster.activeGroup" ng-show="group.group == cluster.activeGroup" ng-repeat="group in cluster.instanceGroups" id="{{group.group}}" aria-labelledby="{{group.group}}-tab">
-                        <div class="container">
+                        <div class="">
                             <div class="form-group">
                                 <label class="col-sm-2 control-label" for="sl_template_active">Template: </label>
                                 <div class="templateselect col-sm-9">
@@ -83,9 +83,9 @@
 
                             <div class="form-group" ng-repeat="blueprint in $root.blueprints|filter: { id: cluster.blueprintId }:true">
                                 <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
-                                <div class="col-sm-5 col-lg-6">
+                                <div class="col-sm-6 col-md-6 col-lg-6">
                                     <div class="host-group-table row" ng-repeat="hostgroup in blueprint.ambariBlueprint.host_groups|filter: { name: group.group }:true">
-                                        <div class="list-group">
+                                        <div class="list-group col-sm-12">
                                             <a href="" class="list-group-item active" style="text-decoration: none;    font-size: 15px;">{{hostgroup.name}}</a>
                                             <a href="" ng-repeat="component in hostgroup.components" class="list-group-item" style="text-decoration: none;    font-size: 15px;">{{component.name}}</a>
                                         </div>
@@ -102,7 +102,7 @@
                 </ul>
                 <div id="myTabContent" class="tab-content">
                     <div role="tabpanel" class="tab-pane fade active review-tab" ng-class="{true:'in', false:''}[group.name == cluster.activeGroup]" ng-hide="group.name != cluster.activeGroup" ng-show="group.name == cluster.activeGroup" ng-repeat="group in cluster.hostGroups" id="{{group.name}}" aria-labelledby="{{group.name}}-tab">
-                        <div class="container">
+                        <div class="">
                             <div class="form-group">
                                 <label class="col-sm-2 control-label" for="sl_template_active">{{msg.cluster_form_hostgroup_constraint_label}}: </label>
                                 <div class="templateselect col-sm-9">
@@ -111,9 +111,9 @@
                             </div>
                             <div class="form-group" ng-repeat="blueprint in $root.blueprints|filter: { id: cluster.blueprintId }:true">
                                 <label class="col-sm-2 control-label" for="sl_comps_active">Components: </label>
-                                <div class="col-sm-5 col-lg-6">
+                                <div class="col-sm-6 col-md-6 col-lg-6">
                                     <div class="host-group-table row" ng-repeat="hostgroup in blueprint.ambariBlueprint.host_groups|filter: { name: group.name }:true">
-                                        <div class="list-group">
+                                        <div class="list-group col-sm-12">
                                             <a href="" class="list-group-item active" style="text-decoration: none;    font-size: 15px;">{{hostgroup.name}}</a>
                                             <a href="" ng-repeat="component in hostgroup.components" class="list-group-item" style="text-decoration: none;    font-size: 15px;">{{component.name}}</a>
                                         </div>

@@ -16,11 +16,13 @@ public class FlowRegister {
     }
 
     public Flow get(String flowId) {
-        return runningFlows.get(flowId).getLeft();
+        Pair<Flow, String> p = runningFlows.get(flowId);
+        return p != null ? p.getLeft() : null;
     }
 
     public String getFlowChainId(String flowId) {
-        return runningFlows.get(flowId).getRight();
+        Pair<Flow, String> p = runningFlows.get(flowId);
+        return p != null ? p.getRight() : null;
     }
 
     public Flow remove(String flowId) {

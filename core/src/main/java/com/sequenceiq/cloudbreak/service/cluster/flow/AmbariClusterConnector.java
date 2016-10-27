@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -77,10 +79,10 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
@@ -90,7 +92,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListenerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
-import com.sequenceiq.cloudbreak.service.stack.flow.HttpClientConfig;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -186,9 +187,9 @@ public class AmbariClusterConnector {
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
 
-            String blueprintText = cluster.getBlueprint().getBlueprintText();
-            FileSystem fs = cluster.getFileSystem();
+            String blueprintText = updateBlueprintWithInputs(cluster, cluster.getBlueprint());
 
+            FileSystem fs = cluster.getFileSystem();
             blueprintText = updateBlueprintConfiguration(stack, blueprintText, cluster.getRdsConfig(), fs);
 
             AmbariClient ambariClient = getAmbariClient(stack);
@@ -258,6 +259,20 @@ public class AmbariClusterConnector {
             blueprintText = blueprintProcessor.removeComponentFromBlueprint("MYSQL_SERVER", blueprintText);
         }
         blueprintText = autoRecoveryConfigProvider.addToBlueprint(blueprintText);
+        return blueprintText;
+    }
+
+    public String updateBlueprintWithInputs(Cluster cluster, Blueprint blueprint) throws CloudbreakSecuritySetupException, IOException {
+        String blueprintText = blueprint.getBlueprintText();
+
+        Map<String, String> bpI = cluster.getBlueprintInputs().get(Map.class);
+        if (bpI != null) {
+            for (Map.Entry<String, String> stringStringEntry : bpI.entrySet()) {
+                blueprintText = blueprintText.replaceAll(String.format("\\{\\{ %s \\}\\}",
+                        stringStringEntry.getKey()), stringStringEntry.getValue());
+            }
+        }
+
         return blueprintText;
     }
 

@@ -73,7 +73,7 @@ function getBasePath(req) {
         }
     }
 
-    return "/";
+    return "";
 }
 
 function continueInit() {

@@ -21,7 +21,6 @@ import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -67,8 +66,10 @@ public class RecipeCommandsTest {
         dummyResult.setPlugins(Collections.emptySet());
         dummyResult.setProperties(Collections.<String, String>emptyMap());
         given(cloudbreakClient.recipeEndpoint()).willReturn(recipeEndpoint);
-        given(recipeEndpoint.postPrivate(any(RecipeRequest.class))).willReturn(new IdJson(1L));
-        given(recipeEndpoint.postPublic(any(RecipeRequest.class))).willReturn(new IdJson(1L));
+        RecipeResponse recipeResponse = new RecipeResponse();
+        recipeResponse.setId(1L);
+        given(recipeEndpoint.postPrivate(any(RecipeRequest.class))).willReturn(recipeResponse);
+        given(recipeEndpoint.postPublic(any(RecipeRequest.class))).willReturn(recipeResponse);
         given(recipeEndpoint.get(RECIPE_ID)).willReturn(dummyResult);
         given(recipeEndpoint.getPublic(RECIPE_NAME)).willReturn(dummyResult);
         given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
@@ -129,17 +130,14 @@ public class RecipeCommandsTest {
 
     @Test
     public void testStoreRecipePreScriptExistsAndPublic() throws Exception {
-
-        underTest.createRecipe("name", null, new File(getClass().getResource("/store-recipe-test").getFile()), null,
-                true);
+        underTest.createRecipe("name", null, new File(getClass().getResource("/store-recipe-test").getFile()), null, true);
         verify(recipeEndpoint, times(1)).postPublic(any(RecipeRequest.class));
         verify(recipeEndpoint, times(0)).postPrivate(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipePostScriptExistsAndPrivate() throws Exception {
-        underTest.createRecipe("name", null, null, new File(getClass().getResource("/store-recipe-test").getFile()),
-                false);
+        underTest.createRecipe("name", null, null, new File(getClass().getResource("/store-recipe-test").getFile()), false);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
         verify(recipeEndpoint, times(1)).postPrivate(any(RecipeRequest.class));
     }

@@ -1,12 +1,7 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,8 +26,6 @@ public class StackDecorator implements Decorator<Stack> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDecorator.class);
 
     private static final double ONE_HUNDRED = 100.0;
-    private static final int PWD_LENGTH = 128;
-    private static final int RADIX = 32;
 
     @Inject
     private CredentialService credentialService;
@@ -70,15 +63,6 @@ public class StackDecorator implements Decorator<Stack> {
             prepareOrchestratorIfNotExist(subject, credential);
             if (subject.getFailurePolicy() != null) {
                 validatFailurePolicy(subject, subject.getFailurePolicy());
-            }
-
-            try {
-                MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-                String raw = RandomStringUtils.randomAscii(PWD_LENGTH);
-                byte[] digest = messageDigest.digest(raw.getBytes());
-                subject.setSaltPassword(new BigInteger(1, digest).toString(RADIX));
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
             }
 
             validate(subject);

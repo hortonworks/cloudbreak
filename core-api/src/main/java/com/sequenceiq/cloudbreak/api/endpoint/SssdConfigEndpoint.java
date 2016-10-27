@@ -12,7 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -25,20 +24,20 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/sssd")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/sssd", description = ControllerDescription.SSSDCONFIG_DESCRIPTION)
+@Api(value = "/sssd", description = ControllerDescription.SSSDCONFIG_DESCRIPTION, protocols = "http,https")
 public interface SssdConfigEndpoint {
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
-    IdJson postPrivate(@Valid SssdConfigRequest sssdConfigRequest);
+    SssdConfigResponse postPrivate(@Valid SssdConfigRequest sssdConfigRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
-    IdJson postPublic(@Valid SssdConfigRequest sssdConfigRequest);
+    SssdConfigResponse postPublic(@Valid SssdConfigRequest sssdConfigRequest);
 
     @GET
     @Path("user")

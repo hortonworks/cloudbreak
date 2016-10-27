@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
@@ -169,6 +170,7 @@ public class TestUtil {
             default:
                 break;
         }
+        stack.setSecurityConfig(new SecurityConfig());
         return stack;
     }
 

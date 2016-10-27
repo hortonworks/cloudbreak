@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
 /**
  * Manages the credentials e.g public keys on Cloud Plarform side
@@ -25,6 +28,13 @@ public interface CredentialConnector {
      */
     CloudCredentialStatus create(AuthenticatedContext authenticatedContext);
 
+
+    /**
+     * Interactive login for credential creation.
+     *
+     * @return parameters for interactive login
+     */
+    Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext, ExtendedCloudCredential extendedCloudCredential);
 
     /**
      * Delete the credential (e.g public key) associated with a stack (cluster) from Cloud provider.

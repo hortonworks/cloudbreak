@@ -10,14 +10,14 @@ import io.swagger.annotations.ApiModelProperty;
 public class FileSystemResponse extends FileSystemBase {
 
     @ApiModelProperty(ModelDescriptions.ID)
-    private String id;
+    private Long id;
 
     @JsonProperty("id")
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 }

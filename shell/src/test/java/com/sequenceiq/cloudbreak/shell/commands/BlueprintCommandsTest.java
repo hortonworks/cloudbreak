@@ -50,7 +50,7 @@ public class BlueprintCommandsTest {
         underTest = new BlueprintCommands(mockContext);
 
         dummyResult = new BlueprintResponse();
-        dummyResult.setId(BLUEPRINT_ID.toString());
+        dummyResult.setId(BLUEPRINT_ID);
         given(mockContext.isMarathonMode()).willReturn(false);
         given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
         given(cloudbreakClient.blueprintEndpoint()).willReturn(blueprintEndpoint);

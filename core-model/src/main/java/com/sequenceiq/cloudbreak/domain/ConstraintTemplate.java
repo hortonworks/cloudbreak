@@ -72,23 +72,35 @@ public class ConstraintTemplate {
 
     @Column(nullable = false)
     private String name;
+
     @Column(length = 1000, columnDefinition = "TEXT")
     private String description;
 
+    @Column(nullable = false)
     private String owner;
+
+    @Column(nullable = false)
     private String account;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
+    @Column(nullable = false)
     private Double cpu;
+
+    @Column(nullable = false)
     private Double memory;
+
+    @Column(nullable = false)
     private Double disk;
 
     @Column(nullable = false)
     private String orchestratorType;
 
+    @Column(nullable = false)
     private boolean deleted;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 

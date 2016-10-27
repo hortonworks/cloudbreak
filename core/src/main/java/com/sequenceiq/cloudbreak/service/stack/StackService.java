@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -65,6 +66,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
+import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -77,6 +79,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Service
 @Transactional
@@ -122,6 +125,8 @@ public class StackService {
     private ContainerOrchestratorResolver containerOrchestratorResolver;
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+    @Inject
+    private SecurityConfigRepository securityConfigRepository;
 
     @Value("${cb.nginx.port:9443}")
     private int nginxPort;
@@ -279,7 +284,14 @@ public class StackService {
             if (!"BYOS".equals(stack.cloudPlatform())) {
                 instanceGroupRepository.save(savedStack.getInstanceGroups());
                 tlsSecurityService.copyClientKeys(stack.getId());
-                tlsSecurityService.storeSSHKeys(stack);
+
+                SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys(stack.getId());
+                securityConfig.setSaltPassword(PasswordUtil.generatePassword());
+                securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
+                securityConfig.setStack(stack);
+                securityConfigRepository.save(securityConfig);
+                stack.setSecurityConfig(securityConfig);
+
                 imageService.create(savedStack, connector.getPlatformParameters(stack), ambariVersion, hdpVersion, imageCatalog);
                 flowManager.triggerProvisioning(savedStack.getId());
             } else {

@@ -5,7 +5,7 @@
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a href="" id="network-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-network-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-            <h4><span class="badge pull-right">{{$root.networks.length}}</span> {{msg.network_manage_title}}</h4>
+            <h4><span class="badge pull-right">{{countList($root.networks)}}</span> {{msg.network_manage_title}}</h4>
         </div>
 
         <div id="panel-network-collapse" class="panel-btn-in-header-collapse collapse">

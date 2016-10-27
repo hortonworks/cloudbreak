@@ -13,12 +13,12 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class StackValidationRequest implements JsonEntity {
-    @ApiModelProperty(required = true)
-    private Set<HostGroupJson> hostGroups = new HashSet<>();
-    @ApiModelProperty(required = true)
-    private Set<InstanceGroupJson> instanceGroups = new HashSet<>();
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.HOSTGROUPS, required = true)
+    private Set<HostGroupRequest> hostGroups = new HashSet<>();
+    @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
+    private Set<InstanceGroupRequest> instanceGroups = new HashSet<>();
     @NotNull
-    @ApiModelProperty(value = StackModelDescription.BLUEPRINT_ID, required = true)
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.BLUEPRINT_ID, required = true)
     private Long blueprintId;
     @NotNull
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
@@ -28,19 +28,19 @@ public class StackValidationRequest implements JsonEntity {
     private String platform;
     private FileSystemRequest fileSystem;
 
-    public Set<HostGroupJson> getHostGroups() {
+    public Set<HostGroupRequest> getHostGroups() {
         return hostGroups;
     }
 
-    public void setHostGroups(Set<HostGroupJson> hostGroups) {
+    public void setHostGroups(Set<HostGroupRequest> hostGroups) {
         this.hostGroups = hostGroups;
     }
 
-    public Set<InstanceGroupJson> getInstanceGroups() {
+    public Set<InstanceGroupRequest> getInstanceGroups() {
         return instanceGroups;
     }
 
-    public void setInstanceGroups(Set<InstanceGroupJson> instanceGroups) {
+    public void setInstanceGroups(Set<InstanceGroupRequest> instanceGroups) {
         this.instanceGroups = instanceGroups;
     }
 

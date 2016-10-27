@@ -2,24 +2,35 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TopologyBase implements JsonEntity {
-    private Long id;
+public abstract class TopologyBase implements JsonEntity {
+
+    @Size(max = 100, min = 5, message = "The length of the topology's name has to be in range of 5 to 100")
+    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+            message = "The topology's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
+
+    @Size(max = 1000, message = "The length of the topology's description has to be less than 1000")
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
+
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
-    private String endpoint;
+
+    @ApiModelProperty(ModelDescriptions.TopologyModelDescription.NODES)
     private Map<String, String> nodes;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -43,14 +54,6 @@ public class TopologyBase implements JsonEntity {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
-    }
-
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
     }
 
     public Map<String, String> getNodes() {

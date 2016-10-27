@@ -14,11 +14,11 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
-public class JsonToSecurityGroupConverterTest extends AbstractJsonConverterTest<SecurityGroupJson> {
+public class JsonToSecurityGroupConverterTest extends AbstractJsonConverterTest<SecurityGroupRequest> {
 
     @InjectMocks
     private JsonToSecurityGroupConverter underTest;
@@ -44,7 +44,7 @@ public class JsonToSecurityGroupConverterTest extends AbstractJsonConverterTest<
     }
 
     @Override
-    public Class<SecurityGroupJson> getRequestClass() {
-        return SecurityGroupJson.class;
+    public Class<SecurityGroupRequest> getRequestClass() {
+        return SecurityGroupRequest.class;
     }
 }

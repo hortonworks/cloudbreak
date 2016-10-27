@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.sequenceiq.cloudbreak.api.endpoint.ConstraintTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -31,14 +30,14 @@ public class ConstraintTemplateController implements ConstraintTemplateEndpoint 
     private ConversionService conversionService;
 
     @Override
-    public IdJson postPrivate(ConstraintTemplateRequest constraintTemplateRequest) {
+    public ConstraintTemplateResponse postPrivate(ConstraintTemplateRequest constraintTemplateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createConstraintTemplate(user, constraintTemplateRequest, false);
     }
 
     @Override
-    public IdJson postPublic(ConstraintTemplateRequest constraintTemplateRequest) {
+    public ConstraintTemplateResponse postPublic(ConstraintTemplateRequest constraintTemplateRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createConstraintTemplate(user, constraintTemplateRequest, true);
@@ -105,10 +104,10 @@ public class ConstraintTemplateController implements ConstraintTemplateEndpoint 
         constraintTemplateService.delete(name, user);
     }
 
-    private IdJson createConstraintTemplate(CbUser user, ConstraintTemplateRequest constraintTemplateRequest, boolean publicInAccount) {
+    private ConstraintTemplateResponse createConstraintTemplate(CbUser user, ConstraintTemplateRequest constraintTemplateRequest, boolean publicInAccount) {
         ConstraintTemplate constraintTemplate = convert(constraintTemplateRequest, publicInAccount);
         constraintTemplate = constraintTemplateService.create(user, constraintTemplate);
-        return new IdJson(constraintTemplate.getId());
+        return conversionService.convert(constraintTemplate, ConstraintTemplateResponse.class);
     }
 
     private ConstraintTemplate convert(ConstraintTemplateRequest constraintTemplateRequest, boolean publicInAccount) {

@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentMap;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
 
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -22,14 +21,10 @@ import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 public class RestClientUtil {
-
-    private static final String USER = "cbadmin";
-    private static final String PASSWORD = "cbadmin";
 
     // apache http connection pool defaults are constraining
     // https://hc.apache.org/httpcomponents-client-ga/tutorial/html/connmgmt.html
@@ -94,11 +89,6 @@ public class RestClientUtil {
         Client client = builder.build();
         LOGGER.info("Jax rs client has been constructed: {}, sslContext: {}", client, sslContext);
         return client;
-    }
-
-    public static WebTarget createTarget(Client client, String address) {
-        HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(USER, PASSWORD);
-        return client.target(address).register(feature);
     }
 
     private static Client createClient(ConfigKey configKey) {

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -14,6 +15,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "Blueprint", uniqueConstraints = {
@@ -72,7 +75,7 @@ public class Blueprint implements ProvisionEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(length = 1000000, columnDefinition = "TEXT")
+    @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
     private String blueprintText;
 
     private String blueprintName;
@@ -81,13 +84,22 @@ public class Blueprint implements ProvisionEntity {
 
     private int hostGroupCount;
 
+    @Column(nullable = false)
     private String owner;
+
+    @Column(nullable = false)
     private String account;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json inputParameters;
 
     public Blueprint() {
 
@@ -171,5 +183,13 @@ public class Blueprint implements ProvisionEntity {
 
     public void setStatus(ResourceStatus status) {
         this.status = status;
+    }
+
+    public Json getInputParameters() {
+        return inputParameters;
+    }
+
+    public void setInputParameters(Json inputParameters) {
+        this.inputParameters = inputParameters;
     }
 }

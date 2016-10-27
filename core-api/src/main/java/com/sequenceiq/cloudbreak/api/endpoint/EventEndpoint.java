@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/events")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/events", description = ControllerDescription.EVENT_DESCRIPTION, position = 7)
+@Api(value = "/events", description = ControllerDescription.EVENT_DESCRIPTION, protocols = "http,https")
 public interface EventEndpoint {
 
     @GET

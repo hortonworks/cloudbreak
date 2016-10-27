@@ -2,6 +2,7 @@
   "items": [
     {
       "value": "m3.medium",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -41,6 +42,7 @@
     },
     {
       "value": "m3.large",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -80,6 +82,7 @@
     },
     {
       "value": "m3.xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -119,6 +122,7 @@
     },
     {
       "value": "m3.2xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -158,6 +162,7 @@
     },
     {
       "value": "m4.large",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -197,6 +202,7 @@
     },
     {
       "value": "m4.xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -236,6 +242,7 @@
     },
     {
       "value": "m4.2xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -275,6 +282,7 @@
     },
     {
       "value": "m4.4xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -314,6 +322,7 @@
     },
     {
       "value": "m4.10xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -353,6 +362,7 @@
     },
     {
       "value": "t2.large",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -392,6 +402,7 @@
     },
     {
       "value": "i2.xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -431,6 +442,7 @@
     },
     {
       "value": "i2.2xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -470,6 +482,7 @@
     },
     {
       "value": "i2.4xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -509,6 +522,7 @@
     },
     {
       "value": "i2.8xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -548,6 +562,7 @@
     },
     {
       "value": "hi1.4xlarge",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -587,6 +602,7 @@
     },
     {
       "value": "hs1.8xlarge",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -626,6 +642,7 @@
     },
     {
       "value": "c4.large",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -665,6 +682,7 @@
     },
     {
       "value": "c4.xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -704,6 +722,7 @@
     },
     {
       "value": "c4.2xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -743,6 +762,7 @@
     },
     {
       "value": "c4.4xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -782,6 +802,7 @@
     },
     {
       "value": "c4.8xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -821,6 +842,7 @@
     },
     {
       "value": "c3.large",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -860,6 +882,7 @@
     },
     {
       "value": "c3.xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -899,6 +922,7 @@
     },
     {
       "value": "c3.2xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -938,6 +962,7 @@
     },
     {
       "value": "c3.4xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -977,6 +1002,7 @@
     },
     {
       "value": "c3.8xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -1016,6 +1042,7 @@
     },
     {
       "value": "x1.32xlarge",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -1048,6 +1075,7 @@
     },
     {
       "value": "cc2.8xlarge",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -1087,6 +1115,7 @@
     },
     {
       "value": "cg1.4xlarge",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -1126,6 +1155,7 @@
     },
     {
       "value": "cr1.8xlarge",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -1165,6 +1195,7 @@
     },
     {
       "value": "g2.2xlarge",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -1204,6 +1235,7 @@
     },
     {
       "value": "r3.large",
+      "extended": true,
       "meta": {
         "configs": [
           {
@@ -1243,6 +1275,7 @@
     },
     {
       "value": "r3.xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -1282,6 +1315,7 @@
     },
     {
       "value": "r3.2xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -1321,6 +1355,7 @@
     },
     {
       "value": "r3.4xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -1360,6 +1395,7 @@
     },
     {
       "value": "r3.8xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -1399,6 +1435,7 @@
     },
     {
       "value": "d2.xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -1438,6 +1475,7 @@
     },
     {
       "value": "d2.2xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -1477,6 +1515,7 @@
     },
     {
       "value": "d2.4xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {
@@ -1516,6 +1555,7 @@
     },
     {
       "value": "d2.8xlarge",
+      "extended": false,
       "meta": {
         "configs": [
           {

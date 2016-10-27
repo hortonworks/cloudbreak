@@ -9,7 +9,6 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
@@ -37,9 +36,9 @@ public class RdsConfigCommands implements BaseCommands {
             @CliOption(key = "connectionUserName", mandatory = true, help = "Username to use for the connection") String connectionUsername,
             @CliOption(key = "connectionPassword", mandatory = true, help = "Password to use for the connection") String connectionPassword,
             @CliOption(key = "hdpVersion", mandatory = true, help = "Compatible HDP version for the RDS configuration") String hdpVersion,
-            @CliOption(key = "publicInAccount", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
+            @CliOption(key = "publicInAccount", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "flags if the config is public in the account") Boolean publicInAccount,
-            @CliOption(key = "validated", mandatory = false, unspecifiedDefaultValue = "true", specifiedDefaultValue = "true",
+            @CliOption(key = "validated", unspecifiedDefaultValue = "true", specifiedDefaultValue = "true",
                     help = "the RDS config parameters will be validated") Boolean validated) {
         try {
             RDSConfigJson rdsConfig = new RDSConfigJson();
@@ -50,13 +49,13 @@ public class RdsConfigCommands implements BaseCommands {
             rdsConfig.setConnectionPassword(connectionPassword);
             rdsConfig.setHdpVersion(hdpVersion);
             rdsConfig.setValidated(validated);
-            IdJson id;
+            Long id;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().rdsConfigEndpoint().postPublic(rdsConfig);
+                id = shellContext.cloudbreakClient().rdsConfigEndpoint().postPublic(rdsConfig).getId();
             } else {
-                id = shellContext.cloudbreakClient().rdsConfigEndpoint().postPrivate(rdsConfig);
+                id = shellContext.cloudbreakClient().rdsConfigEndpoint().postPrivate(rdsConfig).getId();
             }
-            return String.format("RDS config created with id: '%d' and name: '%s'", id.getId(), rdsConfig.getName());
+            return String.format("RDS config created with id: '%d' and name: '%s'", id, rdsConfig.getName());
         } catch (Exception e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
@@ -79,7 +78,7 @@ public class RdsConfigCommands implements BaseCommands {
             } else if (name != null) {
                 RDSConfigResponse config = shellContext.cloudbreakClient().rdsConfigEndpoint().getPublic(name);
                 if (config != null) {
-                    shellContext.addRdsConfig(config.getId());
+                    shellContext.addRdsConfig(config.getId().toString());
                     return String.format("RDS config has been selected, name: %s", name);
                 }
             }

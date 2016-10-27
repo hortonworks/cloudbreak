@@ -52,6 +52,7 @@ public class Recipe implements ProvisionEntity {
     @SequenceGenerator(name = "recipe_generator", sequenceName = "recipe_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
     private String description;
@@ -64,10 +65,13 @@ public class Recipe implements ProvisionEntity {
     @Column(name = "value", columnDefinition = "TEXT", length = 100000)
     private Map<String, String> keyValues;
 
+    @Column(nullable = false)
     private String account;
 
+    @Column(nullable = false)
     private String owner;
 
+    @Column(nullable = false)
     private boolean publicInAccount;
 
     public Long getId() {

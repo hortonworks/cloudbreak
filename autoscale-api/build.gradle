@@ -9,7 +9,6 @@ jar {
 }
 
 dependencies {
-
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
   compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion

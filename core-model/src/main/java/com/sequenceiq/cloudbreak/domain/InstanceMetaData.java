@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -82,6 +83,7 @@ public class InstanceMetaData implements ProvisionEntity {
     private Boolean ambariServer;
     private Boolean consulServer;
     private String discoveryFQDN;
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InstanceStatus instanceStatus;
     private String hypervisor;

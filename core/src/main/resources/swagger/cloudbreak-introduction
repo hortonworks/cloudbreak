@@ -3,4 +3,4 @@ Cloudbreak is a cloud agnostic Hadoop as a Service API. Abstracts the provisioni
 SequenceIQ's Cloudbreak is a RESTful application development platform with the goal of helping developers to build solutions for deploying Hadoop YARN clusters in different environments.
 Once it is deployed in your favourite servlet container it exposes a REST API allowing to span up Hadoop clusters of arbitary sizes and cloud providers. Provisioning Hadoop has never been easier.
 Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Platform, Openstack), Apache Ambari, Docker lightweight containers, Swarm and Consul.
-For further product documentation follow the link: <a href="http://sequenceiq.com/cloudbreak/">http://sequenceiq.com/cloudbreak/</a>
+For further product documentation follow the link: <a href="http://hortonworks.com/apache/cloudbreak/">http://hortonworks.com/apache/cloudbreak/</a>

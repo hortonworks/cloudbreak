@@ -15,7 +15,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.TopologyRequest;
 import com.sequenceiq.cloudbreak.api.model.TopologyResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -28,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/topologies")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/topologies", description = ControllerDescription.TOPOLOGY_DESCRIPTION, position = 9)
+@Api(value = "/topologies", description = ControllerDescription.TOPOLOGY_DESCRIPTION, protocols = "http,https")
 public interface TopologyEndpoint {
 
     @GET
@@ -47,7 +46,7 @@ public interface TopologyEndpoint {
     @Path(value = "account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TopologyOpDesctiption.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES)
-    IdJson postPublic(@Valid TopologyRequest topologyRequest);
+    TopologyResponse postPublic(@Valid TopologyRequest topologyRequest);
 
     @DELETE
     @Path(value = "account/{id}")

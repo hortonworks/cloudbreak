@@ -14,6 +14,8 @@ export TMP_SSH_KEY="${tmpSshKey}"
 export PUBLIC_SSH_KEY="${publicSshKey}"
 export RELOCATE_DOCKER=${relocateDocker?c}
 export SSH_USER=${sshUser}
+export SALT_BOOT_PASSWORD=${saltBootPassword}
+export SALT_BOOT_SIGN_KEY=${signaturePublicKey}
 
 ${customUserData}
 

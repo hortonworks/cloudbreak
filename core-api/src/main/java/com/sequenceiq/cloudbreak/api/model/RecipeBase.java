@@ -12,11 +12,9 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidPlugin;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
-abstract class RecipeBase implements JsonEntity {
+public abstract class RecipeBase implements JsonEntity {
     @Size(max = 100, min = 1, message = "The length of the recipe's name has to be in range of 1 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The recipe's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -28,7 +26,7 @@ abstract class RecipeBase implements JsonEntity {
     private String description;
 
     @ValidPlugin
-    @ApiModelProperty(value = RecipeModelDescription.PLUGINS, required = true)
+    @ApiModelProperty(value = RecipeModelDescription.PLUGINS)
     private Set<String> plugins;
 
     @JsonProperty("properties")

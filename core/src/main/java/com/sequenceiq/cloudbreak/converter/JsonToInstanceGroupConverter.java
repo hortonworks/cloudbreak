@@ -9,14 +9,14 @@ import javax.inject.Inject;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Component
-public class JsonToInstanceGroupConverter extends AbstractConversionServiceAwareConverter<InstanceGroupJson, InstanceGroup> {
+public class JsonToInstanceGroupConverter extends AbstractConversionServiceAwareConverter<InstanceGroupRequest, InstanceGroup> {
 
     @Inject
     private TemplateService templateService;
@@ -25,7 +25,7 @@ public class JsonToInstanceGroupConverter extends AbstractConversionServiceAware
     private SecurityGroupService securityGroupService;
 
     @Override
-    public InstanceGroup convert(InstanceGroupJson json) {
+    public InstanceGroup convert(InstanceGroupRequest json) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(json.getGroup());
         instanceGroup.setNodeCount(json.getNodeCount());

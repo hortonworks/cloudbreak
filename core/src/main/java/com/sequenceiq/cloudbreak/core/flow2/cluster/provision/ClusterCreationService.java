@@ -79,7 +79,6 @@ public class ClusterCreationService {
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Cluster creation finished.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_BUILT, AVAILABLE.name(), stack.getAmbariIp());
-        emailSenderService.sendTelemetryMailIfNeeded(stack, AVAILABLE);
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stack.getCluster().getEmailTo(), stack.getAmbariIp(), cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
@@ -102,7 +101,6 @@ public class ClusterCreationService {
             LOGGER.error("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
         }
 
-        emailSenderService.sendTelemetryMailIfNeeded(stack, CREATE_FAILED);
         if (cluster != null && cluster.getEmailNeeded()) {
             emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stack.getCluster().getEmailTo(), cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());

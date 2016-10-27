@@ -6,17 +6,17 @@ import java.util.Set;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
-import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.SecurityRuleResponse;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 @Component
-public class SecurityGroupToJsonConverter extends AbstractConversionServiceAwareConverter<SecurityGroup, SecurityGroupJson> {
+public class SecurityGroupToJsonConverter extends AbstractConversionServiceAwareConverter<SecurityGroup, SecurityGroupResponse> {
 
     @Override
-    public SecurityGroupJson convert(SecurityGroup source) {
-        SecurityGroupJson json = new SecurityGroupJson();
+    public SecurityGroupResponse convert(SecurityGroup source) {
+        SecurityGroupResponse json = new SecurityGroupResponse();
         json.setId(source.getId());
         json.setName(source.getName());
         json.setDescription(source.getDescription());
@@ -27,8 +27,8 @@ public class SecurityGroupToJsonConverter extends AbstractConversionServiceAware
         return json;
     }
 
-    private List<SecurityRuleJson> convertSecurityRules(Set<SecurityRule> securityRules) {
-        return (List<SecurityRuleJson>) getConversionService().convert(securityRules, TypeDescriptor.forObject(securityRules),
-                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(SecurityRuleJson.class)));
+    private List<SecurityRuleResponse> convertSecurityRules(Set<SecurityRule> securityRules) {
+        return (List<SecurityRuleResponse>) getConversionService().convert(securityRules, TypeDescriptor.forObject(securityRules),
+                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(SecurityRuleResponse.class)));
     }
 }

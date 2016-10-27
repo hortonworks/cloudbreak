@@ -18,7 +18,6 @@ import org.springframework.shell.core.annotation.CliOption;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
 import com.sequenceiq.cloudbreak.shell.commands.CredentialCommands;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
@@ -204,16 +203,16 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
                 checkTopologyForResource(shellContext.cloudbreakClient().topologyEndpoint().getPublics(), platformId, platform);
             }
             credentialRequest.setTopologyId(platformId);
-            IdJson id;
+            Long id;
             publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().credentialEndpoint().postPublic(credentialRequest);
+                id = shellContext.cloudbreakClient().credentialEndpoint().postPublic(credentialRequest).getId();
             } else {
-                id = shellContext.cloudbreakClient().credentialEndpoint().postPrivate(credentialRequest);
+                id = shellContext.cloudbreakClient().credentialEndpoint().postPrivate(credentialRequest).getId();
             }
-            shellContext.setCredential(id.getId().toString());
+            shellContext.setCredential(id.toString());
             createOrSelectTemplateHint();
-            return String.format(CREATE_SUCCESS_MESSAGE, id.getId(), name);
+            return String.format(CREATE_SUCCESS_MESSAGE, id, name);
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

@@ -15,11 +15,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
+import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
@@ -41,6 +45,9 @@ public class ServiceProviderCredentialAdapter {
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
     public Credential init(Credential credential) {
         if (!credential.passwordAuthenticationRequired()) {
@@ -71,6 +78,27 @@ public class ServiceProviderCredentialAdapter {
             throw new OperationException(e);
         }
         return credential;
+    }
+
+    public Map<String, String> interactiveLogin(Credential credential) {
+        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform(), credential.getOwner());
+        ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
+        InteractiveLoginRequest request = new InteractiveLoginRequest(cloudContext, cloudCredential);
+        LOGGER.info("Triggering event: {}", request);
+        eventBus.notify(request.selector(), Event.wrap(request));
+        try {
+            InteractiveLoginResult res = request.await();
+            String message = "Interactive login Failed: ";
+            LOGGER.info("Result: {}", res);
+            if (res.getStatus() != EventStatus.OK) {
+                LOGGER.error(message, res.getErrorDetails());
+                throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
+            }
+            return res.getParameters();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while executing credential verification", e);
+            throw new OperationException(e);
+        }
     }
 
     public Credential update(Credential credential) {

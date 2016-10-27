@@ -18,6 +18,7 @@ import com.ecwid.consul.v1.event.model.Event;
 import com.ecwid.consul.v1.event.model.EventParams;
 import com.ecwid.consul.v1.kv.model.GetValue;
 import com.ecwid.consul.v1.kv.model.PutParams;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 public final class ConsulUtils {
 

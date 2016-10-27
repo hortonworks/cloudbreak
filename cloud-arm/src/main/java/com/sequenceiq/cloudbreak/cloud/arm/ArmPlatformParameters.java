@@ -98,7 +98,7 @@ public class ArmPlatformParameters implements PlatformParameters {
                     }
                 }
                 VmTypeMeta vmTypeMeta = builder.create();
-                vmTypes.add(VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta));
+                vmTypes.add(VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta, true));
             }
         } catch (IOException e) {
             return vmTypes;
@@ -180,7 +180,7 @@ public class ArmPlatformParameters implements PlatformParameters {
     }
 
     @Override
-    public VmTypes vmTypes() {
+    public VmTypes vmTypes(Boolean extended) {
         return new VmTypes(vmTypes, defaultVmType);
     }
 

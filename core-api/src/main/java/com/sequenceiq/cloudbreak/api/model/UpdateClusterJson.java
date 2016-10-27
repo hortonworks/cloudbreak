@@ -5,7 +5,7 @@ import java.util.Set;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,17 +14,20 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateClusterJson implements JsonEntity {
 
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.HOSTGROUP_ADJUSTMENT)
     private HostGroupAdjustmentJson hostGroupAdjustment;
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.STATUS_REQUEST)
     private StatusRequest status;
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.USERNAME_PASSWORD)
     private UserNamePasswordJson userNamePasswordJson;
-    @ApiModelProperty(StackModelDescription.BLUEPRINT_ID)
+    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
-    private Boolean validateBlueprint = true;
-    private Set<HostGroupJson> hostgroups;
+    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.VALIDATE_BLUEPRINT)
+    private Boolean validateBlueprint = Boolean.TRUE;
+    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.HOSTGROUPS)
+    private Set<HostGroupRequest> hostgroups;
     @Valid
+    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.AMBARI_STACK_DETAILS)
     private AmbariStackDetailsJson ambariStackDetails;
 
     public UpdateClusterJson() {
@@ -50,7 +53,7 @@ public class UpdateClusterJson implements JsonEntity {
         return blueprintId;
     }
 
-    public Set<HostGroupJson> getHostgroups() {
+    public Set<HostGroupRequest> getHostgroups() {
         return hostgroups;
     }
 
@@ -58,7 +61,7 @@ public class UpdateClusterJson implements JsonEntity {
         this.blueprintId = blueprintId;
     }
 
-    public void setHostgroups(Set<HostGroupJson> hostgroups) {
+    public void setHostgroups(Set<HostGroupRequest> hostgroups) {
         this.hostgroups = hostgroups;
     }
 

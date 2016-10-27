@@ -45,7 +45,7 @@ public class BYOSPlatformParameters implements PlatformParameters {
     }
 
     @Override
-    public VmTypes vmTypes() {
+    public VmTypes vmTypes(Boolean extended) {
         return new VmTypes(Collections.emptyList(), VmType.vmType(""));
     }
 

@@ -3,7 +3,38 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
-## [v1.5.0]
+## [v1.6.1] - 
+
+### Fixed
+
+- can send invite e-mails when authentication is not enabled
+
+### Changed
+
+- recipe create command in shell is unified with other commands
+
+## [v1.6.0] - 2016-09-15
+
+### Fixed
+
+- region is not a required field when posting a new stack
+- ability to create bigger than 999 GB disks for Azure
+- proper handling of upstart config in Salt to avoid concurrency between sysv and upstart when restarting clusters
+- hive-site xmls are properly generated on worker nodes with default blueprints
+
+### Added
+
+- Ambari and HDP versions are added to the /stack API call's response
+- when deploying a new subnet in an existing VPC on AWS, the CIDR range is automatically calculated when not specified explicitly on the API
+- ability to create clusters on GCP without public IP addresses and without firewall modifications
+- added env variable to specify static shared volumes in Mesos clusters
+
+### Changed
+
+- updated Ambari version to 2.4.1.0
+- salt password is generated per stack for salt user
+
+## [v1.5.0] - 2016-08-31
 
 ### Fixed
 
@@ -35,7 +66,7 @@ The Change Log summarizes the changes in Cloudbreak.
 - remove unecessary `require` flags from API documentation
 - improve security of salt communication
 
-## [v1.4.0]
+## [v1.4.0] - 2016-08-12
 
 ### Fixed
 

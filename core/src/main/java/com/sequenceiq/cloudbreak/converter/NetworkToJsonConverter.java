@@ -2,16 +2,16 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.NetworkJson;
+import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
-public class NetworkToJsonConverter extends AbstractConversionServiceAwareConverter<Network, NetworkJson> {
+public class NetworkToJsonConverter extends AbstractConversionServiceAwareConverter<Network, NetworkResponse> {
 
     @Override
-    public NetworkJson convert(Network source) {
-        NetworkJson json = new NetworkJson();
+    public NetworkResponse convert(Network source) {
+        NetworkResponse json = new NetworkResponse();
         json.setId(source.getId());
         json.setCloudPlatform(source.cloudPlatform());
         json.setName(source.getName());

@@ -28,7 +28,15 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
             }
             result.addValidationError(key, violation.getMessage());
         }
-        LOGGER.error(exception.getMessage(), exception);
+        StringBuilder violations = new StringBuilder();
+        for (ConstraintViolation<?> constraintViolation : exception.getConstraintViolations()) {
+            violations.append("constraintviolation: ")
+                    .append(constraintViolation.getPropertyPath())
+                    .append(" - ")
+                    .append(constraintViolation.getMessage())
+                    .append("\n");
+        }
+        LOGGER.error(violations.toString(), exception);
         return Response.status(Response.Status.BAD_REQUEST).entity(result)
                 .build();
     }

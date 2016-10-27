@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/usages")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/usages", description = ControllerDescription.USAGES_DESCRIPTION, position = 6)
+@Api(value = "/usages", description = ControllerDescription.USAGES_DESCRIPTION, protocols = "http,https")
 public interface UsageEndpoint {
 
     @GET

@@ -16,14 +16,12 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.TopologyRequest;
 import com.sequenceiq.cloudbreak.api.model.TopologyResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
 import com.sequenceiq.cloudbreak.shell.commands.PlatformCommands;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
-
 
 public class BasePlatformCommands implements BaseCommands, PlatformCommands {
     private static final String CREATE_SUCCESS_MSG = "Platform created with id: '%d' and name: '%s'";
@@ -158,9 +156,9 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
             req.setName(name);
             req.setDescription(description);
             req.setNodes(mapping);
-            IdJson id = shellContext.cloudbreakClient().topologyEndpoint().postPublic(req);
+            Long id = shellContext.cloudbreakClient().topologyEndpoint().postPublic(req).getId();
             shellContext.setHint(Hints.CREATE_CREDENTIAL_WITH_TOPOLOGY);
-            return String.format(CREATE_SUCCESS_MSG, id.getId(), name);
+            return String.format(CREATE_SUCCESS_MSG, id, name);
         } catch (Exception e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }

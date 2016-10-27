@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
-import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -33,14 +33,14 @@ public class CredentialController implements CredentialEndpoint {
     private AuthenticatedUserService authenticatedUserService;
 
     @Override
-    public IdJson postPrivate(CredentialRequest credentialRequest) {
+    public CredentialResponse postPrivate(CredentialRequest credentialRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createCredential(user, credentialRequest, false);
     }
 
     @Override
-    public IdJson postPublic(CredentialRequest credentialRequest) {
+    public CredentialResponse postPublic(CredentialRequest credentialRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createCredential(user, credentialRequest, true);
@@ -107,10 +107,29 @@ public class CredentialController implements CredentialEndpoint {
         credentialService.delete(name, user);
     }
 
-    private IdJson createCredential(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
+    @Override
+    public Map<String, String> privateInteractiveLogin(CredentialRequest credentialRequest) {
+        CbUser user = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(user);
+        return interactiveLogin(user, credentialRequest, false);
+    }
+
+    @Override
+    public Map<String, String> publicInteractiveLogin(CredentialRequest credentialRequest) {
+        CbUser user = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(user);
+        return interactiveLogin(user, credentialRequest, true);
+    }
+
+    private Map<String, String> interactiveLogin(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
+        Credential credential = convert(credentialRequest, publicInAccount);
+        return credentialService.interactiveLogin(user, credential);
+    }
+
+    private CredentialResponse createCredential(CbUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
         Credential credential = convert(credentialRequest, publicInAccount);
         credential = credentialService.create(user, credential);
-        return new IdJson(credential.getId());
+        return conversionService.convert(credential, CredentialResponse.class);
     }
 
     private Credential convert(CredentialRequest json, boolean publicInAccount) {

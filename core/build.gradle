@@ -3,6 +3,7 @@ buildscript {
     maven { url 'http://repo.spring.io/libs-release' }
     mavenCentral()
     jcenter()
+    maven { url "http://maven.sequenceiq.com/releases" }
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
@@ -37,6 +38,7 @@ dependencies {
         exclude group: 'org.slf4j';
     }
 
+    compile group: 'org.springframework.retry',     name: 'spring-retry',                   version: '1.1.4.RELEASE'
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-actuator',   version: springBootVersion
@@ -61,6 +63,11 @@ dependencies {
     compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
     compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
     compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
+
+    compile group: 'io.springfox',                  name: 'springfox-swagger2',             version: '2.5.0'
+    compile group: 'io.springfox',                  name: 'springfox-core',                 version: '2.5.0'
+    compile group: 'io.springfox',                  name: 'springfox-swagger-ui',           version: '2.5.0'
+
     compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
     compile group: 'com.google.http-client',        name: 'google-http-client-jackson2',    version: '1.17.0-rc'
     compile (group: 'com.google.oauth-client',      name: 'google-oauth-client-jetty',      version: '1.17.0-rc')   { exclude module: 'servlet-api' }

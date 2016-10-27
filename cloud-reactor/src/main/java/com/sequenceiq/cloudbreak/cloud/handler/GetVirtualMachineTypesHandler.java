@@ -40,8 +40,8 @@ public class GetVirtualMachineTypesHandler implements CloudPlatformEventHandler<
             Map<Platform, Collection<VmType>> platformVms = Maps.newHashMap();
             Map<Platform, VmType> platformDefaultVm = Maps.newHashMap();
             for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
-                VmType defaultVm = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().vmTypes().defaultType();
-                Collection<VmType> vmTypes = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().vmTypes().types();
+                VmType defaultVm = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().vmTypes(request.getExtended()).defaultType();
+                Collection<VmType> vmTypes = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().vmTypes(request.getExtended()).types();
 
                 platformDefaultVm.put(connector.getKey(), defaultVm);
                 platformVms.put(connector.getKey(), vmTypes);
