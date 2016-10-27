@@ -272,12 +272,13 @@ public class ModelDescriptions {
     public static class UsageModelDescription {
         public static final String PROVIDER = "cloud provider of the stack";
         public static final String COSTS = "computed costs of instance usage";
-        public static final String DAY = "days since the instance is running";
+        public static final String DAY = "the day the usage of resources happened";
         public static final String INSTANCE_HOURS = "hours since the instance is running";
         public static final String INSTANCE_TYPE = "type of instance";
         public static final String INSTANCE_GROUP = "group name of instance";
         public static final String BLUEPRINT_ID = "id of the blueprint";
         public static final String BLUEPRINT_NAME = "name of the blueprint";
+        public static final String DURATION = "time since the instances are running in millisec";
     }
 
     public static class EventModelDescription {

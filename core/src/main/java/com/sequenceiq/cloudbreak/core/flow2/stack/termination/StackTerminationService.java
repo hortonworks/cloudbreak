@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
+import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Service
 public class StackTerminationService {
@@ -43,6 +44,9 @@ public class StackTerminationService {
     @Inject
     private StackUpdater stackUpdater;
 
+    @Inject
+    private UsageService usageService;
+
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload) {
         LOGGER.info("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
@@ -55,6 +59,7 @@ public class StackTerminationService {
                     stack.getAmbariIp(), stack.getCluster().getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
         }
+        usageService.closeUsagesForStack(stack);
     }
 
     public void handleStackTerminationError(Stack stack, StackFailureEvent payload, boolean forced) {

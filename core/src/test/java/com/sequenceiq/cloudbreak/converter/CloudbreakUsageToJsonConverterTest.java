@@ -51,7 +51,7 @@ public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterT
         // THEN
         assertEquals(GCP, result.getProvider());
         assertEquals("john.smith@example.com", result.getUsername());
-        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone"));
+        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "duration"));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterT
         // THEN
         assertEquals(AWS, result.getProvider());
         assertEquals("john.smith@example.com", result.getUsername());
-        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone"));
+        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "duration"));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterT
         // THEN
         assertEquals(GCP, result.getProvider());
         assertEquals("john.smith@example.com", result.getUsername());
-        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone"));
+        assertAllFieldsNotNull(result, Lists.newArrayList("availabilityZone", "duration"));
     }
 
     @Override

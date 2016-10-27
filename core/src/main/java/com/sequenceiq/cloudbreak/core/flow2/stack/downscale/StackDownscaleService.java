@@ -13,11 +13,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Service
 public class StackDownscaleService {
@@ -35,6 +37,9 @@ public class StackDownscaleService {
     @Inject
     private StackScalingService stackScalingService;
 
+    @Inject
+    private UsageService usageService;
+
     public void startStackDownscale(StackScalingFlowContext context, Integer adjustment) {
         LOGGER.debug("Downscaling of stack ", context.getStack().getId());
         MDCBuilder.buildMdcContext(context.getStack());
@@ -44,7 +49,8 @@ public class StackDownscaleService {
 
     public void finishStackDownscale(StackScalingFlowContext context, String instanceGroupName, Set<String> instanceIds) {
         Stack stack = context.getStack();
-        stackScalingService.updateRemovedResourcesState(stack, instanceIds, stack.getInstanceGroupByInstanceGroupName(instanceGroupName));
+        InstanceGroup g = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+        stackScalingService.updateRemovedResourcesState(stack, instanceIds, g);
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Downscale of the cluster infrastructure finished successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name());
 
@@ -53,6 +59,7 @@ public class StackDownscaleService {
                     stack.getAmbariIp(), stack.getCluster().getName());
             flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
+        usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, g.getNodeCount());
     }
 
     public void handleStackDownscaleError(Exception errorDetails) {

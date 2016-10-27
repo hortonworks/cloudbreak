@@ -7,6 +7,8 @@ public interface PriceGenerator {
 
     Double calculate(Template template, Long hours);
 
+    Double calculate(String instanceType, Long hours);
+
     Platform getCloudPlatform();
 
 }

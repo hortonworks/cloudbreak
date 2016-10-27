@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.facade;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,7 +21,6 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsageGeneratorService;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesRetrievalService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -30,9 +28,6 @@ public class DefaultCloudbreakUsagesFacadeTest {
 
     @Mock
     private CloudbreakUsagesRetrievalService cloudbreakUsagesService;
-
-    @Mock
-    private CloudbreakUsageGeneratorService cloudbreakUsageGeneratorService;
 
     @Mock
     private ConversionService conversionService;
@@ -52,12 +47,4 @@ public class DefaultCloudbreakUsagesFacadeTest {
         verify(conversionService, times(1)).convert(anyObject(), any(TypeDescriptor.class), any(TypeDescriptor.class));
     }
 
-    @Test
-    public void generateUserUsagesCallWithoutError() {
-        doNothing().when(cloudbreakUsageGeneratorService).generate();
-
-        underTest.generateUserUsages();
-
-        verify(cloudbreakUsageGeneratorService, times(1)).generate();
-    }
 }

@@ -9,6 +9,4 @@ public interface CloudbreakUsagesFacade {
 
     List<CloudbreakUsageJson> getUsagesFor(CbUsageFilterParameters params);
 
-    void generateUserUsages();
-
 }

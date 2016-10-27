@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.WrongMetadataException;
+import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Service
 public class StackStartStopService {
@@ -46,6 +47,9 @@ public class StackStartStopService {
     @Inject
     private MetadataSetupService metadatSetupService;
 
+    @Inject
+    private UsageService usageService;
+
     public void startStackStart(StackStartStopContext context) {
         Stack stack = context.getStack();
         MDCBuilder.buildMdcContext(stack);
@@ -63,6 +67,7 @@ public class StackStartStopService {
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Cluster infrastructure started successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STARTED, AVAILABLE.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STARTED, BillingStatus.BILLING_STARTED.name());
+        usageService.startUsagesForStack(stack);
     }
 
     public void handleStackStartError(Stack stack, StackFailureEvent payload) {
@@ -84,6 +89,7 @@ public class StackStartStopService {
 
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STOPPED, Status.STOPPED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STOPPED, BillingStatus.BILLING_STOPPED.name());
+        usageService.stopUsagesForStack(stack);
 
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
             emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
