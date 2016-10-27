@@ -653,7 +653,7 @@
                                                 <div ng-show="recipes && recipes.length">
                                                     <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">{{msg.active_cluster_details_show_recipes}}</label>
                                                     <div class="col-sm-9">
-                                                        <input type="checkbox" ng-click="toggleRecipes($index)">
+                                                        <input type="checkbox" ng-click="toggleRecipes($index)" ng-checked="recipesToShow[$index]">
                                                     </div>
                                                     <div ng-show="recipesToShow[$index]">
                                                         <div class="col-sm-9">

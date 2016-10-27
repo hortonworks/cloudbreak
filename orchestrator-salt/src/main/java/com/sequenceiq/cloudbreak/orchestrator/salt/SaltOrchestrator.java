@@ -65,10 +65,14 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 public class SaltOrchestrator implements HostOrchestrator {
 
     private static final int MAX_NODES = 5000;
-    private static final int MAX_RETRY_COUNT = 90;
     private static final int SLEEP_TIME = 10000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
+
+    @Value("${cb.max.salt.new.service.retry:90}")
+    private int maxRetry;
+    @Value("${cb.max.salt.recipe.execution.retry:90}")
+    private int maxRetryRecipe;
 
     @Value("${rest.debug:false}")
     private boolean restDebug;
@@ -279,8 +283,13 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
             InterruptedException {
+        runNewService(sc, baseSaltJobRunner, exitCriteriaModel, maxRetry);
+    }
+
+    private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel, int maxRetry)
+            throws ExecutionException, InterruptedException {
         SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner);
-        Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
+        Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry);
         Future<Boolean> saltJobRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltJobRunBootstrapRunner);
         saltJobRunBootstrapFuture.get();
     }
@@ -302,7 +311,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe);
 
             // remove 'recipe' grain from all nodes
             targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
@@ -318,7 +327,11 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
-        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), MAX_RETRY_COUNT, SLEEP_TIME);
+        return runner(bootstrap, exitCriteria, exitCriteriaModel, maxRetry);
+    }
+
+    private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel, int maxRetry) {
+        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, SLEEP_TIME);
     }
 
     private void uploadSaltConfig(SaltConnector saltConnector) throws IOException {
