@@ -76,10 +76,15 @@ cbd-version() {
 }
 
 cbd-update() {
-    declare desc="Binary selfupdater. Either latest github release (default), or specific branch from CircleCI"
+    declare desc="Binary selfupdater. Updates to lates official release"
 
     if [[ "$1" ]]; then
-        cbd-update-snap $1
+        # cbd-update-snap $1
+        warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        warn "Update doesn't support any parameter"
+        warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        echo 'Please use "cbd update" to get the latest official release or contact support if you would like to update to an unsupported version.' | red
+        _exit 1
     else
         cbd-update-release
     fi
