@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Service
 public class StackUpscaleService {
@@ -98,6 +99,9 @@ public class StackUpscaleService {
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
 
+    @Inject
+    private UsageService usageService;
+
     public void startAddInstances(Stack stack, Integer scalingAdjustment) {
         String statusReason = format("Adding %s new instance(s) to the infrastructure.", scalingAdjustment);
         stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, statusReason);
@@ -132,6 +136,7 @@ public class StackUpscaleService {
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 messagesService.getMessage("stack.metadata.setup.billing.changed"));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
+        usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
 
         return upscaleCandidateAddresses;
     }

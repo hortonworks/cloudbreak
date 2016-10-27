@@ -4,12 +4,43 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.api.model.UsageStatus;
+
 @Entity
+@NamedQueries({
+        @NamedQuery(
+                name = "CloudbreakUsage.findOpensForStack",
+                query = "SELECT u FROM CloudbreakUsage u "
+                        + "WHERE u.stackId = :stackId "
+                        + "AND u.status = 'OPEN'"),
+        @NamedQuery(
+                name = "CloudbreakUsage.findStoppedForStack",
+                query = "SELECT u FROM CloudbreakUsage u "
+                        + "WHERE u.stackId = :stackId "
+                        + "AND u.status = 'STOPPED'"),
+        @NamedQuery(
+                name = "CloudbreakUsage.getOpenUsageByStackAndGroupName",
+                query = "SELECT u FROM CloudbreakUsage u "
+                        + "WHERE u.stackId = :stackId "
+                        + "AND u.instanceGroup = :instanceGroupName "
+                        + "AND u.status = 'OPEN'"),
+        @NamedQuery(
+                name = "CloudbreakUsage.findAllOpenAndStopped",
+                query = "SELECT u FROM CloudbreakUsage u "
+                        + "WHERE (u.status = 'STOPPED' "
+                        + "OR u.status = 'OPEN')"
+                        + "AND u.day < :today")
+
+})
 public class CloudbreakUsage implements ProvisionEntity {
 
     @Id
@@ -51,6 +82,18 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     @Column(nullable = false)
     private String instanceGroup;
+
+    @Column
+    private Date periodStarted;
+
+    @Column
+    private String duration;
+
+    @Enumerated(EnumType.STRING)
+    private UsageStatus status;
+
+    @Column
+    private Integer instanceNum;
 
     private Long blueprintId;
 
@@ -166,6 +209,38 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     public void setBlueprintName(String blueprintName) {
         this.blueprintName = blueprintName;
+    }
+
+    public Date getPeriodStarted() {
+        return periodStarted;
+    }
+
+    public void setPeriodStarted(Date periodStarted) {
+        this.periodStarted = periodStarted;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public UsageStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UsageStatus status) {
+        this.status = status;
+    }
+
+    public Integer getInstanceNum() {
+        return instanceNum;
+    }
+
+    public void setInstanceNum(Integer instanceNum) {
+        this.instanceNum = instanceNum;
     }
 
     @Override

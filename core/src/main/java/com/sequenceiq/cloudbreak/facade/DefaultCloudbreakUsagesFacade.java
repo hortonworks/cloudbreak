@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsageGeneratorService;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesRetrievalService;
 
 @Service
@@ -22,9 +21,6 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
 
     @Inject
     private CloudbreakUsagesRetrievalService cloudbreakUsagesService;
-
-    @Inject
-    private CloudbreakUsageGeneratorService cloudbreakUsageGeneratorService;
 
     @Inject
     @Qualifier("conversionService")
@@ -38,8 +34,4 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
                         TypeDescriptor.valueOf(CloudbreakUsageJson.class)));
     }
 
-    @Override
-    public void generateUserUsages() {
-        cloudbreakUsageGeneratorService.generate();
-    }
 }

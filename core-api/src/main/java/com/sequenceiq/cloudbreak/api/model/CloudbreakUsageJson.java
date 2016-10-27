@@ -54,6 +54,9 @@ public class CloudbreakUsageJson implements JsonEntity {
     @ApiModelProperty(UsageModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
 
+    @ApiModelProperty(UsageModelDescription.DURATION)
+    private String duration;
+
     public String getOwner() {
         return owner;
     }
@@ -172,5 +175,13 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setBlueprintName(String blueprintName) {
         this.blueprintName = blueprintName;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
     }
 }

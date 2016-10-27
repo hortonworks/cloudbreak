@@ -36,7 +36,7 @@ public class DefaultCloudbreakUsagesRetrievalHostServiceTypeTest {
     private static final String DUMMY_CLOUD = "GCP";
 
     @InjectMocks
-    private DefaultCloudbreakUsagesRetrievalService underTest;
+    private CloudbreakUsagesRetrievalService underTest;
 
     private CbUsageFilterParameters filterParameters;
 
@@ -47,7 +47,7 @@ public class DefaultCloudbreakUsagesRetrievalHostServiceTypeTest {
 
     @Before
     public void setUp() {
-        underTest = new DefaultCloudbreakUsagesRetrievalService();
+        underTest = new CloudbreakUsagesRetrievalService();
         filterParameters = new CbUsageFilterParameters.Builder()
                 .setFilterEndDate(DUMMY_END_DATE).setAccount(DUMMY_ACCOUNT).setSince(DUMMY_SINCE)
                 .setOwner(DUMMY_OWNER).setRegion(DUMMY_REGION).setCloud(DUMMY_CLOUD).build();

@@ -8,7 +8,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -56,9 +55,4 @@ public interface UsageEndpoint {
             @QueryParam("cloud") String cloud,
             @QueryParam("zone") String zone);
 
-    @GET
-    @Path("generate")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GENERATE, produces = ContentType.JSON, notes = Notes.USAGE_NOTES)
-    Response generate();
 }

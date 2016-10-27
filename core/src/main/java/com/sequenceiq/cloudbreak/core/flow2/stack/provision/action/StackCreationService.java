@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
+import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -118,6 +119,9 @@ public class StackCreationService {
 
     @Inject
     private GatewayConfigService gatewayConfigService;
+
+    @Inject
+    private UsageService usageService;
 
     public void startProvisioning(StackContext context) {
         Stack stack = context.getStack();
@@ -201,6 +205,7 @@ public class StackCreationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED_BILLING, BillingStatus.BILLING_STARTED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED, AVAILABLE.name());
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
+        usageService.openUsagesForStack(stack);
     }
 
     public void handleStackCreationFailure(Stack stack, Exception errorDetails) {
@@ -247,6 +252,7 @@ public class StackCreationService {
                 stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
                 connector.rollback(stack, stack.getResources());
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name(), errorReason);
+                usageService.closeUsagesForStack(stack);
             }
         } catch (Exception ex) {
             LOGGER.error("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);

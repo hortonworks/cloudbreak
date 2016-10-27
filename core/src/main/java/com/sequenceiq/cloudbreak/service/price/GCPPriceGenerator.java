@@ -15,6 +15,11 @@ public class GCPPriceGenerator implements PriceGenerator {
     }
 
     @Override
+    public Double calculate(String instanceType, Long hours) {
+        return 0.0;
+    }
+
+    @Override
     public Platform getCloudPlatform() {
         return Platform.platform(CloudConstants.GCP);
     }

@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -64,11 +62,4 @@ public class CloudbreakUsageController implements UsageEndpoint {
         return cloudbreakUsagesFacade.getUsagesFor(params);
     }
 
-    @Override
-    public Response generate() {
-        CbUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
-        cloudbreakUsagesFacade.generateUserUsages();
-        return Response.status(Response.Status.ACCEPTED).build();
-    }
 }

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
+import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Component
 public class CloudbreakCleanupAction {
@@ -55,11 +56,15 @@ public class CloudbreakCleanupAction {
     @Inject
     private ReactorFlowManager flowManager;
 
+    @Inject
+    private UsageService usageService;
+
     public void resetStates() {
         List<Stack> stacksToSync = resetStackStatus();
         List<Cluster> clustersToSync = resetClusterStatus(stacksToSync);
         setDeleteFailedStatus();
         terminateRunningFlows();
+        usageService.fixUsages();
         triggerSyncs(stacksToSync, clustersToSync);
     }
 

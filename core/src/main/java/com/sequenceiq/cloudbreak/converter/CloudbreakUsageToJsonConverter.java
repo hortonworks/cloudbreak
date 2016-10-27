@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 
 import javax.inject.Inject;
 
@@ -9,7 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
+import com.sequenceiq.cloudbreak.api.model.UsageStatus;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.service.usages.UsageTimeService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -21,6 +24,9 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
 
     @Inject
     private UserDetailsService userDetailsService;
+
+    @Inject
+    private UsageTimeService usageTimeService;
 
     @Override
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
@@ -38,7 +44,8 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
         json.setProvider(entity.getProvider());
         json.setRegion(entity.getRegion());
         json.setAvailabilityZone(entity.getAvailabilityZone());
-        json.setInstanceHours(entity.getInstanceHours());
+        json.setInstanceHours(getInstanceHours(entity));
+        json.setDuration(getDuration(entity));
         json.setDay(day);
         json.setStackId(entity.getStackId());
         json.setStackName(entity.getStackName());
@@ -49,6 +56,21 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
         json.setBlueprintId(entity.getBlueprintId());
         json.setBlueprintName(entity.getBlueprintName());
         return json;
+    }
+
+    private Long getInstanceHours(CloudbreakUsage usage) {
+        if (usage.getStatus() == UsageStatus.OPEN) {
+            Duration newDuration = usageTimeService.calculateNewDuration(usage);
+            return usageTimeService.convertToInstanceHours(newDuration);
+        }
+        return usage.getInstanceHours();
+    }
+
+    private String getDuration(CloudbreakUsage usage) {
+        if (usage.getStatus() == UsageStatus.OPEN) {
+            return usageTimeService.calculateNewDuration(usage).toString();
+        }
+        return usage.getDuration();
     }
 
 }
