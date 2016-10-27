@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
@@ -24,6 +25,7 @@ public class ResourceDefinitionService {
     @Inject
     private EventBus eventBus;
 
+    @Cacheable("resourceDefinitionCache")
     public String getResourceDefinition(String cloudPlatform, String resource) {
         LOGGER.debug("Sending request for {} {} resource property definition", cloudPlatform, resource);
         CloudPlatformVariant platformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.EMPTY);
@@ -38,5 +40,4 @@ public class ResourceDefinitionService {
             throw new OperationException(e);
         }
     }
-
 }
