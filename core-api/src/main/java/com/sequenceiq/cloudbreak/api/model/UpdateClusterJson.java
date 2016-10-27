@@ -25,7 +25,7 @@ public class UpdateClusterJson implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.HOSTGROUPS)
-    private Set<HostGroupBase> hostgroups;
+    private Set<HostGroupRequest> hostgroups;
     @Valid
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.AMBARI_STACK_DETAILS)
     private AmbariStackDetailsJson ambariStackDetails;
@@ -53,7 +53,7 @@ public class UpdateClusterJson implements JsonEntity {
         return blueprintId;
     }
 
-    public Set<HostGroupBase> getHostgroups() {
+    public Set<HostGroupRequest> getHostgroups() {
         return hostgroups;
     }
 
@@ -61,7 +61,7 @@ public class UpdateClusterJson implements JsonEntity {
         this.blueprintId = blueprintId;
     }
 
-    public void setHostgroups(Set<HostGroupBase> hostgroups) {
+    public void setHostgroups(Set<HostGroupRequest> hostgroups) {
         this.hostgroups = hostgroups;
     }
 
