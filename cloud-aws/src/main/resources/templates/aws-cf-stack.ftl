@@ -14,8 +14,8 @@
     },
 
     <#if enableInstanceProfile && existingRole>
-     "RoleName" : {
-          "Description" : "Instance role for machines to reach S3",
+     "InstanceProfile" : {
+          "Description" : "InstanceProfile name or ARN that is assigned to every virtual machine",
           "Type" : "String"
      },
     </#if>
@@ -318,7 +318,7 @@
         "IamInstanceProfile" : { "Ref": "S3InstanceProfile" },
         </#if>
         <#if existingRole && enableInstanceProfile>
-        "IamInstanceProfile" : { "Ref": "RoleName" },
+        "IamInstanceProfile" : { "Ref": "InstanceProfile" },
         </#if>
       	"BlockDeviceMappings" : [
       	  {
