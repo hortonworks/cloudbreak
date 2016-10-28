@@ -55,8 +55,8 @@ public class CloudFormationTemplateBuilder {
         model.put("existingVPC", context.existingVPC);
         model.put("existingIGW", context.existingIGW);
         model.put("existingSubnet", !isNullOrEmptyList(context.existingSubnetCidr));
-        model.put("enableInstanceProfile", context.enableInstanceProfile || context.s3RoleAvailable);
-        model.put("existingRole", context.s3RoleAvailable);
+        model.put("enableInstanceProfile", context.enableInstanceProfile || context.instanceProfileAvailable);
+        model.put("existingRole", context.instanceProfileAvailable);
         model.put("cbSubnet", (isNullOrEmptyList(context.existingSubnetCidr)) ? Lists.newArrayList(context.defaultSubnet)
                 : context.existingSubnetCidr);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
@@ -64,9 +64,6 @@ public class CloudFormationTemplateBuilder {
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
         if (isNoneEmpty(context.snapshotId)) {
             model.put("snapshotId", context.snapshotId);
-        }
-        if (context.s3RoleAvailable) {
-            model.put("roleName", awsInstanceProfileView.getS3Role());
         }
         try {
             String template = processTemplateIntoString(freemarkerConfiguration.getTemplate(context.templatePath, "UTF-8"), model);
@@ -103,7 +100,7 @@ public class CloudFormationTemplateBuilder {
         private boolean mapPublicIpOnLaunch;
         private String templatePath;
         private boolean enableInstanceProfile;
-        private boolean s3RoleAvailable;
+        private boolean instanceProfileAvailable;
         private String defaultSubnet;
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
@@ -146,8 +143,8 @@ public class CloudFormationTemplateBuilder {
             return this;
         }
 
-        public ModelContext withS3RoleAvailable(boolean s3RoleAvailable) {
-            this.s3RoleAvailable = s3RoleAvailable;
+        public ModelContext withInstanceProfileAvailable(boolean instanceProfileAvailable) {
+            this.instanceProfileAvailable = instanceProfileAvailable;
             return this;
         }
 

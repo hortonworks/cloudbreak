@@ -145,7 +145,7 @@ public class AwsResourceConnector implements ResourceConnector {
         boolean existingVPC = awsNetworkView.isExistingVPC();
         boolean existingSubnet = awsNetworkView.isExistingSubnet();
         boolean existingIGW = awsNetworkView.isExistingIGW();
-        boolean s3RoleAvailable = awsInstanceProfileView.isS3RoleAvailable();
+        boolean instanceProfileAvailable = awsInstanceProfileView.isInstanceProfileAvailable();
         boolean enableInstanceProfile = awsInstanceProfileView.isEnableInstanceProfileStrategy();
         List<String> existingSubnetCidr = existingSubnet ? getExistingSubnetCidr(ac, stack) : null;
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
@@ -172,7 +172,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withExistingSubnetCidr(existingSubnetCidr)
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudformationTemplatePath)
                 .withDefaultSubnet(subnet);
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
@@ -280,7 +280,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
         ));
         if (awsInstanceProfileView.isUseExistingInstanceProfile() && awsInstanceProfileView.isEnableInstanceProfileStrategy()) {
-            parameters.add(new Parameter().withParameterKey("RoleName").withParameterValue(awsInstanceProfileView.getS3Role()));
+            parameters.add(new Parameter().withParameterKey("InstanceProfile").withParameterValue(awsInstanceProfileView.getInstanceProfile()));
         }
         if (ac.getCloudContext().getLocation().getAvailabilityZone().value() != null) {
             parameters.add(new Parameter().withParameterKey("AvailabilitySet")

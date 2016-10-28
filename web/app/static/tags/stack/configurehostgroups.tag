@@ -29,9 +29,9 @@
     </div>
 </div>
 <div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AWS' && cluster.parameters.instanceProfileStrategy === 'USE_EXISTING'">
-    <label class="col-sm-3 control-label" for="s3Role">{{msg.role_label}}</label>
+    <label class="col-sm-3 control-label" for="instanceProfile">{{msg.role_label}}</label>
     <div class="col-sm-8">
-        <input type="text" name="s3Role" class="form-control" id="s3Role" ng-model="cluster.parameters.s3Role">
+        <input type="text" name="instanceProfile" class="form-control" id="instanceProfile" ng-model="cluster.parameters.instanceProfile">
     </div>
 </div>
 

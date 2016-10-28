@@ -221,7 +221,8 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "dedicatedInstances", help = "request dedicated instances on AWS") Boolean dedicatedInstances,
             @CliOption(key = "instanceProfileStrategy", help = "seamless S3 access type", specifiedDefaultValue = "false")
                     InstanceProfileStrategy instanceProfileStrategy,
-            @CliOption(key = "s3Role", help = "seamless S3 access role", specifiedDefaultValue = "false") String s3Role,
+            @CliOption(key = "instanceProfile", help = "instanceProfile which will attached to the instance", specifiedDefaultValue = "false")
+                    String instanceProfile,
             @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
 
         Map<String, String> params = new HashMap<>();
@@ -231,11 +232,11 @@ public class AwsCommands implements CommandMarker {
         if (instanceProfileStrategy != null) {
             params.put("instanceProfileStrategy", instanceProfileStrategy.toString());
         }
-        if (s3Role != null && InstanceProfileStrategy.USE_EXISTING.equals(instanceProfileStrategy)) {
-            params.put("s3Role", s3Role);
+        if (instanceProfile != null && InstanceProfileStrategy.USE_EXISTING.equals(instanceProfileStrategy)) {
+            params.put("instanceProfile", instanceProfile);
         }
-        if (s3Role != null && !InstanceProfileStrategy.USE_EXISTING.equals(instanceProfileStrategy)) {
-            return "Please specify the role for S3 connection if you are using 'USE_EXISTING' profile type.";
+        if (instanceProfile != null && !InstanceProfileStrategy.USE_EXISTING.equals(instanceProfileStrategy)) {
+            return "Please specify the role for instanceProfile if you are using 'USE_EXISTING' profile type.";
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold, false,
                 wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
