@@ -281,7 +281,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.toggleAmbariStackDetailsVerify = function() {
             if ($scope.isUndefined($scope.cluster.ambariStackDetails)) {
-                $scope.cluster.ambariStackDetails = {};
+                setAmbariStackDetails($rootScope.activeCredential, $scope.cluster);
             }
             if ($scope.isUndefined($scope.cluster.ambariStackDetails.verify) || $scope.cluster.ambariStackDetails.verify == false) {
                 $scope.cluster.ambariStackDetails.verify = true;
@@ -348,17 +348,53 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             }
             if (!$scope.isUndefined($scope.cluster.ambariStackDetails) && Object.keys($scope.cluster.ambariStackDetails).length !== 0) {
-                if ($scope.isUndefined($scope.cluster.ambariStackDetails.stack) ||
+                if ($scope.isUndefined($scope.cluster.ambariStackDetails.os)) {
+                    if ($scope.isUndefined($scope.cluster.ambariStackDetails.stack) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.version) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.stackRepoId) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.stackBaseURL) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.utilsRepoId) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.utilsBaseURL)) {
+                        $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
+                        return;
+                    } else {
+                        if ($scope.isUndefined($scope.cluster.ambariStackDetails.verify)) {
+                            $scope.cluster.ambariStackDetails.verify = false;
+                        }
+                    }
+                } else {
+                    if ($scope.isUndefined($scope.cluster.ambariStackDetails.stack) &&
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.version) &&
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.stackRepoId) &&
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.stackBaseURL) &&
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.utilsRepoId) &&
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.utilsBaseURL)) {
+                        $scope.cluster.ambariStackDetails = null;
+                    } else if ($scope.isUndefined($scope.cluster.ambariStackDetails.stack) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.version) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.stackRepoId) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.stackBaseURL) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.utilsRepoId) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.utilsBaseURL)) {
+                        $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
+                        return;
+                    } else {
+                        if ($scope.isUndefined($scope.cluster.ambariStackDetails.verify)) {
+                            $scope.cluster.ambariStackDetails.verify = false;
+                        }
+                    }
+                }
+                if (!$scope.isUndefined($scope.cluster.ambariStackDetails) &&
+                    ($scope.isUndefined($scope.cluster.ambariStackDetails.stack) ||
                     $scope.isUndefined($scope.cluster.ambariStackDetails.version) ||
                     $scope.isUndefined($scope.cluster.ambariStackDetails.stackRepoId) ||
                     $scope.isUndefined($scope.cluster.ambariStackDetails.stackBaseURL) ||
                     $scope.isUndefined($scope.cluster.ambariStackDetails.utilsRepoId) ||
-                    $scope.isUndefined($scope.cluster.ambariStackDetails.utilsBaseURL)) {
+                    $scope.isUndefined($scope.cluster.ambariStackDetails.utilsBaseURL))) {
                     $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
                     return;
                 } else {
-                    $scope.cluster.ambariStackDetails.os = "redhat7";
-                    if ($scope.isUndefined($scope.cluster.ambariStackDetails.verify)) {
+                    if (!$scope.isUndefined($scope.cluster.ambariStackDetails) && $scope.isUndefined($scope.cluster.ambariStackDetails.verify)) {
                         $scope.cluster.ambariStackDetails.verify = false;
                     }
                 }
@@ -404,6 +440,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         pushCluster(result);
                     }
                 }, function(failure) {
+                    setAmbariStackDetails($rootScope.activeCredential, $scope.cluster);
                     $scope.showError(failure, $rootScope.msg.cluster_failed);
                 });
             } else {
@@ -721,9 +758,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 validateBlueprint: true,
                 blueprintId: $rootScope.activeClusterBlueprint.id,
                 hostgroups: $rootScope.activeCluster.cluster != undefined && $rootScope.activeCluster.cluster.hostGroups.length > 0 ? $rootScope.activeCluster.cluster.hostGroups : [],
-                ambariStackDetails: $rootScope.activeCluster.cluster != undefined ? $rootScope.activeCluster.cluster.ambariStackDetails : '',
                 fullBp: $rootScope.activeClusterBlueprint,
             };
+            if ($rootScope.activeCluster.cluster != undefined) {
+                setAmbariStackDetails($rootScope.activeCluster, $rootScope.reinstallClusterObject);
+            }
             $scope.selectBlueprintreinstallChange();
         };
 
@@ -757,6 +796,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 setPlatformVariant();
                 setOrchestrator();
                 setInstanceProfile();
+                setAmbariStackDetails($rootScope.activeCredential, $scope.cluster);
             }
         });
 
@@ -817,6 +857,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 if (orderedNets.length > 0) {
                     $scope.cluster.networkId = orderedNets[0].id;
                 }
+            }
+        }
+
+        function setAmbariStackDetails(platformObject, setObject) {
+            setObject.ambariStackDetails = {};
+            if (platformObject.cloudPlatform == 'AWS') {
+                setObject.ambariStackDetails.os = "redhat6";
+            } else {
+                setObject.ambariStackDetails.os = "redhat7";
             }
         }
 
@@ -936,17 +985,53 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             }
             if (!$scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails) && Object.keys($rootScope.reinstallClusterObject.ambariStackDetails).length !== 0) {
-                if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stack) ||
+                if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.os)) {
+                    if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stack) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.version) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackRepoId) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackBaseURL) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsRepoId) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsBaseURL)) {
+                        $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
+                        return;
+                    } else {
+                        if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.verify)) {
+                            $rootScope.reinstallClusterObject.ambariStackDetails.verify = false;
+                        }
+                    }
+                } else {
+                    if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stack) &&
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.version) &&
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackRepoId) &&
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackBaseURL) &&
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsRepoId) &&
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsBaseURL)) {
+                        $rootScope.reinstallClusterObject.ambariStackDetails = null;
+                    } else if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stack) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.version) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackRepoId) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackBaseURL) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsRepoId) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsBaseURL)) {
+                        $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
+                            return;
+                    } else {
+                        if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.verify)) {
+                            $rootScope.reinstallClusterObject.ambariStackDetails.verify = false;
+                        }
+                    }
+                }
+                if (!$scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails) &&
+                    ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stack) ||
                     $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.version) ||
                     $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackRepoId) ||
                     $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackBaseURL) ||
                     $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsRepoId) ||
-                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsBaseURL)) {
+                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsBaseURL))) {
                     $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
                     return;
                 } else {
-                    $rootScope.reinstallClusterObject.ambariStackDetails.os = "redhat7";
-                    if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.verify)) {
+                    if (!$scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails) && $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.verify)) {
                         $rootScope.reinstallClusterObject.ambariStackDetails.verify = false;
                     }
                 }
@@ -1043,6 +1128,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 failurePolicy: {
                     adjustmentType: "BEST_EFFORT",
                 },
+                ambariStackDetails: {},
                 orchestrator: {},
                 configStrategy: $scope.configStrategies[1],
                 ldapRequired: false,

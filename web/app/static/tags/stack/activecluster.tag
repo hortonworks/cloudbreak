@@ -686,56 +686,65 @@
                                             <h3 class="panel-title">{{msg.active_cluster_ambari_details_title}}</h3>
                                         </div>
                                         <div class="panel-body">
-                                            <div class="form-group" name="ambariStackDetailsreinstallpane">
-                                                <div class="form-group" name="ambari_stack1">
-                                                    <label class="col-sm-3 control-label" for="ambari_stack">{{msg.cluster_form_ambari_repo_stack_label}}</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="string" name="ambari_stack" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stack" id="ambari_stack" placeholder="{{msg.cluster_form_ambari_repo_stack_placeholder}}">
+                                            <form name="ambariStackDetailsreinstallpane">
+                                                <div class="form-group" role="form" name="$parent.ambariStackDetailsreinstallpane">
+                                                    <div class="form-group" name="ambari_stack1">
+                                                        <label class="col-sm-3 control-label" for="ambari_stack">{{msg.cluster_form_ambari_repo_stack_label}}</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="string" name="ambari_stack" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stack" id="ambari_stack" placeholder="{{msg.cluster_form_ambari_repo_stack_placeholder}}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group" name="ambari_version1">
+                                                        <label class="col-sm-3 control-label" for="ambari_version">{{msg.cluster_form_ambari_repo_version_label}}</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="string" name="ambari_version" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.version" id="ambari_version" placeholder="{{msg.cluster_form_ambari_repo_version_placeholder}}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group" name="ambari_os1">
+                                                        <label class="col-sm-3 control-label" for="ambari_os">{{msg.cluster_form_ambari_repo_os_label}}</label>
+                                                        <div class="col-sm-9">
+                                                            <select class="form-control" id="ambari_os" name="ambari_os" ng-model="reinstallClusterObject.ambariStackDetails.os">
+                                                                <option style="display:none" value="">select a type</option>
+                                                                <option value="redhat7" >redhat7</option>
+                                                                <option value="redhat6" >redhat6</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group" name="ambari_stackRepoId1" ng-class="{ 'has-error': ambariStackDetailsreinstallpane.ambari_stackRepoId.$dirty && ambariStackDetailsreinstallpane.ambari_stackRepoId.$invalid }">
+                                                        <label class="col-sm-3 control-label" for="ambari_stackRepoId">{{msg.cluster_form_ambari_repo_stack_repoid_label}}</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="string" name="ambari_stackRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackRepoId" id="ambari_stackRepoId" placeholder="{{msg.cluster_form_ambari_repo_stack_repoid_placeholder}}" ng-pattern="/^HDP-([\d\W]+)$/">
+                                                            <div class="help-block" ng-show="ambariStackDetailsreinstallpane.ambari_stackRepoId.$dirty && ambariStackDetailsreinstallpane.ambari_stackRepoId.$invalid"><i class="fa fa-warning"></i> Should be a valid Repo Id like HDP-2.5
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group" name="ambari_stackBaseURL1">
+                                                        <label class="col-sm-3 control-label" for="ambari_stackBaseURL">{{msg.cluster_form_ambari_repo_baseurl_label}}</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="string" name="ambari_stackBaseURL" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackBaseURL" id="ambari_stackBaseURL" placeholder="{{msg.cluster_form_ambari_repo_baseurl_placeholder}}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group" name="ambari_utilsRepoId1" >
+                                                        <label class="col-sm-3 control-label" for="ambari_utilsRepoId">{{msg.cluster_form_ambari_repo_utils_repoid_label}}</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="string" name="ambari_utilsRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.utilsRepoId" id="ambari_utilsRepoId" placeholder="{{msg.cluster_form_ambari_repo_utils_repoid_placeholder}}">
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group" name="ambari_utilsBaseURL1">
+                                                        <label class="col-sm-3 control-label" for="ambari_utilsBaseURL">{{msg.cluster_form_ambari_repo_utils_baseurl_label}}</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="string" name="ambari_utilsBaseURL" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.utilsBaseURL" id="ambari_utilsBaseURL" placeholder="{{msg.cluster_form_ambari_repo_utils_baseurl_placeholder}}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group" name="cluster_verify1">
+                                                        <label class="col-sm-3 control-label" for="cluster_verify">{{msg.cluster_form_ambari_repo_verify_label}}</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="checkbox" name="cluster_verify" id="cluster_verify" ng-model="reinstallClusterObject.ambariStackDetails.verify">
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-group" name="ambari_version1">
-                                                    <label class="col-sm-3 control-label" for="ambari_version">{{msg.cluster_form_ambari_repo_version_label}}</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="string" name="ambari_version" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.version" id="ambari_version" placeholder="{{msg.cluster_form_ambari_repo_version_placeholder}}">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group" name="ambari_os1">
-                                                    <label class="col-sm-3 control-label" for="ambari_os">{{msg.cluster_form_ambari_repo_os_label}}</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="string" disabled name="ambari_os" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.os" id="ambari_os" placeholder="{{msg.cluster_form_ambari_repo_os_placeholder}}">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group" name="ambari_stackRepoId1">
-                                                    <label class="col-sm-3 control-label" for="ambari_stackRepoId">{{msg.cluster_form_ambari_repo_stack_repoid_label}}</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="string" name="ambari_stackRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackRepoId" id="ambari_stackRepoId" placeholder="{{msg.cluster_form_ambari_repo_stack_repoid_placeholder}}">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group" name="ambari_stackBaseURL1">
-                                                    <label class="col-sm-3 control-label" for="ambari_stackBaseURL">{{msg.cluster_form_ambari_repo_baseurl_label}}</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="string" name="ambari_stackBaseURL" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackBaseURL" id="ambari_stackBaseURL" placeholder="{{msg.cluster_form_ambari_repo_baseurl_placeholder}}">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group" name="ambari_utilsRepoId1">
-                                                    <label class="col-sm-3 control-label" for="ambari_utilsRepoId">{{msg.cluster_form_ambari_repo_utils_repoid_label}}</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="string" name="ambari_utilsRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.utilsRepoId" id="ambari_utilsRepoId" placeholder="{{msg.cluster_form_ambari_repo_utils_repoid_placeholder}}">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group" name="ambari_utilsBaseURL1">
-                                                    <label class="col-sm-3 control-label" for="ambari_utilsBaseURL">{{msg.cluster_form_ambari_repo_utils_baseurl_label}}</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="string" name="ambari_utilsBaseURL" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.utilsBaseURL" id="ambari_utilsBaseURL" placeholder="{{msg.cluster_form_ambari_repo_utils_baseurl_placeholder}}">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group" name="cluster_verify1">
-                                                    <label class="col-sm-3 control-label" for="cluster_verify">{{msg.cluster_form_ambari_repo_verify_label}}</label>
-                                                    <div class="col-sm-9">
-                                                        <input type="checkbox" name="cluster_verify" id="cluster_verify" ng-model="reinstallClusterObject.ambariStackDetails.verify">
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -749,7 +758,7 @@
                             <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.cluster_list_cancel_command_label}}</button>
                         </div>
                         <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="reinstallCluster(activeCluster)"><i class="fa fa-check fa-fw"></i>{{msg.active_cluster_command_reinstall_label}}</button>
+                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-disabled="ambariStackDetailsreinstallpane.$invalid" ng-click="reinstallCluster(activeCluster)"><i class="fa fa-check fa-fw"></i>{{msg.active_cluster_command_reinstall_label}}</button>
                         </div>
                     </div>
                 </div>

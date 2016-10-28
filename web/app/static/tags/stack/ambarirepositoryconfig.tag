@@ -15,15 +15,19 @@
 <div class="form-group" name="ambari_os1">
     <label class="col-sm-3 control-label" for="ambari_os">{{msg.cluster_form_ambari_repo_os_label}}</label>
     <div class="col-sm-8">
-        <input type="string" disabled name="ambari_os" class="form-control" ng-model="cluster.ambariStackDetails.os" id="ambari_os" placeholder="{{msg.cluster_form_ambari_repo_os_placeholder}}">
-
+        <select class="form-control" id="ambari_os" name="ambari_os" ng-model="cluster.ambariStackDetails.os">
+            <option style="display:none" value="">select a type</option>
+            <option value="redhat7">redhat7</option>
+            <option value="redhat6">redhat6</option>
+        </select>
     </div>
 </div>
-<div class="form-group" name="ambari_stackRepoId1">
+<div class="form-group" name="ambari_stackRepoId1" ng-class="{ 'has-error': clusterCreationForm.ambari_stackRepoId.$dirty && clusterCreationForm.ambari_stackRepoId.$invalid }">
     <label class="col-sm-3 control-label" for="ambari_stackRepoId">{{msg.cluster_form_ambari_repo_stack_repoid_label}}</label>
     <div class="col-sm-8">
-        <input type="string" name="ambari_stackRepoId" class="form-control" ng-model="cluster.ambariStackDetails.stackRepoId" id="ambari_stackRepoId" placeholder="{{msg.cluster_form_ambari_repo_stack_repoid_placeholder}}">
-
+        <input type="string" name="ambari_stackRepoId" class="form-control" ng-model="cluster.ambariStackDetails.stackRepoId" id="ambari_stackRepoId" placeholder="{{msg.cluster_form_ambari_repo_stack_repoid_placeholder}}" ng-pattern="/^(HDP-[\d\W]*)$/">
+        <div class="help-block" ng-show="clusterCreationForm.ambari_stackRepoId.$dirty && clusterCreationForm.ambari_stackRepoId.$invalid"><i class="fa fa-warning"></i> Should be a valid Repo Id like HDP-2.5
+        </div>
     </div>
 </div>
 <div class="form-group" name="ambari_stackBaseURL1">

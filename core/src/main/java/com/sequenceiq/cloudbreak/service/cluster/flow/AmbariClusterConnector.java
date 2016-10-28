@@ -595,7 +595,10 @@ public class AmbariClusterConnector {
                 String utilRepoId = utilRepo.remove(HDPRepo.REPO_ID_TAG);
                 String[] typeVersion = stackRepoId.split("-");
                 String stackType = typeVersion[0];
-                String version = typeVersion[1];
+                String version = "";
+                if (typeVersion.length > 1) {
+                    version = typeVersion[1];
+                }
                 for (String os : stackRepo.keySet()) {
                     addRepository(ambariClient, stackType, version, os, stackRepoId, stackRepo.get(os), hdpRepo.isVerify());
                 }

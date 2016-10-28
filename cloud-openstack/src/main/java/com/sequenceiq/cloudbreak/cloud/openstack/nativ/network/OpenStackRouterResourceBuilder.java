@@ -73,7 +73,8 @@ public class OpenStackRouterResourceBuilder extends AbstractOpenStackNetworkReso
             OSClient osClient = createOSClient(auth);
             NeutronNetworkView networkView = new NeutronNetworkView(network);
             if (!networkView.isExistingSubnet()) {
-                osClient.networking().router().detachInterface(resource.getReference(), networkView.getCustomSubnetId(), null);
+                String subnetId = context.getStringParameter(OpenStackConstants.SUBNET_ID);
+                osClient.networking().router().detachInterface(resource.getReference(), subnetId, null);
             }
             if (!networkView.isExistingNetwork()) {
                 ActionResponse response = osClient.networking().router().delete(resource.getReference());
