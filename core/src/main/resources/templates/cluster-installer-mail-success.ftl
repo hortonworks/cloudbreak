@@ -94,14 +94,14 @@
                             </td>
                         </tr>
                         <tr >
-                            <td style="background:rgba(51, 51, 51, 0.86); " >
+                            <td style="background: #333333;" >
                                 <table width="540" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto; " class="deviceWidth1" >
                                     <tr>
                                         <td style="line-height:1px; font-size:1px;" height="24" colspan="2">&nbsp;</td>
                                     </tr>
                                     <tr >
                                         <td style="font-size:1px; line-height:1px; " class="block" >
-                                            <div class="mktEditable" id="logo" ><a href="http://hortonworks.com/"><img src="http://hortonworks.com/wp-content/themes/hortonworks/images/svg/ui_logo.svg" alt="" border="0" style="width: 100%;max-width: 154px;float: left;"></a></div>
+                                            <div class="mktEditable" id="logo" ><a href="http://hortonworks.com/"><img src="https://community.hortonworks.com/themes/hortonworks/images/hrx-logo.png" alt="" border="0" style="width: 100%;max-width: 154px;float: left;"></a></div>
                                         </td>
                                         <td style="font-size:22px; line-height:30px; font-family:Arial, Helvetica, sans-serif; color:#ffffff; text-align:right; " class="block top-pad fontt" ></td>
                                     </tr>
@@ -187,7 +187,7 @@
                             </td>
                         </tr>
                         <tr >
-                            <td style="background:#333333; " >
+                            <td style="background: #333333;" >
                                 <table width="540" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto; " class="deviceWidth1" >
                                     <tr>
                                         <td style="line-height:1px; font-size:1px;" height="15" colspan="2">&nbsp;</td>
