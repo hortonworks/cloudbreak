@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 public class BYOSConstants {
 
     public static final Platform BYOS_PLATFORM = Platform.platform(BYOS);
+
     public static final Variant BYOS_VARIANT = Variant.variant(BYOS);
 
     private BYOSConstants() {

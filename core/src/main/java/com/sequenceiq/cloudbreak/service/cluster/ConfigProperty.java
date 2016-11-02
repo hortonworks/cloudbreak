@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.service.cluster;
 public class ConfigProperty {
 
     private final String name;
+
     private final String prefix;
+
     private final String directory;
 
     public ConfigProperty(String name, String directory, String prefix) {

@@ -17,6 +17,7 @@ public abstract class SecurityGroupBase {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
+
     @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
     @Size(max = 1000)
     private String description;

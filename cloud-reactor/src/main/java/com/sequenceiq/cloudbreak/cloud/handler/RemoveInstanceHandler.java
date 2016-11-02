@@ -17,6 +17,7 @@ public class RemoveInstanceHandler implements CloudPlatformEventHandler<RemoveIn
 
     @Inject
     private EventBus eventBus;
+
     @Inject
     @Qualifier("DownscaleStackHandler")
     private DownscaleStackExecuter downscaleStackExecuter;

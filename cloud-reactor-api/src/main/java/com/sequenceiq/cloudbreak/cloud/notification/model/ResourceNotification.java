@@ -13,8 +13,11 @@ import reactor.rx.Promises;
 public class ResourceNotification {
 
     private final CloudResource cloudResource;
+
     private final CloudContext cloudContext;
+
     private final Promise<ResourcePersisted> promise;
+
     private final ResourceNotificationType type;
 
     public ResourceNotification(CloudResource cloudResource, CloudContext cloudContext, ResourceNotificationType type) {

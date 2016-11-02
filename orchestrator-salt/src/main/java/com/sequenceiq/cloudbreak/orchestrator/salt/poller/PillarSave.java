@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 public class PillarSave implements OrchestratorBootstrap {
 
     private final SaltConnector sc;
+
     private final Pillar pillar;
 
     public PillarSave(SaltConnector sc, String gateway) {

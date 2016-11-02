@@ -2,10 +2,15 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.wasbintegrated
 
 public class StorageAccountCheckerContext {
     private String tenantId;
+
     private String subscriptionId;
+
     private String appId;
+
     private String appPassword;
+
     private String storageAccountName;
+
     private String resourceGroupName;
 
     public StorageAccountCheckerContext(String tenantId, String subscriptionId, String appId, String appPassword, String storageAccountName,

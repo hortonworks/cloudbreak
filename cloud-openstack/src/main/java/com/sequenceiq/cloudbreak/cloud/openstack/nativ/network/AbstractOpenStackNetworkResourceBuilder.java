@@ -33,6 +33,7 @@ public abstract class AbstractOpenStackNetworkResourceBuilder extends AbstractOp
 
     @Inject
     private OpenStackResourceNameService resourceNameService;
+
     @Inject
     private OpenStackClient openStackClient;
 

@@ -80,6 +80,7 @@ public class Template {
 
     @Column(nullable = false)
     private String name;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
@@ -97,7 +98,9 @@ public class Template {
 
     @Column(nullable = false)
     private Integer volumeCount;
+
     private Integer volumeSize;
+
     private String volumeType;
 
     @Column(nullable = false)

@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 public class ArmStackView {
 
     private Map<String, List<ArmInstanceView>> groups = new HashMap<>();
+
     private List<String> instanceGroups = new ArrayList<>();
 
     public ArmStackView(List<Group> groupList, ArmStorageView armStorageView) {

@@ -36,21 +36,29 @@ import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 public class ResourceCreateThread implements Callable<ResourceRequestResult<List<CloudResourceStatus>>> {
 
     public static final String NAME = "resourceCreateThread";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceCreateThread.class);
 
     @Inject
     private ResourceBuilders resourceBuilders;
+
     @Inject
     private SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler;
+
     @Inject
     private ResourcePollTaskFactory resourcePollTaskFactory;
+
     @Inject
     private PersistenceNotifier resourceNotifier;
 
     private final long privateId;
+
     private final Group group;
+
     private final ResourceBuilderContext context;
+
     private final AuthenticatedContext auth;
+
     private final Image image;
 
     public ResourceCreateThread(long privateId, Group group, ResourceBuilderContext context, AuthenticatedContext auth, Image image) {

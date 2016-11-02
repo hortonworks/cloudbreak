@@ -35,10 +35,13 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Inject
     private PollTaskFactory statusCheckFactory;
+
     @Inject
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
+
     @Inject
     private EventBus eventBus;
 

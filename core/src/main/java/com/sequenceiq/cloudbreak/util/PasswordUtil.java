@@ -9,6 +9,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 public class PasswordUtil {
 
     private static final int PWD_LENGTH = 128;
+
     private static final int RADIX = 32;
 
     private PasswordUtil() {

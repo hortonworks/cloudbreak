@@ -28,21 +28,33 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintValidatorTest {
     private static final String BLUEPRINT_STRING = "blueprint";
+
     private static final String GROUP1 = "group1";
+
     private static final String GROUP2 = "group2";
+
     private static final String GROUP3 = "group3";
+
     private static final String GROUP4 = "group4";
+
     private static final String MA_MIN1_MAX5 = "mastercomp1";
+
     private static final String MA_MIN1_MAX1 = "mastercomp2";
+
     private static final String MA_MIN1_MAX3 = "mastercomp3";
+
     private static final String SL_MIN0_MAX3 = "slavecomp1";
+
     private static final String SL_MIN5_MAX6 = "slavecomp2";
+
     private static final String UNKNOWN = "unknown";
 
     @Mock
     private StackServiceComponentDescriptors stackServiceComponentDescriptors;
+
     @Mock
     private ObjectMapper objectMapper;
+
     @InjectMocks
     private BlueprintValidator underTest;
 

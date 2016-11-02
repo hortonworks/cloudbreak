@@ -15,17 +15,22 @@ import io.swagger.annotations.ApiModelProperty;
 public class StackValidationRequest implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.HOSTGROUPS, required = true)
     private Set<HostGroupRequest> hostGroups = new HashSet<>();
+
     @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
     private Set<InstanceGroupRequest> instanceGroups = new HashSet<>();
+
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.BLUEPRINT_ID, required = true)
     private Long blueprintId;
+
     @NotNull
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
     private Long networkId;
+
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String platform;
+
     private FileSystemRequest fileSystem;
 
     public Set<HostGroupRequest> getHostGroups() {

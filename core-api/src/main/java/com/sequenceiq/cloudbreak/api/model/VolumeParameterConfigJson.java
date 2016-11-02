@@ -7,9 +7,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VolumeParameterConfigJson {
     private String volumeParameterType;
+
     private Integer minimumSize;
+
     private Integer maximumSize;
+
     private Integer minimumNumber;
+
     private Integer maximumNumber;
 
     public VolumeParameterConfigJson() {

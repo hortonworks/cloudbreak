@@ -27,10 +27,13 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
 
     @Autowired
     private ExecutorService executorService;
+
     @Autowired
     private ClusterService clusterService;
+
     @Autowired
     private ApplicationContext applicationContext;
+
     @Autowired
     private AmbariClientProvider ambariClientProvider;
 

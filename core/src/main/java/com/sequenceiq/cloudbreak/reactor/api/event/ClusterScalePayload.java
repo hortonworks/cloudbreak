@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.reactor.api.event;
 public class ClusterScalePayload implements ScalingAdjustmentPayload {
 
     private final Long stackId;
+
     private final String hostGroupName;
+
     private final Integer scalingAdjustment;
 
     public ClusterScalePayload(Long stackId, String hostGroupName, Integer scalingAdjustment) {

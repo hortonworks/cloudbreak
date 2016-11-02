@@ -46,16 +46,21 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterToJsonConverter.class);
 
     private static final int SECONDS_PER_MINUTE = 60;
+
     private static final int MILLIS_PER_SECOND = 1000;
 
     @Inject
     private BlueprintValidator blueprintValidator;
+
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
+
     @Inject
     private TlsSecurityService tlsSecurityService;
+
     @Inject
     private AmbariClientProvider ambariClientProvider;
+
     @Inject
     private AmbariViewProvider ambariViewProvider;
 

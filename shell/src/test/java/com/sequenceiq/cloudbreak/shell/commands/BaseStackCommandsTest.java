@@ -39,16 +39,22 @@ public class BaseStackCommandsTest {
 
     @Mock
     private ShellContext shellContext;
+
     @Mock
     private CloudbreakClient cloudbreakClient;
+
     @Mock
     private StackEndpoint stackEndpoint;
+
     @Mock
     private ResponseTransformer responseTransformer;
+
     @Mock
     private CloudbreakShellUtil cloudbreakShellUtil;
+
     @Mock
     private ExceptionTransformer exceptionTransformer;
+
     @Mock
     private OutputTransformer outputTransformer;
 

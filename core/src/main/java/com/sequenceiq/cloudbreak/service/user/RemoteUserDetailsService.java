@@ -48,8 +48,11 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class RemoteUserDetailsService implements UserDetailsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteUserDetailsService.class);
+
     private static final int ACCOUNT_PART = 2;
+
     private static final int ROLE_PART = 2;
+
     private static final String UAA_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     @Value("${cb.client.secret}")

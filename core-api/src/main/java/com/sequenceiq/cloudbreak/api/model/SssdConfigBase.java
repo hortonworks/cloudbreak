@@ -16,30 +16,40 @@ public abstract class SssdConfigBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
+
     @Size(max = 1000, message = "The length of the config's description has to be less than 1000")
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
+
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.PROVIDER_TYPE)
     private SssdProviderType providerType;
+
     @Size(min = 10, max = 255, message = "The length of the config's url has to be in range of 10 to 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.URL)
     private String url;
+
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.SCHEMA)
     private SssdSchemaType schema;
+
     @Size(min = 10, max = 255, message = "The length of the config's search base has to be in range of 10 to 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.BASE_SEARCH)
     private String baseSearch;
+
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.TLS_REQUCERT)
     private SssdTlsReqcertType tlsReqcert = SssdTlsReqcertType.HARD;
+
     @Size(max = 255, message = "The length of the active directory server has to be less than 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.AD_SERVER)
     private String adServer;
+
     @Size(max = 255, message = "The length of the kerberos server(s) has to be less than 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.KERBEROS_SERVER)
     private String kerberosServer;
+
     @Size(max = 255, message = "The length of the kerberos realm has to be less than 255")
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.KERBEROS_REALM)
     private String kerberosRealm;
+
     @ApiModelProperty(value = ModelDescriptions.SssdConfigModelDescription.CONFIGURATION)
     private String configuration;
 

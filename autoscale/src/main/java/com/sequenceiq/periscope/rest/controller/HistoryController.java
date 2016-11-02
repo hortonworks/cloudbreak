@@ -16,6 +16,7 @@ public class HistoryController implements HistoryEndpoint {
 
     @Autowired
     private HistoryService historyService;
+
     @Autowired
     private HistoryConverter historyConverter;
 

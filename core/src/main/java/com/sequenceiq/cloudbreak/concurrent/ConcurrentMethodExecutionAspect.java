@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 @Aspect
 public class ConcurrentMethodExecutionAspect {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConcurrentMethodExecutionAspect.class);
+
     private static final int STRIPES = 10;
 
     private Striped<Lock> locks = Striped.lazyWeakLock(STRIPES);

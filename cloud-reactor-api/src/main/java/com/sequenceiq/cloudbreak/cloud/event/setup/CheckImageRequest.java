@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 public class CheckImageRequest<T> extends CloudPlatformRequest<CheckImageResult> {
 
     private final Image image;
+
     private final CloudStack stack;
 
     public CheckImageRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack stack, Image image) {

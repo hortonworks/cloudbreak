@@ -63,19 +63,33 @@ public class ArmTemplateBuilderTest {
     private ArmTemplateBuilder armTemplateBuilder = new ArmTemplateBuilder();
 
     private String stackName;
+
     private ArmCredentialView armCredentialView;
+
     private List<Group> groups;
+
     private String name;
+
     private List<Volume> volumes;
+
     private CloudInstance instance;
+
     private List<SecurityRule> rules;
+
     private Security security;
+
     private Map<InstanceGroupType, String> userData;
+
     private Image image;
+
     private CloudContext cloudContext;
+
     private CloudStack cloudStack;
+
     private ArmStorageView armStorageView;
+
     private ArmStackView armStackView;
+
     private Gson gson = new Gson();
 
     @Before

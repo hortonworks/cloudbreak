@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class TemplateRequest extends TemplateBase {
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_COUNT)
     private Integer volumeCount;
+
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_SIZE)
     private Integer volumeSize;
 

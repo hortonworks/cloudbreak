@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 public class AmbariHostsLeaveStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariHostsWithNames> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariHostsLeaveStatusCheckerTask.class);
+
     private static final String LEFT_STATE = "UNKNOWN";
 
     @Override

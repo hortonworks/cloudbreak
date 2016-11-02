@@ -10,6 +10,7 @@ public class TimeAlertJson extends AbstractAlertJson {
 
     @ApiModelProperty(TimeAlertJsonProperties.TIMEZONE)
     private String timeZone;
+
     @ApiModelProperty(TimeAlertJsonProperties.CRON)
     private String cron;
 

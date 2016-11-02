@@ -8,10 +8,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "integrationtest")
 public class ITProps {
     private Map<String, String> credentialNames;
+
     private Map<String, String> defaultNetworks;
+
     private Map<String, List<String>> testSuites;
+
     private List<String> testTypes;
+
     private List<String> suiteFiles;
+
     private String defaultSecurityGroup;
 
     public void setCredentialNames(Map<String, String> credentialNames) {

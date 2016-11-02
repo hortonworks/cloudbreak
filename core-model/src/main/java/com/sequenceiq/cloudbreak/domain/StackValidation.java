@@ -4,8 +4,11 @@ import java.util.Set;
 
 public class StackValidation implements ProvisionEntity {
     private Set<HostGroup> hostGroups;
+
     private Set<InstanceGroup> instanceGroups;
+
     private Blueprint blueprint;
+
     private Network network;
 
     public Set<HostGroup> getHostGroups() {

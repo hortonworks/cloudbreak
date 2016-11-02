@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformRequest;
 
 public class ClusterCredentialChangeRequest extends ClusterPlatformRequest {
     private final String user;
+
     private final String password;
 
     public ClusterCredentialChangeRequest(Long stackId, String user, String password) {

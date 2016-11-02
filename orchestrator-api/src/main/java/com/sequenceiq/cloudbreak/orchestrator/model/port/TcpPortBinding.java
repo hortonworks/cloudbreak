@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.orchestrator.model.port;
 public class TcpPortBinding {
 
     private Integer exposedPort;
+
     private String hostIp;
+
     private Integer hostPort;
 
     public TcpPortBinding(Integer exposedPort, String hostIp, Integer hostPort) {

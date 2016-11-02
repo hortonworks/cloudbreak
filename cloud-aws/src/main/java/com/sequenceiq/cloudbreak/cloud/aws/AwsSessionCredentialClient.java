@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 public class AwsSessionCredentialClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsSessionCredentialClient.class);
+
     private static final int DEFAULT_SESSION_CREDENTIALS_DURATION = 3600;
 
     @Value("${cb.aws.external.id:}")

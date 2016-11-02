@@ -5,9 +5,13 @@ import java.util.List;
 public class Port {
 
     private final String localPort;
+
     private final String name;
+
     private final String port;
+
     private final String protocol;
+
     private final List<EndpointRule> aclRules;
 
     public Port(String name, String port, String localPort, String protocol, List<EndpointRule> aclRules) {

@@ -30,7 +30,9 @@ import groovyx.net.http.HttpResponseException;
 public class WasbIntegratedFileSystemConfigurator extends AbstractFileSystemConfigurator<WasbIntegratedFileSystemConfiguration> {
 
     private static final int POLLING_INTERVAL = 5000;
+
     private static final int MAX_ATTEMPTS = 50;
+
     private static final String STORAGE_ACCOUNT_KEY = "storageAccountKey";
 
     @Inject

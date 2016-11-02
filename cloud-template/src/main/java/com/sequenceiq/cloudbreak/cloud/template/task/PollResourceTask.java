@@ -18,7 +18,9 @@ public class PollResourceTask extends AbstractPollTask<List<CloudResourceStatus>
     public static final String NAME = "pollResourceTask";
 
     private ResourceChecker checker;
+
     private List<CloudResource> cloudResources;
+
     private ResourceBuilderContext context;
 
     public PollResourceTask(AuthenticatedContext authenticatedContext, ResourceChecker checker,

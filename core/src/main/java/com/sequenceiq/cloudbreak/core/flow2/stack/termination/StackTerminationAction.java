@@ -23,12 +23,16 @@ import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 @Component("StackTerminationAction")
 public class StackTerminationAction extends AbstractStackTerminationAction<StackEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationAction.class);
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private CloudbreakMessagesService messagesService;
+
     @Inject
     private CloudbreakEventService cloudbreakEventService;
+
     @Inject
     private TerminationService terminationService;
 

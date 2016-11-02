@@ -30,7 +30,9 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 @Transactional
 public class TopologyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TopologyService.class);
+
     private static final String DELIMITER = "_";
+
     private static final String TOPOLOGY_NOT_FOUND_MSG = "Topology '%s' not found.";
 
     @Inject

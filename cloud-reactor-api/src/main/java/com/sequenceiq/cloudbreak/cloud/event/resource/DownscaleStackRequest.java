@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 public class DownscaleStackRequest<T> extends CloudStackRequest<T> {
 
     private List<CloudResource> cloudResources;
+
     private List<CloudInstance> instances;
 
     public DownscaleStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> cloudResources,

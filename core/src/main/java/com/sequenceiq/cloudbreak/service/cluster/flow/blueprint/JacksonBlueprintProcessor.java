@@ -18,9 +18,13 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class JacksonBlueprintProcessor implements BlueprintProcessor {
 
     private static final String CONFIGURATIONS_NODE = "configurations";
+
     private static final String SETTINGS_NODE = "settings";
+
     private static final String HOST_GROUPS_NODE = "host_groups";
+
     private static final String BLUEPRINTS = "Blueprints";
+
     private static final String STACK_VERSION = "stack_version";
 
     @Override

@@ -20,7 +20,9 @@ public class PollInstancesStateTask extends AbstractPollTask<InstancesStatusResu
     public static final String NAME = "pollInstancesStateTask";
 
     private List<CloudInstance> instances;
+
     private InstanceConnector instanceConnector;
+
     private Set<InstanceStatus> completedStatuses;
 
     public PollInstancesStateTask(AuthenticatedContext authenticatedContext, InstanceConnector instanceConnector, List<CloudInstance> instances) {

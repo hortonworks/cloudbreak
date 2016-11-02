@@ -27,6 +27,7 @@ public class TemplateValidator {
 
     private Supplier<Map<Platform, Collection<VmType>>> virtualMachines =
             Suppliers.memoize(() -> cloudParameterService.getVmtypes(true).getVirtualMachines());
+
     private Supplier<Map<Platform, Map<String, VolumeParameterType>>> diskMappings =
             Suppliers.memoize(() -> cloudParameterService.getDiskTypes().getDiskMappings());
 

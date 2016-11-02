@@ -19,10 +19,12 @@ import com.sequenceiq.periscope.service.ClusterService;
 public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateFailedHandler.class);
+
     private static final int RETRY_THRESHOLD = 5;
 
     @Autowired
     private ClusterService clusterService;
+
     private final Map<Long, Integer> updateFailures = new ConcurrentHashMap<>();
 
     @Override

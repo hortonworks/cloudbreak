@@ -20,10 +20,13 @@ public class ClusterService {
 
     @Autowired
     private ClusterRepository clusterRepository;
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private SecurityConfigRepository securityConfigRepository;
+
     @Autowired
     private AlertService alertService;
 

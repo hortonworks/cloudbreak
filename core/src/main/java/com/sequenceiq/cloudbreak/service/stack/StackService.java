@@ -89,42 +89,61 @@ public class StackService {
 
     @Inject
     private StackRepository stackRepository;
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private ImageService imageService;
+
     @Inject
     private ClusterRepository clusterRepository;
+
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
+
     @Inject
     private OrchestratorRepository orchestratorRepository;
+
     @Inject
     private TlsSecurityService tlsSecurityService;
+
     @Inject
     private TerminationService terminationService;
+
     @Inject
     private ReactorFlowManager flowManager;
+
     @Inject
     private BlueprintValidator blueprintValidator;
+
     @Inject
     private NetworkConfigurationValidator networkConfigurationValidator;
+
     @Inject
     private SecurityRuleRepository securityRuleRepository;
+
     @Inject
     private CloudbreakEventService eventService;
+
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+
     @Inject
     private ServiceProviderConnectorAdapter connector;
+
     @Inject
     private ImageNameUtil imageNameUtil;
+
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
+
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+
     @Inject
     private SecurityConfigRepository securityConfigRepository;
 

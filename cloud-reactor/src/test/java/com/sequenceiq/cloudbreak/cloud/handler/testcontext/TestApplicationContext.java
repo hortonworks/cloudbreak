@@ -58,6 +58,7 @@ public class TestApplicationContext {
 
     private CloudInstance cloudInstance = new CloudInstance("instanceId",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<>()));
+
     private CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<>()));
 

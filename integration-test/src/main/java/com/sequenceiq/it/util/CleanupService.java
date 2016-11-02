@@ -25,12 +25,14 @@ import com.sequenceiq.it.cloudbreak.config.ITProps;
 @Component
 public class CleanupService {
     private static final Logger LOG = LoggerFactory.getLogger(CleanupService.class);
+
     private static final int DELETE_SLEEP = 30000;
 
     private boolean cleanedUp;
 
     @Value("${integrationtest.cleanup.retryCount}")
     private int cleanUpRetryCount;
+
     @Inject
     private ITProps itProps;
 

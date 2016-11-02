@@ -14,6 +14,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 public class AmbariConfigurationService {
 
     private static final List<String> CONFIG_LIST = new ArrayList<>(ConfigParam.values().length);
+
     private static final String AZURE_ADDRESS_SUFFIX = "cloudapp.net";
 
     static {

@@ -5,6 +5,7 @@ import java.util.Date;
 public class ContainerName {
 
     private String namePrefix;
+
     private String name;
 
     public ContainerName(String name, String namePrefix) {

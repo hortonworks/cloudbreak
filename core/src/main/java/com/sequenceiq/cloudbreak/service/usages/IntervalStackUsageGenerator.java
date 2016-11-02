@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.price.PriceGenerator;
 @Component
 public class IntervalStackUsageGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntervalStackUsageGenerator.class);
+
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @Inject

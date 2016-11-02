@@ -26,7 +26,9 @@ import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 public class BaseCredentialCommands implements BaseCommands, CredentialCommands {
 
     private static final String FILE_NOT_FOUND = "File not found with ssh key.";
+
     private static final String URL_NOT_FOUND = "Url not Available for ssh key.";
+
     private static final String CREATE_SUCCESS_MESSAGE = "Credential created with id: '%d' and name: '%s'";
 
     private ShellContext shellContext;

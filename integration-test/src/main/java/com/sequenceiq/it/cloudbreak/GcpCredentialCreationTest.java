@@ -16,12 +16,16 @@ import com.sequenceiq.it.util.ResourceUtil;
 public class GcpCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.gcpcredential.name}")
     private String defaultName;
+
     @Value("${integrationtest.gcpcredential.projectId}")
     private String defaultProjectId;
+
     @Value("${integrationtest.gcpcredential.serviceAccountId}")
     private String defaultServiceAccountId;
+
     @Value("${integrationtest.gcpcredential.p12File}")
     private String defaultP12File;
+
     @Value("${integrationtest.gcpcredential.publicKeyFile}")
     private String defaultPublicKeyFile;
 

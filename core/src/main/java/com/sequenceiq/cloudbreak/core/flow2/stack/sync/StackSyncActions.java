@@ -50,8 +50,10 @@ public class StackSyncActions {
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
+
     @Inject
     private StackSyncService stackSyncService;
+
     @Inject
     private FlowMessageService flowMessageService;
 
@@ -114,10 +116,13 @@ public class StackSyncActions {
 
         @Inject
         private StackService stackService;
+
         @Inject
         private InstanceMetaDataRepository instanceMetaDataRepository;
+
         @Inject
         private CredentialToCloudCredentialConverter credentialConverter;
+
         @Inject
         private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
 

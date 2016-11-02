@@ -42,6 +42,7 @@ public class OpenStackParameters implements PlatformParameters {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackParameters.class);
 
     private static final Integer START_LABEL = 97;
+
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("vd", START_LABEL);
 
     @Value("${cb.openstack.regions:}")
@@ -51,6 +52,7 @@ public class OpenStackParameters implements PlatformParameters {
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+
     private Region defaultRegion;
 
     @PostConstruct

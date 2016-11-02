@@ -23,10 +23,13 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 public final class ConsulUtils {
 
     public static final String CONSUL_DOMAIN = ".node.dc1.consul";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulUtils.class);
 
     private static final int DEFAULT_TIMEOUT_MS = 5000;
+
     private static final int ALIVE_STATUS = 1;
+
     private static final int LEFT_STATUS = 3;
 
     private ConsulUtils() {

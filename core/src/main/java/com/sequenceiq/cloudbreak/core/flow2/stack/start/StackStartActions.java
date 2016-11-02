@@ -52,10 +52,13 @@ public class StackStartActions {
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
     @Inject
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
+
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
+
     @Inject
     private StackStartStopService stackStartStopService;
 
@@ -130,18 +133,25 @@ public class StackStartActions {
     private abstract static class AbstractStackStartAction<P extends Payload>
             extends AbstractAction<StackStartState, StackStartEvent, StackStartStopContext, P> {
         private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackStartAction.class);
+
         @Inject
         private StackService stackService;
+
         @Inject
         private InstanceMetaDataRepository instanceMetaDataRepository;
+
         @Inject
         private CredentialToCloudCredentialConverter credentialConverter;
+
         @Inject
         private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
+
         @Inject
         private ResourceToCloudResourceConverter cloudResourceConverter;
+
         @Inject
         private CloudbreakMessagesService messagesService;
+
         @Inject
         private CloudbreakEventService cloudbreakEventService;
 

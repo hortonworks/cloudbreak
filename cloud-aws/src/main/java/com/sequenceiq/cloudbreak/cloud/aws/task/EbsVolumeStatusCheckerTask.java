@@ -20,8 +20,11 @@ public class EbsVolumeStatusCheckerTask extends PollBooleanStateTask {
     private static final Logger LOGGER = LoggerFactory.getLogger(EbsVolumeStatusCheckerTask.class);
 
     private AuthenticatedContext authenticatedContext;
+
     private CloudStack stack;
+
     private String volumeId;
+
     private AmazonEC2Client amazonEC2Client;
 
     public EbsVolumeStatusCheckerTask(AuthenticatedContext authenticatedContext, CloudStack stack, AmazonEC2Client amazonEC2Client, String volumeId) {

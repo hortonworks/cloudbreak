@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 public abstract class AbstractClusterAction<P extends Payload> extends AbstractAction<FlowState, FlowEvent, ClusterContext, P> {
     @Inject
     private StackService stackService;
+
     @Inject
     private ClusterService clusterService;
 

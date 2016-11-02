@@ -17,7 +17,9 @@ public class FailurePolicy implements ProvisionEntity {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "failurepolicy_generator")
     @SequenceGenerator(name = "failurepolicy_generator", sequenceName = "failurepolicy_id_seq", allocationSize = 1)
     private Long id;
+
     private Long threshold;
+
     @Enumerated(EnumType.STRING)
     private AdjustmentType adjustmentType;
 

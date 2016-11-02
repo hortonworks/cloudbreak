@@ -53,7 +53,9 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
 
     @Value("${mock.server.address:localhost}")
     private String mockServerAddress;
+
     private int numberOfServers;
+
     private int scalingAdjustment;
 
     @BeforeMethod

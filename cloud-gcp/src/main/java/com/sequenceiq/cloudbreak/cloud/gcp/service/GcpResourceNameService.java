@@ -16,9 +16,13 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpResourceNameService.class);
 
     private static final String FIREWALL_INTERNAL_NAME_SUFFIX = "internal";
+
     private static final String FIREWALL_IN_NAME_SUFFIX = "in";
+
     private static final String RESERVED_IP_SUFFIX = "reserved-ip";
+
     private static final int ATTACHED_DISKS_PART_COUNT = 4;
+
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
     @Value("${cb.max.gcp.resource.name.length:}")

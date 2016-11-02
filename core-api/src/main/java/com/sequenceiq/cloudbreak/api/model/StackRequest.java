@@ -17,11 +17,14 @@ public class StackRequest extends StackBase {
     @Valid
     @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
     private OrchestratorRequest orchestrator;
+
     @Valid
     @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
     private List<InstanceGroupRequest> instanceGroups = new ArrayList<>();
+
     @ApiModelProperty(StackModelDescription.FAILURE_POLICY)
     private FailurePolicyRequest failurePolicy;
+
     @ApiModelProperty(value = StackModelDescription.IMAGE_CATALOG)
     private String imageCatalog;
 

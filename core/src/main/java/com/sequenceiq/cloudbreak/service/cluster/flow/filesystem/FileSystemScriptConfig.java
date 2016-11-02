@@ -8,8 +8,11 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent;
 
 public class FileSystemScriptConfig {
     private String scriptLocation;
+
     private ClusterLifecycleEvent clusterLifecycleEvent;
+
     private ExecutionType executionType;
+
     private Map<String, String> properties = new HashMap<>();
 
     public FileSystemScriptConfig(String scriptLocation, ClusterLifecycleEvent clusterLifecycleEvent, ExecutionType executionType) {

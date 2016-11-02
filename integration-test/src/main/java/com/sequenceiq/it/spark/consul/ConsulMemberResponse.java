@@ -11,6 +11,7 @@ import spark.Response;
 
 public class ConsulMemberResponse extends ITResponse {
     private static final int ALIVE_STATUS = 1;
+
     private int serverNumber;
 
     public ConsulMemberResponse(int serverNumber) {

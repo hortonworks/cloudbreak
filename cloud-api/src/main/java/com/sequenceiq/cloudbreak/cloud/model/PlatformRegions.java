@@ -8,7 +8,9 @@ import java.util.Map;
 public class PlatformRegions {
 
     private final Map<Platform, Collection<Region>> regions;
+
     private final Map<Platform, Map<Region, List<AvailabilityZone>>> availabiltyZones;
+
     private final Map<Platform, Region> defaultRegions;
 
     public PlatformRegions(Map<Platform, Collection<Region>> regions, Map<Platform, Map<Region, List<AvailabilityZone>>> availabiltyZones,

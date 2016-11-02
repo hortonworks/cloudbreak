@@ -10,7 +10,9 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 public class AmbariHostsCheckerContext extends StackContext {
 
     private AmbariClient ambariClient;
+
     private Set<HostMetadata> hostsInCluster;
+
     private int hostCount;
 
     public AmbariHostsCheckerContext(Stack stack, AmbariClient ambariClient, Set<HostMetadata> hostsInCluster, int hostCount) {

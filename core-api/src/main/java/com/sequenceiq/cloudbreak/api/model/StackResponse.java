@@ -18,30 +18,43 @@ import io.swagger.annotations.ApiModelProperty;
 public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long id;
+
     @ApiModelProperty(ModelDescriptions.OWNER)
     private String owner;
+
     @ApiModelProperty(ModelDescriptions.ACCOUNT)
     private String account;
+
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
+
     @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;
+
     private ClusterResponse cluster;
+
     @ApiModelProperty(StackModelDescription.STATUS_REASON)
     private String statusReason;
+
     @Valid
     @ApiModelProperty
     private List<InstanceGroupResponse> instanceGroups = new ArrayList<>();
+
     @ApiModelProperty(StackModelDescription.FAILURE_POLICY)
     private FailurePolicyResponse failurePolicy;
+
     @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
     private OrchestratorResponse orchestrator;
+
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
+
     @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
     private Integer gatewayPort;
+
     @ApiModelProperty(StackModelDescription.IMAGE)
     private ImageJson image;
+
     @ApiModelProperty(StackModelDescription.CLOUDBREAK_DETAILS)
     private CloudbreakDetailsJson cloudbreakDetails;
 

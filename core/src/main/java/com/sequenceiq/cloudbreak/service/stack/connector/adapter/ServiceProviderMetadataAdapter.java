@@ -42,14 +42,19 @@ import reactor.bus.EventBus;
 @Component
 public class ServiceProviderMetadataAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderMetadataAdapter.class);
+
     @Inject
     private EventBus eventBus;
+
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
+
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
+
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
 

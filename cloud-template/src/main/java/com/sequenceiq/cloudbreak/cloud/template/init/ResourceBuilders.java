@@ -24,12 +24,17 @@ public class ResourceBuilders {
 
     @Inject
     private List<NetworkResourceBuilder> network;
+
     @Inject
     private List<ComputeResourceBuilder> compute;
+
     @Inject
     private List<GroupResourceBuilder> group;
+
     private Map<Platform, List<NetworkResourceBuilder>> networkChain = new HashMap<>();
+
     private Map<Platform, List<GroupResourceBuilder>> groupChain = new HashMap<>();
+
     private Map<Platform, List<ComputeResourceBuilder>> computeChain = new HashMap<>();
 
     @PostConstruct

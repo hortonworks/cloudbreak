@@ -20,16 +20,22 @@ public class AwsConnector implements CloudConnector {
 
     @Inject
     private AwsResourceConnector awsResourceConnector;
+
     @Inject
     private AwsInstanceConnector awsInstanceConnector;
+
     @Inject
     private AwsMetadataCollector awsMetadataCollector;
+
     @Inject
     private AwsCredentialConnector awsCredentialConnector;
+
     @Inject
     private AwsPlatformParameters awsPlatformParameters;
+
     @Inject
     private AwsSetup awsSetup;
+
     @Inject
     private AwsAuthenticator awsAuthenticator;
 

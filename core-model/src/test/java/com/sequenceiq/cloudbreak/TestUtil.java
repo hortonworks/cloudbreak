@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 public class TestUtil {
 
     public static final String DUMMY_DESCRIPTION = "dummyDescription";
+
     public static final String N1_HIGHCPU_16_INSTANCE = "n1-highcpu-16";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
@@ -85,6 +86,7 @@ public class TestUtil {
                     + "I5QW2HYwS3jZ2zlOLx5fj+wmeenxNrMxgP7XkbkVcBa76wdfZ1xBAr0ybXb13Gi2\n"
                     + "TA0+meQcD7qPGKxxijqwU5Y1QTw=\n"
                     + "-----END CERTIFICATE-----";
+
     private static final String DUMMY_NAME = "dummyName";
 
     private TestUtil() {

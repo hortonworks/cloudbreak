@@ -14,11 +14,17 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 public class ResourceBuilderContext extends DynamicModel {
 
     private Location location;
+
     private String name;
+
     private int parallelResourceRequest;
+
     private Queue<CloudResource> networkResources = new ConcurrentLinkedQueue<>();
+
     private Map<String, List<CloudResource>> groupResources = new HashMap<>();
+
     private Map<Long, List<CloudResource>> computeResources = new HashMap<>();
+
     private boolean build;
 
     public ResourceBuilderContext(String name, Location location, int parallelResourceRequest, boolean build) {

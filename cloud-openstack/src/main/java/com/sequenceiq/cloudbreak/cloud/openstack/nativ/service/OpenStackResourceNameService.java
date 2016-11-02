@@ -15,6 +15,7 @@ public class OpenStackResourceNameService extends CloudbreakResourceNameService 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackResourceNameService.class);
 
     private static final int ATTACHED_DISKS_PART_COUNT = 4;
+
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
     @Value("${cb.max.openstack.resource.name.length:}")

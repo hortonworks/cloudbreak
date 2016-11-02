@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 public class GcpConstants {
 
     public static final Platform GCP_PLATFORM = Platform.platform(GCP);
+
     public static final Variant GCP_VARIANT = Variant.variant(GCP);
 
     private GcpConstants() {

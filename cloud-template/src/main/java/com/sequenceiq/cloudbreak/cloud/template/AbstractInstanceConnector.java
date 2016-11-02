@@ -23,6 +23,7 @@ public abstract class AbstractInstanceConnector implements InstanceConnector {
 
     @Inject
     private ComputeResourceService computeResourceService;
+
     @Inject
     private ContextBuilders contextBuilders;
 

@@ -8,12 +8,16 @@ public class ConfigSpecification {
 
     @JsonProperty("volumeParameterType")
     private String volumeParameterType;
+
     @JsonProperty("minimumSize")
     private String minimumSize;
+
     @JsonProperty("maximumSize")
     private String maximumSize;
+
     @JsonProperty("minimumNumber")
     private String minimumNumber;
+
     @JsonProperty("maximumNumber")
     private String maximumNumber;
 

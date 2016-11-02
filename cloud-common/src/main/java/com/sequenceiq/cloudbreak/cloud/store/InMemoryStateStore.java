@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 public final class InMemoryStateStore {
 
     private static final Map<Long, PollGroup> STACK_STATE_STORE = new ConcurrentHashMap<>();
+
     private static final Map<Long, PollGroup> CLUSTER_STATE_STORE = new ConcurrentHashMap<>();
 
     private InMemoryStateStore() {

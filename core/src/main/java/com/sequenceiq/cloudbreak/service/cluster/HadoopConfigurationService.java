@@ -29,7 +29,9 @@ public class HadoopConfigurationService {
 
     @Inject
     private HostGroupRepository hostGroupRepository;
+
     private Map<String, ServiceConfig> serviceConfigs = new HashMap<>();
+
     private Map<String, Map<String, String>> bpConfigs = new HashMap<>();
 
     @Value("#{'${cb.byos.dfs.data.dir}'.split('\\,')}")

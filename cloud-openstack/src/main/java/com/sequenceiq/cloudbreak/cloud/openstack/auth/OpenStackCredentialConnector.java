@@ -30,6 +30,7 @@ public class OpenStackCredentialConnector implements CredentialConnector {
 
     @Inject
     private OpenStackClient openStackClient;
+
     @Inject
     private OpenStackSmartSenseIdGenerator smartSenseIdGenerator;
 

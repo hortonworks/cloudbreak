@@ -27,14 +27,21 @@ public class AccountPreferences {
 
     @Id
     private String account;
+
     private Long maxNumberOfClusters;
+
     private Long maxNumberOfNodesPerCluster;
+
     private Long maxNumberOfClustersPerUser;
+
     private String allowedInstanceTypes;
+
     @Column(nullable = false)
     private Long clusterTimeToLive;
+
     @Column(nullable = false)
     private Long userTimeToLive;
+
     @Column(columnDefinition = "TEXT")
     private String platforms;
 

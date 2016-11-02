@@ -16,14 +16,19 @@ import com.sequenceiq.it.util.ResourceUtil;
 public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.openstackcredential.name}")
     private String defaultName;
+
     @Value("${integrationtest.openstackcredential.tenantName}")
     private String defaultTenantName;
+
     @Value("${integrationtest.openstackcredential.userName}")
     private String defaultUserName;
+
     @Value("${integrationtest.openstackcredential.password}")
     private String defaultPassword;
+
     @Value("${integrationtest.openstackcredential.endpoint}")
     private String defaultEndpoint;
+
     @Value("${integrationtest.openstackcredential.publicKeyFile}")
     private String defaultPublicKeyFile;
 

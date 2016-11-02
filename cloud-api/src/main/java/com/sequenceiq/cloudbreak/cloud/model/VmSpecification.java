@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class VmSpecification {
     @JsonProperty("value")
     private String value;
+
     @JsonProperty("extended")
     private Boolean extended = true;
+
     @JsonProperty("meta")
     private MetaSpecification metaSpecification;
 

@@ -22,21 +22,26 @@ public class AmbariDatabaseDetailsJson {
     @NotNull
     @ApiModelProperty(value = VENDOR, required = true)
     private DatabaseVendor vendor;
+
     @NotNull
     @Pattern(regexp = "^[^']+$", message = "Invalid character in name: '")
     @ApiModelProperty(value = NAME, required = true)
     private String name;
+
     @NotNull
     @Pattern(regexp = "^[a-zA-Z0-9]([a-zA-Z0-9-\\.]+)$", message = "The hostname must be valid")
     @ApiModelProperty(value = HOST, required = true)
     private String host;
+
     @NotNull
     @ApiModelProperty(value = PORT, required = true)
     private Integer port;
+
     @NotNull
     @Pattern(regexp = "^[^']+$", message = "Invalid character in user name: '")
     @ApiModelProperty(value = USER_NAME, required = true)
     private String userName;
+
     @NotNull
     @Pattern(regexp = "^[^']+$", message = "Invalid character in password: '")
     @ApiModelProperty(value = PASSWORD, required = true)

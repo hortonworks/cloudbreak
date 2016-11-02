@@ -19,9 +19,13 @@ import com.sequenceiq.it.util.ServerAddressGenerator;
 public class CloudMetaDataStatuses extends ITResponse {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudMetaDataStatuses.class);
+
     private String mockServerAddress;
+
     private int sshPort;
+
     private String prefix;
+
     private Integer from;
 
     public CloudMetaDataStatuses(String mockServerAddress, int sshPort) {

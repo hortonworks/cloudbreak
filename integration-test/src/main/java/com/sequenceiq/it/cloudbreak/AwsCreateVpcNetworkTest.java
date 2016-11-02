@@ -33,7 +33,9 @@ import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 public class AwsCreateVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
 
     private static final List<StackStatus> FAILED_STATUSES = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCreateVpcNetworkTest.class);
+
     private static final int MAX_TRY = 30;
 
     @Test

@@ -15,11 +15,17 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 public class InstanceTerminationContext extends CommonContext {
 
     private final Stack stack;
+
     private final CloudContext cloudContext;
+
     private final CloudCredential cloudCredential;
+
     private final CloudStack cloudStack;
+
     private final List<CloudResource> cloudResources;
+
     private final CloudInstance cloudInstance;
+
     private final InstanceMetaData instanceMetaData;
 
     public InstanceTerminationContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,

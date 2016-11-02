@@ -51,12 +51,17 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class AwsPlatformParameters implements PlatformParameters {
 
     public static final String DEDICATED_INSTANCES = "dedicatedInstances";
+
     public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
+
     public static final String S3_ROLE = "s3Role";
 
     private static final Integer START_LABEL = 97;
+
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
+
     private static final int DEFAULT_REGION_TYPE_POSITION = 4;
+
     private static final int DEFAULT_VM_TYPE_POSITION = 21;
 
     @Value("${cb.aws.vm.parameter.definition.path:}")
@@ -66,9 +71,13 @@ public class AwsPlatformParameters implements PlatformParameters {
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+
     private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
+
     private Map<AvailabilityZone, List<VmType>> sortListOfVmTypes = new HashMap<>();
+
     private Region defaultRegion;
+
     private VmType defaultVmType;
 
     @PostConstruct

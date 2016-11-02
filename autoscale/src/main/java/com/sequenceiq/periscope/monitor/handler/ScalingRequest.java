@@ -24,13 +24,18 @@ import com.sequenceiq.periscope.service.HistoryService;
 public class ScalingRequest implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingRequest.class);
+
     private final int desiredNodeCount;
+
     private final int totalNodes;
+
     private final Cluster cluster;
+
     private final ScalingPolicy policy;
 
     @Inject
     private CloudbreakClient cloudbreakClient;
+
     @Inject
     private HistoryService historyService;
 

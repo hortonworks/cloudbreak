@@ -22,12 +22,16 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 @Service
 public class StackDownscaleService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDownscaleService.class);
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private FlowMessageService flowMessageService;
+
     @Inject
     private EmailSenderService emailSenderService;
+
     @Inject
     private StackScalingService stackScalingService;
 

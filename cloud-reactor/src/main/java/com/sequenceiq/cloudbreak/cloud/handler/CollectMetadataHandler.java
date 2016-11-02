@@ -25,6 +25,7 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Inject
     private EventBus eventBus;
 

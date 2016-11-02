@@ -23,6 +23,7 @@ import reactor.fn.Consumer;
 @Component
 public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     public static final String FLOW_FINAL = "FLOWFINAL";
+
     public static final String FLOW_CANCEL = "FLOWCANCEL";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Flow2Handler.class);

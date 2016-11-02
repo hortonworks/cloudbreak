@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 public class AccountPreferencesValidatorTest {
 
     public static final String EMPTY_STRING = "";
+
     @Mock
     private Stack stack;
 

@@ -79,6 +79,7 @@ public class Blueprint implements ProvisionEntity {
     private String blueprintText;
 
     private String blueprintName;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 

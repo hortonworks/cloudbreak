@@ -33,10 +33,13 @@ public class ServiceProviderSetupAdapter {
 
     @Inject
     private EventBus eventBus;
+
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
+
     @Inject
     private ImageService imageService;
+
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
 

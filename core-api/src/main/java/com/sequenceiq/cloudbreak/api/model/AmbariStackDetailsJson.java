@@ -14,24 +14,31 @@ public class AmbariStackDetailsJson {
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.STACK, required = true)
     private String stack;
+
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.VERSION, required = true)
     private String version;
+
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.OS, required = true)
     private String os;
+
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_REPO_ID, required = true)
     private String stackRepoId;
+
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_BASE_URL, required = true)
     private String stackBaseURL;
+
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_REPO_ID, required = true)
     private String utilsRepoId;
+
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_BASE_URL, required = true)
     private String utilsBaseURL;
+
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.VERIFY, required = true)
     private Boolean verify;

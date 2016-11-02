@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class GcpResourceNameServiceTest {
 
     private ResourceNameService subject;
+
     private final String maxResourceNameLength = "63";
 
     @Before

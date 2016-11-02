@@ -11,10 +11,13 @@ public class AmbariInfo {
 
     @JsonProperty("cb_versions")
     private List<String> cbVersions;
+
     @JsonProperty("version")
     private String version;
+
     @JsonProperty("repo")
     private Map<String, String> repo;
+
     @JsonProperty("hdp")
     private List<HDPInfo> hdp;
 

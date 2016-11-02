@@ -38,20 +38,28 @@ public class ClusterServiceRunner {
 
     @Inject
     private StackService stackService;
+
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
+
     @Inject
     private InstanceMetadataService instanceMetadataService;
+
     @Inject
     private TlsSecurityService tlsSecurityService;
+
     @Inject
     private ClusterContainerRunner containerRunner;
+
     @Inject
     private ClusterHostServiceRunner hostRunner;
+
     @Inject
     private GatewayConfigService gatewayConfigService;
 

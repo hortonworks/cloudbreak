@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 @Transactional
 public class TerminationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminationService.class);
+
     private static final String DELIMITER = "_";
 
     @Inject

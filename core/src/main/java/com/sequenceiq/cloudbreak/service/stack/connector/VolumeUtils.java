@@ -5,6 +5,7 @@ import java.util.List;
 public final class VolumeUtils {
 
     public static final String VOLUME_PREFIX = "/hadoopfs/fs";
+
     private static final int LOG_VOLUME_INDEX = 1;
 
     private VolumeUtils() {

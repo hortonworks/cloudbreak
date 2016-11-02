@@ -15,12 +15,15 @@ public abstract class SecurityRuleBase implements JsonEntity {
             "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             message = "The subnet field should contain a valid CIDR definition.")
     private String subnet;
+
     @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.PORTS, required = true)
     @Pattern(regexp = "^[0-9]+(,[0-9]+)*$",
             message = "The ports field should contain a comma separated list of port numbers, for example: 8080,9090,5555")
     private String ports;
+
     @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.PROTOCOL, required = true)
     private String protocol;
+
     @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.MODIFIABLE)
     private boolean modifiable;
 

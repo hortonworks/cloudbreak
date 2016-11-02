@@ -17,6 +17,7 @@ public class ContextBuilders {
 
     @Inject
     private List<ResourceContextBuilder> contextBuilders;
+
     private Map<Platform, ResourceContextBuilder> map = new HashMap<>();
 
     @PostConstruct

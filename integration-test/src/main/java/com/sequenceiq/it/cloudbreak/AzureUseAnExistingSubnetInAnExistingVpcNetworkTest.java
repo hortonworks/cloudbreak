@@ -26,16 +26,23 @@ import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 public class AzureUseAnExistingSubnetInAnExistingVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
 
     private static final List<StackStatus> FAILED_STATUSES = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureUseAnExistingSubnetInAnExistingVpcNetworkTest.class);
+
     private static final int MAX_TRY = 30;
+
     @Value("${integrationtest.azurermcredential.name}")
     private String defaultName;
+
     @Value("${integrationtest.azurermcredential.subscriptionId}")
     private String defaultSubscriptionId;
+
     @Value("${integrationtest.azurermcredential.secretKey}")
     private String defaultSecretKey;
+
     @Value("${integrationtest.azurermcredential.accessKey}")
     private String defaultAccesKey;
+
     @Value("${integrationtest.azurermcredential.tenantId}")
     private String defaultTenantId;
 

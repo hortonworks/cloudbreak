@@ -19,7 +19,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 public class PlatformVariantsToJsonConverterTest extends AbstractEntityConverterTest<PlatformVariants> {
 
     private static final Platform PLATFORM = Platform.platform("PLATFORM");
+
     private static final Variant VARIANT_1 = Variant.variant("VARIANT1");
+
     private static final Variant VARIANT_2 = Variant.variant("VARIANT2");
 
     private PlatformVariantsToJsonConverter underTest;

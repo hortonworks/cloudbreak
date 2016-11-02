@@ -48,10 +48,15 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @Service
 public class GcpPlatformParameters implements PlatformParameters {
     private static final int DEFAULT_REGION_TYPE_POSITION = 2;
+
     private static final int DEFAULT_VM_TYPE_POSITION = 14;
+
     private static final float THOUSAND = 1000.0f;
+
     private static final int TEN = 10;
+
     private static final Integer START_LABEL = 97;
+
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
 
     @Value("${cb.gcp.vm.parameter.definition.path:}")
@@ -64,8 +69,11 @@ public class GcpPlatformParameters implements PlatformParameters {
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+
     private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
+
     private Region defaultRegion;
+
     private VmType defaultVmType;
 
     @PostConstruct

@@ -28,7 +28,9 @@ import com.google.common.io.BaseEncoding;
 public class RsaKeyUtil {
 
     private static final Integer SALT_LENGTH = 20;
+
     private static final Integer MAX_SIZE = 20;
+
     private static final Map<String, RSAKeyParameters> CACHE =
             Collections.synchronizedMap(new LinkedHashMap<String, RSAKeyParameters>(MAX_SIZE * 4 / 3, 0.75f, true) {
         @Override

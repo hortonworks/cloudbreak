@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.arm.view;
 public class ArmPortView {
 
     private final String cidr;
+
     private final String port;
+
     private final String protocol;
 
     public ArmPortView(String cidr, String port, String protocol) {

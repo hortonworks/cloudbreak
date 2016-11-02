@@ -43,14 +43,19 @@ public class DefaultCloudbreakUsageGeneratorHostServiceTypeTest {
 
     @InjectMocks
     private DefaultCloudbreakUsageGeneratorService underTest;
+
     @Mock
     private CloudbreakUsageRepository usageRepository;
+
     @Mock
     private CloudbreakEventRepository eventRepository;
+
     @Mock
     private StackUsageGenerator stackUsageGenerator;
+
     @Mock
     private StackRepository stackRepository;
+
     @Mock
     private TemplateRepository templateRepository;
 

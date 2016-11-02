@@ -37,6 +37,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
 
     @Inject
     private OpenStackResourceNameService resourceNameService;
+
     @Inject
     @Qualifier("intermediateBuilderExecutor")
     private AsyncTaskExecutor intermediateBuilderExecutor;

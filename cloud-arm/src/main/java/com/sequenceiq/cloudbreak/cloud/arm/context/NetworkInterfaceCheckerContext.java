@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 public class NetworkInterfaceCheckerContext extends ArmStatusCheckerContext {
 
     private String groupName;
+
     private String networkName;
 
     public NetworkInterfaceCheckerContext(ArmCredentialView armCredentialView, String groupName, String networkName) {

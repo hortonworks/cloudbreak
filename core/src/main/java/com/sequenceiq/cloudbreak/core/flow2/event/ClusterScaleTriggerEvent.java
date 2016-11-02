@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPayload {
     private final String hostGroup;
+
     private final Integer adjustment;
 
     public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment) {

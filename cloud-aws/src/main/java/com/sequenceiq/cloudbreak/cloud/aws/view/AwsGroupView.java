@@ -7,14 +7,23 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 
 public class AwsGroupView {
     private Integer instanceCount;
+
     private String type;
+
     private String flavor;
+
     private String groupName;
+
     private Integer volumeCount;
+
     private Integer volumeSize;
+
     private Boolean ebsEncrypted;
+
     private String volumeType;
+
     private Double spotPrice;
+
     private List<SecurityRule> rules;
 
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Integer volumeCount,

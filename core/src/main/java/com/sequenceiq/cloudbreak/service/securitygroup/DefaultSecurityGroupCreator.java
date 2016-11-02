@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.network.Port;
 @Service
 public class DefaultSecurityGroupCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSecurityGroupCreator.class);
+
     private static final String TCP_PROTOCOL = "tcp";
 
     @Inject

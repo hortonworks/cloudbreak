@@ -28,8 +28,10 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Inject
     private PollTaskFactory statusCheckFactory;
+
     @Inject
     private EventBus eventBus;
 

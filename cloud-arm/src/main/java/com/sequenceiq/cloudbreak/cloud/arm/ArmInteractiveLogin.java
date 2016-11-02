@@ -38,10 +38,13 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 public class ArmInteractiveLogin {
 
     public static final String XPLAT_CLI_CLIENT_ID = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
+
     public static final String MANAGEMENT_CORE_WINDOWS = "https://management.core.windows.net/";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmInteractiveLogin.class);
 
     private Executor executor;
+
     private ArmInteractiveLoginStatusCheckerContext armInteractiveLoginStatusCheckerContext;
 
     @Inject

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 @Transactional
 public class TemplateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateService.class);
+
     private static final String DELIMITER = "_";
 
     private static final String TEMPLATE_NOT_FOUND_MSG = "Template '%s' not found.";

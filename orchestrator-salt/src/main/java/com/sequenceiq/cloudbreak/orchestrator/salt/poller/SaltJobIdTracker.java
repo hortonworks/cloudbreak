@@ -23,6 +23,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltJobIdTracker.class);
 
     private final SaltConnector saltConnector;
+
     private SaltJobRunner saltJobRunner;
 
     public SaltJobIdTracker(SaltConnector saltConnector, SaltJobRunner saltJobRunner) {

@@ -20,6 +20,7 @@ public class ArmNetworkInterfaceDeleteStatusCheckerTask extends PollBooleanState
     public static final String NAME = "armNetworkInterfaceDeleteStatusCheckerTask";
 
     private NetworkInterfaceCheckerContext networkInterfaceCheckerContext;
+
     private ArmClient armClient;
 
     public ArmNetworkInterfaceDeleteStatusCheckerTask(AuthenticatedContext authenticatedContext, ArmClient armClient, NetworkInterfaceCheckerContext

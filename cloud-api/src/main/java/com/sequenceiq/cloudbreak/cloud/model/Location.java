@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 public class Location {
 
     private final Region region;
+
     private final AvailabilityZone availabilityZone;
 
     private Location(Region region, AvailabilityZone availabilityZone) {

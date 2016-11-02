@@ -68,14 +68,21 @@ public class MockPlatformParameters implements PlatformParameters {
     }
 
     private static final Integer START_LABEL = 1;
+
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("mockdisk", START_LABEL);
+
     private static final String MOCK_RESOURCE_DEFINITION = "{}";
+
     private static final String[] EUROPE_AVAILABILITY_ZONES = {"europe-a", "europe-b"};
+
     private static final String[] USA_AVAILABILITY_ZONES = {"usa-a", "usa-b", "usa-c"};
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+
     private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
+
     private Region defaultRegion;
+
     private VmType defaultVmType;
 
     @PostConstruct

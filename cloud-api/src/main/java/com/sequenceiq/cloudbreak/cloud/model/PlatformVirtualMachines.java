@@ -7,6 +7,7 @@ import java.util.Map;
 public class PlatformVirtualMachines {
 
     private final Map<Platform, Collection<VmType>> virtualMachines;
+
     private final Map<Platform, VmType> defaultVirtualMachines;
 
     public PlatformVirtualMachines(Map<Platform, Collection<VmType>> virtualMachines, Map<Platform, VmType> defaultVirtualMachines) {

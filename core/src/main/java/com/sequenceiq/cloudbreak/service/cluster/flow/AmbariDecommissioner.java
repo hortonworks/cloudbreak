@@ -80,50 +80,73 @@ public class AmbariDecommissioner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariDecommissioner.class);
 
     private static final int MAX_ATTEMPTS_FOR_REGION_DECOM = 500;
+
     private static final String DATANODE = "DATANODE";
+
     private static final double SAFETY_PERCENTAGE = 1.2;
+
     private static final int NO_REPLICATION = 0;
 
     @Inject
     private StackRepository stackRepository;
+
     @Inject
     private ClusterRepository clusterRepository;
+
     @Inject
     private HostGroupService hostGroupService;
+
     @Inject
     private AmbariClientProvider ambariClientProvider;
+
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+
     @Inject
     private CloudbreakEventService eventService;
+
     @Inject
     private PollingService<AmbariHostsWithNames> rsPollerService;
+
     @Inject
     private PollingService<AmbariClientPollerObject> ambariClientPollingService;
+
     @Inject
     private DNDecommissionStatusCheckerTask dnDecommissionStatusCheckerTask;
+
     @Inject
     private RSDecommissionStatusCheckerTask rsDecommissionStatusCheckerTask;
+
     @Inject
     private AmbariHostsLeaveStatusCheckerTask hostsLeaveStatusCheckerTask;
+
     @Inject
     private PollingService<AmbariHostsWithNames> ambariHostLeave;
+
     @Inject
     private AmbariOperationService ambariOperationService;
+
     @Inject
     private AmbariConfigurationService configurationService;
+
     @Inject
     private HostFilterService hostFilterService;
+
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
+
     @Inject
     private ContainerRepository containerRepository;
+
     @Inject
     private TlsSecurityService tlsSecurityService;
+
     @Inject
     private GatewayConfigService gatewayConfigService;
+
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
+
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
 

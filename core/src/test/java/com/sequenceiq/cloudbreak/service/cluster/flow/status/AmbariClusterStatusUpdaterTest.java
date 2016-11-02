@@ -22,24 +22,34 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 public class AmbariClusterStatusUpdaterTest {
     private static final Long TEST_STACK_ID = 0L;
+
     private static final Long TEST_CLUSTER_ID = 0L;
+
     private static final String TEST_BLUEPRINT = "blueprint";
+
     private static final String TEST_REASON = "Reason";
 
     @InjectMocks
     private AmbariClusterStatusUpdater underTest;
+
     @Mock
     private ClusterService clusterService;
+
     @Mock
     private AmbariClientProvider ambariClientProvider;
+
     @Mock
     private CloudbreakEventService cloudbreakEventService;
+
     @Mock
     private AmbariClusterStatusFactory clusterStatusFactory;
+
     @Mock
     private TlsSecurityService tlsSecurityService;
+
     @Mock
     private AmbariClient ambariClient;
+
     @Mock
     private CloudbreakMessagesService cloudbreakMessagesService;
 

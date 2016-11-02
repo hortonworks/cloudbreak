@@ -9,8 +9,11 @@ public class HDPRepo {
     public static final String REPO_ID_TAG = "repoid";
 
     private Map<String, String> stack;
+
     private Map<String, String> util;
+
     private boolean verify = true;
+
     private String hdpVersion;
 
     public Map<String, String> getStack() {

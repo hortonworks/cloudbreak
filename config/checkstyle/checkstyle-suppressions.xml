@@ -16,6 +16,7 @@
     <suppress checks="RegexpMultilineCheck" files="ShellConfiguration.java"/>
     <suppress checks="IllegalTypeCheck" files="AbstractFlowConfiguration.java|AbstractFlowConfigurationTest.java"/>
     <suppress checks="ParameterNumber" files="UserDataBuilder.java"/>
+    <suppress checks="EmptyLineSeparator" files=".*Description.java|.*Descriptions.java|Notes.java"/>
 
 
     <!-- suppressing checks in application runner classes -->

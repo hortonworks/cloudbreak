@@ -29,10 +29,15 @@ import com.sequenceiq.periscope.api.model.ScalingStatus;
 public class History {
 
     public static final String ALERT_DEFINITION = "alertDefinition";
+
     public static final String PERIOD = "period";
+
     public static final String ALERT_STATE = "alertState";
+
     public static final String ALERT_DESCRIPTION = "alertDescription";
+
     public static final String TIME_ZONE = "timeZone";
+
     public static final String CRON = "cron";
 
     @Id

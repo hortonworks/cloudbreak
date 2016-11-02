@@ -3,8 +3,11 @@ package com.sequenceiq.cloudbreak.orchestrator.model;
 public class ContainerInfo {
 
     private String id;
+
     private String name;
+
     private String host;
+
     private String image;
 
     public ContainerInfo(String id, String name, String host, String image) {

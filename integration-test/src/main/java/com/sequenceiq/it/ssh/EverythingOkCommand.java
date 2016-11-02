@@ -16,8 +16,11 @@ class EverythingOkCommand implements Command {
     private static final Logger LOGGER = LoggerFactory.getLogger(EverythingOkCommand.class);
 
     private ExitCallback callback;
+
     private InputStream in;
+
     private OutputStream err;
+
     private OutputStream out;
 
     @Override

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.InstanceTerminationTriggerEven
 @Component("InstanceTerminationAction")
 public class InstanceTerminationAction extends AbstractInstanceTerminationAction<InstanceTerminationTriggerEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTerminationAction.class);
+
     @Inject
     private InstanceTerminationService instanceTerminationService;
 

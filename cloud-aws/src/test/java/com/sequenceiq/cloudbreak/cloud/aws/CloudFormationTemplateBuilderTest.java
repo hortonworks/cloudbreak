@@ -45,18 +45,31 @@ public class CloudFormationTemplateBuilderTest {
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder = new CloudFormationTemplateBuilder();
 
     private CloudStack cloudStack;
+
     private String name;
+
     private List<Group> groups;
+
     private CloudInstance instance;
+
     private List<Volume> volumes;
+
     private List<SecurityRule> rules;
+
     private Security security;
+
     private Map<InstanceGroupType, String> userData;
+
     private Image image;
+
     private CloudFormationTemplateBuilder.ModelContext modelContext;
+
     private String awsCloudFormationTemplatePath;
+
     private String snapshotId;
+
     private AuthenticatedContext authenticatedContext;
+
     private String existingSubnetCidr;
 
     @Before

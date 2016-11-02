@@ -14,6 +14,7 @@ public class PlatformVirtualMachinesJson implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.VIRTUAL_MACHNES)
     private Map<String, Collection<VmTypeJson>> virtualMachines = new HashMap<>();
+
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DEFAULT_VIRTUAL_MACHINES)
     private Map<String, String> defaultVirtualMachines = new HashMap<>();
 

@@ -20,6 +20,7 @@ public abstract class AbstractOpenStackGroupResourceBuilder extends AbstractOpen
 
     @Inject
     private OpenStackResourceNameService resourceNameService;
+
     @Inject
     private OpenStackClient openStackClient;
 

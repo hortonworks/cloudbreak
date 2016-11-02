@@ -5,7 +5,9 @@ import java.util.Arrays;
 public class SecurityRule {
 
     private final String cidr;
+
     private final String[] ports;
+
     private final String protocol;
 
     public SecurityRule(String cidr, String[] ports, String protocol) {

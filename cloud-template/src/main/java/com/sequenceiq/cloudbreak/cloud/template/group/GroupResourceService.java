@@ -44,10 +44,13 @@ public class GroupResourceService {
 
     @Inject
     private ResourceBuilders resourceBuilders;
+
     @Inject
     private SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler;
+
     @Inject
     private ResourcePollTaskFactory statusCheckFactory;
+
     @Inject
     private PersistenceNotifier resourceNotifier;
 

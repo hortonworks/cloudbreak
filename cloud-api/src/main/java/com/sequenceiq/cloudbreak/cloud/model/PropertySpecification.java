@@ -6,6 +6,7 @@ public class PropertySpecification {
 
     @JsonProperty("Memory")
     private String memory;
+
     @JsonProperty("Cpu")
     private String cpu;
 

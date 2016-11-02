@@ -43,16 +43,21 @@ public class CloudbreakClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakClient.class);
 
     private static final Form EMPTY_FORM = new Form();
+
     private static final String TOKEN_KEY = "TOKEN";
+
     private static final double TOKEN_EXPIRATION_FACTOR = 0.9;
 
     private final ExpiringMap<String, String> tokenCache;
 
     private final Client client;
+
     private final IdentityClient identityClient;
+
     private final String cloudbreakAddress;
 
     private String user;
+
     private String password;
 
     private String secret;
@@ -60,24 +65,43 @@ public class CloudbreakClient {
     private WebTarget t;
 
     private CredentialEndpoint credentialEndpoint;
+
     private TemplateEndpoint templateEndpoint;
+
     private TopologyEndpoint topologyEndpoint;
+
     private UsageEndpoint usageEndpoint;
+
     private UserEndpoint userEndpoint;
+
     private EventEndpoint eventEndpoint;
+
     private SecurityGroupEndpoint securityGroupEndpoint;
+
     private StackEndpoint stackEndpoint;
+
     private SubscriptionEndpoint subscriptionEndpoint;
+
     private NetworkEndpoint networkEndpoint;
+
     private RecipeEndpoint recipeEndpoint;
+
     private SssdConfigEndpoint sssdConfigEndpoint;
+
     private RdsConfigEndpoint rdsConfigEndpoint;
+
     private AccountPreferencesEndpoint accountPreferencesEndpoint;
+
     private BlueprintEndpoint blueprintEndpoint;
+
     private ClusterEndpoint clusterEndpoint;
+
     private ConnectorEndpoint connectorEndpoint;
+
     private ConstraintTemplateEndpoint constraintTemplateEndpoint;
+
     private UtilEndpoint utilEndpoint;
+
     private LdapConfigEndpoint ldapConfigEndpoint;
 
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
@@ -257,10 +281,13 @@ public class CloudbreakClient {
     public static class CloudbreakClientBuilder {
 
         private final String cloudbreakAddress;
+
         private final String identityServerAddress;
+
         private final String clientId;
 
         private String user;
+
         private String password;
 
         private String secret;

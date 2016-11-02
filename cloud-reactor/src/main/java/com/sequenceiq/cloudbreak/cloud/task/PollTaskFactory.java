@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 public class PollTaskFactory {
     @Inject
     private ApplicationContext applicationContext;
+
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 

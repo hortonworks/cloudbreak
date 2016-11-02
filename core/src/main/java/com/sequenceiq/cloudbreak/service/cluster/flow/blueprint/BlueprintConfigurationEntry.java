@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 public class BlueprintConfigurationEntry {
 
     private String configFile;
+
     private String key;
+
     private String value;
 
     public BlueprintConfigurationEntry(String configFile, String key, String value) {

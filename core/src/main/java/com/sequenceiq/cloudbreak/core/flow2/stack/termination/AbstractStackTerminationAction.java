@@ -30,10 +30,13 @@ abstract class AbstractStackTerminationAction<P extends Payload>
         extends AbstractAction<StackTerminationState, StackTerminationEvent, StackTerminationContext, P> {
     @Inject
     private StackService stackService;
+
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
+
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
 

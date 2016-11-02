@@ -10,10 +10,13 @@ public class AmbariJson implements Json {
 
     @ApiModelProperty(AmbariJsonProperties.HOST)
     private String host;
+
     @ApiModelProperty(AmbariJsonProperties.PORT)
     private String port;
+
     @ApiModelProperty(AmbariJsonProperties.USERNAME)
     private String user;
+
     @ApiModelProperty(AmbariJsonProperties.PASSWORD)
     private String pass;
 

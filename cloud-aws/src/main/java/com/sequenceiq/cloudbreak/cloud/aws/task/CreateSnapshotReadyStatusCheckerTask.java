@@ -20,8 +20,11 @@ public class CreateSnapshotReadyStatusCheckerTask extends PollBooleanStateTask {
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateSnapshotReadyStatusCheckerTask.class);
 
     private AuthenticatedContext authenticatedContext;
+
     private CreateSnapshotResult snapshotResult;
+
     private String snapshotId;
+
     private AmazonEC2Client ec2Client;
 
     public CreateSnapshotReadyStatusCheckerTask(AuthenticatedContext authenticatedContext, CreateSnapshotResult snapshotResult, String snapshotId,

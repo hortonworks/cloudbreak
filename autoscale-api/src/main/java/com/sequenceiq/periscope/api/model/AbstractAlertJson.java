@@ -10,12 +10,15 @@ public abstract class AbstractAlertJson implements Json {
 
     @ApiModelProperty(BaseAlertJsonProperties.ID)
     private Long id;
+
     @Pattern(regexp = "([a-zA-Z][-a-zA-Z0-9]*)",
             message = "The name can only contain alphanumeric characters and hyphens and has start with an alphanumeric character")
     @ApiModelProperty(BaseAlertJsonProperties.ALERTNAME)
     private String alertName;
+
     @ApiModelProperty(BaseAlertJsonProperties.DESCRIPTION)
     private String description;
+
     @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
     private Long scalingPolicyId;
 

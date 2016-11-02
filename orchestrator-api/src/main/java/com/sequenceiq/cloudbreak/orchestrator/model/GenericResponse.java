@@ -9,9 +9,13 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 public class GenericResponse {
 
     private String status;
+
     private String address;
+
     private int statusCode;
+
     private String version;
+
     private String errorText;
 
     public String getStatus() {

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 @Component("StackTerminationFinishedAction")
 public class StackTerminationFinishedAction extends AbstractStackTerminationAction<TerminateStackResult> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationFinishedAction.class);
+
     @Inject
     private StackTerminationService stackTerminationService;
 

@@ -5,9 +5,13 @@ import java.util.Map;
 public class ExtendedCloudCredential extends CloudCredential {
 
     private final String description;
+
     private final String owner;
+
     private final String account;
+
     private final String cloudPlatform;
+
     private final boolean publicInAccount;
 
     public ExtendedCloudCredential(Long id, String cloudPlatform, String name, String publicKey, String loginUserName, String description, String owner,

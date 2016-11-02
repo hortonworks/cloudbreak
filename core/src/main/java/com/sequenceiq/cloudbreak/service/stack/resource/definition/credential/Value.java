@@ -6,10 +6,13 @@ public class Value {
 
     @JsonProperty("name")
     private String name;
+
     @JsonProperty("type")
     private String type;
+
     @JsonProperty("encrypted")
     private Boolean encrypted;
+
     @JsonProperty("optional")
     private Boolean optional;
 

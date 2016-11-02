@@ -32,16 +32,21 @@ public class AutoscaleClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoscaleClient.class);
 
     private static final Form EMPTY_FORM = new Form();
+
     private static final String TOKEN_KEY = "TOKEN";
+
     private static final double TOKEN_EXPIRATION_FACTOR = 0.9;
 
     private final ExpiringMap<String, String> tokenCache;
 
     private final Client client;
+
     private final IdentityClient identityClient;
+
     private final String autoscaleAddress;
 
     private String user;
+
     private String password;
 
     private String secret;
@@ -49,9 +54,13 @@ public class AutoscaleClient {
     private WebTarget t;
 
     private AlertEndpoint alertEndpoint;
+
     private ClusterEndpoint clusterEndpoint;
+
     private ConfigurationEndpoint configurationEndpoint;
+
     private HistoryEndpoint historyEndpoint;
+
     private PolicyEndpoint policyEndpoint;
 
     private AutoscaleClient(String autoscaleAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
@@ -142,10 +151,13 @@ public class AutoscaleClient {
     public static class AutoscaleClientBuilder {
 
         private final String autoscaleAddress;
+
         private final String identityServerAddress;
+
         private final String clientId;
 
         private String user;
+
         private String password;
 
         private String secret;

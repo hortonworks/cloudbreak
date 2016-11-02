@@ -20,16 +20,22 @@ public class MockConnector implements CloudConnector {
 
     @Inject
     private MockAuthenticator mockAuthenticator;
+
     @Inject
     private MockSetup mockSetup;
+
     @Inject
     private MockCredentialConnector mockCredentialConnector;
+
     @Inject
     private MockResourceConnector mockResourceConnector;
+
     @Inject
     private MockInstanceConnector mockInstanceConnector;
+
     @Inject
     private MockMetadataCollector mockMetadataCollector;
+
     @Inject
     private MockPlatformParameters mockPlatformParameters;
 

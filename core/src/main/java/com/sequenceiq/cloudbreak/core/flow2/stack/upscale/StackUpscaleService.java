@@ -55,32 +55,46 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 @Service
 public class StackUpscaleService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUpscaleService.class);
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private FlowMessageService flowMessageService;
+
     @Inject
     private StackScalingService stackScalingService;
+
     @Inject
     private StackService stackService;
+
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
+
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
+
     @Inject
     private InstanceMetadataService instanceMetadataService;
+
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
+
     @Inject
     private MetadataSetupService metadataSetupService;
+
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private CloudbreakMessagesService messagesService;
+
     @Inject
     private CloudbreakEventService eventService;
+
     @Inject
     private HostGroupService hostGroupService;
+
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
 

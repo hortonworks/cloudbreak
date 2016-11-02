@@ -53,12 +53,16 @@ public class ServiceProviderConnectorAdapter {
 
     @Inject
     private EventBus eventBus;
+
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
+
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
+
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
 

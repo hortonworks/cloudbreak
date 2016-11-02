@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class NetworkResponse extends NetworkBase {
     @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
+
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
 

@@ -56,13 +56,21 @@ public class HeatTemplateBuilderTest {
     private HeatTemplateBuilder heatTemplateBuilder = new HeatTemplateBuilder();
 
     private String stackName;
+
     private List<Group> groups;
+
     private String name;
+
     private List<Volume> volumes;
+
     private CloudInstance instance;
+
     private List<SecurityRule> rules;
+
     private Security security;
+
     private Map<InstanceGroupType, String> userData;
+
     private Image image;
 
     @Before

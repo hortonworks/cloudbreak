@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 public class OrchestratorRecipeExecutor {
 
     private static final String PRE_INSTALL_TAG = "recipe-pre-install";
+
     private static final String POST_INSTALL_TAG = "recipe-post-install";
 
     @Inject

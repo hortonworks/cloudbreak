@@ -33,7 +33,9 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 public class SaltBootstrapTest {
 
     private SaltConnector saltConnector;
+
     private GatewayConfig gatewayConfig;
+
     private Map<String, String> networkMap;
 
     @Before

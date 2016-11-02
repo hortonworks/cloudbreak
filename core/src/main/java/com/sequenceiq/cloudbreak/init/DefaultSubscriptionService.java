@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
 public class DefaultSubscriptionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSubscriptionService.class);
+
     private static final String DEFAULT_CLIENT_ID = "default";
 
     @Value("${cb.default.subscription.address:}")

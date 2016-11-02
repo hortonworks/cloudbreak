@@ -29,8 +29,10 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 public abstract class AbstractStackCreationAction<P extends Payload> extends AbstractAction<StackCreationState, StackCreationEvent, StackContext, P> {
     @Inject
     private StackService stackService;
+
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
 

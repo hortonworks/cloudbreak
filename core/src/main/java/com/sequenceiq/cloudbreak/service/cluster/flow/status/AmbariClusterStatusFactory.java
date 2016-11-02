@@ -19,6 +19,7 @@ public class AmbariClusterStatusFactory {
 
     private EnumSet<ClusterStatus> partialStatuses = EnumSet.of(ClusterStatus.INSTALLING, ClusterStatus.INSTALL_FAILED, ClusterStatus.STARTING,
             ClusterStatus.STOPPING);
+
     private EnumSet<ClusterStatus> fullStatuses = EnumSet.of(ClusterStatus.INSTALLED, ClusterStatus.STARTED);
 
     public ClusterStatus createClusterStatus(AmbariClient ambariClient, String blueprint) {

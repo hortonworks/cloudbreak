@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MetaSpecification {
     @JsonProperty("configs")
     private List<ConfigSpecification> configSpecification;
+
     @JsonProperty("properties")
     private PropertySpecification properties;
 

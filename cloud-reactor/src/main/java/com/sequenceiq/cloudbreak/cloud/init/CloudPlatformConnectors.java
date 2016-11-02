@@ -36,7 +36,9 @@ public class CloudPlatformConnectors {
 
     @Inject
     private List<CloudConnector> cloudConnectors;
+
     private Map<CloudPlatformVariant, CloudConnector> map = new HashMap<>();
+
     private Multimap<Platform, Variant> platformToVariants;
 
     @PostConstruct

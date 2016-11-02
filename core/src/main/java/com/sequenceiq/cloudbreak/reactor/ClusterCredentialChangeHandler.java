@@ -17,8 +17,10 @@ import reactor.bus.EventBus;
 public class ClusterCredentialChangeHandler implements ClusterEventHandler<ClusterCredentialChangeRequest> {
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
+
     @Inject
     private StackService stackService;
+
     @Inject
     private EventBus eventBus;
 

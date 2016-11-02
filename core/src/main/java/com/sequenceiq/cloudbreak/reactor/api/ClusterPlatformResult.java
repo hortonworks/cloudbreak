@@ -8,8 +8,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> implements Payload, Selectable {
 
     private EventStatus status;
+
     private String statusReason;
+
     private Exception errorDetails;
+
     private R request;
 
     public ClusterPlatformResult(R request) {

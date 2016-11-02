@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 public class VmType extends StringType {
 
     private VmTypeMeta metaData;
+
     private Boolean extended = true;
 
     private VmType(String vmType) {

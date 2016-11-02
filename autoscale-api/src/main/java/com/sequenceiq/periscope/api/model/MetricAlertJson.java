@@ -10,8 +10,10 @@ public class MetricAlertJson extends AbstractAlertJson {
 
     @ApiModelProperty(MetricAlertJsonProperties.ALERTDEFINITION)
     private String alertDefinition;
+
     @ApiModelProperty(MetricAlertJsonProperties.PERIOD)
     private int period;
+
     @ApiModelProperty(MetricAlertJsonProperties.ALERTSTATE)
     private AlertState alertState;
 

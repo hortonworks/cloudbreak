@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class HostGroupResponse extends HostGroupBase {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
+
     @ApiModelProperty(value = HostGroupModelDescription.METADATA)
     private Set<HostMetadataResponse> metadata = new HashSet<>();
 

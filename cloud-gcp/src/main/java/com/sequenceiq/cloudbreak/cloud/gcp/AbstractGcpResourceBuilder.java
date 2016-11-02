@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
 
     protected static final String OPERATION_ID = "opid";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGcpResourceBuilder.class);
 
     @Inject

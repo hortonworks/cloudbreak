@@ -32,6 +32,7 @@ import com.google.gson.JsonPrimitive;
 public class ApplicationCreator {
 
     public static final int CREDENTIAL_END_YEAR = 3;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationCreator.class);
 
     public String createApplication(String accessToken, String tenantId) {

@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 public class StopInstancesRequest<T> extends CloudPlatformRequest<T> {
 
     private List<CloudResource> resources;
+
     private List<CloudInstance> cloudInstances;
 
     public StopInstancesRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> resources, List<CloudInstance> cloudInstances) {

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class RegionSpecification {
     @JsonProperty("name")
     private String name;
+
     @JsonProperty("zones")
     private List<String> zones;
 

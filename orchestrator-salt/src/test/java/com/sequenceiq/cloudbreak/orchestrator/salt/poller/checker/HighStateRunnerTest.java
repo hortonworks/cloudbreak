@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 public class HighStateRunnerTest {
 
     private Set<String> targets;
+
     private Set<Node> allNode;
 
     @Test

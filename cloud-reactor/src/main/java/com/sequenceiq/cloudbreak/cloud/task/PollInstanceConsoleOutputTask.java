@@ -19,9 +19,11 @@ public class PollInstanceConsoleOutputTask extends AbstractPollTask<InstanceCons
     public static final String NAME = "pollInstanceConsoleOutputTask";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PollInstanceConsoleOutputTask.class);
+
     private static final String CB_FINGERPRINT_END = "-----END SSH HOST KEY FINGERPRINTS-----";
 
     private final CloudInstance instance;
+
     private final InstanceConnector instanceConnector;
 
     public PollInstanceConsoleOutputTask(InstanceConnector instanceConnector, AuthenticatedContext authenticatedContext, CloudInstance instance) {

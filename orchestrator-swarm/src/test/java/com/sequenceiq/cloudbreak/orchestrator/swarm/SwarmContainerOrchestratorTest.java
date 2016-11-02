@@ -38,13 +38,19 @@ import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.MunchausenBootstr
 public class SwarmContainerOrchestratorTest {
 
     private static final int FIX_NODE_COUNT = 10;
+
     private static final int FIX_CONSUL_SERVER_COUNT = 3;
+
     private static final int ZERO = 0;
+
     private static final int ONE = 1;
+
     private static final int TWO = 2;
+
     private static final int THREE = 3;
 
     private SwarmContainerOrchestrator underTest = new SwarmContainerOrchestrator();
+
     private SwarmContainerOrchestrator underTestSpy;
 
     @Mock

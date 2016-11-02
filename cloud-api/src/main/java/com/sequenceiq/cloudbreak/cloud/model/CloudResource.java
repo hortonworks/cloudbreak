@@ -13,10 +13,15 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
  */
 public class CloudResource extends DynamicModel {
     private ResourceType type;
+
     private CommonStatus status;
+
     private String name;
+
     private String reference;
+
     private String group;
+
     private boolean persistent;
 
     private CloudResource(ResourceType type, CommonStatus status, String name, String reference, String group, boolean persistent, Map<String, Object> params) {
@@ -68,11 +73,17 @@ public class CloudResource extends DynamicModel {
 
     public static class Builder {
         private ResourceType type;
+
         private CommonStatus status = CommonStatus.CREATED;
+
         private String name;
+
         private String reference;
+
         private boolean persistent = true;
+
         private String group;
+
         private Map<String, Object> parameters = new HashMap<>();
 
         public Builder cloudResource(CloudResource cloudResource) {

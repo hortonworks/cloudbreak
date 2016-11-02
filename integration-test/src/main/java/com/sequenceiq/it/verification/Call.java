@@ -8,12 +8,19 @@ import spark.Request;
 public class Call {
 
     private String method;
+
     private String uri;
+
     private String contentType;
+
     private String postBody;
+
     private String url;
+
     private Map<String, String> headers = new HashMap<>();
+
     private Map<String, String> parameters = new HashMap<>();
+
     private Request request;
 
     private Call() {

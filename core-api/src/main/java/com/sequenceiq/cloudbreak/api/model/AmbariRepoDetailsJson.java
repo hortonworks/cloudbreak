@@ -15,9 +15,11 @@ public class AmbariRepoDetailsJson {
     @NotNull
     @ApiModelProperty(value = AmbariRepoDetailsDescription.VERSION, required = true)
     private String version;
+
     @NotNull
     @ApiModelProperty(value = AmbariRepoDetailsDescription.AMBARI_BASE_URL, required = true)
     private String baseUrl;
+
     @NotNull
     @ApiModelProperty(value = AmbariRepoDetailsDescription.AMBARI_REPO_GPG_KEY, required = true)
     private String gpgKeyUrl;

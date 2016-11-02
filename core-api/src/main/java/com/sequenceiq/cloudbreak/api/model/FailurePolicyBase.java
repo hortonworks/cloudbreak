@@ -9,6 +9,7 @@ public abstract class FailurePolicyBase implements JsonEntity {
 
     @ApiModelProperty(FailurePolicyModelDescription.THRESHOLD)
     private Long threshold;
+
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.ADJUSTMENT_TYPE, required = true)
     private AdjustmentType adjustmentType;
 

@@ -19,10 +19,13 @@ import reactor.bus.EventBus;
 public class ClusterSyncHandler implements ClusterEventHandler<ClusterSyncRequest> {
     @Inject
     private StackService stackService;
+
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private AmbariClusterStatusUpdater ambariClusterStatusUpdater;
+
     @Inject
     private EventBus eventBus;
 

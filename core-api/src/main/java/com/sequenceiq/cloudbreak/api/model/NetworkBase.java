@@ -21,17 +21,22 @@ public abstract class NetworkBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
+
     @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
     @Size(max = 1000)
     private String description;
+
     @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.SUBNET_CIDR)
     @ValidSubnet
     private String subnetCIDR;
+
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
+
     @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
+
     @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;
 

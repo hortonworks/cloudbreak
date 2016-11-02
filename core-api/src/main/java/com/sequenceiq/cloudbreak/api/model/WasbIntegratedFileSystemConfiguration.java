@@ -6,14 +6,19 @@ public class WasbIntegratedFileSystemConfiguration extends FileSystemConfigurati
 
     @NotNull
     private String tenantId;
+
     @NotNull
     private String subscriptionId;
+
     @NotNull
     private String appId;
+
     @NotNull
     private String appPassword;
+
     @NotNull
     private String region;
+
     @NotNull
     private String storageName;
 

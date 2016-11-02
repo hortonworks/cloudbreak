@@ -34,15 +34,25 @@ public class ArmUtils {
     public static final int NOT_FOUND = 404;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmUtils.class);
+
     private static final String RG_NAME = "resourceGroupName";
+
     private static final String SUBNET_ID = "subnetId";
+
     private static final String NETWORK_ID = "networkId";
+
     private static final int PORT_22 = 22;
+
     private static final int PORT_443 = 443;
+
     private static final int PORT_RANGE_NUM = 2;
+
     private static final int RG_PART = 4;
+
     private static final int ID_SEGMENTS = 9;
+
     private static final int SEC_GROUP_PART = 8;
+
     private static final int HOST_GROUP_LENGTH = 3;
 
     @Value("${cb.max.azure.resource.name.length:}")

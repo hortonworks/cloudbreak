@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.model;
 public class CloudVmInstanceStatus {
 
     private CloudInstance cloudInstance;
+
     private InstanceStatus status;
+
     private String statusReason;
 
     public CloudVmInstanceStatus(CloudInstance cloudInstance, InstanceStatus status, String statusReason) {

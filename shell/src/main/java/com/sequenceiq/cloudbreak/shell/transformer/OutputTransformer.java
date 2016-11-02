@@ -19,6 +19,7 @@ public class OutputTransformer {
 
     @Inject
     private TableRenderer tableRenderer;
+
     @Inject
     private JsonRenderer jsonRenderer;
 

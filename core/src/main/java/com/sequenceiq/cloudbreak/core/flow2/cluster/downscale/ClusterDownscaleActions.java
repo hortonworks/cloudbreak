@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 @Configuration
 public class ClusterDownscaleActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDownscaleActions.class);
+
     private static final String SCALING_ADJUSTMENT = "SCALING_ADJUSTMENT";
 
     @Inject

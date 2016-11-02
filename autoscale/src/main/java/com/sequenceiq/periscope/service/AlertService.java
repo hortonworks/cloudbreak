@@ -32,20 +32,28 @@ import freemarker.template.Configuration;
 public class AlertService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AlertService.class);
+
     private static final String ALERT_PATH = "alerts/";
+
     private static final String CONTAINER_ALERT = "pending_containers.ftl";
+
     private static final String APP_ALERT = "pending_apps.ftl";
 
     @Autowired
     private ClusterRepository clusterRepository;
+
     @Autowired
     private MetricAlertRepository metricAlertRepository;
+
     @Autowired
     private TimeAlertRepository timeAlertRepository;
+
     @Autowired
     private ClusterService clusterService;
+
     @Autowired
     private Configuration freemarkerConfiguration;
+
     @Autowired
     private AmbariClientProvider ambariClientProvider;
 

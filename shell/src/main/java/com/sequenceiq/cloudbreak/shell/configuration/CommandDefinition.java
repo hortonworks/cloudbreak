@@ -33,6 +33,7 @@ public class CommandDefinition {
 
     @Inject
     private ShellContext shellContext;
+
     @Inject
     private CloudbreakShellUtil cloudbreakShellUtil;
 

@@ -42,10 +42,13 @@ public class ComputeResourceService {
 
     @Inject
     private AsyncTaskExecutor resourceBuilderExecutor;
+
     @Inject
     private ApplicationContext applicationContext;
+
     @Inject
     private ResourceBuilders resourceBuilders;
+
     @Inject
     private CloudFailureHandler cloudFailureHandler;
 

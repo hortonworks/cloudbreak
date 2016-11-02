@@ -7,21 +7,37 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 public class Notification {
 
     private String eventType;
+
     private Date eventTimestamp;
+
     private String eventMessage;
+
     private String owner;
+
     private String account;
+
     private String cloud;
+
     private String region;
+
     private String blueprintName;
+
     private Long blueprintId;
+
     private Long stackId;
+
     private String stackName;
+
     private Long clusterId;
+
     private String clusterName;
+
     private Status stackStatus;
+
     private Integer nodeCount;
+
     private String instanceGroup;
+
     private Status clusterStatus;
 
     public Notification() {

@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 
 public class DuplicateKeyValueException extends RuntimeException {
     private final APIResourceType resourceType;
+
     private final String value;
 
     public DuplicateKeyValueException(APIResourceType resourceType, String value) {

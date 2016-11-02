@@ -20,6 +20,7 @@ public class ArmVirtualMachineDeleteStatusCheckerTask extends PollBooleanStateTa
     public static final String NAME = "armVirtualMachineDeleteStatusCheckerTask";
 
     private VirtualMachineCheckerContext virtualMachineCheckerContext;
+
     private ArmClient armClient;
 
     public ArmVirtualMachineDeleteStatusCheckerTask(AuthenticatedContext ac, ArmClient armClient, VirtualMachineCheckerContext virtualMachineCheckerContext) {

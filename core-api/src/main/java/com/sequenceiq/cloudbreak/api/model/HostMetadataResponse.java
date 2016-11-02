@@ -12,6 +12,7 @@ public class HostMetadataResponse extends HostMetadataBase {
 
     @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
+
     @ApiModelProperty(value = ModelDescriptions.HostMetadataModelDescription.STATE)
     private String state;
 

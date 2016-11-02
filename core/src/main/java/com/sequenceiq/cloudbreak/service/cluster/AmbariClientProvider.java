@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 public class AmbariClientProvider {
 
     private static final String HTTP_PORT = "8080";
+
     private static final String ADMIN_PRINCIPAL = "/admin";
 
     /**

@@ -6,6 +6,7 @@ import java.util.Map;
 public class PlatformOrchestrators {
 
     private final Map<Platform, Collection<Orchestrator>> orchestrators;
+
     private final Map<Platform, Orchestrator> defaults;
 
     public PlatformOrchestrators(Map<Platform, Collection<Orchestrator>> orchestrators, Map<Platform, Orchestrator> defaults) {

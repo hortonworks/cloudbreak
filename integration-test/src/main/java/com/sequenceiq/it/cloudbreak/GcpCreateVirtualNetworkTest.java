@@ -34,16 +34,21 @@ import com.sequenceiq.it.util.ResourceUtil;
 public class GcpCreateVirtualNetworkTest extends AbstractCloudbreakIntegrationTest {
 
     private static final int MAX_TRY = 30;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpCreateVirtualNetworkTest.class);
 
     @Value("${integrationtest.gcpcredential.name}")
     private String defaultName;
+
     @Value("${integrationtest.gcpcredential.projectId}")
     private String defaultProjectId;
+
     @Value("${integrationtest.gcpcredential.serviceAccountId}")
     private String defaultServiceAccountId;
+
     @Value("${integrationtest.gcpcredential.p12File}")
     private String defaultP12File;
+
     private JacksonFactory jsonFactory;
 
     @Test

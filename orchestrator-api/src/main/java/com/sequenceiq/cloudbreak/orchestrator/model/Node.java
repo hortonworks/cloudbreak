@@ -4,9 +4,13 @@ import java.util.Set;
 
 public class Node {
     private String privateIp;
+
     private String publicIp;
+
     private String hostname;
+
     private String hostGroup;
+
     private Set<String> dataVolumes;
 
     public Node(String privateIp, String publicIp, String fqdn) {

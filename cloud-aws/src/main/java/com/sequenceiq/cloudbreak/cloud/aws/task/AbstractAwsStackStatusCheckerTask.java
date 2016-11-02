@@ -20,12 +20,17 @@ abstract class AbstractAwsStackStatusCheckerTask extends PollBooleanStateTask {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAwsStackStatusCheckerTask.class);
 
     private final AmazonCloudFormationClient cfClient;
+
     private final StackStatus successStatus;
+
     private final StackStatus errorStatus;
+
     private final List<StackStatus> stackErrorStatuses;
+
     private final String cloudFormationStackName;
 
     private final DescribeStacksRequest describeStacksRequest;
+
     private final DescribeStackEventsRequest stackEventsRequest;
 
     AbstractAwsStackStatusCheckerTask(AuthenticatedContext authenticatedContext, AmazonCloudFormationClient cfClient, StackStatus successStatus,

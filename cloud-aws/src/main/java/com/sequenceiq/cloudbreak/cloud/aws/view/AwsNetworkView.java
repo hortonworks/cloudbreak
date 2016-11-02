@@ -11,7 +11,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 public class AwsNetworkView {
 
     private static final String VPC = "vpcId";
+
     private static final String IGW = "internetGatewayId";
+
     private static final String SUBNET = "subnetId";
 
     private Network network;

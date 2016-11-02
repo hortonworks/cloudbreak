@@ -129,11 +129,15 @@ public class Cluster implements ProvisionEntity {
 
     @Column(nullable = false)
     private Boolean secure;
+
     private String kerberosMasterKey;
+
     private String kerberosAdmin;
+
     private String kerberosPassword;
 
     private Boolean ldapRequired;
+
     private Boolean enableShipyard;
 
     @ManyToOne
@@ -141,6 +145,7 @@ public class Cluster implements ProvisionEntity {
 
     @Column(nullable = false)
     private Boolean emailNeeded;
+
     private String emailTo;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -76,32 +76,46 @@ public class StackCreationService {
 
     @Inject
     private StackService stackService;
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private ImageService imageService;
+
     @Inject
     private NotificationSender notificationSender;
+
     @Inject
     private EventBus eventBus;
+
     @Inject
     private CloudbreakMessagesService messagesService;
+
     @Inject
     private CloudbreakEventService cloudbreakEventService;
+
     @Inject
     private ServiceProviderConnectorAdapter connector;
+
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
+
     @Inject
     private InstanceMetadataService instanceMetadataService;
+
     @Inject
     private MetadataSetupService metadatSetupService;
+
     @Inject
     private TlsSetupService tlsSetupService;
+
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
     @Inject
     private FlowMessageService flowMessageService;
+
     @Inject
     private GatewayConfigService gatewayConfigService;
 

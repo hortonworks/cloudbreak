@@ -19,12 +19,19 @@ public class Verification {
     private static final Logger LOGGER = LoggerFactory.getLogger(Verification.class);
 
     private String path;
+
     private boolean regex;
+
     private String httpMethod;
+
     private Map<Call, Response> requestResponseMap;
+
     private Integer atLeast;
+
     private Integer exactTimes;
+
     private List<Pattern> patternList = new ArrayList<>();
+
     private List<String> bodyContainsList = new ArrayList<>();
 
     public Verification(String path, String httpMethod, Map<Call, Response> requestResponseMap, boolean regex) {

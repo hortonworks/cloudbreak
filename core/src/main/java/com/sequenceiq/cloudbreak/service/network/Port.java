@@ -8,10 +8,15 @@ import com.sequenceiq.cloudbreak.cloud.model.EndpointRule;
 public class Port {
 
     private final String name;
+
     private final String localPort;
+
     private final ExposedService exposedService;
+
     private final String port;
+
     private final String protocol;
+
     private final List<EndpointRule> aclRules;
 
     public Port(ExposedService exposedService, String port, String protocol) {

@@ -19,6 +19,7 @@ public class PolicyController implements PolicyEndpoint {
 
     @Autowired
     private ScalingService scalingService;
+
     @Autowired
     private ScalingPolicyConverter policyConverter;
 

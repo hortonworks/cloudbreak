@@ -24,6 +24,7 @@ public class SaltApiRunPostResponse extends ITResponse {
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltApiRunPostResponse.class);
 
     private int numberOfServers;
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public SaltApiRunPostResponse(int numberOfServers) {

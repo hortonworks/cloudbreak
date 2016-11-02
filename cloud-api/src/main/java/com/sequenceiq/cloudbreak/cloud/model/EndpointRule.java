@@ -5,7 +5,9 @@ public class EndpointRule {
     public static final EndpointRule DENY_RULE = new EndpointRule(Action.DENY.getText(), NetworkConfig.OPEN_NETWORK);
 
     private final String action;
+
     private final String remoteSubNet;
+
     private final String description;
 
     public EndpointRule(String action, String remoteSubNet) {

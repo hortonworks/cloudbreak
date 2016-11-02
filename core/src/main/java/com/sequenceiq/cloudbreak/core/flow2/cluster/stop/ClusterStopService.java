@@ -17,10 +17,13 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 public class ClusterStopService {
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private FlowMessageService flowMessageService;
+
     @Inject
     private EmailSenderService emailSenderService;
 

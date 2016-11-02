@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 public class LaunchStackRequest extends CloudStackRequest<LaunchStackResult> {
 
     private final AdjustmentType adjustmentType;
+
     private final Long threshold;
 
     public LaunchStackRequest(CloudContext cloudCtx, CloudCredential cloudCredential, CloudStack cloudStack, AdjustmentType adjustmentType, Long threshold) {

@@ -24,10 +24,15 @@ import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 
 public class DefaultCloudbreakUsagesRetrievalHostServiceTypeTest {
     private static final String DUMMY_ACCOUNT = "account";
+
     private static final Long DUMMY_SINCE = new Date().getTime();
+
     private static final Long DUMMY_END_DATE = new Date().getTime();
+
     private static final String DUMMY_OWNER = "owner";
+
     private static final String DUMMY_REGION = "region";
+
     private static final String DUMMY_CLOUD = "GCP";
 
     @InjectMocks

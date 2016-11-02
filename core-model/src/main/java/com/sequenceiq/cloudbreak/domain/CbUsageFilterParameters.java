@@ -2,10 +2,15 @@ package com.sequenceiq.cloudbreak.domain;
 
 public class CbUsageFilterParameters {
     private String account;
+
     private String owner;
+
     private Long since;
+
     private String cloud;
+
     private String region;
+
     private Long filterEndDate;
 
     private CbUsageFilterParameters(Builder builder) {
@@ -43,10 +48,15 @@ public class CbUsageFilterParameters {
 
     public static class Builder {
         private String account;
+
         private String owner;
+
         private Long since;
+
         private String cloud;
+
         private String region;
+
         private Long filterEndDate;
 
         public Builder setAccount(String account) {

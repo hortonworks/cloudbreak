@@ -33,10 +33,13 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Inject
     private PollTaskFactory statusCheckFactory;
+
     @Inject
     private SyncPollingScheduler<InstancesStatusResult> syncPollingScheduler;
+
     @Inject
     private EventBus eventBus;
 

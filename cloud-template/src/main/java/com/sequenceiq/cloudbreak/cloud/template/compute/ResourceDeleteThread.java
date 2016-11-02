@@ -28,19 +28,26 @@ import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 public class ResourceDeleteThread implements Callable<ResourceRequestResult<List<CloudResourceStatus>>> {
 
     public static final String NAME = "resourceDeleteThread";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceDeleteThread.class);
 
     @Inject
     private SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler;
+
     @Inject
     private ResourcePollTaskFactory resourcePollTaskFactory;
+
     @Inject
     private PersistenceNotifier resourceNotifier;
 
     private final ResourceBuilderContext context;
+
     private final AuthenticatedContext auth;
+
     private final CloudResource resource;
+
     private final ComputeResourceBuilder builder;
+
     private final boolean cancellable;
 
     public ResourceDeleteThread(ResourceBuilderContext context, AuthenticatedContext auth,

@@ -75,21 +75,34 @@ public class InstanceMetaData implements ProvisionEntity {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "instancemetadata_generator")
     @SequenceGenerator(name = "instancemetadata_generator", sequenceName = "instancemetadata_id_seq", allocationSize = 1)
     private Long id;
+
     private Long privateId;
+
     private String privateIp;
+
     private String publicIp;
+
     private Integer sshPort;
+
     private String instanceId;
+
     private Boolean ambariServer;
+
     private Boolean consulServer;
+
     private String discoveryFQDN;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InstanceStatus instanceStatus;
+
     private String hypervisor;
+
     @ManyToOne
     private InstanceGroup instanceGroup;
+
     private Long startDate;
+
     private Long terminationDate;
 
     public InstanceMetaData() {

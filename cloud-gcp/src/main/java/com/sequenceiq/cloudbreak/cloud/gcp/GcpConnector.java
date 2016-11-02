@@ -20,16 +20,22 @@ public class GcpConnector implements CloudConnector {
 
     @Inject
     private GcpAuthenticator authenticator;
+
     @Inject
     private GcpProvisionSetup provisionSetup;
+
     @Inject
     private GcpInstanceConnector instanceConnector;
+
     @Inject
     private GcpResourceConnector resourceConnector;
+
     @Inject
     private GcpCredentialConnector gcpCredentialConnector;
+
     @Inject
     private GcpPlatformParameters gcpPlatformParameters;
+
     @Inject
     private GcpMetadataCollector metadataCollector;
 

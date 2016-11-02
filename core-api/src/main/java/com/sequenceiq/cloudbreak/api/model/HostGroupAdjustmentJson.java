@@ -14,9 +14,11 @@ public class HostGroupAdjustmentJson {
     @NotNull
     @ApiModelProperty(value = HostGroupModelDescription.HOST_GROUP_NAME, required = true)
     private String hostGroup;
+
     @NotNull
     @ApiModelProperty(value = HostGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer scalingAdjustment;
+
     @ApiModelProperty(HostGroupAdjustmentModelDescription.WITH_STACK_UPDATE)
     private Boolean withStackUpdate = Boolean.FALSE;
 

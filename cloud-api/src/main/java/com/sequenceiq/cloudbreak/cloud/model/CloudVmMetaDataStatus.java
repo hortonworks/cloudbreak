@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 public class CloudVmMetaDataStatus {
 
     private final CloudVmInstanceStatus cloudVmInstanceStatus;
+
     private final CloudInstanceMetaData metaData;
 
     public CloudVmMetaDataStatus(CloudVmInstanceStatus cloudVmInstanceStatus, CloudInstanceMetaData metaData) {

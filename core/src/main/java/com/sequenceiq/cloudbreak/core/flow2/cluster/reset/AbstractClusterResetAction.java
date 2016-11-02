@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 public abstract class AbstractClusterResetAction<P extends Payload> extends AbstractAction<ClusterResetState, ClusterResetEvent, ClusterContext, P> {
     @Inject
     private StackService stackService;
+
     @Inject
     private ClusterService clusterService;
 

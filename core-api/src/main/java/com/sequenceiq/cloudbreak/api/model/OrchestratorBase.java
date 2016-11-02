@@ -14,8 +14,10 @@ import io.swagger.annotations.ApiModelProperty;
 public abstract class OrchestratorBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.OrchestratorModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
+
     @ApiModelProperty(value = ModelDescriptions.OrchestratorModelDescription.ENDPOINT)
     private String apiEndpoint;
+
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.OrchestratorModelDescription.TYPE, required = true)
     private String type;

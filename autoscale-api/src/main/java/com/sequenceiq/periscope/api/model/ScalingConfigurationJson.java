@@ -11,8 +11,10 @@ public class ScalingConfigurationJson implements Json {
 
     @ApiModelProperty(ScalingConfigurationJsonProperties.MINSIZE)
     private int minSize;
+
     @ApiModelProperty(ScalingConfigurationJsonProperties.MAXSIZE)
     private int maxSize;
+
     @ApiModelProperty(ScalingConfigurationJsonProperties.COOLDOWN)
     @JsonProperty("cooldown")
     private int coolDown;

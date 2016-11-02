@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class CloudPlatformVariant {
     private Platform platform;
+
     private Variant variant;
 
     public CloudPlatformVariant(Platform platform, Variant variant) {

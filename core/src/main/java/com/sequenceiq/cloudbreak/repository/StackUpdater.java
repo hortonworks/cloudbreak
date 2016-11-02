@@ -22,10 +22,13 @@ public class StackUpdater {
 
     @Inject
     private StackRepository stackRepository;
+
     @Inject
     private ResourceRepository resourceRepository;
+
     @Inject
     private StatusToPollGroupConverter statusToPollGroupConverter;
+
     @Inject
     private SecurityConfigRepository securityConfigRepository;
 

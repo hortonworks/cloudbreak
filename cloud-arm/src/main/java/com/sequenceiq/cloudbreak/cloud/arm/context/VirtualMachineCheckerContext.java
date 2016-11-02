@@ -5,7 +5,9 @@ import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 public class VirtualMachineCheckerContext extends ArmStatusCheckerContext {
 
     private String groupName;
+
     private String virtualMachine;
+
     private String status;
 
     public VirtualMachineCheckerContext(ArmCredentialView armCredentialView, String groupName, String virtualMachine, String status) {

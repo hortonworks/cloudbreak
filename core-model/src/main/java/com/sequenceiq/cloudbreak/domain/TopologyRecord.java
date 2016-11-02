@@ -7,6 +7,7 @@ import javax.persistence.Embeddable;
 public class TopologyRecord {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String hypervisor;
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String rack;
 

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 public class Compound implements Target<String> {
 
     private final Collection<String> targets;
+
     private final CompoundType type;
 
     public Compound(String nodeIP) {

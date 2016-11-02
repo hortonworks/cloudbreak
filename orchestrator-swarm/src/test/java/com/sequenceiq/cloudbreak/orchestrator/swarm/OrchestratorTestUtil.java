@@ -57,8 +57,11 @@ public class OrchestratorTestUtil {
         class TestContainerBootstrapRunner implements Callable<Boolean> {
 
             private final OrchestratorBootstrap containerBootstrap;
+
             private final Map<String, String> mdcMap;
+
             private final ExitCriteria exitCriteria;
+
             private final ExitCriteriaModel exitCriteriaModel;
 
             private TestContainerBootstrapRunner(OrchestratorBootstrap containerBootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,

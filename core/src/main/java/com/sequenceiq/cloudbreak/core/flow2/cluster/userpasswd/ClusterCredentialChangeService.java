@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 public class ClusterCredentialChangeService {
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private FlowMessageService flowMessageService;
 

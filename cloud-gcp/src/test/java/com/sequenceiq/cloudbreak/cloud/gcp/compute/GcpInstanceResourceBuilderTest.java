@@ -51,23 +51,41 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class GcpInstanceResourceBuilderTest {
 
     private long privateId;
+
     private String instanceId;
+
     private String name;
+
     private String flavor;
+
     private List<Volume> volumes;
+
     private Location location;
+
     private Map<InstanceGroupType, String> userData;
+
     private Image image;
+
     private List<SecurityRule> rules;
+
     private Security security;
+
     private CloudContext cloudContext;
+
     private CloudCredential cloudCredential;
+
     private String projectId;
+
     private AuthenticatedContext authenticatedContext;
+
     private GcpResourceNameService resourceNameService;
+
     private GcpContext context;
+
     private CloudResource networkResource;
+
     private List<CloudResource> networkResources;
+
     private Operation operation;
 
     @Mock

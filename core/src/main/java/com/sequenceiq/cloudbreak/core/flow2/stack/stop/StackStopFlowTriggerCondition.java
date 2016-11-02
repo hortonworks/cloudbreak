@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 public class StackStopFlowTriggerCondition implements FlowTriggerCondition {
     @Inject
     private StackService stackService;
+
     @Inject
     private StackStartStopService stackStartStopService;
 

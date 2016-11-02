@@ -38,12 +38,16 @@ public class BaseTemplateCommandsTest {
 
     @Mock
     private ShellContext shellContext;
+
     @Mock
     private CloudbreakClient cloudbreakClient;
+
     @Mock
     private TemplateEndpoint templateEndpoint;
+
     @Mock
     private ResponseTransformer responseTransformer;
+
     @Mock
     private OutputTransformer outputTransformer;
 

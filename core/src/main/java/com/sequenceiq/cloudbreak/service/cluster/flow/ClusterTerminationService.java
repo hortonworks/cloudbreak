@@ -51,20 +51,28 @@ public class ClusterTerminationService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
     @Inject
     private HostGroupRepository hostGroupRepository;
+
     @Resource
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+
     @Inject
     private HostMetadataRepository hostMetadataRepository;
+
     @Inject
     private ConstraintRepository constraintRepository;
+
     @Inject
     private ContainerRepository containerRepository;
+
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
+
     @Inject
     private TlsSecurityService tlsSecurityService;
+
     @Inject
     private ComponentConfigProvider componentConfigProvider;
 

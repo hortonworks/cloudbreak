@@ -15,6 +15,7 @@ public class HistoryService {
 
     @Autowired
     private HistoryRepository historyRepository;
+
     @Autowired
     private ClusterService clusterService;
 

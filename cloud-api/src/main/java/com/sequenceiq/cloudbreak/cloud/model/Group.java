@@ -8,8 +8,11 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 public class Group {
 
     private final String name;
+
     private final InstanceGroupType type;
+
     private final List<CloudInstance> instances;
+
     private final Security security;
 
     public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security) {

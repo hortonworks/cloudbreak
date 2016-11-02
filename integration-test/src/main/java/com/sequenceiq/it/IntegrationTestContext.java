@@ -5,10 +5,13 @@ import java.util.Map;
 
 public class IntegrationTestContext {
     public static final String IDENTITY_URL = "IDENTITY_URL";
+
     public static final String AUTH_USER = "AUTH_USER";
+
     public static final String AUTH_PASSWORD = "AUTH_PASSWORD";
 
     private Map<String, Object> contextParameters = new HashMap<>();
+
     private Map<String, Object> cleanUpParameters = new HashMap<>();
 
     public IntegrationTestContext() {

@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Service
 public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGroupResourceBuilder {
     private static final int MAX_PORT = 65535;
+
     private static final int MIN_PORT = 1;
 
     @Inject

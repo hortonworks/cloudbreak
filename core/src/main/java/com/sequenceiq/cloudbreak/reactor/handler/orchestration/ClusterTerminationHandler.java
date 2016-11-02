@@ -18,10 +18,13 @@ import reactor.bus.EventBus;
 @Component
 public class ClusterTerminationHandler implements ClusterEventHandler<ClusterTerminationRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTerminationHandler.class);
+
     @Inject
     private StackService stackService;
+
     @Inject
     private EventBus eventBus;
+
     @Inject
     private ClusterTerminationService clusterTerminationService;
 

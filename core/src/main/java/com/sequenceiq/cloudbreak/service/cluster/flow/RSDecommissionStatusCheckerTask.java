@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 public class RSDecommissionStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariHostsWithNames> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RSDecommissionStatusCheckerTask.class);
+
     private static final String FINAL_STATE = "INSTALLED";
 
     @Override

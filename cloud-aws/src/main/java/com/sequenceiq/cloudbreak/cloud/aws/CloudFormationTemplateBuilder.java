@@ -102,18 +102,31 @@ public class CloudFormationTemplateBuilder {
 
     public static class ModelContext {
         private AuthenticatedContext ac;
+
         private CloudStack stack;
+
         private String snapshotId;
+
         private boolean existingVPC;
+
         private boolean existingIGW;
+
         private List<String> existingSubnetCidr;
+
         private boolean mapPublicIpOnLaunch;
+
         private String templatePath;
+
         private boolean enableInstanceProfile;
+
         private boolean s3RoleAvailable;
+
         private String defaultSubnet;
+
         private String defaultInboundSecurityGroup;
+
         private String cloudbreakPublicIp;
+
         private int gatewayPort;
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {

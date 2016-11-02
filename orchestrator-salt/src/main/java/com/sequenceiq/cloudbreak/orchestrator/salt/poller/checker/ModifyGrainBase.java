@@ -12,8 +12,11 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 public abstract class ModifyGrainBase extends BaseSaltJobRunner {
 
     private String key;
+
     private String value;
+
     private Compound.CompoundType compoundType;
+
     private boolean addGrain;
 
     public ModifyGrainBase(Set<String> target, Set<Node> allNode, String key, String value, Compound.CompoundType type, boolean addGrain) {

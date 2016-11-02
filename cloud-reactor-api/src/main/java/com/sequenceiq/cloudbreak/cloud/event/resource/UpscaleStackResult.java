@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 public class UpscaleStackResult extends CloudPlatformResult<CloudPlatformRequest> {
 
     private ResourceStatus resourceStatus;
+
     private List<CloudResourceStatus> results;
 
     public UpscaleStackResult(CloudPlatformRequest<?> request, ResourceStatus resourceStatus, List<CloudResourceStatus> results) {

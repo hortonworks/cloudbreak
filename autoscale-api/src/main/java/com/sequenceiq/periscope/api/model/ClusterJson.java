@@ -10,12 +10,16 @@ public class ClusterJson implements Json {
 
     @ApiModelProperty(ClusterJsonProperties.ID)
     private long id;
+
     @ApiModelProperty(ClusterJsonProperties.HOST)
     private String host;
+
     @ApiModelProperty(ClusterJsonProperties.PORT)
     private String port;
+
     @ApiModelProperty(ClusterJsonProperties.STATE)
     private String state;
+
     @ApiModelProperty(ClusterJsonProperties.STACKID)
     private Long stackId;
 

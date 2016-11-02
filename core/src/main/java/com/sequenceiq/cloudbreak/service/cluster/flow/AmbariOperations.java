@@ -9,9 +9,13 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 public class AmbariOperations extends StackContext {
 
     private final AmbariClient ambariClient;
+
     private final AmbariOperationType ambariOperationType;
+
     private Map<String, Integer> requests;
+
     private String requestContext;
+
     private String requestStatus;
 
     public AmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> requests, AmbariOperationType ambariOperationType) {

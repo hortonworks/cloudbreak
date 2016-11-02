@@ -39,12 +39,16 @@ public class BaseNetworkCommandsTest {
 
     @Mock
     private ShellContext shellContext;
+
     @Mock
     private CloudbreakClient cloudbreakClient;
+
     @Mock
     private NetworkEndpoint networkEndpoint;
+
     @Mock
     private ResponseTransformer responseTransformer;
+
     @Mock
     private OutputTransformer outputTransformer;
 

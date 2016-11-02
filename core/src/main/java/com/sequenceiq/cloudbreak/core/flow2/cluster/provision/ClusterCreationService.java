@@ -30,14 +30,19 @@ public class ClusterCreationService {
 
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private FlowMessageService flowMessageService;
+
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
+
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private EmailSenderService emailSenderService;
+
     @Inject
     private ClusterTerminationService clusterTerminationService;
 

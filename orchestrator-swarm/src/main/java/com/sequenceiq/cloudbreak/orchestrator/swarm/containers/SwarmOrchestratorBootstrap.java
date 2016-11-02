@@ -13,7 +13,9 @@ public class SwarmOrchestratorBootstrap implements OrchestratorBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(SwarmOrchestratorBootstrap.class);
 
     private final DockerClient dockerClient;
+
     private final String nodeName;
+
     private final CreateContainerCmd createCmd;
 
     public SwarmOrchestratorBootstrap(DockerClient dockerClient, String nodeName, CreateContainerCmd createCmd) {

@@ -24,21 +24,29 @@ import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 public class TlsSecurityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsSecurityService.class);
+
     private static final String CERT_DIR = "/certs";
+
     private static final String KEY_FILE = "key.pem";
+
     private static final String CERT_FILE = "cert.pem";
+
     private static final String SERVER_CERT_FILE = "ca.pem";
+
     private static final String DIR_PREFIX = "/stack-";
 
     @Value("${periscope.cert.dir:" + CERT_DIR + "}")
     private String certDir;
+
     @Value("#{'${periscope.cert.dir:" + CERT_DIR + "}' + '/' + '${periscope.tls.cert.file:client.pem}'}")
     private String clientCertName;
+
     @Value("#{'${periscope.cert.dir:" + CERT_DIR + "}' + '/' + '${periscope.tls.private.key.file:client-key.pem}'}")
     private String clientPrivateKeyName;
 
     @Inject
     private CloudbreakClient cloudbreakClient;
+
     @Inject
     private SecurityConfigRepository securityConfigRepository;
 

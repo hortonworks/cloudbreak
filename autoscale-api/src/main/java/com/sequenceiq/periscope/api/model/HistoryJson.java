@@ -13,26 +13,37 @@ public class HistoryJson implements Json {
 
     @ApiModelProperty(HistoryJsonProperties.ID)
     private long id;
+
     @ApiModelProperty(HistoryJsonProperties.CLUSTERID)
     private long clusterId;
+
     @ApiModelProperty(HistoryJsonProperties.CBSTACKID)
     private Long cbStackId;
+
     @ApiModelProperty(HistoryJsonProperties.ORIGINALNODECOUNT)
     private int originalNodeCount;
+
     @ApiModelProperty(HistoryJsonProperties.ADJUSTMENT)
     private int adjustment;
+
     @ApiModelProperty(HistoryJsonProperties.ADJUSTMENTTYPE)
     private AdjustmentType adjustmentType;
+
     @ApiModelProperty(HistoryJsonProperties.SCALINGSTATUS)
     private ScalingStatus scalingStatus;
+
     @ApiModelProperty(HistoryJsonProperties.STATUSREASON)
     private String statusReason;
+
     @ApiModelProperty(HistoryJsonProperties.TIMESTAMP)
     private long timestamp;
+
     @ApiModelProperty(HistoryJsonProperties.HOSTGROUP)
     private String hostGroup;
+
     @ApiModelProperty(HistoryJsonProperties.ALERTTYPE)
     private AlertType alertType;
+
     @ApiModelProperty(HistoryJsonProperties.PROPERTIES)
     private Map<String, String> properties = new HashMap<>();
 

@@ -94,6 +94,7 @@ import groovyx.net.http.HttpResponseException;
 public class AmbariClusterService implements ClusterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterService.class);
+
     private static final String MASTER_CATEGORY = "MASTER";
 
     @Inject

@@ -5,7 +5,9 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 public class VirtualMachineCheckerContext extends AwsStatusCheckerContext {
 
     private String groupName;
+
     private String virtualMachine;
+
     private String status;
 
     public VirtualMachineCheckerContext(AwsCredentialView awsCredentialView, String groupName, String virtualMachine, String status) {

@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.client;
 
 public class SaltClientConfig {
     private final String saltPassword;
+
     private final String saltBootPassword;
+
     private final String signatureKeyPem;
 
     public SaltClientConfig(String saltPassword, String saltBootPassword, String signatureKeyPem) {

@@ -32,6 +32,7 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
 
     @Inject
     private OpenStackClient openStackClient;
+
     @Inject
     private OpenStackUtils utils;
 

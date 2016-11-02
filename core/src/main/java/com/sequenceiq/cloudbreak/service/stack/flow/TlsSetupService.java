@@ -46,24 +46,34 @@ import net.schmizz.sshj.xfer.InMemorySourceFile;
 public class TlsSetupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsSetupService.class);
+
     private static final int SETUP_TIMEOUT = 180;
+
     private static final int SSH_POLLING_INTERVAL = 5000;
+
     private static final int SSH_MAX_ATTEMPTS_FOR_HOSTS = 100;
 
     @Inject
     private ServiceProviderConnectorAdapter connector;
+
     @Inject
     private SecurityConfigRepository securityConfigRepository;
+
     @Inject
     private TlsSecurityService tlsSecurityService;
+
     @Inject
     private StackRepository stackRepository;
+
     @Inject
     private PollingService<SshCheckerTaskContext> sshCheckerTaskContextPollingService;
+
     @Inject
     private SshCheckerTask sshCheckerTask;
+
     @Inject
     private Configuration freemarkerConfiguration;
+
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 

@@ -45,7 +45,6 @@ import javax.persistence.SequenceGenerator;
 })
 public class HostGroup {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "hostgroup_generator")
     @SequenceGenerator(name = "hostgroup_generator", sequenceName = "hostgroup_id_seq", allocationSize = 1)

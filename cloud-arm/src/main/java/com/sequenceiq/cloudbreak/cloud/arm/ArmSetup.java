@@ -43,17 +43,23 @@ import groovyx.net.http.HttpResponseException;
 public class ArmSetup implements Setup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmSetup.class);
+
     private static final String TEST_CONTAINER = "cb-test-container";
+
     private static final String DASH = "DASH";
 
     @Inject
     private ArmClient armClient;
+
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
+
     @Inject
     private ArmUtils armUtils;
+
     @Inject
     private ArmPollTaskFactory armPollTaskFactory;
+
     @Inject
     private ArmStorage armStorage;
 

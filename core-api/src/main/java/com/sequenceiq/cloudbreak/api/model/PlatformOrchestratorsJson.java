@@ -13,6 +13,7 @@ public class PlatformOrchestratorsJson implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.ORCHESTRATORS)
     private Map<String, Collection<String>> orchestrators;
+
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DEFAULT_ORCHESTRATORS)
     private Map<String, String> defaults;
 

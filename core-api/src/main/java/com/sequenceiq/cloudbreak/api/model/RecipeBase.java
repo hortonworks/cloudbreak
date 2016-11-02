@@ -21,6 +21,7 @@ public abstract class RecipeBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
+
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;

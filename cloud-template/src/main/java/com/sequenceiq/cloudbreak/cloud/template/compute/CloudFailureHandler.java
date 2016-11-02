@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 public class CloudFailureHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudFailureHandler.class);
+
     private static final double ONE_HUNDRED = 100.0;
 
     @Inject
@@ -164,7 +165,9 @@ public class CloudFailureHandler {
 
     public static class ScaleContext {
         private final Boolean upscale;
+
         private final AdjustmentType adjustmentType;
+
         private final Long threshold;
 
         public ScaleContext(Boolean upscale, AdjustmentType adjustmentType, Long threshold) {

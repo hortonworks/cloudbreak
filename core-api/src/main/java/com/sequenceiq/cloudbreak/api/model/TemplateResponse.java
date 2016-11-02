@@ -10,10 +10,13 @@ import io.swagger.annotations.ApiModelProperty;
 public class TemplateResponse extends TemplateBase {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
+
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
+
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_COUNT, required = true)
     private Integer volumeCount;
+
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_SIZE, required = true)
     private Integer volumeSize;
 

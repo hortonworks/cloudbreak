@@ -11,7 +11,9 @@ import reactor.rx.Promises;
 public class CloudPlatformRequest<T> implements Selectable {
 
     private CloudContext cloudContext;
+
     private CloudCredential cloudCredential;
+
     private Promise<T> result;
 
     public CloudPlatformRequest(CloudContext cloudContext, CloudCredential cloudCredential) {

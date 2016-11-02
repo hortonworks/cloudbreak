@@ -7,7 +7,9 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 
 public class BlueprintServiceComponent {
     private String name;
+
     private int nodeCount;
+
     private List<String> hostgroups;
 
     BlueprintServiceComponent(String name, String hostgroup, int nodeCount) {

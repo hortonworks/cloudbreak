@@ -31,18 +31,23 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 public class ArmStorage {
 
     public static final String IMAGES = "images";
+
     public static final String STORAGE_BLOB_PATTERN = "https://%s.blob.core.windows.net/";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmStorage.class);
 
     private static final int RADIX = 32;
+
     private static final int MAX_LENGTH_OF_NAME_SLICE = 8;
+
     private static final int MAX_LENGTH_OF_RESOURCE_NAME = 24;
 
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
+
     @Inject
     private ArmPollTaskFactory armPollTaskFactory;
+
     @Inject
     private ArmUtils armUtils;
 

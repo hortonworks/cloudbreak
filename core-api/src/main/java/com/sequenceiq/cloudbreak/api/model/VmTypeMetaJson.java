@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VmTypeMetaJson {
     private List<VolumeParameterConfigJson> configs = new ArrayList<>();
+
     private Map<String, String> properties = new HashMap<>();
 
     public VmTypeMetaJson() {

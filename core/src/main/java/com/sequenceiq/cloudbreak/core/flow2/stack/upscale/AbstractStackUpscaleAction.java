@@ -30,16 +30,21 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 
 abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractAction<StackUpscaleState, StackUpscaleEvent, StackScalingFlowContext, P> {
     static final String INSTANCEGROUPNAME = "INSTANCEGROUPNAME";
+
     static final String ADJUSTMENT = "ADJUSTMENT";
 
     @Inject
     private StackService stackService;
+
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
+
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
+
     @Inject
     private StackScalingService stackScalingService;
 

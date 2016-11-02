@@ -30,11 +30,17 @@ import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 public class InstanceGroupCommandsTest {
 
     private static final Integer DUMMY_NODE_COUNT = 1;
+
     private static final String DUMMY_TEMPLATE = "dummy-template";
+
     private static final String DUMMY_TEMPLATE_ID = "50";
+
     private InstanceGroup hostGroup = new InstanceGroup("master");
+
     private InstanceGroupTemplateId dummyTemplateId = new InstanceGroupTemplateId(DUMMY_TEMPLATE_ID);
+
     private InstanceGroupTemplateName dummyTemplateName = new InstanceGroupTemplateName(DUMMY_TEMPLATE);
+
     private SecurityGroupId dummySecurityGroupId = new SecurityGroupId("1");
 
     @InjectMocks

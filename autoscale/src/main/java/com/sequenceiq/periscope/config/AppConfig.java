@@ -37,17 +37,23 @@ public class AppConfig implements AsyncConfigurer {
 
     @Value("${periscope.threadpool.core.size:50}")
     private int corePoolSize;
+
     @Value("${periscope.threadpool.max.size:500}")
     private int maxPoolSize;
+
     @Value("${periscope.threadpool.queue.size:1000}")
     private int queueCapacity;
+
     @Value("${periscope.client.id}")
     private String clientId;
+
     @Inject
     @Named("identityServerUrl")
     private String identityServerUrl;
+
     @Value("${rest.debug:false}")
     private boolean restDebug;
+
     @Value("${cert.validation:true}")
     private boolean certificateValidation;
 

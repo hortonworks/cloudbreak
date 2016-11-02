@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 public class AmbariClusterCreationService {
     @Inject
     private StackService stackService;
+
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
 

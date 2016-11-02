@@ -17,6 +17,7 @@ public class ArmVirtualMachineStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "armVirtualMachineStatusCheckerTask";
 
     private VirtualMachineCheckerContext virtualMachineCheckerContext;
+
     private ArmClient armClient;
 
     public ArmVirtualMachineStatusCheckerTask(AuthenticatedContext authenticatedContext, ArmClient armClient, VirtualMachineCheckerContext

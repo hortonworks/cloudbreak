@@ -19,6 +19,7 @@ import reactor.bus.EventBus;
 public class BootstrapMachineHandler implements ReactorEventHandler<BootstrapMachinesRequest> {
     @Inject
     private EventBus eventBus;
+
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
 

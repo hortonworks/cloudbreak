@@ -12,7 +12,9 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 public class HostOrchestratorClusterContext extends StackContext {
 
     private HostOrchestrator hostOrchestrator;
+
     private GatewayConfig gatewayConfig;
+
     private Set<Node> nodes = new HashSet<>();
 
     public HostOrchestratorClusterContext(Stack stack, HostOrchestrator hostOrchestrator, GatewayConfig gatewayConfig, Set<Node> nodes) {

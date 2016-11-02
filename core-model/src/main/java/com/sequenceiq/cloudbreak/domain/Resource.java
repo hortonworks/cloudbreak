@@ -33,16 +33,19 @@ public class Resource implements ProvisionEntity {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "resource_generator")
     @SequenceGenerator(name = "resource_generator", sequenceName = "resource_id_seq", allocationSize = 1)
     private Long id;
+
     private String instanceGroup;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceType resourceType;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CommonStatus resourceStatus;
 
     private String resourceName;
+
     private String resourceReference;
 
     @ManyToOne

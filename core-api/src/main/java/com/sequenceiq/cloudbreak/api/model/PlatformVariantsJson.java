@@ -13,6 +13,7 @@ public class PlatformVariantsJson implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.PLATFORM_VARIANTS)
     private Map<String, Collection<String>> platformToVariants;
+
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DEFAULT_VARIANTS)
     private Map<String, String> defaultVariants;
 

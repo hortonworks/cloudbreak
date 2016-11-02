@@ -8,11 +8,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class AmbariDatabase {
 
     private String vendor;
+
     private String fancyName;
+
     private String name;
+
     private String host;
+
     private Integer port;
+
     private String userName;
+
     private String password;
 
     public AmbariDatabase() {

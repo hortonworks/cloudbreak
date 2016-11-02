@@ -2,8 +2,11 @@ package com.sequenceiq.it.cloudbreak;
 
 public class InstanceGroup {
     private String templateId;
+
     private String name;
+
     private int nodeCount;
+
     private String type;
 
     public InstanceGroup(String templateId, String name, int nodeCount, String type) {

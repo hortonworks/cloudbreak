@@ -5,6 +5,7 @@ import java.util.Map;
 public class OrchestrationCredential {
 
     private String apiEndpoint;
+
     private Map<String, Object> properties;
 
     public OrchestrationCredential(String apiEndpoint, Map<String, Object> properties) {

@@ -9,6 +9,7 @@ public class Definition {
 
     @JsonProperty("values")
     private List<Value> defaultValues = new ArrayList<>();
+
     @JsonProperty("selectors")
     private List<Selector> selectors = new ArrayList<>();
 

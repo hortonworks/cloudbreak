@@ -6,6 +6,7 @@ import java.util.Set;
 public class HostgroupEntry implements NodeCountEntry {
 
     private Integer nodeCount;
+
     private Set<Long> recipeIdSet = new HashSet<>();
 
     public HostgroupEntry(Integer nodeCount, Set<Long> recipeIdSet) {

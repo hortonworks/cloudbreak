@@ -3,8 +3,11 @@ package com.sequenceiq.it.util;
 public class ServerAddressGenerator {
 
     public static final int ADDRESS_RANGE = 254;
+
     private int numberOfServers;
+
     private String prefix;
+
     private int from = 1;
 
     public ServerAddressGenerator(int numberOfServers) {

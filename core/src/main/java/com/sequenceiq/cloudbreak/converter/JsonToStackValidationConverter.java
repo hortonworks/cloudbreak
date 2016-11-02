@@ -29,8 +29,10 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
 
     @Inject
     private BlueprintService blueprintService;
+
     @Inject
     private NetworkService networkService;
+
     @Inject
     private ConversionService conversionService;
 

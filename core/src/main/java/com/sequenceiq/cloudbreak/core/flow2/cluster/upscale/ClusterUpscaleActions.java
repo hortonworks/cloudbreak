@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 @Configuration
 public class ClusterUpscaleActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleActions.class);
+
     @Inject
     private ClusterUpscaleFlowService clusterUpscaleFlowService;
 
@@ -146,6 +147,7 @@ public class ClusterUpscaleActions {
     private abstract class AbstractClusterUpscaleAction<P extends Payload>
             extends AbstractAction<ClusterUpscaleState, ClusterUpscaleEvent, ClusterUpscaleContext, P> {
         protected static final String HOSTGROUPNAME = "HOSTGROUPNAME";
+
         protected static final String ADJUSTMENT = "ADJUSTMENT";
 
         @Inject

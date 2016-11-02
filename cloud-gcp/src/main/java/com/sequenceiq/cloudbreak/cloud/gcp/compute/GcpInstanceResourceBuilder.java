@@ -42,8 +42,11 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpInstanceResourceBuilder.class);
+
     private static final String GCP_DISK_TYPE = "PERSISTENT";
+
     private static final String GCP_DISK_MODE = "READ_WRITE";
+
     private static final String PREEMPTIBLE = "preemptible";
 
     @Override

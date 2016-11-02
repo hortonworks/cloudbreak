@@ -18,18 +18,26 @@ import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 @Service
 public class AmbariOperationService {
     public static final int MAX_ATTEMPTS_FOR_AMBARI_OPS = -1;
+
     public static final int AMBARI_POLLING_INTERVAL = 5000;
+
     public static final int MAX_ATTEMPTS_FOR_HOSTS = 240;
+
     public static final int MAX_ATTEMPTS_FOR_AMBARI_SERVER_STARTUP = 120;
+
     public static final int MAX_FAILURE_COUNT = 5;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariOperationService.class);
 
     @Inject
     private AmbariOperationsStatusCheckerTask ambariOperationsStatusCheckerTask;
+
     @Inject
     private AmbariOperationsStartCheckerTask ambariOperationsStartCheckerTask;
+
     @Inject
     private AmbariOperationsRequestCheckerTask requestCheckerTask;
+
     @Inject
     private PollingService<AmbariOperations> operationsPollingService;
 

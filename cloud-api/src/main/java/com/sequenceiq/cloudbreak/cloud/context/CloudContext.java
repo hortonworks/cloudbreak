@@ -13,10 +13,15 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 public class CloudContext {
 
     private final Long id;
+
     private final String name;
+
     private final Platform platform;
+
     private final String owner;
+
     private final Variant variant;
+
     private final Location location;
 
     public CloudContext(Long id, String name, String platform, String owner) {

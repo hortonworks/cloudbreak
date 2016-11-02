@@ -31,16 +31,22 @@ public class Topology {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "topology_generator")
     @SequenceGenerator(name = "topology_generator", sequenceName = "topology_id_seq", allocationSize = 1)
     private Long id;
+
     @Column(nullable = false)
     private String name;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
+
     @Column(nullable = false)
     private String cloudPlatform;
+
     @Column(nullable = false)
     private String account;
+
     @Column(nullable = false)
     private String owner;
+
     @Column(nullable = false)
     private boolean deleted;
 

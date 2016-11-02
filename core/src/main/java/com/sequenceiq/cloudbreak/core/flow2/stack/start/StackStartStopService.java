@@ -33,12 +33,16 @@ public class StackStartStopService {
 
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private FlowMessageService flowMessageService;
+
     @Inject
     private EmailSenderService emailSenderService;
+
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private MetadataSetupService metadatSetupService;
 

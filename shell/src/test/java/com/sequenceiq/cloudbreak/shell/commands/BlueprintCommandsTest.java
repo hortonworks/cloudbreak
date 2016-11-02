@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 
 public class BlueprintCommandsTest {
     private static final Long BLUEPRINT_ID = 50L;
+
     private static final String BLUEPRINT_NAME = "dummyName";
 
     @InjectMocks

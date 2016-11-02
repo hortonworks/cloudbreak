@@ -5,8 +5,11 @@ import com.google.common.base.Optional;
 public class StackParamValidation {
 
     private final String paramName;
+
     private final Class clazz;
+
     private final boolean required;
+
     private final Optional<String> regex;
 
     public StackParamValidation(String paramName, Boolean required, Class clazz, Optional<String> regex) {
