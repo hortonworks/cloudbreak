@@ -20,7 +20,7 @@
 </div>
 <div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AWS'">
     <label class="col-sm-3 control-label" for="cluster_instanceProfileEnabled">{{msg.cluster_form_instanceprofile_validate_label}}</label>
-    <div class="col-sm-3">
+    <div class="col-sm-6">
         <select class="form-control" ng-model="cluster.parameters.instanceProfileStrategy" id="cluster_instanceProfileEnabled" name="cluster_instanceProfileEnabled">
             <option ng-option value="NONE">{{$root.displayNames.getPropertyName('s3types', 'NONE')}}</option>
             <option ng-option value="CREATE">{{$root.displayNames.getPropertyName('s3types', 'CREATE')}}</option>

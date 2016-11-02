@@ -78,8 +78,8 @@
       "MARATHON": "in docker containers with marathon"
     },
     "s3types" : {
-      "NONE": "Disable S3 Access By Default",
-      "CREATE": "Create Role For S3 Access",
-      "USE_EXISTING": "Define Existing Role For S3 Access"
+      "NONE": "Disable Instance Profile attaching by default",
+      "CREATE": "Create Instance Profile and attach to the instances",
+      "USE_EXISTING": "Define Existing Instance Profile and attach to the instances"
     }
 }

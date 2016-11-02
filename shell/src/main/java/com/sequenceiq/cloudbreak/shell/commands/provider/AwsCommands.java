@@ -219,9 +219,9 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
             @CliOption(key = "orchestrator", help = "select orchestrator variant version") AwsOrchestratorType orchestratorType,
             @CliOption(key = "dedicatedInstances", help = "request dedicated instances on AWS") Boolean dedicatedInstances,
-            @CliOption(key = "instanceProfileStrategy", help = "seamless S3 access type", specifiedDefaultValue = "false")
+            @CliOption(key = "instanceProfileStrategy", help = "seamless access to Amazon API", specifiedDefaultValue = "false")
                     InstanceProfileStrategy instanceProfileStrategy,
-            @CliOption(key = "instanceProfile", help = "instanceProfile which will attached to the instance", specifiedDefaultValue = "false")
+            @CliOption(key = "instanceProfile", help = "instance profile which will attached to the instance", specifiedDefaultValue = "false")
                     String instanceProfile,
             @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
 
