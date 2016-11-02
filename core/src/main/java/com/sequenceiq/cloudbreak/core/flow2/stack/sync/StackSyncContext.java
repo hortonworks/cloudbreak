@@ -11,9 +11,13 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 public class StackSyncContext extends CommonContext {
 
     private final Stack stack;
+
     private final List<InstanceMetaData> instanceMetaData;
+
     private final CloudContext cloudContext;
+
     private final CloudCredential cloudCredential;
+
     private final Boolean statusUpdateEnabled;
 
     public StackSyncContext(String flowId, Stack stack, List<InstanceMetaData> instanceMetaData, CloudContext cloudContext, CloudCredential cloudCredential,

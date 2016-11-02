@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 public class BlueprintInputJson implements JsonEntity {
 
     private String name;
+
     private String propertyValue;
 
     public BlueprintInputJson() {

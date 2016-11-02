@@ -12,18 +12,25 @@ public class InstanceMetaDataJson implements JsonEntity {
 
     @ApiModelProperty(InstanceMetaDataModelDescription.PRIVATE_IP)
     private String privateIp;
+
     @ApiModelProperty(InstanceMetaDataModelDescription.PUBLIC_IP)
     private String publicIp;
+
     @ApiModelProperty
     private Integer sshPort;
+
     @ApiModelProperty(InstanceMetaDataModelDescription.INSTANCE_ID)
     private String instanceId;
+
     @ApiModelProperty(ModelDescriptions.AMBARI_SERVER)
     private Boolean ambariServer;
+
     @ApiModelProperty(InstanceMetaDataModelDescription.DISCOVERY_FQDN)
     private String discoveryFQDN;
+
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
+
     @ApiModelProperty(InstanceGroupModelDescription.STATUS)
     private InstanceStatus instanceStatus;
 

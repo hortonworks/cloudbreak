@@ -5,8 +5,11 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 public class CloudPlatformResult<R extends CloudPlatformRequest> implements Payload {
 
     private EventStatus status;
+
     private String statusReason;
+
     private Exception errorDetails;
+
     private R request;
 
     protected CloudPlatformResult() {

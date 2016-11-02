@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.domain;
 public class BlueprintParameter implements ProvisionEntity {
 
     private String name;
+
     private String description;
+
     private String referenceConfiguration;
 
     public BlueprintParameter() {

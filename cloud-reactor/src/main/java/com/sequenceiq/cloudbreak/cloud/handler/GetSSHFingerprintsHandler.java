@@ -33,10 +33,13 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
 
     @Inject
     private PollTaskFactory statusCheckFactory;
+
     @Inject
     private SyncPollingScheduler<InstanceConsoleOutputResult> syncPollingScheduler;
+
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Inject
     private EventBus eventBus;
 

@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 public class ArmUtilsTest {
 
     private ArmUtils subject;
+
     private final String maxResourceNameLength = "50";
 
     @Before

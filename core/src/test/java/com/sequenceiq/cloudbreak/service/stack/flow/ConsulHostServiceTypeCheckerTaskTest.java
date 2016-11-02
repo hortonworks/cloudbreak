@@ -24,7 +24,9 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 public class ConsulHostServiceTypeCheckerTaskTest {
 
     private static final String AMBARI_SERVICE = "ambari-8080";
+
     private static final String SERVICE_ENDPOINT = "/v1/catalog/service/";
+
     private static final String SERVICE_RESPONSE = "[{\"Node\":\"ip-10-0-0-124\",\"Address\":\"10.0.0.124\",\"ServiceID\":\"10.0.0.124:ambari:8080\","
             + "\"ServiceName\":\"ambari-8080\",\"ServiceTags\":null,\"ServicePort\":8080}]";
 

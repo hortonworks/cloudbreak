@@ -13,6 +13,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 
 public class StatusUpdateTest extends AbstractCloudbreakIntegrationTest {
     private static final String STOPPED = "STOPPED";
+
     private static final String STARTED = "STARTED";
 
     @BeforeMethod

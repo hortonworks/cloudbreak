@@ -6,7 +6,9 @@ import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 public class StorageCheckerContext extends ArmStatusCheckerContext {
 
     private String groupName;
+
     private String storageName;
+
     private StorageStatus expectedStatus;
 
     public StorageCheckerContext(ArmCredentialView armCredentialView, String groupName, String storageName,

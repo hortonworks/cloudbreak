@@ -6,7 +6,9 @@ import com.sequenceiq.periscope.domain.SecurityConfig;
 public final class AmbariStack {
 
     private final Ambari ambari;
+
     private final Long stackId;
+
     private final SecurityConfig securityConfig;
 
     public AmbariStack(Ambari ambari) {

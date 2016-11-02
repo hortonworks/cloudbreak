@@ -36,12 +36,15 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class OpenStackResourceConnector implements ResourceConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackResourceConnector.class);
+
     private static final long OPERATION_TIMEOUT = 60L;
 
     @Inject
     private OpenStackClient openStackClient;
+
     @Inject
     private HeatTemplateBuilder heatTemplateBuilder;
+
     @Inject
     private OpenStackUtils utils;
 

@@ -42,11 +42,17 @@ public class ArmInteractiveLoginStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "armInteractiveLoginStatusCheckerTask";
 
     public static final String GRAPH_WINDOWS = "https://graph.windows.net/";
+
     public static final String GRAPH_API_VERSION = "1.42-previewInternal";
+
     private static final String LOGIN_MICROSOFTONLINE_OAUTH2 = "https://login.microsoftonline.com/common/oauth2";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmInteractiveLoginStatusCheckerTask.class);
+
     private static final String PASSWORD = "cloudbreak";
+
     private final ArmInteractiveLoginStatusCheckerContext armInteractiveLoginStatusCheckerContext;
+
     private Client client;
 
     @Inject

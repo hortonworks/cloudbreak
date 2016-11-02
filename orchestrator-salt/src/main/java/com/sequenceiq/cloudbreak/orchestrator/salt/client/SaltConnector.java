@@ -45,12 +45,15 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 public class SaltConnector implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltConnector.class);
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final String SALT_USER = "saltuser";
+
     private static final String SALT_PASSWORD = "saltpass";
 
     private static final String SALT_BOOT_USER = "cbadmin";
+
     private static final String SALT_BOOT_PASSWORD = "cbadmin";
 
     private static final String SIGN_HEADER = "signature";
@@ -58,8 +61,11 @@ public class SaltConnector implements Closeable {
     private static final List<Integer> ACCEPTED_STATUSES = Arrays.asList(HttpStatus.SC_OK, HttpStatus.SC_CREATED, HttpStatus.SC_ACCEPTED);
 
     private final Client restClient;
+
     private final WebTarget saltTarget;
+
     private final String saltPassword;
+
     private final String signatureKey;
 
     public SaltConnector(GatewayConfig gatewayConfig, boolean debug) {

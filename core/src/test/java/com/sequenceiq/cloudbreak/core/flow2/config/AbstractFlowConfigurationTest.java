@@ -42,7 +42,9 @@ public class AbstractFlowConfigurationTest {
     private AbstractAction<State, Event, ?, ?> action;
 
     private Flow flow;
+
     private List<FlowConfiguration.Transition<State, Event>> transitions;
+
     private FlowConfiguration.FlowEdgeConfig<State, Event> edgeConfig;
 
     @Before

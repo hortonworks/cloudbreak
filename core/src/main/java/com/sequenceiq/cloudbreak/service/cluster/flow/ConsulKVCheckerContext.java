@@ -9,8 +9,11 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 public class ConsulKVCheckerContext extends StackContext {
 
     private final ConsulClient consulClient;
+
     private final List<String> keys;
+
     private final String expectedValue;
+
     private final String failValue;
 
     public ConsulKVCheckerContext(Stack stack, ConsulClient consulClient, List<String> keys, String expectedValue, String failValue) {

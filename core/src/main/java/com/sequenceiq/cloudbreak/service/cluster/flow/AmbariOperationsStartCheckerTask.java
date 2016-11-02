@@ -19,8 +19,11 @@ public class AmbariOperationsStartCheckerTask extends ClusterBasedStatusCheckerT
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariOperationsStartCheckerTask.class);
 
     private static final BigDecimal COMPLETED = new BigDecimal(100.0);
+
     private static final BigDecimal FAILED = new BigDecimal(-1.0);
+
     private static final BigDecimal PENDING = new BigDecimal(0);
+
     private static final int MAX_RETRY = 3;
 
     @Override

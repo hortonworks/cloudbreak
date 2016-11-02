@@ -15,14 +15,19 @@ import io.swagger.annotations.ApiModelProperty;
 public class BlueprintResponse extends BlueprintBase {
     @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
+
     @ApiModelProperty(value = BlueprintModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
+
     @ApiModelProperty(value = BlueprintModelDescription.HOST_GROUP_COUNT)
     private Integer hostGroupCount;
+
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
+
     @ApiModelProperty(value = BlueprintModelDescription.STATUS)
     private ResourceStatus status;
+
     @ApiModelProperty(value = BlueprintModelDescription.INPUTS)
     private Set<BlueprintParameterJson> inputs = new HashSet<>();
 

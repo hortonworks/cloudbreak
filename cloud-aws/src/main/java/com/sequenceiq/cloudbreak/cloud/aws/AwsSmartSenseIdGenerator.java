@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 @Component
 public class AwsSmartSenseIdGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsSmartSenseIdGenerator.class);
+
     private static final int FIRST_PART_LENGTH = 4;
 
     @Value("${cb.smartsense.configure:false}")

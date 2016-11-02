@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 public class SyncGrainsRunnerTest {
 
     private Set<String> targets;
+
     private Set<Node> allNode;
 
     @Test

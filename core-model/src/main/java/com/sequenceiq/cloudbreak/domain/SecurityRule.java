@@ -24,11 +24,16 @@ public class SecurityRule implements ProvisionEntity {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "securityrule_generator")
     @SequenceGenerator(name = "securityrule_generator", sequenceName = "securityrule_id_seq", allocationSize = 1)
     private Long id;
+
     @ManyToOne
     private SecurityGroup securityGroup;
+
     private String cidr;
+
     private String ports;
+
     private String protocol;
+
     @Column(nullable = false)
     private boolean modifiable;
 

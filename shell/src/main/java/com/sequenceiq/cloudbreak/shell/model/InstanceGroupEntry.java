@@ -3,8 +3,11 @@ package com.sequenceiq.cloudbreak.shell.model;
 public class InstanceGroupEntry {
 
     private Long templateId;
+
     private Integer nodeCount;
+
     private String type;
+
     private Long securityGroupId;
 
     public InstanceGroupEntry(Long templateId, Long securityGroupId, Integer nodeCount, String type) {

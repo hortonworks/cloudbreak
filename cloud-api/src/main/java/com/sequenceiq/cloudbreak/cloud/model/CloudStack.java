@@ -12,8 +12,11 @@ import com.google.common.collect.ImmutableMap;
 public class CloudStack {
 
     private final List<Group> groups;
+
     private final Network network;
+
     private final Image image;
+
     private final Map<String, String> parameters;
 
     public CloudStack(List<Group> groups, Network network, Image image, Map<String, String> parameters) {

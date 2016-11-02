@@ -27,7 +27,9 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class OpenStackUtils {
 
     public static final String CB_INSTANCE_GROUP_NAME = "cb_instance_group_name";
+
     public static final String CB_INSTANCE_PRIVATE_ID = "cb_instance_private_id";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackUtils.class);
 
     @Value("${cb.max.openstack.resource.name.length:}")

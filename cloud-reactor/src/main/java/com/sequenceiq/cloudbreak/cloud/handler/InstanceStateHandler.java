@@ -27,6 +27,7 @@ public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstan
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Inject
     private EventBus eventBus;
 

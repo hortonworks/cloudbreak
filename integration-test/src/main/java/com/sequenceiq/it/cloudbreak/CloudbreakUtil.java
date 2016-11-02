@@ -21,7 +21,9 @@ import groovyx.net.http.HttpResponseException;
 
 public class CloudbreakUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUtil.class);
+
     private static final int MAX_RETRY = 360;
+
     private static final int POLLING_INTERVAL = 10000;
 
     private CloudbreakUtil() {

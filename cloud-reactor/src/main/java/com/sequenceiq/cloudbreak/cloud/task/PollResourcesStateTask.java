@@ -20,6 +20,7 @@ public class PollResourcesStateTask extends AbstractPollTask<ResourcesStatePolle
     public static final String NAME = "pollResourcesStateTask";
 
     private List<CloudResource> cloudResource;
+
     private ResourceConnector resourceConnector;
 
     @Inject

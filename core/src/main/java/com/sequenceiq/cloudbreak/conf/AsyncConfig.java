@@ -20,7 +20,9 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 public class AsyncConfig implements AsyncConfigurer, SchedulingConfigurer {
 
     private static final int CORE_POOL_SIZE = 7;
+
     private static final int MAX_POOL_SIZE = 42;
+
     private static final int QUEUE_CAPACITY = 11;
 
     @Override

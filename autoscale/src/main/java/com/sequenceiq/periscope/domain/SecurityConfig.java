@@ -23,10 +23,13 @@ public class SecurityConfig {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "securityconfig_generator")
     @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_table")
     private Long id;
+
     @Column
     private byte[] clientKey;
+
     @Column
     private byte[] clientCert;
+
     @Column
     private byte[] serverCert;
 

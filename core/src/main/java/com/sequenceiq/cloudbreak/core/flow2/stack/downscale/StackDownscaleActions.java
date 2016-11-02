@@ -34,8 +34,10 @@ public class StackDownscaleActions {
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
+
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
+
     @Inject
     private StackDownscaleService stackDownscaleService;
 

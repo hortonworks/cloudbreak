@@ -17,20 +17,24 @@ public abstract class TemplateBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
+
     @Size(max = 100, min = 5, message = "The length of the template's name has to be in range of 5 to 100")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The name of the template can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
+
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
+
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
     @ApiModelProperty(ModelDescriptions.TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
+
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.INSTANCE_TYPE, required = true)
     private String instanceType;

@@ -44,20 +44,28 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private StackRepository stackRepository;
+
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
+
     @Inject
     private GatewayConfigService gatewayConfigService;
+
     @Inject
     private ConversionService conversionService;
+
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private HostGroupRepository hostGroupRepository;
+
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+
     @Inject
     private BlueprintUtils blueprintUtils;
 

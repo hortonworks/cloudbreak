@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 public class RecipeScript {
     private String script;
+
     private ClusterLifecycleEvent clusterLifecycleEvent;
 
     public RecipeScript(String script, ClusterLifecycleEvent clusterLifecycleEvent) {

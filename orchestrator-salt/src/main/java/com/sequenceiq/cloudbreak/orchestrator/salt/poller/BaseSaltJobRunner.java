@@ -15,8 +15,11 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 public abstract class BaseSaltJobRunner implements SaltJobRunner {
 
     private Set<String> target = new HashSet<>();
+
     private Set<Node> allNode;
+
     private JobId jid;
+
     private JobState jobState = JobState.NOT_STARTED;
 
     public BaseSaltJobRunner(Set<String> target, Set<Node> allNode) {

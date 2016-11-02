@@ -9,6 +9,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
  */
 public class ScriptParams {
     private final String diskPrefix;
+
     private final Integer startLabel;
 
     public ScriptParams(String diskPrefix, Integer startLabel) {

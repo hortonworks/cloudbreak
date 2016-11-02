@@ -19,6 +19,7 @@ import reactor.bus.EventBus;
 public class InstallClusterHandler implements ReactorEventHandler<InstallClusterRequest> {
     @Inject
     private EventBus eventBus;
+
     @Inject
     private AmbariClusterCreationService ambariClusterCreationService;
 

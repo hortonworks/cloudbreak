@@ -28,11 +28,14 @@ import org.springframework.context.annotation.Configuration;
 public class CachingConfig implements CachingConfigurer {
 
     public static final String TEMPORARY_AWS_CREDENTIAL_CACHE = "temporary_aws_credential";
+
     private static final long TTL_IN_SECONDS = 5L * 60;
+
     private static final long MAX_ENTRIES = 1000L;
 
     @Inject
     private List<CacheDefinition> cacheDefinitions;
+
     private Map<Class, CacheDefinition> classCacheDefinitionMap = new HashMap<>();
 
     @PostConstruct

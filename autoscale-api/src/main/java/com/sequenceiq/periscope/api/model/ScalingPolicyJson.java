@@ -12,16 +12,21 @@ public class ScalingPolicyJson implements Json {
 
     @ApiModelProperty(ScalingPolicyJsonProperties.ID)
     private Long id;
+
     @ApiModelProperty(ScalingPolicyJsonProperties.NAME)
     @Pattern(regexp = "([a-zA-Z][-a-zA-Z0-9]*)",
             message = "The name can only contain alphanumeric characters and hyphens and has start with an alphanumeric character")
     private String name;
+
     @ApiModelProperty(ScalingPolicyJsonProperties.ADJUSTMENTTYPE)
     private AdjustmentType adjustmentType;
+
     @ApiModelProperty(ScalingPolicyJsonProperties.SCALINGADJUSTMENT)
     private int scalingAdjustment;
+
     @ApiModelProperty(ScalingPolicyJsonProperties.ALERTID)
     private long alertId;
+
     @ApiModelProperty(ScalingPolicyJsonProperties.HOSTGROUP)
     private String hostGroup;
 

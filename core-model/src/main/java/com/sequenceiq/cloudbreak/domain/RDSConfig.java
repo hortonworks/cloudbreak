@@ -89,19 +89,25 @@ public class RDSConfig {
 
     @Column(nullable = false)
     private String connectionURL;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private RDSDatabase databaseType;
+
     @Column(nullable = false)
     private String connectionUserName;
+
     @Column(nullable = false)
     private String connectionPassword;
+
     private Long creationDate;
+
     @Column(nullable = false)
     private String hdpVersion;
 
     @Column(nullable = false)
     private String owner;
+
     @Column(nullable = false)
     private String account;
 

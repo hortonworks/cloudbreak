@@ -28,9 +28,13 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 @Component
 public class SmartSenseConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartSenseConfigProvider.class);
+
     private static final String SMART_SENSE_SERVER_CONFIG_FILE = "hst-server-conf";
+
     private static final String HST_SERVER_COMPONENT = "HST_SERVER";
+
     private static final String HST_AGENT_COMPONENT = "HST_AGENT";
+
     private static final String NAMENODE_COMPONENT = "NAMENODE";
 
     @Value("${cb.smartsense.configure:false}")

@@ -18,13 +18,17 @@ public class SecurityGroupResponse extends SecurityGroupBase {
 
     @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
+
     @ApiModelProperty(value = ModelDescriptions.OWNER)
     private String owner;
+
     @ApiModelProperty(value = ModelDescriptions.ACCOUNT)
     private String account;
+
     @Valid
     @ApiModelProperty(value = ModelDescriptions.SecurityGroupModelDescription.SECURITY_RULES)
     private List<SecurityRuleResponse> securityRules = new LinkedList<>();
+
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
     @NotNull
     private boolean publicInAccount;

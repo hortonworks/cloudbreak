@@ -6,7 +6,9 @@ import io.swagger.annotations.ApiModel;
 public class BlueprintParameterJson implements JsonEntity {
 
     private String name;
+
     private String description;
+
     private String referenceConfiguration;
 
     public BlueprintParameterJson() {

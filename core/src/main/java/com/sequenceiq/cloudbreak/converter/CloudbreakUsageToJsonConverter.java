@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 @Component
 public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwareConverter<CloudbreakUsage, CloudbreakUsageJson> {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUsageToJsonConverter.class);
 
     @Inject

@@ -26,8 +26,11 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 @Component
 public class IntervalInstanceUsageGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntervalInstanceUsageGenerator.class);
+
     private static final String DATE_FORMAT = "yyyy-MM-dd";
+
     private static final long HOURS_PER_DAY = 24;
+
     private static final double MS_PER_HOUR = 3600000.0;
 
     public Map<String, Long> getInstanceHours(InstanceMetaData instance, Date startTime, Date stopTime) throws ParseException {

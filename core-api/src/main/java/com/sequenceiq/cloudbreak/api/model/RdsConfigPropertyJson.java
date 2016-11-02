@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 public class RdsConfigPropertyJson implements JsonEntity {
 
     private String name;
+
     private String value;
 
     public RdsConfigPropertyJson() {

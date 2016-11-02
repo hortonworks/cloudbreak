@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class StackScaleTriggerEvent extends StackEvent {
     private final String instanceGroup;
+
     private final Integer adjustment;
 
     public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment) {

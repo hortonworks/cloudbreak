@@ -32,12 +32,16 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 public class MarathonCommands implements CommandMarker {
 
     private static final String BYOS = "BYOS";
+
     @Inject
     private ShellContext shellContext;
+
     @Inject
     private CloudbreakClient cloudbreakClient;
+
     @Inject
     private ExceptionTransformer exceptionTransformer;
+
     @Inject
     private ResponseTransformer responseTransformer;
 

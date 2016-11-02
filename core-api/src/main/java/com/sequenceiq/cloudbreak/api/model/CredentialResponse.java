@@ -11,6 +11,7 @@ public class CredentialResponse extends CredentialBase {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
+
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
 

@@ -6,7 +6,9 @@ import java.util.Map;
 
 public class PlatformDisks {
     private Map<Platform, Collection<DiskType>> diskTypes;
+
     private Map<Platform, DiskType> defaultDisks;
+
     private Map<Platform, Map<String, VolumeParameterType>> diskMappings;
 
     public PlatformDisks(Map<Platform, Collection<DiskType>> diskTypes, Map<Platform, DiskType> defaultDisks,

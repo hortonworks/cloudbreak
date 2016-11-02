@@ -51,6 +51,7 @@ public class ClusterRequest {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME, required = true)
     private String userName;
+
     @NotNull
     @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
@@ -108,6 +109,7 @@ public class ClusterRequest {
 
     @ApiModelProperty(value = ClusterModelDescription.ENABLE_SHIPYARD)
     private Boolean enableShipyard = Boolean.FALSE;
+
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
     private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
 

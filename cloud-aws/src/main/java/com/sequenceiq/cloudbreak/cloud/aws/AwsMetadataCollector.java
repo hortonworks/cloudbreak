@@ -41,14 +41,18 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 @Service
 public class AwsMetadataCollector implements MetadataCollector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMetadataCollector.class);
+
     private static final String TAG_NAME = "cbname";
 
     @Inject
     private AwsClient awsClient;
+
     @Inject
     private CloudFormationStackUtil cloudFormationStackUtil;
+
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
+
     @Inject
     private AwsPollTaskFactory awsPollTaskFactory;
 

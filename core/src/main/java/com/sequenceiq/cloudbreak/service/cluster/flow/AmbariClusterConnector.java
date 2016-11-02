@@ -100,69 +100,103 @@ import groovyx.net.http.HttpResponseException;
 @Service
 public class AmbariClusterConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
+
     private static final String REALM = "NODE.DC1.CONSUL";
+
     private static final String DOMAIN = "node.dc1.consul";
+
     private static final String KEY_TYPE = "PERSISTED";
+
     private static final String PRINCIPAL = "/admin";
+
     private static final String FQDN = "fqdn";
+
     private static final String ADMIN = "admin";
 
     @Inject
     private StackRepository stackRepository;
+
     @Inject
     private ClusterRepository clusterRepository;
+
     @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;
+
     @Inject
     private HostGroupService hostGroupService;
+
     @Inject
     private AmbariOperationService ambariOperationService;
+
     @Inject
     private PollingService<AmbariHostsCheckerContext> hostsPollingService;
+
     @Inject
     private HadoopConfigurationService hadoopConfigurationService;
+
     @Inject
     private AmbariClientProvider ambariClientProvider;
+
     @Inject
     private CloudbreakEventService eventService;
+
     @Inject
     private RecipeEngine recipeEngine;
+
     @Inject
     private AmbariHostsStatusCheckerTask ambariHostsStatusCheckerTask;
+
     @Inject
     private PollingService<AmbariHostsCheckerContext> ambariHostJoin;
+
     @Inject
     private PollingService<AmbariClientPollerObject> ambariHealthChecker;
+
     @Inject
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
+
     @Inject
     private AmbariStartupListenerTask ambariStartupListenerTask;
+
     @Inject
     private AmbariHealthCheckerTask ambariHealthCheckerTask;
+
     @Inject
     private AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask;
+
     @Inject
     private HostMetadataRepository hostMetadataRepository;
+
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
+
     @Resource
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+
     @Inject
     private BlueprintProcessor blueprintProcessor;
+
     @Inject
     private TlsSecurityService tlsSecurityService;
+
     @Inject
     private SmartSenseConfigProvider smartSenseConfigProvider;
+
     @Inject
     private ZeppelinConfigProvider zeppelinConfigProvider;
+
     @Inject
     private RDSConfigProvider rdsConfigProvider;
+
     @Inject
     private AutoRecoveryConfigProvider autoRecoveryConfigProvider;
+
     @Inject
     private ImageService imageService;
+
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+
     @Inject
     private AmbariViewProvider ambariViewProvider;
 

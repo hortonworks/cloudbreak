@@ -17,6 +17,7 @@ public class FlowMessageService {
 
     @Inject
     private CloudbreakMessagesService messagesService;
+
     @Inject
     private CloudbreakEventService cloudbreakEventService;
 

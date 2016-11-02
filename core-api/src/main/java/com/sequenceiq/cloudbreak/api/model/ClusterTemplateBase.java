@@ -12,8 +12,10 @@ public abstract class ClusterTemplateBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ClusterTemplateModelDescription.NAME, required = true)
     private String name;
+
     @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.TEMPLATE)
     private String template;
+
     @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.TYPE)
     private ClusterTemplateType type;
 

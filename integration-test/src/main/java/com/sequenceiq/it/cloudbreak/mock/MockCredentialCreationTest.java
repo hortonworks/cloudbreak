@@ -19,6 +19,7 @@ import com.sequenceiq.it.util.ResourceUtil;
 public class MockCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.mockcredential.name}")
     private String defaultName;
+
     @Value("${integrationtest.mockcredential.publicKeyFile}")
     private String defaultPublicKeyFile;
 

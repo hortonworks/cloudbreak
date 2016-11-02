@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 public class ClusterScaleContext extends CommonContext {
 
     private final Stack stack;
+
     private final String hostGroupName;
 
     public ClusterScaleContext(String flowId, Stack stack, String hostGroupName) {

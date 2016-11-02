@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 
 public class StackEvent implements Selectable {
     private String selector;
+
     private Long stackId;
 
     public StackEvent(Long stackId) {

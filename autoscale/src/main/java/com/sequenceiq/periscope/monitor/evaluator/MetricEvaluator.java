@@ -26,13 +26,17 @@ import com.sequenceiq.periscope.utils.ClusterUtils;
 public class MetricEvaluator extends AbstractEventPublisher implements EvaluatorExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricEvaluator.class);
+
     private static final String ALERT_STATE = "state";
+
     private static final String ALERT_TS = "timestamp";
 
     @Autowired
     private ClusterService clusterService;
+
     @Autowired
     private MetricAlertRepository alertRepository;
+
     @Autowired
     private AmbariClientProvider ambariClientProvider;
 

@@ -28,12 +28,16 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 @Service
 public class InstanceTerminationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTerminationService.class);
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private StackScalingService stackScalingService;
+
     @Inject
     private FlowMessageService flowMessageService;
+
     @Inject
     private HostMetadataRepository hostMetadataRepository;
 

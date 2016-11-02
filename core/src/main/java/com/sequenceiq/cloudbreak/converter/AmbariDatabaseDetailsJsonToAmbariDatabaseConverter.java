@@ -12,14 +12,19 @@ public class AmbariDatabaseDetailsJsonToAmbariDatabaseConverter extends Abstract
 
     @Value("${cb.ambari.database.vendor}")
     private String vendor;
+
     @Value("${cb.ambari.database.name}")
     private String name;
+
     @Value("${cb.ambari.database.host}")
     private String host;
+
     @Value("${cb.ambari.database.port}")
     private Integer port;
+
     @Value("${cb.ambari.database.username}")
     private String userName;
+
     @Value("${cb.ambari.database.password}")
     private String password;
 

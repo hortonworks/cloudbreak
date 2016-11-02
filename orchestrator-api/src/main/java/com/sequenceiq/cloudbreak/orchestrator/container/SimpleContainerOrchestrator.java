@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 public abstract class SimpleContainerOrchestrator implements ContainerOrchestrator {
 
     private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
+
     private ExitCriteria exitCriteria;
 
     @Override

@@ -26,7 +26,9 @@ public class SimpleOrchestratorBootstrapRunnerTest {
     public class MockBootstrapRunner implements OrchestratorBootstrap {
 
         private int count;
+
         private int retryOk = 2;
+
         private final Map<String, String> mdcMap;
 
         public MockBootstrapRunner(int retryOk, Map<String, String> mdcMap) {

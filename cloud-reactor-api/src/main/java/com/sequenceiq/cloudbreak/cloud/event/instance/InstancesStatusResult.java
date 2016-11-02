@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 public class InstancesStatusResult {
 
     private final CloudContext cloudContext;
+
     private final List<CloudVmInstanceStatus> results;
 
     public InstancesStatusResult(CloudContext cloudContext, List<CloudVmInstanceStatus> results) {

@@ -43,18 +43,25 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 @Configuration
 public class StackUpscaleActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUpscaleActions.class);
+
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
+
     @Inject
     private CloudResourceToResourceConverter resourceConverter;
+
     @Inject
     private InstanceMetadataService instanceMetadataService;
+
     @Inject
     private StackUpscaleService stackUpscaleService;
+
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
     @Inject
     private FlowMessageService flowMessageService;
 

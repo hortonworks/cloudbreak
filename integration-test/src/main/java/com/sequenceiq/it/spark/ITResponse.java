@@ -14,13 +14,21 @@ import spark.Route;
 public abstract class ITResponse implements Route {
 
     public static final String DOCKER_API_ROOT = "/docker/v1.18";
+
     public static final String SWARM_API_ROOT = "/swarm/v1.18";
+
     public static final String CONSUL_API_ROOT = "/v1";
+
     public static final String AMBARI_API_ROOT = "/api/v1";
+
     public static final String MOCK_ROOT = "/spi";
+
     public static final String SALT_API_ROOT = "/saltapi";
+
     public static final String SALT_BOOT_ROOT = "/saltboot";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ITResponse.class);
+
     private static final String MOCKRESPONSE = "/mockresponse/";
 
     private ObjectMapper objectMapper = new ObjectMapper();

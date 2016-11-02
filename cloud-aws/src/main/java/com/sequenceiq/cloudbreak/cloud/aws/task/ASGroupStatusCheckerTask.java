@@ -31,16 +31,25 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "aSGroupStatusCheckerTask";
 
     private static final int MAX_INSTANCE_ID_SIZE = 100;
+
     private static final int INSTANCE_RUNNING = 16;
+
     private static final int COMPLETED = 100;
+
     private static final String CANCELLED = "Cancelled";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ASGroupStatusCheckerTask.class);
 
     private String autoScalingGroupName;
+
     private Integer requiredInstances;
+
     private AwsClient awsClient;
+
     private CloudFormationStackUtil cloudFormationStackUtil;
+
     private AmazonAutoScalingClient autoScalingClient;
+
     private Optional<Activity> latestActivity;
 
     public ASGroupStatusCheckerTask(AuthenticatedContext authenticatedContext, String asGroupName, Integer requiredInstances, AwsClient awsClient,

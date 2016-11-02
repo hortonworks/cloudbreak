@@ -15,7 +15,9 @@ import com.sequenceiq.periscope.service.ClusterService;
 public abstract class AbstractMonitor implements Monitor {
 
     private ClusterService clusterService;
+
     private ApplicationContext applicationContext;
+
     private ExecutorService executorService;
 
     @Override

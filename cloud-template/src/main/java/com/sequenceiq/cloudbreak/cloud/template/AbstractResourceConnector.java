@@ -38,10 +38,13 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
     @Inject
     private NetworkResourceService networkResourceService;
+
     @Inject
     private GroupResourceService groupResourceService;
+
     @Inject
     private ComputeResourceService computeResourceService;
+
     @Inject
     private ContextBuilders contextBuilders;
 

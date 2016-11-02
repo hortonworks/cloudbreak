@@ -5,7 +5,9 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 public class ArmInteractiveLoginStatusCheckerContext {
 
     private Boolean cancelled = false;
+
     private String deviceCode;
+
     private ExtendedCloudCredential extendedCloudCredential;
 
     public ArmInteractiveLoginStatusCheckerContext(String deviceCode, ExtendedCloudCredential extendedCloudCredential) {

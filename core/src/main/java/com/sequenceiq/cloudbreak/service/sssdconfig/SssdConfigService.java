@@ -31,12 +31,16 @@ public class SssdConfigService {
 
     @Value("${cb.sssd.name}")
     private String sssdName;
+
     @Value("${cb.sssd.type}")
     private String sssdType;
+
     @Value("${cb.sssd.url}")
     private String sssdUrl;
+
     @Value("${cb.sssd.schema}")
     private String sssdSchema;
+
     @Value("${cb.sssd.base}")
     private String sssdBase;
 

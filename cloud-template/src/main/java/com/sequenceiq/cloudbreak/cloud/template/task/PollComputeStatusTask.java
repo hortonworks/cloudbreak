@@ -19,7 +19,9 @@ public class PollComputeStatusTask extends AbstractPollTask<List<CloudVmInstance
     public static final String NAME = "pollComputeStatusTask";
 
     private ComputeResourceBuilder builder;
+
     private ResourceBuilderContext context;
+
     private CloudInstance instance;
 
     public PollComputeStatusTask(AuthenticatedContext auth, ComputeResourceBuilder builder, ResourceBuilderContext context, CloudInstance instance) {

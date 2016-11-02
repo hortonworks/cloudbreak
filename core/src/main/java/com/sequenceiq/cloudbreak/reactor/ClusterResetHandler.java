@@ -17,10 +17,13 @@ import reactor.bus.EventBus;
 @Component
 public class ClusterResetHandler implements ClusterEventHandler<ClusterResetRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterResetHandler.class);
+
     @Inject
     private EventBus eventBus;
+
     @Inject
     private StackService stackService;
+
     @Inject
     private AmbariClusterResetService ambariClusterResetService;
 

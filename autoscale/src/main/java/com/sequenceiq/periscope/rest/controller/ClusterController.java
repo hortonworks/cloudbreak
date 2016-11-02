@@ -30,12 +30,16 @@ public class ClusterController implements ClusterEndpoint {
 
     @Autowired
     private ClusterService clusterService;
+
     @Autowired
     private AmbariConverter ambariConverter;
+
     @Autowired
     private ClusterConverter clusterConverter;
+
     @Autowired
     private ClusterSecurityService clusterSecurityService;
+
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
 

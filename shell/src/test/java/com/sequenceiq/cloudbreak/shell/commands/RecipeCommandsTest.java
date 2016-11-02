@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
 public class RecipeCommandsTest {
     private static final Long RECIPE_ID = 50L;
+
     private static final String RECIPE_NAME = "dummyName";
 
     @InjectMocks

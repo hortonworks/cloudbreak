@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class ClusterUpscaleContext extends ClusterContext {
     private final String hostGroupName;
+
     private final Integer adjustment;
 
     public ClusterUpscaleContext(String flowId, Stack stack, String hostGroupName, Integer adjustment) {

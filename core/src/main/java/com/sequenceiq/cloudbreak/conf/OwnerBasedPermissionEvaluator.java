@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
     private static final String AUTO_SCALE_SCOPE = "cloudbreak.autoscale";
+
     private UserDetailsService userDetailsService;
 
     @Override

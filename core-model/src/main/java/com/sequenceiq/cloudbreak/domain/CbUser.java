@@ -8,11 +8,17 @@ import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 public class CbUser {
 
     private final String userId;
+
     private final String username;
+
     private final String account;
+
     private final List<CbUserRole> roles;
+
     private final String givenName;
+
     private final String familyName;
+
     private final Date created;
 
     public CbUser(String userId, String username, String account, List<CbUserRole> roles, String givenName, String familyName, Date created) {

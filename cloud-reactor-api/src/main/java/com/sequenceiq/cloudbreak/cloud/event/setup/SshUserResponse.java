@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 public class SshUserResponse<T> {
 
     private CloudContext cloudContext;
+
     private String user;
 
     public SshUserResponse(CloudContext cloudContext, String user) {

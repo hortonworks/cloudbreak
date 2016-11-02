@@ -22,7 +22,9 @@ public class FlowChains {
 
     @Inject
     private EventBus eventBus;
+
     private Map<String, Queue<Selectable>> flowChainMap = new ConcurrentHashMap<>();
+
     private Map<String, String> flowChainParentMap = new ConcurrentHashMap<>();
 
     public void putFlowChain(String flowChainId, String parentFlowChainId, Queue<Selectable> flowChain) {

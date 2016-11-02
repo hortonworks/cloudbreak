@@ -14,9 +14,11 @@ public class InstanceGroupAdjustmentJson {
     @NotNull
     @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
     private String instanceGroup;
+
     @NotNull
     @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer scalingAdjustment;
+
     @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.WITH_CLUSTER_EVENT)
     private Boolean withClusterEvent = Boolean.FALSE;
 

@@ -10,11 +10,17 @@ import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 
 public class FlowAdapter<S extends FlowState, E> implements Flow {
     private final String flowId;
+
     private final StateMachine<S, E> flowMachine;
+
     private final StateConverter<S> stateConverter;
+
     private final EventConverter<E> eventConverter;
+
     private final MessageFactory<E> messageFactory;
+
     private boolean flowFailed;
+
     private final Class<? extends FlowConfiguration> flowConfigClass;
 
     public FlowAdapter(String flowId, StateMachine<S, E> flowMachine, MessageFactory<E> messageFactory, StateConverter<S> stateConverter,

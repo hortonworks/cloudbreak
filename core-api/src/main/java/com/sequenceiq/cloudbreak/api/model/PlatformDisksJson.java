@@ -14,8 +14,10 @@ public class PlatformDisksJson implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DISK_TYPES)
     private Map<String, Collection<String>> diskTypes;
+
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DEFAULT_DISKS)
     private Map<String, String> defaultDisks;
+
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DISK_MAPPINGS)
     private Map<String, Map<String, String>> diskMappings;
 

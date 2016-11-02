@@ -20,6 +20,7 @@ public class InteractiveCredentialCreationHandler implements ClusterEventHandler
 
     @Inject
     private CredentialService credentialService;
+
     @Inject
     private ExtendedCloudCredentialToCredentialConverter extendedCloudCredentialToCredentialConverter;
 

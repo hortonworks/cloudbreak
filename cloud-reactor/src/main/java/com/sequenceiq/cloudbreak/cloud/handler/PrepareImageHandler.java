@@ -25,6 +25,7 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Inject
     private EventBus eventBus;
 

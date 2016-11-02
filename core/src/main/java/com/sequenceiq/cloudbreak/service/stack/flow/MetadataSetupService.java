@@ -28,12 +28,16 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 @Service
 public class MetadataSetupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupService.class);
+
     @Inject
     private ServiceProviderMetadataAdapter metadata;
+
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
+
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
     @Inject
     private ClusterService clusterService;
 

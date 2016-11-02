@@ -11,6 +11,7 @@ public class SssdConfigResponse extends SssdConfigBase {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
+
     @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
 

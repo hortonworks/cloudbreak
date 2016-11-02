@@ -10,6 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 public class VersionedApplication {
 
     public static final String LONG_VERSION = "--version";
+
     public static final String SHORT_VERSION = "-v";
 
     private VersionedApplication() {

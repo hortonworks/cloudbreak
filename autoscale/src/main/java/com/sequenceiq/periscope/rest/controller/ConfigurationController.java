@@ -13,6 +13,7 @@ public class ConfigurationController implements ConfigurationEndpoint {
 
     @Autowired
     private ClusterService clusterService;
+
     @Autowired
     private ClusterConverter clusterConverter;
 

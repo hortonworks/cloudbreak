@@ -26,6 +26,7 @@ public class ArmStorageStatusCheckerTask extends PollBooleanStateTask {
 
     @Inject
     private ArmClient armClient;
+
     private StorageCheckerContext storageCheckerContext;
 
     public ArmStorageStatusCheckerTask(AuthenticatedContext authenticatedContext, StorageCheckerContext storageCheckerContext) {

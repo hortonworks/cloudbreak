@@ -20,7 +20,9 @@ public class MunchausenBootstrap implements OrchestratorBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(MunchausenBootstrap.class);
 
     private final DockerClient docker;
+
     private final String[] cmd;
+
     private final String containerName;
 
     public MunchausenBootstrap(DockerClient docker, String containerName, String[] cmd) {

@@ -3,9 +3,13 @@ package com.sequenceiq.cloudbreak.cloud.model;
 public class VolumeParameterConfig {
 
     private VolumeParameterType volumeParameterType;
+
     private Integer minimumSize;
+
     private Integer maximumSize;
+
     private Integer minimumNumber;
+
     private Integer maximumNumber;
 
     public VolumeParameterConfig(VolumeParameterType volumeParameterType,

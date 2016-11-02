@@ -19,12 +19,16 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 @Service
 public class ClusterResetService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterResetService.class);
+
     @Inject
     private FlowMessageService flowMessageService;
+
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private EmailSenderService emailSenderService;
 

@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 public class Image {
 
     private final String imageName;
+
     private final Map<InstanceGroupType, String> userdata;
 
     public Image(@JsonProperty("imageName") String imageName,

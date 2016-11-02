@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public class ClusterDeletionBasedExitCriteriaModel extends ExitCriteriaModel {
     private Long stackId;
+
     private Long clusterId;
 
     public ClusterDeletionBasedExitCriteriaModel(Long stackId, Long clusterId) {

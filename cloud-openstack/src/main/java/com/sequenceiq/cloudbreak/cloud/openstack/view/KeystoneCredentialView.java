@@ -7,12 +7,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class KeystoneCredentialView {
     public static final String CB_KEYSTONE_V2 = "cb-keystone-v2";
+
     public static final String CB_KEYSTONE_V3_DEFAULT_SCOPE = "cb-keystone-v3-default-scope";
+
     public static final String CB_KEYSTONE_V3_PROJECT_SCOPE = "cb-keystone-v3-project-scope";
+
     public static final String CB_KEYSTONE_V3_DOMAIN_SCOPE = "cb-keystone-v3-domain-scope";
 
     private static final String CB_KEYPAIR_NAME = "cb";
+
     private CloudCredential cloudCredential;
+
     private String stackName;
 
     public KeystoneCredentialView(AuthenticatedContext authenticatedContext) {

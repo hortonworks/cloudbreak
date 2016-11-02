@@ -5,16 +5,27 @@ import com.sequenceiq.periscope.api.model.Json;
 public class AppReportJson implements Json {
 
     private String appId;
+
     private String user;
+
     private String queue;
+
     private String state;
+
     private String url;
+
     private long start;
+
     private long finish;
+
     private float progress;
+
     private int usedContainers;
+
     private int reservedContainers;
+
     private int usedMemory;
+
     private int usedVCores;
 
     public String getAppId() {

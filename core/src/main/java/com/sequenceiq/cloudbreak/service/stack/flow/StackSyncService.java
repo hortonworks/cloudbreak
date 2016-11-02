@@ -53,24 +53,34 @@ public class StackSyncService {
 
     @Inject
     private StackService stackService;
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private CloudbreakEventService eventService;
+
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
+
     @Inject
     private HostMetadataRepository hostMetadataRepository;
+
     @Inject
     private ResourceRepository resourceRepository;
+
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
+
     @Inject
     private AmbariDecommissioner ambariDecommissioner;
+
     @Inject
     private ServiceProviderMetadataAdapter metadata;
+
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 

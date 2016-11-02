@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 @Component
 public class AccountPreferencesToJsonConverter extends AbstractConversionServiceAwareConverter<AccountPreferences, AccountPreferencesJson> {
     private static final long HOUR_IN_MS = 3600000L;
+
     private static final long ZERO = 0L;
 
     @Override

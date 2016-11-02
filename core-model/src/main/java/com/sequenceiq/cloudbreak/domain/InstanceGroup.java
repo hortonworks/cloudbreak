@@ -37,19 +37,26 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "instancegroup_generator")
     @SequenceGenerator(name = "instancegroup_generator", sequenceName = "instancegroup_id_seq", allocationSize = 1)
     private Long id;
+
     @OneToOne
     private Template template;
+
     @OneToOne
     private SecurityGroup securityGroup;
+
     @Column(nullable = false)
     private Integer nodeCount;
+
     @Column(nullable = false)
     private String groupName;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InstanceGroupType instanceGroupType = InstanceGroupType.CORE;
+
     @ManyToOne
     private Stack stack;
+
     @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
 

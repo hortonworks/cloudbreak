@@ -76,7 +76,6 @@ public class ClusterBootstrapperErrorHandlerTest {
     @Mock
     private ServiceProviderMetadataAdapter metadata;
 
-
     @InjectMocks
     private ClusterBootstrapperErrorHandler underTest;
 

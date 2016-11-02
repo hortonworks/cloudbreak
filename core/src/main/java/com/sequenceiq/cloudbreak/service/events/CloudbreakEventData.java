@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.service.events;
 
 public class CloudbreakEventData {
     private Long entityId;
+
     private String eventType;
+
     private String eventMessage;
 
     public CloudbreakEventData(Long entityId, String eventType, String eventMessage) {

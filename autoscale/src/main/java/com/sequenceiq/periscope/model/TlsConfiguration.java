@@ -3,7 +3,9 @@ package com.sequenceiq.periscope.model;
 public class TlsConfiguration {
 
     private String clientKeyPath;
+
     private String clientCertPath;
+
     private String serverCertPath;
 
     public TlsConfiguration(String clientKeyPath, String clientCertPath, String serverCertPath) {

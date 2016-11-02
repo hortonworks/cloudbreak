@@ -20,9 +20,13 @@ import com.sequenceiq.cloudbreak.domain.Template;
 public final class ServiceTestUtils {
 
     public static final String DUMMY_OWNER = "gipsz@jakab.kom";
+
     public static final String DUMMY_ACCOUNT = "acmecorp";
+
     public static final String PUBLIC_KEY = "mypublickey";
+
     private static final String C3LARGE_INSTANCE = "c3.large";
+
     private static final String N1_STANDARD_1 = "n1-standard-1";
 
     private ServiceTestUtils() {

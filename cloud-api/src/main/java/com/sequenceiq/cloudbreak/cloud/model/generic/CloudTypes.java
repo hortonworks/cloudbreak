@@ -4,6 +4,7 @@ import java.util.Collection;
 
 public abstract class CloudTypes<T> {
     private final Collection<T> types;
+
     private final T defaultType;
 
     public CloudTypes(Collection<T> types, T defaultType) {

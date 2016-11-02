@@ -19,11 +19,14 @@ import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 @Component
 public class JsonToCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialRequest, Credential> {
     private static final String SSH_USER_CENT = "centos";
+
     private static final String SSH_USER_CB = "cloudbreak";
+
     private static final String SSH_USER_EC2 = "ec2-user";
 
     @Inject
     private CredentialDefinitionService credentialDefinitionService;
+
     @Inject
     private TopologyService topologyService;
 

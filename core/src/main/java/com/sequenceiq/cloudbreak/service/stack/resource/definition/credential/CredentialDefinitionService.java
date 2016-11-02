@@ -20,10 +20,12 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class CredentialDefinitionService {
 
     private static final String SELECTOR = "selector";
+
     private static final String RESOURCE_TYPE = "credential";
 
     @Inject
     private ResourceDefinitionService definitionService;
+
     @Inject
     private PBEStringCleanablePasswordEncryptor encryptor;
 

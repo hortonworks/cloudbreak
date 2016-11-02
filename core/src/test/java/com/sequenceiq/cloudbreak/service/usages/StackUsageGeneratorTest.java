@@ -36,14 +36,18 @@ import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
 public class StackUsageGeneratorTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUsageGeneratorTest.class);
+
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @InjectMocks
     private StackUsageGenerator underTest;
+
     @Mock
     private CloudbreakEventRepository eventRepository;
+
     @Mock
     private IntervalStackUsageGenerator intervalUsageGenerator;
+
     @Mock
     private CloudbreakUsage cloudbreakUsage;
 

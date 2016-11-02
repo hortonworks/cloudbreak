@@ -5,6 +5,7 @@ import java.util.Map;
 public class SaltPillarProperties {
 
     private String path;
+
     private Map<String, Object> properties;
 
     public SaltPillarProperties(String path, Map<String, Object> properties) {

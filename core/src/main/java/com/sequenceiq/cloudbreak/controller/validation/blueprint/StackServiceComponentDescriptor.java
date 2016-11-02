@@ -4,8 +4,11 @@ public class StackServiceComponentDescriptor {
     private static final String MASTER = "MASTER";
 
     private String name;
+
     private String category;
+
     private int minCardinality;
+
     private int maxCardinality;
 
     public StackServiceComponentDescriptor(String name, String category, int minCardinality, int maxCardinality) {

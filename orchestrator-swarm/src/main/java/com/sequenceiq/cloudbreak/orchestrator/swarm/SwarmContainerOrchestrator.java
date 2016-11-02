@@ -56,9 +56,13 @@ import com.sequenceiq.cloudbreak.orchestrator.swarm.containers.SwarmOrchestrator
 @Component
 public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SwarmContainerOrchestrator.class);
+
     private static final int READ_TIMEOUT = 180_000;
+
     private static final String MUNCHAUSEN_WAIT = "3600";
+
     private static final int MAX_IP_FOR_ONE_REQUEST = 600;
+
     private static final String ENV_KEY_VALUE_SEPARATOR = "=";
 
 

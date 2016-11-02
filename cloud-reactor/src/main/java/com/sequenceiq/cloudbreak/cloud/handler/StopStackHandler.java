@@ -33,10 +33,13 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Inject
     private PollTaskFactory statusCheckFactory;
+
     @Inject
     private SyncPollingScheduler<InstancesStatusResult> syncPollingScheduler;
+
     @Inject
     private EventBus eventBus;
 

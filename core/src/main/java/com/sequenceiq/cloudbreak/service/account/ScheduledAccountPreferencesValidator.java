@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 @Service
 public class ScheduledAccountPreferencesValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduledAccountPreferencesValidator.class);
+
     private static final String EVERY_HOUR_0MIN_0SEC = "0 0 * * * *";
 
     @Inject

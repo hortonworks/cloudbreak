@@ -20,6 +20,7 @@ import reactor.bus.EventBus;
 public class HostMetadataSetupHandler implements ReactorEventHandler<HostMetadataSetupRequest> {
     @Inject
     private EventBus eventBus;
+
     @Inject
     private HostMetadataSetup hostMetadataSetup;
 

@@ -13,9 +13,11 @@ public class UserNamePasswordJson {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.UserNamePasswordModelDescription.NEW_USER_NAME, required = true)
     private String userName;
+
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.UserNamePasswordModelDescription.OLD_PASSWORD, required = true)
     private String oldPassword;
+
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.UserNamePasswordModelDescription.NEW_PASSWORD, required = true)
     private String password;

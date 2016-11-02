@@ -15,10 +15,13 @@ import mesosphere.marathon.client.utils.MarathonException;
 
 public class MarathonTaskDeletion implements OrchestratorBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarathonAppDeletion.class);
+
     private static final Integer STATUS_NOT_FOUND = 404;
 
     private final Marathon client;
+
     private final String appId;
+
     private final Set<String> taskIds;
 
     public MarathonTaskDeletion(Marathon client, String appId, Set<String> taskIds) {

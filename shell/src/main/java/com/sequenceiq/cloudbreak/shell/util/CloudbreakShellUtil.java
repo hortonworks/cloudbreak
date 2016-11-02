@@ -15,8 +15,11 @@ import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 @Component
 public class CloudbreakShellUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakShellUtil.class);
+
     private static final int MAX_RETRY = 360;
+
     private static final int POLLING_INTERVAL = 10000;
+
     private static final int MAX_ATTEMPT = 3;
 
     @Inject
@@ -91,6 +94,7 @@ public class CloudbreakShellUtil {
     public class WaitResult {
 
         private WaitResultStatus waitResultStatus;
+
         private String reason;
 
         public WaitResult(WaitResultStatus waitResultStatus, String reason) {

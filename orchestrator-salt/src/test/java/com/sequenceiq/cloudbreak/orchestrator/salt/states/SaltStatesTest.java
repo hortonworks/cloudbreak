@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 public class SaltStatesTest {
 
     private SaltConnector saltConnector;
+
     private Target<String> target;
 
     @Captor

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 public class MockSetup implements Setup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockSetup.class);
+
     private static final int FINISHED_PROGRESS_VALUE = 100;
 
     @Override

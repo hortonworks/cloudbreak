@@ -8,9 +8,13 @@ import net.schmizz.sshj.transport.verification.HostKeyVerifier;
 public class SshCheckerTaskContext extends StackContext {
 
     private HostKeyVerifier hostKeyVerifier;
+
     private String publicIp;
+
     private int sshPort;
+
     private String user;
+
     private String sshPrivateFileLocation;
 
     public SshCheckerTaskContext(Stack stack, HostKeyVerifier hostKeyVerifier, String publicIp, int sshPort, String user, String sshPrivateFileLocation) {

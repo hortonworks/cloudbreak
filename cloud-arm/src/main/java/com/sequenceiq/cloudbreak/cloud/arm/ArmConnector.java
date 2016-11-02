@@ -20,18 +20,25 @@ public class ArmConnector implements CloudConnector {
 
     @Inject
     private ArmClient armClient;
+
     @Inject
     private ArmResourceConnector armResourceConnector;
+
     @Inject
     private ArmInstanceConnector armInstanceConnector;
+
     @Inject
     private ArmMetadataCollector armMetadataCollector;
+
     @Inject
     private ArmCredentialConnector armCredentialConnector;
+
     @Inject
     private ArmPlatformParameters armPlatformParameters;
+
     @Inject
     private ArmSetup armSetup;
+
     @Inject
     private ArmAuthenticator armAuthenticator;
 

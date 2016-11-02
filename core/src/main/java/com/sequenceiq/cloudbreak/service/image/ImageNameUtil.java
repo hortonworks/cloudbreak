@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.HDPInfo;
 public class ImageNameUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageNameUtil.class);
+
     private static final String DEFAULT = "default";
 
     @Inject

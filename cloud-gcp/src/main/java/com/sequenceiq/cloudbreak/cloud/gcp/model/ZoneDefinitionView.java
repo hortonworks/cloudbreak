@@ -6,18 +6,25 @@ public class ZoneDefinitionView {
 
     @JsonProperty("id")
     private String id;
+
     @JsonProperty("kind")
     private String kind;
+
     @JsonProperty("creationTimestamp")
     private String creationTimestamp;
+
     @JsonProperty("name")
     private String name;
+
     @JsonProperty("description")
     private String description;
+
     @JsonProperty("status")
     private String status;
+
     @JsonProperty("region")
     private String region;
+
     @JsonProperty("selfLink")
     private String selfLink;
 

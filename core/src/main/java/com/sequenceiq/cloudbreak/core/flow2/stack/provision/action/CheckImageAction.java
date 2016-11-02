@@ -24,12 +24,16 @@ import reactor.fn.timer.Timer;
 @Component("CheckImageAction")
 public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckImageAction.class);
+
     private static final int REPEAT_TIME = 5000;
+
     private static final int FAULT_TOLERANCE = 5;
+
     private static final String IMAGE_COPY_FAULT_NUM = "IMAGE_COPY_FAULT_NUM";
 
     @Inject
     private StackCreationService stackCreationService;
+
     @Inject
     private Timer timer;
 

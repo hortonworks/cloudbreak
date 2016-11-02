@@ -6,8 +6,11 @@ import java.util.Map;
 public class RecipeModel {
 
     private String name;
+
     private String preInstall;
+
     private String postInstall;
+
     private Map<String, String> keyValues = new HashMap<>();
 
     public RecipeModel(String name) {

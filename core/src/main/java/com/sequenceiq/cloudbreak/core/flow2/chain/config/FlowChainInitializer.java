@@ -19,8 +19,10 @@ import reactor.bus.selector.Selectors;
 public class FlowChainInitializer {
     @Inject
     private EventBus reactor;
+
     @Inject
     private FlowChainHandler flowChainHandler;
+
     @Resource
     private List<FlowEventChainFactory> flowChainFactories;
 

@@ -46,14 +46,19 @@ public class ArmResourceConnector implements ResourceConnector {
 
     @Inject
     private ArmClient armClient;
+
     @Inject
     private ArmTemplateBuilder armTemplateBuilder;
+
     @Inject
     private ArmUtils armUtils;
+
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
+
     @Inject
     private ArmPollTaskFactory armPollTaskFactory;
+
     @Inject
     private ArmStorage armStorage;
 

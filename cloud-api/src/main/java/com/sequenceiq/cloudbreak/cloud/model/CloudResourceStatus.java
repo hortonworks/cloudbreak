@@ -3,8 +3,11 @@ package com.sequenceiq.cloudbreak.cloud.model;
 public class CloudResourceStatus {
 
     private CloudResource cloudResource;
+
     private ResourceStatus status;
+
     private String statusReason;
+
     private Long privateId;
 
     public CloudResourceStatus(CloudResource cloudResource, ResourceStatus status) {

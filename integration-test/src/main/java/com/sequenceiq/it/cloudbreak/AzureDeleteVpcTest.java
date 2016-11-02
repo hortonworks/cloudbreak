@@ -13,12 +13,16 @@ public class AzureDeleteVpcTest extends AbstractCloudbreakIntegrationTest {
 
     @Value("${integrationtest.azurermcredential.name}")
     private String defaultName;
+
     @Value("${integrationtest.azurermcredential.subscriptionId}")
     private String defaultSubscriptionId;
+
     @Value("${integrationtest.azurermcredential.secretKey}")
     private String defaultSecretKey;
+
     @Value("${integrationtest.azurermcredential.accessKey}")
     private String defaultAccesKey;
+
     @Value("${integrationtest.azurermcredential.tenantId}")
     private String defaultTenantId;
 

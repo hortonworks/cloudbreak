@@ -31,17 +31,23 @@ import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 public class ResourceStopStartThread implements Callable<ResourceRequestResult<List<CloudVmInstanceStatus>>> {
 
     public static final String NAME = "resourceStopStartThread";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceStopStartThread.class);
 
     @Inject
     private SyncPollingScheduler<List<CloudVmInstanceStatus>> syncPollingScheduler;
+
     @Inject
     private ResourcePollTaskFactory resourcePollTaskFactory;
 
     private final ResourceBuilderContext context;
+
     private final AuthenticatedContext auth;
+
     private final CloudResource resource;
+
     private final CloudInstance instance;
+
     private final ComputeResourceBuilder builder;
 
     public ResourceStopStartThread(ResourceBuilderContext context, AuthenticatedContext auth,

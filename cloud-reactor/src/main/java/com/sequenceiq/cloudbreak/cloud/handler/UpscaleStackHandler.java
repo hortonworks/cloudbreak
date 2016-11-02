@@ -35,12 +35,16 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Inject
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
+
     @Inject
     private PollTaskFactory statusCheckFactory;
+
     @Inject
     private PersistenceNotifier persistenceNotifier;
+
     @Inject
     private EventBus eventBus;
 

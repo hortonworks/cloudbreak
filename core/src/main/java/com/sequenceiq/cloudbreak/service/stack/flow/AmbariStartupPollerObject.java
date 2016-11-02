@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 public class AmbariStartupPollerObject extends StackContext {
 
     private String ambariIp;
+
     private AmbariClient ambariClient;
 
     public AmbariStartupPollerObject(Stack stack, String ambariIp, AmbariClient ambariClient) {

@@ -7,7 +7,9 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 public class FileSystem extends DynamicModel {
 
     private String name;
+
     private String type;
+
     private boolean defaultFs;
 
     public FileSystem(String name, String type, boolean defaultFs, Map<String, String> parameters) {

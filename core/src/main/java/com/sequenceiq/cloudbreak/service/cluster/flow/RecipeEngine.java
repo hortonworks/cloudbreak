@@ -43,21 +43,29 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class RecipeEngine {
 
     public static final Set<String> DEFAULT_RECIPES =  Sets.newHashSet("hdfs-home", "smartsense-capture-schedule");
+
     private static final String SSSD_CONFIG = "sssd-config-";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
     @Inject
     private TlsSecurityService tlsSecurityService;
+
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
+
     @Resource
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+
     @Inject
     private RecipeBuilder recipeBuilder;
+
     @Inject
     private OrchestratorRecipeExecutor orchestratorRecipeExecutor;
+
     @Inject
     private BlueprintProcessor blueprintProcessor;
+
     @Inject
     private SmartSenseConfigProvider smartSenseConfigProvider;
 

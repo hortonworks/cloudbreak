@@ -10,8 +10,11 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class StackStartStopContext extends CommonContext {
     private final Stack stack;
+
     private final List<InstanceMetaData> instanceMetaData;
+
     private final CloudContext cloudContext;
+
     private final CloudCredential cloudCredential;
 
     public StackStartStopContext(String flowId, Stack stack, List<InstanceMetaData> instanceMetaData,

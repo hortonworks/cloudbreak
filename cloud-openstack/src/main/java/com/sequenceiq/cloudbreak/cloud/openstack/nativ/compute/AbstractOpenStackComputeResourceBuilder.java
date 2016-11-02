@@ -37,6 +37,7 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
 
     @Inject
     private OpenStackResourceNameService resourceNameService;
+
     @Inject
     private OpenStackUtils utils;
 

@@ -65,12 +65,14 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 public class SaltOrchestrator implements HostOrchestrator {
 
     private static final int MAX_NODES = 5000;
+
     private static final int SLEEP_TIME = 10000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
     @Value("${cb.max.salt.new.service.retry:90}")
     private int maxRetry;
+
     @Value("${cb.max.salt.recipe.execution.retry:90}")
     private int maxRetryRecipe;
 
@@ -84,6 +86,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     private HostDiscoveryService hostDiscoveryService;
 
     private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
+
     private ExitCriteria exitCriteria;
 
     @Override

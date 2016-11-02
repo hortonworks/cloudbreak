@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 public class GcpProvisionSetup implements Setup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpProvisionSetup.class);
+
     private static final String READY = "READY";
 
     @Inject

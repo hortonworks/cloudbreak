@@ -33,10 +33,15 @@ public class AwsCommands implements CommandMarker {
     public static final String PLATFORM = "AWS";
 
     private ShellContext shellContext;
+
     private CredentialCommands baseCredentialCommands;
+
     private NetworkCommands baseNetworkCommands;
+
     private TemplateCommands baseTemplateCommands;
+
     private PlatformCommands basePlatformCommands;
+
     private StackCommands stackCommands;
 
     public AwsCommands(ShellContext shellContext,

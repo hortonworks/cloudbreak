@@ -25,16 +25,22 @@ public class OpenStackNativeConnector implements CloudConnector {
 
     @Inject
     private OpenStackCredentialConnector credentialConnector;
+
     @Inject
     private OpenStackAuthenticator authenticator;
+
     @Inject
     private OpenStackNativeResourceConnector resourceConnector;
+
     @Inject
     private OpenStackNativeInstanceConnector instanceConnector;
+
     @Inject
     private OpenStackSetup openStackSetup;
+
     @Inject
     private OpenStackParameters openStackParameters;
+
     @Inject
     private OpenStackNativeMetaDataCollector metadataCollector;
 

@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 @PrepareForTest(SaltStates.class)
 public class SaltJobIdTrackerTest {
 
-
     @Captor
     private ArgumentCaptor<Target<String>> targetCaptor;
 

@@ -16,10 +16,12 @@ import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 @Component
 public class CredentialToJsonConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialResponse> {
     private static final String PASSWORD_FIELD = "password";
+
     private static final String PASSWORD_PLACEHOLDER = "********";
 
     @Inject
     private CredentialDefinitionService credentialDefinitionService;
+
     @Inject
     private TopologyService topologyService;
 

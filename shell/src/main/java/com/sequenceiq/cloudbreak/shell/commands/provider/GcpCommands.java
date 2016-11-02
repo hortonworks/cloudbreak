@@ -33,13 +33,19 @@ import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 public class GcpCommands implements CommandMarker {
 
     public static final String PLATFORM = "GCP";
+
     private static final String P12_FILE_NOT_FOUND = "File not found with service account private key (p12) file.";
 
     private ShellContext shellContext;
+
     private CredentialCommands baseCredentialCommands;
+
     private NetworkCommands baseNetworkCommands;
+
     private TemplateCommands baseTemplateCommands;
+
     private PlatformCommands basePlatformCommands;
+
     private StackCommands stackCommands;
 
     public GcpCommands(ShellContext shellContext,

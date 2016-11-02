@@ -37,29 +37,39 @@ import com.sequenceiq.it.util.CleanupService;
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextTests {
     private static final int WITH_TYPE_LENGTH = 4;
+
     private static final Logger LOG = LoggerFactory.getLogger(CloudbreakTestSuiteInitializer.class);
 
     @Value("${integrationtest.cloudbreak.server}")
     private String defaultCloudbreakServer;
+
     @Value("${integrationtest.testsuite.cleanUpOnFailure}")
     private boolean cleanUpOnFailure;
+
     @Value("${integrationtest.defaultBlueprintName}")
     private String defaultBlueprintName;
+
     @Value("${integrationtest.testsuite.skipRemainingTestsAfterOneFailed}")
     private boolean skipRemainingSuiteTestsAfterOneFailed;
+
     @Value("${integrationtest.cleanup.cleanupBeforeStart}")
     private boolean cleanUpBeforeStart;
+
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
 
     @Inject
     private ITProps itProps;
+
     @Inject
     private TemplateAdditionHelper templateAdditionHelper;
+
     @Inject
     private SuiteContext suiteContext;
+
     @Inject
     private CleanupService cleanUpService;
+
     private IntegrationTestContext itContext;
 
     @BeforeSuite(dependsOnGroups = "suiteInit")

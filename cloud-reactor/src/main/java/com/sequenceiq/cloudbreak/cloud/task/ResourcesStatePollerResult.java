@@ -10,8 +10,11 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 public class ResourcesStatePollerResult {
 
     private CloudContext cloudContext;
+
     private ResourceStatus status;
+
     private String statusReason;
+
     private List<CloudResourceStatus> results;
 
     public ResourcesStatePollerResult(CloudContext cloudContext) {

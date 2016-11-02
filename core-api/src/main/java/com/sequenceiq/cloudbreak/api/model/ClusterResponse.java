@@ -16,47 +16,70 @@ public class ClusterResponse {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
+
     @ApiModelProperty(ModelDescriptions.NAME)
     private String name;
+
     @ApiModelProperty(ClusterModelDescription.STATUS)
     private String status;
+
     @ApiModelProperty(ClusterModelDescription.HOURS)
     private int hoursUp;
+
     @ApiModelProperty(ClusterModelDescription.MINUTES)
     private int minutesUp;
+
     @ApiModelProperty(ClusterModelDescription.CLUSTER_NAME)
     private String cluster;
+
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
+
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
+
     @ApiModelProperty(ClusterModelDescription.STATUS_REASON)
     private String statusReason;
+
     @ApiModelProperty(ModelDescriptions.StackModelDescription.AMBARI_IP)
     private String ambariServerIp;
+
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME)
     private String userName;
+
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD)
     private String password;
+
     private boolean secure;
+
     @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)
     private Boolean ldapRequired = false;
+
     @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
     private Long sssdConfigId;
+
     private Set<HostGroupResponse> hostGroups;
+
     private AmbariStackDetailsJson ambariStackDetails;
+
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_ID)
     private Long rdsConfigId;
+
     @ApiModelProperty(ClusterModelDescription.SERVICE_ENDPOINT_MAP)
     private Map<String, String> serviceEndPoints = new HashMap<>();
+
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy;
+
     @ApiModelProperty(ClusterModelDescription.ENABLE_SHIPYARD)
     private Boolean enableShipyard;
+
     @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
+
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
     private Map<String, Object> attributes;
+
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
     private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
 

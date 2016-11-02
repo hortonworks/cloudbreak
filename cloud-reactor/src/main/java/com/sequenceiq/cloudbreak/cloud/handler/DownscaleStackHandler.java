@@ -32,10 +32,13 @@ public class DownscaleStackHandler implements DownscaleStackExecuter, CloudPlatf
 
     @Inject
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
+
     @Inject
     private PollTaskFactory statusCheckFactory;
+
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Inject
     private EventBus eventBus;
 

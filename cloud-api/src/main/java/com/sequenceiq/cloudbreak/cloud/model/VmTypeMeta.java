@@ -6,14 +6,21 @@ import java.util.Map;
 public class VmTypeMeta {
 
     public static final String CPU = "Cpu";
+
     public static final String MEMORY = "Memory";
+
     public static final String MAXIMUM_PERSISTENT_DISKS_SIZE_GB = "maximumPersistentDisksSizeGb";
 
     private VolumeParameterConfig magneticConfig;
+
     private VolumeParameterConfig autoAttachedConfig;
+
     private VolumeParameterConfig ssdConfig;
+
     private VolumeParameterConfig ephemeralConfig;
+
     private VolumeParameterConfig st1Config;
+
     private Map<String, String> properties = new HashMap<>();
 
     public VmTypeMeta() {
@@ -70,10 +77,15 @@ public class VmTypeMeta {
     public static class VmTypeMetaBuilder {
 
         private VolumeParameterConfig magneticConfig;
+
         private VolumeParameterConfig autoAttachedConfig;
+
         private VolumeParameterConfig ssdConfig;
+
         private VolumeParameterConfig ephemeralConfig;
+
         private VolumeParameterConfig st1Config;
+
         private Map<String, String> properties = new HashMap<>();
 
         private VmTypeMetaBuilder() {

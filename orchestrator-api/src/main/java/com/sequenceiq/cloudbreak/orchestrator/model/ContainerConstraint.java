@@ -10,20 +10,33 @@ import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
 public class ContainerConstraint {
 
     private final String[] cmd;
+
     private final Integer instances;
+
     private final List<Integer> ports;
+
     private final List<List<String>> constraints;
+
     private Map<String, String> env;
+
     private final String networkMode;
+
     private final TcpPortBinding tcpPortBinding;
+
     private ContainerName containerName;
+
     private final Map<String, String> links;
+
     private final String appName;
 
     private List<String> hosts;
+
     private Map<String, String> volumeBinds;
+
     private Double cpu;
+
     private Double mem;
+
     private Double disk;
 
     private ContainerConstraint(ContainerConstraint.Builder builder) {
@@ -107,19 +120,33 @@ public class ContainerConstraint {
     public static class Builder {
 
         private String[] cmd;
+
         private List<Integer> ports = new ArrayList<>();
+
         private Double cpus;
+
         private Double mem;
+
         private Integer instances;
+
         private List<List<String>> constraints = new ArrayList<>();
+
         private Map<String, String> volumeBinds = new HashMap<>();
+
         private Map<String, String> env = new HashMap<>();
+
         private String networkMode;
+
         private TcpPortBinding tcpPortBinding;
+
         private List<String> hosts = new ArrayList<>();
+
         private ContainerName containerName;
+
         private Map<String, String> links = new HashMap<>();
+
         private String appName;
+
         private Double disk;
 
         public Builder containerConstraint(ContainerConstraint containerConstraint) {

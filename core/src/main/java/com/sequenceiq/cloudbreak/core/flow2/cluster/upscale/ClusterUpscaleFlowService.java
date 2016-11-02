@@ -32,18 +32,25 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 @Component
 public class ClusterUpscaleFlowService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleFlowService.class);
+
     @Inject
     private StackService stackService;
+
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private FlowMessageService flowMessageService;
+
     @Inject
     private EmailSenderService emailSenderService;
+
     @Inject
     private StackUpdater stackUpdater;
+
     @Inject
     private HostGroupService hostGroupService;
+
     @Inject
     private HostMetadataRepository hostMetadataRepository;
 

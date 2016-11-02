@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
 public class BaseCredentialCommandsTest {
     private static final String DUMMY_NAME = "dummyName";
+
     private static final Long DUMMY_ID = 60L;
 
     @InjectMocks

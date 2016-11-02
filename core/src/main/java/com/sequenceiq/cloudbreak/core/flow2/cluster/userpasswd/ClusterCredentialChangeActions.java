@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialCha
 @Configuration
 public class ClusterCredentialChangeActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCredentialChangeActions.class);
+
     @Inject
     private ClusterCredentialChangeService clusterCredentialChangeService;
 

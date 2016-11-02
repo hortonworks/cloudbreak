@@ -24,11 +24,17 @@ import org.springframework.context.annotation.DependsOn;
 @Configuration
 public class DatabaseMigrationConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMigrationConfig.class);
+
     private static final String DEFAULT_SCHEMA_LOCATION = "/schema";
+
     private static final String SCHEMA_IN_CONTAINER = "container";
+
     private static final String DEFAULT_SCHEMA_LOCATION_IN_SOURCE = "core/src/main/resources/schema";
+
     private static final String PENDING_OPERATION_WARNING_MSG = "WARNING: Running pending migrations out of order can create unexpected results.";
+
     private static final String UP_OPERATION_SUBFOLDER = "/mybatis";
+
     private static final String PENDING_OPERATION_SUBFOLDER = "/app";
 
     @Value("${cb.schema.scripts.location:" + DEFAULT_SCHEMA_LOCATION_IN_SOURCE + "}")

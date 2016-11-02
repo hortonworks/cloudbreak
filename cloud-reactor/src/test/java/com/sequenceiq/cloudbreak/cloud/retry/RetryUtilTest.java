@@ -12,8 +12,11 @@ import org.junit.Test;
 public class RetryUtilTest {
 
     private RetryTask task = mock(RetryTask.class);
+
     private ErrorTask error = mock(ErrorTask.class);
+
     private CheckTask check = mock(CheckTask.class);
+
     private ExceptionCheckTask exceptionCheck = mock(ExceptionCheckTask.class);
 
     @Test

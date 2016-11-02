@@ -6,6 +6,7 @@ public class InspectContainerResponse {
 
     @SerializedName("Id")
     private String id;
+
     @SerializedName("State")
     private ContainerState state;
 

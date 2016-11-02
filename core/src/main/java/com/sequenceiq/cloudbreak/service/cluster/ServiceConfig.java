@@ -6,7 +6,9 @@ import java.util.Map;
 public class ServiceConfig {
 
     private final String serviceName;
+
     private final Map<String, List<ConfigProperty>> globalConfig;
+
     private final Map<String, List<ConfigProperty>> hostGroupConfig;
 
     public ServiceConfig(String serviceName, Map<String, List<ConfigProperty>> globalConfig, Map<String, List<ConfigProperty>> hostGroupConfig) {

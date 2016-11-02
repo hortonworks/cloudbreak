@@ -30,13 +30,19 @@ import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 public class AzureCommands implements CommandMarker {
 
     public static final String PLATFORM = "AZURE_RM";
+
     public static final String SALT = "SALT";
 
     private ShellContext shellContext;
+
     private CredentialCommands baseCredentialCommands;
+
     private NetworkCommands baseNetworkCommands;
+
     private TemplateCommands baseTemplateCommands;
+
     private PlatformCommands basePlatformCommands;
+
     private StackCommands stackCommands;
 
     public AzureCommands(ShellContext shellContext,

@@ -7,6 +7,7 @@ import javax.persistence.Embeddable;
 public class BlueprintInput implements ProvisionEntity {
 
     private String name;
+
     @Column(columnDefinition = "TEXT")
     private String propertyValue;
 

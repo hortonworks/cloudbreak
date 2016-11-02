@@ -5,7 +5,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 public class ClusterScaleFailedPayload implements HostGroupPayload {
 
     private final Long stackId;
+
     private final String hostGroupName;
+
     private final Exception errorDetails;
 
     public ClusterScaleFailedPayload(Long stackId, String hostGroupName, Exception errorDetails) {

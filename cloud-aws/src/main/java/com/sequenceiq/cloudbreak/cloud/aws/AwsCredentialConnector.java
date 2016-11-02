@@ -32,8 +32,10 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     @Inject
     private AwsSessionCredentialClient credentialClient;
+
     @Inject
     private AwsClient awsClient;
+
     @Inject
     private AwsSmartSenseIdGenerator smartSenseIdGenerator;
 

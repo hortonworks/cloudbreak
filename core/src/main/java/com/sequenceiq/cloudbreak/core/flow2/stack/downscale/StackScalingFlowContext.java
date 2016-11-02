@@ -10,7 +10,9 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class StackScalingFlowContext extends StackContext {
     private final Set<String> instanceIds;
+
     private final String instanceGroupName;
+
     private final Integer adjustment;
 
     public StackScalingFlowContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,

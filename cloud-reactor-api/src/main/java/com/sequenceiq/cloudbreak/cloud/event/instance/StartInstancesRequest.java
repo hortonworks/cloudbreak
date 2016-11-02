@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 public class StartInstancesRequest extends CloudPlatformRequest<StartInstancesResult> {
 
     private List<CloudInstance> cloudInstances;
+
     private List<CloudResource> resources;
 
     public StartInstancesRequest(CloudContext cloudContext, CloudCredential credential, List<CloudResource> resources, List<CloudInstance> cloudInstances) {

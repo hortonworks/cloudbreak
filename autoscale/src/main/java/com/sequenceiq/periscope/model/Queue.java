@@ -5,6 +5,7 @@ import com.sequenceiq.periscope.api.model.Json;
 public class Queue implements Json {
 
     private final String name;
+
     private final int capacity;
 
     public Queue(String name, int capacity) {

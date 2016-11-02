@@ -22,8 +22,10 @@ public class MonitorScheduler {
 
     @Autowired
     private ApplicationContext applicationContext;
+
     @Autowired
     private List<Monitor> monitorList;
+
     @Autowired
     private Scheduler scheduler;
 

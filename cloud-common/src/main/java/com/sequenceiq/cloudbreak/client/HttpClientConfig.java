@@ -2,13 +2,19 @@ package com.sequenceiq.cloudbreak.client;
 
 public class HttpClientConfig {
     private static final String DEFAULT_PRIVATE_KEY_NAME = "/key.pem";
+
     private static final String DEFAULT_CLIENT_CERT_NAME = "/cert.pem";
+
     private static final String DEFAULT_SERVER_CERT_NAME = "/ca.pem";
 
     private String apiAddress;
+
     private Integer apiPort;
+
     private String serverCert;
+
     private String clientCert;
+
     private String clientKey;
 
     public HttpClientConfig(String apiAddress, Integer apiPort) {

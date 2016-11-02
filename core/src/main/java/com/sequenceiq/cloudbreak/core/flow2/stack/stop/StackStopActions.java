@@ -46,10 +46,13 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 @Configuration
 public class StackStopActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStopActions.class);
+
     @Inject
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
+
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
+
     @Inject
     private StackStartStopService stackStartStopService;
 
@@ -106,12 +109,16 @@ public class StackStopActions {
     private abstract static class AbstractStackStopAction<P extends Payload> extends AbstractAction<StackStopState, StackStopEvent, StackStartStopContext, P> {
         @Inject
         private StackService stackService;
+
         @Inject
         private InstanceMetaDataRepository instanceMetaDataRepository;
+
         @Inject
         private CredentialToCloudCredentialConverter credentialConverter;
+
         @Inject
         private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
+
         @Inject
         private ResourceToCloudResourceConverter cloudResourceConverter;
 

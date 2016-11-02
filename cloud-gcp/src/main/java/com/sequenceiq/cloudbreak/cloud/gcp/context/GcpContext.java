@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 public class GcpContext extends ResourceBuilderContext {
 
     public static final String PROJECT_ID = "pid";
+
     private static final String COMPUTE = "compute";
 
     public GcpContext(String name, Location location, String projectId, Compute compute, int parallelResourceRequest, boolean build) {

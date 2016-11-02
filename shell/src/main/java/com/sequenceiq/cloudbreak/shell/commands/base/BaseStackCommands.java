@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 public class BaseStackCommands implements BaseCommands, StackCommands {
 
     private ShellContext shellContext;
+
     private CloudbreakShellUtil cloudbreakShellUtil;
 
     public BaseStackCommands(ShellContext shellContext, CloudbreakShellUtil cloudbreakShellUtil) {

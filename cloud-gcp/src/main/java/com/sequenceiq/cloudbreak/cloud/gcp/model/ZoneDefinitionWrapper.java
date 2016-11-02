@@ -8,10 +8,13 @@ public class ZoneDefinitionWrapper {
 
     @JsonProperty("id")
     private String id;
+
     @JsonProperty("kind")
     private String kind;
+
     @JsonProperty("selfLink")
     private String selfLink;
+
     @JsonProperty("items")
     private List<ZoneDefinitionView> items;
 

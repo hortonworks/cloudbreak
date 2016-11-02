@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 public class AwsTagPreparationService {
 
     private static final String CLOUDBREAK_ID = "CloudbreakId";
+
     private static final String CLOUDBREAK_CLUSTER_TAG = "CloudbreakClusterName";
 
     @Value("${cb.aws.default.cf.tag:}")

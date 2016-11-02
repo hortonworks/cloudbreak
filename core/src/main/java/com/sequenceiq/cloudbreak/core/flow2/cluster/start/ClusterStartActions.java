@@ -24,8 +24,10 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 @Configuration
 public class ClusterStartActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStartActions.class);
+
     @Inject
     private ClusterService clusterService;
+
     @Inject
     private ClusterStartService clusterStartService;
 

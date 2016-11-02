@@ -15,38 +15,55 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     @ApiModelProperty(EventModelDescription.TYPE)
     private String eventType;
+
     @ApiModelProperty(EventModelDescription.TIMESTAMP)
     private long eventTimestamp;
+
     @ApiModelProperty(EventModelDescription.MESSAGE)
     private String eventMessage;
+
     @ApiModelProperty(ModelDescriptions.OWNER)
     private String owner;
+
     @ApiModelProperty(ModelDescriptions.ACCOUNT)
     private String account;
+
     @ApiModelProperty(ModelDescriptions.CLOUD_PLATFORM)
     private String cloud;
+
     @ApiModelProperty(StackModelDescription.REGION)
     private String region;
+
     @ApiModelProperty(StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
+
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private long blueprintId;
+
     @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
+
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ID)
     private Long clusterId;
+
     @ApiModelProperty(ClusterModelDescription.CLUSTER_NAME)
     private String clusterName;
+
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
+
     @ApiModelProperty(StackModelDescription.STACK_NAME)
     private String stackName;
+
     @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status stackStatus;
+
     @ApiModelProperty(InstanceGroupModelDescription.NODE_COUNT)
     private Integer nodeCount;
+
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
+
     @ApiModelProperty(StackModelDescription.CLUSTER_STATUS)
     private Status clusterStatus;
 

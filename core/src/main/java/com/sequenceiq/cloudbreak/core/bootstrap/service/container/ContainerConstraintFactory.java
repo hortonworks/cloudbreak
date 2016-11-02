@@ -43,16 +43,27 @@ import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 @Component
 public class ContainerConstraintFactory {
     private static final String CONTAINER_VOLUME_PATH = "/var/log";
+
     private static final String HADOOP_MOUNT_DIR = "/hadoopfs";
+
     private static final String HOST_VOLUME_PATH = VolumeUtils.getLogVolume("logs");
+
     private static final String HOST_NETWORK_MODE = "host";
+
     private static final int AMBARI_PORT = 8080;
+
     private static final int SHIPYARD_CONTAINER_PORT = 8080;
+
     private static final int SHIPYARD_EXPOSED_PORT = 7070;
+
     private static final int SHIPYARD_DB_CONTAINER_PORT = 8080;
+
     private static final int SHIPYARD_DB_EXPOSED_PORT = 7071;
+
     private static final int LDAP_PORT = 389;
+
     private static final int REGISTRATOR_RESYNC_SECONDS = 60;
+
     private static final String HOSTNAME_SEPARATOR = "|";
 
     @Value("#{'${cb.docker.env.ldap}'.split('\\|')}")

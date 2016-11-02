@@ -14,8 +14,10 @@ public class ScalingService {
 
     @Autowired
     private ClusterService clusterService;
+
     @Autowired
     private AlertService alertService;
+
     @Autowired
     private ScalingPolicyRepository policyRepository;
 

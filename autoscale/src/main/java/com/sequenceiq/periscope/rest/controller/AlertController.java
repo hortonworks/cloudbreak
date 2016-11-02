@@ -26,8 +26,10 @@ public class AlertController implements AlertEndpoint {
 
     @Autowired
     private AlertService alertService;
+
     @Autowired
     private MetricAlertConverter metricAlertConverter;
+
     @Autowired
     private TimeAlertConverter timeAlertConverter;
 

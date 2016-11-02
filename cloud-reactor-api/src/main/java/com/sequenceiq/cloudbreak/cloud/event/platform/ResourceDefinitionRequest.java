@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 public class ResourceDefinitionRequest extends CloudPlatformRequest<ResourceDefinitionResult> {
 
     private final CloudPlatformVariant platform;
+
     private final String resource;
 
     public ResourceDefinitionRequest(CloudPlatformVariant platform, String resource) {

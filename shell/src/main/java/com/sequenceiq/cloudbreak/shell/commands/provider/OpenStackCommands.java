@@ -26,13 +26,19 @@ import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 public class OpenStackCommands implements CommandMarker {
 
     public static final String PLATFORM = "OPENSTACK";
+
     private static final int TEN = 10;
 
     private ShellContext shellContext;
+
     private CredentialCommands baseCredentialCommands;
+
     private NetworkCommands baseNetworkCommands;
+
     private TemplateCommands baseTemplateCommands;
+
     private PlatformCommands basePlatformCommands;
+
     private StackCommands stackCommands;
 
     public OpenStackCommands(ShellContext shellContext,

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
 public class OpenStackInstanceConnector implements InstanceConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackInstanceConnector.class);
+
     private static final int CONSOLE_OUTPUT_LINES = Integer.MAX_VALUE;
 
     @Inject

@@ -24,17 +24,23 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAction.class);
 
     private static final String FLOW_START_TIME = "FLOW_START_TIME";
+
     private static final String FLOW_START_EXEC_TIME = "FLOW_START_EXEC_TIME";
+
     private static final String FLOW_STATE_NAME = "FLOW_STATE_NAME";
+
     private static final int MS_PER_SEC = 1000;
 
     @Inject
     private EventBus eventBus;
+
     @Inject
     private FlowRegister runningFlows;
 
     private Class<P> payloadClass;
+
     private List<PayloadConverter<P>> payloadConverters;
+
     private E failureEvent;
 
     protected AbstractAction(Class<P> payloadClass) {

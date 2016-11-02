@@ -25,16 +25,22 @@ public class OpenStackHeatConnector implements CloudConnector {
 
     @Inject
     private OpenStackCredentialConnector credentialConnector;
+
     @Inject
     private OpenStackAuthenticator authenticator;
+
     @Inject
     private OpenStackResourceConnector resourceConnector;
+
     @Inject
     private OpenStackInstanceConnector instanceConnector;
+
     @Inject
     private OpenStackMetadataCollector metadataCollector;
+
     @Inject
     private OpenStackSetup openStackSetup;
+
     @Inject
     private OpenStackParameters openStackParameters;
 

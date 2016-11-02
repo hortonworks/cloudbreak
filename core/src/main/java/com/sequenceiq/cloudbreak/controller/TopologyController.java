@@ -22,11 +22,14 @@ public class TopologyController implements TopologyEndpoint {
 
     @Autowired
     private TopologyService topologyService;
+
     @Autowired
     private TopologyRepository topologyRepository;
+
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
+
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
 

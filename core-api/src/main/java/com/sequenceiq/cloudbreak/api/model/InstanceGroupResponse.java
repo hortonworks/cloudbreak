@@ -17,6 +17,7 @@ public class InstanceGroupResponse extends InstanceGroupBase {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
+
     @ApiModelProperty(ModelDescriptions.InstanceGroupModelDescription.METADATA)
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
 

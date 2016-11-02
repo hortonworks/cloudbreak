@@ -50,26 +50,37 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
 
     @Mock
     private BlueprintValidator blueprintValidator;
+
     @Mock
     private StackServiceComponentDescriptors stackServiceComponentDescs;
+
     @Mock
     private ConversionService conversionService;
+
     @Mock
     private JsonNode jsonNode;
+
     @Mock
     private JsonNode nameJsonNode;
+
     @Mock
     private Iterator<JsonNode> mockIterator;
+
     @Mock
     private Map<String, HostGroup> hostGroupMap;
+
     @Mock
     private HostGroup hostGroup;
+
     @Mock
     private InstanceGroup instanceGroup;
+
     @Mock
     private InstanceMetaData instanceMetaData;
+
     @Mock
     private Iterator<JsonNode> mockComponentIterator;
+
     @Mock
     private AmbariViewProvider ambariViewProvider;
 

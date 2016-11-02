@@ -9,6 +9,7 @@ import mesosphere.marathon.client.model.v2.App;
 public class MarathonAppBootstrap implements OrchestratorBootstrap {
 
     private final Marathon client;
+
     private final App app;
 
     public MarathonAppBootstrap(Marathon client, App app) {

@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.event.Payload;
 public class StopInstancesResult extends CloudPlatformResult<StopInstancesRequest> implements Payload {
 
     private CloudContext cloudContext;
+
     private InstancesStatusResult results;
 
     public StopInstancesResult(StopInstancesRequest request, CloudContext cloudContext, InstancesStatusResult results) {

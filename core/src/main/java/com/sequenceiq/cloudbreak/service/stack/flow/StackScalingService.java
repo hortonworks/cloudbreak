@@ -33,27 +33,38 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 @Service
 public class StackScalingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackScalingService.class);
+
     private static final int POLLING_INTERVAL = 5000;
+
     private static final int MAX_POLLING_ATTEMPTS = 100;
 
     @Inject
     private StackService stackService;
+
     @Inject
     private CloudbreakEventService eventService;
+
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
+
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
     @Inject
     private HostMetadataRepository hostMetadataRepository;
+
     @Inject
     private TlsSecurityService tlsSecurityService;
+
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
+
     @Inject
     private AmbariDecommissioner ambariDecommissioner;
+
     @Inject
     private ServiceProviderConnectorAdapter connector;
+
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 

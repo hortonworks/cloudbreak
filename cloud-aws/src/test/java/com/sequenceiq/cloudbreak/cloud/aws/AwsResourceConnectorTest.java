@@ -46,16 +46,22 @@ public class AwsResourceConnectorTest {
 
     @Mock
     private AwsClient awsClient;
+
     @Mock
     private CloudFormationStackUtil cfStackUtil;
+
     @Mock
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
+
     @Mock
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
+
     @Mock
     private AwsPollTaskFactory awsPollTaskFactory;
+
     @Mock
     private CloudFormationStackUtil cloudFormationStackUtil;
+
     @Mock
     private AwsTagPreparationService awsTagPreparationService;
 

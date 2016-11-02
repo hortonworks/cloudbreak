@@ -5,12 +5,17 @@ import org.slf4j.LoggerFactory;
 
 public class RetryUtil implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(RetryUtil.class);
+
     private static final int DEFAULT_NUMBER_OF_RETRIES = 3;
 
     private int retryCount;
+
     private RetryTask task;
+
     private ErrorTask errorHandler;
+
     private ExceptionCheckTask exceptionCheck;
+
     private CheckTask check;
 
     private RetryUtil(int count) {

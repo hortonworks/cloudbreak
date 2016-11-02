@@ -35,6 +35,7 @@ import com.sequenceiq.it.config.IntegrationTestConfiguration;
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public abstract class AbstractCloudbreakIntegrationTest extends AbstractTestNGSpringContextTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCloudbreakIntegrationTest.class);
+
     private IntegrationTestContext itContext;
 
     private CloudbreakClient cloudbreakClient;

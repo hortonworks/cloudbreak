@@ -7,7 +7,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 
 public class AwsInstanceView {
 
-
     private InstanceTemplate instanceTemplate;
 
     public AwsInstanceView(InstanceTemplate instanceTemplate) {

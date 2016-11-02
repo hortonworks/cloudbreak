@@ -16,6 +16,7 @@ import reactor.bus.EventBus;
 public class ExtendHostMetadataHandler implements ClusterEventHandler<ExtendHostMetadataRequest> {
     @Inject
     private EventBus eventBus;
+
     @Inject
     private HostMetadataSetup hostMetadataSetup;
 

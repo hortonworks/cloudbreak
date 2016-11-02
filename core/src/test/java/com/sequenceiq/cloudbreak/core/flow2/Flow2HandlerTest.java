@@ -31,6 +31,7 @@ import reactor.bus.Event;
 public class Flow2HandlerTest {
 
     public static final String FLOW_ID = "flowId";
+
     public static final String FLOW_CHAIN_ID = "flowChainId";
 
     @InjectMocks
@@ -58,6 +59,7 @@ public class Flow2HandlerTest {
     private Flow flow;
 
     private FlowState flowState;
+
     private Event<? extends Payload> dummyEvent;
 
     private Payload payload = () -> 1L;

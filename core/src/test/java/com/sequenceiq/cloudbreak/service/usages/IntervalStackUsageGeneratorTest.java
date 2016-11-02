@@ -34,7 +34,9 @@ import com.sequenceiq.cloudbreak.service.price.PriceGenerator;
 public class IntervalStackUsageGeneratorTest {
 
     private static final Date DUMMY_START_DATE = new Date();
+
     private static final Date DUMMY_END_DATE = new Date();
+
     private static final String C3XLARGE_INSTANCE = "c3.xlarge";
 
     @InjectMocks

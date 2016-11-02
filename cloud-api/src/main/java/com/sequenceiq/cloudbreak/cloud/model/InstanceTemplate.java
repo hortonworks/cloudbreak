@@ -9,9 +9,13 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 public class InstanceTemplate extends DynamicModel {
 
     private final String flavor;
+
     private final String groupName;
+
     private final Long privateId;
+
     private final List<Volume> volumes;
+
     private final InstanceStatus status;
 
     public InstanceTemplate(String flavor, String groupName, Long privateId, List<Volume> volumes, InstanceStatus status, Map<String, Object> parameters) {

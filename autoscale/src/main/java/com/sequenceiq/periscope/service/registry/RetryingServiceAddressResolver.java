@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory;
 
 public class RetryingServiceAddressResolver implements ServiceAddressResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(RetryingServiceAddressResolver.class);
+
     private static final int SLEEPTIME = 2000;
 
     private ServiceAddressResolver serviceAddressResolver;
+
     private int maxRetryCount;
 
     public RetryingServiceAddressResolver(ServiceAddressResolver serviceAddressResolver, int timeoutInMillis) {

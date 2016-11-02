@@ -16,11 +16,17 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 
 public class AmbariClusterStatusFactoryTest {
     private static final String TEST_BLUEPRINT = "blueprint";
+
     private static final String TEST_COMP1 = "comp1";
+
     private static final String TEST_COMP2 = "comp2";
+
     private static final String TEST_COMP3 = "comp3";
+
     private static final String TEST_COMP4 = "comp4";
+
     private static final String TEST_COMP5 = "comp5";
+
     private static final String TEST_CLIENT_COMP = "clientcomp";
 
     private AmbariClusterStatusFactory underTest;

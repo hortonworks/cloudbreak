@@ -39,19 +39,27 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
 
     public static final String DOLLAR = "$";
+
     public static final String SPACE = " ";
+
     public static final String EMPTY = "";
+
     public static final String FAILED = "FAILED";
+
     public static final String SUCCESS = "SUCCESS";
 
     @Inject
     private CommandLine commandLine;
+
     @Inject
     private JLineShellComponent shell;
+
     @Inject
     private ShellContext context;
+
     @Inject
     private CloudbreakClient cloudbreakClient;
+
     @Inject
     private ResponseTransformer responseTransformer;
 

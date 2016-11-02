@@ -98,40 +98,57 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 @Service
 public class AwsResourceConnector implements ResourceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceConnector.class);
+
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
+
     private static final int SNAPSHOT_VOLUME_SIZE = 10;
+
     private static final List<String> CAPABILITY_IAM = singletonList("CAPABILITY_IAM");
+
     private static final int INCREMENT_HOST_NUM = 256;
+
     private static final int CIDR_PREFIX = 24;
 
     private static final List<String> SUSPENDED_PROCESSES = asList("Launch", "HealthCheck", "ReplaceUnhealthy", "AZRebalance", "AlarmNotification",
             "ScheduledActions", "AddToLoadBalancer", "RemoveFromLoadBalancerLowPriority");
+
     private static final List<StackStatus> ERROR_STATUSES = asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
+
     private static final String CFS_OUTPUT_EIPALLOCATION_ID = "EIPAllocationID";
 
     @Inject
     private AwsClient awsClient;
+
     @Inject
     private CloudFormationStackUtil cfStackUtil;
+
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
+
     @Inject
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
+
     @Inject
     private AwsPollTaskFactory awsPollTaskFactory;
+
     @Inject
     private CloudFormationStackUtil cloudFormationStackUtil;
+
     @Inject
     private AwsTagPreparationService awsTagPreparationService;
 
     @Value("${cb.publicip:}")
     private String cloudbreakPublicIp;
+
     @Value("${cb.aws.default.inbound.security.group:}")
     private String defaultInboundSecurityGroup;
+
     @Value("${cb.aws.vpc:}")
     private String cloudbreakVpc;
+
     @Value("${cb.nginx.port:9443}")
     private int gatewayPort;
+
     @Value("${cb.aws.cf.template.new.path:}")
     private String awsCloudformationTemplatePath;
 

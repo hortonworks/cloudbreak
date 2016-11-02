@@ -30,9 +30,13 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltBootstrap.class);
 
     private final SaltConnector sc;
+
     private final GatewayConfig gatewayConfig;
+
     private final Set<Node> originalTargets;
+
     private Set<Node> targets;
+
     private String domain;
 
     public SaltBootstrap(SaltConnector sc, GatewayConfig gatewayConfig, Set<Node> targets, String domain) {

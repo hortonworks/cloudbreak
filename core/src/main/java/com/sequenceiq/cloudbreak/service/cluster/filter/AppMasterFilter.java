@@ -23,7 +23,9 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class AppMasterFilter implements HostFilter {
 
     private static final String AM_KEY = "amHostHttpAddress";
+
     private static final String APPS_NODE = "apps";
+
     private static final String APP_NODE = "app";
 
     @Inject

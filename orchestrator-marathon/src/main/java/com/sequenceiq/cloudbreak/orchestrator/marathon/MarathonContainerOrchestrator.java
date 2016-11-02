@@ -48,12 +48,19 @@ import mesosphere.marathon.client.utils.MarathonException;
 @Component
 public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarathonContainerOrchestrator.class);
+
     private static final double MIN_CPU = 0.5;
+
     private static final int MIN_MEM = 1024;
+
     private static final int MIN_INSTANCES = 1;
+
     private static final String HOST_NETWORK_MODE = "HOST";
+
     private static final String DOCKER_CONTAINER_TYPE = "DOCKER";
+
     private static final String SPACE = " ";
+
     private static final Integer STATUS_NOT_FOUND = 404;
 
     @Override

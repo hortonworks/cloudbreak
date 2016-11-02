@@ -3,7 +3,9 @@ package com.sequenceiq.periscope.model;
 public class Priority implements Comparable<Priority> {
 
     public static final Priority HIGH = Priority.of(0);
+
     public static final Priority NORMAL = Priority.of(100);
+
     public static final Priority LOW = Priority.of(Integer.MAX_VALUE);
 
     private final int value;

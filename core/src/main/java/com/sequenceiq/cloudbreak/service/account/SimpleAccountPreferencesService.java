@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.repository.AccountPreferencesRepository;
 @Service
 public class SimpleAccountPreferencesService implements AccountPreferencesService {
     private static final long ZERO = 0L;
+
     private static final int STRIPES = 10;
 
     @Inject

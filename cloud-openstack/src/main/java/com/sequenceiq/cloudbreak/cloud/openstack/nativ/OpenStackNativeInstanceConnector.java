@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.template.AbstractInstanceConnector;
 @Service
 public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackNativeInstanceConnector.class);
+
     private static final int CONSOLE_OUTPUT_LINES = Integer.MAX_VALUE;
 
     @Inject

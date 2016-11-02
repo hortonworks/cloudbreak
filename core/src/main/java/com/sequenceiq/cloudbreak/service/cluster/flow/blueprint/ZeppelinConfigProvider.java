@@ -25,6 +25,7 @@ public class ZeppelinConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZeppelinConfigProvider.class);
 
     private static final String ZEPPELIN_MASTER = "ZEPPELIN_MASTER";
+
     private static final String ZEPPELIN_MASTER_CONFIG_FILE = "zeppelin-env";
 
     @Inject

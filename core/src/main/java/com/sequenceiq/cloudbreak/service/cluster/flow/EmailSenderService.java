@@ -34,6 +34,7 @@ import freemarker.template.Configuration;
 @Service
 public class EmailSenderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailSenderService.class);
+
     private static final String CLUSTER_READY_SUBJECT = "Your cluster '%s' is ready";
 
     @Value("${cb.smtp.sender.from:}")

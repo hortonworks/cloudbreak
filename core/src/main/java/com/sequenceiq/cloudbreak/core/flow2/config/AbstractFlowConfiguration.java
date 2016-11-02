@@ -46,7 +46,9 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);
 
     private StateMachineFactory<S, E> stateMachineFactory;
+
     private final Class<S> stateType;
+
     private final Class<E> eventType;
 
     @Inject
@@ -155,9 +157,13 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     static class MachineConfiguration<S, E> {
         private final StateMachineConfigurationBuilder<S, E> configurationBuilder;
+
         private final StateMachineStateBuilder<S, E> stateBuilder;
+
         private final StateMachineTransitionBuilder<S, E> transitionBuilder;
+
         private final StateMachineListener<S, E> listener;
+
         private final TaskExecutor executor;
 
         MachineConfiguration(StateMachineConfigurationBuilder<S, E> configurationBuilder, StateMachineStateBuilder<S, E> stateBuilder,
@@ -172,9 +178,13 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     protected static class Transition<S extends FlowState, E extends FlowEvent> {
         private final S source;
+
         private final S target;
+
         private final E event;
+
         private final S failureState;
+
         private final E failureEvent;
 
         private Transition(S source, S target, E event, S failureState, E failureEvent) {
@@ -195,6 +205,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
         public static class Builder<S extends FlowState, E extends FlowEvent> {
             private List<Transition<S, E>> transitions = new ArrayList<>();
+
             private Optional<E> defaultFailureEvent = Optional.absent();
 
             public ToBuilder<S, E> from(S from) {
@@ -228,6 +239,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
         public static class ToBuilder<S extends FlowState, E extends FlowEvent> {
             private final S from;
+
             private final Builder<S, E> builder;
 
             ToBuilder(S from, Builder<S, E> b) {
@@ -242,7 +254,9 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
         public static class WithBuilder<S extends FlowState, E extends FlowEvent> {
             private final S from;
+
             private final S to;
+
             private final Builder<S, E> builder;
 
             WithBuilder(S from, S to, Builder<S, E> b) {
@@ -258,9 +272,13 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
         public static class FailureBuilder<S extends FlowState, E extends FlowEvent> {
             private final S from;
+
             private final S to;
+
             private final E with;
+
             private final Builder<S, E> builder;
+
             private S failure;
 
             FailureBuilder(S from, S to, E with, Builder<S, E> b) {
@@ -294,8 +312,11 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     protected static class FlowEdgeConfig<S, E> {
         private final S initState;
+
         private final S finalState;
+
         private final S defaultFailureState;
+
         private final E failureHandled;
 
         public FlowEdgeConfig(S initState, S finalState, S defaultFailureState, E failureHandled) {

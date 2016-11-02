@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
 public class SssdConfigCommandsTest {
     private static final Long CONFIG_ID = 50L;
+
     private static final String CONFIG_NAME = "dummyName";
 
     @InjectMocks

@@ -38,18 +38,31 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 public final class GcpStackUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpStackUtil.class);
+
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
+
     private static final String GCP_IMAGE_TYPE_PREFIX = "https://www.googleapis.com/compute/v1/projects/%s/global/images/";
+
     private static final String EMPTY_BUCKET = "";
+
     private static final int FINISHED = 100;
+
     private static final int PRIVATE_ID_PART = 2;
+
     private static final String SERVICE_ACCOUNT = "serviceAccountId";
+
     private static final String PRIVATE_KEY = "serviceAccountPrivateKey";
+
     private static final String PROJECT_ID = "projectId";
+
     private static final String NETWORK_ID = "networkId";
+
     private static final String SUBNET_ID = "subnetId";
+
     private static final String NO_PUBLIC_IP = "noPublicIp";
+
     private static final String NO_FIREWALL_RULES = "noFirewallRules";
 
     private GcpStackUtil() {

@@ -34,34 +34,63 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 public class ShellContext {
 
     private static final String ACCESSIBLE = "accessible";
+
     private Map<String, Collection<String>> platformToVariants;
+
     private Map<String, Collection<String>> regions;
+
     private Map<String, Map<String, Collection<String>>> availabilityZones;
+
     private Map<String, Collection<String>> volumeTypes;
+
     private Map<String, List<Map<String, String>>> instanceTypes;
+
     private Map<String, Collection<String>> orchestrators;
+
     private Focus focus;
+
     private Hints hint;
+
     private Map<PropertyKey, String> properties = new HashMap<>();
+
     private Map<String, InstanceGroupEntry> instanceGroups = new HashMap<>();
+
     private Map<String, HostgroupEntry> hostGroups = new HashMap<>();
+
     private Set<String> activeHostGroups = new HashSet<>();
+
     private Set<String> activeInstanceGroups = new HashSet<>();
+
     private Set<String> activeTemplates = new HashSet<>();
+
     private Set<String> activeTemplateNames = new HashSet<>();
+
     private String activeCloudPlatform;
+
     private Map<Long, String> networksByProvider = new HashMap<>();
+
     private Map<Long, String> securityGroups = new HashMap<>();
+
     private Map<Long, String> rdsConfigs = new HashMap<>();
+
     private Long activeNetworkId;
+
     private FileSystemType fileSystemType;
+
     private Map<String, Object> fileSystemParameters = new HashMap<>();
+
     private Map<Long, String> ldapConfigs = new HashMap<>();
+
     private Boolean defaultFileSystem;
+
     private Long selectedMarathonStackId;
+
     private String selectedMarathonStackName;
+
     private Set<String> constraintTemplates = new HashSet<>();
+
     private Map<String, MarathonHostgroupEntry> marathonHostgroups = new HashMap<>();
+
     private AmbariDatabaseDetailsJson ambariDatabaseDetailsJson;
 
     @Inject

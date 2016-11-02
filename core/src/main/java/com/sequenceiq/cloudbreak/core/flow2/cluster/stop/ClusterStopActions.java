@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
 @Configuration
 public class ClusterStopActions {
     private static final String STACK_STATUS = "STACK_STATUS";
+
     @Inject
     private ClusterStopService clusterStopService;
 

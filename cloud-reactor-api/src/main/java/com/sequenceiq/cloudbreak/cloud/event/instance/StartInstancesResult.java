@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.event.Payload;
 public class StartInstancesResult extends CloudPlatformResult<StartInstancesRequest> implements Payload {
 
     private CloudContext cloudContext;
+
     private InstancesStatusResult results;
 
     public StartInstancesResult(StartInstancesRequest request, CloudContext cloudContext, InstancesStatusResult results) {

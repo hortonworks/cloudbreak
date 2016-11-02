@@ -30,7 +30,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 @Component
 public class AwsClient {
     private static final String DEFAULT_REGION_NAME = "us-west-1";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsClient.class);
+
     private static final String EXISTING_KEYPAIR_PARAM_KEY = "existingKeyPairName";
 
     @Inject

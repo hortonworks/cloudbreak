@@ -28,6 +28,7 @@ public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
 
     @Inject
     private SuiteContext suiteContext;
+
     private IntegrationTestContext itContext;
 
     @BeforeSuite

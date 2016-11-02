@@ -24,6 +24,7 @@ public class HostGroupToJsonEntityConverterTest extends AbstractEntityConverterT
 
     @InjectMocks
     private HostGroupToJsonConverter underTest;
+
     @Mock
     private ConversionService conversionService;
 

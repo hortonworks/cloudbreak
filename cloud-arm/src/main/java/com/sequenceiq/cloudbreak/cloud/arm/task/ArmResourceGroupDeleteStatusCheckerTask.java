@@ -20,6 +20,7 @@ public class ArmResourceGroupDeleteStatusCheckerTask extends PollBooleanStateTas
     public static final String NAME = "armResourceGroupDeleteStatusCheckerTask";
 
     private ResourceGroupCheckerContext resourceGroupDeleteCheckerContext;
+
     private ArmClient armClient;
 
     public ArmResourceGroupDeleteStatusCheckerTask(AuthenticatedContext authenticatedContext, ArmClient armClient, ResourceGroupCheckerContext

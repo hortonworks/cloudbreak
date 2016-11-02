@@ -14,7 +14,9 @@ import net.sf.ehcache.config.CacheConfiguration;
 public class AwsCachingConfig implements CacheDefinition {
 
     public static final String TEMPORARY_AWS_CREDENTIAL_CACHE = "temporary_aws_credential";
+
     private static final long TTL_IN_SECONDS = 5L * 60;
+
     private static final long MAX_ENTRIES = 1000L;
 
     @Override

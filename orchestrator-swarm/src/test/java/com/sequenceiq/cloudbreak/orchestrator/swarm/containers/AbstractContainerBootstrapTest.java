@@ -35,11 +35,17 @@ import jersey.repackaged.com.google.common.collect.Sets;
 
 public abstract class AbstractContainerBootstrapTest {
     protected static final String DUMMY_CLOUD_PLATFORM = "GCP";
+
     protected static final String DUMMY_GENERATED_ID = "dummyGeneratedId";
+
     protected static final String DUMMY_IMAGE = "sequenceiq/dummy:0.0.1";
+
     protected static final String DUMMY_NODE = "dummyNode";
+
     protected static final Set<String> DUMMY_VOLUMES = Sets.newHashSet("/var/path1", "/var/path2");
+
     protected static final String[] CMD = new String[]{"cmd1", "cmd2"};
+
     protected static final LogVolumePath DUMMY_LOG_VOLUME = new LogVolumePath("/var/path1", "/var/path2");
 
     private OrchestratorBootstrap underTest;

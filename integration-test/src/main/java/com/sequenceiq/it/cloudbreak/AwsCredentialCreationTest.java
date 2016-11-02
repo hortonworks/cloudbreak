@@ -16,12 +16,16 @@ import com.sequenceiq.it.util.ResourceUtil;
 public class AwsCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.awscredential.name}")
     private String defaultName;
+
     @Value("${integrationtest.awscredential.roleArn:}")
     private String defaultRoleArn;
+
     @Value("${integrationtest.awscredential.accessKey:}")
     private String defaultAccessKey;
+
     @Value("${integrationtest.awscredential.secretKey:}")
     private String defaultSecretKey;
+
     @Value("${integrationtest.awscredential.publicKeyFile}")
     private String defaultPublicKeyFile;
 

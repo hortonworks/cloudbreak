@@ -8,7 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class HDPInfo implements Versioned {
 
     private String version;
+
     private HDPRepo repo;
+
     private Map<String, Map<String, String>> images;
 
     public String getVersion() {

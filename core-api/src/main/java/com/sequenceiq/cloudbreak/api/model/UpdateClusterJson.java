@@ -16,16 +16,22 @@ public class UpdateClusterJson implements JsonEntity {
 
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.HOSTGROUP_ADJUSTMENT)
     private HostGroupAdjustmentJson hostGroupAdjustment;
+
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.STATUS_REQUEST)
     private StatusRequest status;
+
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.USERNAME_PASSWORD)
     private UserNamePasswordJson userNamePasswordJson;
+
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
+
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
+
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupRequest> hostgroups;
+
     @Valid
     @ApiModelProperty(ModelDescriptions.ClusterModelDescription.AMBARI_STACK_DETAILS)
     private AmbariStackDetailsJson ambariStackDetails;

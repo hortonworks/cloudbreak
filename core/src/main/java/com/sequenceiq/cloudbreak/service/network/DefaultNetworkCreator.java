@@ -25,7 +25,9 @@ public class DefaultNetworkCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNetworkCreator.class);
 
     private static final String DEFAULT_AWS_NETWORK_NAME = "default-aws-network";
+
     private static final String DEFAULT_GCP_NETWORK_NAME = "default-gcp-network";
+
     private static final String DEFAULT_AZURE_RM_NETWORK_NAME = "default-azure-rm-network";
 
     @Inject

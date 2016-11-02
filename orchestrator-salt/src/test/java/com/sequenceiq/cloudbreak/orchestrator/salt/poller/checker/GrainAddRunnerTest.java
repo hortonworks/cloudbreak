@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 public class GrainAddRunnerTest {
 
     private Set<String> targets;
+
     private Set<Node> allNode;
 
     @Test

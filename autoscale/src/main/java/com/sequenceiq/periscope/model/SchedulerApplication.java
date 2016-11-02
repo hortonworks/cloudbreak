@@ -7,10 +7,15 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 public class SchedulerApplication {
 
     private final ApplicationId applicationId;
+
     private final long startTime;
+
     private Priority priority;
+
     private boolean moved;
+
     private double progress;
+
     private YarnApplicationState state;
 
     public SchedulerApplication(ApplicationReport appReport, Priority priority) {

@@ -32,7 +32,9 @@ import com.sequenceiq.periscope.model.AmbariStack;
 public class Cluster {
 
     private static final int DEFAULT_MIN_SIZE = 3;
+
     private static final int DEFAULT_MAX_SIZE = 100;
+
     private static final int DEFAULT_COOLDOWN = 30;
 
     @Id

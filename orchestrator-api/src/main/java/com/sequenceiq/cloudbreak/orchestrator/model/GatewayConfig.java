@@ -3,15 +3,25 @@ package com.sequenceiq.cloudbreak.orchestrator.model;
 public class GatewayConfig {
 
     private final String publicAddress;
+
     private final String privateAddress;
+
     private final String hostname;
+
     private final String certificateDir;
+
     private final String serverCert;
+
     private final String clientCert;
+
     private final String clientKey;
+
     private final Integer gatewayPort;
+
     private final String saltPassword;
+
     private final String saltBootPassword;
+
     private final String signatureKey;
 
     public GatewayConfig(String publicAddress, String privateAddress, Integer gatewayPort, String certificateDir) {

@@ -27,7 +27,9 @@ import com.google.gson.JsonObject;
 public class AzureRoleManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureRoleManager.class);
+
     private static final String AZURE_MANAGEMENT = "https://management.azure.com";
+
     private static final String OWNER_ROLE = "Owner";
 
     @Retryable(value = IllegalStateException.class, maxAttempts = 10, backoff = @Backoff(delay = 1000))

@@ -62,13 +62,18 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 public class SaltOrchestratorTest {
 
     private GatewayConfig gatewayConfig;
+
     private Set<Node> targets;
+
     private ExitCriteria exitCriteria;
+
     private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
+
     private SaltConnector saltConnector;
 
     @Captor
     private ArgumentCaptor<Set<String>> ipSet;
+
     private ExitCriteriaModel exitCriteriaModel;
 
     @Mock

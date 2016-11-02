@@ -11,7 +11,9 @@ public class SwarmOrchestratorDeletion implements OrchestratorBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(SwarmOrchestratorDeletion.class);
 
     private final DockerClient dockerClient;
+
     private final String nodeName;
+
     private final String containerName;
 
     public SwarmOrchestratorDeletion(DockerClient dockerClient, String nodeName, String containerName) {

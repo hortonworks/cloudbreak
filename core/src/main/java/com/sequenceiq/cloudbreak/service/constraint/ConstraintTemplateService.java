@@ -32,6 +32,7 @@ public class ConstraintTemplateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConstraintTemplateService.class);
 
     private static final String CONSTRAINT_NOT_FOUND_MSG = "Constraint template '%s' not found.";
+
     private static final String DELIMITER = "_";
 
     @Inject

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.model;
 
 public class LogVolumePath {
     private final String hostPath;
+
     private final String containerPath;
 
     public LogVolumePath(String hostPath, String containerPath) {

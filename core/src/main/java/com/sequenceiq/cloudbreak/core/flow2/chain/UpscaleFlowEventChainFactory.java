@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<StackAndClusterUpscaleTriggerEvent> {
     @Inject
     private StackService stackService;
+
     @Inject
     private HostGroupService hostGroupService;
 

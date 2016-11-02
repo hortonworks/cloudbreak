@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 public class CloudInstance extends DynamicModel {
 
     private String instanceId;
+
     private InstanceTemplate template;
 
     public CloudInstance(String instanceId, InstanceTemplate template) {

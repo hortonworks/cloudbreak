@@ -29,6 +29,7 @@ public class RestClientUtil {
     // apache http connection pool defaults are constraining
     // https://hc.apache.org/httpcomponents-client-ga/tutorial/html/connmgmt.html
     private static final int MAX_TOTAL_CONNECTION = 100;
+
     private static final int MAX_PER_ROUTE_CONNECTION = 20;
 
     private static ConcurrentMap<ConfigKey, Client> clients = new ConcurrentHashMap<>();

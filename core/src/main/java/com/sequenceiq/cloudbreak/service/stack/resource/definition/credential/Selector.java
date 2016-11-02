@@ -9,8 +9,10 @@ public class Selector {
 
     @JsonProperty("name")
     private String name;
+
     @JsonProperty("parent")
     private String parent;
+
     @JsonProperty("values")
     private List<Value> values = new ArrayList<>();
 

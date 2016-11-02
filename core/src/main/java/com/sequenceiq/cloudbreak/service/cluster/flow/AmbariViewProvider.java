@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 @Service
 public class AmbariViewProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariViewProvider.class);
+
     private static final String VIEW_DEFINITIONS = "viewDefinitions";
 
     @Inject

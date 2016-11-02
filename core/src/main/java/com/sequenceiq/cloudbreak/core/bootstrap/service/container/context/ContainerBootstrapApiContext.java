@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 public class ContainerBootstrapApiContext extends StackContext {
 
     private GatewayConfig gatewayConfig;
+
     private ContainerOrchestrator containerOrchestrator;
 
     public ContainerBootstrapApiContext(Stack stack, GatewayConfig gatewayConfig, ContainerOrchestrator containerOrchestrator) {

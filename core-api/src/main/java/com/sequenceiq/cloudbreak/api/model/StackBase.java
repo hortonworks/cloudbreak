@@ -23,26 +23,36 @@ public abstract class StackBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
+
     @ApiModelProperty(value = StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
+
     @ApiModelProperty(value = StackModelDescription.REGION)
     private String region;
+
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM)
     private String cloudPlatform;
+
     @ApiModelProperty(StackModelDescription.PLATFORM_VARIANT)
     private String platformVariant;
+
     @NotNull
     @ApiModelProperty(value = StackModelDescription.CREDENTIAL_ID, required = true)
     private Long credentialId;
+
     @ApiModelProperty(StackModelDescription.FAILURE_ACTION)
     private OnFailureAction onFailureAction = OnFailureAction.DO_NOTHING;
+
     @NotNull
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
     private Long networkId;
+
     @ApiModelProperty(StackModelDescription.RELOCATE_DOCKER)
     private Boolean relocateDocker;
+
     @ApiModelProperty(StackModelDescription.AMBARI_VERSION)
     private String ambariVersion;
+
     @ApiModelProperty(StackModelDescription.HDP_VERSION)
     private String hdpVersion;
 

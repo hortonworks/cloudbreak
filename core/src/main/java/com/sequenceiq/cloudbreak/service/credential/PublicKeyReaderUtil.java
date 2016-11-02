@@ -162,8 +162,11 @@ public final class PublicKeyReaderUtil {
     private static class SSH2DataBuffer {
 
         public static final int INT1 = 24;
+
         public static final int INT2 = 16;
+
         public static final int INT3 = 8;
+
         private final byte[] data;
 
         private int pos;

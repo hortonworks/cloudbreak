@@ -24,12 +24,16 @@ public class GcpDeleteVpcTest extends AbstractCloudbreakIntegrationTest {
 
     @Value("${integrationtest.gcpcredential.name}")
     private String defaultName;
+
     @Value("${integrationtest.gcpcredential.projectId}")
     private String defaultProjectId;
+
     @Value("${integrationtest.gcpcredential.serviceAccountId}")
     private String defaultServiceAccountId;
+
     @Value("${integrationtest.gcpcredential.p12File}")
     private String defaultP12File;
+
     private JacksonFactory jsonFactory;
 
     @AfterSuite

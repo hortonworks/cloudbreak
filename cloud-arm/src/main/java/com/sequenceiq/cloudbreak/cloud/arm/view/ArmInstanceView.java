@@ -17,9 +17,13 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class ArmInstanceView {
 
     private InstanceTemplate instance;
+
     private InstanceGroupType type;
+
     private String attachedDiskStorage;
+
     private String attachedDiskStorageType;
+
     private String groupName;
 
     public ArmInstanceView(InstanceTemplate instance, InstanceGroupType type, String attachedDiskStorage, String attachedDiskStorageType, String groupName) {

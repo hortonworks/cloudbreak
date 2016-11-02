@@ -7,6 +7,7 @@ package com.sequenceiq.cloudbreak.shell.model;
 public class Focus {
 
     private final String value;
+
     private final FocusType type;
 
     public Focus(String value, FocusType type) {

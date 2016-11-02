@@ -18,8 +18,10 @@ import reactor.bus.EventBus;
 public class ClusterStartHandler implements ClusterEventHandler<ClusterStartRequest> {
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
+
     @Inject
     private StackService stackService;
+
     @Inject
     private EventBus eventBus;
 

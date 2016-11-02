@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 public class ClusterCommands implements BaseCommands {
 
     private ShellContext shellContext;
+
     private CloudbreakShellUtil cloudbreakShellUtil;
 
     public ClusterCommands(ShellContext shellContext, CloudbreakShellUtil cloudbreakShellUtil) {

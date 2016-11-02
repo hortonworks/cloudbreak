@@ -49,8 +49,11 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class ArmPlatformParameters implements PlatformParameters {
 
     private static final int START_LABEL = 98;
+
     private static final int DEFAULT_REGION_TYPE_POSITION = 4;
+
     private static final int DEFAULT_VM_TYPE_POSITION = 1;
+
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
 
     @Value("${cb.arm.vm.parameter.definition.path:}")
@@ -63,8 +66,11 @@ public class ArmPlatformParameters implements PlatformParameters {
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+
     private List<VmType> vmTypes = new ArrayList<>();
+
     private Region defaultRegion;
+
     private VmType defaultVmType;
 
     @PostConstruct

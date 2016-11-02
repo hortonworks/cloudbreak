@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 public class HostFilterService {
 
     public static final String RM_WS_PATH = "/ws/v1/cluster";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(HostFilterService.class);
 
     @Inject

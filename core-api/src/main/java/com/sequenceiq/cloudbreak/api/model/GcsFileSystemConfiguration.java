@@ -5,10 +5,13 @@ import javax.validation.constraints.NotNull;
 public class GcsFileSystemConfiguration extends FileSystemConfiguration {
     @NotNull
     private String projectId;
+
     @NotNull
     private String serviceAccountEmail;
+
     @NotNull
     private String privateKeyEncoded;
+
     @NotNull
     private String defaultBucketName;
 

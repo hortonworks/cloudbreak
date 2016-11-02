@@ -37,18 +37,25 @@ import com.sequenceiq.it.cloudbreak.config.ITProps;
 @EnableConfigurationProperties(ITProps.class)
 public class IntegrationTestApp implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestApp.class);
+
     private static final IFileParser<XmlSuite> XML_PARSER = new SuiteXmlParser();
+
     private static final IFileParser<XmlSuite> YAML_PARSER = new YamlParser();
+
     private static final IFileParser<XmlSuite> DEFAULT_FILE_PARSER = XML_PARSER;
 
     @Value("${integrationtest.testsuite.threadPoolSize}")
     private int suiteThreadPoolSize;
+
     @Value("${integrationtest.command:}")
     private String itCommand;
+
     @Value("${integrationtest.fulltest.regindex:-1}")
     private int fullTestRegionIndex;
+
     @Value("${integrationtest.fulltest.regnum:-1}")
     private int fullTestRegionNumber;
+
     @Value("${integrationtest.outputdir:.}")
     private String outputDirectory;
 
