@@ -53,7 +53,7 @@ public class AwsPlatformParameters implements PlatformParameters {
     public static final String DEDICATED_INSTANCES = "dedicatedInstances";
 
     public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
-    
+
     public static final String INSTANCE_PROFILE = "instanceProfile";
 
     private static final Integer START_LABEL = 97;
