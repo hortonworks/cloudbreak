@@ -11,8 +11,6 @@ public class PluginValidator implements ConstraintValidator<ValidPlugin, Set<Str
 
     private static final String URL_PATTERN = "^(consul|base64)://.*";
 
-    private static final String SCRIPT_PATTERN = "^(recipe-pre-install|recipe-post-install):.*";
-
     @Override
     public void initialize(ValidPlugin validPlugin) {
     }
@@ -20,7 +18,7 @@ public class PluginValidator implements ConstraintValidator<ValidPlugin, Set<Str
     @Override
     public boolean isValid(Set<String> plugins, ConstraintValidatorContext cxt) {
         if (plugins == null || plugins.isEmpty()) {
-            return false;
+            return true;
         }
         for (String plugin : plugins) {
             if (!plugin.matches(URL_PATTERN)) {
@@ -38,20 +36,6 @@ public class PluginValidator implements ConstraintValidator<ValidPlugin, Set<Str
             return false;
         }
         String content = new String(Base64.decodeBase64(pluginContent));
-        if (content.isEmpty()) {
-            return false;
-        }
-
-        boolean tomlFound = false;
-        boolean scriptFound = false;
-        for (String line : content.split("\n")) {
-            if (line.startsWith("plugin.toml:")) {
-                tomlFound = true;
-            } else if (line.matches(SCRIPT_PATTERN)) {
-                scriptFound = true;
-            }
-        }
-
-        return tomlFound && scriptFound;
+        return !content.isEmpty();
     }
 }
