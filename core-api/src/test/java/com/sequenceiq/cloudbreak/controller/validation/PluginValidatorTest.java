@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,33 +45,9 @@ public class PluginValidatorTest extends AbstractValidatorTest {
     }
 
     @Test
-    public void inValidPluginNullReturnFalse() {
-        Assert.assertEquals(underTest.isValid(null, constraintValidatorContext), false);
-    }
-
-    @Test
-    public void inValidPluginEmptyReturnFalse() {
-        Assert.assertFalse(underTest.isValid(Collections.emptySet(), constraintValidatorContext));
-    }
-
-    @Test
     public void inValidPluginUrlJsonWillReturnFalse() {
         Set<String> plugins = new HashSet<>();
         plugins.add("asd://github.com/user/plugin1.git");
-        Assert.assertFalse(underTest.isValid(plugins, constraintValidatorContext));
-    }
-
-    @Test
-    public void inValidBase64MissingScriptWillReturnFalse() {
-        Set<String> plugins = new HashSet<>();
-        plugins.add("base64://" + Base64.encodeBase64String("plugin.toml:".getBytes()));
-        Assert.assertFalse(underTest.isValid(plugins, constraintValidatorContext));
-    }
-
-    @Test
-    public void inValidBase64MissingPluginDotTomlWillReturnFalse() {
-        Set<String> plugins = new HashSet<>();
-        plugins.add("base64://" + Base64.encodeBase64String("recipe-pre-install:\nrecipe-post-install:".getBytes()));
         Assert.assertFalse(underTest.isValid(plugins, constraintValidatorContext));
     }
 }

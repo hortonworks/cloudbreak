@@ -200,9 +200,10 @@ public class ModelDescriptions {
     }
 
     public static class RecipeModelDescription {
-        public static final String TIMEOUT = "recipe timeout in minutes";
         public static final String PLUGINS = "list of consul plugins with execution types";
         public static final String PROPERTIES = "additional plugin properties";
+        public static final String PRE_URL = "pre-install recipe url";
+        public static final String POST_URL = "post-install recipe url";
     }
 
     public static class SssdConfigModelDescription {

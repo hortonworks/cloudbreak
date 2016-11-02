@@ -1,9 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 
 import javax.inject.Inject;
 
@@ -16,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.sequenceiq.cloudbreak.converter.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -36,7 +34,7 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         if (json.getUrl() != null && !json.getUrl().isEmpty()) {
             String sourceUrl = json.getUrl().trim();
             try {
-                String urlText = readUrl(sourceUrl);
+                String urlText = URLUtils.readUrl(sourceUrl);
                 jsonHelper.createJsonFromString(urlText);
                 blueprint.setBlueprintText(urlText);
             } catch (Exception e) {
@@ -75,20 +73,6 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         }
 
         return blueprint;
-    }
-
-    private String readUrl(String url) throws IOException {
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            url = "http://" + url;
-        }
-        BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
-        String str;
-        StringBuilder sb = new StringBuilder();
-        while ((str = in.readLine()) != null) {
-            sb.append(str);
-        }
-        in.close();
-        return sb.toString();
     }
 
     private void validateBlueprint(String blueprintText) {

@@ -78,19 +78,26 @@ public class RecipeCommands implements BaseCommands {
             @CliOption(key = "description", help = "Description of the recepie") String description,
             @CliOption(key = "preInstallScriptFile", help = "Path of the pre install script file") File preInstallScriptFile,
             @CliOption(key = "postInstallScriptFile", help = "Path of the post install script file") File postInstallScriptFile,
+            @CliOption(key = "preInstallScriptUrl", help = "URL for the pre-install script") String preUrl,
+            @CliOption(key = "postInstallScriptUrl", help = "URL for the post-install script") String postUrl,
             @CliOption(key = "publicInAccount", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "flags if the recipe is public in the account") Boolean publicInAccount) {
+
         if (preInstallScriptFile != null && !preInstallScriptFile.exists()) {
             return "Pre install script file not exists.";
+        } else if (preInstallScriptFile != null && preUrl != null) {
+            return "Either the file or the url can be provided for pre-install.";
+        } else if (postInstallScriptFile != null && postUrl != null) {
+            return "Either the file or the url can be provided for post-install.";
         } else if (postInstallScriptFile != null && !postInstallScriptFile.exists()) {
             return "Post install script file not exists.";
-        } else if (preInstallScriptFile == null && postInstallScriptFile == null) {
+        } else if (preInstallScriptFile == null && postInstallScriptFile == null && preUrl == null && postUrl == null) {
             return "At least one script is required.";
         }
+
         try {
-            String tomlContent = String.format("[plugin]\nname=\"%s\"\ndescription=\"%s\"\nversion=\"1.0\"\n", name, description == null ? "" : description);
-            StringBuilder pluginContentBuilder = new StringBuilder()
-                    .append("plugin.toml:").append(Base64.encodeBase64String(tomlContent.getBytes())).append("\n");
+            StringBuilder pluginContentBuilder = new StringBuilder();
+
             if (preInstallScriptFile != null) {
                 addScriptContent(pluginContentBuilder, "recipe-pre-install", preInstallScriptFile);
             }
@@ -99,12 +106,22 @@ public class RecipeCommands implements BaseCommands {
             }
 
             Set<String> plugins = new HashSet<>();
-            plugins.add("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()));
+            if (pluginContentBuilder.length() > 0) {
+                plugins.add("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()));
+            }
 
             RecipeRequest recipeRequest = new RecipeRequest();
             recipeRequest.setName(name);
             recipeRequest.setDescription(description);
             recipeRequest.setPlugins(plugins);
+
+            if (preUrl != null) {
+                recipeRequest.setPreUrl(preUrl);
+            }
+            if (postUrl != null) {
+                recipeRequest.setPostUrl(postUrl);
+            }
+
             Long id;
             if (publicInAccount) {
                 id = shellContext.cloudbreakClient().recipeEndpoint().postPublic(recipeRequest).getId();
@@ -166,7 +183,6 @@ public class RecipeCommands implements BaseCommands {
         return !shellContext.isMarathonMode();
     }
 
-    @CliCommand(value = "recipe delete", help = "Delete the recipe by its id or name")
     @Override
     public String delete(Long id, String name) {
         try {
