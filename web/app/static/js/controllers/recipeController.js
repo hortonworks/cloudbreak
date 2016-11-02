@@ -138,5 +138,9 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
                 plugins: {}
             }
         }
+
+        $scope.keys = function(obj){
+            return obj? Object.keys(obj) : [];
+        }
     }
 ]);

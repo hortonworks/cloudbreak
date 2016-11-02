@@ -53,8 +53,8 @@ public class AwsPlatformParameters implements PlatformParameters {
     public static final String DEDICATED_INSTANCES = "dedicatedInstances";
 
     public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
-
-    public static final String S3_ROLE = "s3Role";
+    
+    public static final String INSTANCE_PROFILE = "instanceProfile";
 
     private static final Integer START_LABEL = 97;
 
@@ -216,7 +216,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.absent()));
         additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE_STRATEGY, false, InstanceProfileStrategy.class,
                 Optional.absent()));
-        additionalStackParameterValidations.add(new StackParamValidation(S3_ROLE, false, String.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE, false, String.class, Optional.absent()));
         return additionalStackParameterValidations;
     }
 

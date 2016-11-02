@@ -303,6 +303,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    @Transactional(Transactional.TxType.NEVER)
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
         Stack stack = stackService.get(stackId);
         Cluster cluster = stack.getCluster();

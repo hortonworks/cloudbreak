@@ -21,13 +21,13 @@ public class AwsInstanceProfileView {
                 && !isEmpty(String.valueOf(parameters.get(AwsPlatformParameters.INSTANCE_PROFILE_STRATEGY)));
     }
 
-    public boolean isS3RoleAvailable() {
-        return parameters.containsKey(AwsPlatformParameters.S3_ROLE)
-                && !isEmpty(String.valueOf(parameters.get(AwsPlatformParameters.S3_ROLE)));
+    public boolean isInstanceProfileAvailable() {
+        return parameters.containsKey(AwsPlatformParameters.INSTANCE_PROFILE)
+                && !isEmpty(String.valueOf(parameters.get(AwsPlatformParameters.INSTANCE_PROFILE)));
     }
 
-    public String getS3Role() {
-        return String.valueOf(parameters.get(AwsPlatformParameters.S3_ROLE));
+    public String getInstanceProfile() {
+        return String.valueOf(parameters.get(AwsPlatformParameters.INSTANCE_PROFILE));
     }
 
     public InstanceProfileStrategy getInstanceProfileStrategy() {

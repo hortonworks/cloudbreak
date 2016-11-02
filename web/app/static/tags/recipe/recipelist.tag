@@ -48,10 +48,10 @@
                     <tr ng-repeat="plugin in recipe.plugins">
                         <td data-title="'pluginkey'" class="col-md-4 text-center">
                             <ul ng-if="recipe.pluginContents[plugin]" class="nav">
-                                <li ng-repeat="(file, content) in recipe.pluginContents[plugin]">
+                                <li ng-repeat="file in keys(recipe.pluginContents[plugin])">
                                     {{file}}
                                     <br />
-                                    <textarea disabled style="width: 100%; height: 200px;">{{content}}</textarea>
+                                    <textarea disabled style="width: 100%; height: 200px;">{{recipe.pluginContents[plugin][file]}}</textarea>
                                 </li>
                             </ul>
                         </td>

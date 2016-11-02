@@ -117,7 +117,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = true;
         boolean mapPublicIpOnLaunch = true;
         boolean enableInstanceProfile = true;
-        boolean s3RoleAvailable = true;
+        boolean instanceProfileAvailable = true;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -128,7 +128,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
@@ -146,7 +146,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = true;
         boolean mapPublicIpOnLaunch = true;
         boolean enableInstanceProfile = true;
-        boolean s3RoleAvailable = true;
+        boolean instanceProfileAvailable = true;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -157,12 +157,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("RoleName"));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -180,7 +180,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = true;
         boolean mapPublicIpOnLaunch = true;
         boolean enableInstanceProfile = false;
-        boolean s3RoleAvailable = true;
+        boolean instanceProfileAvailable = true;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -191,12 +191,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("RoleName"));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -214,7 +214,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = true;
         boolean mapPublicIpOnLaunch = true;
         boolean enableInstanceProfile = true;
-        boolean s3RoleAvailable = false;
+        boolean instanceProfileAvailable = false;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -225,12 +225,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("RoleName")));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -248,7 +248,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = true;
         boolean mapPublicIpOnLaunch = true;
         boolean enableInstanceProfile = false;
-        boolean s3RoleAvailable = false;
+        boolean instanceProfileAvailable = false;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -259,12 +259,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("RoleName")));
+        assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -282,7 +282,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = true;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
-        boolean s3RoleAvailable = true;
+        boolean instanceProfileAvailable = true;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -293,12 +293,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("RoleName"));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -316,7 +316,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = true;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
-        boolean s3RoleAvailable = true;
+        boolean instanceProfileAvailable = true;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -327,12 +327,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("RoleName"));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -350,7 +350,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = true;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
-        boolean s3RoleAvailable = false;
+        boolean instanceProfileAvailable = false;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -361,12 +361,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("RoleName")));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -384,7 +384,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = true;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
-        boolean s3RoleAvailable = false;
+        boolean instanceProfileAvailable = false;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -395,12 +395,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("RoleName")));
+        assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -418,7 +418,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = false;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
-        boolean s3RoleAvailable = true;
+        boolean instanceProfileAvailable = true;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -429,12 +429,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("RoleName"));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -452,7 +452,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = false;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
-        boolean s3RoleAvailable = true;
+        boolean instanceProfileAvailable = true;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -463,12 +463,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("RoleName"));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -486,7 +486,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = false;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
-        boolean s3RoleAvailable = false;
+        boolean instanceProfileAvailable = false;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -497,12 +497,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("RoleName")));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -520,7 +520,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = false;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
-        boolean s3RoleAvailable = false;
+        boolean instanceProfileAvailable = false;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -531,12 +531,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("RoleName")));
+        assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -554,7 +554,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = false;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
-        boolean s3RoleAvailable = true;
+        boolean instanceProfileAvailable = true;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -565,12 +565,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("RoleName"));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -588,7 +588,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = false;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = true;
-        boolean s3RoleAvailable = false;
+        boolean instanceProfileAvailable = false;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -599,12 +599,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("RoleName")));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -622,7 +622,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = false;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
-        boolean s3RoleAvailable = true;
+        boolean instanceProfileAvailable = true;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -633,12 +633,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("RoleName"));
+        assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));
@@ -656,7 +656,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean existingIGW = false;
         boolean mapPublicIpOnLaunch = false;
         boolean enableInstanceProfile = false;
-        boolean s3RoleAvailable = false;
+        boolean instanceProfileAvailable = false;
         //WHEN
         modelContext = new CloudFormationTemplateBuilder.ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -667,12 +667,12 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(Lists.newArrayList(existingSubnetCidr))
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
-                .withS3RoleAvailable(s3RoleAvailable)
+                .withInstanceProfileAvailable(instanceProfileAvailable)
                 .withTemplatePath(awsCloudFormationTemplatePath);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("RoleName")));
+        assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
         assertThat(templateString, containsString("SubnetId"));

@@ -334,17 +334,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.enableShipyard = false;
             }
             if ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform !== 'AWS') {
-                delete $scope.cluster.parameters.s3Role;
+                delete $scope.cluster.parameters.instanceProfile;
                 delete $scope.cluster.parameters.instanceProfileStrategy;
             } else {
                 if ($scope.cluster.parameters.instanceProfileStrategy == "NONE") {
-                     delete $scope.cluster.parameters.s3Role;
+                     delete $scope.cluster.parameters.instanceProfile;
                      delete $scope.cluster.parameters.instanceProfileStrategy;
-                } else if ($scope.cluster.parameters.instanceProfileStrategy == "USE_EXISTING" && $scope.isUndefined($scope.cluster.parameters.s3Role)) {
-                    $scope.showErrorMessage($rootScope.msg.s3_role_error);
+                } else if ($scope.cluster.parameters.instanceProfileStrategy == "USE_EXISTING" && $scope.isUndefined($scope.cluster.parameters.instanceProfile)) {
+                    $scope.showErrorMessage($rootScope.msg.insprof_role_error);
                     return;
                 } else if ($scope.cluster.parameters.instanceProfileStrategy == "CREATE") {
-                    delete $scope.cluster.parameters.s3Role;
+                    delete $scope.cluster.parameters.instanceProfile;
                 }
             }
             if (!$scope.isUndefined($scope.cluster.ambariStackDetails) && Object.keys($scope.cluster.ambariStackDetails).length !== 0) {
@@ -844,7 +844,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function setInstanceProfile() {
             if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform != undefined) {
                 if ($rootScope.activeCredential.cloudPlatform == 'AWS') {
-                    delete $scope.cluster.parameters.s3Role;
+                    delete $scope.cluster.parameters.instanceProfile;
                     $scope.cluster.parameters.instanceProfileStrategy = "NONE";
                 }
             }
