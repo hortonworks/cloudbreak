@@ -202,8 +202,8 @@ If you want to test the binary CircleCI build from your branch named `fix-someth
 branch=fix-something
 circle_url=https://circleci.com/api/v1/project/sequenceiq/cloudbreak-deployer
 circle_token=[CIRCLE_TOKEN]
-latest_build=$(curl -s -G -d circle-token=${circle_token} ${circle_url}/tree/${branch}?filter=completed\&limit=1 | jq .[0].build_num)
-curl -sL $(curl -s -G -d circle-token=${circle_token} ${circle_url}/${latest_build}/artifacts  | jq .[].url -r | grep -i $(uname)) | tar -xz -C $(dirname $(which cbd))
+latest_build=$(curl -s -G -d circle-token=${circle_token} ${circle_url}/tree/${branch}?filter=completed\&limit=1 | grep -m 1 build_num | sed 's/[^0-9]*//g')
+curl -sL $(curl -s -G -d circle-token=${circle_token} ${circle_url}/${latest_build}/artifacts | grep url | grep -i $(uname) | cut -d\" -f 4) | tar -xz -C $(dirname $(which cbd))
 ```
 
 ### Snapshots
