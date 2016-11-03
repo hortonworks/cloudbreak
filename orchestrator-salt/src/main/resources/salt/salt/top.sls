@@ -7,6 +7,14 @@ base:
     - match: grain
     - kerberos
 
+  'G@roles:ambari_upgrade and G@roles:ambari_server':
+    - match: compound
+    - ambari.server-upgrade
+
+  'G@roles:ambari_upgrade and G@roles:ambari_agent':
+    - match: compound
+    - ambari.agent-upgrade
+
   'roles:ambari_server':
     - match: grain
     - ambari.server
