@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.event;
 
+import java.util.Set;
+
 public interface InstancePayload extends Payload {
-    String getInstanceId();
+    Set<String> getInstanceIds();
 }

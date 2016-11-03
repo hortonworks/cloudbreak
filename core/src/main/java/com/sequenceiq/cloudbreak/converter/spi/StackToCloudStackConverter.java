@@ -56,7 +56,7 @@ public class StackToCloudStackConverter {
         return convert(stack, Collections.singleton(instanceId));
     }
 
-    private CloudStack convert(Stack stack, Set<String> deleteRequestedInstances) {
+    public CloudStack convert(Stack stack, Set<String> deleteRequestedInstances) {
         Image image = null;
         List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), deleteRequestedInstances);
         try {

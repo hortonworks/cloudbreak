@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 import reactor.bus.EventBus;
 
+import java.util.Collections;
+
 /**
  * Flow manager implementation backed by Reactor.
  * This class is the flow state machine and mediates between the states and reactor events
@@ -72,7 +74,8 @@ public class ReactorFlowManager {
 
     public void triggerStackRemoveInstance(Long stackId, String instanceId) {
         String selector = FlowTriggers.REMOVE_INSTANCE_TRIGGER_EVENT;
-        InstanceTerminationTriggerEvent event = new InstanceTerminationTriggerEvent(selector, stackId, instanceId);
+        InstanceTerminationTriggerEvent event = new InstanceTerminationTriggerEvent(selector, stackId,
+                Collections.singleton(instanceId));
         reactor.notify(selector, eventFactory.createEvent(event, selector));
     }
 

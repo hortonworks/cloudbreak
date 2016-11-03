@@ -32,6 +32,6 @@ public class InstanceTerminationAction extends AbstractInstanceTerminationAction
     @Override
     protected Selectable createRequest(InstanceTerminationContext context) {
         return new RemoveInstanceRequest<>(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
-                context.getCloudResources(), context.getCloudInstance());
+                context.getCloudResources(), context.getCloudInstances());
     }
 }

@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.event.resource;
 
-import java.util.List;
-
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.InstancePayload;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RemoveInstanceResult extends CloudPlatformResult<RemoveInstanceRequest> implements InstancePayload {
 
@@ -22,11 +24,12 @@ public class RemoveInstanceResult extends CloudPlatformResult<RemoveInstanceRequ
     }
 
     @Override
-    public String getInstanceId() {
+    public Set<String> getInstanceIds() {
         if (getCloudInstance() == null) {
             return null;
         } else {
-            return getCloudInstance().getInstanceId();
+            List<CloudInstance> instances = getRequest().getInstances();
+            return instances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toSet());
         }
     }
 }
