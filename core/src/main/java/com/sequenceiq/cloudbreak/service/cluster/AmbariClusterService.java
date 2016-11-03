@@ -299,7 +299,7 @@ public class AmbariClusterService implements ClusterService {
     @Override
     @Transactional(Transactional.TxType.NEVER)
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
-        Stack stack = stackService.get(stackId);
+        Stack stack = stackService.getById(stackId);
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
