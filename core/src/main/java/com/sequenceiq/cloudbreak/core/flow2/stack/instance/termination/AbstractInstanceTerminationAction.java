@@ -4,8 +4,10 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -64,12 +66,18 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-        String instanceId = payload.getInstanceId();
-        CloudStack cloudStack = cloudStackConverter.convertForTermination(stack, instanceId);
+        Set<String> instanceIds = payload.getInstanceIds();
+        CloudStack cloudStack = cloudStackConverter.convert(stack, instanceIds);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
-        InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
-        CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData);
-        return new InstanceTerminationContext(flowId, stack, cloudContext, cloudCredential, cloudStack, cloudResources, cloudInstance, instanceMetaData);
+        List<InstanceMetaData> instanceMetaDataList = new ArrayList<>();
+        List<CloudInstance> cloudInstances = new ArrayList<>();
+        for (String instanceId : instanceIds) {
+            InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
+            CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData);
+            instanceMetaDataList.add(instanceMetaData);
+            cloudInstances.add(cloudInstance);
+        }
+        return new InstanceTerminationContext(flowId, stack, cloudContext, cloudCredential, cloudStack, cloudResources, cloudInstances, instanceMetaDataList);
     }
 
     @Override

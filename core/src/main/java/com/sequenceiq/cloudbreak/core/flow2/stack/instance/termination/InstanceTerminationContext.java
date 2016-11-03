@@ -24,20 +24,20 @@ public class InstanceTerminationContext extends CommonContext {
 
     private final List<CloudResource> cloudResources;
 
-    private final CloudInstance cloudInstance;
+    private final List<CloudInstance> cloudInstances;
 
-    private final InstanceMetaData instanceMetaData;
+    private final List<InstanceMetaData> instanceMetaDataList;
 
     public InstanceTerminationContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            CloudStack cloudStack, List<CloudResource> cloudResources, CloudInstance cloudInstance, InstanceMetaData instanceMetaData) {
+            CloudStack cloudStack, List<CloudResource> cloudResources, List<CloudInstance> cloudInstances, List<InstanceMetaData> instanceMetaDataList) {
         super(flowId);
         this.stack = stack;
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
         this.cloudStack = cloudStack;
         this.cloudResources = ImmutableList.copyOf(cloudResources);
-        this.cloudInstance = cloudInstance;
-        this.instanceMetaData = instanceMetaData;
+        this.cloudInstances = cloudInstances;
+        this.instanceMetaDataList = instanceMetaDataList;
     }
 
     public Stack getStack() {
@@ -60,11 +60,11 @@ public class InstanceTerminationContext extends CommonContext {
         return cloudResources;
     }
 
-    public CloudInstance getCloudInstance() {
-        return cloudInstance;
+    public List<CloudInstance> getCloudInstances() {
+        return cloudInstances;
     }
 
-    public InstanceMetaData getInstanceMetaData() {
-        return instanceMetaData;
+    public List<InstanceMetaData> getInstanceMetaDataList() {
+        return instanceMetaDataList;
     }
 }
