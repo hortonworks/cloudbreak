@@ -20,4 +20,8 @@ public class ErrorHandlerAwareFlowEventFactory implements FlowEventFactory<Objec
         return new Event(null, payLoad, errorHandler);
     }
 
+    @Override
+    public <P> Event<P> createEvent(P payLoad) {
+        return new Event(null, payLoad, errorHandler);
+    }
 }

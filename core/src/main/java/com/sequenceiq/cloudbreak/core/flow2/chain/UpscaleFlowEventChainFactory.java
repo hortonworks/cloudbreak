@@ -38,7 +38,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         Stack stack = stackService.getById(event.getStackId());
         Cluster cluster = stack.getCluster();
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new StackSyncTriggerEvent(FlowTriggers.STACK_SYNC_TRIGGER_EVENT, event.getStackId(), false));
+        flowEventChain.add(new StackSyncTriggerEvent(FlowTriggers.STACK_SYNC_TRIGGER_EVENT, event.getStackId(), false, event.accepted()));
         flowEventChain.add(new StackScaleTriggerEvent(FlowTriggers.STACK_UPSCALE_TRIGGER_EVENT, event.getStackId(), event.getInstanceGroup(),
                 event.getAdjustment()));
         if (ScalingType.isClusterUpScale(event.getScalingType()) && cluster != null) {

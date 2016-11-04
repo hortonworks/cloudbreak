@@ -19,7 +19,7 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Sta
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(StackEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new StackEvent(FlowTriggers.STACK_PROVISION_TRIGGER_EVENT, event.getStackId()));
+        flowEventChain.add(new StackEvent(FlowTriggers.STACK_PROVISION_TRIGGER_EVENT, event.getStackId(), event.accepted()));
         flowEventChain.add(new StackEvent(FlowTriggers.CLUSTER_PROVISION_TRIGGER_EVENT, event.getStackId()));
         return flowEventChain;
     }
