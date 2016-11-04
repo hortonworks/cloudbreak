@@ -662,7 +662,7 @@ public class Stack implements ProvisionEntity {
                     break;
                 } else {
                     Json attributes = instanceGroup.getTemplate().getAttributes();
-                    if ((attributes != null) && (attributes.getMap().containsKey("spotPrice"))) {
+                    if (attributes != null && attributes.getMap().get("spotPrice") != null) {
                         reason = StopRestrictionReason.SPOT_INSTANCES;
                         break;
                     }
