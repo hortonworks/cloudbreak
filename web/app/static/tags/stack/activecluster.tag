@@ -201,7 +201,7 @@
                                                 </div>
 
                                                 <div class="form-group">
-                                                    <label class="col-sm-2 control-label" for="sl_nodecount">Node count: </label>
+                                                    <label class="col-sm-2 control-label" for="sl_nodecount">{{msg.node_count}}: </label>
                                                     <div class="col-sm-9">
                                                         <p id="sl_nodecount" class="form-control-static">{{group.constraint.hostCount}}</p>
                                                     </div>

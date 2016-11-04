@@ -160,10 +160,6 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
         function handleAvailableNotification(notification) {
             var actCluster = getActCluster(notification);
             var msg = notification.eventMessage;
-            var nodeCount = notification.nodeCount;
-            if (nodeCount != null && nodeCount != undefined && nodeCount != 0) {
-                actCluster.nodeCount = nodeCount;
-            }
             updateStatus(actCluster, notification, true);
             $scope.showSuccess(msg, actCluster.name);
             addNotificationToGlobalEvents(notification);
@@ -202,6 +198,10 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
         }
 
         function refreshMetadata(notification) {
+            var nodeCount = notification.nodeCount;
+            if (nodeCount != null && nodeCount != undefined && nodeCount != 0) {
+                $rootScope.activeCluster.nodeCount = nodeCount;
+            }
             if ($rootScope.activeCluster.id != undefined && $rootScope.activeCluster.id == notification.stackId) {
                 GlobalStack.get({
                     id: notification.stackId
@@ -218,12 +218,16 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                     }
                     // refresh instance metadata
                     var metadata = []
-                    angular.forEach(success.instanceGroups, function(item) {
-                        angular.forEach(item.metadata, function(item1) {
-                            metadata.push(item1)
-                            $rootScope.activeCluster.metadata = metadata // trigger activeCluster.metadata
+                    angular.forEach(success.instanceGroups, function(ig) {
+                        var actIg = $filter('filter')($rootScope.activeCluster.instanceGroups, {
+                            id: ig.id
+                        }, true)[0]
+                        actIg.nodeCount = ig.nodeCount;
+                        angular.forEach(ig.metadata, function(md) {
+                            metadata.push(md)
                         });
                     });
+                    $rootScope.activeCluster.metadata = metadata // trigger activeCluster.metadata
                 });
             }
         }

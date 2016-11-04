@@ -4,6 +4,7 @@
 .project
 .classpath
 .gradle
+.vscode
 gradle
 .idea
 *.iml
