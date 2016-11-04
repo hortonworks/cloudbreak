@@ -44,6 +44,7 @@ public class Notes {
             + "and a group could be assigned to any Stack(cluster).";
     public static final String ACCOUNT_PREFERENCES_NOTES = "Account related preferences that could be managed by the account admins and different "
             + "restrictions could be added to Cloudbreak resources.";
+    public static final String AMBARI_NOTES = "Ambari is used to provision the Hadoop clusters.";
 
     public static final String USER_NOTES = "Users can be invited under an account by the administrator, and all resources "
             + "(e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users";

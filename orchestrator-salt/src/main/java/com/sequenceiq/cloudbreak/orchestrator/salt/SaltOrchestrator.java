@@ -197,6 +197,34 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public void upgradeAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltPillarConfig pillarConfig,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+        try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+            for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
+                PillarSave pillarSave = new PillarSave(sc, propertiesEntry.getValue());
+                Callable<Boolean> saltPillarRunner = runner(pillarSave, exitCriteria, exitCriteriaModel);
+                Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
+                saltPillarRunnerFuture.get();
+            }
+
+            // add 'ambari_upgrade' role to all nodes
+            Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "roles", "ambari_upgrade", Compound.CompoundType.IP), exitCriteriaModel);
+
+            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe);
+
+            // remove 'ambari_upgrade' role from all nodes
+            targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "roles", "ambari_upgrade", Compound.CompoundType.IP), exitCriteriaModel);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during ambari upgrade", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
     public void tearDown(GatewayConfig gatewayConfig, List<String> hostnames) throws CloudbreakOrchestratorException {
         try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
             SaltStates.removeMinions(saltConnector, hostnames);

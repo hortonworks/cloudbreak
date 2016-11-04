@@ -425,6 +425,28 @@ public class ClusterCommands implements BaseCommands {
         }
     }
 
+    @CliAvailabilityIndicator(value = "cluster upgrade")
+    public boolean upgradeAvailable() {
+        return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
+    }
+
+    @CliCommand(value = "cluster upgrade")
+    public String upgradeCluster(
+            @CliOption(key = "baseUrl", mandatory = true, help = "Base URL of the Ambari repo") String baseUrl,
+            @CliOption(key = "gpgKeyUrl", mandatory = true, help = "GPG key of the Ambari repo") String gpgKeyUrl,
+            @CliOption(key = "version", mandatory = true, help = "Ambari version") String version) {
+        AmbariRepoDetailsJson request = new AmbariRepoDetailsJson();
+        request.setVersion(version);
+        request.setBaseUrl(baseUrl);
+        request.setGpgKeyUrl(gpgKeyUrl);
+        String stackId = shellContext.getStackId();
+        if (stackId == null) {
+            return "No stack selected";
+        }
+        cloudbreakShellUtil.checkResponse("ambariUpgrade", shellContext.cloudbreakClient().clusterEndpoint().upgradeCluster(Long.valueOf(stackId), request));
+        return "Upgrade request successfully sent";
+    }
+
     @Override
     public ShellContext shellContext() {
         return shellContext;

@@ -86,6 +86,7 @@ public class ReactorFlowManagerTest {
         flowManager.triggerFullSync(stackId);
         flowManager.triggerClusterCredentialChange(stackId, "admin", "admin1");
         flowManager.triggerClusterTermination(stackId);
+        flowManager.triggerClusterUpgrade(stackId);
 
         int count = 0;
         for (Method method : flowManager.getClass().getDeclaredMethods()) {

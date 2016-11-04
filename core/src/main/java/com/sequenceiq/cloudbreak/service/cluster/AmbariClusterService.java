@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -523,6 +524,54 @@ public class AmbariClusterService implements ClusterService {
             throw new CloudbreakServiceException(e);
         }
         return stack.getCluster();
+    }
+
+    @Override
+    public void upgrade(Long stackId, AmbariRepo ambariRepoUpgrade) {
+        if (ambariRepoUpgrade != null) {
+            Stack stack = stackService.getById(stackId);
+            Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
+            if (cluster == null) {
+                throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stackId));
+            }
+            if (!stack.isAvailable()) {
+                throw new BadRequestException(String.format(
+                        "Stack '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
+                        stackId, stack.getStatus()));
+            }
+            if (!cluster.isAvailable()) {
+                throw new BadRequestException(String.format(
+                        "Cluster '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
+                        stackId, stack.getStatus()));
+            }
+            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stackId);
+            if (ambariRepo == null) {
+                try {
+                    componentConfigProvider.store(new Component(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(),
+                            new Json(ambariRepoUpgrade), stack));
+                } catch (JsonProcessingException e) {
+                    throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
+                }
+            } else {
+                Component component = componentConfigProvider
+                        .getComponent(stackId, ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name());
+                ambariRepo.setBaseUrl(ambariRepoUpgrade.getBaseUrl());
+                ambariRepo.setGpgKeyUrl(ambariRepoUpgrade.getGpgKeyUrl());
+                ambariRepo.setPredefined(false);
+                ambariRepo.setVersion(ambariRepoUpgrade.getVersion());
+                try {
+                    component.setAttributes(new Json(ambariRepo));
+                    componentConfigProvider.store(component);
+                } catch (JsonProcessingException e) {
+                    throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
+                }
+            }
+            try {
+                flowManager.triggerClusterUpgrade(stack.getId());
+            } catch (Exception e) {
+                throw new CloudbreakServiceException(e);
+            }
+        }
     }
 
     private void createHDPRepoComponent(HDPRepo hdpRepoUpdate, Stack stack) {

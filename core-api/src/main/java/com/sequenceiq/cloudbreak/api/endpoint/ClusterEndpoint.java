@@ -12,6 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
@@ -71,5 +72,11 @@ public interface ClusterEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterOpDescription.GET_CLUSTER_PROPERTIES, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
     ConfigsResponse getConfigs(@PathParam(value = "id") Long stackId, ConfigsRequest requests) throws Exception;
+
+    @POST
+    @Path("{id}/cluster/upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ClusterOpDescription.UPGRADE_AMBARI, produces = ContentType.JSON, notes = Notes.AMBARI_NOTES)
+    Response upgradeCluster(@PathParam(value = "id") Long stackId, AmbariRepoDetailsJson ambariRepoDetails);
 
 }
