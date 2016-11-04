@@ -108,6 +108,11 @@ public class ReactorFlowManager {
         notify(selector, new StackEvent(selector, stackId));
     }
 
+    public void triggerClusterUpgrade(Long stackId) {
+        String selector = FlowChainTriggers.CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+    }
+
     public void triggerClusterCredentialChange(Long stackId, String userName, String password) {
         String selector = FlowTriggers.CLUSTER_CREDENTIALCHANGE_TRIGGER_EVENT;
         ClusterCredentialChangeTriggerEvent event = new ClusterCredentialChangeTriggerEvent(selector, stackId, userName, password);

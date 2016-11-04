@@ -5,6 +5,8 @@ public class FlowChainTriggers {
 
     public static final String CLUSTER_RESET_CHAIN_TRIGGER_EVENT = "CLUSTER_RESET_CHAIN_TRIGGER_EVENT";
 
+    public static final String CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT = "CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT";
+
     public static final String FULL_UPSCALE_TRIGGER_EVENT = "FULL_UPSCALE_TRIGGER_EVENT";
 
     public static final String FULL_DOWNSCALE_TRIGGER_EVENT = "FULL_DOWNSCALE_TRIGGER_EVENT";

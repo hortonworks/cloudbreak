@@ -33,6 +33,9 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void resetAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
+    void upgradeAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException;
+
     List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
