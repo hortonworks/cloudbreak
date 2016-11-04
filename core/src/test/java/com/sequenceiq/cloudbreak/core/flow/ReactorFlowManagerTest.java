@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,18 +18,17 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
+import reactor.rx.Promise;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReactorFlowManagerTest {
-    private static final Platform GCP_PLATFORM = Platform.platform(CloudConstants.GCP);
 
     @Mock
     private EventBus reactor;
@@ -41,17 +39,31 @@ public class ReactorFlowManagerTest {
     @InjectMocks
     private ReactorFlowManager flowManager;
 
+    private Long stackId = 1L;
+
     @Before
     public void setUp() {
         reset(reactor);
         reset(eventFactory);
         when(reactor.notify((Object) anyObject(), any(Event.class))).thenReturn(new EventBus(new ThreadPoolExecutorDispatcher(1, 1)));
-        when(eventFactory.createEvent(anyObject(), anyString())).thenReturn(new Event<Object>(String.class));
+        Acceptable acceptable = new Acceptable() {
+            @Override
+            public Promise<Boolean> accepted() {
+                Promise<Boolean> a = new Promise<>();
+                a.accept(true);
+                return a;
+            }
+
+            @Override
+            public Long getStackId() {
+                return stackId;
+            }
+        };
+        when(eventFactory.createEvent(anyObject())).thenReturn(new Event<>(acceptable));
     }
 
     @Test
     public void shouldReturnTheNextFailureTransition() {
-        Long stackId = 1L;
         InstanceGroupAdjustmentJson instanceGroupAdjustment = new InstanceGroupAdjustmentJson();
         HostGroupAdjustmentJson hostGroupAdjustment = new HostGroupAdjustmentJson();
 

@@ -38,7 +38,7 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
     public Queue<Selectable> createFlowTriggerEventQueue(ClusterAndStackDownscaleTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new ClusterScaleTriggerEvent(FlowTriggers.CLUSTER_DOWNSCALE_TRIGGER_EVENT, event.getStackId(), event.getHostGroupName(),
-                event.getAdjustment()));
+                event.getAdjustment(), event.accepted()));
         if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
             Stack stack = stackService.getById(event.getStackId());
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), event.getHostGroupName());

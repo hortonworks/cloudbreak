@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
+import static com.sequenceiq.cloudbreak.core.flow2.FlowTriggers.STACK_FORCE_TERMINATE_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.FlowTriggers.STACK_TERMINATE_TRIGGER_EVENT;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -11,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
@@ -27,6 +34,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     public static final String FLOW_CANCEL = "FLOWCANCEL";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Flow2Handler.class);
+
+    private static final List<String> ALLOWED_PARALLEL_FLOWS =
+            Collections.unmodifiableList(Arrays.asList(STACK_FORCE_TERMINATE_TRIGGER_EVENT, STACK_TERMINATE_TRIGGER_EVENT));
 
     @Inject
     private FlowLogService flowLogService;
@@ -53,13 +63,16 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         if (FLOW_CANCEL.equals(key)) {
             cancelRunningFlows(payload.getStackId());
         } else if (FLOW_FINAL.equals(key)) {
-            finalizeFlow(flowId, flowChainId, payload.getStackId(), event);
+            finalizeFlow(flowId, flowChainId, payload.getStackId());
         } else {
             if (flowId == null) {
                 LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
-                // TODO this is needed because we have two flow implementations in the same time and we want to avoid conflicts
                 FlowConfiguration<?> flowConfig = flowConfigurationMap.get(key);
                 if (flowConfig != null && flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getStackId())) {
+                    if (!acceptFlow(key, payload)) {
+                        LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getStackId(), key);
+                        return;
+                    }
                     flowId = UUID.randomUUID().toString();
                     Flow flow = flowConfig.createFlow(flowId);
                     runningFlows.put(flow, flowChainId);
@@ -80,6 +93,23 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
+    private synchronized boolean acceptFlow(String key, Payload payload) {
+        if (payload instanceof Acceptable) {
+            Acceptable acceptable = (Acceptable) payload;
+            if (!ALLOWED_PARALLEL_FLOWS.contains(key) && isOtherFlowRunning(payload.getStackId())) {
+                acceptable.accepted().accept(Boolean.FALSE);
+                return false;
+            }
+            acceptable.accepted().accept(Boolean.TRUE);
+        }
+        return true;
+    }
+
+    private boolean isOtherFlowRunning(Long stackId) {
+        Set<String> flowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+        return !flowIds.isEmpty();
+    }
+
     private void cancelRunningFlows(Long stackId) {
         Set<String> flowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(stackId);
         LOGGER.debug("flow cancellation arrived: ids: {}", flowIds);
@@ -95,7 +125,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private void finalizeFlow(String flowId, String flowChainId, Long stackId, Event<? extends Payload> event) {
+    private void finalizeFlow(String flowId, String flowChainId, Long stackId) {
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
         flowLogService.close(stackId, flowId);
         Flow flow = runningFlows.remove(flowId);
