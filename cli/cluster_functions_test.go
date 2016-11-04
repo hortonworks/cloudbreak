@@ -99,13 +99,13 @@ func TestFillWithInstanceProfileStrategy(t *testing.T) {
 func TestFillWithUseExistingInstanceProfileStrategy(t *testing.T) {
 	sp := make(map[string]string)
 	sp["instanceProfileStrategy"] = "USE_EXISTING"
-	sp["s3Role"] = "s3-role"
+	sp["instanceProfile"] = "s3-role"
 	skeleton, sr, cr, br, nj := clusterSkeleton(sp, nil, defaultNetworkParams())
 
 	skeleton.fill(sr, cr, br, nil, nil, nj, nil)
 
-	if skeleton.InstanceRole != sp["s3Role"] {
-		t.Errorf("instance role not match %s == %s", sp["s3Role"], skeleton.InstanceRole)
+	if skeleton.InstanceRole != sp["instanceProfile"] {
+		t.Errorf("instance role not match %s == %s", sp["instanceProfile"], skeleton.InstanceRole)
 	}
 }
 

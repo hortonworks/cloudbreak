@@ -83,7 +83,7 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	parameters := stack.Parameters
 	if len(parameters) > 0 && len(parameters["instanceProfileStrategy"]) > 0 {
 		if parameters["instanceProfileStrategy"] == "USE_EXISTING" {
-			c.InstanceRole = parameters["s3Role"]
+			c.InstanceRole = parameters["instanceProfile"]
 		} else {
 			c.InstanceRole = parameters["instanceProfileStrategy"]
 		}

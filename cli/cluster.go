@@ -240,13 +240,13 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		var stackParameters = make(map[string]string)
-		s3Role := skeleton.InstanceRole
-		if len(s3Role) > 0 {
-			if s3Role == "CREATE" {
+		InstanceProfileDefinition := skeleton.InstanceRole
+		if len(InstanceProfileDefinition) > 0 {
+			if InstanceProfileDefinition == "CREATE" {
 				stackParameters["instanceProfileStrategy"] = "CREATE"
 			} else {
 				stackParameters["instanceProfileStrategy"] = "USE_EXISTING"
-				stackParameters["s3Role"] = s3Role
+				stackParameters["instanceProfile"] = InstanceProfileDefinition
 			}
 		}
 

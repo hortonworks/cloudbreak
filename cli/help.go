@@ -33,7 +33,7 @@ var AWSCreateClusterSkeletonHelp = `
   "WebAccess": true,                                                       // Open access to web UI (Ambari, Spark, Zeppelin)
   "ClusterAndAmbariUser": "admin",                                         // User name for Ambari and all services
   "ClusterAndAmbariPassword": "admin",                                     // Password for Ambari and all services
-  "InstanceRole": "CREATE",                                                // (Optional) Instance role to access S3, accepted values: "", null, CREATE, existing AWS instance role name
+  "InstanceRole": "CREATE",                                                // (Optional) Instance role to access Amazon API, accepted values: "", null, CREATE, existing AWS instance role name
   "Network": {                                                             // (Optional) Use existing VPC and subnet
     "VpcId": "vpc-12345678",                                               // Identifier of an existing VPC where the cluster will be provisioned
     "SubnetId": "subnet-12345678"                                          // Identifier of an existing subnet where the cluster will be provisioned
