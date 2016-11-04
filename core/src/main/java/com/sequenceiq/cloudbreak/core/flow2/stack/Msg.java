@@ -61,7 +61,10 @@ public enum Msg {
     AMBARI_CLUSTER_NOTIFICATION_EMAIL("ambari.cluster.notification.email"),
     AMBARI_CLUSTER_RESET("ambari.cluster.reset"),
     AMBARI_CLUSTER_CHANGED_CREDENTIAL("ambari.cluster.changed.credential"),
-    AMBARI_CLUSTER_CHANGING_CREDENTIAL("ambari.cluster.changing.credential");
+    AMBARI_CLUSTER_CHANGING_CREDENTIAL("ambari.cluster.changing.credential"),
+    AMBARI_CLUSTER_UPGRADE("ambari.cluster.upgrade"),
+    AMBARI_CLUSTER_UPGRADE_FAILED("ambari.cluster.upgrade.failed"),
+    AMBARI_CLUSTER_UPGRADE_FINISHED("ambari.cluster.upgrade.finished");
 
     private String code;
 

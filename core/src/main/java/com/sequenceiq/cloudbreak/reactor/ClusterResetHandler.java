@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.reactor;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterResetService;
@@ -16,8 +14,6 @@ import reactor.bus.EventBus;
 
 @Component
 public class ClusterResetHandler implements ClusterEventHandler<ClusterResetRequest> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterResetHandler.class);
-
     @Inject
     private EventBus eventBus;
 
