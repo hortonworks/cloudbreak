@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
@@ -63,6 +64,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     @Inject
     private AmbariViewProvider ambariViewProvider;
+
+    @Inject
+    private AmbariAuthenticationProvider ambariAuthenticationProvider;
 
     @Override
     public ClusterResponse convert(Cluster source) {
@@ -119,7 +123,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             try {
                 HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(source.getStack().getId(), source.getAmbariIp());
                 AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, source.getStack().getGatewayPort(),
-                        source.getUserName(), source.getPassword());
+                        ambariAuthenticationProvider.getAmbariUserName(source), ambariAuthenticationProvider.getAmbariPassword(source));
                 return ambariViewProvider.provideViewInformation(ambariClient, source);
             } catch (CloudbreakSecuritySetupException e) {
                 LOGGER.error("Unable to setup ambari client tls configs: ", e);

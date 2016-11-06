@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -12,6 +14,9 @@ public class AmbariClientProvider {
     private static final String HTTP_PORT = "8080";
 
     private static final String ADMIN_PRINCIPAL = "/admin";
+
+    @Inject
+    private AmbariAuthenticationProvider ambariAuthenticationProvider;
 
     /**
      * Create a new Ambari client. If the kerberos security is enabled
@@ -56,7 +61,9 @@ public class AmbariClientProvider {
      * @return client
      */
     public AmbariClient getSecureAmbariClient(HttpClientConfig clientConfig, Integer httpsPort, Cluster cluster) {
-        AmbariClient ambariClient = getAmbariClient(clientConfig, httpsPort, cluster.getUserName(), cluster.getPassword());
+        AmbariClient ambariClient = getAmbariClient(clientConfig, httpsPort,
+                ambariAuthenticationProvider.getAmbariUserName(cluster),
+                ambariAuthenticationProvider.getAmbariPassword(cluster));
         if (cluster.isSecure()) {
             setKerberosSession(ambariClient, cluster);
         }

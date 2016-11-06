@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
@@ -199,6 +200,9 @@ public class AmbariClusterConnector {
 
     @Inject
     private AmbariViewProvider ambariViewProvider;
+
+    @Inject
+    private AmbariAuthenticationProvider ambariAuthenticationProvider;
 
     public void waitForAmbariServer(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getDefaultAmbariClient(stack);
@@ -353,7 +357,9 @@ public class AmbariClusterConnector {
     private AmbariClient getAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
+        return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(),
+                ambariAuthenticationProvider.getAmbariUserName(cluster),
+                ambariAuthenticationProvider.getAmbariPassword(cluster));
     }
 
     private AmbariClient getSecureAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
@@ -379,12 +385,14 @@ public class AmbariClusterConnector {
         return cluster;
     }
 
-    public void changeOriginalAmbariCredentials(Stack stack) throws CloudbreakSecuritySetupException {
+    public void changeOriginalAmbariCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), cluster.getAmbariIp());
         String userName = cluster.getUserName();
         String password = cluster.getPassword();
         AmbariClient ambariClient = getDefaultAmbariClient(stack);
+        ambariClient.createUser(ambariAuthenticationProvider.getAmbariUserName(cluster),
+                ambariAuthenticationProvider.getAmbariPassword(cluster), true);
         if (ADMIN.equals(userName)) {
             if (!ADMIN.equals(password)) {
                 ambariClient.changePassword(ADMIN, ADMIN, password, true);

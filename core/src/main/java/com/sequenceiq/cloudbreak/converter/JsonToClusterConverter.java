@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
 public class JsonToClusterConverter extends AbstractConversionServiceAwareConverter<ClusterRequest, Cluster> {
@@ -37,6 +38,8 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setEnableShipyard(source.getEnableShipyard());
         cluster.setEmailTo(source.getEmailTo());
         FileSystemBase fileSystem = source.getFileSystem();
+        cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
+        cluster.setCloudbreakAmbariUser("cloudbreak");
         if (fileSystem != null) {
             cluster.setFileSystem(getConversionService().convert(fileSystem, FileSystem.class));
         }

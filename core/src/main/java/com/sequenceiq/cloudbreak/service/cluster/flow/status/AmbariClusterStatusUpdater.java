@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -43,6 +44,9 @@ public class AmbariClusterStatusUpdater {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
+    @Inject
+    private AmbariAuthenticationProvider ambariAuthenticationProvider;
+
     public void updateClusterStatus(Stack stack, Cluster cluster) throws CloudbreakSecuritySetupException {
         if (isStackOrClusterStatusInvalid(stack, cluster)) {
             String msg = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_COULD_NOT_SYNC.code(), Arrays.asList(stack.getStatus(),
@@ -54,7 +58,9 @@ public class AmbariClusterStatusUpdater {
             clusterService.updateClusterMetadata(stackId);
             String blueprintName = cluster.getBlueprint().getBlueprintName();
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(),
+                    ambariAuthenticationProvider.getAmbariUserName(cluster),
+                    ambariAuthenticationProvider.getAmbariPassword(cluster));
             ClusterStatus clusterStatus = clusterStatusFactory.createClusterStatus(ambariClient, blueprintName);
             updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
 

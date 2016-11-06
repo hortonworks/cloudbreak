@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.BDDMockito;
@@ -14,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -53,10 +57,15 @@ public class AmbariClusterStatusUpdaterTest {
     @Mock
     private CloudbreakMessagesService cloudbreakMessagesService;
 
+    @Mock
+    private AmbariAuthenticationProvider ambariAuthenticationProvider;
+
     @Before
     public void setUp() {
         underTest = new AmbariClusterStatusUpdater();
         MockitoAnnotations.initMocks(this);
+        when(ambariAuthenticationProvider.getAmbariPassword(any(Cluster.class))).thenReturn("admin");
+        when(ambariAuthenticationProvider.getAmbariUserName(any(Cluster.class))).thenReturn("admin");
     }
 
     @Test

@@ -35,6 +35,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Type;
+
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -126,6 +128,11 @@ public class Cluster implements ProvisionEntity {
 
     @Column(nullable = false)
     private String password;
+
+    private String cloudbreakAmbariUser;
+
+    @Type(type = "encrypted_string")
+    private String cloudbreakAmbariPassword;
 
     @Column(nullable = false)
     private Boolean secure;
@@ -489,5 +496,21 @@ public class Cluster implements ProvisionEntity {
 
     public void setBlueprintInputs(Json blueprintInputs) {
         this.blueprintInputs = blueprintInputs;
+    }
+
+    public String getCloudbreakAmbariUser() {
+        return cloudbreakAmbariUser;
+    }
+
+    public void setCloudbreakAmbariUser(String cloudbreakAmbariUser) {
+        this.cloudbreakAmbariUser = cloudbreakAmbariUser;
+    }
+
+    public String getCloudbreakAmbariPassword() {
+        return cloudbreakAmbariPassword;
+    }
+
+    public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
+        this.cloudbreakAmbariPassword = cloudbreakAmbariPassword;
     }
 }
