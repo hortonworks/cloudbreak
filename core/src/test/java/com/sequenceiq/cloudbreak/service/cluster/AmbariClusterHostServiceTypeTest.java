@@ -86,6 +86,9 @@ public class AmbariClusterHostServiceTypeTest {
     @Mock
     private StatusToPollGroupConverter statusToPollGroupConverter;
 
+    @Mock
+    private AmbariAuthenticationProvider ambariAuthenticationProvider;
+
     @InjectMocks
     @Spy
     private AmbariClusterService underTest = new AmbariClusterService();
@@ -110,6 +113,8 @@ public class AmbariClusterHostServiceTypeTest {
         when(stackService.findLazy(anyLong())).thenReturn(stack);
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
         given(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).willReturn(new HttpClientConfig("", 8443, "/tmp"));
+        when(ambariAuthenticationProvider.getAmbariPassword(any(Cluster.class))).thenReturn("admin");
+        when(ambariAuthenticationProvider.getAmbariUserName(any(Cluster.class))).thenReturn("admin");
     }
 
     @Test(expected = BadRequestException.class)

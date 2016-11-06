@@ -20,7 +20,7 @@ public class AmbariClusterCreationService {
     public void startAmbari(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
         ambariClusterConnector.waitForAmbariServer(stack);
-        ambariClusterConnector.changeOriginalAmbariCredentials(stack);
+        ambariClusterConnector.changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
     }
 
     public void buildAmbariCluster(Long stackId) {
