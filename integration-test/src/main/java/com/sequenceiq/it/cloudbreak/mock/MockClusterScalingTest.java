@@ -249,6 +249,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         });
         put(AMBARI_API_ROOT + "/clusters/:cluster/host_components", new AmbariClusterRequestsResponse());
         delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname", new AmbariClusterRequestsResponse());
+        post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
     }
 
 }
