@@ -1,4 +1,4 @@
-<div class="form-group" ng-class="{ 'has-error': gcpTopologyForm.gcpTopologyFortclusterName.$dirty && gcpTopologyForm.gcp_tclusterName.$invalid }">
+<div class="form-group" ng-class="{ 'has-error': gcpTopologyForm.gcp_tclusterName.$dirty && gcpTopologyForm.gcp_tclusterName.$invalid }">
     <label class="col-sm-3 control-label" for="gcp_tclusterName">{{msg.name_label}}</label>
 
     <div class="col-sm-9">
