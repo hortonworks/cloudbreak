@@ -211,6 +211,15 @@ public class ClusterController implements ClusterEndpoint {
         return clusterService.retrieveOutputs(stackId, requests.getRequests());
     }
 
+    @Override
+    public Response upgradeCluster(Long stackId, AmbariRepoDetailsJson ambariRepoDetails) {
+        Stack stack = stackService.get(stackId);
+        MDCBuilder.buildMdcContext(stack);
+        AmbariRepo ambariRepo = conversionService.convert(ambariRepoDetails, AmbariRepo.class);
+        clusterService.upgrade(stackId, ambariRepo);
+        return Response.accepted().build();
+    }
+
     private List<Component> addAmbariRepoConfig(List<Component> components, ClusterRequest request, Stack stack) throws JsonProcessingException {
         // If it is not predefined in image catalog
         if (componentConfigProvider.getAmbariRepo(stack.getId()) == null) {

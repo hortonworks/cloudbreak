@@ -13,6 +13,7 @@ base:
   'roles:ambari_server':
     - match: grain
     - ambari.database
+    - ambari.credentials
 
   'roles:knox_gateway':
     - match: grain
