@@ -3,6 +3,10 @@
 include:
   - ambari.repo
 
+create_ambari_upgrade_log_dir:
+  file.directory:
+    - name: /var/log/ambari-upgrade
+
 stop-ambari-agent:
   service.dead:
     - name: ambari-agent

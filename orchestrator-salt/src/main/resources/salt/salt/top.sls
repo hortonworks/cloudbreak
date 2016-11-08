@@ -7,13 +7,16 @@ base:
     - match: grain
     - kerberos
 
-  'G@roles:ambari_upgrade and G@roles:ambari_server':
-    - match: compound
-    - ambari.server-upgrade
-
   'G@roles:ambari_upgrade and G@roles:ambari_agent':
     - match: compound
     - ambari.agent-upgrade
+    - smartsense.agent-upgrade
+
+  'G@roles:ambari_upgrade and G@roles:ambari_server':
+    - match: compound
+    # smartsense needs to run before the Ambari server upgrade, because it needs a running server
+    - smartsense.server-upgrade
+    - ambari.server-upgrade
 
   'roles:ambari_server':
     - match: grain
