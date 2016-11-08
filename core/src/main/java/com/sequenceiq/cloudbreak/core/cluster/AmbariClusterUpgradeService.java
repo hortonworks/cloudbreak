@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
@@ -50,6 +51,9 @@ public class AmbariClusterUpgradeService {
     @Inject
     private ComponentConfigProvider componentConfigProvider;
 
+    @Inject
+    private AmbariAuthenticationProvider ambariAuthenticationProvider;
+
     public void upgradeCluster(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         try {
@@ -63,6 +67,10 @@ public class AmbariClusterUpgradeService {
                 ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId());
                 AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stackId);
                 Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+                Map<String, Object> credentials = new HashMap<>();
+                credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
+                credentials.put("password", ambariAuthenticationProvider.getAmbariPassword(stack.getCluster()));
+                servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
                 if (ambariRepo != null) {
                     servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
                 }

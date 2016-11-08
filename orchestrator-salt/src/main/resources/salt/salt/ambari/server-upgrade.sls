@@ -7,10 +7,6 @@ stop-ambari-server:
   service.dead:
     - name: ambari-server
 
-create_ambari_upgrade_log_dir:
-  file.directory:
-    - name: /var/log/ambari-upgrade
-
 /opt/ambari-server/ambari-upgrade.sh:
   file.managed:
     - makedirs: True
