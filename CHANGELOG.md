@@ -1,40 +1,86 @@
-
 # Change Log
 
 The Change Log summarizes the changes in Cloudbreak.
 
-## [v1.6.1] - 
+## [v1.6.1]
 
 ### Fixed
 
-- can send invite e-mails when authentication is not enabled
-
-### Changed
-
-- recipe create command in shell is unified with other commands
-
-## [v1.6.0] - 2016-09-15
-
-### Fixed
-
-- region is not a required field when posting a new stack
-- ability to create bigger than 999 GB disks for Azure
-- proper handling of upstart config in Salt to avoid concurrency between sysv and upstart when restarting clusters
-- hive-site xmls are properly generated on worker nodes with default blueprints
+- cannot send invite e-mails from Auth (aka Sultans) when smtp authentictaion is not enabled
+- recipe shell commands was not aligned with UI and with the implementation
+- avoid duplicated privateids for instances (they must be unique)
+- reserve ports on OS for well known Hadoop services
+- do not fail when there is no default VPC on AWS
+- reserve TCP/UDP ports on OS for well-known Hadoop services
+- invalid hostmetadata count after sync when a node from master hostgroup died
+- shell fix to avoid error when creating cluster using templates with encrypted EBS
+- fix concurrent removal of alerts in Autoscale (aka Periscope)
+- ensure that the gcs-connector.sh recipe runs only one time
+- fix multiple salt-minion start
+- short names for OpenStack VMs to avoid MySQL / Hive failures
+- fix uluwatu missing template volume type in some cases
+- avoid timeouts when IPV6 is disabled https://github.com/saltstack/salt/issues/32719
+- do not allow cluster reset when external DB is used for Ambari
+- fix smtp related indentations in application.yml
+- introducing resource definiton cache, to avoid read the same definition from disk multiple times
+- invalid hdp repo config (update to 2.5 and support cnetos6 on AWS)
+- display AWS autoscaling group errors
+- sporadic ssh connectivity issue from on gcp
+- no transaction for cluster update
+- renamed s3role to instanceprofile on UI
+- avoid alphabetical order of recipes by filename
+- stop cluster is not possible due to invalid spot price check
+- sporadic classpath issue, since StackServiceComponentDescriptorMapFactory returns wrong object type
 
 ### Added
 
-- Ambari and HDP versions are added to the /stack API call's response
-- when deploying a new subnet in an existing VPC on AWS, the CIDR range is automatically calculated when not specified explicitly on the API
-- ability to create clusters on GCP without public IP addresses and without firewall modifications
-- added env variable to specify static shared volumes in Mesos clusters
+- OpenStack Liberty and Mitaka support
+- implement Availibility Zones for OpenStack
+- dynamic load of custom provider definitions
+- log every recipe by default (/var/log/recipses)
+- eventlog about recipe execution
+- ability to restart cluster installation in case of failed recipe
 
 ### Changed
 
-- updated Ambari version to 2.4.1.0
-- salt password is generated per stack for salt user
+- ambari client with sources and extra logging
+- remove unnecessary admin user
+- remove cloudbreak log highlighting
+- remove unused timeout value from recipes
+- improved logging for saltbootstrap
+- every recipe runs only once by default
 
-## [v1.5.0] - 2016-08-31
+## [v1.6.0]
+
+### Fixed
+
+- proper handling of upstart config to avoid concurrency between sysv and upstart during ambari agent / server start
+- use m3 for dry-run check because it can be started in ec2-classic
+- consider auto scaling activity history in auto scaling group status checker
+- eliminate criticals reported by Sonar
+- ability to create bigger than 999 GB size volumes on Azure
+- fixed javascript test for nodecount
+- region is not a required field when posting a new stack
+
+### Added
+
+- ARM template JSON validation
+- added property to set static shared volume(s) in BYOS clusters
+- generate salt password per stack
+- added Hibernate field encryptor to encryt sensitive data in DB
+- ability to start GCP clusterts in a NATed environment without public IP address
+- Ambari and HDP versions are added to the /stack API call's response
+- when deploying a new subnet in an existing VPC on AWS, the CIDR range is automatically calculated when not specified explicitly on the API
+
+### Changed
+
+- Cloudbreak dev version uses latest image from image catalog
+- cleanup unnecessary pillar matchers
+- update default blueprints to add hive clients to worker nodes
+- API cleanup, remove invalid required fields from swagger
+- updated Ambari version to 2.4.1.0
+
+## [v1.5.0]
 
 ### Fixed
 
