@@ -312,7 +312,7 @@ identity:
       - traefik.backend=identity-backend
       - traefik.frontend.priority=10
     ports:
-        - 8089:8080
+        - $UAA_PORT:8080
     environment:
         - http_proxy=$CB_HTTP_PROXY
         - https_proxy=$CB_HTTPS_PROXY
