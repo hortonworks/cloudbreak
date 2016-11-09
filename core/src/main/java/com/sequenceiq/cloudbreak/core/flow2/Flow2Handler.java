@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -53,6 +55,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     @Inject
     private EventBus eventBus;
 
+    private Lock lock = new ReentrantLock(true);
+
     @Override
     public void accept(Event<? extends Payload> event) {
         String key = (String) event.getKey();
@@ -69,15 +73,21 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
                 FlowConfiguration<?> flowConfig = flowConfigurationMap.get(key);
                 if (flowConfig != null && flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getStackId())) {
-                    if (!acceptFlow(key, payload)) {
-                        LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getStackId(), key);
-                        return;
+                    Flow flow;
+                    lock.lock();
+                    try {
+                        if (!acceptFlow(key, payload)) {
+                            LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getStackId(), key);
+                            return;
+                        }
+                        flowId = UUID.randomUUID().toString();
+                        flow = flowConfig.createFlow(flowId);
+                        flow.initialize();
+                        flowLogService.save(flowId, key, payload, flowConfig.getClass(), flow.getCurrentState());
+                    } finally {
+                        lock.unlock();
                     }
-                    flowId = UUID.randomUUID().toString();
-                    Flow flow = flowConfig.createFlow(flowId);
                     runningFlows.put(flow, flowChainId);
-                    flow.initialize();
-                    flowLogService.save(flowId, key, payload, flowConfig.getClass(), flow.getCurrentState());
                     flow.sendEvent(key, payload);
                 }
             } else {
@@ -93,7 +103,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private synchronized boolean acceptFlow(String key, Payload payload) {
+    private boolean acceptFlow(String key, Payload payload) {
         if (payload instanceof Acceptable) {
             Acceptable acceptable = (Acceptable) payload;
             if (!ALLOWED_PARALLEL_FLOWS.contains(key) && isOtherFlowRunning(payload.getStackId())) {
