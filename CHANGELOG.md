@@ -2,6 +2,54 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
+## [v1.6.1]
+
+### Fixed
+
+- cannot send invite e-mails from Auth (aka Sultans) when smtp authentictaion is not enabled
+- recipe shell commands was not aligned with UI and with the implementation
+- avoid duplicated privateids for instances (they must be unique)
+- reserve ports on OS for well known Hadoop services
+- do not fail when there is no default VPC on AWS
+- reserve TCP/UDP ports on OS for well-known Hadoop services
+- invalid hostmetadata count after sync when a node from master hostgroup died
+- shell fix to avoid error when creating cluster using templates with encrypted EBS
+- fix concurrent removal of alerts in Autoscale (aka Periscope)
+- ensure that the gcs-connector.sh recipe runs only one time
+- fix multiple salt-minion start
+- short names for OpenStack VMs to avoid MySQL / Hive failures
+- fix uluwatu missing template volume type in some cases
+- avoid timeouts when IPV6 is disabled https://github.com/saltstack/salt/issues/32719
+- do not allow cluster reset when external DB is used for Ambari
+- fix smtp related indentations in application.yml
+- introducing resource definiton cache, to avoid read the same definition from disk multiple times
+- invalid hdp repo config (update to 2.5 and support cnetos6 on AWS)
+- display AWS autoscaling group errors
+- sporadic ssh connectivity issue from on gcp
+- no transaction for cluster update
+- renamed s3role to instanceprofile on UI
+- avoid alphabetical order of recipes by filename
+- stop cluster is not possible due to invalid spot price check
+- sporadic classpath issue, since StackServiceComponentDescriptorMapFactory returns wrong object type
+
+### Added
+
+- OpenStack Liberty and Mitaka support
+- implement Availibility Zones for OpenStack
+- dynamic load of custom provider definitions
+- log every recipe by default (/var/log/recipses)
+- eventlog about recipe execution
+- ability to restart cluster installation in case of failed recipe
+
+### Changed
+
+- ambari client with sources and extra logging
+- remove unnecessary admin user
+- remove cloudbreak log highlighting
+- remove unused timeout value from recipes
+- improved logging for saltbootstrap
+- every recipe runs only once by default
+
 ## [v1.6.0]
 
 ### Fixed
