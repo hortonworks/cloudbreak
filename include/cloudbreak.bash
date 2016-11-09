@@ -2,6 +2,7 @@
 cloudbreak-config() {
   : ${BRIDGE_IP:=$(docker run --label cbreak.sidekick=true alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
   env-import PRIVATE_IP $BRIDGE_IP
+  env-import UAA_PORT 8089
   env-import DOCKER_MACHINE ""
   cloudbreak-conf-tags
   cloudbreak-conf-images
@@ -295,7 +296,7 @@ _cloudbreak-shell() {
         --label cbreak.sidekick=true \
         --dns=$PRIVATE_IP \
         -e CLOUDBREAK_ADDRESS=http://cloudbreak.service.consul:8080 \
-        -e IDENTITY_ADDRESS=http://identity.service.consul:8089 \
+        -e IDENTITY_ADDRESS=http://identity.service.consul:$UAA_PORT \
         -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
         -e SEQUENCEIQ_PASSWORD=$UAA_DEFAULT_USER_PW \
         -w /data \
@@ -457,7 +458,7 @@ util-token() {
         -w '%{redirect_url}' \
         -H "accept: application/x-www-form-urlencoded" \
         --data-urlencode credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${UAA_DEFAULT_USER_PW}'"}' \
-        "${PUBLIC_IP}:8089/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
+        "${PUBLIC_IP}:${UAA_PORT}/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
            | cut -d'&' -f 2)
     info $TOKEN
 }
