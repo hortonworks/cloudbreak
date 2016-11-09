@@ -474,7 +474,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         try {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.SYNC);
-            shellContext.cloudbreakClient().stackEndpoint().put(Long.valueOf(shellContext.getStackId()), updateStackJson);
+            cloudbreakShellUtil.checkResponse("syncStack",
+                    shellContext.cloudbreakClient().stackEndpoint().put(Long.valueOf(shellContext.getStackId()), updateStackJson));
             return "Stack is syncing";
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
