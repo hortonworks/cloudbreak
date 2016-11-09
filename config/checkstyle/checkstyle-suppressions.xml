@@ -17,6 +17,8 @@
     <suppress checks="IllegalTypeCheck" files="AbstractFlowConfiguration.java|AbstractFlowConfigurationTest.java"/>
     <suppress checks="ParameterNumber" files="UserDataBuilder.java"/>
     <suppress checks="EmptyLineSeparator" files=".*Description.java|.*Descriptions.java|Notes.java"/>
+    <suppress checks=".*" files="PrometheusResponse.java"/>
+    <suppress checks="CyclomaticComplexity" files="PrometheusEvaluator.java"/>
 
 
     <!-- suppressing checks in application runner classes -->
