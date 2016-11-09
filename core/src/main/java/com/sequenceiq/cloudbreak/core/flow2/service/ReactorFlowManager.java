@@ -1,12 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
@@ -22,10 +15,16 @@ import com.sequenceiq.cloudbreak.core.flow2.event.InstanceTerminationTriggerEven
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.repair.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-
+import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
+import org.springframework.stereotype.Service;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Flow manager implementation backed by Reactor.
@@ -176,5 +175,15 @@ public class ReactorFlowManager {
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage());
         }
+    }
+
+    public void triggerManualRepairFlow(Long stackId) {
+        String selector = FlowTriggers.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+    }
+
+    public void triggerStackRepairFlow(Long stackId, UnhealthyInstances unhealthyInstances) {
+        String selector = FlowChainTriggers.STACK_REPAIR_TRIGGER_EVENT;
+        reactor.notify(selector, eventFactory.createEvent(new StackRepairTriggerEvent(stackId, unhealthyInstances), selector));
     }
 }

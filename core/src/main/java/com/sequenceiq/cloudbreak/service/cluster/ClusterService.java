@@ -64,4 +64,6 @@ public interface ClusterService {
     ConfigsResponse retrieveOutputs(Long stackId, Set<BlueprintParameterJson> requests) throws CloudbreakSecuritySetupException, IOException;
 
     void upgrade(Long stackId, AmbariRepo ambariRepo);
+
+    Map<String, String> getHostStatuses(Long stackId) throws CloudbreakSecuritySetupException;
 }

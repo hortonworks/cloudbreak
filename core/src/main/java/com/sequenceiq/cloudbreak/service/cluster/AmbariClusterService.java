@@ -753,6 +753,12 @@ public class AmbariClusterService implements ClusterService {
         return configsResponse;
     }
 
+    @Override
+    public Map<String, String> getHostStatuses(Long stackId) throws CloudbreakSecuritySetupException {
+        AmbariClient ambariClient = getAmbariClient(stackId);
+        return ambariClient.getHostStatuses();
+    }
+
     private void prepareResults(Set<BlueprintParameterJson> requests, Cluster cluster, Map<String, String> bpI, Map<String, String> results) {
         if (cluster.getBlueprintInputs().getValue() != null) {
             if (bpI != null) {
@@ -792,6 +798,14 @@ public class AmbariClusterService implements ClusterService {
 
     private void prepareAdditionalInputParameters(Map<String, String> results, Cluster cluster) {
         results.put("REMOTE_CLUSTER_NAME", cluster.getName());
+    }
+
+    private AmbariClient getAmbariClient(Long stackId) throws CloudbreakSecuritySetupException {
+        Stack stack = stackService.getById(stackId);
+        HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stackId, stack.getAmbariIp());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(
+                httpClientConfig, stack.getGatewayPort(), stack.getCluster().getUserName(), stack.getCluster().getPassword());
+        return ambariClient;
     }
 
     private enum Msg {

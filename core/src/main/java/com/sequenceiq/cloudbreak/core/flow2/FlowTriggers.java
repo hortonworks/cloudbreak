@@ -41,6 +41,8 @@ public class FlowTriggers {
 
     public static final String CLUSTER_TERMINATION_TRIGGER_EVENT = "CLUSTER_TERMINATION_TRIGGER_EVENT";
 
+    public static final String MANUAL_STACK_REPAIR_TRIGGER_EVENT = "MANUAL_STACK_REPAIR_TRIGGER_EVENT";
+
     private FlowTriggers() {
     }
 }

@@ -1,24 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+
+import javax.inject.Inject;
+import java.util.List;
 
 @Component
 public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstancesStateRequest> {
@@ -26,10 +19,10 @@ public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstan
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceStateHandler.class);
 
     @Inject
-    private CloudPlatformConnectors cloudPlatformConnectors;
+    private EventBus eventBus;
 
     @Inject
-    private EventBus eventBus;
+    private InstanceStateQuery instanceStateQuery;
 
     @Override
     public Class<GetInstancesStateRequest> type() {
@@ -43,10 +36,9 @@ public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstan
         CloudContext cloudContext = request.getCloudContext();
         GetInstancesStateResult result;
         try {
-            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            List<CloudInstance> instances = request.getInstances();
-            List<CloudVmInstanceStatus> instanceStatuses = connector.instances().check(auth, instances);
+            List<CloudVmInstanceStatus> instanceStatuses =
+                    instanceStateQuery.getCloudVmInstanceStatuses(
+                            request.getCloudCredential(), cloudContext, request.getInstances());
             result = new GetInstancesStateResult(request, instanceStatuses);
         } catch (Exception e) {
             result = new GetInstancesStateResult("Instance state synchronizing failed", e, request);

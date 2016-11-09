@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 
+import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,6 +88,8 @@ public class ReactorFlowManagerTest {
         flowManager.triggerClusterCredentialChange(stackId, "admin", "admin1");
         flowManager.triggerClusterTermination(stackId);
         flowManager.triggerClusterUpgrade(stackId);
+        flowManager.triggerManualRepairFlow(stackId);
+        flowManager.triggerStackRepairFlow(stackId, new UnhealthyInstances());
 
         int count = 0;
         for (Method method : flowManager.getClass().getDeclaredMethods()) {

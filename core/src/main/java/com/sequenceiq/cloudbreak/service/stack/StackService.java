@@ -381,6 +381,9 @@ public class StackService {
             case FULL_SYNC:
                 sync(stack, status, true);
                 break;
+            case REPAIR_FAILED_NODES:
+                repairFailedNodes(stack);
+                break;
             case STOPPED:
                 stop(stack, cluster, status);
                 break;
@@ -390,6 +393,11 @@ public class StackService {
             default:
                 throw new BadRequestException("Cannot update the status of stack because status request not valid.");
         }
+    }
+
+    private void repairFailedNodes(Stack stack) {
+        LOGGER.warn("Received request to replace failed nodes: " + stack.getId());
+        flowManager.triggerManualRepairFlow(stack.getId());
     }
 
     private void sync(Stack stack, StatusRequest statusRequest, boolean full) {
