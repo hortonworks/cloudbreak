@@ -1,7 +1,32 @@
-
 # Change Log
 
 The Change Log summarizes the changes in Cloudbreak.
+
+## [v1.6.0]
+
+### Fixed
+
+- proper handling of upstart config to avoid concurrency between sysv and upstart during ambari agent / server start
+- use m3 for dry-run check because it can be started in ec2-classic
+- consider auto scaling activity history in auto scaling group status checker
+- eliminate criticals reported by Sonar
+- ability to create bigger than 999 GB size volumes on Azure
+- fixed javascript test for nodecount
+
+### Added
+
+- ARM template JSON validation
+- added property to set static shared volume(s) in BYOS clusters
+- generate salt password per stack
+- added Hibernate field encryptor to encryt sensitive data in DB
+- ability to start GCP clusterts in a NATed environment without public IP address
+
+### Changed
+
+- Cloudbreak dev version uses latest image from image catalog
+- cleanup unnecessary pillar matchers
+- update default blueprints to add hive clients to worker nodes
+- API cleanup, remove invalid required fields from swagger
 
 ## [v1.5.0]
 
