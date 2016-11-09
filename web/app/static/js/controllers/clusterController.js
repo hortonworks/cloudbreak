@@ -1086,6 +1086,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             });
         }
 
+        $scope.repairCluster = function(activeCluster) {
+            var newStatus = {
+                "status": "REPAIR_FAILED_NODES"
+            };
+            GlobalStack.update({
+                id: activeCluster.id
+            }, newStatus, function(result) {}, function(error) {
+                $scope.showError(error, $rootScope.msg.cluster_replace_nodes_failed);
+            });
+        }
+
         $scope.$watch('cluster.region', function() {
             if ($rootScope.activeCredential !== undefined && ($rootScope.activeCredential.cloudPlatform === 'AWS' || $rootScope.activeCredential.cloudPlatform === 'OPENSTACK' || $rootScope.activeCredential.cloudPlatform === 'GCP')) {
                 if ($scope.cluster.region === null) {
