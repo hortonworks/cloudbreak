@@ -8,23 +8,24 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.MetricEvaluator;
+import com.sequenceiq.periscope.monitor.evaluator.PrometheusEvaluator;
 
-//@Component
-public class MetricMonitor extends AbstractMonitor implements Monitor {
+@Component
+public class PrometheusMonitor extends AbstractMonitor implements Monitor {
 
     @Override
     public String getIdentifier() {
-        return "metric-monitor";
+        return "prometheus-monitor";
     }
 
     @Override
     public String getTriggerExpression() {
-        return MonitorUpdateRate.METRIC_UPDATE_RATE_CRON;
+        return MonitorUpdateRate.PROMETHEUS_UPDATE_RATE_CRON;
     }
 
     @Override
     public Class getEvaluatorType() {
-        return MetricEvaluator.class;
+        return PrometheusEvaluator.class;
     }
 
     @Override
