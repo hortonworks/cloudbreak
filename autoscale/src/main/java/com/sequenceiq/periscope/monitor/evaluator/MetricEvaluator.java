@@ -6,8 +6,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.domain.BaseAlert;
@@ -21,8 +19,8 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.AmbariClientProvider;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
-@Component("MetricEvaluator")
-@Scope("prototype")
+//@Component("MetricEvaluator")
+//@Scope("prototype")
 public class MetricEvaluator extends AbstractEventPublisher implements EvaluatorExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricEvaluator.class);

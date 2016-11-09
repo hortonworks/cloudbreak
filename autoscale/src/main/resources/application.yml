@@ -4,3 +4,8 @@ server:
 cb:
   server:
     contextPath: "/cb"
+
+spring:
+  cloud:
+    consul:
+      host: consul.service.consul
