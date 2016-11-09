@@ -418,7 +418,8 @@ public class ClusterCommands implements BaseCommands {
         try {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.SYNC);
-            shellContext.cloudbreakClient().clusterEndpoint().put(Long.valueOf(shellContext.getStackId()), updateClusterJson);
+            cloudbreakShellUtil.checkResponse("syncCluster",
+                    shellContext.cloudbreakClient().clusterEndpoint().put(Long.valueOf(shellContext.getStackId()), updateClusterJson));
             return "Cluster is syncing";
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
