@@ -21,8 +21,8 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.AmbariClientProvider;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
-@Component("MetricEvaluator")
-@Scope("prototype")
+//@Component("MetricEvaluator")
+//@Scope("prototype")
 public class MetricEvaluator extends AbstractEventPublisher implements EvaluatorExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricEvaluator.class);

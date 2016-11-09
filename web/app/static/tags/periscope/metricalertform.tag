@@ -31,7 +31,6 @@
     <div class="col-sm-2">
         <select class="form-control logic-ops" id="alertState" ng-model="alert.alertState">
             <option value="OK">OK</option>
-            <option value="WARN">WARN</option>
             <option value="CRITICAL">CRITICAL</option>
         </select>
     </div>
