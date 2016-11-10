@@ -23,17 +23,12 @@ public class SubscriptionService {
 
     @Transactional(Transactional.TxType.NEVER)
     public Long subscribe(Subscription subscription) {
-        Subscription exists = null;
-        List<Subscription> clientSubscriptions = subscriptionRepository.findByClientId(subscription.getClientId());
-        for (Subscription s : clientSubscriptions) {
-            if (s.getEndpoint().equals(subscription.getEndpoint())) {
-                exists = s;
-                LOGGER.info(String.format("Subscription already exists for this client with the same endpoint [client: '%s', endpoint: '%s']",
-                                subscription.getClientId(),
-                                subscription.getEndpoint()));
-                break;
-            }
+        List<Subscription> clientSubscriptions = subscriptionRepository.findByClientIdAndEndpoint(subscription.getClientId(), subscription.getEndpoint());
+        if (!clientSubscriptions.isEmpty()) {
+            LOGGER.info(String.format("Subscription already exists for this client with the same endpoint [client: '%s', endpoint: '%s']",
+                    subscription.getClientId(), subscription.getEndpoint()));
+            return clientSubscriptions.get(0).getId();
         }
-        return exists == null ? subscriptionRepository.save(subscription).getId() : exists.getId();
+        return subscriptionRepository.save(subscription).getId();
     }
 }
