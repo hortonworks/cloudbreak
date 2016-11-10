@@ -104,16 +104,27 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getAttributes() != null) {
             clusterResponse.setAttributes(source.getAttributes().getMap());
         }
-        clusterResponse.setAmbariServerIp(source.getStack().getGatewayInstanceGroup().getInstanceMetaData().iterator().next().getPublicIpWrapper());
+
+        String ambariIp = getAmbariIp(source);
+        clusterResponse.setAmbariServerIp(ambariIp);
         clusterResponse.setUserName(source.getUserName());
         clusterResponse.setPassword(source.getPassword());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
-        clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source));
+        clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source, ambariIp));
         clusterResponse.setBlueprintInputs(convertBlueprintInputs(source.getBlueprintInputs()));
         clusterResponse.setEnableShipyard(source.getEnableShipyard());
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
         return clusterResponse;
+    }
+
+    private String getAmbariIp(Cluster cluster) {
+        Set<InstanceMetaData> gateway = cluster.getStack().getGatewayInstanceGroup().getInstanceMetaData();
+        String ambariIp = null;
+        if (cluster.getAmbariIp() != null && gateway != null && !gateway.isEmpty()) {
+            ambariIp = gateway.iterator().next().getPublicIpWrapper();
+        }
+        return ambariIp;
     }
 
     private Cluster provideViewDefinitions(Cluster source) {
@@ -158,11 +169,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         return jsons;
     }
 
-    private Map<String, String> prepareServiceEndpointsMap(Cluster cluster) {
+    private Map<String, String> prepareServiceEndpointsMap(Cluster cluster, String ambariIp) {
         Set<HostGroup> hostGroups = cluster.getHostGroups();
         Blueprint blueprint = cluster.getBlueprint();
         Boolean shipyardEnabled = cluster.getEnableShipyard();
-        String ambariIp = cluster.getStack().getGatewayInstanceGroup().getInstanceMetaData().iterator().next().getPublicIpWrapper();
 
         Map<String, String> result = new HashMap<>();
         List<Port> ports = NetworkUtils.getPorts(Optional.absent());
