@@ -804,7 +804,9 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackService.getById(stackId);
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stackId, stack.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(
-                httpClientConfig, stack.getGatewayPort(), stack.getCluster().getUserName(), stack.getCluster().getPassword());
+                httpClientConfig, stack.getGatewayPort(),
+                ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()),
+                ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
         return ambariClient;
     }
 

@@ -65,4 +65,8 @@ public class MachineDefinitionView {
     public String getSelfLink() {
         return getParameter("selfLink");
     }
+
+    public String getPrice() {
+        return getParameter("price");
+    }
 }

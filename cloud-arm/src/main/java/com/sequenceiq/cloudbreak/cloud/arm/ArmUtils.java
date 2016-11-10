@@ -173,7 +173,7 @@ public class ArmUtils {
 
     public void validateStorageType(CloudStack stack) {
         for (Group group : stack.getGroups()) {
-            InstanceTemplate template = group.getInstances().get(0).getTemplate();
+            InstanceTemplate template = group.getReferenceInstanceConfiguration().getTemplate();
             String flavor = template.getFlavor();
             String volumeType = template.getVolumeType();
             ArmDiskType diskType = ArmDiskType.getByValue(volumeType);

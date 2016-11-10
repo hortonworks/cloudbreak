@@ -197,7 +197,7 @@ public class StackUpscaleService {
 
     private void updateNodeCount(Long stackId, List<Group> originalGroups, List<CloudResourceStatus> statuses, boolean create) {
         for (Group group : originalGroups) {
-            int nodeCount = group.getInstances().size();
+            int nodeCount = group.getInstancesSize();
             List<CloudResourceStatus> failedResources = removeFailedMetadata(stackId, statuses, group);
             if (!failedResources.isEmpty() && create) {
                 int failedCount = failedResources.size();

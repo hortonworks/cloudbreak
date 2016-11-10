@@ -138,6 +138,28 @@
           }
         ],
         "cardinality": "1+"
+      },
+      {
+        "name": "compute",
+        "configurations": [],
+        "components": [
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "SPARK_CLIENT"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          }
+        ],
+        "cardinality": "1+"
       }
     ]
   }

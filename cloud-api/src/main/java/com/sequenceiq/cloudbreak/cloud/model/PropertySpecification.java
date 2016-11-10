@@ -10,6 +10,9 @@ public class PropertySpecification {
     @JsonProperty("Cpu")
     private String cpu;
 
+    @JsonProperty("Price")
+    private Double price;
+
     public PropertySpecification() {
     }
 
@@ -27,5 +30,13 @@ public class PropertySpecification {
 
     public void setCpu(String cpu) {
         this.cpu = cpu;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 }

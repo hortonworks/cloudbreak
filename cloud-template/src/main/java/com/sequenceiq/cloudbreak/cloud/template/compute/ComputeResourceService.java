@@ -129,7 +129,7 @@ public class ComputeResourceService {
     private int getFullNodeCount(List<Group> groups) {
         int fullNodeCount = 0;
         for (Group group : groups) {
-            fullNodeCount += group.getInstances().size();
+            fullNodeCount += group.getInstancesSize();
         }
         return fullNodeCount;
     }

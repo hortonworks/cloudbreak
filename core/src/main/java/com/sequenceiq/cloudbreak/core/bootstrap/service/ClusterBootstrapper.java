@@ -111,7 +111,7 @@ public class ClusterBootstrapper {
         if (orchestratorType.hostOrchestrator()) {
             bootstrapOnHost(stack);
         } else if (OrchestratorConstants.MARATHON.equals(stackOrchestratorType)) {
-            LOGGER.info("Skipping bootstrap of the macines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
+            LOGGER.info("Skipping bootstrap of the machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
         } else if (orchestratorType.containerOrchestrator()) {
             bootstrapContainers(stack);
         } else {
@@ -124,9 +124,13 @@ public class ClusterBootstrapper {
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN());
-            node.setHostGroup(instanceMetaData.getInstanceGroupName());
-            nodes.add(node);
+            if (instanceMetaData.getPrivateIp() == null && instanceMetaData.getPublicIpWrapper() == null) {
+                LOGGER.warn("Skipping instancemetadata because the public ip and private ip are null '{}'.", instanceMetaData);
+            } else {
+                Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN());
+                node.setHostGroup(instanceMetaData.getInstanceGroupName());
+                nodes.add(node);
+            }
         }
         try {
             InstanceGroup gateway = stack.getGatewayInstanceGroup();

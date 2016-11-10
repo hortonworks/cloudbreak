@@ -67,7 +67,7 @@ public class ParameterGenerator {
         CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate);
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
         Security security = new Security(rules);
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",

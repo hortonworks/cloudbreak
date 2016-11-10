@@ -42,7 +42,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         List<CloudResource> cloudResources = new ArrayList<>();
-        CloudInstance instance = group.getInstances().get(0);
+        CloudInstance instance = group.getReferenceInstanceConfiguration();
         InstanceTemplate template = instance.getTemplate();
         GcpResourceNameService resourceNameService = getResourceNameService();
         String groupName = group.getName();
@@ -58,7 +58,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public List<CloudResource> build(GcpContext context, long privateId, final AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource) throws Exception {
-        CloudInstance instance = group.getInstances().get(0);
+        CloudInstance instance = group.getReferenceInstanceConfiguration();
         InstanceTemplate template = instance.getTemplate();
         Volume volume = template.getVolumes().get(0);
 

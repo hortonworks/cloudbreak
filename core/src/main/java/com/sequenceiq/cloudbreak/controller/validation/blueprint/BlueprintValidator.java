@@ -171,7 +171,7 @@ public class BlueprintValidator {
             if (stackServiceComponentDescriptor != null) {
                 int minCardinality = stackServiceComponentDescriptor.getMinCardinality();
                 int maxCardinality = stackServiceComponentDescriptor.getMaxCardinality();
-                if (!isNodeCountCorrect(nodeCount, minCardinality, maxCardinality)) {
+                if (!isNodeCountCorrect(nodeCount, minCardinality, maxCardinality) && !(nodeCount == 0 && !stackServiceComponentDescriptor.isMaster())) {
                     throw new BadRequestException(String.format("Incorrect number of '%s' components are in '%s' hostgroups: count: %d, min: %d max: %d",
                             componentName, blueprintServiceComponent.getHostgroups().toString(), nodeCount, minCardinality, maxCardinality));
                 }

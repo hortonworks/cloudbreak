@@ -171,7 +171,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
                 iterator.remove();
             }
         }
-        return new Group(scalingGroup.getName(), scalingGroup.getType(), instances, scalingGroup.getSecurity());
+        return new Group(scalingGroup.getName(), scalingGroup.getType(), instances, scalingGroup.getSecurity(), null);
     }
 
     private Group getGroup(List<Group> groups, String groupName) {

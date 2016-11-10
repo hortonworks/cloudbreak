@@ -299,7 +299,7 @@
         "VPCZoneIdentifier" : [{ "Ref" : "SubnetId" }],
         </#if>
         "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}" },
-        "MinSize" : 1,
+        "MinSize" : 0,
         "MaxSize" : ${group.instanceCount},
         "DesiredCapacity" : ${group.instanceCount},
         "Tags" : [ { "Key" : "Name", "Value" : { "Fn::Join" : ["-", [ { "Ref" : "StackName" }, "${group.groupName}"]] }, "PropagateAtLaunch" : "true" },
@@ -352,7 +352,7 @@
         "InstanceType"   : "${group.flavor}",
         "KeyName"        : { "Ref" : "KeyName" },
         <#if group.spotPrice??>
-        "SpotPrice"      : ${group.spotPrice},
+        "SpotPrice"      : "${group.spotPrice}",
         </#if>
         <#if group.type == "CORE">
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}

@@ -163,7 +163,7 @@ public class GroupResourceService {
     private List<Group> getOrderedCopy(List<Group> groups) {
         Ordering<Group> byLengthOrdering = new Ordering<Group>() {
             public int compare(Group left, Group right) {
-                return Ints.compare(left.getInstances().size(), right.getInstances().size());
+                return Ints.compare(left.getInstancesSize(), right.getInstancesSize());
             }
         };
         return byLengthOrdering.sortedCopy(groups);

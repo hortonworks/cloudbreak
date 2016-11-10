@@ -27,7 +27,7 @@ public class MockResourceConnector implements ResourceConnector {
             AdjustmentType adjustmentType, Long threshold) throws Exception {
         List<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
         for (Group group : stack.getGroups()) {
-            for (int i = 0; i < group.getInstances().size(); i++) {
+            for (int i = 0; i < group.getInstancesSize(); i++) {
                 CloudResource cloudResource = new CloudResource.Builder()
                         .type(ResourceType.MOCK_INSTANCE)
                         .status(CommonStatus.CREATED)
@@ -66,7 +66,7 @@ public class MockResourceConnector implements ResourceConnector {
         }
         int createResourceCount = 0;
         for (int i = 0; i < stack.getGroups().size(); i++) {
-            createResourceCount += stack.getGroups().get(i).getInstances().size();
+            createResourceCount += stack.getGroups().get(i).getInstancesSize();
         }
         createResourceCount -= resources.size();
         if (createResourceCount > 0) {

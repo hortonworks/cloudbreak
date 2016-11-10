@@ -11,6 +11,8 @@ public class VmTypeMeta {
 
     public static final String MAXIMUM_PERSISTENT_DISKS_SIZE_GB = "maximumPersistentDisksSizeGb";
 
+    public static final String PRICE = "Price";
+
     private VolumeParameterConfig magneticConfig;
 
     private VolumeParameterConfig autoAttachedConfig;
@@ -172,6 +174,11 @@ public class VmTypeMeta {
             return this;
         }
 
+        public VmTypeMetaBuilder withPrice(Double price) {
+            this.properties.put(PRICE, price.toString());
+            return this;
+        }
+
         public VmTypeMeta create() {
             VmTypeMeta vmTypeMeta = new VmTypeMeta();
             vmTypeMeta.setAutoAttachedConfig(this.autoAttachedConfig);
@@ -182,5 +189,6 @@ public class VmTypeMeta {
             vmTypeMeta.setProperties(this.properties);
             return vmTypeMeta;
         }
+
     }
 }

@@ -562,8 +562,8 @@ public class AwsResourceConnector implements ResourceConnector {
 
             amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                     .withAutoScalingGroupName(asGroupName)
-                    .withMaxSize(group.getInstances().size())
-                    .withDesiredCapacity(group.getInstances().size()));
+                    .withMaxSize(group.getInstancesSize())
+                    .withDesiredCapacity(group.getInstancesSize()));
             LOGGER.info("Updated Auto Scaling group's desiredCapacity: [stack: '{}', to: '{}']", ac.getCloudContext().getId(),
                     resources.size());
         }
@@ -622,7 +622,7 @@ public class AwsResourceConnector implements ResourceConnector {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
             LOGGER.info("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(),
                     asGroupName);
-            PollTask<Boolean> task = awsPollTaskFactory.newASGroupStatusCheckerTask(ac, asGroupName, group.getInstances().size(), awsClient, cfStackUtil);
+            PollTask<Boolean> task = awsPollTaskFactory.newASGroupStatusCheckerTask(ac, asGroupName, group.getInstancesSize(), awsClient, cfStackUtil);
             try {
                 Boolean statePollerResult = task.call();
                 if (!task.completed(statePollerResult)) {

@@ -99,7 +99,8 @@ public class AwsPlatformParameters implements PlatformParameters {
 
                 VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
                         .withCpuAndMemory(vmSpecification.getMetaSpecification().getProperties().getCpu(),
-                                vmSpecification.getMetaSpecification().getProperties().getMemory());
+                                vmSpecification.getMetaSpecification().getProperties().getMemory())
+                        .withPrice(vmSpecification.getMetaSpecification().getProperties().getPrice());
 
                 for (ConfigSpecification configSpecification : vmSpecification.getMetaSpecification().getConfigSpecification()) {
                     addConfig(builder, configSpecification);
