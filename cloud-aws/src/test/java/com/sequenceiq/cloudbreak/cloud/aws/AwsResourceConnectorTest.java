@@ -67,7 +67,7 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDR() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -110,7 +110,7 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRWithNon24Subnets() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -149,7 +149,7 @@ public class AwsResourceConnectorTest {
 
     @Test(expected = CloudConnectorException.class)
     public void testFindNonOverLappingCIDRWit24Vpc() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -180,7 +180,7 @@ public class AwsResourceConnectorTest {
 
     @Test(expected = CloudConnectorException.class)
     public void testFindNonOverLappingCIDRWit24VpcEmptySubnet() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -209,7 +209,7 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRWit20Vpc() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -248,7 +248,7 @@ public class AwsResourceConnectorTest {
 
     @Test(expected = CloudConnectorException.class)
     public void testFindNonOverLappingCIDRWit20VpcFull() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -293,7 +293,7 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRWit20Vpc1Empty() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -340,7 +340,7 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRWit20Vpc1EmptyInTheMiddle() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -387,7 +387,7 @@ public class AwsResourceConnectorTest {
 
     @Test(expected = CloudConnectorException.class)
     public void testFindNonOverLappingCIDRForFullVpc() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -425,7 +425,7 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRForOneSpot() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");

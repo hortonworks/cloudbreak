@@ -35,10 +35,10 @@ public class CloudFormationTemplateBuilder {
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(context.stack);
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
         for (Group group : context.stack.getGroups()) {
-            AwsInstanceView awsInstanceView = new AwsInstanceView(group.getInstances().get(0).getTemplate());
+            AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
             awsGroupViews.add(
                     new AwsGroupView(
-                            group.getInstances().size(),
+                            group.getInstancesSize(),
                             group.getType().name(),
                             awsInstanceView.getFlavor(),
                             group.getName(),

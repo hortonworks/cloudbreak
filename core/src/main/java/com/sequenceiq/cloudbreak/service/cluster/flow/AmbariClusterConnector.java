@@ -249,9 +249,11 @@ public class AmbariClusterConnector {
             String clusterTemplate;
             if (cluster.isSecure()) {
                 clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                        cluster.getPassword(), cluster.getKerberosAdmin() + PRINCIPAL, cluster.getKerberosPassword(), KEY_TYPE);
+                        ambariAuthenticationProvider.getAmbariPassword(cluster),
+                        cluster.getKerberosAdmin() + PRINCIPAL, cluster.getKerberosPassword(), KEY_TYPE);
             } else {
-                clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy, cluster.getPassword());
+                clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
+                        ambariAuthenticationProvider.getAmbariPassword(cluster));
             }
             LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate));
             PollingResult pollingResult = ambariOperationService.waitForOperationsToStart(stack, ambariClient, singletonMap("INSTALL_START", 1),

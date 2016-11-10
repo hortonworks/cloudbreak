@@ -128,8 +128,10 @@ public class AwsMetadataCollector implements MetadataCollector {
             if (tag == null) {
                 // so it is not tracked at the moment, therefore it considered as a new instance, and we shall track it by tagging it, with the private id of
                 // an untracked CloudInstance
-                cloudInstance = untrackedInstances.remove();
-                cloudInstance = new CloudInstance(instanceId, cloudInstance.getTemplate());
+                if (untrackedInstances.size() != 0) {
+                    cloudInstance = untrackedInstances.remove();
+                    cloudInstance = new CloudInstance(instanceId, cloudInstance.getTemplate());
+                }
             }
         }
 

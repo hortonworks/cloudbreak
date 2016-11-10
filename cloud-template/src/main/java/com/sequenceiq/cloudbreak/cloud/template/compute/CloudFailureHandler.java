@@ -118,7 +118,7 @@ public class CloudFailureHandler {
             ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Boolean upscale) {
         List<ComputeResourceBuilder> compute = resourceBuilders.compute(auth.getCloudContext().getPlatform());
         List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
-        LOGGER.info(String.format("InstanceGroup %s node count decreased with one so the new node size is: %s", group.getName(), group.getInstances().size()));
+        LOGGER.info(String.format("InstanceGroup %s node count decreased with one so the new node size is: %s", group.getName(), group.getInstancesSize()));
         if (getRemovableInstanceTemplates(group, ids).size() <= 0 && !upscale) {
             LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will throw");
             throwError(statuses);

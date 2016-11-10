@@ -22,7 +22,7 @@ public abstract class InstanceGroupBase implements JsonEntity {
     @ApiModelProperty(value = InstanceGroupModelDescription.SECURITY_GROUP_ID)
     private Long securityGroupId;
 
-    @Min(value = 1, message = "The node count has to be greater than 0")
+    @Min(value = 0, message = "The node count has to be greater or equals than 0")
     @Max(value = 100000, message = "The node count has to be less than 100000")
     @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
     @ApiModelProperty(value = InstanceGroupModelDescription.NODE_COUNT, required = true)

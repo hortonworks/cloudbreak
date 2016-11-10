@@ -99,7 +99,7 @@ public class CloudFormationTemplateBuilderTest {
         );
         image = new Image("cb-centos66-amb200-2015-05-25", userData);
         groups = new ArrayList<>();
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");

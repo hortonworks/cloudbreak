@@ -194,7 +194,7 @@ public class GcpInstanceResourceBuilderTest {
     public Group newGroupWithParams(Map<String, Object> params) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params);
         CloudInstance cloudInstance = new CloudInstance(instanceId, instanceTemplate);
-        return new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security);
+        return new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null);
     }
 
 }
