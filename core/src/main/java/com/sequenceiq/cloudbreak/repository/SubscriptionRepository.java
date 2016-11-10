@@ -9,5 +9,5 @@ import com.sequenceiq.cloudbreak.domain.Subscription;
 @EntityType(entityClass = Subscription.class)
 public interface SubscriptionRepository extends CrudRepository<Subscription, Long> {
 
-    List<Subscription> findByClientId(String clientId);
+    List<Subscription> findByClientIdAndEndpoint(String clientId, String endpoint);
 }
