@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade;
 
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
 public enum ClusterUpgradeState implements FlowState {
@@ -10,10 +9,5 @@ public enum ClusterUpgradeState implements FlowState {
     CLUSTER_UPGRADE_STATE,
     CLUSTER_UPGRADE_FINISHED_STATE,
 
-    FINAL_STATE;
-
-    @Override
-    public Class<? extends AbstractAction> action() {
-        return null;
-    }
+    FINAL_STATE
 }
