@@ -109,8 +109,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setPassword(source.getPassword());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
-        clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source.getHostGroups(), source.getBlueprint(), source.getAmbariIp(),
-                source.getEnableShipyard()));
+        clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source));
         clusterResponse.setBlueprintInputs(convertBlueprintInputs(source.getBlueprintInputs()));
         clusterResponse.setEnableShipyard(source.getEnableShipyard());
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
@@ -159,9 +158,14 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         return jsons;
     }
 
-    private Map<String, String> prepareServiceEndpointsMap(Set<HostGroup> hostGroups, Blueprint blueprint, String ambariIp, Boolean shipyardEnabled) {
-        Map<String, String> result = new HashMap<>();
+    private Map<String, String> prepareServiceEndpointsMap(Cluster cluster) {
+        Set<HostGroup> hostGroups = cluster.getHostGroups();
+        Blueprint blueprint = cluster.getBlueprint();
+        Boolean shipyardEnabled = cluster.getEnableShipyard();
+        String ambariIp = cluster.getStack().getGatewayInstanceGroup().getInstanceMetaData().iterator().next().getPublicIpWrapper();
 
+        Map<String, String> result = new HashMap<>();
+        result.put("ambariWebAddress", ambariIp);
         List<Port> ports = NetworkUtils.getPorts(Optional.absent());
         collectPortsOfAdditionalServices(result, ambariIp, shipyardEnabled);
         try {
