@@ -104,7 +104,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getAttributes() != null) {
             clusterResponse.setAttributes(source.getAttributes().getMap());
         }
-        clusterResponse.setAmbariServerIp(source.getAmbariIp());
+        clusterResponse.setAmbariServerIp(source.getStack().getGatewayInstanceGroup().getInstanceMetaData().iterator().next().getPublicIpWrapper());
         clusterResponse.setUserName(source.getUserName());
         clusterResponse.setPassword(source.getPassword());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
@@ -165,7 +165,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         String ambariIp = cluster.getStack().getGatewayInstanceGroup().getInstanceMetaData().iterator().next().getPublicIpWrapper();
 
         Map<String, String> result = new HashMap<>();
-        result.put("ambariWebAddress", ambariIp);
         List<Port> ports = NetworkUtils.getPorts(Optional.absent());
         collectPortsOfAdditionalServices(result, ambariIp, shipyardEnabled);
         try {
