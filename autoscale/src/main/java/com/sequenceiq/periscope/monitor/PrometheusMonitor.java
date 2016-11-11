@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
-import com.sequenceiq.periscope.monitor.evaluator.MetricEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.PrometheusEvaluator;
 
 @Component
