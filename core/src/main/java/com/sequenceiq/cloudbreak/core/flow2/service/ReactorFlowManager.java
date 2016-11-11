@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.controller.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
@@ -170,7 +171,8 @@ public class ReactorFlowManager {
         try {
             Boolean accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             if (accepted == null || !accepted) {
-                throw new CloudbreakApiException("Stack is under operation, request not allowed.");
+                throw new FlowsAlreadyRunningException("Stack " + event.getData().getStackId()
+                        + " has flows under operation, request not allowed.");
             }
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage());
@@ -179,11 +181,11 @@ public class ReactorFlowManager {
 
     public void triggerManualRepairFlow(Long stackId) {
         String selector = FlowTriggers.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
-        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+        notify(selector, new StackEvent(selector, stackId));
     }
 
     public void triggerStackRepairFlow(Long stackId, UnhealthyInstances unhealthyInstances) {
         String selector = FlowChainTriggers.STACK_REPAIR_TRIGGER_EVENT;
-        reactor.notify(selector, eventFactory.createEvent(new StackRepairTriggerEvent(stackId, unhealthyInstances), selector));
+        notify(selector, new StackRepairTriggerEvent(stackId, unhealthyInstances));
     }
 }

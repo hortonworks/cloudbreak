@@ -1,21 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 
-public class StackRepairTriggerEvent implements Payload {
-
-    private final Long stackId;
+public class StackRepairTriggerEvent extends StackEvent {
 
     private final UnhealthyInstances unhealthyInstances;
 
     public StackRepairTriggerEvent(Long stackId, UnhealthyInstances unhealthyInstances) {
-        this.stackId = stackId;
+        super(stackId);
         this.unhealthyInstances = unhealthyInstances;
-    }
-
-    public Long getStackId() {
-        return stackId;
     }
 
     public UnhealthyInstances getUnhealthyInstances() {

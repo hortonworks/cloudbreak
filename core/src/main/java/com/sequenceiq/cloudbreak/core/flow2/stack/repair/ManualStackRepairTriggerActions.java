@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
 
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
@@ -18,6 +21,9 @@ public class ManualStackRepairTriggerActions {
     @Inject
     private StackRepairService stackRepairService;
 
+    @Inject
+    private FlowMessageService flowMessageService;
+
     @Bean(name = "UNHEALTHY_INSTANCES_DETECTION_STATE")
     public Action detectUnhealthyInstancesAction() {
         return new AbstractStackRepairTriggerAction<StackEvent>(StackEvent.class) {
@@ -25,6 +31,7 @@ public class ManualStackRepairTriggerActions {
             @Override
             protected void doExecute(StackRepairTriggerContext context, StackEvent payload, Map<Object, Object> variables)
                     throws Exception {
+                flowMessageService.fireEventAndLog(payload.getStackId(), Msg.STACK_REPAIR_DETECTION_STARTED, Status.UPDATE_IN_PROGRESS.name());
                 sendEvent(context);
             }
 
