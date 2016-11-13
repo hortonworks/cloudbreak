@@ -1,27 +1,30 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.core.flow2.stack.repair.StackRepairNotificationRequest;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.StackRepairNotificationRequest;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class StackRepairService {
-    private static final Logger LOG = LoggerFactory.getLogger(StackRepairService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackRepairService.class);
 
     @Inject
     private FlowMessageService flowMessageService;
@@ -38,13 +41,17 @@ public class StackRepairService {
     @Inject
     private ExecutorService executorService;
 
+    @Inject
+    private StackService stackService;
+
     public void add(StackRepairNotificationRequest payload) {
         if (payload.getUnhealthyInstanceIds().isEmpty()) {
-            LOG.warn("No instances are unhealthy, returning...");
+            LOGGER.warn("No instances are unhealthy, returning...");
             flowMessageService.fireEventAndLog(payload.getStackId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, Status.AVAILABLE.name());
             return;
         }
-        UnhealthyInstances unhealthyInstances = groupInstancesByHostGroups(payload.getStack(), payload.getUnhealthyInstanceIds());
+        Stack stack = stackService.getById(payload.getStackId());
+        UnhealthyInstances unhealthyInstances = groupInstancesByHostGroups(stack, payload.getUnhealthyInstanceIds());
         StackRepairFlowSubmitter stackRepairFlowSubmitter =
                 new StackRepairFlowSubmitter(payload.getStackId(), unhealthyInstances);
         flowMessageService.fireEventAndLog(payload.getStackId(), Msg.STACK_REPAIR_ATTEMPTING, Status.UPDATE_IN_PROGRESS.name());
@@ -97,14 +104,14 @@ public class StackRepairService {
                 } catch (FlowsAlreadyRunningException fare) {
                     trials++;
                     if (trials == RETRIES) {
-                        LOG.error("Could not submit because other flows are running for stack " + stackId);
+                        LOGGER.error("Could not submit because other flows are running for stack " + stackId);
                         return;
                     }
-                    LOG.info("Waiting for other flows of stack " + stackId + " to complete.");
+                    LOGGER.info("Waiting for other flows of stack " + stackId + " to complete.");
                     try {
                         Thread.sleep(SLEEP_TIME_MS);
                     } catch (InterruptedException e) {
-                        LOG.error("Interrupted while waiting for other flows to finish.", e);
+                        LOGGER.error("Interrupted while waiting for other flows to finish.", e);
                         return;
                     }
                 }

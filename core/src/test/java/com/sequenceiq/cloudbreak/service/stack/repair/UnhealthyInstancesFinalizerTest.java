@@ -1,5 +1,23 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -12,23 +30,6 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnhealthyInstancesFinalizerTest {
@@ -43,11 +44,10 @@ public class UnhealthyInstancesFinalizerTest {
     private InstanceStateQuery instanceStateQuery;
 
     @InjectMocks
-    private UnhealthyInstancesFinalizer unhealthyInstancesFinalizer;
+    private UnhealthyInstancesFinalizer underTest;
 
     @Test
     public void shouldFinalizeInstancesMarkedAsTerminated() {
-
         Stack stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
 
         CloudCredential cloudCredential = mock(CloudCredential.class);
@@ -71,7 +71,8 @@ public class UnhealthyInstancesFinalizerTest {
         when(instanceStateQuery.getCloudVmInstanceStatuses(eq(cloudCredential), any(CloudContext.class), eq(cloudInstances))).
                 thenReturn(cloudVmInstanceStatusList);
 
-        Set<String> unhealthyInstances = unhealthyInstancesFinalizer.finalizeUnhealthyInstances(stack, candidateUnhealthyInstances);
+        Set<String> unhealthyInstances = underTest.finalizeUnhealthyInstances(stack, candidateUnhealthyInstances);
+
         assertEquals(1, unhealthyInstances.size());
         assertTrue(unhealthyInstances.contains(instanceId2));
     }
@@ -92,7 +93,6 @@ public class UnhealthyInstancesFinalizerTest {
 
         List<CloudInstance> cloudInstances = new ArrayList<>();
         CloudInstance cloudInstance1 = setupCloudInstance(instanceId1, cloudInstances);
-        CloudInstance cloudInstance2 = setupCloudInstance(instanceId2, cloudInstances);
         when(cloudInstanceConverter.convert(candidateUnhealthyInstances)).thenReturn(cloudInstances);
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatusList = new ArrayList<>();
@@ -100,7 +100,8 @@ public class UnhealthyInstancesFinalizerTest {
         when(instanceStateQuery.getCloudVmInstanceStatuses(eq(cloudCredential), any(CloudContext.class), eq(cloudInstances))).
                 thenReturn(cloudVmInstanceStatusList);
 
-        Set<String> unhealthyInstances = unhealthyInstancesFinalizer.finalizeUnhealthyInstances(stack, candidateUnhealthyInstances);
+        Set<String> unhealthyInstances = underTest.finalizeUnhealthyInstances(stack, candidateUnhealthyInstances);
+
         assertEquals(2, unhealthyInstances.size());
         assertTrue(unhealthyInstances.contains(instanceId1));
         assertTrue(unhealthyInstances.contains(instanceId2));

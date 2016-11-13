@@ -1,5 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
@@ -16,16 +23,12 @@ import com.sequenceiq.cloudbreak.core.flow2.event.InstanceTerminationTriggerEven
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.stack.repair.StackRepairTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
-import org.springframework.stereotype.Service;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import javax.inject.Inject;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Flow manager implementation backed by Reactor.
@@ -159,6 +162,16 @@ public class ReactorFlowManager {
         notify(selector, new StackEvent(selector, stackId));
     }
 
+    public void triggerManualRepairFlow(Long stackId) {
+        String selector = FlowTriggers.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
+        notify(selector, new StackEvent(selector, stackId));
+    }
+
+    public void triggerStackRepairFlow(Long stackId, UnhealthyInstances unhealthyInstances) {
+        String selector = FlowChainTriggers.STACK_REPAIR_TRIGGER_EVENT;
+        notify(selector, new StackRepairTriggerEvent(stackId, unhealthyInstances));
+    }
+
     private void cancelRunningFlows(Long stackId) {
         StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEvent(cancelEvent, Flow2Handler.FLOW_CANCEL));
@@ -171,21 +184,10 @@ public class ReactorFlowManager {
         try {
             Boolean accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             if (accepted == null || !accepted) {
-                throw new FlowsAlreadyRunningException("Stack " + event.getData().getStackId()
-                        + " has flows under operation, request not allowed.");
+                throw new FlowsAlreadyRunningException(String.format("Stack %d has flows under operation, request not allowed.", event.getData().getStackId()));
             }
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage());
         }
-    }
-
-    public void triggerManualRepairFlow(Long stackId) {
-        String selector = FlowTriggers.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
-        notify(selector, new StackEvent(selector, stackId));
-    }
-
-    public void triggerStackRepairFlow(Long stackId, UnhealthyInstances unhealthyInstances) {
-        String selector = FlowChainTriggers.STACK_REPAIR_TRIGGER_EVENT;
-        notify(selector, new StackRepairTriggerEvent(stackId, unhealthyInstances));
     }
 }
