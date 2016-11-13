@@ -1,20 +1,21 @@
-package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
-
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
-import com.sequenceiq.cloudbreak.core.flow2.chain.FlowEventChainFactory;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
-import org.springframework.stereotype.Component;
+package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
+import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
+
 @Component
 public class StackRepairFlowEventChainFactory implements FlowEventChainFactory<StackRepairTriggerEvent> {
+
     @Override
     public String initEvent() {
         return FlowChainTriggers.STACK_REPAIR_TRIGGER_EVENT;

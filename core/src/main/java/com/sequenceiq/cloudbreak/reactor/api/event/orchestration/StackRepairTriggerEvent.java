@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
+package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
