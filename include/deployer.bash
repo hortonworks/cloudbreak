@@ -350,7 +350,7 @@ deployer-login() {
     info "login email:"
     echo "  $UAA_DEFAULT_USER_EMAIL" | blue
     info "password:"
-    echo "  $UAA_DEFAULT_USER_PW" | blue
+    echo "  ****" | blue
 
     info "creating config file for hdc cli: $HOME/.hdc/config"
     mkdir -p $HOME/.hdc
@@ -375,7 +375,6 @@ restart-cmd() {
     compose-kill
     deployer-regenerate
     start-requested-services
-    
 }
 
 start-wait-cmd() {
