@@ -55,14 +55,14 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         }
 
         function getAlertDefinitions(id) {
-            $scope.alertDefinitions = [{label:"HDFS Capacity Utilization", name: "hdfs_usage"}];
-//            MetricDefinitions.query({
-//                id: id
-//            }, function(success) {
-//                success.forEach(function(el) {
-//                    $scope.alertDefinitions.push(el);
-//                });
-//            });
+            $scope.alertDefinitions = [];
+            MetricDefinitions.query({
+                id: id
+            }, function(success) {
+                success.forEach(function(el) {
+                    $scope.alertDefinitions.push(el);
+                });
+            });
         }
 
         function getAlarms(id) {
