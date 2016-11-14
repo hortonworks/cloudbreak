@@ -1,1 +1,2 @@
 export DOCKER_MACHINE=test
+export INTEGCB_LOCATION=integcb
