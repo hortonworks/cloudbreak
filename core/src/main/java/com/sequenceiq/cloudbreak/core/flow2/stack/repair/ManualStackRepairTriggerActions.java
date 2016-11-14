@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.StackRepairNotificationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -59,9 +58,7 @@ public class ManualStackRepairTriggerActions {
             @Override
             protected void doExecute(StackRepairTriggerContext context, UnhealthyInstancesDetectionResult payload, Map<Object, Object> variables)
                     throws Exception {
-                StackRepairNotificationRequest stackRepairNotificationRequest =
-                        new StackRepairNotificationRequest(context.getStack().getId(), payload.getUnhealthyInstanceIds());
-                stackRepairService.add(stackRepairNotificationRequest);
+                stackRepairService.add(context.getStack(), payload.getUnhealthyInstanceIds());
                 sendEvent(context);
             }
 

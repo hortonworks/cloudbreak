@@ -17,10 +17,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.StackRepairNotificationRequest;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class StackRepairService {
@@ -41,20 +39,16 @@ public class StackRepairService {
     @Inject
     private ExecutorService executorService;
 
-    @Inject
-    private StackService stackService;
-
-    public void add(StackRepairNotificationRequest payload) {
-        if (payload.getUnhealthyInstanceIds().isEmpty()) {
+    public void add(Stack stack, Set<String> unhealthyInstanceIds) {
+        if (unhealthyInstanceIds.isEmpty()) {
             LOGGER.warn("No instances are unhealthy, returning...");
-            flowMessageService.fireEventAndLog(payload.getStackId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, Status.AVAILABLE.name());
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, Status.AVAILABLE.name());
             return;
         }
-        Stack stack = stackService.getById(payload.getStackId());
-        UnhealthyInstances unhealthyInstances = groupInstancesByHostGroups(stack, payload.getUnhealthyInstanceIds());
+        UnhealthyInstances unhealthyInstances = groupInstancesByHostGroups(stack, unhealthyInstanceIds);
         StackRepairFlowSubmitter stackRepairFlowSubmitter =
-                new StackRepairFlowSubmitter(payload.getStackId(), unhealthyInstances);
-        flowMessageService.fireEventAndLog(payload.getStackId(), Msg.STACK_REPAIR_ATTEMPTING, Status.UPDATE_IN_PROGRESS.name());
+                new StackRepairFlowSubmitter(stack.getId(), unhealthyInstances);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_ATTEMPTING, Status.UPDATE_IN_PROGRESS.name());
         executorService.submit(stackRepairFlowSubmitter);
     }
 

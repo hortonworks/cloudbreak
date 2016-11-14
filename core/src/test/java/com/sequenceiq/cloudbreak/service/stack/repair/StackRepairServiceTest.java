@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -28,10 +27,8 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.StackRepairNotificationRequest;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackRepairServiceTest {
@@ -48,9 +45,6 @@ public class StackRepairServiceTest {
     @Mock
     private FlowMessageService flowMessageService;
 
-    @Mock
-    private StackService stackService;
-
     @InjectMocks
     private StackRepairService underTest;
 
@@ -65,15 +59,11 @@ public class StackRepairServiceTest {
         cluster = mock(Cluster.class);
         when(stack.getCluster()).thenReturn(cluster);
         when(cluster.getId()).thenReturn(2L);
-
-        when(stackService.getById(anyLong())).thenReturn(stack);
     }
 
     @Test
     public void shouldIgnoreIfNoInstancesToRepair() {
-        StackRepairNotificationRequest stackRepairNotificationRequest = new StackRepairNotificationRequest(stack.getId(), Collections.EMPTY_SET);
-
-        underTest.add(stackRepairNotificationRequest);
+        underTest.add(stack, Collections.EMPTY_SET);
 
         verifyZeroInteractions(executorService);
         verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, Status.AVAILABLE.name());
@@ -104,9 +94,8 @@ public class StackRepairServiceTest {
         instanceIds.add(instanceId1);
         instanceIds.add(instanceId2);
         instanceIds.add(instanceId3);
-        StackRepairNotificationRequest stackRepairNotificationRequest = new StackRepairNotificationRequest(stack.getId(), instanceIds);
 
-        underTest.add(stackRepairNotificationRequest);
+        underTest.add(stack, instanceIds);
 
         UnhealthyInstances expectedUnhealthyInstances = new UnhealthyInstances();
         expectedUnhealthyInstances.addInstance(instanceId1, slaveGroup1);
