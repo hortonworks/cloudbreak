@@ -198,21 +198,36 @@ function continueInit() {
                         var cookieArray = tokenResp.headers['set-cookie'];
                         var sessionId = getCookieFieldValue(cookieArray, 'JSESSIONID');
 
-                        if (sessionId) {
-                            req.session.uaa_sessionid = sessionId;
-                        }
+                        getToken(req, res, function(token) {
+                            getUserByName(req, res, token, username, function(adminUserData) {
+                                getAccountNum(req, res, adminUserData, function(accountNum) {
+                                    if(accountNum > 1) {
+                                        console.log("User has multiple accounts, disabling login");
+                                        res.render('login', {
+                                           basePath: getBasePath(req),
+                                           errorMessage: "User has multiple accounts, please fix before login."
+                                        });
+                                    } else {
+                                        console.log("User has only one account, login can be continued");
+                                        if (sessionId) {
+                                            req.session.uaa_sessionid = sessionId;
+                                        }
 
-                        if (req.session.client_id == null) {
-                            var sourceCookie = getCookie(req, 'source')
-                            if (sourceCookie == null || sourceCookie == 'undefined') {
-                                res.redirect(getBasePath(req) + '/dashboard')
-                            } else {
-                                var sourceUrl = new Buffer(sourceCookie, 'base64').toString('utf-8')
-                                res.redirect(sourceUrl)
-                            }
-                        } else {
-                            res.redirect(getBasePath(req) + '/confirm')
-                        }
+                                        if (req.session.client_id == null) {
+                                            var sourceCookie = getCookie(req, 'source')
+                                            if (sourceCookie == null || sourceCookie == 'undefined') {
+                                                res.redirect(getBasePath(req) + '/dashboard')
+                                            } else {
+                                                var sourceUrl = new Buffer(sourceCookie, 'base64').toString('utf-8')
+                                                res.redirect(sourceUrl)
+                                            }
+                                        } else {
+                                            res.redirect(getBasePath(req) + '/confirm')
+                                        }
+                                     }
+                                });
+                            });
+                        });
                     } else {
                         res.render('login', {
                             basePath: getBasePath(req),
@@ -1401,6 +1416,21 @@ function continueInit() {
             }
         });
     }
+
+    getAccountNum = function(req, res, userData, callback) {
+        var groups = userData.groups
+        var accountNum = 0
+        for (var i = 0; i < groups.length; i++) {
+            if (groups[i].display.lastIndexOf('sequenceiq.account', 0) === 0) {
+                companyId = groups[i].display
+                console.log('Account found for user:' + companyId)
+                accountNum++
+            }
+        }
+        callback(accountNum)
+
+    }
+
 
     // errors
 
