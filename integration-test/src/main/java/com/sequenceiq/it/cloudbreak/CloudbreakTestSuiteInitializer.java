@@ -55,6 +55,15 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Value("${integrationtest.cleanup.cleanupBeforeStart}")
     private boolean cleanUpBeforeStart;
 
+    @Value("${integrationtest.ambari.defaultAmbariUser}")
+    private String defaultAmbariUser;
+
+    @Value("${integrationtest.ambari.defaultAmbariPassword}")
+    private String defaultAmbariPassword;
+
+    @Value("${integrationtest.ambari.defaultAmbariPort}")
+    private String defaultAmbariPort;
+
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
 
@@ -123,6 +132,13 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
+    @BeforeSuite(dependsOnMethods = "initContext")
+    @Parameters({"ambariUser", "ambariPassword", "ambariPort"})
+    public void initAmbariCredentials(@Optional("") String ambariUser, @Optional("") String ambariPassword, @Optional("") String ambariPort) {
+        putAmbariCredentialsToContext(ambariUser, ambariPassword, ambariPort);
+
+    }
+
     private void putBlueprintToContextIfExist(BlueprintEndpoint endpoint, String blueprintName) {
         endpoint.getPublics();
         if (StringUtils.isEmpty(blueprintName)) {
@@ -134,6 +150,22 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                 itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, resourceId);
             }
         }
+    }
+
+    private void putAmbariCredentialsToContext(String ambariUser, String ambariPassword, String ambariPort) {
+        if (StringUtils.isEmpty(ambariUser)) {
+            ambariUser = defaultAmbariUser;
+        }
+        if (StringUtils.isEmpty(ambariPassword)) {
+            ambariPassword = defaultAmbariPassword;
+        }
+        if (StringUtils.isEmpty(ambariPort)) {
+            ambariPort = defaultAmbariPort;
+        }
+
+        itContext.putContextParam(CloudbreakITContextConstants.AMBARI_USER_ID, ambariUser);
+        itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID, ambariPassword);
+        itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID, ambariPort);
     }
 
     private void putNetworkToContext(NetworkEndpoint endpoint, String cloudProvider, String networkName) {

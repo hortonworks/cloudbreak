@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
-
 public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
 
     @BeforeMethod
@@ -26,14 +25,17 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         IntegrationTestContext itContext = getItContext();
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.BLUEPRINT_ID), "Blueprint id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.STACK_ID), "Stack id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID), "Ambari user id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), "Ambari password id is mandatory.");
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID), "Ambari port id is mandatory.");
     }
 
     @Test
-    @Parameters({ "clusterName", "ambariPort", "ambariUser", "ambariPassword", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
-            "kerberosPassword", "runRecipesOnHosts", "checkAmbari" })
-    public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("8080") String ambariPort, @Optional("admin") String ambariUser,
-            @Optional("admin123!@#") String ambariPassword, @Optional("false") boolean emailNeeded,
-            @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword,
+    @Parameters({"clusterName", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
+            "kerberosPassword", "runRecipesOnHosts", "checkAmbari"})
+    public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("false") boolean emailNeeded,
+            @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey,
+            @Optional String kerberosAdmin, @Optional String kerberosPassword,
             @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
@@ -42,8 +44,10 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         Integer blueprintId = Integer.valueOf(itContext.getContextParam(CloudbreakITContextConstants.BLUEPRINT_ID));
         List<HostGroup> hostgroups = itContext.getContextParam(CloudbreakITContextConstants.HOSTGROUP_ID, List.class);
         Set<HostGroupRequest> hostGroupJsons1 = convertHostGroups(hostgroups, runRecipesOnHosts);
-        itContext.putContextParam(CloudbreakITContextConstants.AMBARI_USER_ID, ambariUser);
-        itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID, ambariPassword);
+        String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
+        String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
+        String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
+
         // WHEN
         // TODO email needed
         ClusterRequest clusterRequest = new ClusterRequest();
