@@ -28,6 +28,12 @@ integrationtest:
        p12File:
        publicKeyFile:
 
+    #ambari credentials
+    ambari:
+       defaultAmbariUser: admin
+       defaultAmbariPassword: admin123!@#
+       defaultAmbariPort: 8080
+
     # aws credential details
     awscredential:
        name:

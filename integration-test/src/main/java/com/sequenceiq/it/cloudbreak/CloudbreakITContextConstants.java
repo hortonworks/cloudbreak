@@ -27,6 +27,8 @@ public class CloudbreakITContextConstants {
 
     public static final String AMBARI_PASSWORD_ID = "AMBARI_PASSWORD";
 
+    public static final String AMBARI_PORT_ID = "AMBARI_PORT";
+
     public static final String ADDITIONAL_NODES = "ADDITIONAL_NODES";
 
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
