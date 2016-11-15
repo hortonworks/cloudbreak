@@ -54,6 +54,10 @@ dependencies {
     testCompile group: 'org.springframework',       name: 'spring-test',                            version: springFrameworkVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',                version: springBootVersion
 
+    runtime ('org.springframework.cloud:spring-cloud-starter-consul-config:1.0.0.M6-v3'){
+        exclude group: 'com.ecwid.consul';
+    }
+
     compile project(':core-api')
     compile project(':autoscale-api')
 }

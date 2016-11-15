@@ -14,9 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.domain.BaseAlert;
@@ -62,6 +60,9 @@ public class AlertService {
 
     @Value("${prometheus.address}")
     private String prometheusAddress;
+
+    @Autowired
+    private AlertTypes alertTypes;
 
     public MetricAlert createMetricAlert(long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findOneByUser(clusterId);
@@ -160,14 +161,10 @@ public class AlertService {
 
     public List<Map<String, Object>> getAlertDefinitions(long clusterId) {
         List<Map<String, Object>> ret = new ArrayList<>();
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Map> alertValues = restTemplate.getForEntity(prometheusAddress + "/api/v1/label/alertname/values", Map.class);
-        Map<String, Object> body = alertValues.getBody();
-        List<String> alertNames = (List<String>) body.get("data");
-        for (String alertName : alertNames) {
+        for (String alert : alertTypes.getAlerts().split(",")) {
             Map<String, Object> tmp = new HashMap<>();
-            tmp.put("name", alertName);
-            tmp.put("label", alertName);
+            tmp.put("name", alert.split(":")[1]);
+            tmp.put("label", alert.split(":")[0]);
             ret.add(tmp);
         }
         return ret;
