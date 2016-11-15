@@ -1,9 +1,10 @@
 package cli
 
 import (
-	"github.com/urfave/cli"
 	"reflect"
 	"strconv"
+
+	"github.com/urfave/cli"
 )
 
 var REQUIRED RequiredFlag = RequiredFlag{true}
@@ -189,7 +190,7 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "rds-url",
-			Usage: "URL of the RDS",
+			Usage: "URL of the RDS, <Endpoint>/<DB Name>",
 		},
 	}
 	FlRdsDbType = StringFlag{
