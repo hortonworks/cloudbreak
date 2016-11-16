@@ -124,7 +124,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 new StateMachineListenerAdapter<S, E>() {
                     @Override
                     public void stateChanged(State<S, E> from, State<S, E> to) {
-                        LOGGER.info("{} changed from {} to {}", getClass().getSimpleName(), from, to);
+                        LOGGER.debug("state changed from {} to {}", from, to);
                     }
 
                     @Override
