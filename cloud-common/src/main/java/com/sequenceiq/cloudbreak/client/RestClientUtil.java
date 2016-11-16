@@ -61,7 +61,7 @@ public class RestClientUtil {
                 .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
                 .build();
 
-        LOGGER.info("Constructing jax rs client for config: server cert: {}, client cert: {}, debug: {}", serverCert, clientCert, debug);
+        LOGGER.debug("Constructing jax rs client for config: server cert: {}, client cert: {}, debug: {}", serverCert, clientCert, debug);
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
 
@@ -88,12 +88,12 @@ public class RestClientUtil {
         }
 
         Client client = builder.build();
-        LOGGER.info("Jax rs client has been constructed: {}, sslContext: {}", client, sslContext);
+        LOGGER.debug("Jax rs client has been constructed: {}, sslContext: {}", client, sslContext);
         return client;
     }
 
     private static Client createClient(ConfigKey configKey) {
-        LOGGER.info("Constructing jax rs client: {}", configKey);
+        LOGGER.debug("Constructing jax rs client: {}", configKey);
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
 

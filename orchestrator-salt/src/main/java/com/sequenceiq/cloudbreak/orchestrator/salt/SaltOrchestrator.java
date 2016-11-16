@@ -392,7 +392,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             for (String dir : structure.keySet()) {
                 zout.putNextEntry(new ZipEntry(dir));
                 for (Resource resource : structure.get(dir)) {
-                    LOGGER.info("Zip salt entry: {}", resource.getFilename());
+                    LOGGER.debug("Zip salt entry: {}", resource.getFilename());
                     zout.putNextEntry(new ZipEntry(dir + resource.getFilename()));
                     InputStream inputStream = resource.getInputStream();
                     byte[] bytes = IOUtils.toByteArray(inputStream);

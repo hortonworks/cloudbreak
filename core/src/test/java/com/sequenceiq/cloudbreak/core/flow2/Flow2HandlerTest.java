@@ -148,10 +148,26 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowFinalFlowFailed() {
+    public void testFlowFinalFlowFailedNoChain() {
         given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
+        given(runningFlows.remove(anyString())).willReturn(flow);
+        underTest.accept(dummyEvent);
+        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
+        verify(runningFlows, times(1)).remove(eq(FLOW_ID));
+        verify(runningFlows, times(0)).get(eq(FLOW_ID));
+        verify(runningFlows, times(0)).put(any(Flow.class), isNull(String.class));
+        verify(flowChains, times(0)).removeFullFlowChain(anyString());
+        verify(flowChains, times(0)).triggerNextFlow(anyString());
+    }
+
+    @Test
+    public void testFlowFinalFlowFailedWithChain() {
+        given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
+        given(runningFlows.remove(FLOW_ID)).willReturn(flow);
+        dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
+        dummyEvent.getHeaders().set("FLOW_CHAIN_ID", "FLOW_CHAIN_ID");
         given(runningFlows.remove(anyString())).willReturn(flow);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
