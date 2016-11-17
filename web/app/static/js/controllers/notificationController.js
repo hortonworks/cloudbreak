@@ -27,8 +27,11 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
 
         function handleNotification(notification) {
             var eventType = notification.eventType;
-
-            if (successEvents.indexOf(eventType) > -1) {
+            if ("PERISCOPE_HISTORY" == eventType) {
+                notification.historyRecord.eventTimestampAsFloat = notification.historyRecord.timestamp;
+                notification.historyRecord.timestamp = new Date(notification.historyRecord.timestamp).toLocaleString();
+                $rootScope.scalingHistory.push(notification.historyRecord)
+            } else if (successEvents.indexOf(eventType) > -1) {
                 $scope.showSuccess(notification.eventMessage, notification.stackName);
                 handleStatusChange(notification, true);
             } else if (errorEvents.indexOf(eventType) > -1) {

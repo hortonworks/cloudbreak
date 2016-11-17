@@ -19,12 +19,12 @@ public class HistoryService {
     @Autowired
     private ClusterService clusterService;
 
-    public void createEntry(ScalingStatus scalingStatus, String statusReason, int originalNodeCount, ScalingPolicy scalingPolicy) {
+    public History createEntry(ScalingStatus scalingStatus, String statusReason, int originalNodeCount, ScalingPolicy scalingPolicy) {
         History history = new History(scalingStatus, statusReason, originalNodeCount)
                 .withScalingPolicy(scalingPolicy)
                 .withAlert(scalingPolicy.getAlert())
                 .withCluster(scalingPolicy.getAlert().getCluster());
-        historyRepository.save(history);
+        return historyRepository.save(history);
     }
 
     public List<History> getHistory(long clusterId) {

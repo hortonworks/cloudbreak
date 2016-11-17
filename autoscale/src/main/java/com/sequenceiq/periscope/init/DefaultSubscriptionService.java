@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.init;
+package com.sequenceiq.periscope.init;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.domain.Subscription;
-import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
+import com.sequenceiq.periscope.domain.Subscription;
+import com.sequenceiq.periscope.subscription.SubscriptionService;
 
 @Component
 public class DefaultSubscriptionService {
@@ -29,9 +29,7 @@ public class DefaultSubscriptionService {
     public void init() {
         if (!Strings.isNullOrEmpty(defaultSubscriptionAddress)) {
             LOGGER.info("Configuring default subscription {}", defaultSubscriptionAddress);
-            Subscription subscription = new Subscription();
-            subscription.setClientId(DEFAULT_CLIENT_ID);
-            subscription.setEndpoint(defaultSubscriptionAddress);
+            Subscription subscription = new Subscription(DEFAULT_CLIENT_ID, defaultSubscriptionAddress);
             subscriptionService.subscribe(subscription);
         }
     }
