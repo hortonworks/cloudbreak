@@ -2,20 +2,16 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
 
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
@@ -103,17 +99,10 @@ public class SaltConnectorTest {
     }
 
     //@Test
-    public void testRunNetIf() {
-        List<String> targets = Collections.singletonList("10.0.0.5");
-        String targetIps = "S@" + targets.stream().collect(Collectors.joining(" or S@"));
-        NetworkInterfaceResponse response = SaltStates.networkInterfaceIP(client, new Compound(targetIps));
-        Assert.assertNotNull(response.getResultGroupByHost());
-    }
-
-    //@Test
     public void testRunDeleteMinions() {
-        List<String> targets = Collections.singletonList("10.0.0.5");
-        Object object = SaltStates.removeMinions(client, targets);
+        Map<String, String> privateIpsByFQDN = new HashMap<>();
+        privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
+        Object object = SaltStates.removeMinions(client, privateIpsByFQDN);
         Assert.assertNotNull(object);
     }
 

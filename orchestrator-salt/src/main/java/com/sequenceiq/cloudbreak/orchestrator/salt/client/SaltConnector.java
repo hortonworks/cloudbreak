@@ -169,9 +169,10 @@ public class SaltConnector implements Closeable {
 
     public Map<String, String> members(List<String> privateIps) throws CloudbreakOrchestratorFailedException {
         Map<String, List<String>> clients = singletonMap("clients", privateIps);
-        GenericResponses responses = saltTarget.path(BOOT_HOSTNAME_ENDPOINT.getContextPath()).request()
+        Response response = saltTarget.path(BOOT_HOSTNAME_ENDPOINT.getContextPath()).request()
                 .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(clients).getBytes()))
-                .post(Entity.json(clients)).readEntity(GenericResponses.class);
+                .post(Entity.json(clients));
+        GenericResponses responses = JaxRSUtil.response(response, GenericResponses.class);
         List<GenericResponse> failedResponses = responses.getResponses().stream()
                 .filter(genericResponse -> !ACCEPTED_STATUSES.contains(genericResponse.getStatusCode())).collect(Collectors.toList());
         if (!failedResponses.isEmpty()) {

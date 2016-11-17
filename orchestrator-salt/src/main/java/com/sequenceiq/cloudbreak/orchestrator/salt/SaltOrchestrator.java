@@ -225,9 +225,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void tearDown(GatewayConfig gatewayConfig, List<String> hostnames) throws CloudbreakOrchestratorException {
+    public void tearDown(GatewayConfig gatewayConfig, Map<String, String> privateIPsByFQDN) throws CloudbreakOrchestratorException {
         try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
-            SaltStates.removeMinions(saltConnector, hostnames);
+            SaltStates.removeMinions(saltConnector, privateIPsByFQDN);
         } catch (Exception e) {
             LOGGER.error("Error occurred during salt minion tear down", e);
             throw new CloudbreakOrchestratorFailedException(e);

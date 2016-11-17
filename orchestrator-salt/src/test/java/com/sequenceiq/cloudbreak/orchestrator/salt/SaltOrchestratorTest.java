@@ -18,9 +18,9 @@ import static org.powermock.api.mockito.PowerMockito.verifyNew;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -52,8 +52,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
+import com.sequenceiq.cloudbreak.orchestrator.salt.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -197,18 +197,18 @@ public class SaltOrchestratorTest {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
-        List<String> hostNames = new ArrayList<>();
-        hostNames.add("10-0-0-1.example.com");
-        hostNames.add("10-0-0-1.example.com");
-        hostNames.add("10-0-0-1.example.com");
+        Map<String, String> privateIpsByFQDN = new HashMap<>();
+        privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
+        privateIpsByFQDN.put("10-0-0-2.example.com", "10.0.0.2");
+        privateIpsByFQDN.put("10-0-0-3.example.com", "10.0.0.3");
 
         mockStatic(SaltStates.class);
-        SaltStates.removeMinions(eq(saltConnector), eq(hostNames));
+        SaltStates.removeMinions(eq(saltConnector), eq(privateIpsByFQDN));
 
-        saltOrchestrator.tearDown(gatewayConfig, hostNames);
+        saltOrchestrator.tearDown(gatewayConfig, privateIpsByFQDN);
 
         verifyStatic();
-        SaltStates.removeMinions(eq(saltConnector), eq(hostNames));
+        SaltStates.removeMinions(eq(saltConnector), eq(privateIpsByFQDN));
     }
 
     @Test
@@ -216,16 +216,16 @@ public class SaltOrchestratorTest {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
-        List<String> hostNames = new ArrayList<>();
-        hostNames.add("10-0-0-1.example.com");
-        hostNames.add("10-0-0-1.example.com");
-        hostNames.add("10-0-0-1.example.com");
+        Map<String, String> privateIpsByFQDN = new HashMap<>();
+        privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
+        privateIpsByFQDN.put("10-0-0-2.example.com", "10.0.0.2");
+        privateIpsByFQDN.put("10-0-0-3.example.com", "10.0.0.3");
 
         mockStatic(SaltStates.class);
-        PowerMockito.when(SaltStates.removeMinions(eq(saltConnector), eq(hostNames))).thenThrow(new NullPointerException());
+        PowerMockito.when(SaltStates.removeMinions(eq(saltConnector), eq(privateIpsByFQDN))).thenThrow(new NullPointerException());
 
         try {
-            saltOrchestrator.tearDown(gatewayConfig, hostNames);
+            saltOrchestrator.tearDown(gatewayConfig, privateIpsByFQDN);
             fail();
         } catch (CloudbreakOrchestratorFailedException e) {
             assertTrue(NullPointerException.class.isInstance(e.getCause()));

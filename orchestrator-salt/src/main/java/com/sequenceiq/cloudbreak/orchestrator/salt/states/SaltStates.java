@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +22,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
@@ -122,38 +122,31 @@ public class SaltStates {
         return false;
     }
 
+    public static PingResponse ping(SaltConnector sc, Target<String> target) {
+        return sc.run(target, "test.ping", LOCAL, PingResponse.class);
+    }
+
     public static NetworkInterfaceResponse networkInterfaceIP(SaltConnector sc, Target<String> target) {
         return sc.run(target, "network.interface_ip", LOCAL, NetworkInterfaceResponse.class, "eth0");
     }
 
-    public static Object removeMinions(SaltConnector sc, List<String> hostnames) {
+    public static Object removeMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {
         // This is slow
         // String targetIps = "S@" + hostnames.stream().collect(Collectors.joining(" or S@"));
         //Map<String, String> ipToMinionId = SaltStates.networkInterfaceIP(sc, new Compound(targetIps)).getResultGroupByHost();
 
-        Map<String, String> saltHostnames = SaltStates.networkInterfaceIP(sc, Glob.ALL).getResultGroupByHost();
-        List<String> hostnamesWithoutDomain = hostnames.stream().map(host -> host.split("\\.")[0]).collect(Collectors.toList());
-        List<String> minionIds = saltHostnames.entrySet().stream()
-                .filter(entry -> hostnamesWithoutDomain.contains(entry.getKey().split("\\.")[0]))
-                .map(Map.Entry::getKey).collect(Collectors.toList());
         SaltAction saltAction = new SaltAction(SaltActionType.STOP);
-        for (String hostname : minionIds) {
+        for (Map.Entry<String, String> entry : privateIPsByFQDN.entrySet()) {
             Minion minion = new Minion();
-            minion.setAddress(saltHostnames.get(hostname));
+            minion.setAddress(entry.getValue());
             saltAction.addMinion(minion);
         }
         sc.action(saltAction);
 
-        return sc.wheel("key.delete", minionIds, Object.class);
+        return sc.wheel("key.delete", privateIPsByFQDN.keySet(), Object.class);
     }
 
     private static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
         return sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service);
     }
-
-    public static String resolveHostNameToMinionHostName(SaltConnector sc, String minionName) {
-        Map<String, String> saltHostnames = SaltStates.networkInterfaceIP(sc, Glob.ALL).getResultGroupByHost();
-        return saltHostnames.get(minionName);
-    }
-
 }
