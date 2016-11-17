@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId.jobId;
 
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,9 +92,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             JobState jobState = JobState.FAILED;
             jobState.setNodesWithError(missingNodesWithReason);
             saltJobRunner.setJobState(JobState.FAILED);
-            Set<String> newTargets = missingNodesWithReason.keySet().stream().map(node -> SaltStates.resolveHostNameToMinionHostName(saltConnector, node))
-                    .collect(Collectors.toSet());
-            saltJobRunner.setTarget(newTargets);
+            saltJobRunner.setTarget(missingNodesWithReason.keySet());
         } else {
             LOGGER.info("The job (jid: {}) completed successfully on every node.", jobId);
             saltJobRunner.setJobState(JobState.FINISHED);

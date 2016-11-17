@@ -124,7 +124,7 @@ public class ClusterBootstrapper {
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper());
+            Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN());
             node.setHostGroup(instanceMetaData.getInstanceGroupName());
             nodes.add(node);
         }
@@ -227,7 +227,7 @@ public class ClusterBootstrapper {
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             if (upscaleCandidateAddresses.contains(instanceMetaData.getPrivateIp())) {
-                nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
+                nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN()));
             }
         }
         try {

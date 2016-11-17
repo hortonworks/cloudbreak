@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
@@ -54,7 +55,7 @@ public class SaltStatesTest {
     private Target<String> target;
 
     @Captor
-    private ArgumentCaptor<List<String>> minionIdsCaptor;
+    private ArgumentCaptor<Set<String>> minionIdsCaptor;
 
     @Before
     public void setUp() {
@@ -165,23 +166,19 @@ public class SaltStatesTest {
         verify(saltConnector, times(1)).run(any(), eq("network.interface_ip"), eq(LOCAL), eq(NetworkInterfaceResponse.class), eq("eth0"));
     }
 
+        @Test
+    public void pingTest() {
+        SaltStates.ping(saltConnector, target);
+        verify(saltConnector, times(1)).run(any(), eq("test.ping"), eq(LOCAL), eq(PingResponse.class));
+    }
+
     @Test
     public void removeMinionsTest() {
-        List<String> hostNames = new ArrayList<>();
-        hostNames.add("10-0-0-1.example.com");
-        hostNames.add("10-0-0-2.example.com");
-        hostNames.add("10-0-0-3.example.com");
-        NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
-        List<Map<String, String>> result = new ArrayList<>();
-        Map<String, String> resultMap = new HashMap<>();
-        resultMap.put("10-0-0-1.example.com", "10.0.0.1");
-        resultMap.put("10-0-0-2.example.com", "10.0.0.2");
-        resultMap.put("10-0-0-3.example.com", "10.0.0.3");
-        result.add(resultMap);
-        networkInterfaceResponse.setResult(result);
-        when(saltConnector.run(any(), eq("network.interface_ip"), eq(LOCAL), eq(NetworkInterfaceResponse.class), eq("eth0")))
-                .thenReturn(networkInterfaceResponse);
-        SaltStates.removeMinions(saltConnector, hostNames);
+        Map<String, String> privateIpsByFQDN = new HashMap<>();
+        privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
+        privateIpsByFQDN.put("10-0-0-2.example.com", "10.0.0.2");
+        privateIpsByFQDN.put("10-0-0-3.example.com", "10.0.0.3");
+        SaltStates.removeMinions(saltConnector, privateIpsByFQDN);
 
         ArgumentCaptor<SaltAction> saltActionArgumentCaptor = ArgumentCaptor.forClass(SaltAction.class);
         verify(saltConnector, times(1)).action(saltActionArgumentCaptor.capture());
@@ -191,29 +188,11 @@ public class SaltStatesTest {
 
         assertThat(saltAction.getMinions(), hasSize(3));
 
-        List<String> minionAddressList = saltAction.getMinions().stream().map(Minion::getAddress).collect(Collectors.toList());
-        assertThat(minionAddressList, containsInAnyOrder("10.0.0.1", "10.0.0.2", "10.0.0.3"));
+        Set<String> minionAddresses = saltAction.getMinions().stream().map(Minion::getAddress).collect(Collectors.toSet());
+        assertThat(minionAddresses, containsInAnyOrder("10.0.0.1", "10.0.0.2", "10.0.0.3"));
 
         verify(saltConnector, times(1)).wheel(eq("key.delete"), minionIdsCaptor.capture(), any());
-        List<String> minionIds = minionIdsCaptor.getValue();
+        Set<String> minionIds = minionIdsCaptor.getValue();
         assertThat(minionIds, containsInAnyOrder("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com"));
     }
-
-    @Test
-    public void resolveHostNameToMinionHostNameTest() {
-        NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
-        List<Map<String, String>> result = new ArrayList<>();
-        Map<String, String> resultMap = new HashMap<>();
-        resultMap.put("10-0-0-1.example.com", "10.0.0.1");
-        resultMap.put("10-0-0-2.example.com", "10.0.0.2");
-        resultMap.put("10-0-0-3.example.com", "10.0.0.3");
-        result.add(resultMap);
-        networkInterfaceResponse.setResult(result);
-        when(saltConnector.run(any(), eq("network.interface_ip"), eq(LOCAL), eq(NetworkInterfaceResponse.class), eq("eth0")))
-                .thenReturn(networkInterfaceResponse);
-
-        String hostName = SaltStates.resolveHostNameToMinionHostName(saltConnector, "10-0-0-1.example.com");
-        assertEquals("10.0.0.1", hostName);
-    }
-
 }

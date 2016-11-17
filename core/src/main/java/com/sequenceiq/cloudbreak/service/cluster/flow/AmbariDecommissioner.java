@@ -386,7 +386,7 @@ public class AmbariDecommissioner {
         return result;
     }
 
-    private void stopAndDeleteHosts(Stack stack, AmbariClient ambariClient, final List<String> hostList, Set<String> components) throws CloudbreakException {
+    private void stopAndDeleteHosts(Stack stack, AmbariClient ambariClient, final List<String> hostNames, Set<String> components) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         Map<String, Object> map = new HashMap<>();
         map.putAll(orchestrator.getAttributes().getMap());
@@ -399,24 +399,28 @@ public class AmbariDecommissioner {
                 Set<Container> containers = containerRepository.findContainersInCluster(stack.getCluster().getId());
 
                 List<ContainerInfo> containersToDelete = containers.stream()
-                        .filter(input -> hostList.contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName()))
+                        .filter(input -> hostNames.contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName()))
                         .map(input -> new ContainerInfo(input.getContainerId(), input.getName(), input.getHost(), input.getImage()))
                         .collect(Collectors.toList());
 
                 containerOrchestrator.deleteContainer(containersToDelete, credential);
                 containerRepository.delete(containers);
-                PollingResult pollingResult = waitForHostsToLeave(stack, ambariClient, hostList);
+                PollingResult pollingResult = waitForHostsToLeave(stack, ambariClient, hostNames);
                 if (isTimeout(pollingResult)) {
-                    LOGGER.warn("Ambari agent stop timed out, delete the hosts anyway, hosts: {}", hostList);
+                    LOGGER.warn("Ambari agent stop timed out, delete the hosts anyway, hosts: {}", hostNames);
                 }
                 if (!isExited(pollingResult)) {
-                    deleteHosts(stack, hostList, components);
+                    deleteHosts(stack, hostNames, components);
                 }
             } else if (orchestratorType.hostOrchestrator()) {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack);
-                hostOrchestrator.tearDown(gatewayConfig, hostList);
-                deleteHosts(stack, hostList, components);
+                Map<String, String> privateIpsByFQDN = new HashMap<>();
+                stack.getInstanceMetaDataAsList().stream()
+                        .filter(instanceMetaData -> hostNames.stream().anyMatch(hn -> hn.contains(instanceMetaData.getDiscoveryFQDN().split("\\.")[0])))
+                        .forEach(instanceMetaData -> privateIpsByFQDN.put(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getPrivateIp()));
+                hostOrchestrator.tearDown(gatewayConfig, privateIpsByFQDN);
+                deleteHosts(stack, hostNames, components);
             }
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.error("Failed to delete containers while decommissioning: ", e);
