@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
@@ -44,9 +45,10 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
             for (SecurityRule rule : security.getRules()) {
                 IPProtocol osProtocol = getProtocol(rule.getProtocol());
                 String cidr = rule.getCidr();
-                for (String portStr : rule.getPorts()) {
-                    int port = Integer.valueOf(portStr);
-                    securityGroupService.createRule(createRule(securityGroupId, osProtocol, cidr, port, port));
+                for (PortDefinition portStr : rule.getPorts()) {
+                    int from = Integer.valueOf(portStr.getFrom());
+                    int to = Integer.valueOf(portStr.getTo());
+                    securityGroupService.createRule(createRule(securityGroupId, osProtocol, cidr, from, to));
                 }
             }
             NeutronNetworkView neutronView = new NeutronNetworkView(network);

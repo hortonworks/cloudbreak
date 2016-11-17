@@ -6,11 +6,11 @@ public class SecurityRule {
 
     private final String cidr;
 
-    private final String[] ports;
+    private final PortDefinition[] ports;
 
     private final String protocol;
 
-    public SecurityRule(String cidr, String[] ports, String protocol) {
+    public SecurityRule(String cidr, PortDefinition[] ports, String protocol) {
         this.cidr = cidr;
         this.ports = ports;
         this.protocol = protocol;
@@ -20,7 +20,7 @@ public class SecurityRule {
         return protocol;
     }
 
-    public String[] getPorts() {
+    public PortDefinition[] getPorts() {
         return ports;
     }
 

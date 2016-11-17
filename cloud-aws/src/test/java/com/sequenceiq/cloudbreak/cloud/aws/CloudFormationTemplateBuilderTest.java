@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
@@ -92,7 +93,8 @@ public class CloudFormationTemplateBuilderTest {
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
                 new HashMap<>());
         instance = new CloudInstance("SOME_ID", instanceTemplate);
-        rules = Collections.singletonList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
+        rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
+                new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, null);
         userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",

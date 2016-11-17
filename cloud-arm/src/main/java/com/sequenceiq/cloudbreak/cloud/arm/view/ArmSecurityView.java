@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 
 public class ArmSecurityView {
@@ -16,8 +17,13 @@ public class ArmSecurityView {
         for (Group group : groups) {
             List<ArmPortView> groupPorts = new ArrayList<>();
             for (SecurityRule securityRule : group.getSecurity().getRules()) {
-                for (String port : securityRule.getPorts()) {
-                    groupPorts.add(new ArmPortView(securityRule.getCidr(), port, securityRule.getProtocol()));
+                for (PortDefinition port : securityRule.getPorts()) {
+                    if (port.isRange()) {
+                        String portRange = String.format("%s-%s", port.getFrom(), port.getTo());
+                        groupPorts.add(new ArmPortView(securityRule.getCidr(), portRange, securityRule.getProtocol()));
+                    } else {
+                        groupPorts.add(new ArmPortView(securityRule.getCidr(), port.getFrom(), securityRule.getProtocol()));
+                    }
                 }
             }
             ports.put(group.getName(), groupPorts);

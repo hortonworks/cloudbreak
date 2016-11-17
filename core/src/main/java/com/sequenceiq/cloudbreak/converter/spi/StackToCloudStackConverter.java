@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
@@ -114,7 +115,18 @@ public class StackToCloudStackConverter {
         Long id = ig.getSecurityGroup().getId();
         List<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityRuleRepository.findAllBySecurityGroupId(id);
         for (com.sequenceiq.cloudbreak.domain.SecurityRule securityRule : securityRules) {
-            rules.add(new SecurityRule(securityRule.getCidr(), securityRule.getPorts(), securityRule.getProtocol()));
+            List<PortDefinition> portDefinitions = new ArrayList<>();
+            for (String actualPort : securityRule.getPorts()) {
+                String[] segments = actualPort.split("-");
+                if (segments.length > 1) {
+                    portDefinitions.add(new PortDefinition(segments[0], segments[1]));
+                } else {
+                    portDefinitions.add(new PortDefinition(segments[0], segments[0]));
+                }
+            }
+
+            rules.add(new SecurityRule(securityRule.getCidr(), portDefinitions.toArray(new PortDefinition[portDefinitions.size()]),
+                    securityRule.getProtocol()));
         }
         return new Security(rules, ig.getSecurityGroup().getSecurityGroupId());
     }

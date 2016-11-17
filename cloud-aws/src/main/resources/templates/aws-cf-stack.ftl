@@ -388,7 +388,7 @@
           </#if>
           <#list group.rules as r>
             <#list r.ports as p>
-              { "IpProtocol" : "${r.protocol}", "FromPort" : "${p}", "ToPort" : "${p}", "CidrIp" : "${r.cidr}"} ,
+              { "IpProtocol" : "${r.protocol}", "FromPort" : "${p.from}", "ToPort" : "${p.to}", "CidrIp" : "${r.cidr}"} ,
             </#list>
 		  </#list>
           <#list cbSubnet as s>
