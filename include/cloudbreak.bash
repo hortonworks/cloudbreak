@@ -461,6 +461,7 @@ util-token() {
         "${PUBLIC_IP}:${UAA_PORT}/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
            | cut -d'&' -f 2)
     info $TOKEN
+    echo ${TOKEN#*=}
 }
 
 util-local-dev() {
