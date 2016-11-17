@@ -133,11 +133,13 @@ public class UsageService {
     }
 
     private CloudbreakUsage closeUsage(CloudbreakUsage usage) {
+        if (usage.getStatus() == UsageStatus.OPEN) {
+            Duration newDuration = usageTimeService.calculateNewDuration(usage);
+            usage.setInstanceHours(usageTimeService.convertToInstanceHours(newDuration));
+            usage.setDuration(newDuration.toString());
+            usage.setCosts(usagePriceService.calculateCostOfUsage(usage));
+        }
         usage.setStatus(UsageStatus.CLOSED);
-        Duration newDuration = usageTimeService.calculateNewDuration(usage);
-        usage.setInstanceHours(usageTimeService.convertToInstanceHours(newDuration));
-        usage.setDuration(newDuration.toString());
-        usage.setCosts(usagePriceService.calculateCostOfUsage(usage));
         return usage;
     }
 
