@@ -16,8 +16,7 @@ public class RsaPublicKeyValidator {
         try {
             PublicKeyReaderUtil.load(credential.getPublicKey());
         } catch (Exception e) {
-            String errorMessage = String.format("Could not validate publickey certificate [certificate: '%s'], detailed message: %s",
-                    credential.getPublicKey(), e.getMessage());
+            String errorMessage = String.format("Could not validate public SSH key: %s", e.getMessage());
             LOGGER.error(errorMessage, e);
             throw new BadRequestException(errorMessage, e);
         }
