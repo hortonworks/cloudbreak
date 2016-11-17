@@ -12,7 +12,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         $scope.scalingConfiguration = {};
         $scope.scalingAction = {};
         $scope.alert = {};
-        $scope.scalingHistory = {};
+        $rootScope.scalingHistory = {};
         $scope.metricBasedAlarm = true;
         $scope.timeBasedAlarm = false;
         $scope.actPeriscopeCluster = undefined;
@@ -99,35 +99,37 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
                     item.eventTimestampAsFloat = item.timestamp;
                     item.timestamp = new Date(item.timestamp).toLocaleString();
                 });
-                $scope.scalingHistory = success;
+                $rootScope.scalingHistory = success;
                 $scope.pagination = {
                     currentPage: 1,
                     itemsPerPage: 10,
-                    totalItems: $scope.scalingHistory.length
+                    totalItems: $rootScope.scalingHistory.length
                 }
             }, function(error) {
                 console.log(error);
             });
         }
 
-        $scope.$watch('scalingHistory', function() {
-            if ($scope.scalingHistory != null) {
+        $scope.$watchCollection(function() {
+            return $rootScope.scalingHistory;
+        }, function() {
+            if ($rootScope.scalingHistory != null) {
                 paginateScalingHistory();
             }
         });
 
         $scope.$watch('pagination.currentPage + pagination.itemsPerPage', function() {
-            if ($scope.scalingHistory != null) {
+            if ($rootScope.scalingHistory != null) {
                 paginateScalingHistory();
             }
         });
 
         function paginateScalingHistory() {
-            if ($scope.pagination != null && $scope.scalingHistory.length > 0) {
-                $scope.pagination.totalItems = $scope.scalingHistory.length;
+            if ($scope.pagination != null && $rootScope.scalingHistory.length > 0) {
+                $scope.pagination.totalItems = $rootScope.scalingHistory.length;
                 var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
                     end = begin + $scope.pagination.itemsPerPage;
-                $scope.filteredScalingHistory = $scope.scalingHistory.slice(begin, end);
+                $scope.filteredScalingHistory = $rootScope.scalingHistory.slice(begin, end);
             } else {
                 $scope.filteredScalingHistory = [];
             }

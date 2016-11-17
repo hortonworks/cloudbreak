@@ -233,9 +233,13 @@ function continueInit() {
     // main page ===================================================================
 
     app.get('/', function(req, res) {
-        if (config.subscriptionAddress == null) {
+        if (config.subscriptionAddress == null && process.env.ULU_SUBSCRIBE_TO_NOTIFICATIONS == "true") {
+            console.log('<<<<Subscribe for notifications.');
             subscribe()
+        } else {
+            console.log('<<<<No subscription needed.');
         }
+
         var oauthFlowUrl = config.sultansRedirectAddress + 'oauth/authorize?response_type=code' + '&client_id=' + config.clientId + '&scope=' + config.clientScopes + '&redirect_uri=' + redirectUri
 
         if (!req.session.token) {
