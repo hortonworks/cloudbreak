@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.gcp.group;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
 import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_FIREWALL_IN;
-import static java.util.Arrays.asList;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceNotNeededException;
@@ -132,7 +132,15 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         for (SecurityRule securityRule : securityRules) {
             Firewall.Allowed rule = new Firewall.Allowed();
             rule.setIPProtocol(securityRule.getProtocol());
-            rule.setPorts(asList(securityRule.getPorts()));
+            List<String> ports = new ArrayList<>();
+            for (PortDefinition portDefinition : securityRule.getPorts()) {
+                if (portDefinition.isRange()) {
+                    ports.add(String.format("%s-%s", portDefinition.getFrom(), portDefinition.getTo()));
+                } else {
+                    ports.add(portDefinition.getFrom());
+                }
+            }
+            rule.setPorts(ports);
             rules.add(rule);
         }
         return rules;

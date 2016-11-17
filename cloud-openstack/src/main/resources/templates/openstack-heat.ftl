@@ -176,8 +176,8 @@ ${core_user_data}
         <#list r.getPorts() as p>
         {remote_ip_prefix: ${r.cidr},
         protocol: ${r.protocol},
-        port_range_min: ${p},
-        port_range_max: ${p}},
+        port_range_min: ${p.from},
+        port_range_max: ${p.to}},
         </#list>
         </#list>
         {remote_ip_prefix: { get_param: app_net_cidr },
