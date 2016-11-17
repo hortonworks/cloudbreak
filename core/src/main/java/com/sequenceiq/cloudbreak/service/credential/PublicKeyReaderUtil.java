@@ -237,7 +237,7 @@ public final class PublicKeyReaderUtil {
 
             SSH2RSA_ERROR_DECODING_PUBLIC_KEY_BLOB("SSH2RSA: error decoding public key blob"),
 
-            CORRUPT_BYTE_ARRAY_ON_READ("Corrupt byte array on read");
+            CORRUPT_BYTE_ARRAY_ON_READ("Public key length is shorter than 2048 bits or byte array is corrupt.");
 
             private final String message;
 
