@@ -41,7 +41,18 @@ public class ClusterCredentialChangeActions {
             @Override
             protected void doExecute(ClusterContext context, ClusterCredentialChangeTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterCredentialChangeService.credentialChange(context.getStack().getId());
-                sendEvent(context.getFlowId(), new ClusterCredentialChangeRequest(context.getStack().getId(), payload.getUser(), payload.getPassword()));
+                ClusterCredentialChangeRequest request;
+                switch (payload.getType()) {
+                    case REPLACE:
+                        request = ClusterCredentialChangeRequest.replaceUserRequest(context.getStack().getId(), payload.getUser(), payload.getPassword());
+                        break;
+                    case UPDATE:
+                        request = ClusterCredentialChangeRequest.changePasswordRequest(context.getStack().getId(), payload.getPassword());
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("Ambari credential update request not supported: " + payload.getType());
+                }
+                sendEvent(context.getFlowId(), request);
             }
         };
     }
@@ -51,8 +62,18 @@ public class ClusterCredentialChangeActions {
         return new AbstractClusterAction<ClusterCredentialChangeResult>(ClusterCredentialChangeResult.class) {
             @Override
             protected void doExecute(ClusterContext context, ClusterCredentialChangeResult payload, Map<Object, Object> variables) throws Exception {
-                clusterCredentialChangeService.finishCredentialChange(context.getStack().getId(), context.getCluster(),
-                        payload.getRequest().getUser(), payload.getRequest().getPassword());
+                switch (payload.getRequest().getType()) {
+                    case REPLACE:
+                        clusterCredentialChangeService.finishCredentialReplace(context.getStack().getId(), context.getCluster(),
+                                payload.getRequest().getUser(), payload.getRequest().getPassword());
+                        break;
+                    case UPDATE:
+                        clusterCredentialChangeService.finishCredentialUpdate(context.getStack().getId(), context.getCluster(),
+                                payload.getRequest().getPassword());
+                        break;
+                    default:
+                        LOGGER.error("Ambari credential update request not supported: " + payload.getRequest().getType());
+                }
                 sendEvent(context);
             }
 

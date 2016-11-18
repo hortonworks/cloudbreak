@@ -168,16 +168,13 @@ public class AmbariClusterConnectorTest {
 
     @Test
     public void testChangeAmbariCredentialsWhenUserIsTheSameThenModifyUser() throws Exception {
-        underTest.credentialChangeAmbariCluster(stack.getId(), "admin", "admin1");
+        underTest.credentialUpdateAmbariCluster(stack.getId(), "admin1");
         verify(ambariClient, times(1)).changePassword(anyString(), anyString(), anyString(), anyBoolean());
-        verify(ambariClient, times(0)).deleteUser(anyString());
-        verify(ambariClient, times(0)).createUser(anyString(), anyString(), anyBoolean());
     }
 
     @Test
     public void testChangeAmbariCredentialsWhenUserDifferentThanExistThenCreateNewUserDeleteOldOne() throws Exception {
-        underTest.credentialChangeAmbariCluster(stack.getId(), "admin123", "admin1");
-        verify(ambariClient, times(0)).changePassword(anyString(), anyString(), anyString(), anyBoolean());
+        underTest.credentialReplaceAmbariCluster(stack.getId(), "admin123", "admin1");
         verify(ambariClient, times(1)).deleteUser(anyString());
         verify(ambariClient, times(1)).createUser(anyString(), anyString(), anyBoolean());
     }

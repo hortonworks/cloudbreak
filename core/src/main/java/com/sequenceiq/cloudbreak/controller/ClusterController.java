@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -298,18 +297,13 @@ public class ClusterController implements ClusterEndpoint {
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
                     stack.getStatus()));
         }
-        if (Optional.ofNullable(userNamePasswordJson.getOldPassword()).orElse("").isEmpty()) {
-            throw new BadRequestException(String.format("The old password of the Stack '%s' is missing.", stackId));
-        } else if (Optional.ofNullable(userNamePasswordJson.getPassword()).orElse("").isEmpty()) {
-            throw new BadRequestException(String.format("The new password of the Stack '%s' is missing.", stackId));
-        }
         if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword())) {
             throw new BadRequestException(String.format(
                     "Cluster actual password does not match in the request, please pass the real password on Stack '%s' with status '%s'.", stackId,
                     stack.getStatus()));
         }
-        LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}, password: {}",
-                stackId, userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
+        LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}",
+                stackId, userNamePasswordJson.getUserName());
         clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
     }
 

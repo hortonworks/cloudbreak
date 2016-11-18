@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 
-import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -85,7 +85,8 @@ public class ReactorFlowManagerTest {
         flowManager.triggerClusterSync(stackId);
         flowManager.triggerStackSync(stackId);
         flowManager.triggerFullSync(stackId);
-        flowManager.triggerClusterCredentialChange(stackId, "admin", "admin1");
+        flowManager.triggerClusterCredentialReplace(stackId, "admin", "admin1");
+        flowManager.triggerClusterCredentialUpdate(stackId, "admin1");
         flowManager.triggerClusterTermination(stackId);
         flowManager.triggerClusterUpgrade(stackId);
         flowManager.triggerManualRepairFlow(stackId);

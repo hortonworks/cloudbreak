@@ -22,10 +22,20 @@ public class ClusterCredentialChangeService {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_CHANGING_CREDENTIAL, Status.UPDATE_IN_PROGRESS.name());
     }
 
-    public void finishCredentialChange(Long stackId, Cluster cluster, String user, String password) {
-        clusterService.updateClusterUsernameAndPassword(cluster, user, password);
+    public void finishCredentialReplace(Long stackId, Cluster cluster, String user, String password) {
+        cluster.setUserName(user);
+        cluster.setPassword(password);
+        finishCredentialChange(stackId, cluster);
+    }
+
+    public void finishCredentialUpdate(Long stackId, Cluster cluster, String password) {
+        cluster.setPassword(password);
+        finishCredentialChange(stackId, cluster);
+    }
+
+    private void finishCredentialChange(Long stackId, Cluster cluster) {
+        clusterService.updateCluster(cluster);
         clusterService.updateClusterStatusByStackId(stackId, Status.AVAILABLE);
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_CHANGED_CREDENTIAL, Status.AVAILABLE.name());
     }
-
 }

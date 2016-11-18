@@ -116,9 +116,15 @@ public class ReactorFlowManager {
         reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
     }
 
-    public void triggerClusterCredentialChange(Long stackId, String userName, String password) {
+    public void triggerClusterCredentialReplace(Long stackId, String userName, String password) {
         String selector = FlowTriggers.CLUSTER_CREDENTIALCHANGE_TRIGGER_EVENT;
-        ClusterCredentialChangeTriggerEvent event = new ClusterCredentialChangeTriggerEvent(selector, stackId, userName, password);
+        ClusterCredentialChangeTriggerEvent event = ClusterCredentialChangeTriggerEvent.replaceUserEvent(selector, stackId, userName, password);
+        notify(selector, event);
+    }
+
+    public void triggerClusterCredentialUpdate(Long stackId, String password) {
+        String selector = FlowTriggers.CLUSTER_CREDENTIALCHANGE_TRIGGER_EVENT;
+        ClusterCredentialChangeTriggerEvent event = ClusterCredentialChangeTriggerEvent.changePasswordEvent(selector, stackId, password);
         notify(selector, event);
     }
 

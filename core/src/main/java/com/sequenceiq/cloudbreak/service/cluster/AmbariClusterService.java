@@ -331,10 +331,20 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson) {
+    public void updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson) {
         Stack stack = stackService.get(stackId);
-        flowManager.triggerClusterCredentialChange(stack.getId(), userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
-        return stack.getCluster();
+        Cluster cluster = stack.getCluster();
+        String oldUserName = cluster.getUserName();
+        String oldPassword = cluster.getPassword();
+        String newUserName = userNamePasswordJson.getUserName();
+        String newPassword = userNamePasswordJson.getPassword();
+        if (!newUserName.equals(oldUserName)) {
+            flowManager.triggerClusterCredentialReplace(stack.getId(), userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
+        } else if (!newPassword.equals(oldPassword)) {
+            flowManager.triggerClusterCredentialUpdate(stack.getId(), userNamePasswordJson.getPassword());
+        } else {
+            throw new BadRequestException("The request may not change credential");
+        }
     }
 
     private void sync(Stack stack) {
@@ -409,16 +419,6 @@ public class AmbariClusterService implements ClusterService {
     @Transactional(Transactional.TxType.NEVER)
     public Cluster updateCluster(Cluster cluster) {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
-        cluster = clusterRepository.save(cluster);
-        return cluster;
-    }
-
-    @Override
-    @Transactional(Transactional.TxType.NEVER)
-    public Cluster updateClusterUsernameAndPassword(Cluster cluster, String userName, String password) {
-        LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
-        cluster.setUserName(userName);
-        cluster.setPassword(password);
         cluster = clusterRepository.save(cluster);
         return cluster;
     }
