@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
+import com.sequenceiq.cloudbreak.util.JaxRSUtil;
 
 public class SaltConnector implements Closeable {
 
@@ -83,26 +84,28 @@ public class SaltConnector implements Closeable {
     }
 
     public GenericResponse health() {
-        GenericResponse response = saltTarget.path(SaltEndpoint.BOOT_HEALTH.getContextPath()).request()
-                .get().readEntity(GenericResponse.class);
-        LOGGER.info("Health response: {}", response);
-        return response;
+        Response response = saltTarget.path(SaltEndpoint.BOOT_HEALTH.getContextPath()).request().get();
+        GenericResponse responseEntity = JaxRSUtil.response(response, GenericResponse.class);
+        LOGGER.info("Health response: {}", responseEntity);
+        return responseEntity;
     }
 
     public GenericResponse pillar(Pillar pillar) {
-        GenericResponse response = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE.getContextPath()).request()
+        Response response = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE.getContextPath()).request()
                 .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
-                .post(Entity.json(pillar)).readEntity(GenericResponse.class);
-        LOGGER.info("Pillar response: {}", response);
-        return response;
+                .post(Entity.json(pillar));
+        GenericResponse responseEntity = JaxRSUtil.response(response, GenericResponse.class);
+        LOGGER.info("Pillar response: {}", responseEntity);
+        return responseEntity;
     }
 
     public GenericResponses action(SaltAction saltAction) {
-        GenericResponses responses = saltTarget.path(SaltEndpoint.BOOT_ACTION_DISTRIBUTE.getContextPath()).request()
+        Response response = saltTarget.path(SaltEndpoint.BOOT_ACTION_DISTRIBUTE.getContextPath()).request()
                 .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(saltAction).getBytes()))
-                .post(Entity.json(saltAction)).readEntity(GenericResponses.class);
-        LOGGER.info("SaltAction response: {}", responses);
-        return responses;
+                .post(Entity.json(saltAction));
+        GenericResponses responseEntity = JaxRSUtil.response(response, GenericResponses.class);
+        LOGGER.info("SaltAction response: {}", responseEntity);
+        return responseEntity;
     }
 
     public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
@@ -123,11 +126,12 @@ public class SaltConnector implements Closeable {
                 }
             }
         }
-        T response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
+        Response response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
                 .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
-                .post(Entity.form(form)).readEntity(clazz);
-        LOGGER.info("Salt run response: {}", response);
-        return response;
+                .post(Entity.form(form));
+        T responseEntity = JaxRSUtil.response(response, clazz);
+        LOGGER.info("Salt run response: {}", responseEntity);
+        return responseEntity;
     }
 
     public <T> T wheel(String fun, Collection<String> match, Class<T> clazz) {
@@ -138,11 +142,12 @@ public class SaltConnector implements Closeable {
         if (match != null && !match.isEmpty()) {
             form.param("match", match.stream().collect(Collectors.joining(",")));
         }
-        T response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
+        Response response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
                 .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
-                .post(Entity.form(form)).readEntity(clazz);
-        LOGGER.info("SaltAction response: {}", response);
-        return response;
+                .post(Entity.form(form));
+        T responseEntity = JaxRSUtil.response(response, clazz);
+        LOGGER.info("SaltAction response: {}", responseEntity);
+        return responseEntity;
     }
 
     public void upload(String path, String fileName, InputStream inputStream) throws IOException {
