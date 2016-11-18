@@ -51,11 +51,9 @@ public interface ClusterService {
 
     Cluster updateClusterMetadata(Long stackId);
 
-    Cluster updateClusterUsernameAndPassword(Cluster cluster, String userName, String password);
-
     Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, HDPRepo hdpRepo);
 
-    Cluster updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson);
+    void updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson);
 
     ClusterResponse getClusterResponse(ClusterResponse response, String clusterJson);
 

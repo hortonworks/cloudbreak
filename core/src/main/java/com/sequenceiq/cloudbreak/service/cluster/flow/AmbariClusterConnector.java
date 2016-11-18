@@ -33,6 +33,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -373,21 +374,37 @@ public class AmbariClusterConnector {
         return ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster, user, password);
     }
 
-    public Cluster credentialChangeAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakSecuritySetupException {
+    public void credentialReplaceAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        String oldUserName = cluster.getUserName();
-        String oldPassword = cluster.getPassword();
-        AmbariClient ambariClient = getPrivateSecureAmbariClient(stack, oldUserName, oldPassword);
-        if (newUserName.equals(oldUserName)) {
-            if (!newPassword.equals(oldPassword)) {
-                ambariClient.changePassword(oldUserName, oldPassword, newPassword, true);
-            }
-        } else {
+        AmbariClient ambariClient = getPrivateSecureAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
+        try {
             ambariClient.createUser(newUserName, newPassword, true);
-            ambariClient.deleteUser(oldUserName);
+        } catch (Exception e) {
+            if (e instanceof HttpResponseException && ((HttpResponseException) e).getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+                try {
+                    ambariClient = getPrivateSecureAmbariClient(stack, newUserName, newPassword);
+                    ambariClient.ambariServerVersion();
+                } catch (Exception ie) {
+                    throw e;
+                }
+            }
         }
-        return cluster;
+        ambariClient.deleteUser(cluster.getUserName());
+    }
+
+    public void credentialUpdateAmbariCluster(Long stackId, String newPassword) throws CloudbreakSecuritySetupException {
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+        AmbariClient ambariClient = getPrivateSecureAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
+        try {
+            ambariClient.changePassword(cluster.getUserName(), cluster.getPassword(), newPassword, true);
+        } catch (Exception e) {
+            if (e instanceof HttpResponseException && ((HttpResponseException) e).getStatusCode() == HttpStatus.FORBIDDEN.value()) {
+                ambariClient = getPrivateSecureAmbariClient(stack, cluster.getUserName(), newPassword);
+                ambariClient.ambariServerVersion();
+            }
+        }
     }
 
     public void changeOriginalAmbariCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakSecuritySetupException {

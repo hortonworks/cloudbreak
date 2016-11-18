@@ -35,7 +35,16 @@ public class ClusterCredentialChangeHandler implements ClusterEventHandler<Clust
         ClusterCredentialChangeResult result;
         try {
             Stack stack = stackService.getById(request.getStackId());
-            ambariClusterConnector.credentialChangeAmbariCluster(stack.getId(), request.getUser(), request.getPassword());
+            switch (request.getType()) {
+                case REPLACE:
+                    ambariClusterConnector.credentialReplaceAmbariCluster(stack.getId(), request.getUser(), request.getPassword());
+                    break;
+                case UPDATE:
+                    ambariClusterConnector.credentialUpdateAmbariCluster(stack.getId(), request.getPassword());
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Ambari credential update request not supported: " + request.getType());
+            }
             result = new ClusterCredentialChangeResult(request);
         } catch (Exception e) {
             result = new ClusterCredentialChangeResult(e.getMessage(), e, request);
