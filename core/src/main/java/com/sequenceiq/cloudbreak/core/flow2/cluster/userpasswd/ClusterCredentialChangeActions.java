@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -15,6 +17,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -27,6 +31,9 @@ public class ClusterCredentialChangeActions {
 
     @Inject
     private ClusterCredentialChangeService clusterCredentialChangeService;
+
+    @Inject
+    private FlowMessageService flowMessageService;
 
     @Bean(name = "CLUSTER_CREDENTIALCHANGE_STATE")
     public Action changingClusterCredential() {
@@ -62,6 +69,7 @@ public class ClusterCredentialChangeActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.error("Exception during cluster authentication change!: {}", payload.getException().getMessage());
+                flowMessageService.fireEventAndLog(payload.getStackId(), Msg.AMBARI_CLUSTER_CHANGE_CREDENTIAL_FAILED, UPDATE_FAILED.name());
                 sendEvent(context);
             }
 
