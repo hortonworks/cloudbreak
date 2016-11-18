@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
@@ -65,11 +65,11 @@ public class StackTerminationService {
     public void handleStackTerminationError(Stack stack, StackFailureEvent payload, boolean forced) {
         String stackUpdateMessage;
         Msg eventMessage;
-        Status status;
+        DetailedStackStatus status;
         if (!forced) {
             Exception errorDetails = payload.getException();
             stackUpdateMessage = "Termination failed: " + errorDetails.getMessage();
-            status = Status.DELETE_FAILED;
+            status = DetailedStackStatus.DELETE_FAILED;
             eventMessage = Msg.STACK_INFRASTRUCTURE_DELETE_FAILED;
             stackUpdater.updateStackStatus(stack.getId(), status, stackUpdateMessage);
             LOGGER.error("Error during stack termination flow: ", errorDetails);
@@ -77,7 +77,7 @@ public class StackTerminationService {
             terminationService.finalizeTermination(stack.getId(), true);
             clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
             stackUpdateMessage = "Stack was force terminated.";
-            status = DELETE_COMPLETED;
+            status = DetailedStackStatus.DELETE_COMPLETED;
             eventMessage = Msg.STACK_FORCED_DELETE_COMPLETED;
         }
         flowMessageService.fireEventAndLog(stack.getId(), eventMessage, status.name(), stackUpdateMessage);

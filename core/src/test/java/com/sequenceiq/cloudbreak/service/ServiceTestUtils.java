@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.Template;
 
 public final class ServiceTestUtils {
@@ -94,7 +96,7 @@ public final class ServiceTestUtils {
         stack.setRegion("EU_WEST_1");
         stack.setOwner(owner);
         stack.setAccount(account);
-        stack.setStatus(Status.REQUESTED);
+        stack.setStackStatus(new StackStatus(stack, Status.REQUESTED, "", DetailedStackStatus.PROVISION_REQUESTED));
         stack.setInstanceGroups(instanceGroups);
         stack.setCluster(cluster);
         stack.setPublicInAccount(true);

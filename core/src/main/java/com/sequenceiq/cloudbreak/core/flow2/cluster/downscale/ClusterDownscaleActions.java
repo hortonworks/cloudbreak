@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
@@ -138,7 +139,7 @@ public class ClusterDownscaleActions {
                 String message = payload.getErrorDetails().getMessage();
                 LOGGER.error("Error during Cluster downscale flow: " + message, payload.getErrorDetails());
                 clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED, message);
-                stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Node(s) could not be removed from the cluster: " + message);
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Node(s) could not be removed from the cluster: " + message);
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", message);
                 sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.stringRepresentation(), payload);
             }

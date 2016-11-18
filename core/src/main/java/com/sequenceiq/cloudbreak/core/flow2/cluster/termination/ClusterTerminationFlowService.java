@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
 
@@ -10,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
@@ -54,7 +54,7 @@ public class ClusterTerminationFlowService {
         flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_COMPLETED, DELETE_COMPLETED.name(), cluster.getId());
         clusterService.updateClusterStatusByStackId(cluster.getStack().getId(), DELETE_COMPLETED);
         InMemoryStateStore.deleteCluster(cluster.getId());
-        stackUpdater.updateStackStatus(cluster.getStack().getId(), AVAILABLE);
+        stackUpdater.updateStackStatus(cluster.getStack().getId(), DetailedStackStatus.AVAILABLE);
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendTerminationSuccessEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
             flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_COMPLETED.name());

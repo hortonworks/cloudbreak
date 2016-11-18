@@ -21,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -196,21 +196,21 @@ public class StackSyncService {
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STOPPED_ON_PROVIDER.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
-            updateStackStatusIfEnabled(stack.getId(), AVAILABLE, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
+            updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.STOPPED).equals(instances.size())) {
-            updateStackStatusIfEnabled(stack.getId(), STOPPED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
+            updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.STOPPED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
         } else {
-            updateStackStatusIfEnabled(stack.getId(), DELETE_FAILED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
+            updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.DELETE_FAILED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), DELETE_FAILED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
         }
     }
 
-    private void updateStackStatusIfEnabled(Long stackId, Status status, String statusReason, boolean stackStatusUpdateEnabled) {
+    private void updateStackStatusIfEnabled(Long stackId, DetailedStackStatus status, String statusReason, boolean stackStatusUpdateEnabled) {
         if (stackStatusUpdateEnabled) {
             stackUpdater.updateStackStatus(stackId, status, statusReason);
         }

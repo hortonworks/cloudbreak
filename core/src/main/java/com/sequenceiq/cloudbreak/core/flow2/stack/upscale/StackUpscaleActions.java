@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
@@ -26,8 +25,6 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
-import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -37,7 +34,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesReq
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 
 @Configuration
@@ -57,13 +53,7 @@ public class StackUpscaleActions {
     private StackUpscaleService stackUpscaleService;
 
     @Inject
-    private ClusterService clusterService;
-
-    @Inject
     private StackToCloudStackConverter cloudStackConverter;
-
-    @Inject
-    private FlowMessageService flowMessageService;
 
     @Bean(name = "ADD_INSTANCES_STATE")
     public Action addInstances() {
@@ -114,7 +104,7 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<StackEvent>(StackEvent.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterService.updateClusterStatusByStackId(context.getStack().getId(), Status.UPDATE_IN_PROGRESS);
+                stackUpscaleService.extendingMetadata(context.getStack());
                 sendEvent(context);
             }
 
@@ -144,7 +134,7 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<BootstrapNewNodesEvent>(BootstrapNewNodesEvent.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesEvent payload, Map<Object, Object> variables) throws Exception {
-                flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_BOOTSTRAP_NEW_NODES, Status.UPDATE_IN_PROGRESS.name());
+                stackUpscaleService.bootstrappingNewNodes(context.getStack());
                 BootstrapNewNodesRequest request = new BootstrapNewNodesRequest(context.getStack().getId(), payload.getUpscaleCandidateAddresses());
                 sendEvent(context.getFlowId(), request);
             }
@@ -156,6 +146,7 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<BootstrapNewNodesResult>(BootstrapNewNodesResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesResult payload, Map<Object, Object> variables) throws Exception {
+                stackUpscaleService.extendingHostMetadata(context.getStack());
                 ExtendHostMetadataRequest request = new ExtendHostMetadataRequest(context.getStack().getId(),
                         payload.getRequest().getUpscaleCandidateAddresses());
                 sendEvent(context.getFlowId(), request);

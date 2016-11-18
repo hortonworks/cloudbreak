@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -123,10 +124,18 @@ public class StackCreationService {
     @Inject
     private UsageService usageService;
 
+    public void setupProvision(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
+    }
+
+    public void prepareImage(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.IMAGE_SETUP, "Image setup");
+    }
+
     public void startProvisioning(StackContext context) {
         Stack stack = context.getStack();
         MDCBuilder.buildMdcContext(stack);
-        stackUpdater.updateStackStatus(stack.getId(), CREATE_IN_PROGRESS, "Creating infrastructure");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATING_INFRASTRUCTURE, "Creating infrastructure");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name());
         instanceMetadataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
     }
@@ -136,6 +145,7 @@ public class StackCreationService {
         Stack stack = context.getStack();
         validateResourceResults(context.getCloudContext(), result);
         List<CloudResourceStatus> results = result.getResults();
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.METADATA_COLLECTION, "Metadata collection");
         updateNodeCount(stack.getId(), context.getCloudStack().getGroups(), results, true);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
         return stackService.getById(stack.getId());
@@ -174,6 +184,7 @@ public class StackCreationService {
     public Stack setupMetadata(StackContext context, CollectMetadataResult collectMetadataResult) {
         Stack stack = context.getStack();
         metadatSetupService.saveInstanceMetaData(stack, collectMetadataResult.getResults(), InstanceStatus.CREATED);
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.TLS_SETUP, "TLS setup");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, UPDATE_IN_PROGRESS.name());
         LOGGER.debug("Metadata setup DONE.");
         return stackService.getById(stack.getId());
@@ -204,7 +215,7 @@ public class StackCreationService {
     public void stackCreationFinished(Stack stack) {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED_BILLING, BillingStatus.BILLING_STARTED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_PROVISIONED, AVAILABLE.name());
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED, "Stack provisioned.");
         usageService.openUsagesForStack(stack);
     }
 
@@ -218,7 +229,7 @@ public class StackCreationService {
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, UPDATE_IN_PROGRESS.name(), errorReason);
             if (!stack.isStackInDeletionPhase()) {
                 handleFailure(stack, errorReason);
-                stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, errorReason);
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, CREATE_FAILED.name(), errorReason);
             }
         }
@@ -248,14 +259,14 @@ public class StackCreationService {
             if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
                 LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
             } else {
-                stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ROLLING_BACK);
                 connector.rollback(stack, stack.getResources());
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name(), errorReason);
                 usageService.closeUsagesForStack(stack);
             }
         } catch (Exception ex) {
             LOGGER.error("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
-            stackUpdater.updateStackStatus(stack.getId(), CREATE_FAILED, String.format("Rollback failed: %s", ex.getMessage()));
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, String.format("Rollback failed: %s", ex.getMessage()));
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_ROLLBACK_FAILED, CREATE_FAILED.name(), ex.getMessage());
         }
     }

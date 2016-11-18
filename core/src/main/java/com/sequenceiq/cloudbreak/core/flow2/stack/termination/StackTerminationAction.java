@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -59,7 +60,7 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Stack
             TerminateStackResult terminateStackResult = new TerminateStackResult(statusReason, new IllegalArgumentException(statusReason), terminateRequest);
             sendEvent(context.getFlowId(), StackTerminationEvent.TERMINATION_FAILED_EVENT.stringRepresentation(), terminateStackResult);
         } else {
-            stackUpdater.updateStackStatus(stack.getId(), DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
             cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(),
                     messagesService.getMessage(Msg.STACK_DELETE_IN_PROGRESS.code()));
             LOGGER.debug("Assembling terminate stack event for stack: {}", stack);

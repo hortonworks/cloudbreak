@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
@@ -44,7 +45,7 @@ public class InstanceTerminationService {
 
     public void instanceTermination(InstanceTerminationContext context) {
         Stack stack = context.getStack();
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, "Removing instance");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REMOVE_INSTANCE, "Removing instance");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE, UPDATE_IN_PROGRESS.name());
         List<InstanceMetaData> instanceMetaDataList = context.getInstanceMetaDataList();
         for (InstanceMetaData instanceMetaData : instanceMetaDataList) {
@@ -81,14 +82,14 @@ public class InstanceTerminationService {
             }
         }
         LOGGER.info("Terminate instance result: {}", payload);
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Instance removed");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Instance removed");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE_FINISHED, AVAILABLE.name());
     }
 
     public void handleInstanceTerminationError(Stack stack, StackFailureEvent payload) {
         Exception ex = payload.getException();
         LOGGER.error("Error during instance terminating flow:", ex);
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Instance termination failed. " + ex.getMessage());
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Instance termination failed. " + ex.getMessage());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE_FAILED, AVAILABLE.name(), ex.getMessage());
     }
 }

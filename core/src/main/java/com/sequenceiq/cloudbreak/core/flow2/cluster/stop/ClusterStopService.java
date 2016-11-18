@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -32,9 +33,9 @@ public class ClusterStopService {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.STOP_IN_PROGRESS);
     }
 
-    public void clusterStopFinished(Stack stack, Status statusBeforeAmbariStop) {
+    public void clusterStopFinished(Stack stack, DetailedStackStatus statusBeforeAmbariStop) {
         if (!statusBeforeAmbariStop.equals(stack.getStatus())) {
-            stackUpdater.updateStackStatus(stack.getId(), stack.isStopRequested() ? Status.STOP_REQUESTED : statusBeforeAmbariStop);
+            stackUpdater.updateStackStatus(stack.getId(), stack.isStopRequested() ? DetailedStackStatus.STOP_REQUESTED : statusBeforeAmbariStop);
         }
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.STOPPED);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOPPED, Status.STOPPED.name());
@@ -43,7 +44,7 @@ public class ClusterStopService {
     public void handleClusterStopFailure(Stack stack, String errorReason) {
         Cluster cluster = stack.getCluster();
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.STOP_FAILED);
-        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "The Ambari cluster could not be stopped: " + errorReason);
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "The Ambari cluster could not be stopped: " + errorReason);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOP_FAILED, Status.AVAILABLE.name(), errorReason);
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),

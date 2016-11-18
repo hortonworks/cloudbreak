@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
@@ -82,7 +83,8 @@ public class ClusterUpscaleFlowService {
     public void clusterUpscaleFailed(Stack stack, Exception errorDetails) {
         LOGGER.error("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED, errorDetails.getMessage());
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, String.format("New node(s) could not be added to the cluster: %s", errorDetails));
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED,
+                String.format("New node(s) could not be added to the cluster: %s", errorDetails));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
     }
 

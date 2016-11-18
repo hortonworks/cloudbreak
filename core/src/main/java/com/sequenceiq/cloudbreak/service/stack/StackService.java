@@ -2,10 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.isGateway;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 
 import java.util.Date;
 import java.util.List;
@@ -26,6 +24,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
@@ -55,6 +54,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -314,7 +314,7 @@ public class StackService {
                 imageService.create(savedStack, connector.getPlatformParameters(stack), ambariVersion, hdpVersion, imageCatalog);
                 flowManager.triggerProvisioning(savedStack.getId());
             } else {
-                savedStack.setStatus(Status.AVAILABLE);
+                savedStack.setStackStatus(new StackStatus(savedStack, Status.AVAILABLE, "", DetailedStackStatus.PROVISIONED));
                 savedStack.setCreated(new Date().getTime());
                 stackRepository.save(savedStack);
             }
@@ -414,7 +414,7 @@ public class StackService {
 
     private void stop(Stack stack, Cluster cluster, StatusRequest statusRequest) {
         if (cluster != null && cluster.isStopInProgress()) {
-            stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
             String message = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_REQUESTED.code());
             eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), message);
         } else {
@@ -433,7 +433,7 @@ public class StackService {
                 throw new BadRequestException(
                         String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stack.getId()));
             } else {
-                stackUpdater.updateStackStatus(stack.getId(), STOP_REQUESTED);
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
                 flowManager.triggerStackStop(stack.getId());
             }
         }
@@ -448,7 +448,7 @@ public class StackService {
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getId()));
         } else if (stack.isStopped() || stack.isStartFailed()) {
-            stackUpdater.updateStackStatus(stack.getId(), START_REQUESTED);
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
         }
     }
@@ -462,9 +462,10 @@ public class StackService {
             validateHostGroupAdjustment(instanceGroupAdjustmentJson, stack, instanceGroupAdjustmentJson.getScalingAdjustment());
         }
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
-            stackUpdater.updateStackStatus(stackId, UPDATE_REQUESTED);
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_REQUESTED);
             flowManager.triggerStackUpscale(stack.getId(), instanceGroupAdjustmentJson);
         } else {
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_REQUESTED);
             flowManager.triggerStackDownscale(stack.getId(), instanceGroupAdjustmentJson);
         }
     }
