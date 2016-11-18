@@ -70,6 +70,7 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                stackCreationService.setupProvision(context.getStack());
                 sendEvent(context);
             }
 
@@ -85,6 +86,7 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<SetupResult>(SetupResult.class) {
             @Override
             protected void doExecute(StackContext context, SetupResult payload, Map<Object, Object> variables) throws Exception {
+                stackCreationService.prepareImage(context.getStack());
                 sendEvent(context);
             }
 

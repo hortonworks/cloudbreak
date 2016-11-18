@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -75,7 +74,7 @@ public class TerminationService {
             terminateInstanceGroups(stack);
             terminateMetaDataInstances(stack);
             stackRepository.save(stack);
-            stackUpdater.updateStackStatus(stackId, DELETE_COMPLETED, "Stack was terminated successfully.");
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
         } catch (Exception ex) {
             LOGGER.error("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             throw new TerminationFailedException(ex);

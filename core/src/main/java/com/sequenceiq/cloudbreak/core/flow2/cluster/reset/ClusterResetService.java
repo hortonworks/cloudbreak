@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
@@ -41,7 +42,7 @@ public class ClusterResetService {
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         MDCBuilder.buildMdcContext(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.CREATE_FAILED, errorReason);
-        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE);
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, Status.CREATE_FAILED.name(), errorReason);
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stack.getCluster().getEmailTo(), cluster.getName());

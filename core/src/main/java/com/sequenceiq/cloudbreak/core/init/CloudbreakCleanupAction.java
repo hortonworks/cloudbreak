@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
@@ -37,6 +39,9 @@ public class CloudbreakCleanupAction {
 
     @Inject
     private StackRepository stackRepository;
+
+    @Inject
+    private StackUpdater stackUpdater;
 
     @Inject
     private ClusterRepository clusterRepository;
@@ -73,8 +78,7 @@ public class CloudbreakCleanupAction {
         for (Stack stack : stacksInProgress) {
             if (!WAIT_FOR_SYNC.equals(stack.getStatus())) {
                 loggingStatusChange("Stack", stack.getId(), stack.getStatus(), WAIT_FOR_SYNC);
-                stack.setStatus(WAIT_FOR_SYNC);
-                stackRepository.save(stack);
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.WAIT_FOR_SYNC, stack.getStatusReason());
             }
             cleanInstanceMetaData(instanceMetaDataRepository.findAllInStack(stack.getId()));
         }
@@ -113,8 +117,7 @@ public class CloudbreakCleanupAction {
         List<Stack> stacksDeleteInProgress = stackRepository.findByStatuses(Collections.singletonList(Status.DELETE_IN_PROGRESS));
         for (Stack stack : stacksDeleteInProgress) {
             loggingStatusChange("Stack", stack.getId(), stack.getStatus(), Status.DELETE_FAILED);
-            stack.setStatus(Status.DELETE_FAILED);
-            stackRepository.save(stack);
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_FAILED, stack.getStatusReason());
         }
     }
 

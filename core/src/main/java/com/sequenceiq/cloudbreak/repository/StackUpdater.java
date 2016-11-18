@@ -8,17 +8,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackStatus;
 
 @Component
 public class StackUpdater {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUpdater.class);
+
+    @Inject
+    private StackStatusRepository stackStatusRepository;
 
     @Inject
     private StackRepository stackRepository;
@@ -32,12 +37,12 @@ public class StackUpdater {
     @Inject
     private SecurityConfigRepository securityConfigRepository;
 
-    public Stack updateStackStatus(Long stackId, Status status) {
-        return doUpdateStackStatus(stackId, status, "");
+    public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus) {
+        return doUpdateStackStatus(stackId, detailedStatus, "");
     }
 
-    public Stack updateStackStatus(Long stackId, Status status, String statusReason) {
-        return doUpdateStackStatus(stackId, status, statusReason);
+    public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
+        return doUpdateStackStatus(stackId, detailedStatus, statusReason);
     }
 
     public Stack addStackResources(Long stackId, List<Resource> resources) {
@@ -60,15 +65,11 @@ public class StackUpdater {
         return stackRepository.save(stack);
     }
 
-    private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
+    private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
+        Status status = detailedStatus.getStatus();
         if (!stack.isDeleteCompleted()) {
-            if (status != null) {
-                stack.setStatus(status);
-            }
-            if (statusReason != null) {
-                stack.setStatusReason(statusReason);
-            }
+            stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
             InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(status));
             if (Status.DELETE_COMPLETED.equals(status)) {
                 InMemoryStateStore.deleteStack(stackId);
@@ -77,5 +78,4 @@ public class StackUpdater {
         }
         return stack;
     }
-
 }

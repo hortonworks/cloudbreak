@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
@@ -56,6 +57,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -146,14 +148,13 @@ public class TestUtil {
 
     public static Stack stack(Status stackStatus, Credential credential) {
         Stack stack = new Stack();
-        stack.setStatus(stackStatus);
+        stack.setStackStatus(new StackStatus(stack, stackStatus, "statusReason", DetailedStackStatus.UNKNOWN));
         stack.setCredential(credential);
         stack.setName("simplestack");
         stack.setOwner("userid");
         stack.setAccount("account");
         stack.setId(1L);
         stack.setInstanceGroups(generateGcpInstanceGroups(3));
-        stack.setStatusReason("statusReason");
         stack.setRegion("region");
         stack.setCreated(123L);
         stack.setCloudPlatform(credential.cloudPlatform());

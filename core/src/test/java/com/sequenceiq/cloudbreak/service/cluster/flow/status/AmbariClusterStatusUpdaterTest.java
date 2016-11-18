@@ -11,11 +11,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
@@ -97,7 +99,7 @@ public class AmbariClusterStatusUpdaterTest {
     private Stack createStack(Status stackStatus) {
         Stack stack = new Stack();
         stack.setId(TEST_STACK_ID);
-        stack.setStatus(stackStatus);
+        stack.setStackStatus(new StackStatus(stack, stackStatus, "", DetailedStackStatus.UNKNOWN));
         return stack;
     }
 

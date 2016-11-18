@@ -28,6 +28,7 @@ public class StatusToPollGroupConverter extends AbstractConversionServiceAwareCo
             case START_FAILED:
             case STOP_FAILED:
             case DELETE_FAILED:
+            case WAIT_FOR_SYNC:
                 return PollGroup.POLLABLE;
             case DELETE_IN_PROGRESS:
             case DELETE_COMPLETED:

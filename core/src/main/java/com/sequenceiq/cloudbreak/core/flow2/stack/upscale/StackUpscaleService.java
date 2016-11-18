@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
@@ -104,7 +105,7 @@ public class StackUpscaleService {
 
     public void startAddInstances(Stack stack, Integer scalingAdjustment) {
         String statusReason = format("Adding %s new instance(s) to the infrastructure.", scalingAdjustment);
-        stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS, statusReason);
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ADDING_NEW_INSTANCES, statusReason);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_ADDING_INSTANCES, UPDATE_IN_PROGRESS.name(), scalingAdjustment);
     }
 
@@ -119,6 +120,11 @@ public class StackUpscaleService {
         }
         LOGGER.debug("Adding new instances to the stack is DONE");
         return resourceSet;
+    }
+
+    public void extendingMetadata(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.EXTENDING_METADATA);
+        clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_IN_PROGRESS);
     }
 
     public Set<String> finishExtendMetadata(Stack stack, String instanceGroupName, CollectMetadataResult payload) {
@@ -141,8 +147,17 @@ public class StackUpscaleService {
         return upscaleCandidateAddresses;
     }
 
+    public void bootstrappingNewNodes(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_NEW_NODES);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BOOTSTRAP_NEW_NODES, Status.UPDATE_IN_PROGRESS.name());
+    }
+
+    public void extendingHostMetadata(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.EXTENDING_HOST_METADATA);
+    }
+
     public void finishExtendHostMetadata(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack upscale has been finished successfully.");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
     }
 
@@ -150,12 +165,11 @@ public class StackUpscaleService {
         LOGGER.error("Exception during the downscaling of stack", payload.getException());
         try {
             String errorReason = payload.getException().getMessage();
-            stackUpdater.updateStackStatus(stack.getId(), AVAILABLE, "Stack update failed. " + errorReason);
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, AVAILABLE.name(), errorReason);
         } catch (Exception e) {
             LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
         }
-
     }
 
     private Set<Resource> transformResults(List<CloudResourceStatus> cloudResourceStatuses, Stack stack) {

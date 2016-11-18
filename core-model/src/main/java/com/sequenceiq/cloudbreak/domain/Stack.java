@@ -95,7 +95,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
                         + "LEFT JOIN FETCH c.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.credential.id= :credentialId "
-                        + "AND c.status= 'REQUESTED'"),
+                        + "AND c.stackStatus.status= 'REQUESTED'"),
         @NamedQuery(
                 name = "Stack.findOneWithLists",
                 query = "SELECT c FROM Stack c "
@@ -114,7 +114,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
                         + "LEFT JOIN FETCH s.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE s.owner= :user "
-                        + "AND s.status <> 'DELETE_COMPLETED' "),
+                        + "AND s.stackStatus.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
                 name = "Stack.findPublicInAccountForUser",
                 query = "SELECT s FROM Stack s "
@@ -124,7 +124,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
                         + "LEFT JOIN FETCH s.cluster c "
                         + "LEFT JOIN FETCH c.hostGroups "
                         + "WHERE ((s.account= :account AND s.publicInAccount= true) OR s.owner= :user) "
-                        + "AND s.status <> 'DELETE_COMPLETED' "),
+                        + "AND s.stackStatus.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
                 name = "Stack.findAllInAccount",
                 query = "SELECT s FROM Stack s "
@@ -134,7 +134,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
                         + "LEFT JOIN FETCH s.cluster c "
                         + "LEFT JOIN FETCH c.hostGroups "
                         + "WHERE s.account= :account "
-                        + "AND s.status <> 'DELETE_COMPLETED' "),
+                        + "AND s.stackStatus.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
                 name = "Stack.findByAmbari",
                 query = "SELECT s from Stack s "
@@ -142,7 +142,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
                         + "LEFT JOIN FETCH s.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE s.cluster.ambariIp= :ambariIp "
-                        + "AND s.status <> 'DELETE_COMPLETED' "),
+                        + "AND s.stackStatus.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
                 name = "Stack.findOneByName",
                 query = "SELECT c FROM Stack c "
@@ -188,11 +188,11 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
         @NamedQuery(
                 name = "Stack.findAllAlive",
                 query = "SELECT s FROM Stack s "
-                        + "WHERE s.status <> 'DELETE_COMPLETED' "),
+                        + "WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
                 name = "Stack.findByStatuses",
                 query = "SELECT s FROM Stack s "
-                        + "WHERE s.status IN :statuses"
+                        + "WHERE s.stackStatus.status IN :statuses"
         ),
         @NamedQuery(
                 name = "Stack.findStacksWithoutEvents",
@@ -231,12 +231,6 @@ public class Stack implements ProvisionEntity {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "TEXT")
-    private String statusReason;
-
-    @Enumerated(EnumType.STRING)
-    private Status status;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")
     @Column(name = "value", columnDefinition = "TEXT", length = 100000, nullable = false)
@@ -253,6 +247,9 @@ public class Stack implements ProvisionEntity {
 
     @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Cluster cluster;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private StackStatus stackStatus;
 
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Resource> resources = new HashSet<>();
@@ -358,20 +355,20 @@ public class Stack implements ProvisionEntity {
         this.credential = credential;
     }
 
-    public Status getStatus() {
-        return status;
+    public StackStatus getStackStatus() {
+        return stackStatus;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setStackStatus(StackStatus stackStatus) {
+        this.stackStatus = stackStatus;
+    }
+
+    public Status getStatus() {
+        return stackStatus != null ? stackStatus.getStatus() : null;
     }
 
     public String getStatusReason() {
-        return statusReason;
-    }
-
-    public void setStatusReason(String statusReason) {
-        this.statusReason = statusReason;
+        return stackStatus != null ? stackStatus.getStatusReason() : null;
     }
 
     public Long getVersion() {
@@ -564,19 +561,19 @@ public class Stack implements ProvisionEntity {
     }
 
     public boolean isStackInDeletionPhase() {
-        return status.equals(DELETE_COMPLETED) || status.equals(DELETE_IN_PROGRESS);
+        return DELETE_COMPLETED.equals(getStatus()) || DELETE_IN_PROGRESS.equals(getStatus());
     }
 
     public boolean isStopFailed() {
-        return STOP_FAILED.equals(status);
+        return STOP_FAILED.equals(getStatus());
     }
 
     public boolean isStackInStopPhase() {
-        return STOP_IN_PROGRESS.equals(status) || STOPPED.equals(status);
+        return STOP_IN_PROGRESS.equals(getStatus()) || STOPPED.equals(getStatus());
     }
 
     public boolean isStartFailed() {
-        return START_FAILED.equals(status);
+        return START_FAILED.equals(getStatus());
     }
 
     public Map<String, String> getParameters() {
@@ -613,38 +610,39 @@ public class Stack implements ProvisionEntity {
     }
 
     public boolean isAvailable() {
-        return AVAILABLE.equals(status);
+        return AVAILABLE.equals(getStatus());
     }
 
     public boolean isStopRequested() {
-        return STOP_REQUESTED.equals(status);
+        return STOP_REQUESTED.equals(getStatus());
     }
 
     public boolean isStopped() {
-        return STOPPED.equals(status);
+        return STOPPED.equals(getStatus());
     }
 
     public boolean isDeleteCompleted() {
-        return DELETE_COMPLETED.equals(status);
+        return DELETE_COMPLETED.equals(getStatus());
     }
 
     public boolean isDeleteInProgress() {
-        return DELETE_IN_PROGRESS.equals(status);
+        return DELETE_IN_PROGRESS.equals(getStatus());
     }
 
     public boolean isStartInProgress() {
-        return START_IN_PROGRESS.equals(status) || START_REQUESTED.equals(status);
+        return START_IN_PROGRESS.equals(getStatus()) || START_REQUESTED.equals(getStatus());
     }
 
     public boolean isRequested() {
-        return REQUESTED.equals(status) || CREATE_IN_PROGRESS.equals(status);
+        return REQUESTED.equals(getStatus()) || CREATE_IN_PROGRESS.equals(getStatus());
     }
 
     public boolean isStackReadyForStop() {
-        return AVAILABLE.equals(status) || STOP_REQUESTED.equals(status);
+        return AVAILABLE.equals(getStatus()) || STOP_REQUESTED.equals(getStatus());
     }
 
     public boolean isModificationInProgress() {
+        Status status = getStatus();
         return CREATE_IN_PROGRESS.equals(status)
                 || UPDATE_IN_PROGRESS.equals(status)
                 || STOP_IN_PROGRESS.equals(status)
@@ -690,5 +688,4 @@ public class Stack implements ProvisionEntity {
     public boolean isInstanceGroupsSpecified() {
         return instanceGroups != null && !instanceGroups.isEmpty();
     }
-
 }

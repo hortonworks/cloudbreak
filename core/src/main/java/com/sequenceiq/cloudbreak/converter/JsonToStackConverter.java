@@ -19,10 +19,10 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 @Component
@@ -52,7 +53,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setRegion(getRegion(source));
         stack.setAvailabilityZone(source.getAvailabilityZone());
         stack.setOnFailureActionAction(source.getOnFailureAction());
-        stack.setStatus(Status.REQUESTED);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED.getStatus(), "", DetailedStackStatus.PROVISION_REQUESTED));
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         stack.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicy.class));
         stack.setParameters(getValidParameters(source));
