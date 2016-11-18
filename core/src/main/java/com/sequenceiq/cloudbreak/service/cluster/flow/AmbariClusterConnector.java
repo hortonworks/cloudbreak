@@ -368,12 +368,18 @@ public class AmbariClusterConnector {
         return ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
     }
 
+    private AmbariClient getPrivateSecureAmbariClient(Stack stack, String user, String password) throws CloudbreakSecuritySetupException {
+        Cluster cluster = stack.getCluster();
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        return ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster, user, password);
+    }
+
     public Cluster credentialChangeAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         String oldUserName = cluster.getUserName();
         String oldPassword = cluster.getPassword();
-        AmbariClient ambariClient = getSecureAmbariClient(stack);
+        AmbariClient ambariClient = getPrivateSecureAmbariClient(stack, oldUserName, oldPassword);
         if (newUserName.equals(oldUserName)) {
             if (!newPassword.equals(oldPassword)) {
                 ambariClient.changePassword(oldUserName, oldPassword, newPassword, true);
