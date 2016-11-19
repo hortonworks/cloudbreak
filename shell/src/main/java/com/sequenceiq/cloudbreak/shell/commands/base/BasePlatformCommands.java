@@ -37,7 +37,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
         return !shellContext.isMarathonMode();
     }
 
-    @CliCommand(value = "platform list", help = "Shows the currently available platform")
+    @CliCommand(value = "platform list", help = "Shows the currently available platforms")
     public String list() {
         try {
             Set<TopologyResponse> publics = shellContext.cloudbreakClient().topologyEndpoint().getPublics();

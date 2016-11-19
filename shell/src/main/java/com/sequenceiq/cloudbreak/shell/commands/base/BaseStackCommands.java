@@ -56,7 +56,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         return !shellContext.isMarathonMode();
     }
 
-    @CliCommand(value = "stack list", help = "Shows all of your stack")
+    @CliCommand(value = "stack list", help = "Shows all of your stacks")
     public String list() {
         try {
             Set<StackResponse> publics = shellContext.cloudbreakClient().stackEndpoint().getPublics();
@@ -216,13 +216,13 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         }
     }
 
-    @CliCommand(value = "stack select --id", help = "Delete the stack by its id")
+    @CliCommand(value = "stack select --id", help = "Select the stack by its id")
     @Override
     public String selectById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
         return select(id, null);
     }
 
-    @CliCommand(value = "stack select --name", help = "Delete the stack by its name")
+    @CliCommand(value = "stack select --name", help = "Select the stack by its name")
     @Override
     public String selectByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return select(null, name);
@@ -420,7 +420,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliCommand(value = "stack node --REMOVE", help = "Remove nodes from the cluster")
     public String removeNode(
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
-            @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be removed to the stack") Integer adjustment) {
+            @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be removed from the stack") Integer adjustment) {
         try {
             if (adjustment > -1) {
                 return "The adjustment value in case of node removal should be negative.";

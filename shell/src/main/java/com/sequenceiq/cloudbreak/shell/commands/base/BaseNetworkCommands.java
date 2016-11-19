@@ -69,13 +69,13 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
         return !shellContext.getNetworksByProvider().isEmpty() && !shellContext.isMarathonMode();
     }
 
-    @CliCommand(value = "network select --id", help = "Delete the network by its id")
+    @CliCommand(value = "network select --id", help = "Select the network by its id")
     @Override
     public String selectById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
         return select(id, null);
     }
 
-    @CliCommand(value = "network select --name", help = "Delete the network by its name")
+    @CliCommand(value = "network select --name", help = "Select the network by its name")
     @Override
     public String selectByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return select(null, name);

@@ -143,7 +143,7 @@ public class AwsCommands implements CommandMarker {
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --AWS --EXISTING_SUBNET", help = "Create an AWS network which use an existing subnet in an existing network")
+    @CliCommand(value = "network create --AWS --EXISTING_SUBNET", help = "Create an AWS network which uses an existing subnet in an existing network")
     public String createNetworkWithExistingSubnet(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "vpcID", mandatory = true, help = "The ID of the virtual private cloud (VPC)") String vpcId,

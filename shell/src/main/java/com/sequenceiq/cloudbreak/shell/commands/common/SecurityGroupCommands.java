@@ -136,13 +136,13 @@ public class SecurityGroupCommands implements BaseCommands {
         throw new UnsupportedOperationException("Select is not supported on securitygroups");
     }
 
-    @CliCommand(value = "securitygroup select --id", help = "Delete the securitygroup by its id")
+    @CliCommand(value = "securitygroup select --id", help = "Select the securitygroup by its id")
     @Override
     public String selectById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
         return select(id, null);
     }
 
-    @CliCommand(value = "securitygroup select --name", help = "Delete the securitygroup by its name")
+    @CliCommand(value = "securitygroup select --name", help = "Select the securitygroup by its name")
     @Override
     public String selectByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return select(null, name);

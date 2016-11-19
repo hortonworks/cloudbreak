@@ -114,7 +114,7 @@ public class InstanceGroupCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "instancegroup show", help = "Configure instance groups")
+    @CliCommand(value = "instancegroup show", help = "Show the currently available instance groups")
     public String show() throws Exception {
         if (shellContext.getInstanceGroups().isEmpty()) {
             return "List of instance groups is empty currently.";

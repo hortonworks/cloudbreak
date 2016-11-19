@@ -66,7 +66,7 @@ public class MarathonCommands implements CommandMarker {
         shellContext.setHint(Hints.MARATHON_STACK);
     }
 
-    @CliCommand(value = "mode --DEFAULT", help = "Change to Marathon mode")
+    @CliCommand(value = "mode --DEFAULT", help = "Change to the default, non-marathon mode")
     public void rootMode() {
         shellContext.resetFocus();
         shellContext.setHint(Hints.CREATE_CREDENTIAL);

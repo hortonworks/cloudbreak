@@ -144,7 +144,7 @@ public class GcpCommands implements CommandMarker {
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --GCP --EXISTING_SUBNET", help = "Create a GCP network which use an existing subnet in an existing network")
+    @CliCommand(value = "network create --GCP --EXISTING_SUBNET", help = "Create a GCP network which uses an existing subnet in an existing network")
     public String createExistingSubnetNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "networkId", mandatory = true, help = "Id of a custom network") String networkId,

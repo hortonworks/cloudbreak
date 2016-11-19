@@ -124,13 +124,13 @@ public class BlueprintCommands implements BaseCommands {
         }
     }
 
-    @CliCommand(value = "blueprint select --id", help = "Delete the blueprint by its id")
+    @CliCommand(value = "blueprint select --id", help = "Select the blueprint by its id")
     @Override
     public String selectById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
         return select(id, null);
     }
 
-    @CliCommand(value = "blueprint select --name", help = "Delete the blueprint by its name")
+    @CliCommand(value = "blueprint select --name", help = "Select the blueprint by its name")
     @Override
     public String selectByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return select(null, name);
