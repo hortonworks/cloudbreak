@@ -77,13 +77,13 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
         return shellContext.isCredentialAccessible() && !shellContext.isMarathonMode();
     }
 
-    @CliCommand(value = "credential select --id", help = "Delete the credential by its id")
+    @CliCommand(value = "credential select --id", help = "Select the credential by its id")
     @Override
     public String selectById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
         return select(id, null);
     }
 
-    @CliCommand(value = "credential select --name", help = "Delete the credential by its name")
+    @CliCommand(value = "credential select --name", help = "Select the credential by its name")
     @Override
     public String selectByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return select(null, name);

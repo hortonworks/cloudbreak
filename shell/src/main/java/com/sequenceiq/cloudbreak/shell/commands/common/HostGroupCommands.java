@@ -55,7 +55,7 @@ public class HostGroupCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "hostgroup show", help = "Configure host groups")
+    @CliCommand(value = "hostgroup show", help = "Show the currently available host groups")
     public String showHostGroup() throws Exception {
         return shellContext.outputTransformer().render(shellContext.getHostGroups(), "hostgroup");
     }

@@ -118,7 +118,7 @@ public class AzureCommands implements CommandMarker {
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
-    @CliCommand(value = "network create --AZURE --EXISTING_SUBNET", help = "Create an Azure network which use an existing subnet in an existing network")
+    @CliCommand(value = "network create --AZURE --EXISTING_SUBNET", help = "Create an Azure network which uses an existing subnet in an existing network")
     public String createNetworkWithExistingSubnet(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "resourceGroupName", mandatory = true,

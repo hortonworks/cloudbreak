@@ -50,13 +50,13 @@ public class SssdConfigCommands implements BaseCommands {
         return shellContext.isSssdConfigAccessible();
     }
 
-    @CliCommand(value = "sssdconfig select --id", help = "Delete the config by its id")
+    @CliCommand(value = "sssdconfig select --id", help = "Select the config by its id")
     @Override
     public String selectById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
         return select(id, null);
     }
 
-    @CliCommand(value = "sssdconfig select --name", help = "Delete the config by its name")
+    @CliCommand(value = "sssdconfig select --name", help = "Select the config by its name")
     @Override
     public String selectByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return select(null, name);

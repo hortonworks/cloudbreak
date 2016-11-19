@@ -122,13 +122,13 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
         }
     }
 
-    @CliCommand(value = "template delete --id", help = "Shows the template by its id")
+    @CliCommand(value = "template delete --id", help = "Deletes the template by its id")
     @Override
     public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
         return delete(id, null);
     }
 
-    @CliCommand(value = "template delete --name", help = "Shows the template by its name")
+    @CliCommand(value = "template delete --name", help = "Deletes the template by its name")
     @Override
     public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return delete(null, name);
