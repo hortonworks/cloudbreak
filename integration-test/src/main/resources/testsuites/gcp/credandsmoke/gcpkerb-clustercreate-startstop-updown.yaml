@@ -66,19 +66,13 @@ tests:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
 
-  - name: stop cluster
-    parameters: {
-      newStatus: STOPPED
-    }
+  - name: stop cluster and stack
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterAndStackStopTest
 
-  - name: start cluster
-    parameters: {
-      newStatus: STARTED
-    }
+  - name: start stack and cluster
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.StackAndClusterStartTest
 
   - name: upscale
     parameters: {

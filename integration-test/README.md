@@ -175,17 +175,17 @@ tests:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
 
-  - name: stop cluster
+  - name: stop cluster and stack
     parameters:
-      newStatus: STOPPED
+      waitOn: true
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterAndStackStopTest
 
-  - name: start cluster
+  - name: start stack and cluster
     parameters:
-      newStatus: STARTED
+      waitOn: true
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.StackAndClusterStartTest
 
   - name: upscale
     parameters:
@@ -259,14 +259,19 @@ tests:
 **Common, not cloudprovider specific tests:**
 * BlueprintCreationTest
 * BlueprintDeleteByNameTest
+* ClusterAndStackStopTest
 * ClusterCreationTest
+* ClusterStartTest
+* ClusterStopTest
 * CountRecipeResultsTest
 * CredentialDeleteByNameTest
 * NetworkDeleteByNameTest
 * RecipeCreationTest
 * ScalingTest
+* StackAndClusterStartTest
 * StackCreationTest
-* StatusUpdateTest
+* StackStartTest
+* StackStopTest
 
 **Cloud provider specific tests:**
 * Credential creation tests
