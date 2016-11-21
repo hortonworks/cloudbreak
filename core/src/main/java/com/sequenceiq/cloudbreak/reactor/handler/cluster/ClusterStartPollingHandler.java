@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.ClusterEventHandler;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -15,7 +15,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ClusterStartHandler implements ClusterEventHandler<ClusterStartRequest> {
+public class ClusterStartPollingHandler implements ClusterEventHandler<ClusterStartPollingRequest> {
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
 
@@ -26,20 +26,20 @@ public class ClusterStartHandler implements ClusterEventHandler<ClusterStartRequ
     private EventBus eventBus;
 
     @Override
-    public Class<ClusterStartRequest> type() {
-        return ClusterStartRequest.class;
+    public Class<ClusterStartPollingRequest> type() {
+        return ClusterStartPollingRequest.class;
     }
 
     @Override
-    public void accept(Event<ClusterStartRequest> event) {
-        ClusterStartRequest request = event.getData();
-        ClusterStartResult result;
+    public void accept(Event<ClusterStartPollingRequest> event) {
+        ClusterStartPollingRequest request = event.getData();
+        ClusterStartPollingResult result;
         try {
             Stack stack = stackService.getById(request.getStackId());
-            int requestId = ambariClusterConnector.startCluster(stack);
-            result = new ClusterStartResult(request, requestId);
+            ambariClusterConnector.waitForAllServices(stack, request.getRequestId());
+            result = new ClusterStartPollingResult(request);
         } catch (Exception e) {
-            result = new ClusterStartResult(e.getMessage(), e, request);
+            result = new ClusterStartPollingResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
     }

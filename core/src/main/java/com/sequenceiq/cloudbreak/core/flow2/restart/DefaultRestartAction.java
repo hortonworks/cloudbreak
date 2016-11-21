@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2;
+package com.sequenceiq.cloudbreak.core.flow2.restart;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
 
 import reactor.bus.Event;

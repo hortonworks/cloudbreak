@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -32,6 +33,7 @@ import org.springframework.statemachine.state.State;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.DefaultFlowTriggerCondition;
+import com.sequenceiq.cloudbreak.core.flow2.restart.DefaultRestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowAdapter;
@@ -54,6 +56,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     @Inject
     private ApplicationContext applicationContext;
+
+    @Inject
+    @Qualifier("DefaultRestartAction")
+    private DefaultRestartAction defaultRestartAction;
 
     public AbstractFlowConfiguration(Class<S> stateType, Class<E> eventType) {
         this.stateType = stateType;

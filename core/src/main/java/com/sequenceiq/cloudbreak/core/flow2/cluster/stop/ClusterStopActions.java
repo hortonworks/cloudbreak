@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
@@ -23,7 +22,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
 
 @Configuration
 public class ClusterStopActions {
-    private static final String STACK_STATUS = "STACK_STATUS";
 
     @Inject
     private ClusterStopService clusterStopService;
@@ -34,7 +32,6 @@ public class ClusterStopActions {
             @Override
             protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 Stack stack = context.getStack();
-                variables.put(STACK_STATUS, stack.getStackStatus().getDetailedStackStatus());
                 clusterStopService.stoppingCluster(stack);
                 sendEvent(context);
             }
@@ -51,8 +48,7 @@ public class ClusterStopActions {
         return new AbstractClusterAction<ClusterStopResult>(ClusterStopResult.class) {
             @Override
             protected void doExecute(ClusterContext context, ClusterStopResult payload, Map<Object, Object> variables) throws Exception {
-                DetailedStackStatus statusBeforeAmbariStop = (DetailedStackStatus) variables.get(STACK_STATUS);
-                clusterStopService.clusterStopFinished(context.getStack(), statusBeforeAmbariStop);
+                clusterStopService.clusterStopFinished(context.getStack());
                 sendEvent(context);
             }
 

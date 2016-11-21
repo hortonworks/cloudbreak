@@ -24,7 +24,7 @@ public class ClusterStartFlowTriggerCondition implements FlowTriggerCondition {
         Cluster cluster = stack.getCluster();
         boolean result = cluster != null && cluster.isStartRequested();
         if (!result) {
-            LOGGER.warn("Cluster start cannot be triggered, because cluster is null or not in startRequested status");
+            LOGGER.warn("Cluster start cannot be triggered, because cluster {}", cluster == null ? "is null" : "not in startRequested status");
         }
         return result;
     }

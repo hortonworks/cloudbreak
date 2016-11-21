@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartFlowConfig
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
@@ -50,8 +51,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             STACK_FORCE_TERMINATE_TRIGGER_EVENT, STACK_TERMINATE_TRIGGER_EVENT
     ));
 
-    private static final List<Class<?>> RESTARTABLE_FLOWS = Collections.unmodifiableList(Arrays.asList(
-            StackSyncFlowConfig.class, ClusterSyncFlowConfig.class, ClusterTerminationFlowConfig.class,
+    private static final List<Class<? extends FlowConfiguration>> RESTARTABLE_FLOWS = Collections.unmodifiableList(Arrays.asList(
+            StackSyncFlowConfig.class, ClusterSyncFlowConfig.class, ClusterTerminationFlowConfig.class, ClusterCredentialChangeFlowConfig.class,
             ClusterStartFlowConfig.class, ClusterStopFlowConfig.class
     ));
 

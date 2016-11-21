@@ -33,10 +33,7 @@ public class ClusterStopService {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.STOP_IN_PROGRESS);
     }
 
-    public void clusterStopFinished(Stack stack, DetailedStackStatus statusBeforeAmbariStop) {
-        if (!statusBeforeAmbariStop.equals(stack.getStatus())) {
-            stackUpdater.updateStackStatus(stack.getId(), stack.isStopRequested() ? DetailedStackStatus.STOP_REQUESTED : statusBeforeAmbariStop);
-        }
+    public void clusterStopFinished(Stack stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.STOPPED);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOPPED, Status.STOPPED.name());
     }
