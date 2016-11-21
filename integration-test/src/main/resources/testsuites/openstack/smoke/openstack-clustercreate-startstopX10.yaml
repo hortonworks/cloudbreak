@@ -56,74 +56,66 @@ tests:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
 
-  - name: stop cluster
-    parameters:
-      newStatus: STOPPED
+  - name: stop cluster and stack
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterAndStackStopTest
 
-  - name: start cluster
-    parameters:
-      newStatus: STARTED
+  - name: start stack and cluster
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.StackAndClusterStartTest
 
-  - name: stop cluster1
-    parameters:
-      newStatus: STOPPED
+  - name: stop cluster1 and stack1
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterStopTest
+      - com.sequenceiq.it.cloudbreak.startstop.StackStopTest
 
-  - name: start cluster1
-    parameters:
-      newStatus: STARTED
+  - name: start stack1 and cluster1
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.StackStartTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterStartTest
 
   - name: stop cluster2
-    parameters:
-      newStatus: STOPPED
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterStopTest
+
+  - name: stop stack2
+    classes:
+      - com.sequenceiq.it.cloudbreak.startstop.StackStopTest
+
+  - name: start stack2
+    classes:
+      - com.sequenceiq.it.cloudbreak.startstop.StackStartTest
 
   - name: start cluster2
-    parameters:
-      newStatus: STARTED
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterStartTest
 
-  - name: stop cluster3
-    parameters:
-      newStatus: STOPPED
+  - name: stop cluster3 and stack3
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterAndStackStopTest
 
-  - name: start cluster3
-    parameters:
-      newStatus: STARTED
+  - name: start stack3 and cluster3
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.StackAndClusterStartTest
 
-  - name: stop cluster4
+  - name: stop cluster4 and stack4
     parameters:
-      newStatus: STOPPED
+      waitOn: true
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterAndStackStopTest
 
-  - name: start cluster4
+  - name: start stack4 and cluster4
     parameters:
-      newStatus: STARTED
+      waitOn: true
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.StackAndClusterStartTest
 
-  - name: stop cluster5
-    parameters:
-      newStatus: STOPPED
+  - name: stop cluster5 and stack5
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterStopTest
+      - com.sequenceiq.it.cloudbreak.startstop.StackStopTest
 
-  - name: start cluster5
-    parameters:
-      newStatus: STARTED
+  - name: start stack5 and cluster5
     classes:
-      - com.sequenceiq.it.cloudbreak.StatusUpdateTest
+      - com.sequenceiq.it.cloudbreak.startstop.StackStartTest
+      - com.sequenceiq.it.cloudbreak.startstop.ClusterStartTest
