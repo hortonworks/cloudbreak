@@ -58,7 +58,7 @@ public class ClusterStartService {
         Cluster cluster = stack.getCluster();
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_FAILED);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + errorReason);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_START_FAILED, Status.AVAILABLE.name(), errorReason);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_START_FAILED, Status.START_FAILED.name(), errorReason);
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), cluster.getEmailTo(), stack.getAmbariIp(), cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.START_FAILED.name());

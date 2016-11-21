@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -47,11 +49,21 @@ public class ClusterStartActions {
         };
     }
 
-    @Bean(name = "CLUSTER_START_FINISHED_STATE")
-    public Action clusterStartFinished() {
+    @Bean(name = "CLUSTER_START_POLLING_STATE")
+    public Action clusterStartPolling() {
         return new AbstractClusterAction<ClusterStartResult>(ClusterStartResult.class) {
             @Override
             protected void doExecute(ClusterContext context, ClusterStartResult payload, Map<Object, Object> variables) throws Exception {
+                sendEvent(context.getFlowId(), new ClusterStartPollingRequest(context.getStack().getId(), payload.getRequestId()));
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_START_FINISHED_STATE")
+    public Action clusterStartFinished() {
+        return new AbstractClusterAction<ClusterStartPollingResult>(ClusterStartPollingResult.class) {
+            @Override
+            protected void doExecute(ClusterContext context, ClusterStartPollingResult payload, Map<Object, Object> variables) throws Exception {
                 clusterStartService.clusterStartFinished(context.getStack());
                 sendEvent(context);
             }

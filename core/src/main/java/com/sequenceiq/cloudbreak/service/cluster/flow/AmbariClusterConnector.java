@@ -422,13 +422,18 @@ public class AmbariClusterConnector {
         }
     }
 
-    public void startCluster(Stack stack) throws CloudbreakException {
+    public int startCluster(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getAmbariClient(stack);
         waitForAmbariToStart(stack);
         if (!"BYOS".equals(stack.cloudPlatform())) {
             startAmbariAgents(stack);
         }
-        startAllServices(stack, ambariClient);
+        return startAllServices(stack, ambariClient);
+    }
+
+    public void waitForAllServices(Stack stack, int requestId) throws CloudbreakException {
+        AmbariClient ambariClient = getAmbariClient(stack);
+        waitForAllServices(stack, ambariClient, requestId);
     }
 
     public boolean isAmbariAvailable(Stack stack) throws CloudbreakException {
@@ -457,8 +462,6 @@ public class AmbariClusterConnector {
             bpConfigEntries.addAll(fsConfigurator.getDefaultFsProperties(fsConfiguration));
         }
         return blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries, true);
-
-
     }
 
     private void decorateFsConfigurationProperties(FileSystemConfiguration fsConfiguration, Stack stack) {
@@ -491,23 +494,36 @@ public class AmbariClusterConnector {
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STOPPED.code()));
     }
 
-    private void startAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
+    private void startAllServicesAndWait(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
+        int requestId = startAllServices(stack, ambariClient);
+        if (requestId != -1) {
+            waitForAllServices(stack, ambariClient, requestId);
+        } else {
+            LOGGER.error("Failed to start Hadoop services.");
+            throw new CloudbreakException("Failed to start Hadoop services.");
+        }
+    }
+
+    private int startAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
         LOGGER.info("Start all Hadoop services");
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STARTING.code()));
         int requestId = ambariClient.startAllServices();
-        if (requestId != -1) {
-            LOGGER.info("Waiting for Hadoop services to start on stack");
-            PollingResult servicesStartResult = ambariOperationService.waitForOperations(stack, ambariClient, singletonMap("start services", requestId),
-                    START_AMBARI_PROGRESS_STATE);
-            if (isExited(servicesStartResult)) {
-                throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
-            } else if (isTimeout(servicesStartResult)) {
-                throw new CloudbreakException("Timeout while starting Ambari services.");
-            }
-        } else {
-            LOGGER.warn("Failed to start Hadoop services.");
+        if (requestId == -1) {
+            LOGGER.error("Failed to start Hadoop services.");
             throw new CloudbreakException("Failed to start Hadoop services.");
+        }
+        return requestId;
+    }
+
+    private void waitForAllServices(Stack stack, AmbariClient ambariClient, int requestId) throws CloudbreakException {
+        LOGGER.info("Waiting for Hadoop services to start on stack");
+        PollingResult servicesStartResult = ambariOperationService.waitForOperations(stack, ambariClient, singletonMap("start services", requestId),
+                START_AMBARI_PROGRESS_STATE);
+        if (isExited(servicesStartResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
+        } else if (isTimeout(servicesStartResult)) {
+            throw new CloudbreakException("Timeout while starting Ambari services.");
         }
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STARTED.code()));
@@ -623,7 +639,7 @@ public class AmbariClusterConnector {
         }
 
         if (!components.isEmpty()) {
-            startAllServices(stack, ambariClient);
+            startAllServicesAndWait(stack, ambariClient);
         }
     }
 
