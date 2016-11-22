@@ -552,6 +552,7 @@ periscope:
         - PERISCOPE_SCHEMA_MIGRATION_AUTO
         - REST_DEBUG
         - CERT_VALIDATION
+        - CB_DEFAULT_SUBSCRIPTION_ADDRESS
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/as/
