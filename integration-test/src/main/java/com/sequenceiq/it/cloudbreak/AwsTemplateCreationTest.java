@@ -32,7 +32,6 @@ public class AwsTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
             @Optional("standard") String awsVolumeType, @Optional("1") String awsVolumeCount, @Optional("10") String awsVolumeSize) throws Exception {
         // GIVEN
         // WHEN
-        // TODO PublicInAccount, Encrypted
         TemplateRequest templateRequest = new TemplateRequest();
         templateRequest.setName(awsTemplateName);
         templateRequest.setDescription("AWS template for integration testing");

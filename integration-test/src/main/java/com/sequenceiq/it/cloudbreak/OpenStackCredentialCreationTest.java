@@ -60,7 +60,6 @@ public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrati
         credentialRequest.setParameters(map);
         credentialRequest.setCloudPlatform("OPENSTACK");
         // WHEN
-        // TODO publicInAccount
         String id = getCloudbreakClient().credentialEndpoint().postPrivate(credentialRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);

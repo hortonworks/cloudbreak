@@ -191,8 +191,6 @@ public class AmbariDecommissioner {
             if (isSuccess(pollingResult)) {
                 pollingResult = waitForDataNodeDecommission(stack, ambariClient);
                 if (isSuccess(pollingResult)) {
-                    //TODO https://hortonworks.jira.com/browse/BUG-53283
-                    //TODO for now we only wait for the Ambari request to finish
                     //pollingResult = waitForRegionServerDecommission(stack, ambariClient, hostList, components);
                     if (isSuccess(pollingResult)) {
                         pollingResult = stopHadoopComponents(stack, ambariClient, hostList);

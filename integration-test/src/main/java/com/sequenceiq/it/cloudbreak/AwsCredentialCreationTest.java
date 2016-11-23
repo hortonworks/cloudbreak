@@ -40,7 +40,6 @@ public class AwsCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         secretKey = StringUtils.hasLength(secretKey) ? secretKey : defaultSecretKey;
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
-        // TODO publicInAccount
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName(credentialName);
         credentialRequest.setPublicKey(publicKey);
@@ -57,7 +56,6 @@ public class AwsCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         credentialRequest.setParameters(map);
         credentialRequest.setCloudPlatform("AWS");
         // WHEN
-        // TODO publicInAccount
         String id = getCloudbreakClient().credentialEndpoint().postPrivate(credentialRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);

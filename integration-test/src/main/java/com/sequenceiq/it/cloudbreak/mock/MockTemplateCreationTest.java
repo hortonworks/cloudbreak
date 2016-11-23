@@ -33,7 +33,6 @@ public class MockTemplateCreationTest extends AbstractCloudbreakIntegrationTest 
             @Optional("magnetic") String volumeType, @Optional("1") String volumeCount, @Optional("30") String volumeSize) throws Exception {
         // GIVEN
         // WHEN
-        // TODO: publicInAccount
         TemplateRequest templateRequest = new TemplateRequest();
         templateRequest.setName(templateName);
         templateRequest.setDescription("MOCK template for integration testing");

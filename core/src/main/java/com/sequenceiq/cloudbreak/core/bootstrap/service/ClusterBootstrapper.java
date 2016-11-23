@@ -205,7 +205,6 @@ public class ClusterBootstrapper {
                     POLLING_INTERVAL,
                     MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
-            // TODO: put it in orchestrator api
             Orchestrator orchestrator = new Orchestrator();
             orchestrator.setApiEndpoint(gatewayIp + ":" + stack.getGatewayPort());
             orchestrator.setType("SWARM");

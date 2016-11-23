@@ -41,7 +41,6 @@ import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
 
 @ApplicationPath(CoreApi.API_ROOT_CONTEXT)
-//TODO find a working solution for storing response codes globally
 @Component
 public class EndpointConfig extends ResourceConfig {
 

@@ -47,7 +47,6 @@ public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegration
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         // WHEN
-        // TODO publicInAccount
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName(credentialName);
         credentialRequest.setPublicKey(publicKey);

@@ -24,7 +24,6 @@ public class OpenStackNetworkCreationTest extends AbstractCloudbreakIntegrationT
         // GIVEN
         publicNetId = getPublicNetId(publicNetId, defaultPublicNetId);
         // WHEN
-        // TODO: publicInAccount
         NetworkRequest networkRequest = new NetworkRequest();
         networkRequest.setDescription("OpenStack network for integration testing");
         networkRequest.setName(networkName);

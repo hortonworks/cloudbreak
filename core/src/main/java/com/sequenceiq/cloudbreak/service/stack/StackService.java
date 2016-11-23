@@ -528,7 +528,6 @@ public class StackService {
     private void validateHostGroupAdjustment(final InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
         HostGroup hostGroup = stack.getCluster().getHostGroups().stream().filter(input -> {
-            // TODO: why instancegroups?
             return input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup());
         }).findFirst().get();
         if (hostGroup == null) {

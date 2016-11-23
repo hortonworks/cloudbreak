@@ -262,7 +262,6 @@ public class AmbariClusterConnector {
             recipeEngine.executePostInstall(stack);
 
             // executeSmokeTest(stack, ambariClient);
-            //TODO https://hortonworks.jira.com/browse/BUG-51920
             startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
             triggerSmartSenseCapture(ambariClient, blueprintText);
             cluster = ambariViewProvider.provideViewInformation(ambariClient, cluster);
@@ -415,7 +414,6 @@ public class AmbariClusterConnector {
             if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
                 stopAllServices(stack, ambariClient);
             }
-            // TODO: ambari agent containers should be stopped through the orchestrator API
 //            if (!"BYOS".equals(stack.cloudPlatform())) {
 //                stopAmbariAgents(stack, null);
 //            }
@@ -683,7 +681,6 @@ public class AmbariClusterConnector {
                     String domain = gatewayHost.substring(gatewayHost.indexOf(".") + 1);
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, domain.toUpperCase(), domain);
                 } else {
-                    // TODO this won't work on mesos, but it doesn't work anyway
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);
                 }
                 blueprintText = addHBaseClient(blueprintText);
@@ -702,7 +699,6 @@ public class AmbariClusterConnector {
         }
     }
 
-    // TODO https://issues.apache.org/jira/browse/AMBARI-15295
     private String addHBaseClient(String blueprint) {
         String processingBlueprint = blueprint;
         try {

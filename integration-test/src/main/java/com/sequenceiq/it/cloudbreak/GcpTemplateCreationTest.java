@@ -33,7 +33,6 @@ public class GcpTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
             @Optional("false") Boolean preemptible) throws Exception {
         // GIVEN
         // WHEN
-        // TODO: publicInAccount
         TemplateRequest templateRequest = new TemplateRequest();
         templateRequest.setName(gcpName);
         templateRequest.setDescription("GCP template for integration testing");

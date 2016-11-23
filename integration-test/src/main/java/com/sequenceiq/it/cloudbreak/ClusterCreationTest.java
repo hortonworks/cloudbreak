@@ -49,7 +49,6 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
 
         // WHEN
-        // TODO email needed
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setName(clusterName);
         clusterRequest.setDescription("Cluster for integration test");

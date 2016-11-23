@@ -70,7 +70,6 @@ public class MockClusterCreationWithSwarmSuccessTest extends AbstractMockIntegra
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_USER_ID, ambariUser);
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID, ambariPassword);
         // WHEN
-        // TODO email needed
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setName(clusterName);
         clusterRequest.setDescription("Cluster for integration test");

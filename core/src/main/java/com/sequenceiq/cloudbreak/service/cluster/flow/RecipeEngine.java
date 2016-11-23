@@ -148,7 +148,6 @@ public class RecipeEngine {
     private void configureSssd(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
         if (stack.getCluster().getSssdConfig() != null) {
             List<String> sssdPayload = generateSssdRecipePayload(stack);
-            // TODO implementation required
             throw new IllegalStateException("implementation required");
         }
     }

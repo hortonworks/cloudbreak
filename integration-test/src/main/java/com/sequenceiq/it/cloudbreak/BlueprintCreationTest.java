@@ -20,7 +20,6 @@ public class BlueprintCreationTest extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         String blueprintContent = ResourceUtil.readStringFromResource(applicationContext, blueprintFile);
         // WHEN
-        // TODO publicInAccount
         BlueprintRequest blueprintRequest = new BlueprintRequest();
         blueprintRequest.setName(blueprintName);
         blueprintRequest.setDescription("Blueprint for integration testing");
