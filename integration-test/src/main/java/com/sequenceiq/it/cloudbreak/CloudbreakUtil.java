@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -16,10 +17,12 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.it.IntegrationTestContext;
 
 import groovyx.net.http.HttpResponseException;
 
 public class CloudbreakUtil {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUtil.class);
 
     private static final int MAX_RETRY = 360;
@@ -157,5 +160,16 @@ public class CloudbreakUtil {
             }
         }
         return nodeCount;
+    }
+
+    public static String getAmbariIp(StackEndpoint stackEndpoint, String stackId, IntegrationTestContext itContext) {
+        String ambariIp = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_IP_ID);
+        if (StringUtils.isEmpty(ambariIp)) {
+            StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+            ambariIp = stackResponse.getCluster().getAmbariServerIp();
+            Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
+            itContext.putContextParam(CloudbreakITContextConstants.AMBARI_IP_ID, ambariIp);
+        }
+        return ambariIp;
     }
 }

@@ -74,18 +74,16 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.startstop.StackAndClusterStartTest
 
-  - name: upscale
-    parameters: {
-      instanceGroup: host_group_slave_1,
-      scalingAdjustment: 2
-    }
+  - name: upscale stack and cluster
+    parameters:
+     instanceGroup: host_group_slave_1
+     scalingAdjustment: 2
     classes:
-      - com.sequenceiq.it.cloudbreak.ScalingTest
+      - com.sequenceiq.it.cloudbreak.scaling.StackAndClusterUpscaleTest
 
-  - name: downscale
-    parameters: {
-      instanceGroup: host_group_slave_1,
-      scalingAdjustment: -1
-    }
+  - name: downscale cluster and stack
+    parameters:
+     instanceGroup: slave_1
+     scalingAdjustment: -1
     classes:
-      - com.sequenceiq.it.cloudbreak.ScalingTest
+      - com.sequenceiq.it.cloudbreak.scaling.ClusterAndStackDownscaleTest

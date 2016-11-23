@@ -23,6 +23,8 @@ public class CloudbreakITContextConstants {
 
     public static final String SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED = "SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED";
 
+    public static final String AMBARI_IP_ID = "AMBARI_IP";
+
     public static final String AMBARI_USER_ID = "AMBARI_USER";
 
     public static final String AMBARI_PASSWORD_ID = "AMBARI_PASSWORD";

@@ -68,13 +68,13 @@ tests:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
 
-  - name: upscale
-    parameters: {
-      instanceGroup: slave_1,
-      scalingAdjustment: 1
-    }
+  - name: upscale stack, upscale cluster
+    parameters:
+     instanceGroup: slave_1
+     scalingAdjustment: 1
     classes:
-      - com.sequenceiq.it.cloudbreak.ScalingTest
+      - com.sequenceiq.it.cloudbreak.scaling.StackScalingTest
+      - com.sequenceiq.it.cloudbreak.scaling.ClusterScalingTest
 
   - name: count recipe results
     parameters: {
