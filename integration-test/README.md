@@ -187,19 +187,21 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.startstop.StackAndClusterStartTest
 
-  - name: upscale
+  - name: upscale stack, upscale cluster
     parameters:
-      instanceGroup: slave_1
-      scalingAdjustment: 4
+     instanceGroup: slave_1
+     scalingAdjustment: 4
     classes:
-      - com.sequenceiq.it.cloudbreak.ScalingTest
+      - com.sequenceiq.it.cloudbreak.scaling.StackScalingTest
+      - com.sequenceiq.it.cloudbreak.scaling.ClusterScalingTest
 
-  - name: downscale
+  - name: downscale cluster, downscale stack
     parameters:
-      instanceGroup: slave_1
-      scalingAdjustment: -2
+     instanceGroup: slave_1
+     scalingAdjustment: -2
     classes:
-      - com.sequenceiq.it.cloudbreak.ScalingTest
+      - com.sequenceiq.it.cloudbreak.scaling.ClusterScalingTest
+      - com.sequenceiq.it.cloudbreak.scaling.StackScalingTest
 
 ```
 
@@ -259,19 +261,23 @@ tests:
 **Common, not cloudprovider specific tests:**
 * BlueprintCreationTest
 * BlueprintDeleteByNameTest
+* ClusterAndStackDownscaleTest
 * ClusterAndStackStopTest
 * ClusterCreationTest
+* ClusterScalingTest
 * ClusterStartTest
 * ClusterStopTest
 * CountRecipeResultsTest
 * CredentialDeleteByNameTest
 * NetworkDeleteByNameTest
 * RecipeCreationTest
-* ScalingTest
+* StackAndClusterUpscaleTest
 * StackAndClusterStartTest
 * StackCreationTest
+* StackScalingTest
 * StackStartTest
 * StackStopTest
+
 
 **Cloud provider specific tests:**
 * Credential creation tests
