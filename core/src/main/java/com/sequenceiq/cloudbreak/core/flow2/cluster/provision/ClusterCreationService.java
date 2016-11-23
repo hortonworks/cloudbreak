@@ -95,8 +95,6 @@ public class ClusterCreationService {
         clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, exception.getMessage());
         stackUpdater.updateStackStatus(stack.getId(), AVAILABLE);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), exception.getMessage());
-
-        // TODO Only triggering the deleteClusterContainers flow
         try {
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             if (cluster != null && orchestratorType.containerOrchestrator()) {

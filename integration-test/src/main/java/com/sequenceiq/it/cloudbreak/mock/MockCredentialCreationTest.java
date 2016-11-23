@@ -42,7 +42,6 @@ public class MockCredentialCreationTest extends AbstractCloudbreakIntegrationTes
         credentialRequest.setParameters(map);
         credentialRequest.setCloudPlatform("MOCK");
         // WHEN
-        // TODO publicInAccount
         String id = getCloudbreakClient().credentialEndpoint().postPrivate(credentialRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);

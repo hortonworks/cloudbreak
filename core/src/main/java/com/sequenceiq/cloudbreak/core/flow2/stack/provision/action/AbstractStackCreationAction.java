@@ -42,7 +42,6 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
 
     protected StackContext createFlowContext(String flowId, StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
         Stack stack = stackService.getById(payload.getStackId());
-        // TODO LogAspect!!
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),

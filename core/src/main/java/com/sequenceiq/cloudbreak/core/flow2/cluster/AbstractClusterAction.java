@@ -31,7 +31,6 @@ public abstract class AbstractClusterAction<P extends Payload> extends AbstractA
     protected ClusterContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> clusterContext, P payload) {
         Stack stack = stackService.getById(payload.getStackId());
         Cluster cluster = clusterService.retrieveClusterByStackId(payload.getStackId());
-        // TODO LogAspect!!
         MDCBuilder.buildMdcContext(cluster);
         return new ClusterContext(flowId, stack, cluster);
     }

@@ -16,7 +16,6 @@ public class MockNetworkCreationTest extends AbstractCloudbreakIntegrationTest {
             throws Exception {
         // GIVEN
         // WHEN
-        // TODO: publicInAccount
         NetworkRequest networkRequest = new NetworkRequest();
         networkRequest.setDescription("Mock network for integration testing");
         networkRequest.setName(networkName);

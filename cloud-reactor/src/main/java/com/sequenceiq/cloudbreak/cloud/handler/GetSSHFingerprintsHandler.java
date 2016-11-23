@@ -84,7 +84,6 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
         }
     }
 
-    //TODO remove it from here and core and move it to a common module
     public static class FingerprintParserUtil {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(FingerprintParserUtil.class);

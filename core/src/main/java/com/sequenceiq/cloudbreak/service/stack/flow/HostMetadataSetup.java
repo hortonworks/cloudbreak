@@ -79,7 +79,6 @@ public class HostMetadataSetup {
             for (InstanceMetaData instanceMetaData : metadataToUpdate) {
                 String privateIp = instanceMetaData.getPrivateIp();
                 String address = members.get(privateIp);
-                // TODO remove column
                 instanceMetaData.setConsulServer(false);
                 instanceMetaData.setDiscoveryFQDN(address);
                 LOGGER.info("Domain used for isntance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(), address,

@@ -56,7 +56,6 @@ public class JsonToCredentialConverter extends AbstractConversionServiceAwareCon
         return credential;
     }
 
-    //TODO remove this part completely when cloudbreak user is used everywhere
     private void setUserName(Credential credential, Map<String, Object> parameters) {
         if (parameters.containsKey("keystoneVersion")) {
             credential.setLoginUserName(SSH_USER_CENT);

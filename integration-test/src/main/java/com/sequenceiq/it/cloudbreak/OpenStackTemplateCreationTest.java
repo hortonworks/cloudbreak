@@ -30,7 +30,6 @@ public class OpenStackTemplateCreationTest extends AbstractCloudbreakIntegration
             @Optional("1") String volumeCount, @Optional("10") String volumeSize) throws Exception {
         // GIVEN
         // WHEN
-        // TODO: publicInAccount
         TemplateRequest templateRequest = new TemplateRequest();
         templateRequest.setName(templateName);
         templateRequest.setDescription("OpenStack template for integration testing");

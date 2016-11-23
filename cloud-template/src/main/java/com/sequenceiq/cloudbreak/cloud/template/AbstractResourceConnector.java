@@ -126,7 +126,6 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), resources, false);
 
         //compute
-        //TODO we should somehow group the corresponding resources together
         List<CloudResource> deleteResources = getDeleteResources(resources, vms);
         return computeResourceService.deleteResources(context, auth, deleteResources, true);
     }

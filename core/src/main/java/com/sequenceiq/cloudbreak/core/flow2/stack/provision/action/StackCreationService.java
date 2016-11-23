@@ -248,7 +248,6 @@ public class StackCreationService {
             if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
                 LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
             } else {
-                // TODO Only trigger the rollback flow
                 stackUpdater.updateStackStatus(stack.getId(), UPDATE_IN_PROGRESS);
                 connector.rollback(stack, stack.getResources());
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name(), errorReason);

@@ -30,7 +30,6 @@ public class AzureTemplateCreationTest extends AbstractCloudbreakIntegrationTest
             @Optional("1") String azureVolumeCount, @Optional("10") String azureVolumeSize) throws Exception {
         // GIVEN
         // WHEN
-        // TODO publicInAccount
         TemplateRequest templateRequest = new TemplateRequest();
         templateRequest.setName(azureTemplateName);
         templateRequest.setDescription("AZURE_RM template for integration testing");

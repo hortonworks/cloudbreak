@@ -165,7 +165,6 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         given(blueprintValidator.getHostGroupName(jsonNode)).willReturn("slave_1");
         given(blueprintValidator.createHostGroupMap(any(Set.class))).willReturn(hostGroupMap);
         given(hostGroupMap.get("slave_1")).willReturn(hostGroup);
-        //TODO
 //        given(hostGroup.getInstanceGroup()).willReturn(instanceGroup);
         given(instanceGroup.getInstanceMetaData()).willReturn(Sets.newHashSet(instanceMetaData));
         given(blueprintValidator.getComponentsNode(jsonNode)).willReturn(nameJsonNode);
