@@ -30,9 +30,10 @@ public class OutputTransformer {
             if (object instanceof Map) {
                 Map map = (Map) object;
                 if (!map.values().isEmpty()) {
-                    if (map.values().toArray()[0] instanceof Collection) {
+                    Object value = map.values().stream().filter(e -> e != null).findAny().orElse(null);
+                    if (value instanceof Collection) {
                         return tableRenderer.renderMultiValueMap((Map<String, List<String>>) object, true, headers);
-                    } else if (map.values().toArray()[0] instanceof String) {
+                    } else if (value instanceof String) {
                         return tableRenderer.renderSingleMapWithSortedColumn((Map<Object, String>) object, headers);
                     } else {
                         return tableRenderer.renderObjectValueMap((Map<String, Object>) object, headers[0]);
