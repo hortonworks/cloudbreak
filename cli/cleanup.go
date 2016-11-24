@@ -16,13 +16,14 @@ func CleanupResources(c *cli.Context) error {
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	var wg sync.WaitGroup
-	wg.Add(5)
+	wg.Add(6)
 
 	go oAuth2Client.cleanupBlueprints(&wg)
 	go oAuth2Client.cleanupTemplates(&wg)
 	go oAuth2Client.cleanupCredentials(&wg)
 	go oAuth2Client.cleanupNetworks(&wg)
 	go oAuth2Client.cleanupSecurityGroups(&wg)
+	go oAuth2Client.cleanupRecipes(&wg)
 
 	wg.Wait()
 
@@ -111,6 +112,24 @@ func cleanupSecurityGroupsImpl(getGroups func() []*models.SecurityGroupResponse,
 		if len(secGroupName) > 5 && secGroupName[0:4] == "secg" {
 			if err := deleteGroup(secGroupName); err != nil {
 				log.Warnf("[cleanupSecurityGroups] failed to delete security group: %s", secGroupName)
+				continue
+			}
+		}
+	}
+}
+
+func (c *Cloudbreak) cleanupRecipes(wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	cleanupRecipesImpl(c.GetPublicRecipes, c.DeleteRecipe)
+}
+
+func cleanupRecipesImpl(getRecipes func() []*models.RecipeResponse, deleteRecipe func(string) error) {
+	for _, recipe := range getRecipes() {
+		recipeName := recipe.Name
+		if strings.Contains(recipeName, "hrec") {
+			if err := deleteRecipe(recipeName); err != nil {
+				log.Warnf("[cleanupRecipesImpl] failed to delete recipe: %s", recipeName)
 				continue
 			}
 		}

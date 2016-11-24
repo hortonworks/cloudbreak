@@ -58,6 +58,18 @@ func (s *ClusterSkeleton) Validate() error {
 		}
 	}
 
+	if len(s.Master.Recipes) != 0 {
+		if e := validateRecipes(s.Master.Recipes); len(e) != 0 {
+			res = append(res, e...)
+		}
+	}
+
+	if len(s.Worker.Recipes) != 0 {
+		if e := validateRecipes(s.Worker.Recipes); len(e) != 0 {
+			res = append(res, e...)
+		}
+	}
+
 	if len(res) > 0 {
 		return swagerrors.CompositeValidationError(res...)
 	}
@@ -106,6 +118,33 @@ func (h *HiveMetastore) Validate() []error {
 		}
 	}
 
+	return res
+}
+
+func (r *Recipe) Validate() []error {
+	var res []error = nil
+
+	if err := validate.RequiredString("URI", "recipe", r.URI); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("Phase", "recipe", r.Phase); err != nil {
+		res = append(res, err)
+	}
+
+	if r.Phase != PRE && r.Phase != POST {
+		res = append(res, errors.New(fmt.Sprintf("Valid recipe phases: %s, %s", PRE, POST)))
+	}
+
+	return res
+}
+
+func validateRecipes(recipes []Recipe) []error {
+	var res []error = make([]error, 0)
+	for _, recipe := range recipes {
+		for _, e := range recipe.Validate() {
+			res = append(res, e)
+		}
+	}
 	return res
 }
 

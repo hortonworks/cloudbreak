@@ -19,7 +19,13 @@ var AWSCreateClusterSkeletonHelp = `
     "InstanceType": "m4.xlarge",                                           // Instance type of master instance group
     "VolumeType": "gp2",                                                   // Volume type of master instance group, accepted values: gp2, standard, ephemeral
     "VolumeSize": 32,                                                      // Volume size of master instance group
-    "VolumeCount": 1                                                       // Volume count of master instance group
+    "VolumeCount": 1,                                                      // Volume count of master instance group
+    "Recipes:" [                                                           // (Optional) List of recipes
+      {
+        "URI": "http://some-site.com/test.sh",                             // URI of the script
+        "Phase: "pre"                                                      // Which phase to run the script on, accepted values: pre, post
+      }
+    ]
   },
   "Worker": {                                                              // Worker instance group
     "InstanceType": "m3.xlarge",                                           // Instance type of worker instance group
@@ -27,6 +33,12 @@ var AWSCreateClusterSkeletonHelp = `
     "VolumeSize": 40,                                                      // Volume size of worker instance group
     "VolumeCount": 2,                                                      // Volume count of master instance group
     "InstanceCount": 1                                                     // Instance count of worker instance group, accepted value: >0
+    "Recipes:" [                                                           // (Optional) List of recipes
+      {
+        "URI": "http://some-site.com/test.sh",                             // URI of the script
+        "Phase: "post"                                                     // Which phase to run the script on, accepted values: pre, post
+      }
+    ]
   },
   "SSHKeyName": "my-existing-keypair-name",                                // Name of an existing EC2 KeyPair to enable SSH access to the cluster node instances.
   "RemoteAccess": "0.0.0.0/0",                                             // Allow connections from this address range. Must be a valid CIDR IP (for example: 0.0.0.0/0 will allow access from all)

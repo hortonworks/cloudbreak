@@ -9,6 +9,7 @@ import (
 
 	"github.com/hortonworks/hdc-cli/client/blueprints"
 	"github.com/hortonworks/hdc-cli/client/cluster"
+	"github.com/hortonworks/hdc-cli/client/recipes"
 	"github.com/hortonworks/hdc-cli/client/stacks"
 	"github.com/hortonworks/hdc-cli/client/templates"
 	"github.com/hortonworks/hdc-cli/models"
@@ -34,7 +35,7 @@ func TestFetchClusterImplReduced(t *testing.T) {
 		}}, nil
 	}
 
-	fetchClusterImpl(stack, true, getBlueprint, nil, nil, nil, nil, nil)
+	fetchClusterImpl(stack, true, getBlueprint, nil, nil, nil, nil, nil, nil)
 
 	if !blueprintCalled {
 		t.Error("blueprint not called")
@@ -85,7 +86,13 @@ func TestFetchClusterImplNotReduced(t *testing.T) {
 		return nil
 	}
 
-	fetchClusterImpl(stack, false, nil, getTemplate, getSecurityDetails, getCredential, getNetwork, getRdsConfig)
+	var recipeCalled bool
+	getRecipe := func(*recipes.GetRecipesIDParams) (*recipes.GetRecipesIDOK, error) {
+		recipeCalled = true
+		return nil, nil
+	}
+
+	fetchClusterImpl(stack, false, nil, getTemplate, getSecurityDetails, getCredential, getNetwork, getRdsConfig, getRecipe)
 
 	if !templateCalled {
 		t.Error("template not called")
@@ -109,7 +116,7 @@ func TestDescribeClusterImpl(t *testing.T) {
 		return &ClusterSkeleton{ClusterAndAmbariPassword: "password"}, nil
 	}
 
-	skeleton := describeClusterImpl("name", func(string) *models.StackResponse { return nil }, fetchCluster)
+	skeleton := describeClusterImpl("name", "json", func(string) *models.StackResponse { return nil }, fetchCluster)
 
 	if len(skeleton.ClusterAndAmbariPassword) != 0 {
 		t.Errorf("password not cleaned up, %s", skeleton.ClusterAndAmbariPassword)
@@ -211,9 +218,15 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 		return &cluster.PostStacksIDClusterOK{Payload: &models.ClusterResponse{ID: &clusterId}}, nil
 	}
 
+	createRecipes := func(skeleton ClusterSkeleton, master chan int64, worker chan int64, wg *sync.WaitGroup) {
+		defer wg.Done()
+		close(master)
+		close(worker)
+	}
+
 	actualId = createClusterImpl(*skeleton, getBlueprint,
 		createFuncs[0], createTemplate, createFuncs[1], createFuncs[2], createBlueprint,
-		postStack, getRdsConfig, postCluster)
+		postStack, getRdsConfig, postCluster, createRecipes)
 
 	return
 }

@@ -71,9 +71,15 @@ func assembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 	return skeleton
 }
 
-func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.CredentialResponse, blueprint *models.BlueprintResponse,
-	templateMap map[string]*models.TemplateResponse, securityMap map[string][]*models.SecurityRuleResponse,
-	network *models.NetworkResponse, rdsConfig *models.RDSConfigResponse) error {
+func (c *ClusterSkeleton) fill(
+	stack *models.StackResponse,
+	credential *models.CredentialResponse,
+	blueprint *models.BlueprintResponse,
+	templateMap map[string]*models.TemplateResponse,
+	securityMap map[string][]*models.SecurityRuleResponse,
+	network *models.NetworkResponse,
+	rdsConfig *models.RDSConfigResponse,
+	recipeMap map[string][]*models.RecipeResponse) error {
 
 	if stack == nil {
 		return errors.New("Stack definition is not returned from Cloudbreak")
@@ -135,6 +141,9 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 		c.HiveMetastore = &rdsConfig
 	}
 
+	c.Master.Recipes = convertRecipes(recipeMap[MASTER])
+	c.Worker.Recipes = convertRecipes(recipeMap[WORKER])
+
 	if securityMap != nil {
 		if stack.InstanceGroups != nil {
 			for _, v := range stack.InstanceGroups {
@@ -167,6 +176,24 @@ func (c *ClusterSkeleton) fill(stack *models.StackResponse, credential *models.C
 	c.RemoteAccess = strings.Join(keys, ",")
 
 	return nil
+}
+
+func convertRecipes(recipes []*models.RecipeResponse) []Recipe {
+	var convertedRecipes []Recipe = []Recipe{}
+	for _, recipeResponse := range recipes {
+		var recipe Recipe
+		uri := recipeResponse.Properties[PRE_URL]
+		if len(uri) != 0 {
+			recipe.Phase = PRE
+		} else if uri = recipeResponse.Properties[POST_URL]; len(uri) != 0 {
+			recipe.Phase = POST
+		}
+		if len(uri) != 0 {
+			recipe.URI = uri
+			convertedRecipes = append(convertedRecipes, recipe)
+		}
+	}
+	return convertedRecipes
 }
 
 func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context) {

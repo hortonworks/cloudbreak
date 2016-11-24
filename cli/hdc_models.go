@@ -6,6 +6,10 @@ const (
 	MASTER   = "master"
 	WORKER   = "worker"
 	POSTGRES = "POSTGRES"
+	PRE      = "pre"
+	POST     = "post"
+	PRE_URL  = PRE + "-url"
+	POST_URL = POST + "-url"
 )
 
 var SUPPORTED_HDP_VERSIONS = [...]float64{2.5}
@@ -34,11 +38,17 @@ type ClusterSkeleton struct {
 }
 
 type InstanceConfig struct {
-	InstanceType  string `json:"InstanceType" yaml:"InstanceType"`
-	VolumeType    string `json:"VolumeType" yaml:"VolumeType"`
-	VolumeSize    *int32 `json:"VolumeSize" yaml:"VolumeSize"`
-	VolumeCount   *int32 `json:"VolumeCount" yaml:"VolumeCount"`
-	InstanceCount int32  `json:"InstanceCount,omitempty" yaml:"InstanceCount,omitempty"`
+	InstanceType  string   `json:"InstanceType" yaml:"InstanceType"`
+	VolumeType    string   `json:"VolumeType" yaml:"VolumeType"`
+	VolumeSize    *int32   `json:"VolumeSize" yaml:"VolumeSize"`
+	VolumeCount   *int32   `json:"VolumeCount" yaml:"VolumeCount"`
+	InstanceCount int32    `json:"InstanceCount,omitempty" yaml:"InstanceCount,omitempty"`
+	Recipes       []Recipe `json:"Recipes" yaml:"Recipes"`
+}
+
+type Recipe struct {
+	URI   string `json:"URI" yaml:"URI"`
+	Phase string `json:"Phase" yaml:"Phase"`
 }
 
 type Network struct {

@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/hortonworks/hdc-cli/client/blueprints"
+	"github.com/hortonworks/hdc-cli/client/recipes"
 	"github.com/hortonworks/hdc-cli/client/templates"
 )
 
@@ -28,7 +29,14 @@ func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
 func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeleton, error) {
 	defer timeTrack(time.Now(), "fetch cluster")
 
-	return fetchClusterImpl(stack, reduced, c.Cloudbreak.Blueprints.GetBlueprintsID, c.Cloudbreak.Templates.GetTemplatesID, c.GetSecurityDetails, c.GetCredentialById, c.GetNetworkById, c.GetRDSConfigById)
+	return fetchClusterImpl(stack, reduced,
+		c.Cloudbreak.Blueprints.GetBlueprintsID,
+		c.Cloudbreak.Templates.GetTemplatesID,
+		c.GetSecurityDetails,
+		c.GetCredentialById,
+		c.GetNetworkById,
+		c.GetRDSConfigById,
+		c.Cloudbreak.Recipes.GetRecipesID)
 }
 
 func fetchClusterImpl(stack *models.StackResponse, reduced bool,
@@ -37,7 +45,8 @@ func fetchClusterImpl(stack *models.StackResponse, reduced bool,
 	getSecurityDetails func(*models.StackResponse) (map[string][]*models.SecurityRuleResponse, error),
 	getCredential func(int64) (*models.CredentialResponse, error),
 	getNetwork func(int64) *models.NetworkResponse,
-	getRdsConfig func(int64) *models.RDSConfigResponse) (*ClusterSkeleton, error) {
+	getRdsConfig func(int64) *models.RDSConfigResponse,
+	getRecipe func(*recipes.GetRecipesIDParams) (*recipes.GetRecipesIDOK, error)) (*ClusterSkeleton, error) {
 
 	var wg sync.WaitGroup
 
@@ -56,6 +65,7 @@ func fetchClusterImpl(stack *models.StackResponse, reduced bool,
 	var credential *models.CredentialResponse = nil
 	var network *models.NetworkResponse = nil
 	var rdsConfig *models.RDSConfigResponse = nil
+	var recipeMap map[string][]*models.RecipeResponse = nil
 	// some operations does not require all info
 	if !reduced {
 		templateMap = make(map[string]*models.TemplateResponse)
@@ -70,6 +80,25 @@ func fetchClusterImpl(stack *models.StackResponse, reduced bool,
 					log.Warnf("[FetchCluster] failed to get the instance group info of %s", instanceGroup.Group)
 				}
 			}(i, v)
+		}
+
+		if stack.Cluster != nil {
+			recipeMap = make(map[string][]*models.RecipeResponse)
+			for i, hg := range stack.Cluster.HostGroups {
+				wg.Add(1)
+				go func(i int, hg *models.HostGroupResponse) {
+					defer wg.Done()
+					for _, id := range hg.RecipeIds {
+						recipe, err := getRecipe(&recipes.GetRecipesIDParams{id})
+						if err == nil {
+							recipeMap[hg.Name] = append(recipeMap[hg.Name], recipe.Payload)
+						} else {
+							log.Warnf("[FetchCluster] failed to get the recipe info of id: %d", id)
+						}
+					}
+
+				}(i, hg)
+			}
 		}
 
 		wg.Add(1)
@@ -104,7 +133,7 @@ func fetchClusterImpl(stack *models.StackResponse, reduced bool,
 	wg.Wait()
 
 	clusterSkeleton := &ClusterSkeleton{}
-	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, rdsConfig)
+	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, rdsConfig, recipeMap)
 
 	return clusterSkeleton, nil
 }
@@ -119,18 +148,25 @@ func DescribeCluster(c *cli.Context) error {
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	clusterSkeleton := describeClusterImpl(clusterName, oAuth2Client.GetClusterByName, oAuth2Client.FetchCluster)
+	format := c.String(FlOutput.Name)
+	clusterSkeleton := describeClusterImpl(clusterName, format, oAuth2Client.GetClusterByName, oAuth2Client.FetchCluster)
 
-	output := Output{Format: c.String(FlOutput.Name)}
+	output := Output{Format: format}
 	output.Write(ClusterSkeletonHeader, clusterSkeleton)
 
 	return nil
 }
 
-func describeClusterImpl(clusterName string, getCluster func(string) *models.StackResponse, fetchCluster func(*models.StackResponse, bool) (*ClusterSkeleton, error)) *ClusterSkeleton {
+func describeClusterImpl(clusterName string, format string,
+	getCluster func(string) *models.StackResponse,
+	fetchCluster func(*models.StackResponse, bool) (*ClusterSkeleton, error)) *ClusterSkeleton {
 	stack := getCluster(clusterName)
 	clusterSkeleton, _ := fetchCluster(stack, false)
 	clusterSkeleton.ClusterAndAmbariPassword = ""
+	if format == "table" {
+		clusterSkeleton.Master.Recipes = []Recipe{}
+		clusterSkeleton.Worker.Recipes = []Recipe{}
+	}
 	return clusterSkeleton
 }
 
@@ -173,7 +209,8 @@ func CreateCluster(c *cli.Context) error {
 		oAuth2Client.CreateBlueprint,
 		oAuth2Client.Cloudbreak.Stacks.PostStacksUser,
 		oAuth2Client.GetRDSConfigByName,
-		oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster)
+		oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster,
+		oAuth2Client.CreateRecipe)
 
 	oAuth2Client.waitForClusterToFinish(stackId, c)
 	return nil
@@ -188,12 +225,13 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	createBlueprint func(ClusterSkeleton, *models.BlueprintResponse, chan int64, *sync.WaitGroup),
 	postStack func(*stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error),
 	getRdsConfig func(string) models.RDSConfigResponse,
-	postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error)) int64 {
+	postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error),
+	createRecipes func(ClusterSkeleton, chan int64, chan int64, *sync.WaitGroup)) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
 
 	var wg sync.WaitGroup
-	wg.Add(5)
+	wg.Add(6)
 
 	credentialId := make(chan int64, 1)
 	go copyCredential(skeleton, credentialId, &wg)
@@ -210,7 +248,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	blueprintId := make(chan int64, 1)
 	go createBlueprint(skeleton, blueprint, blueprintId, &wg)
 
-	wg.Wait()
+	masterRecipeIds := make(chan int64, len(skeleton.Master.Recipes))
+	workerRecipeIds := make(chan int64, len(skeleton.Worker.Recipes))
+	go createRecipes(skeleton, masterRecipeIds, workerRecipeIds, &wg)
+
+	go wg.Wait()
 
 	// create stack
 
@@ -291,14 +333,25 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			HostCount:         int32(skeleton.Worker.InstanceCount),
 		}
 
+		var masterRecipes []int64
+		for id := range masterRecipeIds {
+			masterRecipes = append(masterRecipes, id)
+		}
+		var workerRecipes []int64
+		for id := range workerRecipeIds {
+			workerRecipes = append(workerRecipes, id)
+		}
+
 		hostGroups := []*models.HostGroupRequest{
 			{
 				Name:       MASTER,
 				Constraint: &masterConstraint,
+				RecipeIds:  masterRecipes,
 			},
 			{
 				Name:       WORKER,
 				Constraint: &workerConstraint,
+				RecipeIds:  workerRecipes,
 			},
 		}
 
@@ -507,6 +560,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 			VolumeType:   "gp2",
 			VolumeCount:  &(&int32Wrapper{1}).i,
 			VolumeSize:   &(&int32Wrapper{32}).i,
+			Recipes:      []Recipe{},
 		},
 		Worker: InstanceConfig{
 			InstanceType:  "m3.xlarge",
@@ -514,6 +568,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 			VolumeCount:   &(&int32Wrapper{2}).i,
 			VolumeSize:    &(&int32Wrapper{40}).i,
 			InstanceCount: 2,
+			Recipes:       []Recipe{},
 		},
 		WebAccess:      true,
 		InstanceRole:   "CREATE",
