@@ -48,7 +48,7 @@ var updateStackTypeStatusPropEnum []interface{}
 func (m *UpdateStack) validateStatusEnum(path, location string, value string) error {
 	if updateStackTypeStatusPropEnum == nil {
 		var res []string
-		if err := json.Unmarshal([]byte(`["SYNC","FULL_SYNC","STOPPED","STARTED"]`), &res); err != nil {
+		if err := json.Unmarshal([]byte(`["SYNC","FULL_SYNC","REPAIR_FAILED_NODES","STOPPED","STARTED"]`), &res); err != nil {
 			return err
 		}
 		for _, v := range res {

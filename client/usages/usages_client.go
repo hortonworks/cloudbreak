@@ -23,33 +23,6 @@ type Client struct {
 }
 
 /*
-Generate generates usages
-
-Cloudbreak gives you an up to date overview of cluster usage based on different filtering criteria (start/end date, users, providers, region, etc)
-*/
-func (a *Client) Generate(params *GenerateParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGenerateParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "generate",
-		Method:             "GET",
-		PathPattern:        "/usages/generate",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GenerateReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
 GetAccount retrieves public and private owned usages by filter parameters
 
 Cloudbreak gives you an up to date overview of cluster usage based on different filtering criteria (start/end date, users, providers, region, etc)

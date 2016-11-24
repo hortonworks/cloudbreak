@@ -39,7 +39,7 @@ func (a *Client) GetDisktypeByType(params *GetDisktypeByTypeParams) (*GetDisktyp
 		PathPattern:        "/connectors/disktypes/{type}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetDisktypeByTypeReader{formats: a.formats},
 	})
@@ -66,7 +66,7 @@ func (a *Client) GetDisktypes(params *GetDisktypesParams) (*GetDisktypesOK, erro
 		PathPattern:        "/connectors/disktypes",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetDisktypesReader{formats: a.formats},
 	})
@@ -93,7 +93,7 @@ func (a *Client) GetOchestratorsByType(params *GetOchestratorsByTypeParams) (*Ge
 		PathPattern:        "/connectors/ochestrators/{type}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetOchestratorsByTypeReader{formats: a.formats},
 	})
@@ -120,7 +120,7 @@ func (a *Client) GetOrchestratortypes(params *GetOrchestratortypesParams) (*GetO
 		PathPattern:        "/connectors/ochestrators",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetOrchestratortypesReader{formats: a.formats},
 	})
@@ -147,7 +147,7 @@ func (a *Client) GetPlatformVariantByType(params *GetPlatformVariantByTypeParams
 		PathPattern:        "/connectors/variants/{type}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetPlatformVariantByTypeReader{formats: a.formats},
 	})
@@ -174,7 +174,7 @@ func (a *Client) GetPlatformVariants(params *GetPlatformVariantsParams) (*GetPla
 		PathPattern:        "/connectors/variants",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetPlatformVariantsReader{formats: a.formats},
 	})
@@ -201,7 +201,7 @@ func (a *Client) GetPlatforms(params *GetPlatformsParams) (*GetPlatformsOK, erro
 		PathPattern:        "/connectors",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetPlatformsReader{formats: a.formats},
 	})
@@ -228,7 +228,7 @@ func (a *Client) GetRegionAvByType(params *GetRegionAvByTypeParams) (*GetRegionA
 		PathPattern:        "/connectors/regions/av/{type}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetRegionAvByTypeReader{formats: a.formats},
 	})
@@ -255,7 +255,7 @@ func (a *Client) GetRegionRByType(params *GetRegionRByTypeParams) (*GetRegionRBy
 		PathPattern:        "/connectors/regions/r/{type}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetRegionRByTypeReader{formats: a.formats},
 	})
@@ -282,7 +282,7 @@ func (a *Client) GetRegions(params *GetRegionsParams) (*GetRegionsOK, error) {
 		PathPattern:        "/connectors/connectors/regions",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetRegionsReader{formats: a.formats},
 	})
@@ -309,7 +309,7 @@ func (a *Client) GetVMTypeByType(params *GetVMTypeByTypeParams) (*GetVMTypeByTyp
 		PathPattern:        "/connectors/vmtypes/{type}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetVMTypeByTypeReader{formats: a.formats},
 	})
@@ -336,7 +336,7 @@ func (a *Client) GetVMTypes(params *GetVMTypesParams) (*GetVMTypesOK, error) {
 		PathPattern:        "/connectors/connectors/vmtypes",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"", "http", "https"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetVMTypesReader{formats: a.formats},
 	})

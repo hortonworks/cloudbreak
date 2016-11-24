@@ -31,9 +31,13 @@ type CloudbreakUsage struct {
 	 */
 	Costs *float64 `json:"costs,omitempty"`
 
-	/* days since the instance is running
+	/* the day the usage of resources happened
 	 */
 	Day *string `json:"day,omitempty"`
+
+	/* time since the instances are running in millisec
+	 */
+	Duration *string `json:"duration,omitempty"`
 
 	/* group name of instance
 	 */

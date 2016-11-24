@@ -35,7 +35,7 @@ type UpdateCluster struct {
 
 	Unique: true
 	*/
-	Hostgroups []*HostGroupBase `json:"hostgroups,omitempty"`
+	Hostgroups []*HostGroupRequest `json:"hostgroups,omitempty"`
 
 	/* request status
 	 */
@@ -99,7 +99,7 @@ var updateClusterTypeStatusPropEnum []interface{}
 func (m *UpdateCluster) validateStatusEnum(path, location string, value string) error {
 	if updateClusterTypeStatusPropEnum == nil {
 		var res []string
-		if err := json.Unmarshal([]byte(`["SYNC","FULL_SYNC","STOPPED","STARTED"]`), &res); err != nil {
+		if err := json.Unmarshal([]byte(`["SYNC","FULL_SYNC","REPAIR_FAILED_NODES","STOPPED","STARTED"]`), &res); err != nil {
 			return err
 		}
 		for _, v := range res {

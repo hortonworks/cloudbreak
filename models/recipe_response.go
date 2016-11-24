@@ -52,10 +52,6 @@ type RecipeResponse struct {
 	/* resource is visible in account
 	 */
 	Public *bool `json:"public,omitempty"`
-
-	/* recipe timeout in minutes
-	 */
-	Timeout *int32 `json:"timeout,omitempty"`
 }
 
 // Validate validates this recipe response

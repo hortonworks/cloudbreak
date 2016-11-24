@@ -41,13 +41,17 @@ type RecipeRequest struct {
 	*/
 	Plugins []string `json:"plugins,omitempty"`
 
+	/* post-install recipe url
+	 */
+	PostURL *string `json:"postUrl,omitempty"`
+
+	/* pre-install recipe url
+	 */
+	PreURL *string `json:"preUrl,omitempty"`
+
 	/* additional plugin properties
 	 */
 	Properties map[string]string `json:"properties,omitempty"`
-
-	/* recipe timeout in minutes
-	 */
-	Timeout *int32 `json:"timeout,omitempty"`
 }
 
 // Validate validates this recipe request

@@ -211,6 +211,33 @@ func (a *Client) GetConfigs(params *GetConfigsParams) (*GetConfigsOK, error) {
 	return result.(*GetConfigsOK), nil
 }
 
+/*
+UpgradeCluster upgrades the ambari version
+
+Ambari is used to provision the Hadoop clusters.
+*/
+func (a *Client) UpgradeCluster(params *UpgradeClusterParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpgradeClusterParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "upgradeCluster",
+		Method:             "POST",
+		PathPattern:        "/stacks/{id}/cluster/upgrade",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &UpgradeClusterReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport client.Transport) {
 	a.transport = transport
