@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -104,6 +105,13 @@ public class Recipe implements ProvisionEntity {
 
     public void setKeyValues(Map<String, String> keyValues) {
         this.keyValues = keyValues;
+    }
+
+    public void addKeyValue(String key, String value) {
+        if (keyValues == null) {
+            keyValues = new HashMap<>();
+        }
+        keyValues.put(key, value);
     }
 
     public Set<Plugin> getPlugins() {

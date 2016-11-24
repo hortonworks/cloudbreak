@@ -9,6 +9,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
+import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Plugin;
@@ -29,9 +30,11 @@ public class JsonToRecipeConverter extends AbstractConversionServiceAwareConvert
         }
         if (json.getPreUrl() != null) {
             setScriptContent(plugins, json.getPreUrl(), "recipe-pre-install");
+            recipe.addKeyValue(RecipeExecutionPhase.PRE.url(), json.getPreUrl());
         }
         if (json.getPostUrl() != null) {
             setScriptContent(plugins, json.getPostUrl(), "recipe-post-install");
+            recipe.addKeyValue(RecipeExecutionPhase.POST.url(), json.getPostUrl());
         }
         if (plugins.isEmpty()) {
             throw new BadRequestException("At least one script is required");
