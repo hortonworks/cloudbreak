@@ -262,7 +262,7 @@ public class ArmResourceConnector implements ResourceConnector {
     }
 
     private ArmStackView getArmStack(ArmCredentialView armCredentialView, CloudContext cloudContext, CloudStack cloudStack) {
-        return new ArmStackView(cloudStack.getGroups(), new ArmStorageView(armCredentialView, cloudContext, armStorage,
+        return new ArmStackView(cloudContext.getName(), cloudStack.getGroups(), new ArmStorageView(armCredentialView, cloudContext, armStorage,
                 armStorage.getArmAttachedStorageOption(cloudStack.getParameters())));
     }
 

@@ -10,13 +10,16 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmDiskType;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmStorage;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmUtils;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class ArmInstanceView {
 
-    private InstanceTemplate instance;
+    private CloudInstance instance;
+
+    private InstanceTemplate instanceTemplate;
 
     private InstanceGroupType type;
 
@@ -26,26 +29,42 @@ public class ArmInstanceView {
 
     private String groupName;
 
-    public ArmInstanceView(InstanceTemplate instance, InstanceGroupType type, String attachedDiskStorage, String attachedDiskStorageType, String groupName) {
+    private String stackName;
+
+    public ArmInstanceView(String stackName, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
+            String attachedDiskStorageType, String groupName) {
         this.instance = instance;
+        this.instanceTemplate = instance.getTemplate();
         this.type = type;
         this.attachedDiskStorage = attachedDiskStorage;
         this.attachedDiskStorageType = attachedDiskStorageType;
         this.groupName = groupName;
+        this.stackName = stackName;
+    }
+
+    /**
+     * Used in freemarker template.
+     */
+    public String getHostName() {
+        String hostName = instance.getStringParameter(CloudInstance.DISCOVERY_NAME);
+        if (hostName == null) {
+            hostName = stackName + "-" + getInstanceId();
+        }
+        return hostName;
     }
 
     /**
      * Used in freemarker template.
      */
     public String getFlavor() {
-        return instance.getFlavor();
+        return instanceTemplate.getFlavor();
     }
 
     /**
      * Used in freemarker template.
      */
     public boolean isBootDiagnosticsEnabled() {
-        return ArmDiskType.LOCALLY_REDUNDANT.equals(ArmDiskType.getByValue(instance.getVolumeType()));
+        return ArmDiskType.LOCALLY_REDUNDANT.equals(ArmDiskType.getByValue(instanceTemplate.getVolumeType()));
     }
 
     public InstanceGroupType getType() {
@@ -53,17 +72,17 @@ public class ArmInstanceView {
     }
 
     public String getInstanceId() {
-        return ArmUtils.getGroupName(instance.getGroupName()) + instance.getPrivateId();
+        return ArmUtils.getGroupName(instanceTemplate.getGroupName()) + instanceTemplate.getPrivateId();
     }
 
     public long getPrivateId() {
-        return instance.getPrivateId();
+        return instanceTemplate.getPrivateId();
     }
 
     public List<ArmVolumeView> getVolumes() {
         List<ArmVolumeView> list = new ArrayList<>();
         int index = 0;
-        for (Volume volume : instance.getVolumes()) {
+        for (Volume volume : instanceTemplate.getVolumes()) {
             ArmVolumeView cv = new ArmVolumeView(volume, index);
             list.add(cv);
             index++;

@@ -132,7 +132,7 @@ public class ArmTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -152,7 +152,7 @@ public class ArmTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -172,7 +172,7 @@ public class ArmTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -192,7 +192,7 @@ public class ArmTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -213,7 +213,7 @@ public class ArmTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -235,7 +235,7 @@ public class ArmTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -256,7 +256,7 @@ public class ArmTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -277,7 +277,7 @@ public class ArmTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -298,7 +298,7 @@ public class ArmTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -319,7 +319,7 @@ public class ArmTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -340,7 +340,7 @@ public class ArmTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -362,7 +362,7 @@ public class ArmTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
                 Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
