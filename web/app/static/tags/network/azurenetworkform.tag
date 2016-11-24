@@ -150,6 +150,20 @@
                         <!-- .col-sm-9 -->
                     </div>
                     <div class="form-group">
+                        <label class="col-sm-3 control-label" for="azure_network_no_public_ip">{{msg.network_dont_create_publicip}}</label>
+                        <div class="col-sm-9">
+                            <input type="checkbox" name="azure_network_no_public_ip" id="azure_network_no_public_ip" ng-model="network.parameters.noPublicIp">
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="azure_network_no_firewall_rules">{{msg.network_dont_create_firewall_rules}}</label>
+                        <div class="col-sm-9">
+                            <input type="checkbox" name="azure_network_no_firewall_rules" id="azure_network_no_firewall_rules" ng-model="network.parameters.noFirewallRules">
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-3 control-label" for="topologySelect">{{msg.credential_select_topology}}</label>
                         <div class="col-sm-9">
                             <select class="form-control" id="topologySelect" name="topologySelect" ng-model="network.topologyId" ng-options="topology.id as topology.name for topology in $root.topologies | filter: filterByCloudPlatform | orderBy:'name'">

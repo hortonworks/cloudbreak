@@ -27,4 +27,22 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+
+    <div class="form-group" ng-if="network.parameters.noPublicIp">
+        <label class="col-sm-3 control-label" for="{{network.name}}-no-public">{{msg.network_dont_create_publicip}}</label>
+
+        <div class="col-sm-9">
+            <p id="{{network.name}}-no-public" class="form-control-static">{{network.parameters.noPublicIp}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+
+    <div class="form-group" ng-if="network.parameters.noFirewallRules">
+        <label class="col-sm-3 control-label" for="{{network.name}}-no-firewall-rules">{{msg.network_dont_create_firewall_rules}}</label>
+
+        <div class="col-sm-9">
+            <p id="{{network.name}}-no-firewall-rules" class="form-control-static">{{network.parameters.noFirewallRules}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
 </form>
