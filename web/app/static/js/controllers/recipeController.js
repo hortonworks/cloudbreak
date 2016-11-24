@@ -7,7 +7,7 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
 
         var decorateBase64Plugins = function(recipe) {
             recipe.pluginContents = {};
-            recipe.plugins.forEach(function (p) {
+            recipe.plugins.forEach(function(p) {
                 var lines = recipe.pluginContents[p] = {};
                 var files = $base64.decode(p.substring(9)).split('\n');
                 for (var f = 0; f < files.length; f++) {
@@ -139,8 +139,8 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
             }
         }
 
-        $scope.keys = function(obj){
-            return obj? Object.keys(obj) : [];
+        $scope.keys = function(obj) {
+            return obj ? Object.keys(obj) : [];
         }
     }
 ]);

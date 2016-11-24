@@ -338,8 +338,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 delete $scope.cluster.parameters.instanceProfileStrategy;
             } else {
                 if ($scope.cluster.parameters.instanceProfileStrategy == "NONE") {
-                     delete $scope.cluster.parameters.instanceProfile;
-                     delete $scope.cluster.parameters.instanceProfileStrategy;
+                    delete $scope.cluster.parameters.instanceProfile;
+                    delete $scope.cluster.parameters.instanceProfileStrategy;
                 } else if ($scope.cluster.parameters.instanceProfileStrategy == "USE_EXISTING" && $scope.isUndefined($scope.cluster.parameters.instanceProfile)) {
                     $scope.showErrorMessage($rootScope.msg.insprof_role_error);
                     return;
@@ -386,11 +386,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
                 if (!$scope.isUndefined($scope.cluster.ambariStackDetails) &&
                     ($scope.isUndefined($scope.cluster.ambariStackDetails.stack) ||
-                    $scope.isUndefined($scope.cluster.ambariStackDetails.version) ||
-                    $scope.isUndefined($scope.cluster.ambariStackDetails.stackRepoId) ||
-                    $scope.isUndefined($scope.cluster.ambariStackDetails.stackBaseURL) ||
-                    $scope.isUndefined($scope.cluster.ambariStackDetails.utilsRepoId) ||
-                    $scope.isUndefined($scope.cluster.ambariStackDetails.utilsBaseURL))) {
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.version) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.stackRepoId) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.stackBaseURL) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.utilsRepoId) ||
+                        $scope.isUndefined($scope.cluster.ambariStackDetails.utilsBaseURL))) {
                     $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
                     return;
                 } else {
@@ -608,7 +608,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
                     $rootScope.activeCluster = $rootScope.clusters[actClusterIndex] = success;
                     if ($rootScope.activeCluster.blueprintId) {
-                        $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, {id: $rootScope.activeCluster.blueprintId }, true)[0];
+                        $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, {
+                            id: $rootScope.activeCluster.blueprintId
+                        }, true)[0];
                     }
                     if (typeof($rootScope.activeCluster.credentialId) !== "undefined" && $rootScope.activeCluster.credentialId) {
                         if ($rootScope.activeCluster.cloudPlatform) {
@@ -852,7 +854,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         function setNetwork() {
             if ($rootScope.activeCredential != undefined) {
-                var nets = $filter('filter')($rootScope.networks, function(value, index, array) {value.cloudPlatform === $rootScope.activeCredential.cloudPlatform}, true);
+                var nets = $filter('filter')($rootScope.networks, function(value, index, array) {
+                    value.cloudPlatform === $rootScope.activeCredential.cloudPlatform
+                }, true);
                 var orderedNets = $filter('orderBy')($rootScope.networks, 'name', false);
                 if (orderedNets.length > 0) {
                     $scope.cluster.networkId = orderedNets[0].id;
@@ -881,11 +885,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
-         function setOrchestrator() {
+        function setOrchestrator() {
             if ($rootScope.activeCredential !== undefined) {
                 $scope.cluster.orchestrator.type = $rootScope.params.defaultOrchestrators[$rootScope.activeCredential.cloudPlatform];
             }
-         }
+        }
 
         $rootScope.$watch('activeCluster.metadata', function() {
             if ($rootScope.activeCluster.metadata != null) {
@@ -1014,7 +1018,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsRepoId) ||
                         $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsBaseURL)) {
                         $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
-                            return;
+                        return;
                     } else {
                         if ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.verify)) {
                             $rootScope.reinstallClusterObject.ambariStackDetails.verify = false;
@@ -1023,11 +1027,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
                 if (!$scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails) &&
                     ($scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stack) ||
-                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.version) ||
-                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackRepoId) ||
-                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackBaseURL) ||
-                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsRepoId) ||
-                    $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsBaseURL))) {
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.version) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackRepoId) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.stackBaseURL) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsRepoId) ||
+                        $scope.isUndefined($rootScope.reinstallClusterObject.ambariStackDetails.utilsBaseURL))) {
                     $scope.showErrorMessage($rootScope.msg.ambari_repository_config_error);
                     return;
                 } else {
@@ -1267,9 +1271,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.noProxyBeforeAmbari = function() {
-            return $rootScope.activeCluster.orchestrator.type === 'MARATHON'
-            || $rootScope.activeCluster.cloudbreakDetails === null
-            || !$rootScope.activeCluster.cloudbreakDetails
+            return $rootScope.activeCluster.orchestrator.type === 'MARATHON' || $rootScope.activeCluster.cloudbreakDetails === null || !$rootScope.activeCluster.cloudbreakDetails
         }
     }
 ]);

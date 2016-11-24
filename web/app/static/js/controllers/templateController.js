@@ -80,20 +80,22 @@ angular.module('uluwatuControllers').controller('templateController', [
             }
 
             function handleAwsTemplateSuccess(result) {
-                GlobalTemplate.get({ id: result.id }, function(templ) {
-                     $rootScope.templates.push(templ);
-                     initializeAwsTemp();
-                     $scope.showSuccess($filter("format")($rootScope.msg.aws_template_success, String(result.id)));
-                     $scope.awsTemplateForm.$setPristine();
-                     collapseCreateTemplateFormPanel();
-                     $scope.unShowErrorMessageAlert();
+                GlobalTemplate.get({
+                    id: result.id
+                }, function(templ) {
+                    $rootScope.templates.push(templ);
+                    initializeAwsTemp();
+                    $scope.showSuccess($filter("format")($rootScope.msg.aws_template_success, String(result.id)));
+                    $scope.awsTemplateForm.$setPristine();
+                    collapseCreateTemplateFormPanel();
+                    $scope.unShowErrorMessageAlert();
                 });
             }
         }
 
         $scope.createOpenstackTemplate = function() {
             $scope.openstackTemp.cloudPlatform = 'OPENSTACK';
-            if($scope.openstackTemp.volumeCount === 0){
+            if ($scope.openstackTemp.volumeCount === 0) {
                 $scope.openstackTemp.volumeSize = null
             }
 
@@ -322,6 +324,7 @@ angular.module('uluwatuControllers').controller('templateController', [
 
         var defaultAwsVolumeCount = 1;
         var defaultAwsVolumeSize = 100;
+
         function initializeAwsTemp() {
             $scope.awsTemp = {
                 volumeCount: defaultAwsVolumeCount,
@@ -401,10 +404,10 @@ angular.module('uluwatuControllers').controller('templateController', [
             $scope.alertMessage = $scope.statusMessage;
         }
 
-         initializeAzureTemp();
-         initializeAwsTemp();
-         initializeGcpTemp();
-         initializeOpenstackTemp();
-         initializeMesosTemp();
+        initializeAzureTemp();
+        initializeAwsTemp();
+        initializeGcpTemp();
+        initializeOpenstackTemp();
+        initializeMesosTemp();
     }
 ]);

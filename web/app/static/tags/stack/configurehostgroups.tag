@@ -71,14 +71,14 @@
                             <div class="form-group" ng-hide='instanceGroup.nodeCount !== 1'>
                                 <label class="col-sm-3 control-label" for="template-ambari-{{$index}}">{{msg.cluster_form_hostgroup_ambari_label}}</label>
                                 <div class="col-sm-8">
-                                    <input type="checkbox" id="template-ambari-{{$index}}" name="template-ambari-{{$index}}" ng-checked="instanceGroup.type === 'GATEWAY'" ng-disabled="instanceGroup.nodeCount !== 1 || instanceGroup.type === 'GATEWAY'" ng-click="changeAmbariServer(instanceGroup)"/>
+                                    <input type="checkbox" id="template-ambari-{{$index}}" name="template-ambari-{{$index}}" ng-checked="instanceGroup.type === 'GATEWAY'" ng-disabled="instanceGroup.nodeCount !== 1 || instanceGroup.type === 'GATEWAY'" ng-click="changeAmbariServer(instanceGroup)" />
                                     <div class="help-block" ng-hide="ambariServerSelected()"><i class="fa fa-warning"></i> {{msg.cluster_form_hostgroup_ambari_warning}}</div>
                                 </div>
                             </div>
                             <div class="form-group" ng-hide="$root.recipes.length === 0">
-                               <label class="col-sm-3 control-label" for="recipenames{{$index}}">Recipes</label>
+                                <label class="col-sm-3 control-label" for="recipenames{{$index}}">Recipes</label>
                                 <div class="col-sm-8">
-                                    <div id="recipenames{{$index}}" name="recipenames{{$index}}" >
+                                    <div id="recipenames{{$index}}" name="recipenames{{$index}}">
                                         <div class="radio" ng-repeat="recipe in $root.recipes" style="padding-top: 0;">
                                             <div>
                                                 <input type="checkbox" style="margin-right: 10px;" ng-model="$index_recipe.id" name="{{$index}}_{{recipe.id}}" ng-change="changeRecipeRun(recipe.id, instanceGroup.group, $index_recipe.id)">{{recipe.name}}

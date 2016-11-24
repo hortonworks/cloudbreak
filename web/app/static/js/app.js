@@ -324,7 +324,7 @@ cloudbreakApp.directive('enddatevalidation', function($parse) {
     };
 });
 
-cloudbreakApp.directive("subnetrvalidation", function () {
+cloudbreakApp.directive("subnetrvalidation", function() {
     var cidrPattern = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/
     var rfcPattern = /^(10\.|172\.|192\.168)/
     return {

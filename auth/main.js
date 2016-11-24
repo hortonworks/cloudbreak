@@ -56,20 +56,20 @@ function waitingForAddressesAndContinue() {
 }
 
 function debugHeaders(req) {
-  if (process.env.DEBUG) {
-    for(var key in req.headers) {
-        var value = req.headers[key];
-        console.log("[DEBUG]    HEADERS " + key + " : " + value);
+    if (process.env.DEBUG) {
+        for (var key in req.headers) {
+            var value = req.headers[key];
+            console.log("[DEBUG]    HEADERS " + key + " : " + value);
+        }
     }
-  }
 }
 
 function getBasePath(req) {
-    if (req.headers['x-forwarded-for']  !== undefined) {
+    if (req.headers['x-forwarded-for'] !== undefined) {
         if (process.env.SL_BASE_PATH !== undefined) {
             return process.env.SL_BASE_PATH;
         } else {
-           return "/sl";
+            return "/sl";
         }
     }
 
@@ -201,11 +201,11 @@ function continueInit() {
                         getToken(req, res, function(token) {
                             getUserByName(req, res, token, username, function(adminUserData) {
                                 getAccountNum(req, res, adminUserData, function(accountNum) {
-                                    if(accountNum > 1) {
+                                    if (accountNum > 1) {
                                         console.log("User has multiple accounts, disabling login");
                                         res.render('login', {
-                                           basePath: getBasePath(req),
-                                           errorMessage: "User has multiple accounts, please fix before login."
+                                            basePath: getBasePath(req),
+                                            errorMessage: "User has multiple accounts, please fix before login."
                                         });
                                     } else {
                                         console.log("User has only one account, login can be continued");
@@ -224,7 +224,7 @@ function continueInit() {
                                         } else {
                                             res.redirect(getBasePath(req) + '/confirm')
                                         }
-                                     }
+                                    }
                                 });
                             });
                         });
