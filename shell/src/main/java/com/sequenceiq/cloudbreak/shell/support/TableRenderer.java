@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * Utility class used to render tables.
  */
 @Component
-public final class TableRenderer {
+public class TableRenderer {
 
     public static final int THREE = 3;
 
