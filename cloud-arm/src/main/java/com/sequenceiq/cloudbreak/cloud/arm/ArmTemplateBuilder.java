@@ -77,6 +77,8 @@ public class ArmTemplateBuilder {
             model.put("resourceGroupName", armUtils.getCustomResourceGroupName(network));
             model.put("existingVNETName", armUtils.getCustomNetworkId(network));
             model.put("existingSubnetName", armUtils.getCustomSubnetId(network));
+            model.put("noPublicIp", armUtils.isPrivateIp(network));
+            model.put("noFirewallRules", armUtils.isNoSecurityGroups(network));
             String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8"), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;

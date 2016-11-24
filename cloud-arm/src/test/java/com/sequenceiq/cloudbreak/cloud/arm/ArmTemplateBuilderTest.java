@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.arm;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +53,8 @@ import freemarker.template.Configuration;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ArmTemplateBuilderTest {
+    public static final String CORE_CUSTOM_DATA = "CORE";
+    public static final String GATEWAY_CUSTOM_DATA = "GATEWAY";
     @Mock
     private ArmUtils armUtils;
 
@@ -89,8 +94,8 @@ public class ArmTemplateBuilderTest {
         ReflectionTestUtils.setField(armTemplateBuilder, "armTemplatePath", "templates/arm-v2.ftl");
         ReflectionTestUtils.setField(armTemplateBuilder, "armTemplateParametersPath", "templates/parameters.ftl");
         userData = ImmutableMap.of(
-                InstanceGroupType.CORE, "CORE",
-                InstanceGroupType.GATEWAY, "GATEWAY"
+                InstanceGroupType.CORE, CORE_CUSTOM_DATA,
+                InstanceGroupType.GATEWAY, GATEWAY_CUSTOM_DATA
         );
         groups = new ArrayList<>();
         stackName = "testStack";
@@ -107,6 +112,107 @@ public class ArmTemplateBuilderTest {
                 Location.location(Region.region("EU"), new AvailabilityZone("availabilityZone")));
         armCredentialView = new ArmCredentialView(cloudCredential("siq-haas"));
         armStorageView = new ArmStorageView(armCredentialView, cloudContext, armStorage, null);
+        reset(armUtils);
+    }
+
+    @Test
+    public void buildNoPublicIpNoFirewall() {
+        //GIVEN
+        Network network = new Network(new Subnet("testSubnet"));
+        when(armUtils.isPrivateIp(any())).then(invocation -> true);
+        when(armUtils.isNoSecurityGroups(any())).then(invocation -> true);
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
+        cloudStack = new CloudStack(groups, network, image, parameters);
+        armStackView = new ArmStackView(groups, armStorageView);
+        //WHEN
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString, not(containsString("publicIPAddress")));
+        assertThat(templateString, not(containsString("networkSecurityGroups")));
+    }
+
+    @Test
+    public void buildNoPublicIpNoFirewallButExistingNetwork() {
+        //GIVEN
+        when(armUtils.isExistingNetwork(any())).thenReturn(true);
+        when(armUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
+        when(armUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
+        when(armUtils.getCustomSubnetId(any())).thenReturn("existingSubnet");
+        Network network = new Network(new Subnet("testSubnet"));
+        when(armUtils.isPrivateIp(any())).then(invocation -> true);
+        when(armUtils.isNoSecurityGroups(any())).then(invocation -> true);
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
+        cloudStack = new CloudStack(groups, network, image, parameters);
+        armStackView = new ArmStackView(groups, armStorageView);
+        //WHEN
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString, not(containsString("publicIPAddress")));
+        assertThat(templateString, not(containsString("networkSecurityGroups")));
+    }
+
+    @Test
+    public void buildNoPublicIpButFirewall() {
+        //GIVEN
+        Network network = new Network(new Subnet("testSubnet"));
+        when(armUtils.isPrivateIp(any())).then(invocation -> true);
+        when(armUtils.isNoSecurityGroups(any())).then(invocation -> false);
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
+        cloudStack = new CloudStack(groups, network, image, parameters);
+        armStackView = new ArmStackView(groups, armStorageView);
+        //WHEN
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString, not(containsString("publicIPAddress")));
+        assertThat(templateString, containsString("networkSecurityGroups"));
+    }
+
+    @Test
+    public void buildWithPublicIpAndFirewall() {
+        //GIVEN
+        Network network = new Network(new Subnet("testSubnet"));
+        when(armUtils.isPrivateIp(any())).then(invocation -> false);
+        when(armUtils.isNoSecurityGroups(any())).then(invocation -> false);
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
+        cloudStack = new CloudStack(groups, network, image, parameters);
+        armStackView = new ArmStackView(groups, armStorageView);
+        //WHEN
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString, containsString("publicIPAddress"));
+        assertThat(templateString, containsString("networkSecurityGroups"));
+    }
+
+    private String base64EncodedUserData(String data) {
+        return new String(Base64.encodeBase64(String.format("%s", data).getBytes()));
     }
 
     @Test
@@ -120,17 +226,17 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Dynamic\""));
+        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + "\""));
     }
 
-    @Test(expected = AssertionError.class)
-    public void buildWithInstanceGroupTypeCoreShouldThrowAssertionError() throws Exception {
+    @Test
+    public void buildWithInstanceGroupTypeCoreShouldNotContainsGatewayCustomData() throws Exception {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
@@ -140,13 +246,13 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Static\""));
+        assertThat(templateString, not(containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + "\"")));
     }
 
     @Test
@@ -160,17 +266,17 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Static\""));
+        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + "\""));
     }
 
-    @Test(expected = AssertionError.class)
-    public void buildWithInstanceGroupTypeGatewayShouldThrowAssertionError() throws Exception {
+    @Test
+    public void buildWithInstanceGroupTypeGatewayShouldNotContainsCoreCustomData() throws Exception {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
@@ -180,13 +286,13 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Dynamic\""));
+        assertThat(templateString, not(containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + "\"")));
     }
 
     @Test
@@ -201,14 +307,14 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Static\""));
-        assertThat(templateString, containsString("\"publicIPAllocationMethod\": \"Dynamic\""));
+        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + "\""));
+        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + "\""));
     }
 
     @Test
@@ -223,9 +329,9 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -235,6 +341,10 @@ public class ArmTemplateBuilderTest {
     @Test
     public void buildTestExistingVNETName() {
         //GIVEN
+        when(armUtils.isExistingNetwork(any())).thenReturn(true);
+        when(armUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
+        when(armUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
+        when(armUtils.getCustomSubnetId(any())).thenReturn("existingSubnet");
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -244,17 +354,19 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("existingVNETName")));
+        assertThat(templateString, containsString("existingVNETName"));
+        assertThat(templateString, containsString("existingSubnet"));
+        assertThat(templateString, containsString("existingResourceGroup"));
     }
 
     @Test
-    public void buildTestExistingSubnetName() {
+    public void buildTestExistingSubnetNameNotInTemplate() {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
@@ -265,9 +377,9 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -286,9 +398,9 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -307,9 +419,9 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -328,9 +440,9 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -350,9 +462,9 @@ public class ArmTemplateBuilderTest {
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView(groups, armStorageView);
         //WHEN
-        when(armStorage.getImageStorageName(Mockito.any(ArmCredentialView.class), Mockito.any(CloudContext.class), Mockito.anyString(),
-                Mockito.any(ArmAttachedStorageOption.class))).thenReturn("test");
-        when(armStorage.getDiskContainerName(Mockito.any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
