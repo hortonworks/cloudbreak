@@ -729,8 +729,8 @@
                                                         <div class="col-sm-9">
                                                             <select class="form-control" id="ambari_os" name="ambari_os" ng-model="reinstallClusterObject.ambariStackDetails.os">
                                                                 <option style="display:none" value="">select a type</option>
-                                                                <option value="redhat7" >redhat7</option>
-                                                                <option value="redhat6" >redhat6</option>
+                                                                <option value="redhat7">redhat7</option>
+                                                                <option value="redhat6">redhat6</option>
                                                             </select>
                                                         </div>
                                                     </div>
@@ -748,7 +748,7 @@
                                                             <input type="string" name="ambari_stackBaseURL" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackBaseURL" id="ambari_stackBaseURL" placeholder="{{msg.cluster_form_ambari_repo_baseurl_placeholder}}">
                                                         </div>
                                                     </div>
-                                                    <div class="form-group" name="ambari_utilsRepoId1" >
+                                                    <div class="form-group" name="ambari_utilsRepoId1">
                                                         <label class="col-sm-3 control-label" for="ambari_utilsRepoId">{{msg.cluster_form_ambari_repo_utils_repoid_label}}</label>
                                                         <div class="col-sm-9">
                                                             <input type="string" name="ambari_utilsRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.utilsRepoId" id="ambari_utilsRepoId" placeholder="{{msg.cluster_form_ambari_repo_utils_repoid_placeholder}}">

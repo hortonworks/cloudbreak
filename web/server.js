@@ -150,11 +150,11 @@ function continueInit() {
     identityServerClient.registerMethod("retrieveToken", config.identityServerAddress + "oauth/token", "POST");
 
     var proxyRestClient = new restClient.Client();
-    proxyRestClient.on('requestTimeout', function (req) {
+    proxyRestClient.on('requestTimeout', function(req) {
         console.error("A request has expired: " + req);
         req.abort();
     });
-    proxyRestClient.on('responseTimeout', function (res) {
+    proxyRestClient.on('responseTimeout', function(res) {
         console.error("Response has expired: " + res);
     });
     proxyRestClient.registerMethod("subscribe", config.cloudbreakAddress + "/subscriptions", "POST");

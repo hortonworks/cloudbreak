@@ -166,7 +166,7 @@
     <label class="col-sm-3 control-label" for="facing">{{msg.credential_openstack_form_facing_label}}</label>
 
     <div class="col-sm-2">
-        <select  class="form-control" name="facing" id="facing" ng-model="credentialOpenstack.parameters.facing" ng-dropdown required ng-init="credentialOpenstack.parameters.facing='public'">
+        <select class="form-control" name="facing" id="facing" ng-model="credentialOpenstack.parameters.facing" ng-dropdown required ng-init="credentialOpenstack.parameters.facing='public'">
             <option ng-option value="public" ng-selected="true">public</option>
             <option ng-option value="admin">admin</option>
             <option ng-option value="internal">internal</option>

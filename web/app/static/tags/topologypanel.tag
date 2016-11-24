@@ -12,7 +12,7 @@
             <div class="panel-body">
 
                 <p class="btn-row-over-panel" ng-if="isWriteScope('platforms', userDetails.groups)">
-                    <a href="" id="panel-create-topologies-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-topologies-collapse" >
+                    <a href="" id="panel-create-topologies-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-topologies-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> {{msg.topology_form_create}}</span>
                     </a>
                 </p>

@@ -51,7 +51,7 @@
                         <label class="col-sm-3 control-label" for="openstack_publicNetId">{{msg.network_openstack_form_public_network_id_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="openstack_publicNetId" ng-model="network.parameters.publicNetId" ng-minlength="10" ng-maxlength="60" id="openstack_publicNetId" placeholder="{{msg.network_openstack_form_public_network_id_placeholder}}" >
+                            <input type="text" class="form-control" name="openstack_publicNetId" ng-model="network.parameters.publicNetId" ng-minlength="10" ng-maxlength="60" id="openstack_publicNetId" placeholder="{{msg.network_openstack_form_public_network_id_placeholder}}">
                             <div class="help-block" ng-show="openStackNetworkForm_1.openstack_publicNetId.$dirty && openStackNetworkForm_1.openstack_publicNetId.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_publicnetid_invalid}}
                             </div>
@@ -138,7 +138,7 @@
                         <label class="col-sm-3 control-label" for="openstack_publicNetId">{{msg.network_openstack_form_public_network_id_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="openstack_publicNetId" ng-model="network.parameters.publicNetId" ng-minlength="10" ng-maxlength="60" id="openstack_publicNetId" placeholder="{{msg.network_openstack_form_public_network_id_placeholder}}" >
+                            <input type="text" class="form-control" name="openstack_publicNetId" ng-model="network.parameters.publicNetId" ng-minlength="10" ng-maxlength="60" id="openstack_publicNetId" placeholder="{{msg.network_openstack_form_public_network_id_placeholder}}">
                             <div class="help-block" ng-show="openStackNetworkForm_2.openstack_publicNetId.$dirty && openStackNetworkForm_2.openstack_publicNetId.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_publicnetid_invalid}}
                             </div>
@@ -239,7 +239,7 @@
                         <label class="col-sm-3 control-label" for="openstack_publicNetId">{{msg.network_openstack_form_public_network_id_label}}</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="openstack_publicNetId" ng-model="network.parameters.publicNetId" ng-minlength="10" ng-maxlength="60" id="openstack_publicNetId" placeholder="{{msg.network_openstack_form_public_network_id_placeholder}}" >
+                            <input type="text" class="form-control" name="openstack_publicNetId" ng-model="network.parameters.publicNetId" ng-minlength="10" ng-maxlength="60" id="openstack_publicNetId" placeholder="{{msg.network_openstack_form_public_network_id_placeholder}}">
                             <div class="help-block" ng-show="openStackNetworkForm_3.openstack_publicNetId.$dirty && openStackNetworkForm_3.openstack_publicNetId.$invalid">
                                 <i class="fa fa-warning"></i> {{msg.network_publicnetid_invalid}}
                             </div>
