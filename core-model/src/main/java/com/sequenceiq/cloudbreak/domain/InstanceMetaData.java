@@ -113,12 +113,12 @@ public class InstanceMetaData implements ProvisionEntity {
         return instanceGroup;
     }
 
-    public String getInstanceGroupName() {
-        return instanceGroup.getGroupName();
-    }
-
     public void setInstanceGroup(InstanceGroup instanceGroup) {
         this.instanceGroup = instanceGroup;
+    }
+
+    public String getInstanceGroupName() {
+        return instanceGroup.getGroupName();
     }
 
     public String getPrivateIp() {
@@ -181,12 +181,15 @@ public class InstanceMetaData implements ProvisionEntity {
         return discoveryFQDN;
     }
 
-    public String getDiscoveryName() {
-        return discoveryFQDN.split("\\.")[0];
-    }
-
     public void setDiscoveryFQDN(String discoveryFQDN) {
         this.discoveryFQDN = discoveryFQDN;
+    }
+
+    public String getDiscoveryName() {
+        if (discoveryFQDN == null) {
+            return null;
+        }
+        return discoveryFQDN.split("\\.")[0];
     }
 
     public InstanceStatus getInstanceStatus() {
