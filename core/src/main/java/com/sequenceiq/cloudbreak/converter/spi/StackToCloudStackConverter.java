@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.spi;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,13 +81,14 @@ public class StackToCloudStackConverter {
             // existing instances
             for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
                 InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-                instances.add(buildInstance(metaData.getInstanceId(), template, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
+                instances.add(buildInstance(metaData.getInstanceId(), template, instanceGroup.getGroupName(), metaData.getPrivateId(),
+                        metaData.getDiscoveryName(), status));
             }
             // new instances
             int existingNodesSize = instances.size();
             if (existingNodesSize < desiredNodeCount) {
                 for (long i = 0; i < desiredNodeCount - existingNodesSize; i++) {
-                    instances.add(buildInstance(null, template, instanceGroup.getGroupName(), privateId++, InstanceStatus.CREATE_REQUESTED));
+                    instances.add(buildInstance(null, template, instanceGroup.getGroupName(), privateId++, null, InstanceStatus.CREATE_REQUESTED));
                 }
             }
             groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances, buildSecurity(instanceGroup)));
@@ -116,9 +118,13 @@ public class StackToCloudStackConverter {
         return cloudInstances;
     }
 
-    public CloudInstance buildInstance(String id, Template template, String name, Long privateId, InstanceStatus status) {
+    public CloudInstance buildInstance(String id, Template template, String name, Long privateId, String hostName, InstanceStatus status) {
         InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status);
-        return new CloudInstance(id, instanceTemplate);
+        Map<String, Object> params = new HashMap<>();
+        if (hostName != null) {
+            params.put(CloudInstance.DISCOVERY_NAME, hostName);
+        }
+        return new CloudInstance(id, instanceTemplate, params);
     }
 
     public InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status) {
