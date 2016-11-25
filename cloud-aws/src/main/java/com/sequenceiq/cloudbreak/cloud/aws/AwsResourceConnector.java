@@ -588,8 +588,22 @@ public class AwsResourceConnector implements ResourceConnector {
         }
         DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
                 .withShouldDecrementDesiredCapacity(true);
-        amazonASClient.detachInstances(detachInstancesRequest);
-        amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
+        try {
+            amazonASClient.detachInstances(detachInstancesRequest);
+        } catch (AmazonServiceException e) {
+            if (instanceIds.size() != 1 || !"ValidationError".equals(e.getErrorCode()) || !e.getErrorMessage().contains("not part of Auto Scaling")) {
+                throw e;
+            }
+            LOGGER.info(e.getErrorMessage());
+        }
+        try {
+            amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
+        } catch (AmazonServiceException e) {
+            if (!"InvalidInstanceID.NotFound".equals(e.getErrorCode())) {
+                throw e;
+            }
+            LOGGER.info(e.getErrorMessage());
+        }
         LOGGER.info("Terminated instances in stack '{}': '{}'", auth.getCloudContext().getId(), instanceIds);
         return check(auth, resources);
     }
