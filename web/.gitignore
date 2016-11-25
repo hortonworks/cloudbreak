@@ -6,6 +6,6 @@ atlassian-ide-plugin.xml
 connection.properties
 node_modules/
 npm-debug.log
-app/static/bower_components
+#app/static/bower_components
 start-local.sh
 build.sh
