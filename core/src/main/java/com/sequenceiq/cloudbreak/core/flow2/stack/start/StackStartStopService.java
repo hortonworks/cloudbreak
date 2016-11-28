@@ -106,7 +106,7 @@ public class StackStartStopService {
         if (stack != null && stack.isStopRequested()) {
             return true;
         } else {
-            LOGGER.info("Stack stop has not been requested, stop stack later.");
+            LOGGER.info("Stack stop has not been requested and stack isn, stop stack later.");
             return false;
         }
     }
