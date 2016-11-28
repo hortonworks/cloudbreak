@@ -111,25 +111,15 @@ func TestFetchClusterImplNotReduced(t *testing.T) {
 	}
 }
 
-func TestDescribeClusterImpl(t *testing.T) {
-	fetchCluster := func(*models.StackResponse, bool) (*ClusterSkeleton, error) {
-		return &ClusterSkeleton{ClusterAndAmbariPassword: "password"}, nil
-	}
-
-	skeleton := describeClusterImpl("name", "json", func(string) *models.StackResponse { return nil }, fetchCluster)
-
-	if len(skeleton.ClusterAndAmbariPassword) != 0 {
-		t.Errorf("password not cleaned up, %s", skeleton.ClusterAndAmbariPassword)
-	}
-}
-
 func TestCreateClusterImplMinimal(t *testing.T) {
 	skeleton := &ClusterSkeleton{
-		ClusterName:              "cluster-name",
-		HDPVersion:               "hdp-version",
-		ClusterAndAmbariUser:     "user",
-		ClusterAndAmbariPassword: "passwd",
-		Worker: InstanceConfig{InstanceCount: 3},
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			ClusterName:              "cluster-name",
+			HDPVersion:               "hdp-version",
+			ClusterAndAmbariUser:     "user",
+			ClusterAndAmbariPassword: "passwd",
+			Worker: InstanceConfig{InstanceCount: 3},
+		},
 	}
 
 	actualId, actualStack, actualCluster := executeStackCreation(skeleton)
@@ -147,8 +137,10 @@ func TestCreateClusterImplFull(t *testing.T) {
 	inputs := make(map[string]string)
 	inputs["key"] = "value"
 	skeleton := &ClusterSkeleton{
-		ClusterInputs: inputs,
-		InstanceRole:  "role",
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			ClusterInputs: inputs,
+			InstanceRole:  "role",
+		},
 		HiveMetastore: &HiveMetastore{},
 	}
 	skeleton.HiveMetastore.Name = "ms-name"
@@ -165,7 +157,9 @@ func TestCreateClusterImplFull(t *testing.T) {
 
 func TestCreateClusterImplNewRole(t *testing.T) {
 	skeleton := &ClusterSkeleton{
-		InstanceRole: "CREATE",
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			InstanceRole: "CREATE",
+		},
 	}
 
 	_, actualStack, _ := executeStackCreation(skeleton)

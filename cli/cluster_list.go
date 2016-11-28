@@ -47,7 +47,7 @@ func ListClusters(c *cli.Context) error {
 }
 
 func listClustersImpl(getStacks func(*stacks.GetStacksUserParams) (*stacks.GetStacksUserOK, error),
-	fetchCluster func(*models.StackResponse, bool) (*ClusterSkeleton, error), writer func([]string, []Row)) error {
+	fetchCluster func(*models.StackResponse, bool) (*ClusterSkeletonResult, error), writer func([]string, []Row)) error {
 
 	respStacks, err := getStacks(&stacks.GetStacksUserParams{})
 	if err != nil {
@@ -55,7 +55,7 @@ func listClustersImpl(getStacks func(*stacks.GetStacksUserParams) (*stacks.GetSt
 		return err
 	}
 	var wg sync.WaitGroup
-	clusters := make([]ClusterSkeleton, len(respStacks.Payload))
+	clusters := make([]ClusterSkeletonResult, len(respStacks.Payload))
 	for i, stack := range respStacks.Payload {
 		wg.Add(1)
 		go func(i int, stack *models.StackResponse) {

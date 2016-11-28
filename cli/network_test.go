@@ -13,9 +13,11 @@ import (
 
 func TestCreateNetworkImplCustomNetwork(t *testing.T) {
 	skeleton := ClusterSkeleton{
-		Network: &Network{
-			VpcId:    "vpcid",
-			SubnetId: "subnetid",
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			Network: &Network{
+				VpcId:    "vpcid",
+				SubnetId: "subnetid",
+			},
 		},
 	}
 	c := make(chan int64, 1)

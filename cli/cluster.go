@@ -26,7 +26,7 @@ func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
 	return stack.Payload
 }
 
-func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeleton, error) {
+func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeletonResult, error) {
 	defer timeTrack(time.Now(), "fetch cluster")
 
 	return fetchClusterImpl(stack, reduced,
@@ -46,7 +46,7 @@ func fetchClusterImpl(stack *models.StackResponse, reduced bool,
 	getCredential func(int64) (*models.CredentialResponse, error),
 	getNetwork func(int64) *models.NetworkResponse,
 	getRdsConfig func(int64) *models.RDSConfigResponse,
-	getRecipe func(*recipes.GetRecipesIDParams) (*recipes.GetRecipesIDOK, error)) (*ClusterSkeleton, error) {
+	getRecipe func(*recipes.GetRecipesIDParams) (*recipes.GetRecipesIDOK, error)) (*ClusterSkeletonResult, error) {
 
 	var wg sync.WaitGroup
 
@@ -132,7 +132,7 @@ func fetchClusterImpl(stack *models.StackResponse, reduced bool,
 	// synchronize here
 	wg.Wait()
 
-	clusterSkeleton := &ClusterSkeleton{}
+	clusterSkeleton := &ClusterSkeletonResult{}
 	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, rdsConfig, recipeMap)
 
 	return clusterSkeleton, nil
@@ -159,10 +159,9 @@ func DescribeCluster(c *cli.Context) error {
 
 func describeClusterImpl(clusterName string, format string,
 	getCluster func(string) *models.StackResponse,
-	fetchCluster func(*models.StackResponse, bool) (*ClusterSkeleton, error)) *ClusterSkeleton {
+	fetchCluster func(*models.StackResponse, bool) (*ClusterSkeletonResult, error)) *ClusterSkeletonResult {
 	stack := getCluster(clusterName)
 	clusterSkeleton, _ := fetchCluster(stack, false)
-	clusterSkeleton.ClusterAndAmbariPassword = ""
 	if format == "table" {
 		clusterSkeleton.Master.Recipes = []Recipe{}
 		clusterSkeleton.Worker.Recipes = []Recipe{}
@@ -553,26 +552,28 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 
 func getBaseSkeleton() *ClusterSkeleton {
 	return &ClusterSkeleton{
-		ClusterType: getDefaultClusterType(),
-		HDPVersion:  "2.5",
-		Master: InstanceConfig{
-			InstanceType: "m4.xlarge",
-			VolumeType:   "gp2",
-			VolumeCount:  &(&int32Wrapper{1}).i,
-			VolumeSize:   &(&int32Wrapper{32}).i,
-			Recipes:      []Recipe{},
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			ClusterType: getDefaultClusterType(),
+			HDPVersion:  "2.5",
+			Master: InstanceConfig{
+				InstanceType: "m4.xlarge",
+				VolumeType:   "gp2",
+				VolumeCount:  &(&int32Wrapper{1}).i,
+				VolumeSize:   &(&int32Wrapper{32}).i,
+				Recipes:      []Recipe{},
+			},
+			Worker: InstanceConfig{
+				InstanceType:  "m3.xlarge",
+				VolumeType:    "ephemeral",
+				VolumeCount:   &(&int32Wrapper{2}).i,
+				VolumeSize:    &(&int32Wrapper{40}).i,
+				InstanceCount: 2,
+				Recipes:       []Recipe{},
+			},
+			WebAccess:    true,
+			InstanceRole: "CREATE",
+			Network:      &Network{},
 		},
-		Worker: InstanceConfig{
-			InstanceType:  "m3.xlarge",
-			VolumeType:    "ephemeral",
-			VolumeCount:   &(&int32Wrapper{2}).i,
-			VolumeSize:    &(&int32Wrapper{40}).i,
-			InstanceCount: 2,
-			Recipes:       []Recipe{},
-		},
-		WebAccess:      true,
-		InstanceRole:   "CREATE",
-		Network:        &Network{},
 		HiveMetastore:  &HiveMetastore{},
 		Configurations: []models.Configurations{},
 	}

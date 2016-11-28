@@ -12,7 +12,9 @@ import (
 
 func TestCreateSecurityGroupImplNoWebAccess(t *testing.T) {
 	skeleton := ClusterSkeleton{
-		RemoteAccess: "remote-access",
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			RemoteAccess: "remote-access",
+		},
 	}
 	c := make(chan int64, 1)
 	expectedId := int64(1)
@@ -54,7 +56,7 @@ func TestCreateSecurityGroupImplNoWebAccess(t *testing.T) {
 }
 
 func TestCreateSecurityGroupImplWebAccess(t *testing.T) {
-	skeleton := ClusterSkeleton{WebAccess: true}
+	skeleton := ClusterSkeleton{ClusterSkeletonBase: ClusterSkeletonBase{WebAccess: true}}
 	c := make(chan int64, 1)
 	var actualGroup *models.SecurityGroupRequest
 	postSecGroup := func(params *securitygroups.PostSecuritygroupsAccountParams) (*securitygroups.PostSecuritygroupsAccountOK, error) {

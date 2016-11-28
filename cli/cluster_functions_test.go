@@ -8,8 +8,8 @@ import (
 	"github.com/hortonworks/hdc-cli/models"
 )
 
-func clusterSkeleton(stackParams map[string]string, credParams map[string]interface{}, netParams map[string]interface{}) (ClusterSkeleton, *models.StackResponse, *models.CredentialResponse, *models.BlueprintResponse, *models.NetworkResponse) {
-	skeleton := ClusterSkeleton{}
+func clusterSkeleton(stackParams map[string]string, credParams map[string]interface{}, netParams map[string]interface{}) (ClusterSkeletonResult, *models.StackResponse, *models.CredentialResponse, *models.BlueprintResponse, *models.NetworkResponse) {
+	skeleton := ClusterSkeletonResult{}
 	sr := models.StackResponse{
 		Name:         "stack-name",
 		Status:       &(&stringWrapper{"status"}).s,

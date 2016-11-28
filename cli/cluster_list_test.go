@@ -20,14 +20,16 @@ func TestListClustersImpl(t *testing.T) {
 		return &stacks.GetStacksUserOK{Payload: resps}, nil
 	}
 	mtx := sync.Mutex{}
-	expected := make([]ClusterSkeleton, 0)
-	fetchCluster := func(stack *models.StackResponse, reduced bool) (*ClusterSkeleton, error) {
+	expected := make([]ClusterSkeletonResult, 0)
+	fetchCluster := func(stack *models.StackResponse, reduced bool) (*ClusterSkeletonResult, error) {
 		u := strconv.FormatInt(*stack.ID, 10)
-		skeleton := ClusterSkeleton{
-			ClusterName: "name" + u,
-			HDPVersion:  "version" + u,
-			ClusterType: "type" + u,
-			Status:      "status" + u,
+		skeleton := ClusterSkeletonResult{
+			ClusterSkeletonBase: ClusterSkeletonBase{
+				ClusterName: "name" + u,
+				HDPVersion:  "version" + u,
+				ClusterType: "type" + u,
+			},
+			Status: "status" + u,
 		}
 
 		mtx.Lock()

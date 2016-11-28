@@ -18,7 +18,7 @@ func TestClusterSkeletonValidateAllMissing(t *testing.T) {
 }
 
 func TestClusterSkeletonValidateInstanceCountIsZero(t *testing.T) {
-	skeleton := ClusterSkeleton{Worker: InstanceConfig{InstanceCount: -1}}
+	skeleton := ClusterSkeleton{ClusterSkeletonBase: ClusterSkeletonBase{Worker: InstanceConfig{InstanceCount: -1}}}
 
 	errors := skeleton.Validate()
 
@@ -31,15 +31,17 @@ func TestClusterSkeletonValidateInstanceCountIsZero(t *testing.T) {
 
 func TestClusterSkeletonValidateAllGood(t *testing.T) {
 	skeleton := ClusterSkeleton{
-		ClusterName:              "name",
-		HDPVersion:               "2.5",
-		ClusterType:              "type",
-		Worker:                   InstanceConfig{InstanceCount: 1},
-		SSHKeyName:               "ssh",
-		RemoteAccess:             "remote",
-		WebAccess:                true,
-		ClusterAndAmbariUser:     "user",
-		ClusterAndAmbariPassword: "pass",
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			ClusterName:              "name",
+			HDPVersion:               "2.5",
+			ClusterType:              "type",
+			Worker:                   InstanceConfig{InstanceCount: 1},
+			SSHKeyName:               "ssh",
+			RemoteAccess:             "remote",
+			WebAccess:                true,
+			ClusterAndAmbariUser:     "user",
+			ClusterAndAmbariPassword: "pass",
+		},
 	}
 
 	errors := skeleton.Validate()
@@ -176,15 +178,17 @@ func TestHiveMetastoreSkeletonValidateAllGoodExisting(t *testing.T) {
 
 func TestInvalidHDPVersion(t *testing.T) {
 	skeleton := ClusterSkeleton{
-		ClusterName:              "name",
-		HDPVersion:               "2.4",
-		ClusterType:              "type",
-		Worker:                   InstanceConfig{InstanceCount: 1},
-		SSHKeyName:               "ssh",
-		RemoteAccess:             "remote",
-		WebAccess:                true,
-		ClusterAndAmbariUser:     "user",
-		ClusterAndAmbariPassword: "pass",
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			ClusterName:              "name",
+			HDPVersion:               "2.4",
+			ClusterType:              "type",
+			Worker:                   InstanceConfig{InstanceCount: 1},
+			SSHKeyName:               "ssh",
+			RemoteAccess:             "remote",
+			WebAccess:                true,
+			ClusterAndAmbariUser:     "user",
+			ClusterAndAmbariPassword: "pass",
+		},
 	}
 
 	errors := skeleton.Validate()
@@ -196,15 +200,17 @@ func TestInvalidHDPVersion(t *testing.T) {
 
 func TestInvalidHDPVersionSimpleNumber(t *testing.T) {
 	skeleton := ClusterSkeleton{
-		ClusterName:              "name",
-		HDPVersion:               "2",
-		ClusterType:              "type",
-		Worker:                   InstanceConfig{InstanceCount: 1},
-		SSHKeyName:               "ssh",
-		RemoteAccess:             "remote",
-		WebAccess:                true,
-		ClusterAndAmbariUser:     "user",
-		ClusterAndAmbariPassword: "pass",
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			ClusterName:              "name",
+			HDPVersion:               "2",
+			ClusterType:              "type",
+			Worker:                   InstanceConfig{InstanceCount: 1},
+			SSHKeyName:               "ssh",
+			RemoteAccess:             "remote",
+			WebAccess:                true,
+			ClusterAndAmbariUser:     "user",
+			ClusterAndAmbariPassword: "pass",
+		},
 	}
 
 	errors := skeleton.Validate()
@@ -216,15 +222,17 @@ func TestInvalidHDPVersionSimpleNumber(t *testing.T) {
 
 func TestInvalidHDPVersionForNonNumber(t *testing.T) {
 	skeleton := ClusterSkeleton{
-		ClusterName:              "name",
-		HDPVersion:               "something",
-		ClusterType:              "type",
-		Worker:                   InstanceConfig{InstanceCount: 1},
-		SSHKeyName:               "ssh",
-		RemoteAccess:             "remote",
-		WebAccess:                true,
-		ClusterAndAmbariUser:     "user",
-		ClusterAndAmbariPassword: "pass",
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			ClusterName:              "name",
+			HDPVersion:               "something",
+			ClusterType:              "type",
+			Worker:                   InstanceConfig{InstanceCount: 1},
+			SSHKeyName:               "ssh",
+			RemoteAccess:             "remote",
+			WebAccess:                true,
+			ClusterAndAmbariUser:     "user",
+			ClusterAndAmbariPassword: "pass",
+		},
 	}
 
 	errors := skeleton.Validate()

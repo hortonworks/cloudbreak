@@ -73,7 +73,7 @@ func TestCreateCredential(t *testing.T) {
 }
 
 func TestCopyDefaultCredentialImpl(t *testing.T) {
-	skeleton := ClusterSkeleton{SSHKeyName: "ssh-key"}
+	skeleton := ClusterSkeleton{ClusterSkeletonBase: ClusterSkeletonBase{SSHKeyName: "ssh-key"}}
 	c := make(chan int64, 1)
 	getCred := func(name string) models.CredentialResponse {
 		return models.CredentialResponse{}

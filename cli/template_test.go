@@ -11,17 +11,19 @@ import (
 
 func TestCreateTemplateImpl(t *testing.T) {
 	skeleton := ClusterSkeleton{
-		Master: InstanceConfig{
-			InstanceType: "master",
-			VolumeType:   "master-volume",
-			VolumeSize:   &(&int32Wrapper{32}).i,
-			VolumeCount:  &(&int32Wrapper{1}).i,
-		},
-		Worker: InstanceConfig{
-			InstanceType: "worker",
-			VolumeType:   "worker-volume",
-			VolumeSize:   &(&int32Wrapper{64}).i,
-			VolumeCount:  &(&int32Wrapper{2}).i,
+		ClusterSkeletonBase: ClusterSkeletonBase{
+			Master: InstanceConfig{
+				InstanceType: "master",
+				VolumeType:   "master-volume",
+				VolumeSize:   &(&int32Wrapper{32}).i,
+				VolumeCount:  &(&int32Wrapper{1}).i,
+			},
+			Worker: InstanceConfig{
+				InstanceType: "worker",
+				VolumeType:   "worker-volume",
+				VolumeSize:   &(&int32Wrapper{64}).i,
+				VolumeCount:  &(&int32Wrapper{2}).i,
+			},
 		},
 	}
 	c := make(chan int64, 2)

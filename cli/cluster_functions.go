@@ -26,7 +26,7 @@ func (c *ClusterSkeleton) JsonPretty() string {
 	return string(j)
 }
 
-func (c *ClusterSkeleton) DataAsStringArray() []string {
+func (c *ClusterSkeletonResult) DataAsStringArray() []string {
 	return []string{c.ClusterName, c.HDPVersion, c.ClusterType, c.Master.Yaml(), c.Worker.Yaml(),
 		c.SSHKeyName, c.RemoteAccess, strconv.FormatBool(c.WebAccess), c.ClusterAndAmbariUser, c.Status, c.StatusReason}
 }
@@ -71,7 +71,7 @@ func assembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 	return skeleton
 }
 
-func (c *ClusterSkeleton) fill(
+func (c *ClusterSkeletonResult) fill(
 	stack *models.StackResponse,
 	credential *models.CredentialResponse,
 	blueprint *models.BlueprintResponse,
@@ -108,7 +108,6 @@ func (c *ClusterSkeleton) fill(
 		}
 
 		c.ClusterAndAmbariUser = SafeStringConvert(stack.Cluster.UserName)
-		c.ClusterAndAmbariPassword = SafeStringConvert(stack.Cluster.Password)
 		if len(stack.Cluster.BlueprintInputs) > 0 {
 			var inputs = make(map[string]string)
 			for _, input := range stack.Cluster.BlueprintInputs {
@@ -133,10 +132,8 @@ func (c *ClusterSkeleton) fill(
 	}
 
 	if rdsConfig != nil {
-		rdsConfig := HiveMetastore{
-			MetaStore{
-				Name: rdsConfig.Name,
-			},
+		rdsConfig := HiveMetastoreResult{
+			Name: rdsConfig.Name,
 		}
 		c.HiveMetastore = &rdsConfig
 	}
