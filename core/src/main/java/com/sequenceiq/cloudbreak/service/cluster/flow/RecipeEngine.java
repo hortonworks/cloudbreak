@@ -132,7 +132,7 @@ public class RecipeEngine {
         FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
         FileSystemConfiguration fsConfiguration = getFileSystemConfiguration(fs);
         List<RecipeScript> recipeScripts = fsConfigurator.getScripts(fsConfiguration);
-        List<Recipe> fsRecipes = recipeBuilder.buildRecipes(scriptName, recipeScripts, fs.getProperties());
+        List<Recipe> fsRecipes = recipeBuilder.buildRecipes(scriptName, recipeScripts);
         for (Recipe recipe : fsRecipes) {
             for (HostGroup hostGroup : hostGroups) {
                 hostGroup.addRecipe(recipe);
@@ -181,7 +181,7 @@ public class RecipeEngine {
                 if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", cluster.getUserName());
                     RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL);
-                    Recipe recipe = recipeBuilder.buildRecipes("hdfs-home", Collections.singletonList(recipeScript), Collections.emptyMap()).get(0);
+                    Recipe recipe = recipeBuilder.buildRecipes("hdfs-home", Collections.singletonList(recipeScript)).get(0);
                     hostGroup.addRecipe(recipe);
                     break;
                 }
@@ -201,7 +201,7 @@ public class RecipeEngine {
                         String script = FileReaderUtils.readFileFromClasspath("scripts/smartsense-capture-schedule.sh");
                         RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL);
                         Recipe recipe = recipeBuilder.buildRecipes("smartsense-capture-schedule",
-                                Collections.singletonList(recipeScript), Collections.emptyMap()).get(0);
+                                Collections.singletonList(recipeScript)).get(0);
                         hostGroup.addRecipe(recipe);
                         break;
                     }

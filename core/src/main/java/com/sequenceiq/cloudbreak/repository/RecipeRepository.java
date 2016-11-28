@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @EntityType(entityClass = Recipe.class)
@@ -19,6 +20,8 @@ public interface RecipeRepository extends CrudRepository<Recipe, Long> {
     Set<Recipe> findAllInAccount(@Param("account") String account);
 
     Set<Recipe> findForUser(@Param("owner") String userId);
+
+    Set<Recipe> findByType(@Param("recipeType") RecipeType recipeType);
 
     Recipe findByNameForUser(@Param("name") String name, @Param("owner") String userId);
 

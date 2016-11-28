@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -41,8 +42,10 @@ public class PillarSave implements OrchestratorBootstrap {
         this.sc = sc;
         Map<String, Map<String, List<String>>> scripts = new HashMap<>();
         for (String hostGroup : recipes.keySet()) {
-            List<String> pre = recipes.get(hostGroup).stream().filter(h -> h.getPreInstall() != null).map(RecipeModel::getName).collect(Collectors.toList());
-            List<String> post = recipes.get(hostGroup).stream().filter(h -> h.getPostInstall() != null).map(RecipeModel::getName).collect(Collectors.toList());
+            List<String> pre = recipes.get(hostGroup).stream().
+                    filter(h -> h.getRecipeType() == RecipeType.PRE).map(RecipeModel::getName).collect(Collectors.toList());
+            List<String> post = recipes.get(hostGroup).stream().
+                    filter(h -> h.getRecipeType() == RecipeType.POST).map(RecipeModel::getName).collect(Collectors.toList());
             Map<String, List<String>> prePostScripts = new HashMap<>();
             prePostScripts.put("pre", pre);
             prePostScripts.put("post", post);

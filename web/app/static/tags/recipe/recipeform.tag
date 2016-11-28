@@ -17,45 +17,40 @@
     </div>
 
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="recipetype">{{msg.plugins_label}}</label>
+        <label class="col-sm-3 control-label" for="recipeType">{{msg.recipe_execution_type_label}}</label>
         <div class="col-sm-9">
             <div class="row">
                 <div class="col-md-3">
-                    <select class="form-control" id="recipetype" name="recipetype" ng-options="recipeType.key as recipeType.value for recipeType in $root.config.RECIPE_TYPE.content_types" ng-model="recipeType"></select>
+                    <select class="form-control" id="recipeType" name="recipeType" ng-options="recipeType.key as recipeType.value for recipeType in $root.config.RECIPE_EXECUTION_TYPE.execution_types" ng-model="recipe.recipeType"></select>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="form-group" ng-show="recipeType == 'FILE'" ng-class="{ 'has-error': !fileReadAvailable }">
-        <label class="col-sm-3 control-label" for="preInstallFile" style="border-bottom: 0">{{msg.recipe_pre_install_file}}</label>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="recipeContentType">{{msg.plugins_label}}</label>
         <div class="col-sm-9">
-            <input type="file" name="preInstallFile" id="preInstallFile" onchange="angular.element(this).scope().generateStoredPluginFromFile()" ng-disabled="{{!fileReadAvailable}}" />
+            <div class="row">
+                <div class="col-md-3">
+                    <select class="form-control" id="recipeContentType" name="recipeContentType" ng-options="recipeContentType.key as recipeContentType.value for recipeContentType in $root.config.RECIPE_CONTENT_TYPE.content_types" ng-model="recipeContentType"></select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group" ng-show="recipeContentType == 'FILE'" ng-class="{ 'has-error': !fileReadAvailable }">
+        <label class="col-sm-3 control-label" for="recipeFile" style="border-bottom: 0">{{msg.recipe_file}}</label>
+        <div class="col-sm-9">
+            <input type="file" name="recipeFile" id="recipeFile" onchange="angular.element(this).scope().generateStoredContentFromFile()" ng-disabled="{{!fileReadAvailable}}" />
             <div class="help-block" ng-show="!fileReadAvailable"><i class="fa fa-warning"></i> {{msg.file_upload_not_allowed}}
             </div>
         </div>
     </div>
 
-    <div class="form-group" ng-show="recipeType == 'FILE'" ng-class="{ 'has-error': !fileReadAvailable }">
-        <label class="col-sm-3 control-label" for="postInstallFile" style="border-bottom: 0">{{msg.recipe_post_install_file}}</label>
+    <div class="form-group" ng-show="recipeContentType == 'SCRIPT'">
+        <label class="col-sm-3 control-label" for="recipeScript" style="border-bottom: 0">{{msg.recipe_script}}</label>
         <div class="col-sm-9">
-            <input type="file" name="postInstallFile" id="postInstallFile" onchange="angular.element(this).scope().generateStoredPluginFromFile()" ng-disabled="{{!fileReadAvailable}}" />
-            <div class="help-block" ng-show="!fileReadAvailable"><i class="fa fa-warning"></i> {{msg.file_upload_not_allowed}}
-            </div>
-        </div>
-    </div>
-
-    <div class="form-group" ng-show="recipeType == 'SCRIPT'">
-        <label class="col-sm-3 control-label" for="preInstallScript" style="border-bottom: 0">{{msg.recipe_pre_install_script}}</label>
-        <div class="col-sm-9">
-            <textarea name="preInstallScript" id="preInstallScript" class="form-control" ng-model="$parent.preInstallScript" ng-change="generateStoredPluginFromText()" rows=10 ng-attr-placeholder="{{msg.recipe_pre_install_script_placeholder}}"></textarea>
-        </div>
-    </div>
-
-    <div class="form-group" ng-show="recipeType == 'SCRIPT'">
-        <label class="col-sm-3 control-label" for="postInstallScript" style="border-bottom: 0">{{msg.recipe_post_install_script}}</label>
-        <div class="col-sm-9">
-            <textarea name="postInstallScript" id="postInstallScript" class="form-control" ng-model="$parent.postInstallScript" ng-change="generateStoredPluginFromText()" rows=10 ng-attr-placeholder="{{msg.recipe_post_install_script_placeholder}}"></textarea>
+            <textarea name="recipeScript" id="recipeScript" class="form-control" ng-model="$parent.recipeScript" rows=10 ng-attr-placeholder="{{msg.recipe_script_placeholder}}"></textarea>
         </div>
     </div>
 
@@ -68,7 +63,7 @@
 
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
-            <a id="createRecipe" class="btn btn-success btn-block" ng-disabled="recipeCreationForm.$invalid || (recipeType == 'SCRIPT' && $parent.preInstallScript == '' && $parent.postInstallScript == '')" ng-click="createRecipe()" role="button"><i class="fa fa-plus fa-fw"></i>{{msg.recipe_form_create}}</a>
+            <a id="createRecipe" class="btn btn-success btn-block" ng-disabled="recipeCreationForm.$invalid || (recipeContentType == 'SCRIPT' && $parent.recipeScript == '')" ng-click="createRecipe()" role="button"><i class="fa fa-plus fa-fw"></i>{{msg.recipe_form_create}}</a>
         </div>
     </div>
 

@@ -11,7 +11,6 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.doNothing;
 
 import java.io.File;
-import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.shell.commands.common.RecipeCommands;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
@@ -64,8 +64,6 @@ public class RecipeCommandsTest {
         MockitoAnnotations.initMocks(this);
         dummyResult = new RecipeResponse();
         dummyResult.setId(RECIPE_ID);
-        dummyResult.setPlugins(Collections.emptySet());
-        dummyResult.setProperties(Collections.<String, String>emptyMap());
         given(cloudbreakClient.recipeEndpoint()).willReturn(recipeEndpoint);
         RecipeResponse recipeResponse = new RecipeResponse();
         recipeResponse.setId(1L);
@@ -131,33 +129,35 @@ public class RecipeCommandsTest {
 
     @Test
     public void testStoreRecipePreScriptExistsAndPublic() throws Exception {
-        underTest.createRecipe("name", null, null, new File(getClass().getResource("/store-recipe-test").getFile()), null, null, true);
+        underTest.createRecipe("name", RecipeType.PRE, null,
+                new File(getClass().getResource("/store-recipe-test").getFile()), null, true);
         verify(recipeEndpoint, times(1)).postPublic(any(RecipeRequest.class));
         verify(recipeEndpoint, times(0)).postPrivate(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipePostScriptExistsAndPrivate() throws Exception {
-        underTest.createRecipe("name", null, null, new File(getClass().getResource("/store-recipe-test").getFile()), null, null, false);
+        underTest.createRecipe("name", RecipeType.PRE, null,
+                new File(getClass().getResource("/store-recipe-test").getFile()), null, false);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
         verify(recipeEndpoint, times(1)).postPrivate(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipeMissingScriptFiles() throws Exception {
-        underTest.createRecipe("name", null, null, null, null, null, null);
+        underTest.createRecipe("name", RecipeType.PRE, null, null, null, null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipeNotExistsPreScriptFile() throws Exception {
-        underTest.createRecipe("name", null, new File(""), null, null, null, null);
+        underTest.createRecipe("name", RecipeType.PRE, null, new File(""), null, null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipeNotExistsPostScriptFile() throws Exception {
-        underTest.createRecipe("name", null, null, new File(""), null, null, null);
+        underTest.createRecipe("name", RecipeType.PRE, null, new File(""), null, null);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 }

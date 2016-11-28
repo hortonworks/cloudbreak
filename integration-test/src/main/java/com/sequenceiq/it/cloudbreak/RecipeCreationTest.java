@@ -41,9 +41,6 @@ public class RecipeCreationTest extends AbstractCloudbreakIntegrationTest {
         RecipeRequest recipeRequest = new RecipeRequest();
         recipeRequest.setName(name);
         recipeRequest.setDescription(description);
-        Set<String> list = new HashSet<>();
-        list.add("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()));
-        recipeRequest.setPlugins(list);
         RecipeEndpoint recipeEndpoint = getCloudbreakClient().recipeEndpoint();
         String id = recipeEndpoint.postPrivate(recipeRequest).getId().toString();
 

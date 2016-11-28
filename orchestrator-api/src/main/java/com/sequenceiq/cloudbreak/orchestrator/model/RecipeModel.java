@@ -1,61 +1,39 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.sequenceiq.cloudbreak.common.type.RecipeType;
 
 public class RecipeModel {
 
     private String name;
 
-    private String preInstall;
+    private RecipeType recipeType;
 
-    private String postInstall;
+    private String script;
 
-    private Map<String, String> keyValues = new HashMap<>();
-
-    public RecipeModel(String name) {
+    public RecipeModel(String name, RecipeType recipeType, String script) {
         this.name = name;
+        this.recipeType = recipeType;
+        this.script = script;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public RecipeType getRecipeType() {
+        return recipeType;
     }
 
-    public String getPreInstall() {
-        return preInstall;
-    }
-
-    public void setPreInstall(String preInstall) {
-        this.preInstall = preInstall;
-    }
-
-    public String getPostInstall() {
-        return postInstall;
-    }
-
-    public void setPostInstall(String postInstall) {
-        this.postInstall = postInstall;
-    }
-
-    public Map<String, String> getKeyValues() {
-        return keyValues;
-    }
-
-    public void setKeyValues(Map<String, String> keyValues) {
-        this.keyValues = keyValues;
+    public String getScript() {
+        return script;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("RecipeModel{");
         sb.append(", name='").append(name).append('\'');
-        sb.append(", preInstall=").append(preInstall);
-        sb.append(", postInstall=").append(postInstall);
-        sb.append(", keyValues=").append(keyValues);
+        sb.append(", script=").append(script);
+        sb.append(", recipeType=").append(recipeType);
         sb.append('}');
         return sb.toString();
     }
