@@ -1,16 +1,12 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import java.util.Map;
-import java.util.Set;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
-import com.sequenceiq.cloudbreak.validation.ValidPlugin;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -26,13 +22,15 @@ public abstract class RecipeBase implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ValidPlugin
-    @ApiModelProperty(value = RecipeModelDescription.PLUGINS)
-    private Set<String> plugins;
+    @NotNull
+    @ApiModelProperty(value = RecipeModelDescription.TYPE)
+    private RecipeType recipeType;
 
-    @JsonProperty("properties")
-    @ApiModelProperty(value = RecipeModelDescription.PROPERTIES)
-    private Map<String, String> properties;
+    @ApiModelProperty(value = RecipeModelDescription.CONTENT)
+    private String content;
+
+    @ApiModelProperty(value = RecipeModelDescription.RECIPE_URI)
+    private String uri;
 
     public String getName() {
         return name;
@@ -50,19 +48,27 @@ public abstract class RecipeBase implements JsonEntity {
         this.description = description;
     }
 
-    public Set<String> getPlugins() {
-        return plugins;
+    public RecipeType getRecipeType() {
+        return recipeType;
     }
 
-    public void setPlugins(Set<String> plugins) {
-        this.plugins = plugins;
+    public void setRecipeType(RecipeType recipeType) {
+        this.recipeType = recipeType;
     }
 
-    public Map<String, String> getProperties() {
-        return properties;
+    public String getContent() {
+        return content;
     }
 
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 }

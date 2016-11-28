@@ -1,18 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
-import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
-import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
@@ -22,43 +17,22 @@ public class JsonToRecipeConverter extends AbstractConversionServiceAwareConvert
         Recipe recipe = new Recipe();
         recipe.setName(json.getName());
         recipe.setDescription(json.getDescription());
-        recipe.setKeyValues(json.getProperties());
-        Set<Plugin> plugins = new HashSet<>();
-        Set<String> originalPlugins = json.getPlugins();
-        if (originalPlugins != null && !originalPlugins.isEmpty()) {
-            plugins = originalPlugins.stream().map(Plugin::new).collect(Collectors.toSet());
+        recipe.setRecipeType(json.getRecipeType());
+        recipe.setContent(json.getContent());
+        recipe.setUri(json.getUri());
+        if (recipe.getUri() != null && recipe.getContent() == null) {
+            recipe.setContent(fetchScriptContent(recipe.getUri()));
         }
-        if (json.getPreUrl() != null) {
-            setScriptContent(plugins, json.getPreUrl(), "recipe-pre-install");
-            recipe.addKeyValue(RecipeExecutionPhase.PRE.url(), json.getPreUrl());
-        }
-        if (json.getPostUrl() != null) {
-            setScriptContent(plugins, json.getPostUrl(), "recipe-post-install");
-            recipe.addKeyValue(RecipeExecutionPhase.POST.url(), json.getPostUrl());
-        }
-        if (plugins.isEmpty()) {
-            throw new BadRequestException("At least one script is required");
-        }
-        recipe.setPlugins(plugins);
         return recipe;
     }
 
-    private void setScriptContent(Set<Plugin> plugins, String url, String name) {
+    private String fetchScriptContent(String url) {
         try {
             String script = URLUtils.readUrl(url);
-            for (Plugin plugin : plugins) {
-                String decodedContent = new String(Base64.decodeBase64(plugin.getContent().replaceFirst("base64://", "")));
-                if (decodedContent.contains(name)) {
-                    decodedContent = decodedContent.replaceAll(name + ":.*\\n", "");
-                }
-                plugin.setContent("base64://"
-                        + Base64.encodeBase64String((decodedContent + name + ":" + Base64.encodeBase64String(script.getBytes()) + "\n").getBytes()));
-            }
-            if (plugins.isEmpty()) {
-                plugins.add(new Plugin("base64://" + Base64.encodeBase64String((name + ":" + Base64.encodeBase64String(script.getBytes()) + "\n").getBytes())));
-            }
+            return Base64.encodeBase64String(script.getBytes());
         } catch (IOException e) {
-            throw new BadRequestException("Cannot download the" + name + " script from URL: " + url);
+            throw new BadRequestException("Cannot download script from URL: " + url);
         }
     }
+
 }

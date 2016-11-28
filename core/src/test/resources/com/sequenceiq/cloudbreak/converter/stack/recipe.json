@@ -1,11 +1,7 @@
 {
   "name" : "recipe-01",
   "description" : "my first recipe",
-  "properties": {
-    "recipes.gcp-p12.p12-encoded": "<base64-encoded-p12-file>"
-  },
-  "plugins": [
-    "https://github.com/sequenceiq/consul-plugins-gcs-connector.git",
-    "https://github.com/sequenceiq/consul-plugins-gcp-p12.git"
-  ]
+  "recipeType": "PRE",
+  "content": "base64",
+  "uri": "https://some.url"
 }

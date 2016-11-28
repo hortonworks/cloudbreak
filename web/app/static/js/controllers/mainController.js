@@ -30,7 +30,16 @@ angular.module('uluwatuControllers')
                     name: 'Role Based',
                     id: 'role-based'
                 }],
-                'RECIPE_TYPE': {
+                'RECIPE_EXECUTION_TYPE': {
+                    execution_types: [{
+                        key: 'PRE',
+                        value: 'PRE'
+                    }, {
+                        key: 'POST',
+                        value: 'POST'
+                    }]
+                },
+                'RECIPE_CONTENT_TYPE': {
                     content_types: [{
                         key: 'SCRIPT',
                         value: 'Script'

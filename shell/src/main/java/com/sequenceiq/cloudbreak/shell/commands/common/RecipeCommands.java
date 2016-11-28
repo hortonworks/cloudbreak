@@ -2,9 +2,7 @@ package com.sequenceiq.cloudbreak.shell.commands.common;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +15,7 @@ import org.springframework.shell.core.annotation.CliOption;
 
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
@@ -75,51 +74,32 @@ public class RecipeCommands implements BaseCommands {
     @CliCommand(value = "recipe create", help = "Creates a new recipe")
     public String createRecipe(
             @CliOption(key = "name", mandatory = true, help = "Unique name of the recepie") String name,
+            @CliOption(key = "type", mandatory = true, help = "Type of recipe") RecipeType recipeType,
             @CliOption(key = "description", help = "Description of the recepie") String description,
-            @CliOption(key = "preInstallScriptFile", help = "Path of the pre install script file") File preInstallScriptFile,
-            @CliOption(key = "postInstallScriptFile", help = "Path of the post install script file") File postInstallScriptFile,
-            @CliOption(key = "preInstallScriptUrl", help = "URL for the pre-install script") String preUrl,
-            @CliOption(key = "postInstallScriptUrl", help = "URL for the post-install script") String postUrl,
+            @CliOption(key = "scriptFile", help = "Path of the script file") File scriptFile,
+            @CliOption(key = "scriptUrl", help = "URL for the script") String url,
             @CliOption(key = "publicInAccount", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "flags if the recipe is public in the account") Boolean publicInAccount) {
 
-        if (preInstallScriptFile != null && !preInstallScriptFile.exists()) {
+        if (scriptFile != null && !scriptFile.exists()) {
             return "Pre install script file not exists.";
-        } else if (preInstallScriptFile != null && preUrl != null) {
-            return "Either the file or the url can be provided for pre-install.";
-        } else if (postInstallScriptFile != null && postUrl != null) {
-            return "Either the file or the url can be provided for post-install.";
-        } else if (postInstallScriptFile != null && !postInstallScriptFile.exists()) {
-            return "Post install script file not exists.";
-        } else if (preInstallScriptFile == null && postInstallScriptFile == null && preUrl == null && postUrl == null) {
-            return "At least one script is required.";
+        } else if (scriptFile != null && url != null) {
+            return "Either the file or the url can be provided for recipe.";
+        } else if (scriptFile == null && url == null) {
+            return "File or the url must be provided for recipe";
         }
 
         try {
-            StringBuilder pluginContentBuilder = new StringBuilder();
-
-            if (preInstallScriptFile != null) {
-                addScriptContent(pluginContentBuilder, "recipe-pre-install", preInstallScriptFile);
-            }
-            if (postInstallScriptFile != null) {
-                addScriptContent(pluginContentBuilder, "recipe-post-install", postInstallScriptFile);
-            }
-
-            Set<String> plugins = new HashSet<>();
-            if (pluginContentBuilder.length() > 0) {
-                plugins.add("base64://" + Base64.encodeBase64String(pluginContentBuilder.toString().getBytes()));
-            }
-
             RecipeRequest recipeRequest = new RecipeRequest();
+            recipeRequest.setRecipeType(recipeType);
             recipeRequest.setName(name);
             recipeRequest.setDescription(description);
-            recipeRequest.setPlugins(plugins);
+            recipeRequest.setUri(url);
 
-            if (preUrl != null) {
-                recipeRequest.setPreUrl(preUrl);
-            }
-            if (postUrl != null) {
-                recipeRequest.setPostUrl(postUrl);
+            if (scriptFile != null) {
+                String script = IOUtils.toString(new FileInputStream(scriptFile));
+                String encodedContent = Base64.encodeBase64String(script.getBytes());
+                recipeRequest.setContent(encodedContent);
             }
 
             Long id;
@@ -134,7 +114,7 @@ public class RecipeCommands implements BaseCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = { "recipe show --id", "recipe show --name" })
+    @CliAvailabilityIndicator(value = {"recipe show --id", "recipe show --name"})
     @Override
     public boolean showAvailable() {
         return !shellContext.isMarathonMode();
@@ -157,9 +137,7 @@ public class RecipeCommands implements BaseCommands {
             map.put("name", recipeMap.getName());
             map.put("description", recipeMap.getDescription());
 
-            return shellContext.outputTransformer().render(map, "FIELD", "INFO") + "\n\n"
-                    + shellContext.outputTransformer().render(recipeMap.getProperties(), "CONSUL-KEY", "VALUE") + "\n\n"
-                    + shellContext.outputTransformer().render(recipeMap.getPlugins(), "PLUGIN", "EXECUTION_TYPE") + "\n\n";
+            return shellContext.outputTransformer().render(map, "FIELD", "INFO");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -177,7 +155,7 @@ public class RecipeCommands implements BaseCommands {
         return show(null, name);
     }
 
-    @CliAvailabilityIndicator(value = { "recipe delete --id", "recipe delete --name" })
+    @CliAvailabilityIndicator(value = {"recipe delete --id", "recipe delete --name"})
     @Override
     public boolean deleteAvailable() {
         return !shellContext.isMarathonMode();
@@ -214,11 +192,6 @@ public class RecipeCommands implements BaseCommands {
     @Override
     public ShellContext shellContext() {
         return shellContext;
-    }
-
-    private void addScriptContent(StringBuilder builder, String name, File scriptFile) throws IOException {
-        String script = IOUtils.toString(new FileInputStream(scriptFile));
-        builder.append(name).append(":").append(Base64.encodeBase64String(script.getBytes())).append("\n");
     }
 
 }

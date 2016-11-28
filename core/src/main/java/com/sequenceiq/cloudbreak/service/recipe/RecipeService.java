@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.recipe;
 
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
@@ -29,12 +30,19 @@ public class RecipeService {
     @Inject
     private HostGroupRepository hostGroupRepository;
 
+    @Inject
+    private RecipeMigration recipeMigration;
+
+    @PostConstruct
+    public void migrate() {
+        recipeMigration.migrate();
+    }
+
     @Transactional(Transactional.TxType.NEVER)
     public Recipe create(CbUser user, Recipe recipe) {
         recipe.setOwner(user.getUserId());
         recipe.setAccount(user.getAccount());
         try {
-            recipe.getPlugins().stream().forEach(plugin -> plugin.setRecipe(recipe));
             return recipeRepository.save(recipe);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.RECIPE, recipe.getName(), ex);

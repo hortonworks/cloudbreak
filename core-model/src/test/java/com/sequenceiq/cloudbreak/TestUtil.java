@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -48,7 +49,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -413,8 +413,9 @@ public class TestUtil {
             recipe.setId((long) (i + 1));
             recipe.setName("recipe-" + (i + 1));
             recipe.setPublicInAccount(true);
-            recipe.setPlugins(createRecipePlugins());
-            recipe.setKeyValues(new HashMap<>());
+            recipe.setUri("https://some/url");
+            recipe.setContent("base64Content");
+            recipe.setRecipeType(RecipeType.PRE);
             recipes.add(recipe);
         }
         return recipes;
@@ -531,13 +532,6 @@ public class TestUtil {
         cloudbreakEvent.setClusterId(1L);
         cloudbreakEvent.setClusterName("test");
         return cloudbreakEvent;
-    }
-
-    private static Set<Plugin> createRecipePlugins() {
-        Set<Plugin> plugin = new HashSet<>();
-        plugin.add(new Plugin("first"));
-        plugin.add(new Plugin("second"));
-        return plugin;
     }
 
     public static FailurePolicy failurePolicy() {

@@ -4,18 +4,24 @@ public enum RecipeExecutionPhase {
     PRE("pre"), POST("post");
 
     private String value;
-    private String url;
 
     RecipeExecutionPhase(String value) {
         this.value = value;
-        this.url = value + "-url";
+    }
+
+    public static RecipeExecutionPhase convert(RecipeType recipeType) {
+        switch (recipeType) {
+            case PRE:
+                return PRE;
+            case POST:
+                return POST;
+            default:
+                throw new UnsupportedOperationException("Unsupported Execution Phase: " + recipeType);
+        }
     }
 
     public String value() {
         return value;
     }
 
-    public String url() {
-        return url;
-    }
 }

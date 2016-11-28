@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -37,10 +36,6 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
 @Component
 public class OrchestratorRecipeExecutor {
-
-    private static final String PRE_INSTALL_TAG = "recipe-pre-install";
-
-    private static final String POST_INSTALL_TAG = "recipe-post-install";
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -94,20 +89,9 @@ public class OrchestratorRecipeExecutor {
     private List<RecipeModel> convert(Set<Recipe> recipes) {
         List<RecipeModel> result = new ArrayList<>();
         for (Recipe recipe : recipes) {
-            recipe.getPlugins().stream().filter(rawRecipe -> rawRecipe.getContent().startsWith("base64://")).forEach(rawRecipe -> {
-                String decodedRecipe = new String(Base64.decodeBase64(rawRecipe.getContent().replaceFirst("base64://", "")));
-                RecipeModel recipeModel = new RecipeModel(recipe.getName());
-                Map<String, String> recipeMap = Stream.of(decodedRecipe.split("\n"))
-                        .collect(Collectors.toMap(s -> s.substring(0, s.indexOf(":")), s -> s.substring(s.indexOf(":") + 1)));
-                if (recipeMap.containsKey(PRE_INSTALL_TAG)) {
-                    recipeModel.setPreInstall(new String(Base64.decodeBase64(recipeMap.get(PRE_INSTALL_TAG))));
-                }
-                if (recipeMap.containsKey(POST_INSTALL_TAG)) {
-                    recipeModel.setPostInstall(new String(Base64.decodeBase64(recipeMap.get(POST_INSTALL_TAG))));
-                }
-                recipeModel.setKeyValues(recipe.getKeyValues());
-                result.add(recipeModel);
-            });
+            String decodedContent = new String(Base64.decodeBase64(recipe.getContent()));
+            RecipeModel recipeModel = new RecipeModel(recipe.getName(), recipe.getRecipeType(), decodedContent);
+            result.add(recipeModel);
         }
         return result;
     }

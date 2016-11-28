@@ -8,7 +8,11 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+/**
+ * @deprecated plugins are not supported anymore, content is stored in recipe itself
+ */
 @Entity
+@Deprecated
 public class Plugin {
 
     @Id
@@ -45,11 +49,11 @@ public class Plugin {
         this.recipe = recipe;
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
-
     public String getContent() {
         return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

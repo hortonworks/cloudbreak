@@ -1,18 +1,16 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -20,31 +18,36 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.common.type.RecipeType;
+
 @Entity
 @Table(name = "recipe", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" })
+        @UniqueConstraint(columnNames = {"account", "name"})
 })
 @NamedQueries({
         @NamedQuery(
                 name = "Recipe.findForUser",
                 query = "SELECT r FROM Recipe r "
-                        + "WHERE r.owner= :owner"),
+                        + "WHERE r.owner= :owner AND r.recipeType NOT IN ('LEGACY','MIGRATED')"),
         @NamedQuery(
                 name = "Recipe.findPublicInAccountForUser",
                 query = "SELECT r FROM Recipe r "
-                        + "WHERE (r.account= :account AND r.publicInAccount= true) "
-                        + "OR r.owner= :owner"),
+                        + "WHERE (r.account= :account AND r.publicInAccount= true AND r.recipeType NOT IN ('LEGACY','MIGRATED')) "
+                        + "OR (r.owner= :owner AND r.recipeType NOT IN ('LEGACY','MIGRATED'))"),
         @NamedQuery(
                 name = "Recipe.findAllInAccount",
                 query = "SELECT r FROM Recipe r "
-                        + "WHERE r.account= :account "),
+                        + "WHERE r.account= :account AND r.recipeType NOT IN ('LEGACY','MIGRATED')"),
         @NamedQuery(
                 name = "Recipe.findByNameForUser",
                 query = "SELECT r FROM Recipe r "
-                        + "WHERE r.name= :name and r.owner= :owner "),
+                        + "WHERE r.name= :name AND r.owner= :owner AND r.recipeType NOT IN ('LEGACY','MIGRATED')"),
         @NamedQuery(
                 name = "Recipe.findByNameInAccount",
-                query = "SELECT r FROM Recipe r WHERE r.name= :name and r.account= :account")
+                query = "SELECT r FROM Recipe r WHERE r.name= :name AND r.account= :account"),
+        @NamedQuery(
+                name = "Recipe.findByType",
+                query = "SELECT r FROM Recipe r WHERE recipeType= :recipeType"),
 })
 public class Recipe implements ProvisionEntity {
 
@@ -61,10 +64,14 @@ public class Recipe implements ProvisionEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Plugin> plugins;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyColumn(name = "key")
-    @Column(name = "value", columnDefinition = "TEXT", length = 100000)
-    private Map<String, String> keyValues;
+    @Enumerated(EnumType.STRING)
+    private RecipeType recipeType;
+
+    @Column(nullable = false)
+    private String uri;
+
+    @Column(nullable = false)
+    private String content;
 
     @Column(nullable = false)
     private String account;
@@ -99,27 +106,36 @@ public class Recipe implements ProvisionEntity {
         this.description = description;
     }
 
-    public Map<String, String> getKeyValues() {
-        return keyValues;
-    }
-
-    public void setKeyValues(Map<String, String> keyValues) {
-        this.keyValues = keyValues;
-    }
-
-    public void addKeyValue(String key, String value) {
-        if (keyValues == null) {
-            keyValues = new HashMap<>();
-        }
-        keyValues.put(key, value);
-    }
-
     public Set<Plugin> getPlugins() {
         return plugins;
     }
 
     public void setPlugins(Set<Plugin> plugins) {
         this.plugins = plugins;
+    }
+
+    public RecipeType getRecipeType() {
+        return recipeType;
+    }
+
+    public void setRecipeType(RecipeType recipeType) {
+        this.recipeType = recipeType;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public String getAccount() {

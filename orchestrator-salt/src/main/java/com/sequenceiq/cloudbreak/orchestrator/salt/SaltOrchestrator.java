@@ -248,12 +248,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             for (List<RecipeModel> recipeList : recipes.values()) {
                 for (RecipeModel model : recipeList) {
-                    if (model.getPreInstall() != null) {
-                        uploadRecipe(sc, model.getName(), model.getPreInstall(), RecipeExecutionPhase.PRE);
-                    }
-                    if (model.getPostInstall() != null) {
-                        uploadRecipe(sc, model.getName(), model.getPostInstall(), RecipeExecutionPhase.POST);
-                    }
+                    uploadRecipe(sc, model.getName(), model.getScript(), RecipeExecutionPhase.convert(model.getRecipeType()));
                 }
             }
         } catch (Exception e) {
@@ -416,11 +411,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         final byte[] recipeBytes = recipe.getBytes(StandardCharsets.UTF_8);
         LOGGER.info("Upload '{}' recipe: {}", phase.value(), name);
         try {
-            if (RecipeExecutionPhase.PRE.equals(phase)) {
-                sc.upload("/srv/salt/pre-recipes/scripts", name, new ByteArrayInputStream(recipeBytes));
-            } else {
-                sc.upload("/srv/salt/post-recipes/scripts", name, new ByteArrayInputStream(recipeBytes));
-            }
+            sc.upload("/srv/salt/" + phase.value() + "-recipes/scripts", name, new ByteArrayInputStream(recipeBytes));
         } catch (IOException e) {
             LOGGER.warn("Cannot upload recipe: {}", recipe);
         }
