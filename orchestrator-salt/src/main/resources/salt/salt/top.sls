@@ -2,6 +2,7 @@ base:
   '*':
     - discovery
     - java
+    - metadata
 
   'roles:kerberos_server':
     - match: grain
