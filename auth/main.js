@@ -57,7 +57,7 @@ function waitingForAddressesAndContinue() {
 
 function debugHeaders(req) {
     if (process.env.DEBUG) {
-        for (var key in req.headers) {
+        for(var key in req.headers) {
             var value = req.headers[key];
             console.log("[DEBUG]    HEADERS " + key + " : " + value);
         }
@@ -65,7 +65,7 @@ function debugHeaders(req) {
 }
 
 function getBasePath(req) {
-    if (req.headers['x-forwarded-for'] !== undefined) {
+    if (req.headers['x-forwarded-for']  !== undefined) {
         if (process.env.SL_BASE_PATH !== undefined) {
             return process.env.SL_BASE_PATH;
         } else {
@@ -73,7 +73,7 @@ function getBasePath(req) {
         }
     }
 
-    return "";
+    return "/";
 }
 
 function continueInit() {
@@ -145,7 +145,7 @@ function continueInit() {
     var firstNameErrorMsg = 'first name is empty'
     var lastNameErrorMsg = 'last name is empty'
     var companyErrorMsg = 'company name is empty'
-        // register.html
+    // register.html
     app.get('/register', function(req, res) {
         res.render('register', {
             basePath: getBasePath(req),
@@ -201,7 +201,7 @@ function continueInit() {
                         getToken(req, res, function(token) {
                             getUserByName(req, res, token, username, function(adminUserData) {
                                 getAccountNum(req, res, adminUserData, function(accountNum) {
-                                    if (accountNum > 1) {
+                                    if(accountNum > 1) {
                                         console.log("User has multiple accounts, disabling login");
                                         res.render('login', {
                                             basePath: getBasePath(req),

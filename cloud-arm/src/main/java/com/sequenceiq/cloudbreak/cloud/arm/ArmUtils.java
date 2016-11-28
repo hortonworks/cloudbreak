@@ -41,6 +41,10 @@ public class ArmUtils {
 
     private static final String NETWORK_ID = "networkId";
 
+    private static final String NO_PUBLIC_IP = "noPublicIp";
+
+    private static final String NO_FIREWALL_RULES = "noFirewallRules";
+
     private static final int PORT_22 = 22;
 
     private static final int PORT_443 = 443;
@@ -124,6 +128,22 @@ public class ArmUtils {
 
     public boolean isExistingNetwork(Network network) {
         return isNoneEmpty(getCustomNetworkId(network)) && isNoneEmpty(getCustomResourceGroupName(network)) && isNoneEmpty(getCustomSubnetId(network));
+    }
+
+    public boolean isPrivateIp(Network network) {
+        if (network.getParameters().containsKey(NO_PUBLIC_IP)) {
+            return network.getParameter(NO_PUBLIC_IP, Boolean.class);
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isNoSecurityGroups(Network network) {
+        if (network.getParameters().containsKey(NO_FIREWALL_RULES)) {
+            return network.getParameter(NO_FIREWALL_RULES, Boolean.class);
+        } else {
+            return false;
+        }
     }
 
     public String getCustomNetworkId(Network network) {

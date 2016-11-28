@@ -55,21 +55,19 @@ public class ArmMetadataCollector implements MetadataCollector {
                 Map networkInterface = (Map) access.getNetworkInterface(resource.getName(), networkInterfaceName);
                 List ips = (ArrayList) ((Map) networkInterface.get("properties")).get("ipConfigurations");
                 Map properties = (Map) ((Map) ips.get(0)).get("properties");
-                String publicIp;
-                if (properties.get("publicIPAddress") == null) {
-                    publicIp = access.getLoadBalancerIp(resource.getName(), armTemplateUtils.getLoadBalancerId(resource.getName()));
-                } else {
+                String publicIp = null;
+                if (properties.get("publicIPAddress") != null) {
                     Map publicIPAddress = (Map) properties.get("publicIPAddress");
                     String publicIpName = publicIPAddress.get("id").toString();
                     Map publicAdressObject = (Map) access.getPublicIpAddress(resource.getName(), getNameFromConnectionString(publicIpName));
                     Map publicIpProperties = (Map) publicAdressObject.get("properties");
                     publicIp = publicIpProperties.get("ipAddress").toString();
                 }
+                if (properties.get("loadBalancerBackendAddressPools") != null) {
+                    publicIp = access.getLoadBalancerIp(resource.getName(), armTemplateUtils.getLoadBalancerId(resource.getName()));
+                }
                 String privateIp = properties.get("privateIPAddress").toString();
                 String instanceId = instance.getKey();
-                if (publicIp == null) {
-                    throw new CloudConnectorException(String.format("Public ip address can not be null but it was on %s instance.", instance.getKey()));
-                }
                 CloudInstanceMetaData md = new CloudInstanceMetaData(privateIp, publicIp);
 
                 InstanceTemplate template = templateMap.get(instanceId);

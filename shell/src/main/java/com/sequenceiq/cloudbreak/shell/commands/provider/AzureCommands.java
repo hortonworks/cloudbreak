@@ -126,15 +126,19 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "networkId", mandatory = true, help = "Name of the custom network within the custom resource group") String networkId,
             @CliOption(key = "subnetId", mandatory = true, help = "Name of the custom subnet within the custom resource group") String subnetId,
             @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "noPublicIp", help = "If true, no public IP is created for the instances") Boolean noPublicIp,
+            @CliOption(key = "noFirewallRules", help = "If true, no new firewall rules will be created for the network") Boolean noFirewallRules,
             @CliOption(key = "description", help = "Description of the network") String description,
             @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
-    ) {
-        Map<String, Object> parameters = new HashMap<>();
-        if (rgName != null && networkId != null && subnetId != null) {
+                ) {
+            Map<String, Object> parameters = new HashMap<>();
+            if (rgName != null && networkId != null && subnetId != null) {
             parameters.put("resourceGroupName", rgName);
             parameters.put("networkId", networkId);
             parameters.put("subnetId", subnetId);
         }
+        parameters.put("noPublicIp", noPublicIp != null ? noPublicIp : false);
+        parameters.put("noFirewallRules", noFirewallRules != null ? noFirewallRules : false);
         return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
     }
 
