@@ -6,4 +6,8 @@ public class StartAmbariSuccess extends StackEvent {
     public StartAmbariSuccess(Long stackId) {
         super(stackId);
     }
+
+    public StartAmbariSuccess(String selector, Long stackId) {
+        super(selector, stackId);
+    }
 }

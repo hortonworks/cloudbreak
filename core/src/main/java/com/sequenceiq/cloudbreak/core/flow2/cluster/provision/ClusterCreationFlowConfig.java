@@ -36,7 +36,7 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
     private static final List<Transition<ClusterCreationState, ClusterCreationEvent>> TRANSITIONS =
             new Transition.Builder<ClusterCreationState, ClusterCreationEvent>().defaultFailureEvent(CLUSTER_CREATION_FAILED_EVENT)
             .from(INIT_STATE).to(BOOTSTRAPPING_MACHINES_STATE).event(CLUSTER_CREATION_EVENT).noFailureEvent()
-            .from(INIT_STATE).to(STARTING_AMBARI_STATE).event(CLUSTER_INSTALL_EVENT).noFailureEvent()
+            .from(INIT_STATE).to(INSTALLING_CLUSTER_STATE).event(CLUSTER_INSTALL_EVENT).noFailureEvent()
             .from(BOOTSTRAPPING_MACHINES_STATE).to(COLLECTING_HOST_METADATA_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
                     .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
             .from(COLLECTING_HOST_METADATA_STATE).to(STARTING_AMBARI_SERVICES_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
