@@ -71,25 +71,25 @@ public class CloudbreakCleanupAction {
     private Flow2Handler flow2Handler;
 
     public void resetStates() {
-        restartDistruptedFlows();
+        List<Long> stackIdsUnderOperation = restartDistruptedFlows();
         usageService.fixUsages();
         setDeleteFailedStatus();
-        List<Stack> stacksToSync = resetStackStatus();
-        List<Cluster> clustersToSync = resetClusterStatus(stacksToSync);
+        List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
+        List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
         triggerSyncs(stacksToSync, clustersToSync);
     }
 
-    private List<Stack> resetStackStatus() {
-        List<Stack> stacksInProgress = stackRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC,
-                START_IN_PROGRESS, STOP_IN_PROGRESS));
-        for (Stack stack : stacksInProgress) {
-            if (!WAIT_FOR_SYNC.equals(stack.getStatus())) {
-                loggingStatusChange("Stack", stack.getId(), stack.getStatus(), WAIT_FOR_SYNC);
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.WAIT_FOR_SYNC, stack.getStatusReason());
-            }
-            cleanInstanceMetaData(instanceMetaDataRepository.findAllInStack(stack.getId()));
-        }
-        return stacksInProgress;
+    private List<Stack> resetStackStatus(List<Long> excludeStackIds) {
+        return stackRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
+            .stream().filter(s -> !excludeStackIds.contains(s.getId()) || WAIT_FOR_SYNC.equals(s.getStatus()))
+            .map(s -> {
+                if (!WAIT_FOR_SYNC.equals(s.getStatus())) {
+                    loggingStatusChange("Stack", s.getId(), s.getStatus(), WAIT_FOR_SYNC);
+                    stackUpdater.updateStackStatus(s.getId(), DetailedStackStatus.WAIT_FOR_SYNC, s.getStatusReason());
+                }
+                cleanInstanceMetaData(instanceMetaDataRepository.findAllInStack(s.getId()));
+                return s;
+            }).collect(Collectors.toList());
     }
 
     private void cleanInstanceMetaData(Set<InstanceMetaData> metadataSet) {
@@ -101,18 +101,15 @@ public class CloudbreakCleanupAction {
         }
     }
 
-    private List<Cluster> resetClusterStatus(List<Stack> stacksToSync) {
-        List<Cluster> clustersInProgress = clusterRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC));
-        List<Cluster> clustersToSync = new ArrayList<>();
-        for (Cluster cluster : clustersInProgress) {
-            loggingStatusChange("Cluster", cluster.getId(), cluster.getStatus(), WAIT_FOR_SYNC);
-            cluster.setStatus(WAIT_FOR_SYNC);
-            clusterRepository.save(cluster);
-            if (!stackToSyncContainsCluster(stacksToSync, cluster)) {
-                clustersToSync.add(cluster);
-            }
-        }
-        return clustersToSync;
+    private List<Cluster> resetClusterStatus(List<Stack> stacksToSync, List<Long> excludeStackIds) {
+        return clusterRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
+            .stream().filter(c -> !excludeStackIds.contains(c.getStack().getId()))
+            .map(c -> {
+                loggingStatusChange("Cluster", c.getId(), c.getStatus(), WAIT_FOR_SYNC);
+                c.setStatus(WAIT_FOR_SYNC);
+                clusterRepository.save(c);
+                return c;
+            }).filter(c -> !stackToSyncContainsCluster(stacksToSync, c)).collect(Collectors.toList());
     }
 
     private boolean stackToSyncContainsCluster(List<Stack> stacksToSync, Cluster cluster) {
@@ -128,17 +125,20 @@ public class CloudbreakCleanupAction {
         }
     }
 
-    private void restartDistruptedFlows() {
+    private List<Long> restartDistruptedFlows() {
+        List<Long> stackIds = new ArrayList<>();
         List<Object[]> runningFlows = flowLogRepository.findAllNonFinalized();
         String logMessage = "Restarting flow {}";
         for (Object[] flow : runningFlows) {
             LOGGER.info(logMessage, flow[0]);
             try {
                 flow2Handler.restartFlow((String) flow[0]);
+                stackIds.add((Long) flow[1]);
             } catch (Exception e) {
                 flowLogService.terminate((Long) flow[1], (String) flow[0]);
             }
         }
+        return stackIds;
     }
 
     private void loggingStatusChange(String type, Long id, Status status, Status deleteFailed) {
