@@ -49,7 +49,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             return call();
         }
         if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
-            String jobIsRunningMessage = String.format("Job: %s is running currently, waiting for next polling attempt", saltJobRunner.getJid());
+            String jobIsRunningMessage = String.format("Job: %s is running currently", saltJobRunner.getJid());
             throw new CloudbreakOrchestratorFailedException(jobIsRunningMessage);
         }
         if (JobState.FAILED.equals(saltJobRunner.getJobState())) {

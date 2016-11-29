@@ -171,9 +171,12 @@ public class SaltOrchestrator implements HostOrchestrator {
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
+            if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) e.getCause();
+            }
             throw new CloudbreakOrchestratorFailedException(e);
         }
-        LOGGER.info("Run Servcies on nodes finished: {}", allNodes);
+        LOGGER.info("Run services on nodes finished: {}", allNodes);
     }
 
     @Override
