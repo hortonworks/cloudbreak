@@ -95,7 +95,7 @@ public class ClusterResetActions {
         return new AbstractStackFailureAction<ClusterResetState, ClusterResetEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterResetService.handleResetClusterFailure(context.getStack(), payload.getException().getMessage());
+                clusterResetService.handleResetClusterFailure(context.getStack(), payload.getException());
                 sendEvent(context);
             }
 

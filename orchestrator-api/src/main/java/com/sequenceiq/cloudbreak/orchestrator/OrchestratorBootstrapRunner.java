@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -18,6 +19,10 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
     private static final int MAX_RETRY_COUNT = 30;
 
     private static final int SLEEP_TIME = 5000;
+
+    private static final int MS_IN_SEC = 1000;
+
+    private static final int SEC_IN_MIN = 60;
 
     private final OrchestratorBootstrap orchestratorBootstrap;
 
@@ -86,8 +91,14 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         }
 
         if (!success) {
-            LOGGER.error(String.format("Orchestrator component failed to start in %s attempts: %s", maxRetryCount, actualException));
-            throw actualException;
+            String cause = null;
+            if (actualException != null) {
+                cause = actualException.getMessage();
+            }
+            String errorMessage = String.format("Timeout: Orchestrator component failed to finish in %f mins, last message: %s",
+                    (double) maxRetryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN, cause);
+            LOGGER.error(errorMessage);
+            throw new CloudbreakOrchestratorFailedException(errorMessage);
         }
         return Boolean.TRUE;
     }
