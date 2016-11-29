@@ -168,7 +168,7 @@ public class AmbariClusterService implements ClusterService {
     @Override
     @Transactional(Transactional.TxType.NEVER)
     public Cluster create(CbUser user, Long stackId, Cluster cluster, List<Component> components) {
-        Stack stack = stackService.get(stackId);
+        Stack stack = stackService.getById(stackId);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
