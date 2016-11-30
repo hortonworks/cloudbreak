@@ -73,7 +73,7 @@ public class Flow2HandlerTest {
         underTest = new Flow2Handler();
         MockitoAnnotations.initMocks(this);
         Map<String, Object> headers = new HashMap<>();
-        headers.put("FLOW_ID", FLOW_ID);
+        headers.put(Flow2Handler.FLOW_ID, FLOW_ID);
         dummyEvent = new Event<>(new Event.Headers(headers), payload);
         flowState = new OwnFlowState();
     }
@@ -141,7 +141,7 @@ public class Flow2HandlerTest {
     public void testFlowFinalFlowChained() {
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
-        dummyEvent.getHeaders().set("FLOW_CHAIN_ID", FLOW_CHAIN_ID);
+        dummyEvent.getHeaders().set(Flow2Handler.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
@@ -171,7 +171,7 @@ public class Flow2HandlerTest {
         given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
-        dummyEvent.getHeaders().set("FLOW_CHAIN_ID", "FLOW_CHAIN_ID");
+        dummyEvent.getHeaders().set(Flow2Handler.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
         given(runningFlows.remove(anyString())).willReturn(flow);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));

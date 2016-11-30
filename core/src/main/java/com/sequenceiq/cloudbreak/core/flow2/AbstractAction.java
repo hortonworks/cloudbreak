@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_ID;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -108,10 +111,10 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     protected void sendEvent(String flowId, String selector, Object payload) {
         LOGGER.info("Triggering event: {}", payload);
         Map<String, Object> headers = new HashMap<>();
-        headers.put("FLOW_ID", flowId);
+        headers.put(FLOW_ID, flowId);
         String flowChainId = runningFlows.getFlowChainId(flowId);
         if (flowChainId != null) {
-            headers.put("FLOW_CHAIN_ID", flowChainId);
+            headers.put(FLOW_CHAIN_ID, flowChainId);
         }
         eventBus.notify(selector, new Event<>(new Event.Headers(headers), payload));
     }

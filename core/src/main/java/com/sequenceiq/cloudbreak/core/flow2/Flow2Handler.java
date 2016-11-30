@@ -44,6 +44,10 @@ import reactor.fn.Consumer;
 
 @Component
 public class Flow2Handler implements Consumer<Event<? extends Payload>> {
+    public static final String FLOW_ID = "FLOW_ID";
+
+    public static final String FLOW_CHAIN_ID = "FLOW_CHAIN_ID";
+
     public static final String FLOW_FINAL = "FLOWFINAL";
 
     public static final String FLOW_CANCEL = "FLOWCANCEL";
@@ -197,10 +201,10 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     private String getFlowId(Event<?> event) {
-        return event.getHeaders().get("FLOW_ID");
+        return event.getHeaders().get(FLOW_ID);
     }
 
     private String getFlowChainId(Event<?> event) {
-        return event.getHeaders().get("FLOW_CHAIN_ID");
+        return event.getHeaders().get(FLOW_CHAIN_ID);
     }
 }
