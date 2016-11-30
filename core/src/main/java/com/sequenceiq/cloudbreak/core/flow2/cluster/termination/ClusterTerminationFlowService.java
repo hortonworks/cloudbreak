@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_FAILED;
 
@@ -47,7 +48,7 @@ public class ClusterTerminationFlowService {
         LOGGER.info("Cluster delete started.");
     }
 
-    public void finishClusterTermination(ClusterContext context, ClusterTerminationResult payload) {
+    public void finishClusterTerminationAllowed(ClusterContext context, ClusterTerminationResult payload) {
         LOGGER.info("Terminate cluster result: {}", payload);
         Cluster cluster = context.getCluster();
         terminationService.finalizeClusterTermination(cluster.getId());
@@ -61,6 +62,16 @@ public class ClusterTerminationFlowService {
         }
     }
 
+    public void finishClusterTerminationNotAllowed(ClusterContext context, ClusterTerminationResult payload) {
+        Cluster cluster = context.getCluster();
+        flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), "Operation not allowed");
+        clusterService.updateClusterStatusByStackId(cluster.getStack().getId(), AVAILABLE);
+        stackUpdater.updateStackStatus(cluster.getStack().getId(), DetailedStackStatus.AVAILABLE);
+        if (cluster.getEmailNeeded()) {
+            sendDeleteFailedMail(cluster);
+        }
+    }
+
     public void handleClusterTerminationError(StackFailureEvent payload) {
         LOGGER.info("Handling cluster delete failure event.");
         Exception errorDetails = payload.getException();
@@ -71,8 +82,12 @@ public class ClusterTerminationFlowService {
         clusterService.updateCluster(cluster);
         flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendTerminationFailureEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
-            flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
+            sendDeleteFailedMail(cluster);
         }
+    }
+
+    private void sendDeleteFailedMail(Cluster cluster) {
+        emailSenderService.sendTerminationFailureEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
+        flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
     }
 }

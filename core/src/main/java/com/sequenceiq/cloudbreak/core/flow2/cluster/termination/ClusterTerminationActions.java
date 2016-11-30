@@ -45,7 +45,11 @@ public class ClusterTerminationActions {
         return new AbstractClusterAction<ClusterTerminationResult>(ClusterTerminationResult.class) {
             @Override
             protected void doExecute(ClusterContext context, ClusterTerminationResult payload, Map<Object, Object> variables) throws Exception {
-                clusterTerminationFlowService.finishClusterTermination(context, payload);
+                if (payload.isOperationAllowed()) {
+                    clusterTerminationFlowService.finishClusterTerminationAllowed(context, payload);
+                } else {
+                    clusterTerminationFlowService.finishClusterTerminationNotAllowed(context, payload);
+                }
                 sendEvent(context);
             }
 

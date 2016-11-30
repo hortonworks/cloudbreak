@@ -38,8 +38,8 @@ public class ClusterTerminationHandler implements ClusterEventHandler<ClusterTer
         ClusterTerminationRequest request = event.getData();
         ClusterTerminationResult result;
         try {
-            clusterTerminationService.deleteClusterContainers(request.getClusterId());
-            result = new ClusterTerminationResult(request);
+            Boolean allowed = clusterTerminationService.deleteClusterContainers(request.getClusterId());
+            result = new ClusterTerminationResult(request, allowed);
         } catch (Exception e) {
             LOGGER.error("Failed to delete cluster containers: {}", e);
             result = new ClusterTerminationResult(e.getMessage(), e, request);
