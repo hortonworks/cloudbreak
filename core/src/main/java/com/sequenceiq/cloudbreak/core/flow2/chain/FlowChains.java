@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -70,7 +72,7 @@ public class FlowChains {
     protected void sendEvent(String flowChainId, Selectable selectable) {
         LOGGER.info("Triggering event: {}", selectable);
         Map<String, Object> headers = new HashMap<>();
-        headers.put("FLOW_CHAIN_ID", flowChainId);
+        headers.put(FLOW_CHAIN_ID, flowChainId);
         eventBus.notify(selectable.selector(), new Event<>(new Event.Headers(headers), selectable));
     }
 

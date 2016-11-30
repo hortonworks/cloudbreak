@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
+
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
@@ -51,6 +53,6 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
     }
 
     private String getFlowChainId(Event<?> event) {
-        return event.getHeaders().get("FLOW_CHAIN_ID");
+        return event.getHeaders().get(FLOW_CHAIN_ID);
     }
 }
