@@ -88,6 +88,12 @@
         }
       },
       {
+        "hive-interactive-env": {
+          "enable_hive_interactive": "true",
+          "llap_queue_capacity": "75"
+        }
+      },
+      {
         "hive-site":{
           "hive.exec.compress.output":"true",
           "hive.merge.mapfiles":"true",
@@ -198,6 +204,9 @@
             "name":"HIVE_SERVER"
           },
           {
+            "name":"HIVE_SERVER_INTERACTIVE"
+          },
+          {
             "name":"JOURNALNODE"
           },
           {
@@ -241,6 +250,9 @@
           },
           {
             "name":"WEBHCAT_SERVER"
+          },
+          {
+            "name": "ZEPPELIN_MASTER"
           },
           {
             "name":"YARN_CLIENT"
