@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class ArmInstanceView {
 
+    private static final int MAX_STACK_NAME_IN_HOSTNAME = 3;
+
     private CloudInstance instance;
 
     private InstanceTemplate instanceTemplate;
@@ -48,7 +50,13 @@ public class ArmInstanceView {
     public String getHostName() {
         String hostName = instance.getStringParameter(CloudInstance.DISCOVERY_NAME);
         if (hostName == null) {
-            hostName = stackName + "-" + getInstanceId();
+            String shortenedStackname;
+            if (stackName.length() > MAX_STACK_NAME_IN_HOSTNAME) {
+                shortenedStackname = stackName.substring(0, MAX_STACK_NAME_IN_HOSTNAME);
+            } else {
+                shortenedStackname = stackName;
+            }
+            hostName = shortenedStackname + "-" + getInstanceId();
         }
         return hostName;
     }
