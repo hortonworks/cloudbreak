@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -73,7 +72,6 @@ public class CloudbreakCleanupAction {
     public void resetStates() {
         List<Long> stackIdsUnderOperation = restartDistruptedFlows();
         usageService.fixUsages();
-        setDeleteFailedStatus();
         List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
         List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
         triggerSyncs(stacksToSync, clustersToSync);
@@ -115,14 +113,6 @@ public class CloudbreakCleanupAction {
     private boolean stackToSyncContainsCluster(List<Stack> stacksToSync, Cluster cluster) {
         Set<Long> stackIds = stacksToSync.stream().map(Stack::getId).collect(Collectors.toSet());
         return stackIds.contains(cluster.getStack().getId());
-    }
-
-    private void setDeleteFailedStatus() {
-        List<Stack> stacksDeleteInProgress = stackRepository.findByStatuses(Collections.singletonList(Status.DELETE_IN_PROGRESS));
-        for (Stack stack : stacksDeleteInProgress) {
-            loggingStatusChange("Stack", stack.getId(), stack.getStatus(), Status.DELETE_FAILED);
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_FAILED, stack.getStatusReason());
-        }
     }
 
     private List<Long> restartDistruptedFlows() {

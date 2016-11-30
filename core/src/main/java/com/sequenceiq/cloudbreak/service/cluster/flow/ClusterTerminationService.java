@@ -76,32 +76,37 @@ public class ClusterTerminationService {
     @Inject
     private ComponentConfigProvider componentConfigProvider;
 
-    public void deleteClusterContainers(Long clusterId) {
+    public Boolean deleteClusterContainers(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
         if (cluster == null) {
             String msg = String.format("Failed to delete containers of cluster (id:'%s'), because the cluster could not be found in the database.", clusterId);
             throw new TerminationFailedException(msg);
         }
-        deleteClusterContainers(cluster);
+        return deleteClusterContainers(cluster);
     }
 
-    public void deleteClusterContainers(Cluster cluster) {
+    public Boolean deleteClusterContainers(Cluster cluster) {
         try {
             Orchestrator orchestrator = cluster.getStack().getOrchestrator();
-            Map<String, Object> map = new HashMap<>();
-            map.putAll(orchestrator.getAttributes().getMap());
-            map.put("certificateDir", tlsSecurityService.prepareCertDir(cluster.getStack().getId()));
-            OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
-            Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
-            List<ContainerInfo> containerInfo = containers.stream()
-                    .map(c -> new ContainerInfo(c.getContainerId(), c.getName(), c.getHost(), c.getImage())).collect(Collectors.toList());
-            containerOrchestrator.deleteContainer(containerInfo, credential);
-            containerRepository.delete(containers);
-            deleteClusterHostGroupsWithItsMetadata(cluster);
-        } catch (CloudbreakException | CloudbreakOrchestratorException e) {
-            throw new TerminationFailedException(String.format("Failed to delete containers of cluster (id:'%s',name:'%s').",
-                    cluster.getId(), cluster.getName()), e);
+            try {
+                Map<String, Object> map = new HashMap<>();
+                map.putAll(orchestrator.getAttributes().getMap());
+                map.put("certificateDir", tlsSecurityService.prepareCertDir(cluster.getStack().getId()));
+                OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
+                Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
+                List<ContainerInfo> containerInfo = containers.stream()
+                        .map(c -> new ContainerInfo(c.getContainerId(), c.getName(), c.getHost(), c.getImage())).collect(Collectors.toList());
+                containerOrchestrator.deleteContainer(containerInfo, credential);
+                containerRepository.delete(containers);
+                deleteClusterHostGroupsWithItsMetadata(cluster);
+            } catch (CloudbreakException | CloudbreakOrchestratorException e) {
+                throw new TerminationFailedException(String.format("Failed to delete containers of cluster (id:'%s',name:'%s').",
+                        cluster.getId(), cluster.getName()), e);
+            }
+            return Boolean.TRUE;
+        } catch (CloudbreakException e) {
+            return Boolean.FALSE;
         }
     }
 
