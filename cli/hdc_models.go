@@ -8,8 +8,6 @@ const (
 	POSTGRES = "POSTGRES"
 	PRE      = "pre"
 	POST     = "post"
-	PRE_URL  = PRE + "-url"
-	POST_URL = POST + "-url"
 )
 
 var SUPPORTED_HDP_VERSIONS = [...]float64{2.5}

@@ -19,18 +19,24 @@ type UserNamePassword struct {
 	/* old password in ambari
 
 	Required: true
+	Max Length: 2147483647
+	Min Length: 1
 	*/
 	OldPassword string `json:"oldPassword"`
 
 	/* new password in ambari
 
 	Required: true
+	Max Length: 2147483647
+	Min Length: 1
 	*/
 	Password string `json:"password"`
 
 	/* new user name in ambari
 
 	Required: true
+	Max Length: 2147483647
+	Min Length: 1
 	*/
 	UserName string `json:"userName"`
 }
@@ -66,6 +72,14 @@ func (m *UserNamePassword) validateOldPassword(formats strfmt.Registry) error {
 		return err
 	}
 
+	if err := validate.MinLength("oldPassword", "body", string(m.OldPassword), 1); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("oldPassword", "body", string(m.OldPassword), 2147483647); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -75,12 +89,28 @@ func (m *UserNamePassword) validatePassword(formats strfmt.Registry) error {
 		return err
 	}
 
+	if err := validate.MinLength("password", "body", string(m.Password), 1); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("password", "body", string(m.Password), 2147483647); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (m *UserNamePassword) validateUserName(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("userName", "body", string(m.UserName)); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("userName", "body", string(m.UserName), 1); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("userName", "body", string(m.UserName), 2147483647); err != nil {
 		return err
 	}
 

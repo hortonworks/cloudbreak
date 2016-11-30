@@ -47,12 +47,9 @@ func createRecipeImpl(skeleton ClusterSkeleton, masterRecipes chan int64, worker
 func createRecipe(recipe Recipe, postPublicRecipe func(params *recipes.PostRecipesAccountParams) (*recipes.PostRecipesAccountOK, error)) int64 {
 	recipeName := getRecipeName(recipe.URI)
 	recipeRequest := models.RecipeRequest{
-		Name: recipeName,
-	}
-	if recipe.Phase == PRE {
-		recipeRequest.PreURL = &recipe.URI
-	} else {
-		recipeRequest.PostURL = &recipe.URI
+		Name:       recipeName,
+		URI:        &recipe.URI,
+		RecipeType: strings.ToUpper(recipe.Phase),
 	}
 
 	log.Infof("[createRecipe] creating recipe with name: %s", recipeName)

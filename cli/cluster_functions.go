@@ -177,18 +177,8 @@ func (c *ClusterSkeletonResult) fill(
 
 func convertRecipes(recipes []*models.RecipeResponse) []Recipe {
 	var convertedRecipes []Recipe = []Recipe{}
-	for _, recipeResponse := range recipes {
-		var recipe Recipe
-		uri := recipeResponse.Properties[PRE_URL]
-		if len(uri) != 0 {
-			recipe.Phase = PRE
-		} else if uri = recipeResponse.Properties[POST_URL]; len(uri) != 0 {
-			recipe.Phase = POST
-		}
-		if len(uri) != 0 {
-			recipe.URI = uri
-			convertedRecipes = append(convertedRecipes, recipe)
-		}
+	for _, resp := range recipes {
+		convertedRecipes = append(convertedRecipes, Recipe{URI: *resp.URI, Phase: strings.ToLower(resp.RecipeType)})
 	}
 	return convertedRecipes
 }

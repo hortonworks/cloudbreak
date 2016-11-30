@@ -4,7 +4,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"strconv"
+	"encoding/json"
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
 	"github.com/go-swagger/go-swagger/swag"
@@ -18,6 +18,10 @@ import (
 swagger:model RecipeResponse
 */
 type RecipeResponse struct {
+
+	/* content of recipe
+	 */
+	Content *string `json:"content,omitempty"`
 
 	/* description of the resource
 
@@ -39,19 +43,19 @@ type RecipeResponse struct {
 	*/
 	Name string `json:"name"`
 
-	/* list of consul plugins with execution types
-
-	Unique: true
-	*/
-	Plugins []string `json:"plugins,omitempty"`
-
-	/* additional plugin properties
-	 */
-	Properties map[string]string `json:"properties,omitempty"`
-
 	/* resource is visible in account
 	 */
 	Public *bool `json:"public,omitempty"`
+
+	/* type of recipe
+
+	Required: true
+	*/
+	RecipeType string `json:"recipeType"`
+
+	/* recipe uri
+	 */
+	URI *string `json:"uri,omitempty"`
 }
 
 // Validate validates this recipe response
@@ -68,12 +72,7 @@ func (m *RecipeResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validatePlugins(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateProperties(formats); err != nil {
+	if err := m.validateRecipeType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -122,34 +121,31 @@ func (m *RecipeResponse) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RecipeResponse) validatePlugins(formats strfmt.Registry) error {
+var recipeResponseTypeRecipeTypePropEnum []interface{}
 
-	if swag.IsZero(m.Plugins) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("plugins", "body", m.Plugins); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Plugins); i++ {
-
-		if err := validate.RequiredString("plugins"+"."+strconv.Itoa(i), "body", string(m.Plugins[i])); err != nil {
+func (m *RecipeResponse) validateRecipeTypeEnum(path, location string, value string) error {
+	if recipeResponseTypeRecipeTypePropEnum == nil {
+		var res []string
+		if err := json.Unmarshal([]byte(`["LEGACY","MIGRATED","PRE","POST"]`), &res); err != nil {
 			return err
 		}
-
+		for _, v := range res {
+			recipeResponseTypeRecipeTypePropEnum = append(recipeResponseTypeRecipeTypePropEnum, v)
+		}
 	}
-
+	if err := validate.Enum(path, location, value, recipeResponseTypeRecipeTypePropEnum); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (m *RecipeResponse) validateProperties(formats strfmt.Registry) error {
+func (m *RecipeResponse) validateRecipeType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Properties) { // not required
-		return nil
+	if err := validate.RequiredString("recipeType", "body", string(m.RecipeType)); err != nil {
+		return err
 	}
 
-	if err := validate.Required("properties", "body", m.Properties); err != nil {
+	if err := m.validateRecipeTypeEnum("recipeType", "body", m.RecipeType); err != nil {
 		return err
 	}
 
