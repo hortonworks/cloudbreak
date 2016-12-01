@@ -118,6 +118,9 @@ public class ClusterRequest {
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
     private String blueprintCustomProperties;
 
+    @ApiModelProperty(value = ClusterModelDescription.RECOVERY_MODE)
+    private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
+
     public String getDescription() {
         return description;
     }
@@ -325,5 +328,13 @@ public class ClusterRequest {
 
     public void setBlueprintCustomProperties(JsonNode blueprintCustomProperties) {
         this.blueprintCustomProperties = blueprintCustomProperties.toString();
+    }
+
+    public RecoveryMode getRecoveryMode() {
+        return recoveryMode;
+    }
+
+    public void setRecoveryMode(RecoveryMode recoveryMode) {
+        this.recoveryMode = recoveryMode;
     }
 }

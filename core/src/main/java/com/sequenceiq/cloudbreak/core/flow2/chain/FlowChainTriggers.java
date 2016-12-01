@@ -19,6 +19,8 @@ public class FlowChainTriggers {
 
     public static final String STACK_REPAIR_TRIGGER_EVENT = "STACK_REPAIR_TRIGGER_EVENT";
 
+    public static final String CLUSTER_REPAIR_TRIGGER_EVENT = "CLUSTER_REPAIR_TRIGGER_EVENT";
+
     public static final String TEST_CHAIN_OF_CHAIN_TRIGGER_EVENT = "TEST_CHAIN_OF_CHAIN_TRIGGER_EVENT";
 
     public static final String TEST_CHAIN_OF_CHAIN_OF_CHAIN_TRIGGER_EVENT = "TEST_CHAIN_OF_CHAIN_OF_CHAIN_TRIGGER_EVENT";

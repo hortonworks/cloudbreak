@@ -132,6 +132,7 @@ public class ModelDescriptions {
         public static final String AMBARI_DATABASE_ERROR = "result of Ambari database test";
         public static final String RDS_CONFIG = "details of the external database for Hadoop components";
         public static final String RDS_CONNECTION_RESULT = "result of RDS connection test";
+        public static final String RECOVERY_MODE = "recovery mode of the cluster";
     }
 
     public static class ClusterTemplateModelDescription {
@@ -336,5 +337,9 @@ public class ModelDescriptions {
 
     public static class SubscriptionModelDescription {
         public static final String ENDPOINT = "url of the endpoint";
+    }
+
+    public static class RepairClusterRequest {
+        public static final String FAILED_NODES = "List of failed nodes";
     }
 }

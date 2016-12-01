@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -21,8 +23,10 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTrigger
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.InstanceTerminationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
@@ -71,7 +75,7 @@ public class ReactorFlowManager {
 
     public void triggerStackDownscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment) {
         String selector = FlowTriggers.STACK_DOWNSCALE_TRIGGER_EVENT;
-        StackScaleTriggerEvent stackScaleTriggerEvent = new StackScaleTriggerEvent(selector, stackId, instanceGroupAdjustment.getInstanceGroup(),
+        StackScaleTriggerEvent stackScaleTriggerEvent = new StackDownscaleTriggerEvent(selector, stackId, instanceGroupAdjustment.getInstanceGroup(),
                 instanceGroupAdjustment.getScalingAdjustment());
         notify(selector, stackScaleTriggerEvent);
     }
@@ -176,6 +180,10 @@ public class ReactorFlowManager {
     public void triggerStackRepairFlow(Long stackId, UnhealthyInstances unhealthyInstances) {
         String selector = FlowChainTriggers.STACK_REPAIR_TRIGGER_EVENT;
         notify(selector, new StackRepairTriggerEvent(stackId, unhealthyInstances));
+    }
+
+    public void triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap) {
+        notify(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, new ClusterRepairTriggerEvent(stackId, failedNodesMap));
     }
 
     private void cancelRunningFlows(Long stackId) {

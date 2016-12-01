@@ -54,6 +54,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         } catch (JsonProcessingException e) {
             cluster.setBlueprintInputs(null);
         }
+        cluster.setRecoveryMode(source.getRecoveryMode());
         return cluster;
     }
 
